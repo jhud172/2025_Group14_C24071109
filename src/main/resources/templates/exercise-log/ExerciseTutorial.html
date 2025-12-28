@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Exercise</title>
+    <link rel="stylesheet" href="/css/Exercise.css">
+    <link rel="stylesheet" href="/css/navBar.css">
+</head>
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+<body>
+
+
+<section th:class="page_content">
+    <!-- Exercise name from database -->
+    <h2 th:class="title" th:text="${exercise.name}">
+        Data from Exercise Name
+    </h2>
+    <br>
+
+    <!-- Video from database - Show only if videoUrl exists -->
+<!--    <div th:if="${exercise.video_url != null and !#strings.isEmpty(exercise.videoUrl)}">-->
+        <iframe width="960"
+                height="540"
+                th:src="${exercise.videoUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+<!--    </div>-->
+
+<!--     Fallback if no video URL-->
+    <div th:unless="${exercise.videoUrl != null and !#strings.isEmpty(exercise.videoUrl)}"
+         th:class="no-video">
+        <p>No video available for this exercise</p>
+    </div>
+
+    <!-- Exercise description from database -->
+    <p th:class="exercise_description" th:text="${exercise.description}">
+        this data will come from the database
+    </p>
+
+    <!-- Additional exercise details -->
+    <div th:class="exercise-details">
+        <!-- Your commented out details -->
+    </div>
+
+</section>
+
+<footer>
+    <!-- Footer content -->
+</footer>
+
+</body>
+</html>

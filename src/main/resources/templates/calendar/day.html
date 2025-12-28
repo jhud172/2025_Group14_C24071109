@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${date}">Day View</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css">
+    <link rel="stylesheet" href="/css/day.css">
+    <link rel="stylesheet" href="/css/navBar.css">
+</head>
+
+<header th:insert="~{fragments/navbar.html}" class="header"></header>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+
+<header class="sticky top-0 backdrop-blur-md bg-white/70 shadow p-4 mb-6 rounded-xl">
+    <h1 class="text-4xl font-extrabold text-gray-800 tracking-tight"><span class="text-blue-700">Day View:</span> <span th:text="${date}"></span></h1>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- LEFT PANEL — ADD TASK -->
+    <section class="bg-white/80 backdrop-blur shadow-xl rounded-2xl p-6 border border-gray-200">
+        <h2 class="text-2xl font-semibold mb-4 text-gray-800">Add Task</h2>
+        <form th:action="@{'/calendar/day/' + ${date} + '/add-task'}" method="post" class="space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
+                <input type="text" name="title" required class="w-full p-3 rounded-xl border border-gray-300 shadow-inner focus:ring-2 focus:ring-blue-500 transition">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                <input type="time" name="time" class="w-full p-3 rounded-xl border border-gray-300 shadow-inner focus:ring-2 focus:ring-blue-500 transition">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <textarea name="notes" rows="4" class="w-full p-3 rounded-xl border border-gray-300 shadow-inner focus:ring-2 focus:ring-blue-500 transition"></textarea>
+            </div>
+            <div class="flex items-center gap-3">
+                <label class="checkbox-wrapper"><input type="checkbox" name="isExercise"><span class="checkbox-custom"></span></label>
+                <span class="text-gray-700">Exercise Task</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <label class="checkbox-wrapper"><input type="checkbox" name="completed"><span class="checkbox-custom"></span></label>
+                <span class="text-gray-700">Mark Completed</span>
+            </div>
+            <button class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl transition">Add Task</button>
+        </form>
+    </section>
+
+    <!-- RIGHT PANEL — TASKS AND OCCURRENCES -->
+    <section class="lg:col-span-2">
+
+        <!-- TASKS -->
+        <h2 class="text-3xl font-bold mb-6 text-gray-900 flex items-center gap-3"><span class="text-blue-700">•</span>Tasks</h2>
+        <div th:if="${#lists.isEmpty(tasks)}" class="bg-white/70 backdrop-blur px-4 py-6 rounded-xl shadow text-gray-500 italic">No tasks for this day.</div>
+        <div th:each="task : ${tasks}" class="p-5 mb-5 rounded-2xl shadow-lg border border-gray-200 bg-white/90 backdrop-blur transition hover:shadow-xl" th:classappend="${task.completed} ? 'bg-green-100/80' : 'bg-white/90'">
+            <div class="flex justify-between items-start">
+                <div class="space-y-1">
+                    <p class="font-bold text-xl" th:text="${task.title}"></p>
+                    <p th:if="${task.time}" class="text-sm text-gray-700" th:text="${task.time}"></p>
+                    <div th:if="${task.exercise}">
+                        <p class="text-xs text-purple-700 font-semibold bg-purple-100 px-2 py-1 rounded w-fit">Exercise Task</p>
+                        <div th:if="${task.exerciseLog == null}">
+                            <a th:href="@{'/exercise-log/add-calendar?taskId=' + ${task.id}}" class="mt-2 inline-block bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg text-sm shadow transition">Complete Exercise Log</a>
+                        </div>
+                        <div th:if="${task.exerciseLog != null}">
+                            <p class="mt-2 text-green-700 font-semibold flex items-center gap-1"><span class="text-xl">✓</span> Log Completed</p>
+                        </div>
+                    </div>
+                    <p th:if="${task.notes}" class="text-sm text-gray-600" th:text="${task.notes}"></p>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <button type="button" th:onclick="'toggleEdit(' + ${task.id} + ')'" class="text-blue-600 text-sm font-medium bg-blue-50 px-3 py-1 rounded-lg hover:bg-blue-100 hover:text-blue-800 transition">Edit</button>
+                    <form th:action="@{'/calendar/day/' + ${date} + '/toggle-complete'}" method="post">
+                        <input type="hidden" name="taskId" th:value="${task.id}">
+                        <label class="checkbox-wrapper"><input type="checkbox" name="completed" th:checked="${task.completed}" onchange="this.form.submit()"><span class="checkbox-custom"></span></label>
+                    </form>
+                </div>
+            </div>
+            <th:block th:replace="~{fragments/edit-task :: editForm(task=${task})}"></th:block>
+        </div>
+
+        <!-- SCHEDULED EXERCISES -->
+        <h2 class="text-3xl font-bold mt-10 mb-4 text-gray-900 flex items-center gap-3"><span class="text-green-700">•</span>Scheduled Exercises</h2>
+        <div th:if="${#lists.isEmpty(occurrences)}" class="bg-white/80 backdrop-blur p-4 rounded-xl shadow text-gray-500 italic">No scheduled exercises today.</div>
+        <div th:each="occ : ${occurrences}" class="bg-green-100 p-5 mb-4 rounded-xl shadow border-l-4 border-green-600">
+            <p class="font-bold text-lg" th:text="${occ.scheduleName}"></p>
+            <div class="text-gray-700 mt-2">
+                <span th:if="${occ.exercise != null}" th:text="'Exercise: ' + ${occ.exercise.name}"></span>
+                <span th:if="${occ.customExercise != null}" th:text="'Custom: ' + ${occ.customExercise.name}"></span>
+            </div>
+            <div th:if="${occ.exerciseLog == null}" class="mt-3">
+                <a th:href="@{'/exercise-log/add-occurrence?occId=' + ${occ.id}}" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">Complete Exercise Log</a>
+            </div>
+            <div th:if="${occ.exerciseLog != null}" class="mt-4 bg-white/80 p-4 rounded-xl">
+                <p class="font-semibold text-green-700">Exercise Completed ✔</p>
+                <p class="text-sm text-gray-700">Duration: <span th:text="${occ.exerciseLog.durationMinutes}"></span> mins</p>
+                <p th:if="${occ.exerciseLog.comments != null}" class="text-sm text-gray-600 italic" th:text="${occ.exerciseLog.comments}"></p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="/js/day.js"></script>
+
+</body>
+</html>

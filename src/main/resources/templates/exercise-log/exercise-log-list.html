@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Your Exercise Logs</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css">
+    <link rel="stylesheet" href="/css/navBar.css">
+</head>
+
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-10">
+<h1 class="text-4xl font-extrabold text-gray-900 mb-8 tracking-tight">Your Exercise Logs</h1>
+<div class="flex justify-between items-center mb-6">
+    <div class="flex items-center gap-3">
+        <input id="log-search" type="text" placeholder="Search logs..." class="p-2 w-64 rounded-lg border border-gray-300 shadow-sm focus:ring-blue-400 focus:border-blue-400">
+        <select id="sort-select" class="p-2 rounded-lg border border-gray-300 shadow-sm">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+        </select>
+    </div>
+    <a href="/exercise-log/export/pdf" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">Download PDF</a>
+</div>
+<div id="log-grid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
+    <div th:each="log : ${logs}" class="log-card bg-white/90 backdrop-blur-xl border border-gray-200 shadow-xl rounded-2xl p-6 hover:shadow-2xl transition cursor-pointer" th:attr="data-date=${log.date},data-before=${log.moodBefore},data-after=${log.moodAfter},data-confidence=${log.confidence},data-id=${log.id}">
+        <h2 class="text-xl font-bold text-gray-900 mb-2" th:text="${#temporals.format(log.date,'dd MMM yyyy')}"></h2>
+        <p class="text-gray-700"><strong>Mood Before:</strong> <span th:text="${log.moodBefore}"></span></p>
+        <p class="text-gray-700"><strong>Mood After:</strong> <span th:text="${log.moodAfter}"></span></p>
+        <p class="text-gray-700"><strong>Confidence:</strong> <span th:text="${log.confidence}"></span></p>
+    </div>
+</div>
+<div id="empty-state" th:if="${#lists.isEmpty(logs)}" class="mt-12 text-center text-gray-600 text-lg italic"></div>
+<div id="pagination-controls" class="mt-8 flex justify-center gap-3"></div>
+<div id="preview-panel" class="hidden fixed right-0 top-0 w-96 h-full bg-white shadow-2xl border-l border-gray-300 p-6 z-50 transform translate-x-full transition-transform duration-300">
+    <button id="close-preview" class="text-right font-bold text-xl mb-4">×</button>
+    <h2 id="preview-date" class="text-2xl font-bold text-gray-900 mb-4"></h2>
+    <p class="text-gray-700"><strong>Mood Before:</strong> <span id="preview-before"></span></p>
+    <p class="text-gray-700"><strong>Mood After:</strong> <span id="preview-after"></span></p>
+    <p class="text-gray-700"><strong>Confidence:</strong> <span id="preview-confidence"></span></p>
+    <a id="preview-view-btn" class="mt-6 block px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 text-center transition">Open Full Log</a>
+</div>
+
+<script src="/js/logs.js"></script>
+
+</body>
+</html>

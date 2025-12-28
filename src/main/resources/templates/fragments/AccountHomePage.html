@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:th="http://www.thymeleaf.org">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" th:href="@{/css/template.css}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="AccountHomePage">
+    <div sec:authorize="isAuthenticated()">
+        <div class="loggedInDashboard">
+
+            <div class="container mt-5 mb-5">
+                <!-- Welcome Header -->
+                <div class="welcome-header animate">
+                    <h2>Feeling the Progress yet?</h2>
+                    <p class="welcome-subtitle">Stay up to date with your next tasks and see what you've been working hard on!</p>
+                </div>
+
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Schedule Card -->
+                    <div class="dashboard-card animate delay-1 opacity-0">
+                        <div class="dashboard-header">
+                            <i class="fas fa-calendar-alt"></i> Your Schedule
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(activeSchedules)}" class="p-6 bg-white/80 rounded-lg shadow text-gray-500 mb-8">You haven't created any schedules yet.</div>
+                        <div class="dashboard-body">
+                            <div th:each="applied : ${activeSchedules}" class="schedule-container">
+                                <!-- Today's Schedule -->
+                                <div class="schedule-day">
+                                    <div class="day-header">
+                                        <div class="day-date" th:text="${applied.dateApplied}"></div>
+                                    </div>
+
+                                    <div class="schedule-item">
+                                        <div class="time-badge">08:30 AM</div>
+                                        <div class="schedule-details">
+                                            <h4 th:text="${applied.schedule.name}"></h4>
+                                            <p th:if="${schedule.description}" class="text-gray-600 text-sm mt-1" th:text="${schedule.description}"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accomplishments Card -->
+                    <div class="dashboard-card animate delay-2 opacity-0">
+                        <div class="dashboard-header">
+                            <i class="fas fa-trophy"></i> Your Accomplishments
+                        </div>
+                        <div class="dashboard-body">
+                            <div class="accomplishments-container">
+                                <a th:href="@{/calendar}" class="action_button">
+                                    <i class="fas fa-plus-circle"></i> Log Exercise
+                                </a>
+
+                                <div class="log-placeholder">
+                                    <!-- Recent Accomplishments -->
+                                    <div th:if="${recentExerciseLogs.isEmpty()}"> You do not have any exercise logs yet.</div>
+                                    <section th:class="accomplishments" th:each="exerciseLog: ${recentExerciseLogs}">
+                                        <div class="accomplishment-card">
+                                            <div class="accomplishment-header">
+                                                <div class="accomplishment-title">Morning Run</div>
+                                                <div class="accomplishment-date" th:text="'Date: ' + ${exerciseLog.date}"></div>
+                                            </div>
+                                            <div class="accomplishment-details">
+                                                <div class="accomplishment-stat">
+                                                    <div class="stat-value" th:text="' Confidence: ' + ${exerciseLog.confidence} + '/4'"></div>
+                                                    <div class="stat-label" th:text="'Mood Before: ' + ${exerciseLog.moodBefore} + '/4'"></div>
+                                                    <div class="stat-label" th:text="'Mood After: ' + ${exerciseLog.moodAfter} + '/4'"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <script>
+                // Simple animation on scroll
+                document.addEventListener('DOMContentLoaded', function() {
+                    const animateElements = document.querySelectorAll('.animate');
+
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.remove('opacity-0');
+                            }
+                        });
+                    }, {
+                        threshold: 0.1,
+                        rootMargin: '0px 0px -50px 0px'
+                    });
+
+                    animateElements.forEach(el => observer.observe(el));
+
+                    // Add hover effect to cards
+                    const cards = document.querySelectorAll('.dashboard-card, .stat-card, .action-card, .accomplishment-card');
+                    cards.forEach(card => {
+                        card.addEventListener('mouseenter', function() {
+                            if (this.classList.contains('dashboard-card')) {
+                                this.style.transform = 'translateY(-5px)';
+                            } else if (this.classList.contains('accomplishment-card')) {
+                                this.style.transform = 'translateX(5px)';
+                            } else {
+                                this.style.transform = 'translateY(-5px)';
+                            }
+                        });
+
+                        card.addEventListener('mouseleave', function() {
+                            this.style.transform = 'translateY(0)';
+                        });
+                    });
+
+                    // Simulate user name from authentication
+                    const usernameElement = document.querySelector('.username');
+                    // In a real application, this would come from your authentication system
+                    // For demo purposes, we'll use a sample name
+                    const sampleNames = ['Alex Johnson', 'Sam Wilson', 'Jordan Taylor', 'Casey Smith'];
+                    const randomName = sampleNames[Math.floor(Math.random() * sampleNames.length)];
+                    usernameElement.textContent = randomName;
+                });
+            </script>
+
+        </div>
+    </div>
+
+    <span sec:authorize="!isAuthenticated()">
+    <a class="content">
+
+<div class="content-wrapper">
+        <div class="corner-decoration top-left"></div>
+        <div class="corner-decoration bottom-right"></div>
+
+        <div class="content-container">
+            <!-- How Our App Helps -->
+            <section class="benefits-section">
+                <h2 class="section-title animate">How Our Exercise App Transforms Your Lifestyle</h2>
+                <p style="text-align: center; font-size: 1.2rem; color: #718096; margin-bottom: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                    After your GP consultation, our intelligent platform provides the tools and support needed to turn medical advice into sustainable daily habits.
+                </p>
+
+                <div class="benefits-grid">
+
+                    <div class="benefit-card animate delay-2 opacity-0">
+                        <div class="benefit-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Visual Progress Tracking</h3>
+                        <p>Beautiful dashboards showing your improvement over time. Track fitness milestones, health metrics, and celebrate achievements with visual rewards.</p>
+                    </div>
+
+                    <div class="benefit-card animate delay-3 opacity-0">
+                        <div class="benefit-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h3>Medical Integration</h3>
+                        <p>Secure sharing of progress reports with your healthcare provider. Ensures your exercise plan aligns perfectly with medical guidance for optimal results.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section animate">
+                <h2>Ready to Start Your Health Journey?</h2>
+                <p>Book a lifestyle consultation with your GP today and get personalized exercise recommendations tailored to your health goals.</p>
+                <a href="https://www.nhsapp.service.nhs.uk/login" class="cta-button">
+                    <i class="fas fa-calendar-check"></i> Book GP Consultation
+                </a>
+            </section>
+
+            <!-- Simple Steps -->
+            <section class="steps-section">
+                <h2 class="section-title animate">Your Path to Better Health</h2>
+                <div class="steps-container">
+                    <div class="step animate delay-1 opacity-0" style="font-family: 'Poppins', sans-serif;">
+                        <div class="step-number">1</div>
+                        <h3>GP Consultation</h3>
+                        <p>Begin with a professional lifestyle assessment from your local doctor to establish your health baseline and goals.</p>
+                    </div>
+
+                    <div class="step-connector connector-1"></div>
+
+                    <div class="step animate delay-2 opacity-0" style="font-family: 'Poppins', sans-serif;">
+                        <div class="step-number">2</div>
+                        <h3>Personalized Plan</h3>
+                        <p>Receive a custom exercise schedule in our app, designed around your doctor's recommendations and personal preferences.</p>
+                    </div>
+
+                    <div class="step-connector connector-2"></div>
+
+                    <div class="step animate delay-3 opacity-0" style="font-family: 'Poppins', sans-serif;">
+                        <div class="step-number">3</div>
+                        <h3>Track & Succeed</h3>
+                        <p>Follow your plan with guided support, track improvements, and adjust your routine as you progress toward your goals.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features -->
+            <section class="features-section">
+                <h2 class="section-title animate">Premium Features for Lasting Change</h2>
+                <div class="features-list">
+                    <div class="feature-item animate delay-1 opacity-0">
+                        <div class="feature-icon">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <div class="feature-content" style="font-family: 'Poppins', sans-serif;">
+                            <h4>300+ Guided Workouts</h4>
+                            <p>From beginner routines to advanced training, all with proper form guidance and video demonstrations.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item animate delay-2 opacity-0">
+                        <div class="feature-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="feature-content" style="font-family: 'Poppins', sans-serif;">
+                            <h4>Adaptive Reminders</h4>
+                            <p>Smart notifications that learn your schedule and gently nudge you at optimal times for maximum consistency.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item animate delay-3 opacity-0">
+                        <div class="feature-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="feature-content" style="font-family: 'Poppins', sans-serif;">
+                            <h4>Health Metrics Tracking</h4>
+                            <p>Monitor heart rate, steps, calories, sleep patterns, and other vital wellness indicators in one place.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item animate delay-3 opacity-0">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="feature-content" style="font-family: 'Poppins', sans-serif;">
+                            <h4>Privacy-First Design</h4>
+                            <p>Your health data is encrypted and never shared without your explicit permission. Complete control over your information.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Final CTA -->
+            <section class="final-cta animate">
+                <h2>Transform Your Health Journey</h2>
+                <p style="font-family: 'Poppins', sans-serif;">Combine expert medical guidance with intelligent technology for sustainable lifestyle improvements. Start with a GP consultation and continue with our supportive exercise platform.</p>
+                <a href="https://www.nhs.uk/service-search/find-a-gp/" class="secondary-button">
+                    <i class="fas fa-stethoscope"></i> Find a GP Near You
+                </a>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Simple animation on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const animateElements = document.querySelectorAll('.animate');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.remove('opacity-0');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            animateElements.forEach(el => observer.observe(el));
+
+            // Add hover effect to cards
+            const cards = document.querySelectorAll('.benefit-card, .feature-item');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+
+
+    </a>
+</span>
+</div>
+
+</body>
+</html>

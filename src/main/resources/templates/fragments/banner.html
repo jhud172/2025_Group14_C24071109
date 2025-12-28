@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      xmlns:th="http://www.thymeleaf.org">
+      <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" th:href="@{/css/template.css}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <div th:fragment="banner">
+    <div sec:authorize="isAuthenticated()">
+      <section class="bannerLoggedIn">
+
+        <div th:class="introduction" style="max-width:100%;">
+          <h2 th:class="title">
+            Welcome back, <span sec:authentication="name">User</span>!
+          </h2>
+          <br>
+          <p th:class="intro">
+            You're making great progress on your health journey.
+          </p>
+          <p th:class="intro">
+            Keep up the amazing work!
+          </p>
+
+          <div class="quick-actions animate delay-2 opacity-0">
+            <div class="actions-grid">
+              <a href="/calendar" class="action-card">
+                <div class="action-icon">
+                  <i class="fas fa-dumbbell"></i>
+                </div>
+                <div class="action-title">Start Workout</div>
+                <div class="action-description">Begin a new exercise session</div>
+              </a>
+
+              <a href="/profile" class="action-card">
+                <div class="action-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="action-title">View Progress</div>
+                <div class="action-description">Check your fitness analytics</div>
+              </a>
+
+              <a href="/schedules" class="action-card">
+                <div class="action-icon">
+                  <i class="fas fa-calendar-plus"></i>
+                </div>
+                <div class="action-title">Edit Schedule</div>
+                <div class="action-description">Adjust your workout plan</div>
+              </a>
+
+              <a href="https://www.nhsapp.service.nhs.uk/login" class="action-card">
+                <div class="action-icon">
+                  <i class="fas fa-user-md"></i>
+                </div>
+                <div class="action-title">GP Connection</div>
+                <div class="action-description">Share progress with your doctor</div>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+    </div>
+
+
+    <span sec:authorize="!isAuthenticated()">
+      <a class="bannerLoggedOut">
+
+      <div th:class="introduction" >
+        <h2 th:class="title">
+            Ready to Improve your Lifestyle?
+        </h2>
+        <p th:class="intro">
+            Start your journey to unlock your healthy lifestyle glow by incorporating positive health habits one after another!
+        </p>
+        <p th:class="intro">
+            Your step-to-step guide in becoming a better, healthier and happier you.
+        </p>
+        <a th:href="@{/health-record}" th:class="start_button">
+            Start Now
+        </a>
+    </div>
+
+      </a>
+    </span>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <title>Health Record Details</title>
+    <link rel="stylesheet" href="/css/navBar.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+</head>
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+<body>
+<div class="mx-auto max-w-3xl px-4 py-8">
+    <div class="flex justify-between items-center mb-8"><h1 class="text-xl font-bold">Health Record Details</h1>
+    </div>
+
+    <div class="bg-white p-6 rounded border border-gray-200">
+        <div class="space-y-8">
+            <div class="border-b border-gray-100 pb-4"><span class="font-semibold">Date Recorded:</span> <span
+                    th:text="${record.baselineDate}"></span></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="space-y-6">
+                    <div><h3 class="font-bold mb-2">Cardiovascular</h3>
+                        <div class="space-y-2"><p><span class="font-semibold">Blood Pressure:</span> <span
+                                th:text="${record.systolicBloodPressure}"></span> / <span
+                                th:text="${record.diastolicBloodPressure}"></span> mmHg </p>
+                            <p><span class="font-semibold">Cholesterol:</span> <span
+                                    th:text="${record.cholesterol}"></span>
+                                mmol/L </p></div>
+                    </div>
+                    <div><h3 class="font-bold mb-2">Body Measurements</h3>
+                        <div class="space-y-2"><p><span class="font-semibold">Weight:</span> <span
+                                th:text="${record.weightKg}"></span> kg</p>
+                            <p><span class="font-semibold">Height:</span> <span th:text="${record.heightCm}"></span> cm
+                            </p>
+                            <p><span class="font-semibold">Waist:</span> <span th:text="${record.waistCm}"></span> cm
+                            </p>
+                            <p><span class="font-semibold">BMI:</span> <span th:text="${record.bmi}"></span></p>
+                            <p><span class="font-semibold">Waist/Height Ratio:</span> <span
+                                    th:text="${record.waistHeightRatio}"></span></p></div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div><h3 class="font-bold mb-2">Activity & Conditions</h3>
+                        <div class="space-y-2"><p><span class="font-semibold">Activity Level:</span> <span
+                                th:text="${record.activityLevel}"></span></p></div>
+                    </div>
+                    <div><h3 class="font-bold mb-2">Physical Conditions</h3>
+                        <ul class="list-disc list-inside">
+                            <li th:each="pc : ${record.physicalConditions}" th:text="${pc.name}"></li>
+                        </ul>
+                        <p th:if="${#lists.isEmpty(record.physicalConditions)}">None recorded</p></div>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-gray-100"><a href="/health-record/list"
+                                                          class="text-blue-600 hover:underline">Back
+                to list</a></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

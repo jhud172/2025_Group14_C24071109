@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Schedule Entries</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"/>
+    <link rel="stylesheet" href="/css/Main.css">
+    <link rel="stylesheet" href="/css/navBar.css">
+</head>
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+<body class="bg-gray-100 p-8">
+
+<h1 class="text-3xl font-bold mb-4">
+    Editing Schedule:
+    <span th:text="${schedule.name}"></span>
+</h1>
+
+<a href="/calendar" class="underline text-blue-600">← Back to calendar</a>
+
+<div class="grid grid-cols-2 gap-10 mt-8">
+
+    <div>
+        <h2 class="text-xl font-bold mb-3">Current Entries</h2>
+
+        <div th:each="e : ${entries}" class="p-4 bg-white rounded shadow mb-2">
+            <p class="font-semibold" th:text="'Day: ' + ${e.dayOfWeek}"></p>
+            <p th:text="'Order: ' + ${e.orderNumber}"></p>
+            <p th:text="'Exercise: ' + ${e.exercise.name}"></p>
+        </div>
+    </div>
+
+    <div class="p-6 bg-white rounded shadow">
+        <h2 class="text-xl font-bold mb-4">Add Entry</h2>
+
+        <form th:action="@{'/schedules/' + ${schedule.id} + '/entries'}"
+              method="post"
+              class="space-y-4">
+
+            <div>
+                <label class="block font-semibold mb-1">Exercise</label>
+
+                <select name="exercise.id" class="border p-2 rounded w-full">
+                    <option th:each="ex : ${exercises}"
+                            th:value="${ex.id}"
+                            th:text="${ex.name}">Exercise</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-1">Day of Week</label>
+                <select name="dayOfWeek" class="border p-2 rounded w-full">
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                    <option value="7">Sunday</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-1">Order in the Day</label>
+                <input type="number" name="orderNumber" value="1" min="1"
+                       class="border p-2 rounded w-full"/>
+            </div>
+
+            <button class="px-4 py-2 bg-green-600 text-white rounded">
+                Add Entry
+            </button>
+
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

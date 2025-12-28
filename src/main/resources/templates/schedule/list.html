@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Your Schedules</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"/>
+    <link rel="stylesheet" href="/css/navBar.css">
+</head>
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+<body class="bg-gray-100">
+
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Active Schedules</h1>
+    <div th:if="${#lists.isEmpty(activeSchedules)}" class="p-6 bg-white/80 rounded-lg shadow text-gray-500 mb-8">You currently have no active schedules.</div>
+    <div th:each="applied : ${activeSchedules}" class="bg-green-50 p-4 rounded-xl shadow mb-4 border border-green-300">
+        <h2 class="text-xl font-semibold text-gray-900" th:text="${applied.schedule.name}"></h2>
+        <p class="text-gray-700 mt-1">Applied on:<span class="font-semibold" th:text="${applied.dateApplied}"></span></p>
+        <div class="mt-3 flex gap-4">
+            <a th:href="@{'/schedules/' + ${applied.schedule.id} + '/entries'}" class="text-blue-700 font-semibold hover:underline">Edit</a>
+            <a th:href="@{'/schedules/applied/' + ${applied.id} + '/remove'}" class="text-yellow-600 font-semibold hover:underline">Remove from Calendar</a>
+        </div>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-6 mt-10">All Schedules</h1>
+    <div th:if="${#lists.isEmpty(schedules)}" class="p-6 bg-white/80 rounded-lg shadow text-gray-500">You haven't created any schedules yet.</div>
+    <div th:each="schedule : ${schedules}" class="bg-white/80 p-4 rounded-xl shadow mb-4 border hover:shadow-lg transition">
+        <h2 class="text-xl font-semibold text-gray-800" th:text="${schedule.name}"></h2>
+        <p th:if="${schedule.description}" class="text-gray-600 text-sm mt-1" th:text="${schedule.description}"></p>
+        <div class="mt-3 flex gap-4">
+            <a th:href="@{'/schedules/' + ${schedule.id} + '/entries'}" class="text-blue-600 font-semibold hover:underline">Edit</a>
+            <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}" class="text-green-700 font-semibold hover:underline">Apply</a>
+            <a th:href="@{'/schedules/' + ${schedule.id} + '/delete'}" class="text-red-600 font-semibold hover:underline">Delete</a>
+        </div>
+    </div>
+    <a href="/schedules/builder" class="mt-8 inline-block px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">+ Create New Schedule</a>
+</div>
+</body>
+</html>

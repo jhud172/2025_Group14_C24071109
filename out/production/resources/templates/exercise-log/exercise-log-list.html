@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Exercise Logs</title>
+</head>
+    <body>
+
+        <h1>All Exercise Logs</h1>
+
+        <div th:if="${param.success}">
+            <p>Exercise log saved successfully!</p>
+        </div>
+
+        <table border="1">
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Duration</th>
+                <th>Intensity</th>
+                <th>View</th>
+            </tr>
+
+            <tr th:each="log : ${logs}">
+                <td th:text="${log.date}"></td>
+                <td th:text="${log.exerciseType}"></td>
+                <td th:text="${log.durationMinutes} + ' min'"></td>
+                <td th:text="${log.intensityLevel}"></td>
+                <td>
+                    <a th:href="@{'/exercise-log/' + ${log.id}}">View</a>
+                </td>
+            </tr>
+        </table>
+
+    </body>
+</html>

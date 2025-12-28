@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:replace="~{fragments/slimselectCss :: slimselectCss}"></div>
+
+<form th:action="@{/health-record}" th:method="post" th:object="${healthRecordForm}">
+
+    <label th:for="*{id}">
+        <input th:field="*{id}" type="hidden">
+    </label>
+
+    <label th:for="*{baselineDate}">
+        <input type="hidden" th:field="*{baselineDate}">
+    </label>
+
+    <label th:for="*{systolicBloodPressure}"> Systolic blood pressure:
+        <input th:field="*{systolicBloodPressure}" placeholder="mmHg">
+    </label>
+
+    <label th:for="*{diastolicBloodPressure}"> Diastolic blood pressure:
+        <input th:field="*{diastolicBloodPressure}" placeholder="mmHg">
+    </label>
+
+    <label th:for="*{cholesterol}"> Cholesterol:
+        <input th:field="*{diastolicBloodPressure}" placeholder="mmol/L">
+    </label>
+
+    <label th:for="*{weightKg}"> Weight:
+        <input th:field="*{weightKg}" placeholder="kg">
+    </label>
+
+    <label th:for="*{heightCm}"> Height:
+        <input th:field="*{heightCm}" placeholder="cm">
+    </label>
+
+    <label th:for="*{bmi}"> BMI:
+        <input th:field="*{bmi}" type="hidden">
+    </label>
+
+    <label th:for="*{activityLevel}"> Activity Level:
+        <select th:field="*{activityLevel}">
+            <option value="Sedentary">Sedentary</option>
+            <option value="Lightly Active">Lightly Active</option>
+            <option value="Moderately Active">Moderately Active</option>
+            <option value="Very Active">Very Active</option>
+        </select>
+    </label>
+
+    <label th:for="*{physicalConditions}"> Physical conditions:
+        <select id="selectElement" multiple="multiple" th:field="*{physicalConditions}">
+            <option th:each="physicalCondition: ${allPhysicalConditions}" th:text="${physicalCondition.name}"
+                    th:value="${physicalCondition.id}"></option>
+        </select>
+    </label>
+
+    <button type="submit"> Submit</button>
+</form>
+<div th:replace="~{fragments/slimselectJs :: slimselectJs}"></div>
+</body>
+<script> new SlimSelect({select: '#selectElement'}) </script>
+</html>

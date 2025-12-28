@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Weekly View</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css">
+    <link rel="stylesheet" href="/css/day.css">
+    <link rel="stylesheet" href="/css/month.css">
+    <link rel="stylesheet" href="/css/navBar.css">
+    <style>
+
+    </style>
+</head>
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+<main class="flex min-h-screen">
+    <aside class="w-72 bg-white/80 backdrop-blur-xl shadow-xl h-screen p-6 border-r border-gray-300 flex flex-col sticky top-0">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Your Schedules</h2>
+        <input id="schedule-search" type="text" placeholder="Search schedules..." class="w-full mb-4 p-2 rounded-lg border border-gray-300 shadow-sm focus:ring-blue-400 focus:border-blue-400">
+        <ul id="schedule-list" class="space-y-3 flex-1 overflow-y-auto pr-1 custom-scroll">
+            <li th:each="schedule, iter : ${schedules}" th:if="${iter.index < 5}" class="schedule-item">
+                <div class="p-3 bg-gray-100 rounded-xl shadow hover:shadow-md transition cursor-pointer">
+                    <p class="font-semibold text-gray-800" th:text="${schedule.name}"></p>
+                    <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}" class="text-blue-600 text-sm underline hover:text-blue-800 transition">Apply to Calendar</a>
+                </div>
+            </li>
+        </ul>
+        <a href="/schedules" class="mt-4 block text-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition font-semibold">View All Schedules</a>
+        <a href="/schedules/builder" class="block mt-4 text-green-700 font-bold underline hover:text-green-800 transition text-lg">+ Create New Schedule</a>
+    </aside>
+
+    <section class="flex-1 p-10">
+        <div class="flex gap-4 mb-6">
+            <a href="/calendar?view=month" class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-200">Month View</a>
+            <a href="/calendar?view=week" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow">Week View</a>
+        </div>
+        <div class="flex justify-between items-center mb-6">
+            <a th:href="@{/calendar(view='week', week=${prevWeek}, weekYear=${prevWeekYear})}"
+               class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-200">← Prev Week</a>
+
+            <h1 class="text-3xl font-bold text-gray-800">
+                Week <span th:text="${weekStart}"></span> → <span th:text="${weekEnd}"></span>
+            </h1>
+
+            <a th:href="@{/calendar(view='week', week=${nextWeek}, weekYear=${nextWeekYear})}"
+               class="px-4 py-2 bg-white rounded-lg shadow hover:bg-gray-200">Next Week →</a>
+        </div>
+
+        <div class="grid grid-cols-7 gap-4 mb-3 text-center font-semibold text-gray-700">
+            <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+        </div>
+        <div class="grid grid-cols-7 gap-4">
+            <div th:each="i : ${#numbers.sequence(0,6)}" th:with="day=${weekDays[i]}" class="calendar-cell bg-white/90 backdrop-blur p-4 shadow-lg rounded-2xl h-80 border border-gray-200 relative overflow-hidden hover:shadow-2xl hover:border-blue-300 transition" th:classappend=" ${day.isBefore(today)} ? 'opacity-60' : (${day.isEqual(today)} ? 'bg-blue-100 border-blue-500 shadow-xl' : '')">
+                <a th:if="${day != null}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}" class="font-bold text-lg block text-gray-800 hover:text-blue-700 transition"><span th:text="${day.dayOfMonth}"></span> • <span th:text="${day.dayOfWeek}"></span></a>
+                <div th:with="tasks=${tasksByDate[T(java.time.LocalDate).parse(day.toString())]}, tTotal=${tasks!=null?tasks.size():0}, sched=${occurrences[day]}, sTotal=${sched!=null?sched.size():0}" class="space-y-2 overflow-y-auto pr-1 custom-scroll mt-2" style="max-height:260px;">
+                    <div th:each="task, iter : ${tasks}" th:if="${iter.index < 3}" class="calendar-item flex items-center justify-between text-xs p-2 rounded-lg shadow border transition hover:shadow-md hover:bg-white/40" th:classappend="${task.completed} ? 'bg-green-50 border-green-300 opacity-80' : 'bg-white/70 border-gray-300'" th:attr="data-date=${day},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-exercise=${task.exercise},data-completed=${task.completed},data-id=${task.id}">
+                        <div class="flex flex-col w-[85%] leading-tight"><span class="font-semibold text-gray-800 text-[0.78rem]" th:classappend="${task.completed}?'line-through':''" th:text="${task.title}"></span><span class="text-gray-700 text-[0.7rem]" th:classappend="${task.completed}?'line-through':''" th:text="${task.time!=null?task.time:'—'}"></span></div>
+                        <div th:if="${task.completed}" class="text-green-600 text-base font-bold flex-shrink-0">✓</div>
+                    </div>
+                    <a th:if="${tTotal > 3}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}" class="block text-center text-xs p-1 bg-white border border-blue-300 rounded-lg font-semibold text-blue-700" th:text="${'+' + (tTotal - 3) + ' more tasks'}"></a>
+                    <div th:if="${tTotal > 0 and sTotal > 0}" class="border-t border-gray-300 my-1 opacity-50"></div>
+                    <div th:each="occ, iter : ${sched}" th:if="${iter.index < 3}" class="calendar-item flex items-center justify-between text-xs p-2 rounded-lg shadow border bg-blue-50/70 border-blue-300 transition hover:shadow-md hover:bg-blue-100/70" th:attr="data-date=${day},data-title=${occ.exercise!=null?occ.exercise.name:(occ.customExercise!=null?occ.customExercise.name:'Unknown')},data-notes=${occ.scheduleName}">
+                        <div class="flex flex-col w-[85%] leading-tight"><span class="font-semibold text-blue-900 text-[0.78rem]" th:text="${occ.exercise!=null?occ.exercise.name:(occ.customExercise!=null?occ.customExercise.name:'Unknown')}"></span><span class="text-blue-800 text-[0.7rem]" th:text="'From: ' + ${occ.scheduleName}"></span></div>
+                    </div>
+                    <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}" class="block text-center text-xs p-1 bg-blue-50 border border-blue-300 rounded-lg font-semibold text-blue-700" th:text="${'+' + (sTotal - 3) + ' more schedules'}"></a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<div id="preview-card" class="hidden fixed z-50 bg-white shadow-xl rounded-xl p-4 border border-gray-300 w-72 opacity-0 transition-opacity duration-200 pointer-events-auto"></div>
+<script src="/js/week.js"></script>
+</body>
+</html>

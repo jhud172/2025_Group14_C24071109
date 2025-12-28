@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Exercise Log</title>
+    <link rel="stylesheet" href="/css/navBar.css">
+    <link rel="stylesheet" href="/css/exerciselogform.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-200 p-8">
+<div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="bg-white/90 backdrop-blur-xl shadow-2xl rounded-2xl p-10 border border-gray-200 animate-[fadeIn_0.5s_ease]">
+        <h1 class="text-4xl font-extrabold mb-6 text-gray-900 tracking-tight">Exercise Log</h1>
+        <form th:action="@{/exercise-log}" th:object="${exerciseLog}" method="post" class="space-y-8">
+            <input th:type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" th:field="*{occurrenceId}">
+            <input type="hidden" th:field="*{calendarTaskId}">
+            <div>
+                <label class="block text-lg font-semibold text-gray-700 mb-2">Date</label>
+                <input type="date" th:field="*{date}" class="w-full p-3 rounded-xl border border-gray-300 shadow-inner focus:ring-2 focus:ring-blue-600 transition"/>
+                <p class="text-red-600 text-sm mt-1" th:errors="*{date}" th:if="${#fields.hasErrors('date')}"></p>
+            </div>
+            <div class="mb-6">
+                <label class="block text-lg font-semibold text-gray-700 mb-2">How did you feel before exercising?</label>
+                <div class="flex flex-col items-center gap-3">
+                    <div id="moodBeforeEmoji" class="text-4xl transition-all duration-300">😐</div>
+                    <input type="range" min="1" max="4" step="1" th:field="*{moodBefore}" class="w-full accent-blue-600 slider-control" oninput="updateMoodSlider('before', this.value)">
+                </div>
+            </div>
+            <div class="mb-6">
+                <label class="block text-lg font-semibold text-gray-700 mb-2">How did you feel after exercising?</label>
+                <div class="flex flex-col items-center gap-3">
+                    <div id="moodAfterEmoji" class="text-4xl transition-all duration-300">😐</div>
+                    <input type="range" min="1" max="4" step="1" th:field="*{moodAfter}" class="w-full accent-blue-600 slider-control" oninput="updateMoodSlider('after', this.value)">
+                </div>
+            </div>
+            <div class="mb-6">
+                <label class="block text-lg font-semibold text-gray-700 mb-2">Confidence Level</label>
+                <div class="flex flex-col items-center gap-3">
+                    <div id="confidenceEmoji" class="text-4xl transition-all duration-300">😐</div>
+                    <input type="range" min="1" max="4" step="1" th:field="*{confidence}" class="w-full accent-blue-600 slider-control cursor-pointer" oninput="updateConfidenceSlider(this.value)">
+                </div>
+                <p class="text-red-600 text-sm mt-1" th:errors="*{confidence}" th:if="${#fields.hasErrors('confidence')}"></p>
+            </div>
+            <div>
+                <label class="block text-lg font-semibold text-gray-700 mb-2">Duration (minutes)</label>
+                <input type="number" th:field="*{durationMinutes}" min="1" placeholder="e.g., 30" class="w-full p-3 rounded-xl border border-gray-300 shadow-inner focus:ring-2 focus:ring-blue-500 transition" />
+                <p class="text-red-600 text-sm mt-1" th:errors="*{durationMinutes}" th:if="${#fields.hasErrors('durationMinutes')}"></p>
+            </div>
+            <div>
+                <label class="block text-lg font-semibold text-gray-700 mb-2">Comments</label>
+                <textarea th:field="*{comments}" rows="4" oninput="updatePreview()" class="w-full p-3 rounded-xl border border-gray-300 shadow-inner focus:ring-2 focus:ring-blue-600 transition" placeholder="Anything to note about your session?"></textarea>
+                <p class="text-red-600 text-sm mt-1" th:errors="*{comments}" th:if="${#fields.hasErrors('comments')}"></p>
+            </div>
+            <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white rounded-xl text-lg font-bold shadow-xl transition">Save Log</button>
+        </form>
+    </div>
+    <div class="bg-white/80 shadow-xl p-8 rounded-2xl border border-gray-200 animate-[fadeIn_0.7s_ease]">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Preview</h2>
+        <div class="space-y-4 text-gray-800">
+            <p class="text-lg flex justify-between">
+                <span class="font-semibold">Date:</span>
+                <span id="previewDate" class="font-medium">—</span>
+            </p>
+            <p class="text-lg flex justify-between">
+                <span class="font-semibold">Mood Before:</span>
+                <span id="previewMoodBefore" class="font-medium">🙂</span>
+            </p>
+            <p class="text-lg flex justify-between">
+                <span class="font-semibold">Mood After:</span>
+                <span id="previewMoodAfter" class="font-medium">🙂</span>
+            </p>
+            <p class="text-lg flex justify-between">
+                <span class="font-semibold">Confidence:</span>
+                <span id="previewConfidence" class="font-medium">😎</span>
+            </p>
+            <p class="text-lg flex justify-between">
+                <span class="font-semibold">Duration:</span>
+                <span id="previewDuration" class="font-medium">—</span>
+            </p>
+            <div>
+                <p class="text-lg font-semibold">Comments:</p>
+                <p id="previewComments" class="italic text-gray-600">No comments yet…</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/exerciselogform.js"></script>
+</body>
+</html>

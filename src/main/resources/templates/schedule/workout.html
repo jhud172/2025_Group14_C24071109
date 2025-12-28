@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Workouts</title>
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="_csrf_param" th:content="${_csrf.parameterName}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/navBar.css">
+    <link rel="stylesheet" href="/css/Main.css">
+
+    <style>
+        .sortable-ghost { opacity: 0.5; background: #e5e7eb; }
+    </style>
+</head>
+
+<body>
+
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+
+<div class="text-gray-800 font-sans antialiased h-screen flex flex-col overflow-hidden flex-1 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 h-full min-h-0">
+
+    <div class="h-full flex flex-col bg-white rounded-xl shadow-lg overflow-hidden">
+
+        <div class="flex-1 overflow-y-auto p-6 scroll-smooth">
+
+            <div id="workout-input-container">
+                <div th:replace="~{fragments/workout/workout-frags.html :: createWorkout}"></div>
+            </div>
+
+        </div>
+
+        <div class="p-4 border-t bg-gray-50 flex justify-center shrink-0 z-10">
+            <button id="schedule-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition duration-200 flex justify-center items-center gap-2 cursor-pointer">
+                <span>Continue to Schedule</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="h-full overflow-y-auto flex flex-col gap-6 pr-1 pb-4 scroll-smooth">
+
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 shrink-0">
+            <div class="p-5 border-b">
+                <h1 class="text-xl font-bold text-gray-900">Suggested Exercises</h1>
+                <h2 class="text-sm text-gray-500 mt-1 mb-3">Based on your preferences and conditions</h2>
+                <div th:replace="/fragments/workout/searchbar :: searchbar(exercise-search-input)"></div>
+            </div>
+
+            <div class="p-4">
+                <div id="no-exercises-msg"
+                     th:classappend="${!#lists.isEmpty(suggestedExercises)} ? 'hidden'"
+                     class="text-center p-8 text-gray-500 italic bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                     No exercises found from your preferences. Please select preferences.
+                </div>
+
+                <ul id="suggested-list" class="space-y-3">
+                    <li th:each="exercise : ${suggestedExercises}" th:data-id="${exercise.id}"
+                        class="p-3 bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:border-blue-300 cursor-move transition group">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-gray-800 group-hover:text-blue-600" th:text="${exercise.name}">Exercise Name</span>
+                            <svg class="w-4 h-4 text-gray-400" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </div>
+                        <p class="text-sm text-gray-600 line-clamp-2" th:text="${exercise.description}">Description...</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 shrink-0">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-xl">
+                <h1 class="text-lg font-bold text-gray-900">Your Workouts</h1>
+                <button id="btn-new-workout" data-url="/workout/create"
+                        class="text-xs bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition font-semibold uppercase tracking-wide">
+                    + New
+                </button>
+            </div>
+
+            <div class="px-4 py-2 bg-gray-50 border-b">
+                <div th:replace="~{fragments/workout/searchbar :: searchbar(workout-search-input)}"></div>
+            </div>
+
+            <div class="p-4">
+                <ul id="existing-workouts" class="space-y-2">
+                    <li th:each="workout : ${usersWorkouts}"
+                        th:data-id="${workout.id}"
+                        th:data-url="@{/workout/edit/{id}(id=${workout.id})}"
+                        class="workout-item p-3 bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md transition group flex justify-between items-center cursor-pointer">
+                        <span class="font-bold text-sm text-gray-700" th:text="${workout.name}">Workout Name</span>
+                        <button class="btn-delete text-gray-400 hover:text-red-600 transition p-1 hover:bg-red-50 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script src="/js/create-workouts.js"></script>
+</body>
+</html>

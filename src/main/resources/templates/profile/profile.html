@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link rel="stylesheet" href="/css/navBar.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+<body>
+
+<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-8">
+
+    <div class="mb-8">
+        <h2 class="text-xl font-bold">Client Profile</h2>
+    </div>
+
+    <div th:if="${healthRecord == null}">
+        <div class="bg-white p-4 rounded border border-gray-200">
+            <p>You do not have a health record yet. </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6" th:classappend="${healthRecord != null} ? 'md:grid-cols-3': ' md:grid-cols-2'">
+        <div class="bg-white p-4 rounded border border-gray-200" th:if="${healthRecord != null}">
+            <h3 class="font-semibold mb-2"> Physical Conditions</h3>
+            <div th:if="${healthRecord.physicalConditions.isEmpty()}"> You do not have any recorded physical conditions.</div>
+            <ul>
+                <li th:each="physicalCondition: ${healthRecord.physicalConditions}"
+                    th:text="${physicalCondition.name}" class="p-1 text-gray-700 text-sm"></li>
+            </ul>
+        </div>
+        <div class="bg-white p-4 rounded border border-gray-200">
+            <h3 class="font-semibold mb-2"> Exercise Preferences</h3>
+            <div th:if="${userPreferenceList.isEmpty()}"> You have not selected any preferences.</div>
+
+            <ul>
+                <div th:each="category : ${userPreferenceList}" class="p-1">
+                    <h4 th:text="${category.key}" class="font-medium text-sm text-gray-700"></h4>
+                    <li th:each="preference: ${category.value}"
+                        th:text="${preference.description}" class="text-gray-700 text-sm"></li>
+                </div>
+                <div class="mt-6">
+                    <a class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50" href="/select-preferences">
+                        Select Preferences </a>
+                </div>
+            </ul>
+        </div>
+        <div class="bg-white p-4 rounded border border-gray-200">
+            <h3 class="font-semibold mb-2"> Recent Exercise Logs</h3>
+            <div th:if="${recentExerciseLogs.isEmpty()}"> You do not have any exercise logs yet.</div>
+
+            <ul>
+                <li th:each="exerciseLog: ${recentExerciseLogs}">
+                    <div class="mt-2">
+                        <span th:text="'Date: ' + ${exerciseLog.date}" class="font-medium text-sm text-gray-700"></span>
+                        <div class="flex justify-between mt-1 text-gray-700 text-sm">
+                            <span th:text="' Confidence: ' + ${exerciseLog.confidence} + '/4'"></span>
+                            <span th:text="'Mood Before: ' + ${exerciseLog.moodBefore} + '/4'"></span>
+                            <span th:text="'Mood After: ' + ${exerciseLog.moodAfter} + '/4'"></span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div class="mt-6">
+                <a class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50" href="/exercise-log/list"> View
+                    exercise logs </a>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${healthRecord != null}">
+        <h2 class="font-semibold mb-3"> Key Metrics </h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="bg-white p-4 rounded border border-gray-200 border-l-4"
+                 th:classappend="${(healthRecord.systolicBloodPressure > 140 || healthRecord.diastolicBloodPressure > 90) ? 'border-l-red-500 ' :
+             ((healthRecord.systolicBloodPressure > 120 || healthRecord.diastolicBloodPressure > 80) ? 'border-l-amber-500':'border-l-green-500')} ">
+                <p class="text-xs text-gray-500"> Blood Pressure</p>
+                <span class="text-xl font-semibold" th:text="${healthRecord.systolicBloodPressure}"></span>
+                <span class="text-xl font-semibold"> / </span>
+                <span class="text-xl font-semibold" th:text="${healthRecord.diastolicBloodPressure}"></span>
+                <span class="text-xs text-gray-500"> mmHg </span>
+            </div>
+
+
+            <div class="bg-white p-4 rounded border border-gray-200  border-l-4"
+                 th:classappend="${(healthRecord.cholesterol > 6) ? 'border-l-red-500 ' :
+             ((healthRecord.cholesterol > 5) ? 'border-l-amber-500':'border-l-green-500')} ">
+                <p class="text-xs text-gray-500"> Cholesterol</p>
+                <span class="text-xl font-semibold" th:text="${healthRecord.cholesterol}"></span>
+                <span class="text-xs text-gray-500"> mmol/L </span>
+            </div>
+
+            <div class="bg-white p-4 rounded border border-gray-200 border-l-4"
+                 th:classappend="${(healthRecord.bmi > 30 || healthRecord.bmi < 18.5) ? 'border-l-red-500 ' :
+             ((healthRecord.bmi > 25 ) ? 'border-l-amber-500':'border-l-green-500')} ">
+                <p class="text-xs text-gray-500"> BMI </p>
+                <span class="text-xl font-semibold" th:text="${healthRecord.bmi}"></span>
+                <span class="block text-xs text-gray-500"
+                      th:text="'Weight: ' + ${healthRecord.weightKg} + 'kg'"> </span>
+            </div>
+
+            <div class="bg-white p-4 rounded border border-gray-200 border-l-4"
+                 th:classappend="${(healthRecord.waistHeightRatio > 0.6) ? 'border-l-red-500 ' :
+             ((healthRecord.waistHeightRatio > 0.5) ? 'border-l-amber-500':'border-l-green-500')} ">
+                <p class="text-xs text-gray-500"> Waist/Height Ratio </p>
+                <span class="text-xl font-semibold" th:text="${healthRecord.waistHeightRatio}"></span>
+                <span class="block text-xs text-gray-500" th:text="'Waist: ' + ${healthRecord.waistCm} + 'cm'"> </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="font-semibold"> Health record charts </h2>
+        <select id="health-record-select" onchange="selectHealthRecordCharts()"
+                class="rounded border-0 py-1.5 pl-3 pr-10 text-slate-700 ring-1 ring-inset ring-gray-300">
+            <option value="body-measurements">Measurement trends</option>
+            <option value="cardiovascular-health">Cardiovascular trends</option>
+        </select>
+    </div>
+    <div id="body-measurement-graphs">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-4 rounded border border-gray-200">
+                <h4 class="text-sm mb-2 font-semibold">BMI</h4>
+                <div class="relative h-64 w-full">
+                    <canvas id="bmi"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded border border-gray-200">
+                <h4 class="text-sm mb-2 font-semibold">Waist/Height Ratio</h4>
+                <div class="relative h-64 w-full">
+                    <canvas id="waistHeightRatio"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="cardiovascular-graphs" class="hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-4 rounded border border-gray-200">
+                <h4 class="text-sm mb-2 font-semibold">Cholesterol</h4>
+                <div class="relative h-64 w-full">
+                    <canvas id="cholesterol"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded border border-gray-200">
+                <h4 class="text-sm mb-2 font-semibold"> Blood Pressure</h4>
+                <div class="relative h-64 w-full">
+                    <canvas id="blood-pressure"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="font-semibold mb-3"> Exercise Log Charts </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <div class="bg-white p-4 rounded border border-gray-200">
+            <h4 class="text-sm mb-2 font-semibold">Average Mood</h4>
+            <div class="relative h-64 w-full">
+                <canvas id="averageMood"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded border border-gray-200">
+            <h4 class="text-sm mb-2 font-semibold">Average Confidence</h4>
+
+            <div class="relative h-64 w-full">
+                <canvas id="averageConfidence"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+<script th:inline="javascript">
+
+    function selectHealthRecordCharts() {
+        const select = document.getElementById('health-record-select');
+        const selected = select.value;
+
+        const bodyCharts = document.getElementById('body-measurement-graphs')
+        const cardiovascularCharts = document.getElementById('cardiovascular-graphs')
+
+        if (selected === 'body-measurements') {
+            bodyCharts.classList.remove('hidden')
+            cardiovascularCharts.classList.add('hidden')
+        } else {
+            bodyCharts.classList.add('hidden')
+            cardiovascularCharts.classList.remove('hidden')
+        }
+
+    }
+
+    // Mood chart
+    const moodGraph = document.getElementById('averageMood');
+    const moodLabels = [[${charts.averageMoodLabels}]];
+    const moodData = [[${charts.averageMoodData}]];
+
+    const moodChart = new Chart(moodGraph, {
+        type: 'bar',
+        data: {
+            labels: moodLabels,
+            datasets: [{
+                label: 'Average mood difference',
+                data: moodData
+            }]
+        },
+        options: {
+            indexAxis: 'x',
+            scales: {
+                y: {
+                    min: -5,
+                    max: 5,
+                    ticks: {
+                        stepSize: 1,
+                        callback: (mood) => {
+                            if (mood === 5 || mood === -5) {
+                                return ''
+                            }
+
+                            if (mood === 0) {
+                                return `${mood}`
+                            } else if (mood > 0) {
+                                return `+${mood}`
+                            } else if (mood < 0) {
+                                return `${mood}`
+                            }
+                        }
+                    },
+                    grid: {
+                        lineWidth: (mood) => {
+                            if (mood.tick.value === 0) {
+                                return 2
+                            } else {
+                                return 1
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (moodDifference) => {
+                            const mood = moodDifference.raw
+                            if (mood === 0) {
+                                return `No change`
+                            } else if (mood > 0) {
+                                return `Mood increased (+${mood})`
+                            } else if (mood < 0) {
+                                return `Mood declined (${mood})`
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    });
+
+    // Confidence chart
+    const confidenceGraph = document.getElementById('averageConfidence');
+    const confidenceLabels = [[${charts.averageConfidenceLabels}]];
+    const confidenceData = [[${charts.averageConfidenceData}]];
+    const confidenceDescriptions = {1: 'Not confident', 2: 'A little confident', 3: 'Confident', 4: 'Very confident'};
+
+
+    const confidenceChart = new Chart(confidenceGraph, {
+        type: 'line',
+        data: {
+            labels: confidenceLabels,
+            datasets: [{
+                label: 'Average confidence',
+                data: confidenceData
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    min: 0,
+                    max: 5,
+                    ticks: {
+                        stepSize: 1,
+                        callback: confidence => confidenceDescriptions[Math.round(confidence)]
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: confidence => confidenceDescriptions[Math.round(confidence.raw)]
+                    }
+                }
+            },
+        }
+    });
+
+
+    const bmiGraph = document.getElementById('bmi');
+    const bmiLabels = [[${charts.bmiLabels}]];
+    const bmiData = [[${charts.bmiData}]];
+
+    const bmiChart = new Chart(bmiGraph, {
+        type: 'line',
+        data: {
+            labels: bmiLabels,
+            datasets: [{
+                label: 'BMI measurement',
+                data: bmiData
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    min: 10,
+                    max: 40,
+                    ticks: {
+                        stepSize: 5,
+                        callback: (bmi) => bmi.toFixed(1)
+                    },
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (bmiMeasurement) => {
+                            const bmi = bmiMeasurement.raw
+                            const bmiDecimal = bmi.toFixed(1)
+                            if (bmi < 18.5) {
+                                return `Underweight Range(${bmiDecimal})`
+                            } else if (bmi < 24.9) {
+                                return `Healthy Range (${bmiDecimal})`
+                            }
+                            if (bmi < 30) {
+                                return `Overweight Range (${bmiDecimal})`
+                            } else if (bmi >= 30) {
+                                return `Obese Range (${bmiDecimal})`
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    });
+
+    const waistHeightRatioGraph = document.getElementById('waistHeightRatio');
+    const waistHeightRatioLabels = [[${charts.waistHeightRatioLabels}]];
+    const waistHeightRatioData = [[${charts.waistHeightRatioData}]];
+
+    const waistHeightRatioChart = new Chart(waistHeightRatioGraph, {
+        type: 'line',
+        data: {
+            labels: waistHeightRatioLabels,
+            datasets: [{
+                label: 'Waist to Height Ratio',
+                data: waistHeightRatioData
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    min: 0.3,
+                    max: 0.8,
+                    ticks: {
+                        stepSize: 0.1,
+                    },
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (whrMeasurement) => {
+                            const whr = whrMeasurement.raw
+                            if (whr < 0.4) {
+                                return `Possibly Underweight (${whr})`
+                            } else if (whr < 0.5) {
+                                return `Healthy Range (${whr})`
+                            } else if (whr < 0.6) {
+                                return `Increased health risk (${whr})`
+                            } else if (whr > 0.6) {
+                                return `Highest health risk(${whr})`
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+
+    const cholesterolGraph = document.getElementById('cholesterol');
+    const cholesterolLabels = [[${charts.cholesterolLabels}]];
+    const cholesterolData = [[${charts.cholesterolData}]];
+
+    const cholesterolChart = new Chart(cholesterolGraph, {
+        type: 'line',
+        data: {
+            labels: cholesterolLabels,
+            datasets: [{
+                label: 'Cholesterol (mmol/L)',
+                data: cholesterolData
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    min: 0,
+                    max: 10,
+                    ticks: {
+                        stepSize: 1,
+                    },
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (cholesterolLevel) => {
+                            const cholesterol = cholesterolLevel.raw
+                            if (cholesterol < 5) {
+                                return `Healthy Range (${cholesterol})`
+                            } else if (cholesterol < 6) {
+                                return `Increased health risk (${cholesterol})`
+                            } else if (cholesterol > 6) {
+                                return `Highest health risk (${cholesterol})`
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+
+    const bpGraph = document.getElementById('blood-pressure');
+    const bpLabels = [[${charts.bloodPressureLabels}]];
+        const systolicData = [[${charts.systolicBPData}]];
+    const diastolicData = [[${charts.diastolicBPData}]];
+
+
+    const bloodPressureChart = new Chart(bpGraph, {
+        type: 'line',
+        data: {
+            labels: bpLabels,
+            datasets: [{
+                label: 'Systolic Blood Pressure',
+                data: systolicData
+            },
+                {
+                    label: 'Diastolic Blood Pressure',
+                    data: diastolicData
+                }
+            ]
+        }
+    });
+</script>
+
+</body>
+</html>

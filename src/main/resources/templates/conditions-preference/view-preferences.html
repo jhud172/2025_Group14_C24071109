@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/navBar.css">
+</head>
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+<body>
+
+<p> Preferences </p>
+<div th:if="${preferences.isEmpty()}"> You have not selected any preferences.</div>
+<div th:each="preference : ${preferences}">
+<p th:text="${preference.description}"></p>
+</div>
+
+<p> Conditions </p>
+<div th:if="${physicalConditions.isEmpty()}"> You do not have any saved conditions.</div>
+<div th:each="physicalCondition : ${physicalConditions}">
+    <p th:text="${physicalCondition.name}"></p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Health Record Form</title>
+    <link rel="stylesheet" href="/css/navBar.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+<body>
+<div th:replace="~{fragments/slimselectCss :: slimselectCss}"></div>
+
+<form th:action="@{/health-record}" th:method="post" th:object="${healthRecordForm}" class="mx-auto my-auto max-w-xl mt-10">
+    <input th:type="hidden"
+           th:name="${_csrf.parameterName}"
+           th:value="${_csrf.token}"/>
+
+    <label th:for="*{id}">
+        <input th:field="*{id}" type="hidden">
+    </label>
+
+    <label th:for="*{user.id}">
+        <input th:field="*{user.id}" type="hidden">
+    </label>
+
+
+    <div class="grid grid-cols-2 gap-8">
+
+        <div class="col-span-2">
+            <label th:for="*{baselineDate}"> Date and Time:
+                <div class="mt-2.5">
+                    <input type="datetime-local" th:field="*{baselineDate}" class="w-full rounded border border-gray-300 p-2">
+                </div>
+            </label>
+        </div>
+
+        <div>
+            <label th:for="*{systolicBloodPressure}"> Systolic blood pressure:
+                <div class="mt-2.5">
+                    <input th:field="*{systolicBloodPressure}" placeholder="mmHg"
+                           class="w-full rounded border border-gray-300 p-2">
+                </div>
+            </label>
+            <div th:errors="*{systolicBloodPressure}" th:if="${#fields.hasErrors('systolicBloodPressure')}"
+                 class="text-sm text-red-800 font-medium flex items-center mt-2">Systolic
+                blood
+                pressure error
+            </div>
+        </div>
+        <div>
+            <label th:for="*{diastolicBloodPressure}"> Diastolic blood pressure:
+                <div class="mt-2.5">
+                    <input th:field="*{diastolicBloodPressure}" placeholder="mmHg"
+                           class="w-full rounded border border-gray-300 p-2">
+                </div>
+            </label>
+            <div th:errors="*{diastolicBloodPressure}" th:if="${#fields.hasErrors('diastolicBloodPressure')}"
+                 class="text-sm text-red-800 font-medium flex items-center mt-2">Diastolic
+                blood
+                pressure error
+            </div>
+        </div>
+
+        <div class="col-span-2">
+            <label th:for="*{cholesterol}"> Cholesterol:
+                <div class="mt-2.5">
+                    <input th:field="*{cholesterol}" placeholder="mmol/L"
+                           class="w-full rounded border border-gray-300 p-2">
+                </div>
+            </label>
+            <div th:errors="*{cholesterol}" th:if="${#fields.hasErrors('cholesterol')}"
+                 class="text-sm text-red-800 font-medium flex items-center mt-2">Cholesterol error
+            </div>
+        </div>
+
+        <div>
+            <label th:for="*{weightKg}"> Weight:
+                <div class="mt-2.5">
+                    <input th:field="*{weightKg}" placeholder="kg" class="w-full rounded border border-gray-300 p-2">
+                </div>
+            </label>
+            <div th:errors="*{weightKg}" th:if="${#fields.hasErrors('weightKg')}"
+                 class="text-sm text-red-800 font-medium flex items-center mt-2">Weight error
+            </div>
+        </div>
+        <div>
+            <label th:for="*{heightCm}"> Height:
+                <div class="mt-2.5">
+                    <input th:field="*{heightCm}" placeholder="cm" class="w-full rounded border border-gray-300 p-2">
+                </div>
+            </label>
+            <div th:errors="*{heightCm}" th:if="${#fields.hasErrors('heightCm')}"
+                 class="text-sm text-red-800 font-medium flex items-center mt-2">Height error
+            </div>
+        </div>
+
+        <div class="col-span-2">
+            <label th:for="*{waistCm}"> Waist circumference:
+                <div class="mt-2.5">
+                    <input th:field="*{waistCm}" placeholder="cm" class="w-full rounded border border-gray-300 p-2">
+                </div>
+            </label>
+            <div th:errors="*{waistCm}" th:if="${#fields.hasErrors('waistCm')}"
+                 class="text-sm text-red-800 font-medium flex items-center mt-2">Waist circumference error
+            </div>
+        </div>
+
+        <div class="col-span-2">
+            <label th:for="*{activityLevel}"> Activity Level:
+                <div class="mt-2.5">
+                    <select th:field="*{activityLevel}" class="w-full rounded border border-gray-300 p-2">
+                        <option value="Sedentary"> I do little to no exercise</option>
+                        <option value="Lightly Active">I exercise 1-3 times a week</option>
+                        <option value="Moderately Active"> I exercise 3-5 times a week</option>
+                        <option value="Very Active">I exercise 6-7 times a week</option>
+                    </select>
+                </div>
+            </label>
+            <div th:errors="*{activityLevel}" th:if="${#fields.hasErrors('activityLevel')}"
+                 class="text-sm text-red-800 font-medium flex items-center mt-2">Activity level error
+            </div>
+        </div>
+
+        <div class="col-span-2">
+            <label th:for="*{physicalConditions}"> Physical conditions:
+                <div class="mt-2.5">
+                    <select id="selectElement" multiple="multiple" th:field="*{physicalConditions}" class="w-full">
+                        <option th:each="physicalCondition: ${allPhysicalConditions}"
+                                th:text="${physicalCondition.name}"
+                                th:value="${physicalCondition.id}"></option>
+                    </select>
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <button type="submit"  class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50"> Save </button>
+    </div>
+</form>
+<div th:replace="~{fragments/slimselectJs :: slimselectJs}"></div>
+</body>
+<script> new SlimSelect({select: '#selectElement'}) </script>
+</html>

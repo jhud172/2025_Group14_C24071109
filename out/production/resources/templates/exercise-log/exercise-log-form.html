@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Exercise Log</title>
+</head>
+    <body>
+
+        <h1>Log Exercise Session</h1>
+
+        <form th:action="@{/exercise-log}" th:object="${exerciseLog}" method="post">
+
+            <label>Date:
+                <input type="date" th:field="*{date}" required>
+            </label><br>
+
+            <label>Exercise Type:
+                <input type="text" th:field="*{exerciseType}" placeholder="Running, Gym, Walking" required>
+            </label><br>
+
+            <label>Duration (minutes):
+                <input type="number" th:field="*{durationMinutes}" min="1" required>
+            </label><br>
+
+            <label>Intensity Level (1–5):
+                <input type="number" th:field="*{intensityLevel}" min="1" max="5">
+            </label><br>
+
+            <label>Pain Level (0–10):
+                <input type="number" th:field="*{painLevel}" min="0" max="10">
+            </label><br>
+
+            <label>Confidence After (0–10):
+                <input type="number" th:field="*{confidenceAfter}" min="0" max="10">
+            </label><br>
+
+            <label>Comments:
+                <textarea th:field="*{comments}"></textarea>
+            </label><br>
+
+            <button type="submit">Save</button>
+        </form>
+
+    </body>
+</html>

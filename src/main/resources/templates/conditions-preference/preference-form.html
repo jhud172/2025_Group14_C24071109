@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/navBar.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body>
+<div th:replace="~{fragments/slimselectCss :: slimselectCss}"></div>
+<header th:class="header" th:insert="~{fragments/navbar.html}"></header>
+
+<div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+    <h1 class="text-xl font-bold">Select Preferences</h1>
+</div>
+
+<div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8 space-y-8">
+
+    <form method="post" th:object="${userPreferenceForm}" th:action="@{/select-preferences}">
+        <input th:name="${_csrf.parameterName}"
+               th:type="hidden"
+               th:value="${_csrf.token}"/>
+
+        <h3 class="font-semibold mb-3"> Physical Conditions</h3>
+
+        <select id="selectElement" multiple="multiple" th:field="*{selectedConditionIds}">
+            <option th:each="physicalCondition: ${allPhysicalConditions}" th:text="${physicalCondition.name}"
+                    th:value="${physicalCondition.id}"
+                    th:disabled="${lockedConditions.contains(physicalCondition.id)}"
+                    th:data-mandatory="${lockedConditions.contains(physicalCondition.id)}"></option>
+        </select>
+        <div class="mt-8">
+            <h3 class="font-semibold mb-3"> Preferences </h3>
+            <div class="bg-white p-4 rounded border border-gray-200">
+                <div th:each="category : ${preferencesByCategory}" class="border-b border-gray-100 last:border-0">
+                    <details class="group py-2">
+                        <summary class="font-medium text-sm text-gray-700 flex justify-between items-center">
+                            <h3 th:text="${category.key}"></h3>
+                            <span class="text-gray-400 group-open:rotate-180">▼</span>
+                        </summary>
+
+                        <div class="grid grid-cols-1 gap-2 pt-3 pb-1 pl-2">
+                            <div th:each="preference : ${category.value}" class="flex items-center gap-3">
+                                <input th:value="${preference.id}" th:field="*{selectedPreferenceIds}"
+                                       type="checkbox"
+                                       class="rounded border-gray-300 focus:ring-slate-800">
+                                <span th:text="${preference.description}" class="text-gray-700"></span>
+
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+        <div class="mt-8">
+            <button th:type="submit" class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50"> Save </button>
+        </div>
+    </form>
+</div>
+<div th:replace="~{fragments/slimselectJs :: slimselectJs}"></div>
+</body>
+<script> new SlimSelect({select: '#selectElement'})
+</script>
+</html>
