@@ -1,0 +1,87 @@
+<div th:fragment="styles">
+    <link rel="stylesheet" href="/css/navBar.css">
+    <link rel="stylesheet" href="/css/notes.css">
+</div>
+
+<div th:fragment="content">
+    <div class="note-form-wrapper">
+        <form th:action="${note != null and note.id != null} ? @{/notes/{id}/edit(id=${note.id})} : @{/notes/folders/{id}/new(id=${folder.id})}"
+              method="post" class="note-form" id="noteForm">
+
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <div class="note-form-header">
+                <input class="note-title-input" type="text" name="title" placeholder="Title" maxlength="120" th:value="${note != null ? note.title : ''}" required>
+
+                <div class="note-colour-picker">
+                    <span class="label">Colour</span>
+                    <button type="button" class="chip active" data-note-colour="slate">Slate</button>
+                    <button type="button" class="chip" data-note-colour="purple">Purple</button>
+                    <button type="button" class="chip" data-note-colour="cyan">Cyan</button>
+                    <button type="button" class="chip" data-note-colour="green">Green</button>
+                    <button type="button" class="chip" data-note-colour="pink">Pink</button>
+                </div>
+
+                <input type="hidden" name="noteColour" id="noteColour" value="slate">
+            </div>
+
+            <div class="editor-toolbar" role="toolbar" aria-label="Note formatting toolbar">
+                <button type="button" class="tool" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+                <button type="button" class="tool" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+                <button type="button" class="tool" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+                <span class="tool-sep"></span>
+
+                <select class="tool-select" id="headingSelect" title="Heading style">
+                    <option value="p">Normal</option>
+                    <option value="h1">Heading 1</option>
+                    <option value="h2">Heading 2</option>
+                    <option value="h3">Heading 3</option>
+                    <option value="blockquote">Quote</option>
+                </select>
+
+                <select class="tool-select" id="fontSizeSelect" title="Font size">
+                    <option value="2">Small</option>
+                    <option value="3" selected>Normal</option>
+                    <option value="4">Large</option>
+                    <option value="5">XL</option>
+                </select>
+
+                <span class="tool-sep"></span>
+
+                <button type="button" class="tool" data-cmd="insertUnorderedList" title="Bullets">• List</button>
+                <button type="button" class="tool" data-cmd="insertOrderedList" title="Numbered">1. List</button>
+
+                <span class="tool-sep"></span>
+
+                <button type="button" class="tool" data-align="left" title="Align left">⟸</button>
+                <button type="button" class="tool" data-align="center" title="Align centre">≡</button>
+                <button type="button" class="tool" data-align="right" title="Align right">⟹</button>
+
+                <span class="tool-sep"></span>
+
+                <button type="button" class="tool" id="linkBtn" title="Insert link">🔗 Link</button>
+                <button type="button" class="tool" id="highlightBtn" title="Highlight">🖍</button>
+                <button type="button" class="tool" id="clearBtn" title="Clear formatting">Clear</button>
+            </div>
+
+            <div class="editor-shell" id="editorShell">
+                <div class="editor" id="editor" contenteditable="true" spellcheck="true" data-placeholder="Write your note…" th:utext="${note != null ? note.content : ''}"></div>
+            </div>
+
+            <input type="hidden" name="content" id="contentHtml">
+
+            <div class="form-actions">
+                <button class="primary-btn" type="submit">Save</button>
+                <a class="cancel" th:if="${folder != null}" th:href="@{/notes/folders/{id}(id=${folder.id})}">Cancel</a>
+                <a class="cancel" th:if="${folder == null}" th:href="@{/notes}">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div th:fragment="pageScripts">
+    <script src="/js/note-editor.js" defer></script>
+</div>
+
+<th:block th:with="pageTitle=${note != null and note.id != null} ? 'Edit Note' : 'New Note', pageStyles=~{::styles}, content=~{::content}, pageScripts=~{::pageScripts}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ~{::pageScripts})}"></th:block>

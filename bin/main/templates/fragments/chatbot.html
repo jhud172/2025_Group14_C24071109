@@ -1,0 +1,51 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="chatbot">
+
+    <!-- CSRF values available on pages with Spring Security -->
+    <input type="hidden" id="chat_csrf"
+           th:if="${_csrf != null}"
+           th:value="${_csrf.token}"/>
+
+    <input type="hidden" id="chat_csrf_header"
+           th:if="${_csrf != null}"
+           th:value="${_csrf.headerName}"/>
+
+    <!-- Floating button -->
+    <button type="button" class="chat-fab" id="chatFab" aria-label="Open chat">
+        <span class="chat-fab-dot"></span>
+        <span class="chat-fab-icon">💬</span>
+    </button>
+
+    <!-- Chat panel -->
+    <section class="chat-panel" id="chatPanel" aria-hidden="true">
+        <header class="chat-header">
+            <div class="chat-title">
+                <div class="chat-badge">AI</div>
+                <div>
+                    <div class="chat-name">Coach Bot</div>
+                    <div class="chat-sub">Training, notes, scheduling help</div>
+                </div>
+            </div>
+
+            <div class="chat-actions">
+                <button type="button" class="chat-icon-btn" id="chatClear" title="Clear">🧹</button>
+                <button type="button" class="chat-icon-btn" id="chatClose" title="Close">✕</button>
+            </div>
+        </header>
+
+        <div class="chat-body" id="chatBody">
+            <div class="chat-msg chat-msg-ai">
+                <div class="bubble">
+                    Ask me anything about your workouts, progress, notes, or what to do today.
+                </div>
+            </div>
+        </div>
+
+        <form class="chat-inputbar" id="chatForm" autocomplete="off">
+            <input id="chatInput" type="text" placeholder="Message…" maxlength="800" required>
+            <button type="submit" class="chat-send" id="chatSend">
+                Send
+            </button>
+        </form>
+    </section>
+
+</div>

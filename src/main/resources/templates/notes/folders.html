@@ -1,0 +1,98 @@
+<div th:fragment="styles">
+    <div th:fragment="styles">
+        <link rel="stylesheet" href="/css/navBar.css">
+        <link rel="stylesheet" href="/css/notes.css">
+    </div>
+
+    <div th:fragment="content">
+        <div class="notes-shell">
+            <aside class="notes-sidebar">
+                <div class="sidebar-header">
+                    <div>
+                        <h3>Folders</h3>
+                        <form th:action="@{/notes/folders/new}" method="post" class="inline-form">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <input type="text" name="name" placeholder="New folder…" maxlength="80" required>
+                            <button type="submit">+</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="folder-list">
+                    <a th:each="folder : ${folders}" th:href="@{/notes/folders/{id}(id=${folder.id})}" th:classappend="${activeFolder != null and folder.id == activeFolder.id} ? ' active' : ''" class="folder-item">
+                        <span class="folder-dot" th:classappend="' dot-' + ${folder.colour}"></span>
+                        <span th:text="${folder.name}">Folder</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-footer" th:if="${activeFolder != null}">
+                    <form th:action="@{/notes/folders/{id}/rename(id=${activeFolder.id})}" method="post">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <input type="text" name="name" th:value="${activeFolder.name}" maxlength="80" required>
+                        <button type="submit">Rename</button>
+                    </form>
+
+                    <form th:action="@{/notes/folders/{id}/delete(id=${activeFolder.id})}" method="post" data-confirm data-confirm-title="Delete folder?" data-confirm-message="This will delete the folder and ALL notes inside it.">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button class="danger" type="submit">Delete</button>
+                    </form>
+                </div>
+            </aside>
+
+            <main class="notes-main">
+                <div class="notes-toolbar">
+                    <div class="breadcrumbs">
+                        <span>Notes</span>
+                        <span th:if="${activeFolder != null}"> / <span th:text="${activeFolder.name}">Folder</span></span>
+                    </div>
+
+                    <div class="toolbar-actions">
+                        <form th:if="${activeFolder != null}" th:action="@{/notes/folders/{id}(id=${activeFolder.id})}" method="get">
+                            <input type="text" name="q" placeholder="Search…" th:value="${q}">
+                            <button type="submit">Search</button>
+                        </form>
+
+                        <a th:if="${activeFolder != null}" class="primary-btn" th:href="@{/notes/folders/{id}/new(id=${activeFolder.id})}">New Note</a>
+                    </div>
+                </div>
+
+                <div th:if="${activeFolder == null}" class="empty big">Select a folder to view your notes.</div>
+
+                <div th:if="${activeFolder != null}" class="file-grid">
+                    <a th:each="note : ${notes}" th:href="@{/notes/{id}(id=${note.id})}" class="file-tile">
+                        <div class="file-icon">📄</div>
+                        <div class="file-info">
+                            <div class="file-title" th:text="${note.title}">Title</div>
+                            <div class="file-date" th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy')}">Date</div>
+                        </div>
+                    </a>
+
+                    <div class="empty" th:if="${notes == null or #lists.isEmpty(notes)}">
+                        <span th:if="${q != null and q.length() > 0}">No results for "<span th:text="${q}">query</span>".</span>
+                        <span th:if="${q == null or q.length() == 0}">No notes in this folder yet.</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Confirm modal -->
+        <div id="confirmOverlay" class="modal-overlay">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+                <h3 id="confirmTitle">Confirm</h3>
+                <p id="confirmMessage">Are you sure?</p>
+                <div class="modal-actions">
+                    <button id="confirmCancel" class="btn" type="button">Cancel</button>
+                    <button id="confirmOk" class="btn-danger" type="button">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:fragment="pageScripts">
+        <script src="/js/notes.js" defer></script>
+    </div>
+
+    <th:block th:with="pageTitle='Notes', pageStyles=~{::styles}, content=~{::content}, pageScripts=~{::pageScripts}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ~{::pageScripts})}"></th:block>
+</div>
+
+</div>

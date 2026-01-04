@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(pageTitle,pageStyles,content,pageScripts)">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} ?: 'Healthy Habits'">Healthy Habits</title>
+
+    <!-- Core styles -->
+    <link rel="stylesheet" href="/css/template.css">
+    <link rel="stylesheet" href="/css/navBar.css">
+    <link rel="stylesheet" href="/css/Main.css">
+
+    <!-- Page-specific styles -->
+    <!-- When pageStyles is provided from the page, resolve it as a fragment expression.
+    Using th:insert allows the styles fragment contents to be inserted into this block. -->
+    <th:block th:if="${pageStyles != null}"
+              th:insert="${pageStyles}"></th:block>
+
+    <!-- Chatbot -->
+    <link rel="stylesheet" href="/css/chatbot.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+</header>
+<header class="site-header"
+    th:replace="~{fragments/navbar :: navbar}">
+</header>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="app-shell">
+    <!-- The main content for each page is provided as a fragment reference in the 'content' parameter.
+        Use th:replace with a fragment expression to render it here. -->
+    <th:block th:replace="${content}"></th:block>
+</main>
+
+<!-- CHATBOT (global) -->
+<div th:replace="~{fragments/chatbot :: chatbot}"></div>
+
+<!-- Core scripts -->
+<script src="/js/chatbot.js" defer></script>
+
+<!-- Page-specific scripts -->
+<!-- Insert page-specific scripts when provided. -->
+<th:block th:if="${pageScripts != null}"
+    th:insert="${pageScripts}"></th:block>
+
+</body>
+</html>

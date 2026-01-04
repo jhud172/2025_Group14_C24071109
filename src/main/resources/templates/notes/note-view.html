@@ -1,0 +1,49 @@
+<div th:fragment="styles">
+    <link rel="stylesheet" href="/css/navBar.css">
+    <link rel="stylesheet" href="/css/notes.css">
+</div>
+
+<div th:fragment="content">
+    <div class="note-view" th:if="${note != null}">
+        <div class="note-card">
+            <div class="note-header">
+                <div class="note-meta">
+                    <a class="back-link" th:if="${note.folder != null}" th:href="@{/notes/folders/{id}(id=${note.folder.id})}">← Back</a>
+                    <span class="title" th:text="${note.title}">Title</span>
+                    <span class="dot">·</span>
+                    <span th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy HH:mm')}">Date</span>
+                </div>
+
+                <div class="note-actions">
+                    <a class="btn-like" th:href="@{/notes/{id}/edit(id=${note.id})}">Edit</a>
+                    <form th:action="@{/notes/{id}/delete(id=${note.id})}" method="post" data-confirm data-confirm-title="Delete note?" data-confirm-message="This will permanently remove the note.">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button class="btn-danger" type="submit">Delete</button>
+                    </form>
+                </div>
+            </div>
+
+            <article class="note-content" th:utext="${note.content}"></article>
+        </div>
+    </div>
+
+    <div class="empty big" th:if="${note == null}">Note not found.</div>
+
+    <!-- Confirm modal -->
+    <div id="confirmOverlay" class="modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+            <h3 id="confirmTitle">Confirm</h3>
+            <p id="confirmMessage">Are you sure?</p>
+            <div class="modal-actions">
+                <button id="confirmCancel" class="btn" type="button">Cancel</button>
+                <button id="confirmOk" class="btn-danger" type="button">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="pageScripts">
+    <script src="/js/notes.js" defer></script>
+</div>
+
+<th:block th:with="pageTitle=${note != null ? note.title : 'Note'}, pageStyles=~{::styles}, content=~{::content}, pageScripts=~{::pageScripts}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ~{::pageScripts})}"></th:block>

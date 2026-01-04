@@ -32,9 +32,13 @@ public class ExerciseLogController {
     private PdfService pdfService;
 
     private final UserService userService;
+    private final uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelService levelService;
 
-    public ExerciseLogController(UserService userService) {
+    @Autowired
+    public ExerciseLogController(UserService userService,
+                                 uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelService levelService) {
         this.userService = userService;
+        this.levelService = levelService;
     }
 
     @Autowired
@@ -56,6 +60,8 @@ public class ExerciseLogController {
     public String save(@ModelAttribute("exerciseLog") ExerciseLogForm form) {
         User user = authHelper.getAuthenticatedUser();
         service.saveLog(form, user);
+        // Award points for logging exercise
+        levelService.addPoints(user, 10);
         return "redirect:/calendar";
     }
 

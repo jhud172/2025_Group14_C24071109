@@ -60,6 +60,25 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<ExerciseLog> exerciseLogs = new ArrayList<>();
 
+    // ===== Notes and Gamification =====
+    /**
+     * A user can have many note folders. These are removed when the user is removed.
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notes.NoteFolder> noteFolders = new ArrayList<>();
+
+    /**
+     * A user can have many notes. Notes are removed when the user is removed.
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notes.Note> notes = new ArrayList<>();
+
+    /**
+     * Holds the user's accumulated points and level for gamification.
+     */
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelProgress levelProgress;
+
     public User() {}
 
     public User(String email, String firstName, String lastName,
