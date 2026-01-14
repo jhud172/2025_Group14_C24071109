@@ -195,6 +195,34 @@
             </div>
         </section>
 
+        <!-- Consistency / streak -->
+        <section aria-label="Consistency" class="mb-6">
+            <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Consistency</p>
+                        <h2 class="mt-1 text-lg font-semibold text-slate-900">Days logged this week</h2>
+                        <p class="mt-1 text-sm text-slate-600" th:text="${streakCount} + ' / 7 days'">0 / 7 days</p>
+                    </div>
+
+                    <div class="flex items-center" aria-label="Streak status">
+                        <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700"
+                              th:text="${streakCount >= 5} ? 'Strong' : (${streakCount >= 3} ? 'Building' : 'Start small')">Start small</span>
+                    </div>
+                </div>
+
+                <div class="mt-5 flex items-center gap-2" aria-label="Days logged strip">
+                    <span
+                        th:each="d : ${streakDays}"
+                        class="h-3 w-3 rounded-full border"
+                        th:classappend="${d.logged} ? ' bg-slate-900 border-slate-900' : ' bg-white border-slate-300'"
+                        th:title="${d.dayLabel}"
+                        th:aria-label="${d.dayLabel} + (${d.logged} ? ': logged' : ': not logged')"
+                        role="img"></span>
+                </div>
+            </div>
+        </section>
+
         <!-- Trainer connection status -->
         <section aria-label="Trainer connection status" class="mb-6">
             <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">

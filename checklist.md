@@ -28,7 +28,7 @@
 - [x] Progress signals (mini analytics without heavy analytics)
 	Small, meaningful signals: logs this week, planned vs completed, best mood uplift, consistency score.
 
-- [ ] Consistency / streak component (lightweight)
+- [x] Consistency / streak component (lightweight)
 	Even a simple “Days logged this week” strip or streak indicator makes it feel like progress is building.
 
 - [ ] “Insights” card becomes actionable

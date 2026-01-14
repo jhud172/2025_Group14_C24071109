@@ -133,6 +133,15 @@ public class HomePageController {
         modelAndView.addObject("weekCompletedCount", weekCompletedCount);
         modelAndView.addObject("consistencyScore", consistencyScore);
 
+        List<StreakDay> streakDays = new ArrayList<>(7);
+        for (int i = 0; i < 7; i++) {
+            LocalDate d = weekStart.plusDays(i);
+            String label = d.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.UK);
+            streakDays.add(new StreakDay(label, daysLoggedThisWeek.contains(d)));
+        }
+        modelAndView.addObject("streakDays", streakDays);
+        modelAndView.addObject("streakCount", daysLoggedThisWeek.size());
+
         List<UpcomingItem> upcomingItems = buildUpcomingItems(user, today, today.plusDays(14));
         modelAndView.addObject("upcomingItems", upcomingItems);
 
