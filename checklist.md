@@ -19,7 +19,7 @@
 - [x] Week strip: hover preview / micro-interaction
 	On hover, reveal a small “Open day →” and/or “Next item: …” line so it feels interactive and alive.
 
-- [ ] Upcoming list (next 3 items)
+- [x] Upcoming list (next 3 items)
 	A list of the next few scheduled items (workouts/tasks/sessions). Users care about specifics more than totals.
 
 - [ ] “Plan health” / availability check card
