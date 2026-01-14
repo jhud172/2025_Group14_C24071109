@@ -2,12 +2,15 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.HomePage;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,16 +69,69 @@ public class HomePageController {
         modelAndView.addObject("recentExerciseLogs", recentExerciseLogs);
 
         LocalDate today = LocalDate.now();
+        List<ExerciseLog> allLogs = exerciseLogService.getLogsForUser(user);
 
-        long logsLast7DaysCount = exerciseLogService.getLogsForUser(user).stream()
+        long logsLast7DaysCount = allLogs.stream()
             .map(ExerciseLog::getDate)
             .filter(d -> d != null)
             .filter(d -> !d.isBefore(today.minusDays(6)) && !d.isAfter(today))
             .count();
 
+        LocalDate weekStart = today.with(DayOfWeek.MONDAY);
+        LocalDate weekEnd = weekStart.plusDays(6);
+
+        long logsThisWeekCount = allLogs.stream()
+                .map(ExerciseLog::getDate)
+                .filter(d -> d != null)
+                .filter(d -> !d.isBefore(weekStart) && !d.isAfter(weekEnd))
+                .count();
+
+        Set<LocalDate> daysLoggedThisWeek = new HashSet<>();
+        for (ExerciseLog log : allLogs) {
+            LocalDate d = log.getDate();
+            if (d == null || d.isBefore(weekStart) || d.isAfter(weekEnd)) {
+                continue;
+            }
+            daysLoggedThisWeek.add(d);
+        }
+
+        int bestMoodUplift = allLogs.stream()
+                .filter(l -> l.getDate() != null && !l.getDate().isBefore(weekStart) && !l.getDate().isAfter(weekEnd))
+                .filter(l -> l.getMoodBefore() != null && l.getMoodAfter() != null)
+                .mapToInt(l -> l.getMoodAfter() - l.getMoodBefore())
+                .max()
+                .orElse(0);
+
+        List<CalendarTask> weekTasks = calendarTaskRepository.findByUserAndDateBetween(user, weekStart, weekEnd);
+        List<ScheduleOccurrence> weekOccurrences = scheduleOccurrenceRepository.findByUserAndDateBetween(user, weekStart, weekEnd);
+
+        int weekPlannedCount = weekTasks.size() + weekOccurrences.size();
+        int weekCompletedCount = 0;
+        for (CalendarTask task : weekTasks) {
+            if (Boolean.TRUE.equals(task.getCompleted())) {
+                weekCompletedCount++;
+            }
+        }
+        for (ScheduleOccurrence occ : weekOccurrences) {
+            if (occ.isCompleted()) {
+                weekCompletedCount++;
+            }
+        }
+
+        int consistencyScore = weekPlannedCount == 0
+                ? 0
+                : (int) Math.round(100.0 * weekCompletedCount / weekPlannedCount);
+
         Long trainerConversationId = findTrainerConversationId(user);
         modelAndView.addObject("logsLast7DaysCount", logsLast7DaysCount);
         modelAndView.addObject("trainerConversationId", trainerConversationId);
+
+        modelAndView.addObject("logsThisWeekCount", logsThisWeekCount);
+        modelAndView.addObject("daysLoggedThisWeek", daysLoggedThisWeek.size());
+        modelAndView.addObject("bestMoodUplift", bestMoodUplift);
+        modelAndView.addObject("weekPlannedCount", weekPlannedCount);
+        modelAndView.addObject("weekCompletedCount", weekCompletedCount);
+        modelAndView.addObject("consistencyScore", consistencyScore);
 
         List<UpcomingItem> upcomingItems = buildUpcomingItems(user, today, today.plusDays(14));
         modelAndView.addObject("upcomingItems", upcomingItems);

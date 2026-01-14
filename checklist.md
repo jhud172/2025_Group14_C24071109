@@ -25,7 +25,7 @@
 - [x] “Plan health” / availability check card
 	A small card that nudges “Set your availability” or “Adjust your week” (ties directly into calendar-led behaviour change).
 
-- [ ] Progress signals (mini analytics without heavy analytics)
+- [x] Progress signals (mini analytics without heavy analytics)
 	Small, meaningful signals: logs this week, planned vs completed, best mood uplift, consistency score.
 
 - [ ] Consistency / streak component (lightweight)
