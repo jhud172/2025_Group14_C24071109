@@ -13,7 +13,7 @@
 - [x] Week strip: snap scrolling + better “day cards”
 	Make it feel premium with snap-x snap-mandatory, and improve each day card layout so it’s more informative.
 
-- [ ] Week strip: “day load” indicator (tiny bars/dots)
+- [x] Week strip: “day load” indicator (tiny bars/dots)
 	A little visual indicator per day based on tasks+workouts count (light → heavy). It adds signal without adding content.
 
 - [ ] Week strip: hover preview / micro-interaction
