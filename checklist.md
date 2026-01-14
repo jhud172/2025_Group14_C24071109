@@ -22,7 +22,7 @@
 - [x] Upcoming list (next 3 items)
 	A list of the next few scheduled items (workouts/tasks/sessions). Users care about specifics more than totals.
 
-- [ ] “Plan health” / availability check card
+- [x] “Plan health” / availability check card
 	A small card that nudges “Set your availability” or “Adjust your week” (ties directly into calendar-led behaviour change).
 
 - [ ] Progress signals (mini analytics without heavy analytics)
