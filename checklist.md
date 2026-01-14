@@ -16,7 +16,7 @@
 - [x] Week strip: “day load” indicator (tiny bars/dots)
 	A little visual indicator per day based on tasks+workouts count (light → heavy). It adds signal without adding content.
 
-- [ ] Week strip: hover preview / micro-interaction
+- [x] Week strip: hover preview / micro-interaction
 	On hover, reveal a small “Open day →” and/or “Next item: …” line so it feels interactive and alive.
 
 - [ ] Upcoming list (next 3 items)
