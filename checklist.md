@@ -10,7 +10,7 @@
 	Show whether the user is linked to a verified trainer (or “none yet”), with CTAs: “Explore trainers” / “Message trainer” / “Switch trainer”.
 	Assumption: there is no trainer marketplace/verification model yet; “linked” is inferred from an Inbox conversation that includes a participant with role TRAINER. “Explore/Switch” routes to `/explore` placeholder.
 
-- [ ] Week strip: snap scrolling + better “day cards”
+- [x] Week strip: snap scrolling + better “day cards”
 	Make it feel premium with snap-x snap-mandatory, and improve each day card layout so it’s more informative.
 
 - [ ] Week strip: “day load” indicator (tiny bars/dots)
