@@ -3,7 +3,7 @@
 - [x] “Next action” card (the brain of the page)
 	A single, decisive block that tells the user what to do next (log workout / complete next task / prep next session / plan week) with one primary button and one secondary.
 
-- [ ] Upgrade the “Daily Snapshot” into a dashboard header
+- [x] Upgrade the “Daily Snapshot” into a dashboard header
 	Add a proper header row that can hold: greeting, today status, quick streak/consistency chip, and a trainer link status (linked / not linked).
 
 - [ ] Trainer connection status panel
