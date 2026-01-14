@@ -6,8 +6,9 @@
 - [x] Upgrade the “Daily Snapshot” into a dashboard header
 	Add a proper header row that can hold: greeting, today status, quick streak/consistency chip, and a trainer link status (linked / not linked).
 
-- [ ] Trainer connection status panel
+- [x] Trainer connection status panel
 	Show whether the user is linked to a verified trainer (or “none yet”), with CTAs: “Explore trainers” / “Message trainer” / “Switch trainer”.
+	Assumption: there is no trainer marketplace/verification model yet; “linked” is inferred from an Inbox conversation that includes a participant with role TRAINER. “Explore/Switch” routes to `/explore` placeholder.
 
 - [ ] Week strip: snap scrolling + better “day cards”
 	Make it feel premium with snap-x snap-mandatory, and improve each day card layout so it’s more informative.
