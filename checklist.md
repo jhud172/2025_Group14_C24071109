@@ -32,9 +32,9 @@ Make top of day page feel like a “hub” without adding clutter.
 - [x] Add a small “Today” badge if date == today. (Rendered badge when viewing today; tests: `./gradlew test`)
 
 ### Tests
-- [ ] MVC test: GET `/calendar/day/{date}` renders header and includes `data-testid="day-hub-header"`.
-- [ ] Assert the title contains the date string.
-- [ ] If today date is used, verify “Today” badge renders.
+- [x] MVC test: GET `/calendar/day/{date}` renders header and includes `data-testid="day-hub-header"`. (Added `CalendarDayHubHeaderMvcTest`; tests: `./gradlew test`)
+- [x] Assert the title contains the date string. (Asserted `2026-01-15` is present; tests: `./gradlew test`)
+- [x] If today date is used, verify “Today” badge renders. (Added today-based MVC assertion; tests: `./gradlew test`)
 
 ---
 
