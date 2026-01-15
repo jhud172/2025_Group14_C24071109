@@ -47,7 +47,7 @@ A streak strip that shows each day status:
 - Red = skipped (items existed but none completed / no logs and day elapsed)
 
 ### Implementation
-- [ ] Ensure a DB table exists to justify the bar: `daily_completion` with fields:
+- [x] Ensure a DB table exists to justify the bar: `daily_completion` with fields: (Already present in `schema.sql` with composite PK + constraints; exercised by `DailyCompletionRepositoryTest`; tests: `./gradlew test`)
   - user_id, date (composite key)
   - completion_status (ENUM: GREY, GREEN, ORANGE, RED)
   - completion_percentage (0–100)
