@@ -88,7 +88,8 @@ class CalendarDayHubHeaderMvcTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-testid=\"day-hub-header\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Day view: ")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("2026-01-15")));
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("2026-01-15")))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("ring-white/20")));
     }
 
     @TestConfiguration

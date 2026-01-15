@@ -25,7 +25,7 @@ Make top of day page feel like a “hub” without adding clutter.
 - [x] Replace the current header with a “Day Hub Header” layout: (Day header now includes right-side status pills; tests: `./gradlew test`)
   - Left: “Calendar” label + “Day view” title
   - Right: compact pills for `Timed Focus`, `Daily Focus` status, and `Completion %`
-- [ ] Add subtle background effect using Tailwind only:
+- [x] Add subtle background effect using Tailwind only: (Added dark ring crispness on hub header; tests: `./gradlew test`)
   - Use `bg-white/70 backdrop-blur border shadow-sm` in light
   - Use `dark:bg-slate-900/50 dark:border-slate-800` in dark
   - Add `ring-1 ring-white/20` in dark for crispness
