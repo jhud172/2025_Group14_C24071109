@@ -29,7 +29,7 @@ Make top of day page feel like a “hub” without adding clutter.
   - Use `bg-white/70 backdrop-blur border shadow-sm` in light
   - Use `dark:bg-slate-900/50 dark:border-slate-800` in dark
   - Add `ring-1 ring-white/20` in dark for crispness
-- [ ] Add a small “Today” badge if date == today.
+- [x] Add a small “Today” badge if date == today. (Rendered badge when viewing today; tests: `./gradlew test`)
 
 ### Tests
 - [ ] MVC test: GET `/calendar/day/{date}` renders header and includes `data-testid="day-hub-header"`.

@@ -24,6 +24,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(CalendarController.class)
 @ActiveProfiles("test")
 class CalendarDayHubHeaderMvcTest {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     private MockMvc mvc;
@@ -90,6 +93,26 @@ class CalendarDayHubHeaderMvcTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Day view: ")))
             .andExpect(content().string(org.hamcrest.Matchers.containsString("2026-01-15")))
             .andExpect(content().string(org.hamcrest.Matchers.containsString("ring-white/20")));
+    }
+
+    @Test
+    void dayViewRendersTodayBadgeWhenDateIsToday() throws Exception {
+        User sessionUser = new User();
+        sessionUser.setId(1L);
+        LocalDate today = LocalDate.now();
+
+        given(taskService.getTasks(eq(sessionUser), eq(today))).willReturn(Collections.emptyList());
+        given(scheduleOccurrenceService.getOccurrencesForUserOnDate(eq(sessionUser), eq(today))).willReturn(Collections.emptyList());
+        given(workoutScheduleService.findByUserAndDayOfWeek(eq(sessionUser), any(Integer.class))).willReturn(Collections.emptyList());
+
+        given(taskTemplateService.listRecents(eq(sessionUser), eq(6))).willReturn(Collections.emptyList());
+        given(taskTemplateService.listFavourites(eq(sessionUser))).willReturn(Collections.emptyList());
+        given(taskTemplateService.listAll(eq(sessionUser))).willReturn(Collections.emptyList());
+
+        mvc.perform(get("/calendar/day/" + today.format(DATE_FORMAT)).sessionAttr("user", sessionUser))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-testid=\"today-badge\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Today")));
     }
 
     @TestConfiguration
