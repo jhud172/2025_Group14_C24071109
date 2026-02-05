@@ -24,6 +24,10 @@ public interface CalendarTaskService {
 
     void updateTask(Long id, User user, String title, String time, String notes, boolean exercise);
 
+    void updateGracePeriodMinutes(Long id, User user, Integer gracePeriodMinutes);
+
+    void deleteTask(Long id, User user);
+
     Map<LocalDate, List<CalendarTask>> getTasksByRange(User user, LocalDate start, LocalDate end);
 
 }

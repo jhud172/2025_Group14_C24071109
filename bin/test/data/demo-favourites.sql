@@ -1,7 +1,5 @@
-DELETE FROM favourites;
+-- Disabled: consolidated into 00-data.sql to avoid relying on non-deterministic
+-- execution ordering from `classpath:data/*.sql`.
 
-INSERT INTO favourites (id, user_id, exercise_id, custom_exercise_id)
-VALUES
-    (1, 1, 1, NULL),
-    (2, 1, 3, NULL),
-    (3, 2, NULL, 1);
+-- No-op statement so Spring SQL init does not treat this script as empty.
+SELECT 1;

@@ -1,33 +1,218 @@
-<div th:fragment="styles">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"/>
-    <link rel="stylesheet" href="/css/navBar.css">
-</div>
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Your Schedules', null, ~{::content}, ~{::pageScripts})}">
 
-<div th:fragment="content">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-900 mb-6">Active Schedules</h1>
-        <div th:if="${#lists.isEmpty(activeSchedules)}" class="p-6 bg-white/80 rounded-lg shadow text-gray-500 mb-8">You currently have no active schedules.</div>
-        <div th:each="applied : ${activeSchedules}" class="bg-green-50 p-4 rounded-xl shadow mb-4 border border-green-300">
-            <h2 class="text-xl font-semibold text-gray-900" th:text="${applied.schedule.name}"></h2>
-            <p class="text-gray-700 mt-1">Applied on:<span class="font-semibold" th:text="${applied.dateApplied}"></span></p>
-            <div class="mt-3 flex gap-4">
-                <a th:href="@{'/schedules/' + ${applied.schedule.id} + '/entries'}" class="text-blue-700 font-semibold hover:underline">Edit</a>
-                <a th:href="@{'/schedules/applied/' + ${applied.id} + '/remove'}" class="text-yellow-600 font-semibold hover:underline">Remove from Calendar</a>
+    <div th:fragment="content">
+        <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Your schedules</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Manage active plans, shared routines, and apply new schedules.</p>
+                </div>
+                <a href="/schedules/builder"
+                   class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                    + Create new schedule
+                </a>
             </div>
+
+            <section class="mt-8">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Active schedules</h2>
+                    <span class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Live on your calendar</span>
+                </div>
+
+                <div th:if="${#lists.isEmpty(activeSchedules)}"
+                     class="mt-4 rounded-2xl border border-slate-200 bg-white/70 p-6 text-slate-600 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
+                    You currently have no active schedules.
+                </div>
+
+                <div class="mt-4 space-y-4">
+                    <div th:each="applied : ${activeSchedules}"
+                         class="rounded-2xl border border-emerald-200 bg-white/90 p-5 shadow-sm backdrop-blur dark:border-emerald-900/40 dark:bg-slate-900/50">
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100" th:text="${applied.schedule.name}"></h3>
+                                    <span th:if="${applied.schedule.user != null and applied.schedule.user.id != currentUserId}"
+                                          class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                                        Trainer-shared
+                                    </span>
+                                </div>
+                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                                    Applied on <span class="font-semibold" th:text="${applied.dateApplied}"></span>
+                                    <span th:if="${applied.schedule.user != null and applied.schedule.user.id != currentUserId}">
+                                        · Shared by <span class="font-semibold" th:text="${applied.schedule.user.username}"></span>
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2">
+                                <a th:if="${applied.schedule.user != null and applied.schedule.user.id == currentUserId}"
+                                   th:href="@{'/schedules/' + ${applied.schedule.id} + '/entries'}"
+                                   class="inline-flex items-center justify-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900/50 dark:text-slate-100 dark:ring-slate-800">
+                                    Edit
+                                </a>
+                                <a th:href="@{'/schedules/applied/' + ${applied.id} + '/remove'}"
+                                   class="inline-flex items-center justify-center rounded-xl bg-yellow-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500">
+                                    Remove
+                                </a>
+                            </div>
+                        </div>
+
+                        <form th:action="@{'/schedules/applied/' + ${applied.id} + '/settings'}" method="post" class="mt-4 flex flex-col gap-4 border-t border-emerald-100 pt-4 dark:border-emerald-900/40 sm:flex-row sm:items-center sm:justify-between">
+                            <input type="hidden" th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+                            <input type="hidden" name="shownOnCalendar" value="false" />
+                            <input type="hidden" name="requiresLogging" value="false" />
+
+                            <div class="flex flex-wrap gap-4">
+                                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
+                                    <input type="checkbox" name="shownOnCalendar" value="true" th:checked="${applied.shownOnCalendar}"
+                                           class="peer sr-only" onchange="this.form.submit()">
+                                    <span class="relative inline-flex h-5 w-9 items-center rounded-full bg-slate-200 transition peer-checked:bg-emerald-500 dark:bg-slate-700">
+                                        <span class="inline-block h-4 w-4 translate-x-0.5 rounded-full bg-white transition peer-checked:translate-x-4"></span>
+                                    </span>
+                                    Shown on calendar
+                                </label>
+                                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
+                                    <input type="checkbox" name="requiresLogging" value="true" th:checked="${applied.requiresLogging}"
+                                           class="peer sr-only" onchange="this.form.submit()">
+                                    <span class="relative inline-flex h-5 w-9 items-center rounded-full bg-slate-200 transition peer-checked:bg-blue-500 dark:bg-slate-700">
+                                        <span class="inline-block h-4 w-4 translate-x-0.5 rounded-full bg-white transition peer-checked:translate-x-4"></span>
+                                    </span>
+                                    Requires logging
+                                </label>
+                            </div>
+
+                            <div class="text-xs text-slate-500 dark:text-slate-400">
+                                Changes save automatically
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-10">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">All schedules</h2>
+                    <div class="w-full sm:max-w-xs">
+                        <label class="sr-only" for="schedule-search">Search schedules</label>
+                        <input id="schedule-search" type="text" placeholder="Search schedules..."
+                               class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100" />
+                    </div>
+                </div>
+
+                <div id="schedule-search-empty"
+                     class="mt-4 hidden rounded-2xl border border-dashed border-slate-200 bg-white/70 p-6 text-sm text-slate-600 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
+                    No schedules match your search.
+                </div>
+
+                <div class="mt-6 space-y-6">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">My schedules</h3>
+                            <span class="text-xs text-slate-500 dark:text-slate-400" th:text="${#lists.size(schedules)} + ' total'"></span>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(schedules)}"
+                             class="mt-3 rounded-2xl border border-slate-200 bg-white/70 p-6 text-sm text-slate-600 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
+                            You haven't created any schedules yet.
+                        </div>
+
+                        <div class="mt-3 grid gap-4 lg:grid-cols-2">
+                            <div th:each="schedule : ${schedules}"
+                                 class="schedule-card rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900/50"
+                                 th:attr="data-schedule-name=${#strings.toLowerCase(schedule.name)}">
+                                <div class="flex flex-col gap-3">
+                                    <div>
+                                        <h4 class="text-base font-semibold text-slate-900 dark:text-slate-100" th:text="${schedule.name}"></h4>
+                                        <p th:if="${schedule.description}" class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${schedule.description}"></p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <a th:href="@{'/schedules/' + ${schedule.id} + '/entries'}"
+                                           class="inline-flex items-center justify-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900/50 dark:text-slate-100 dark:ring-slate-800">
+                                            Edit
+                                        </a>
+                                        <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}"
+                                           class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
+                                            Apply
+                                        </a>
+                                        <a th:href="@{'/schedules/' + ${schedule.id} + '/delete'}"
+                                           class="inline-flex items-center justify-center rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">
+                                            Delete
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${sharedSchedules != null and !#lists.isEmpty(sharedSchedules)}">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Trainer-shared schedules</h3>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Shared with you</span>
+                        </div>
+
+                        <div class="mt-3 grid gap-4 lg:grid-cols-2">
+                            <div th:each="schedule : ${sharedSchedules}"
+                                 class="schedule-card rounded-2xl border border-indigo-200 bg-indigo-50/70 p-5 shadow-sm backdrop-blur transition hover:shadow-md dark:border-indigo-900/40 dark:bg-indigo-950/30"
+                                 th:attr="data-schedule-name=${#strings.toLowerCase(schedule.name)}">
+                                <div class="flex flex-col gap-3">
+                                    <div>
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <h4 class="text-base font-semibold text-slate-900 dark:text-slate-100" th:text="${schedule.name}"></h4>
+                                            <span class="rounded-full bg-indigo-200 px-2 py-0.5 text-xs font-semibold text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-200">Trainer-shared</span>
+                                        </div>
+                                        <p class="mt-1 text-sm text-slate-700 dark:text-slate-200">
+                                            Shared by <span class="font-semibold" th:text="${schedule.user.username}"></span>
+                                        </p>
+                                        <p th:if="${schedule.description}" class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${schedule.description}"></p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}"
+                                           class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                                            Apply
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-6 mt-10">All Schedules</h1>
-        <div th:if="${#lists.isEmpty(schedules)}" class="p-6 bg-white/80 rounded-lg shadow text-gray-500">You haven't created any schedules yet.</div>
-        <div th:each="schedule : ${schedules}" class="bg-white/80 p-4 rounded-xl shadow mb-4 border hover:shadow-lg transition">
-            <h2 class="text-xl font-semibold text-gray-800" th:text="${schedule.name}"></h2>
-            <p th:if="${schedule.description}" class="text-gray-600 text-sm mt-1" th:text="${schedule.description}"></p>
-            <div class="mt-3 flex gap-4">
-                <a th:href="@{'/schedules/' + ${schedule.id} + '/entries'}" class="text-blue-600 font-semibold hover:underline">Edit</a>
-                <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}" class="text-green-700 font-semibold hover:underline">Apply</a>
-                <a th:href="@{'/schedules/' + ${schedule.id} + '/delete'}" class="text-red-600 font-semibold hover:underline">Delete</a>
-            </div>
-        </div>
-        <a href="/schedules/builder" class="mt-8 inline-block px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">+ Create New Schedule</a>
     </div>
-</div>
 
-<th:block th:with="pageTitle='Your Schedules', pageStyles=~{::styles}, content=~{::content}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ${null})}"></th:block>
+    <th:block th:fragment="pageScripts">
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const input = document.getElementById("schedule-search");
+                const cards = document.querySelectorAll("[data-schedule-name]");
+                const emptyState = document.getElementById("schedule-search-empty");
+
+                const runFilter = () => {
+                    const term = (input?.value || "").trim().toLowerCase();
+                    let visible = 0;
+
+                    cards.forEach(card => {
+                        const name = card.getAttribute("data-schedule-name") || "";
+                        const show = term.length === 0 || name.includes(term);
+                        card.classList.toggle("hidden", !show);
+                        if (show) {
+                            visible += 1;
+                        }
+                    });
+
+                    if (emptyState) {
+                        emptyState.classList.toggle("hidden", term.length === 0 || visible > 0);
+                    }
+                };
+
+                if (input) {
+                    input.addEventListener("input", runFilter);
+                }
+            });
+        </script>
+    </th:block>
+
+</th:block>

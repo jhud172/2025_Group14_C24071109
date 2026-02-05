@@ -25,20 +25,36 @@ public class UserService {
     }
 
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElse(null);
+        if (username == null || username.isBlank()) {
+            return null;
+        }
+        return userRepository.findByUsernameIgnoreCase(username.trim()).orElse(null);
     }
     // Inside UserService.java
 
     @Transactional
     public User saveUser(User user) {
+        if (user.getUsername() != null) {
+            user.setUsername(user.getUsername().trim().toLowerCase());
+        }
+        if (user.getEmail() != null) {
+            user.setEmail(user.getEmail().trim());
+        }
         // password encoder
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setEnabled(true);
         user.setSubscriptionStatus(false);
 
+        if (user.getRole() == null) {
+            user.setRole(Role.CLIENT);
+        }
+
         User savedUser = userRepository.save(user);
 
+        // Keep legacy ROLE_USER for broad compatibility.
         assignRoleToUser(user.getUsername(), "USER");
+        // Also assign the new primary role used by role-based dashboards.
+        assignRoleToUser(user.getUsername(), user.getRole().name());
 
         return savedUser;
     }
@@ -56,24 +72,50 @@ public class UserService {
             roleId = jdbcTemplate.queryForObject(findRoleSql, Integer.class, roleName);
         }
 
-        // Link user to role
-        String insertSql = "INSERT INTO users_roles (username, role_id) VALUES (?, ?)";
-        jdbcTemplate.update(insertSql, username, roleId);
+        // Link user to role (idempotent)
+        String insertSql = """
+                INSERT INTO users_roles (username, role_id)
+                SELECT ?, ?
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM users_roles ur
+                    WHERE ur.username = ?
+                      AND ur.role_id = ?
+                )
+                """;
+        jdbcTemplate.update(insertSql, username, roleId, username, roleId);
     }
 
     public boolean emailExists(String email) {
-        return userRepository.existsByEmail(email);
+        if (email == null) {
+            return false;
+        }
+        return userRepository.existsByEmailIgnoreCase(email.trim());
     }
 
     public boolean usernameExists(String username) {
-        return userRepository.existsByUsername(username);
+        if (username == null) {
+            return false;
+        }
+        return userRepository.existsByUsernameIgnoreCase(username.trim());
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email).orElse(null);
+        if (email == null || email.isBlank()) {
+            return null;
+        }
+        return userRepository.findByEmailIgnoreCase(email.trim()).orElse(null);
     }
 
     public boolean verifyPassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
+    @Transactional
+    public void updatePassword(User user, String rawPassword) {
+        if (user == null || rawPassword == null) {
+            return;
+        }
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        userRepository.save(user);
     }
 }

@@ -55,9 +55,34 @@ public class Note {
     @Column(nullable = false)
     private Boolean pinned = false;
 
+    @Column(name = "is_public", nullable = false)
+    private boolean isPublic = false;
+
+    public boolean isPublic() {
+        return this.isPublic;
+    }
+
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @PrePersist
+    public void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

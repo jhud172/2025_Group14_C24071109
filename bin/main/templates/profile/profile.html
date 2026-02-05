@@ -1,200 +1,493 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Profile', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+
 <div th:fragment="styles">
-    <link rel="stylesheet" href="/css/navBar.css">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </div>
 
 <div th:fragment="content">
-    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-8">
-
-        <div class="mb-8"><h2 class="text-xl font-bold">Client Profile</h2></div>
-
-        <div th:if="${healthRecord == null}">
-            <div class="bg-white p-4 rounded border border-gray-200">
-                <p>You do not have a health record yet. </p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 gap-6" th:classappend="${healthRecord != null} ? 'md:grid-cols-3': ' md:grid-cols-2'">
-            <div class="bg-white p-4 rounded border border-gray-200" th:if="${healthRecord != null}">
-                <h3 class="font-semibold mb-2"> Physical Conditions</h3>
-                <div th:if="${healthRecord.physicalConditions.isEmpty()}"> You do not have any recorded physical conditions.</div>
-                <ul>
-                    <li th:each="physicalCondition: ${healthRecord.physicalConditions}" th:text="${physicalCondition.name}" class="p-1 text-gray-700 text-sm"></li>
-                </ul>
-            </div>
-            <div class="bg-white p-4 rounded border border-gray-200">
-                <h3 class="font-semibold mb-2"> Exercise Preferences</h3>
-                <div th:if="${userPreferenceList.isEmpty()}"> You have not selected any preferences.</div>
-
-                <ul>
-                    <div th:each="category : ${userPreferenceList}" class="p-1">
-                        <h4 th:text="${category.key}" class="font-medium text-sm text-gray-700"></h4>
-                        <li th:each="preference: ${category.value}" th:text="${preference.description}" class="text-gray-700 text-sm"></li>
-                    </div>
-                    <div class="mt-6">
-                        <a class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50" href="/select-preferences">Select Preferences</a>
-                    </div>
-                </ul>
-            </div>
-            <div class="bg-white p-4 rounded border border-gray-200">
-                <h3 class="font-semibold mb-2"> Recent Exercise Logs</h3>
-                <div th:if="${recentExerciseLogs.isEmpty()}"> You do not have any exercise logs yet.</div>
-
-                <ul>
-                    <li th:each="exerciseLog: ${recentExerciseLogs}">
-                        <div class="mt-2">
-                            <span th:text="'Date: ' + ${exerciseLog.date}" class="font-medium text-sm text-gray-700"></span>
-                            <div class="flex justify-between mt-1 text-gray-700 text-sm">
-                                <span th:text="' Confidence: ' + ${exerciseLog.confidence} + '/4'"></span>
-                                <span th:text="'Mood Before: ' + ${exerciseLog.moodBefore} + '/4'"></span>
-                                <span th:text="'Mood After: ' + ${exerciseLog.moodAfter} + '/4'"></span>
-                            </div>
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-8" id="profile-shell" data-edit-mode="false">
+        <section class="profile-dimmable rounded-3xl border border-slate-200/70 bg-gradient-to-br from-white via-white to-slate-50 p-6 shadow-sm dark:border-slate-800 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900/40">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+                    <div class="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950" data-avatar-button>
+                        <img th:if="${user != null && user.profileImageUrl != null}" th:src="${user.profileImageUrl}" alt="Profile photo" class="h-full w-full object-cover" />
+                        <span th:if="${user == null || user.profileImageUrl == null}" class="text-xl font-semibold text-slate-600 dark:text-slate-200"
+                              th:text="${(user != null && user.firstName != null ? user.firstName.substring(0,1) : '') + (user != null && user.lastName != null ? user.lastName.substring(0,1) : '')}">CP</span>
+                        <div class="profile-avatar-overlay pointer-events-none absolute inset-0 flex items-center justify-center bg-slate-900/60 text-xs font-semibold text-white opacity-0 transition">
+                            Change photo
                         </div>
-                    </li>
-                </ul>
-                <div class="mt-6"><a class="border border-gray-300 px-4 py-2 rounded hover:bg-gray-50" href="/exercise-log/list"> View exercise logs </a></div>
-            </div>
-        </div>
-
-        <div th:if="${healthRecord != null}">
-            <h2 class="font-semibold mb-3"> Key Metrics </h2>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="bg-white p-4 rounded border border-gray-200 border-l-4" th:classappend="${(healthRecord.systolicBloodPressure > 140 || healthRecord.diastolicBloodPressure > 90) ? 'border-l-red-500 ' : ((healthRecord.systolicBloodPressure > 120 || healthRecord.diastolicBloodPressure > 80) ? 'border-l-amber-500':'border-l-green-500')} ">
-                    <p class="text-xs text-gray-500"> Blood Pressure</p>
-                    <span class="text-xl font-semibold" th:text="${healthRecord.systolicBloodPressure}"></span>
-                    <span class="text-xl font-semibold"> / </span>
-                    <span class="text-xl font-semibold" th:text="${healthRecord.diastolicBloodPressure}"></span>
-                    <span class="text-xs text-gray-500"> mmHg </span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{profile.welcome}">Welcome back</p>
+                        <h1 class="mt-1 text-2xl font-semibold text-slate-900 dark:text-white" th:text="${user != null ? user.fullName : 'Profile'}">Profile</h1>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300" th:text="#{profile.tagline}">Your premium profile hub — keep details, health, and preferences up to date.</p>
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                            <span th:text="${user != null ? '@' + user.username : '@user'}">@user</span>
+                            · <span th:text="${platformSubscription != null ? platformSubscription.plan : 'Free'}">Free</span>
+                            <span class="ml-1 text-xs" th:text="${platformSubscription != null ? platformSubscription.status : 'STANDARD'}">STANDARD</span>
+                        </p>
+                        <a th:if="${user != null && user.profileImageUrl != null}"
+                           th:href="${user.profileImageUrl}"
+                           target="_blank"
+                           rel="noopener"
+                           class="mt-2 inline-flex text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">
+                            View profile image
+                        </a>
+                    </div>
                 </div>
-
-                <div class="bg-white p-4 rounded border border-gray-200  border-l-4" th:classappend="${(healthRecord.cholesterol > 6) ? 'border-l-red-500 ' : ((healthRecord.cholesterol > 5) ? 'border-l-amber-500':'border-l-green-500')} ">
-                    <p class="text-xs text-gray-500"> Cholesterol</p>
-                    <span class="text-xl font-semibold" th:text="${healthRecord.cholesterol}"></span>
-                    <span class="text-xs text-gray-500"> mmol/L </span>
-                </div>
-
-                <div class="bg-white p-4 rounded border border-gray-200 border-l-4" th:classappend="${(healthRecord.bmi > 30 || healthRecord.bmi < 18.5) ? 'border-l-red-500 ' : ((healthRecord.bmi > 25 ) ? 'border-l-amber-500':'border-l-green-500')} ">
-                    <p class="text-xs text-gray-500"> BMI </p>
-                    <span class="text-xl font-semibold" th:text="${healthRecord.bmi}"></span>
-                    <span class="block text-xs text-gray-500" th:text="'Weight: ' + ${healthRecord.weightKg} + 'kg'"> </span>
-                </div>
-
-                <div class="bg-white p-4 rounded border border-gray-200 border-l-4" th:classappend="${(healthRecord.waistHeightRatio > 0.6) ? 'border-l-red-500 ' : ((healthRecord.waistHeightRatio > 0.5) ? 'border-l-amber-500':'border-l-green-500')} ">
-                    <p class="text-xs text-gray-500"> Waist/Height Ratio </p>
-                    <span class="text-xl font-semibold" th:text="${healthRecord.waistHeightRatio}"></span>
-                    <span class="block text-xs text-gray-500" th:text="'Waist: ' + ${healthRecord.waistCm} + 'cm'"> </span>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <a href="/inbox" class="inline-flex items-center justify-center rounded-xl border border-slate-300/80 bg-white px-4 py-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100" th:text="#{profile.inbox}">Inbox</a>
+                        <button type="button" id="toggle-profile-edit"
+                            class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
+                            th:text="#{profile.customise}"
+                            th:attr="data-edit-open-label=#{profile.customise}, data-edit-close-label=#{profile.close}">Customise profile</button>
                 </div>
             </div>
+
+            <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-2xl border border-slate-200/70 bg-white px-4 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{profile.points}">Points</p>
+                    <p class="mt-2 text-xl font-semibold text-slate-900 dark:text-white" th:text="${levelProgress != null ? levelProgress.points : 0}">0</p>
+                </div>
+                <div class="rounded-2xl border border-slate-200/70 bg-white px-4 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{profile.level}">Level</p>
+                    <p class="mt-2 text-xl font-semibold text-slate-900 dark:text-white" th:text="${levelProgress != null ? levelProgress.level : 1}">1</p>
+                </div>
+                <div class="rounded-2xl border border-slate-200/70 bg-white px-4 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{profile.exerciseLogs}">Exercise logs</p>
+                    <p class="mt-2 text-xl font-semibold text-slate-900 dark:text-white" th:text="${exerciseLogCount}">0</p>
+                </div>
+                <div class="rounded-2xl border border-slate-200/70 bg-white px-4 py-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{profile.subscription}">Subscription</p>
+                    <p class="mt-2 text-xl font-semibold text-slate-900 dark:text-white" th:text="${platformSubscription != null ? platformSubscription.plan : 'Free'}">Free</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="profile-dimmable space-y-3">
+            <div th:if="${profileUpdated}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" th:text="#{profile.updated}">Profile updated.</div>
+            <div th:if="${profileError}" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" th:text="${profileError}">Error.</div>
+            <div th:if="${verifySuccess}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" th:text="${verifySuccess}">Verification sent.</div>
+            <div th:if="${verifyError}" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" th:text="${verifyError}">Verification error.</div>
+            <div th:if="${settingsUpdated}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" th:text="#{profile.settingsSaved}">Settings saved.</div>
+            <div th:if="${conditionUpdated}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" th:text="#{profile.conditionsUpdated}">Conditions updated.</div>
+            <div th:if="${conditionError}" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" th:text="${conditionError}">Condition error.</div>
+            <div th:if="${exportRequested}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" th:text="#{profile.exportRequested}">Export request received. We will notify you.</div>
+            <div th:if="${deleteError}" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" th:text="${deleteError}">Delete error.</div>
         </div>
 
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="font-semibold"> Health record charts </h2>
-            <select id="health-record-select" onchange="selectHealthRecordCharts()" class="rounded border-0 py-1.5 pl-3 pr-10 text-slate-700 ring-1 ring-inset ring-gray-300">
-                <option value="body-measurements">Measurement trends</option>
-                <option value="cardiovascular-health">Cardiovascular trends</option>
-            </select>
-        </div>
-        <div id="body-measurement-graphs">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-white p-4 rounded border border-gray-200">
-                    <h4 class="text-sm mb-2 font-semibold">BMI</h4>
-                    <div class="relative h-64 w-full"><canvas id="bmi"></canvas></div>
+        <section class="profile-editor rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-white" th:text="#{profile.details.title}">Profile details</h2>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{profile.details.subtitle}">Keep your details current. Toggle edit mode to update.</p>
                 </div>
-                <div class="bg-white p-4 rounded border border-gray-200">
-                    <h4 class="text-sm mb-2 font-semibold">Waist/Height Ratio</h4>
-                    <div class="relative h-64 w-full"><canvas id="waistHeightRatio"></canvas></div>
+                <div class="text-xs text-slate-500 space-y-1">
+                    <div th:if="${user != null && user.usernameChangedAt != null}">
+                        <span th:text="#{profile.username.lastChanged(${#temporals.format(user.usernameChangedAt, 'dd MMM yyyy')})}">Last changed on —</span>
+                    </div>
+                    <div th:if="${!canChangeUsername}">
+                        <span th:text="#{profile.username.nextChange(${nextUsernameChangeAt != null ? #temporals.format(nextUsernameChangeAt, 'dd MMM yyyy') : 'soon'})}">Username can be changed every 7 days. Next change on soon.</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div id="cardiovascular-graphs" class="hidden">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-white p-4 rounded border border-gray-200">
-                    <h4 class="text-sm mb-2 font-semibold">Cholesterol</h4>
-                    <div class="relative h-64 w-full"><canvas id="cholesterol"></canvas></div>
-                </div>
-                <div class="bg-white p-4 rounded border border-gray-200">
-                    <h4 class="text-sm mb-2 font-semibold"> Blood Pressure</h4>
-                    <div class="relative h-64 w-full"><canvas id="blood-pressure"></canvas></div>
-                </div>
-            </div>
-        </div>
 
-        <h2 class="font-semibold mb-3"> Exercise Log Charts </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white p-4 rounded border border-gray-200">
-                <h4 class="text-sm mb-2 font-semibold">Average Mood</h4>
-                <div class="relative h-64 w-full"><canvas id="averageMood"></canvas></div>
+            <div class="mt-6 grid gap-6 lg:grid-cols-[2fr_3fr]">
+                <div class="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/30">
+                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200" th:text="#{profile.current.title}">Current profile</h3>
+                    <dl class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                        <div>
+                            <dt class="text-xs uppercase tracking-wide text-slate-400" th:text="#{profile.username}">Username</dt>
+                            <dd th:text="${user != null ? '@' + user.username : '@user'}">@user</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs uppercase tracking-wide text-slate-400" th:text="#{profile.bio}">Bio</dt>
+                            <dd th:text="${user != null && user.bio != null ? user.bio : 'Add a short bio to personalize your profile.'}">Bio</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs uppercase tracking-wide text-slate-400" th:text="#{profile.email}">Email</dt>
+                            <dd class="flex flex-wrap items-center gap-2">
+                                <span th:text="${user != null ? user.email : 'you@example.com'}">you@example.com</span>
+                                <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                                      th:classappend="${user != null && user.emailVerified} ? ' bg-emerald-100 text-emerald-700' : ' bg-amber-100 text-amber-700'"
+                                      th:text="${user != null && user.emailVerified} ? #{profile.verified} : #{profile.unverified}">Unverified</span>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs uppercase tracking-wide text-slate-400" th:text="#{profile.phone}">Phone</dt>
+                            <dd class="flex flex-wrap items-center gap-2">
+                                <span th:text="${user != null && user.phoneNumber != null ? user.phoneNumber : #messages.msg('profile.phone.notAdded')}">Not added</span>
+                                <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                                      th:classappend="${user != null && user.phoneVerified} ? ' bg-emerald-100 text-emerald-700' : ' bg-amber-100 text-amber-700'"
+                                      th:text="${user != null && user.phoneVerified} ? #{profile.verified} : #{profile.unverified}">Unverified</span>
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <form th:action="@{/profile/update}" method="post" class="profile-edit hidden space-y-4" id="profile-edit-form">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{profile.username}">
+                            Username
+                            <input type="text" name="username" th:value="${user != null ? user.username : ''}" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-slate-900/30 dark:border-slate-700 dark:bg-slate-950" th:disabled="${!canChangeUsername}" />
+                            <p th:if="${profileFieldErrors != null && profileFieldErrors.containsKey('username')}" class="mt-2 text-xs text-rose-600" th:text="${profileFieldErrors['username']}">Username error.</p>
+                        </label>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{profile.email}">
+                            Email
+                            <input type="email" name="email" th:value="${user != null ? user.email : ''}" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-slate-900/30 dark:border-slate-700 dark:bg-slate-950" />
+                            <p th:if="${profileFieldErrors != null && profileFieldErrors.containsKey('email')}" class="mt-2 text-xs text-rose-600" th:text="${profileFieldErrors['email']}">Email error.</p>
+                        </label>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{profile.phone}">
+                            Phone number
+                            <input type="tel" name="phoneNumber" th:value="${user != null && user.phoneNumber != null ? user.phoneNumber : ''}" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-slate-900/30 dark:border-slate-700 dark:bg-slate-950" />
+                            <p th:if="${profileFieldErrors != null && profileFieldErrors.containsKey('phoneNumber')}" class="mt-2 text-xs text-rose-600" th:text="${profileFieldErrors['phoneNumber']}">Phone error.</p>
+                        </label>
+                    </div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{profile.bio}">
+                        Bio
+                        <textarea name="bio" rows="4" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-slate-900 focus:ring-slate-900/30 dark:border-slate-700 dark:bg-slate-950" th:text="${user != null && user.bio != null ? user.bio : ''}"></textarea>
+                        <p th:if="${profileFieldErrors != null && profileFieldErrors.containsKey('bio')}" class="mt-2 text-xs text-rose-600" th:text="${profileFieldErrors['bio']}">Bio error.</p>
+                    </label>
+                    <div class="flex items-center justify-end gap-3">
+                        <button type="button" id="cancel-profile-edit" class="rounded-xl border border-slate-300/80 bg-white px-4 py-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" th:text="#{profile.cancel}">Cancel</button>
+                        <button type="submit" class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900" th:text="#{profile.saveChanges}">Save changes</button>
+                    </div>
+                </form>
+
+                <div class="profile-edit hidden rounded-2xl border border-slate-200/70 bg-white p-5 text-sm text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300">
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white" th:text="#{profile.verify.title}">Verify your contact details</h3>
+                    <p class="mt-2 text-xs text-slate-500" th:text="#{profile.verify.subtitle}">Email and phone verification keep your account secure. New details reset verification.</p>
+                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                        <form th:action="@{/verify/email/send}" method="post">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit" class="w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" th:text="#{profile.verify.email}">Send email verification</button>
+                        </form>
+                        <form th:action="@{/verify/phone/send}" method="post">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit" class="w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" th:text="#{profile.verify.sms}">Send SMS code</button>
+                        </form>
+                    </div>
+                    <form th:action="@{/verify/phone/confirm}" method="post" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <label class="flex-1">
+                            <span class="text-xs font-semibold text-slate-500" th:text="#{profile.verify.code}">Enter SMS code</span>
+                            <input type="text" name="code" maxlength="6" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-950" />
+                        </label>
+                        <button type="submit" class="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900" th:text="#{profile.verify.confirm}">Confirm code</button>
+                    </form>
+                </div>
+
+                <form th:action="@{/profile/image}" method="post" enctype="multipart/form-data" class="profile-edit hidden rounded-2xl border border-slate-200/70 bg-white p-5 text-sm text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Profile image</h3>
+                    <p class="mt-2 text-xs text-slate-500">Upload a new image to update your avatar.</p>
+                    <div class="mt-4 flex flex-wrap items-center gap-3">
+                        <div class="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+                            <img th:if="${user != null && user.profileImageUrl != null}" th:src="${user.profileImageUrl}" alt="Profile photo" class="h-full w-full object-cover" />
+                            <span th:if="${user == null || user.profileImageUrl == null}" class="text-sm font-semibold text-slate-500">N/A</span>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <a th:if="${user != null && user.profileImageUrl != null}"
+                               th:href="${user.profileImageUrl}"
+                               target="_blank"
+                               rel="noopener"
+                               class="text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white">
+                                View current image
+                            </a>
+                            <input type="file" id="profileImageInput" name="profileImage" accept="image/png,image/jpeg,image/webp" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs shadow-sm dark:border-slate-700 dark:bg-slate-950" />
+                        </div>
+                    </div>
+                    <p id="profile-image-error" class="mt-2 text-xs text-rose-600 hidden">Invalid image.</p>
+                    <p th:if="${profileImageError}" class="mt-2 text-xs text-rose-600" th:text="${profileImageError}">Image error.</p>
+                    <button type="submit" class="mt-4 inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">Upload new</button>
+                </form>
             </div>
-            <div class="bg-white p-4 rounded border border-gray-200">
-                <h4 class="text-sm mb-2 font-semibold">Average Confidence</h4>
-                <div class="relative h-64 w-full"><canvas id="averageConfidence"></canvas></div>
+        </section>
+
+        <section class="profile-dimmable rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Settings hub</h2>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Preferences, accessibility, and account actions.</p>
+                </div>
+                <a th:href="@{/pricing}" class="inline-flex items-center justify-center rounded-xl border border-slate-300/80 bg-white px-4 py-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100">Manage subscription</a>
             </div>
-        </div>
+
+            <div class="mt-6 grid gap-6 lg:grid-cols-3">
+                <div class="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/30">
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Preferences</h3>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Update goals, training preferences, and theme.</p>
+                    <a th:href="@{/select-preferences}" class="mt-4 inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">Open preferences</a>
+                </div>
+
+                <form th:action="@{/profile/settings/accessibility}" method="post" class="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/30" id="accessibility-form">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Accessibility</h3>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Colour blind mode and disability support toggles.</p>
+                    <div class="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-200">
+                        <label class="flex items-center justify-between gap-3">
+                            <span>Colour blind mode</span>
+                            <input type="checkbox" name="colorBlindMode" th:checked="${userSettings != null && userSettings.colorBlindMode}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/30" />
+                        </label>
+                        <label class="flex items-center justify-between gap-3">
+                            <span>Hearing support</span>
+                            <input type="checkbox" name="disabilityHearing" th:checked="${userSettings != null && userSettings.disabilityHearing}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/30" />
+                        </label>
+                        <label class="flex items-center justify-between gap-3">
+                            <span>Mobility support</span>
+                            <input type="checkbox" name="disabilityMobility" th:checked="${userSettings != null && userSettings.disabilityMobility}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/30" />
+                        </label>
+                        <label class="flex items-center justify-between gap-3">
+                            <span>Vision support</span>
+                            <input type="checkbox" name="disabilityVision" th:checked="${userSettings != null && userSettings.disabilityVision}" class="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900/30" />
+                        </label>
+                    </div>
+                    <div id="accessibility-feedback" class="mt-3 hidden rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800" role="status" aria-live="polite">
+                        Accessibility settings applied across the site.
+                    </div>
+                    <button type="submit" class="mt-4 inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">Save accessibility</button>
+                </form>
+
+                <div class="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/30">
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Exercise logs</h3>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Review progress, trends, and history.</p>
+                    <a th:href="@{/exercise-log/list}" class="mt-4 inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">View logs</a>
+                </div>
+            </div>
+
+            <div class="mt-6 grid gap-6 lg:grid-cols-2">
+                <div class="rounded-2xl border border-slate-200/70 bg-white p-5 dark:border-slate-800 dark:bg-slate-950/40">
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Request data export</h3>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">We will prepare a downloadable export and notify you in inbox.</p>
+                    <form th:action="@{/profile/data-export}" method="post" class="mt-4">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="inline-flex items-center justify-center rounded-xl border border-slate-300/80 bg-white px-4 py-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-100">Request export</button>
+                    </form>
+                    <div th:if="${recentExportRequests != null && !recentExportRequests.isEmpty()}" class="mt-4 text-xs text-slate-500">
+                        Last request: <span th:text="${#temporals.format(recentExportRequests[0].requestedAt, 'dd MMM yyyy')}" class="font-semibold text-slate-700 dark:text-slate-200">—</span>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-rose-200/70 bg-rose-50 p-5 dark:border-rose-900/60 dark:bg-rose-950/30">
+                    <h3 class="text-sm font-semibold text-rose-900 dark:text-rose-100">Delete account</h3>
+                    <p class="mt-2 text-sm text-rose-700 dark:text-rose-200">This action permanently removes your data and cannot be undone.</p>
+                    <form th:action="@{/profile/delete}" method="post" class="mt-4 space-y-3">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <label class="block text-sm text-rose-900 dark:text-rose-100">
+                            Type DELETE to confirm
+                            <input type="text" name="confirmText" class="mt-2 w-full rounded-xl border border-rose-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-rose-500 focus:ring-rose-500/30 dark:border-rose-800 dark:bg-rose-950" />
+                        </label>
+                        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-rose-700">Delete account</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-dimmable rounded-3xl border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Health conditions</h2>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Track permanent or time-limited conditions.</p>
+                </div>
+                <p class="text-xs text-slate-500">Premium members receive inbox follow-ups when timed conditions end.</p>
+            </div>
+
+            <div class="mt-6 grid gap-6 lg:grid-cols-2">
+                <div class="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/30">
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Permanent conditions</h3>
+                    <ul class="mt-4 space-y-3">
+                        <li th:if="${permanentConditions == null || permanentConditions.isEmpty()}" class="text-sm text-slate-500">No permanent conditions saved.</li>
+                        <li th:each="condition : ${permanentConditions}" class="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
+                            <span th:text="${condition.name}">Condition</span>
+                            <form th:action="@{/profile/conditions/{id}/delete(id=${condition.id})}" method="post">
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="text-xs text-rose-600 hover:underline">Remove</button>
+                            </form>
+                        </li>
+                    </ul>
+                    <form th:action="@{/profile/conditions/permanent}" method="post" class="mt-4 space-y-3">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                            Add condition
+                            <input type="text" name="conditionName" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-950" />
+                        </label>
+                        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">Add permanent</button>
+                    </form>
+                </div>
+
+                <div class="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/30">
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Timed conditions</h3>
+                    <ul class="mt-4 space-y-3">
+                        <li th:if="${timedConditions == null || timedConditions.isEmpty()}" class="text-sm text-slate-500">No timed conditions saved.</li>
+                        <li th:each="condition : ${timedConditions}" class="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
+                            <div class="flex items-center justify-between">
+                                <span th:text="${condition.name}">Condition</span>
+                                <span class="text-xs uppercase tracking-wide text-slate-400" th:text="${condition.status}">ACTIVE</span>
+                            </div>
+                            <p class="mt-2 text-xs text-slate-500">
+                                <span th:text="${condition.startDate != null ? condition.startDate : '—'}">—</span>
+                                → <span th:text="${condition.endDate != null ? condition.endDate : '—'}">—</span>
+                                · <span th:text="${condition.durationDays != null ? condition.durationDays + ' days' : ''}"></span>
+                            </p>
+                            <div class="mt-3 flex flex-wrap items-center gap-2">
+                                <form th:action="@{/profile/conditions/{id}/extend(id=${condition.id})}" method="post" class="flex items-center gap-2">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <input type="number" name="extraDays" min="1" value="7" class="w-20 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-950" />
+                                    <button type="submit" class="text-xs text-slate-700 hover:underline dark:text-slate-200">Extend</button>
+                                </form>
+                                <form th:action="@{/profile/conditions/{id}/recover(id=${condition.id})}" method="post">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" class="text-xs text-emerald-600 hover:underline">Mark recovered</button>
+                                </form>
+                                <form th:action="@{/profile/conditions/{id}/delete(id=${condition.id})}" method="post">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" class="text-xs text-rose-600 hover:underline">Remove</button>
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
+                    <form th:action="@{/profile/conditions/timed}" method="post" class="mt-4 space-y-3">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200 sm:col-span-3">
+                                Condition name
+                                <input type="text" name="conditionName" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-950" />
+                            </label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                                Start date
+                                <input type="date" name="startDate" th:value="${today}" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-950" />
+                            </label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                                Duration (days)
+                                <input type="number" name="durationDays" min="1" value="14" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-950" />
+                            </label>
+                        </div>
+                        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">Add timed condition</button>
+                    </form>
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 
 <div th:fragment="pageScripts" th:inline="javascript">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+    const toggleButton = document.getElementById('toggle-profile-edit');
+    const cancelButton = document.getElementById('cancel-profile-edit');
+    const profileShell = document.getElementById('profile-shell');
+    const editPanels = document.querySelectorAll('.profile-edit');
+    const editForm = document.getElementById('profile-edit-form');
+    const avatarButton = document.querySelector('[data-avatar-button]');
+    const profileImageInput = document.getElementById('profileImageInput');
+    const profileImageError = document.getElementById('profile-image-error');
+    const accessibilityForm = document.getElementById('accessibility-form');
+    const accessibilityFeedback = document.getElementById('accessibility-feedback');
 
-    /* Health record chart scripts (preserve Thymeleaf inline expressions) */
-    function selectHealthRecordCharts() {
-        const select = document.getElementById('health-record-select');
-        const selected = select.value;
+    let isDirty = false;
 
-        const bodyCharts = document.getElementById('body-measurement-graphs')
-        const cardiovascularCharts = document.getElementById('cardiovascular-graphs')
-
-        if (selected === 'body-measurements') {
-            bodyCharts.classList.remove('hidden')
-            cardiovascularCharts.classList.add('hidden')
-        } else {
-            bodyCharts.classList.add('hidden')
-            cardiovascularCharts.classList.remove('hidden')
+    const setEditing = (editing) => {
+        if (!profileShell || !editPanels.length) {
+            return;
         }
+        profileShell.setAttribute('data-edit-mode', editing ? 'true' : 'false');
+        editPanels.forEach((panel) => panel.classList.toggle('hidden', !editing));
+        if (toggleButton) {
+            const openLabel = toggleButton.getAttribute('data-edit-open-label') || 'Customise profile';
+            const closeLabel = toggleButton.getAttribute('data-edit-close-label') || 'Close editor';
+            toggleButton.textContent = editing ? closeLabel : openLabel;
+        }
+        document.body.classList.toggle('profile-editing', editing);
+        document.body.style.overflow = editing ? 'hidden' : '';
+    };
+
+    if (toggleButton && profileShell && editPanels.length) {
+        toggleButton.addEventListener('click', () => {
+            const currentlyEditing = profileShell.getAttribute('data-edit-mode') === 'true';
+            if (currentlyEditing && isDirty && !confirm('Discard unsaved changes?')) {
+                return;
+            }
+            if (!currentlyEditing) {
+                isDirty = false;
+            }
+            setEditing(!currentlyEditing);
+        });
     }
 
-    const moodGraph = document.getElementById('averageMood');
-    const moodLabels = [[${charts.averageMoodLabels}]];
-    const moodData = [[${charts.averageMoodData}]];
+    if (cancelButton && editForm) {
+        cancelButton.addEventListener('click', () => {
+            if (isDirty && !confirm('Discard unsaved changes?')) {
+                return;
+            }
+            editForm.reset();
+            isDirty = false;
+            setEditing(false);
+        });
+    }
 
-    const moodChart = new Chart(moodGraph, {
-        type: 'bar',
-        data: { labels: moodLabels, datasets: [{ label: 'Average mood difference', data: moodData }] },
-        options: { indexAxis: 'x', scales: { y: { min: -5, max: 5, ticks: { stepSize: 1, callback: (mood) => { if (mood === 5 || mood === -5) { return '' } if (mood === 0) { return `${mood}` } else if (mood > 0) { return `+${mood}` } else if (mood < 0) { return `${mood}` } } }, grid: { lineWidth: (mood) => { if (mood.tick.value === 0) { return 2 } else { return 1 } } } } }, plugins: { tooltip: { callbacks: { label: (moodDifference) => { const mood = moodDifference.raw if (mood === 0) { return `No change` } else if (mood > 0) { return `Mood increased (+${mood})` } else if (mood < 0) { return `Mood declined (${mood})` } } } } }
+    if (editForm) {
+        editForm.addEventListener('change', () => {
+            isDirty = true;
+        });
+    }
+
+    window.addEventListener('beforeunload', (event) => {
+        if (profileShell && profileShell.getAttribute('data-edit-mode') === 'true' && isDirty) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
     });
 
-    const confidenceGraph = document.getElementById('averageConfidence');
-    const confidenceLabels = [[${charts.averageConfidenceLabels}]];
-    const confidenceData = [[${charts.averageConfidenceData}]];
-    const confidenceDescriptions = {1: 'Not confident', 2: 'A little confident', 3: 'Confident', 4: 'Very confident'};
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('a');
+        if (!link) {
+            return;
+        }
+        if (profileShell && profileShell.getAttribute('data-edit-mode') === 'true' && isDirty) {
+            const shouldLeave = confirm('You have unsaved changes. Leave without saving?');
+            if (!shouldLeave) {
+                event.preventDefault();
+            }
+        }
+    });
 
-    const confidenceChart = new Chart(confidenceGraph, { type: 'line', data: { labels: confidenceLabels, datasets: [{ label: 'Average confidence', data: confidenceData }] }, options: { scales: { y: { min: 0, max: 5, ticks: { stepSize: 1, callback: confidence => confidenceDescriptions[Math.round(confidence)] } } }, plugins: { tooltip: { callbacks: { label: confidence => confidenceDescriptions[Math.round(confidence.raw)] } } } } });
+    if (avatarButton && profileImageInput) {
+        avatarButton.addEventListener('click', () => {
+            if (profileShell && profileShell.getAttribute('data-edit-mode') === 'true') {
+                profileImageInput.click();
+            }
+        });
+    }
 
-    const bmiGraph = document.getElementById('bmi');
-    const bmiLabels = [[${charts.bmiLabels}]];
-    const bmiData = [[${charts.bmiData}]];
+    if (profileImageInput && profileImageError) {
+        profileImageInput.addEventListener('change', () => {
+            profileImageError.classList.add('hidden');
+            const file = profileImageInput.files && profileImageInput.files[0];
+            if (!file) {
+                return;
+            }
+            const maxSize = 2 * 1024 * 1024;
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+            if (!allowedTypes.includes(file.type) || file.size > maxSize) {
+                profileImageInput.value = '';
+                profileImageError.textContent = 'Please choose a PNG, JPG, or WebP file under 2MB.';
+                profileImageError.classList.remove('hidden');
+            }
+        });
+    }
 
-    const bmiChart = new Chart(bmiGraph, { type: 'line', data: { labels: bmiLabels, datasets: [{ label: 'BMI measurement', data: bmiData }] }, options: { scales: { y: { min: 10, max: 40, ticks: { stepSize: 5, callback: (bmi) => bmi.toFixed(1) } } }, plugins: { tooltip: { callbacks: { label: (bmiMeasurement) => { const bmi = bmiMeasurement.raw const bmiDecimal = bmi.toFixed(1) if (bmi < 18.5) { return `Underweight Range(${bmiDecimal})` } else if (bmi < 24.9) { return `Healthy Range (${bmiDecimal})` } if (bmi < 30) { return `Overweight Range (${bmiDecimal})` } else if (bmi >= 30) { return `Obese Range (${bmiDecimal})` } } } } } });
+    if (accessibilityForm && accessibilityFeedback) {
+        accessibilityForm.addEventListener('change', () => {
+            accessibilityFeedback.classList.remove('hidden');
+            clearTimeout(accessibilityFeedback._timeout);
+            accessibilityFeedback._timeout = setTimeout(() => accessibilityFeedback.classList.add('hidden'), 3000);
 
-    const waistHeightRatioGraph = document.getElementById('waistHeightRatio');
-    const waistHeightRatioLabels = [[${charts.waistHeightRatioLabels}]];
-    const waistHeightRatioData = [[${charts.waistHeightRatioData}]];
-
-    const waistHeightRatioChart = new Chart(waistHeightRatioGraph, { type: 'line', data: { labels: waistHeightRatioLabels, datasets: [{ label: 'Waist to Height Ratio', data: waistHeightRatioData }] }, options: { scales: { y: { min: 0.3, max: 0.8, ticks: { stepSize: 0.1 } } }, plugins: { tooltip: { callbacks: { label: (whrMeasurement) => { const whr = whrMeasurement.raw if (whr < 0.4) { return `Possibly Underweight (${whr})` } else if (whr < 0.5) { return `Healthy Range (${whr})` } else if (whr < 0.6) { return `Increased health risk (${whr})` } else if (whr > 0.6) { return `Highest health risk(${whr})` } } } } } });
-
-    const cholesterolGraph = document.getElementById('cholesterol');
-    const cholesterolLabels = [[${charts.cholesterolLabels}]];
-    const cholesterolData = [[${charts.cholesterolData}]];
-
-    const cholesterolChart = new Chart(cholesterolGraph, { type: 'line', data: { labels: cholesterolLabels, datasets: [{ label: 'Cholesterol (mmol/L)', data: cholesterolData }] }, options: { scales: { y: { min: 0, max: 10, ticks: { stepSize: 1 } } }, plugins: { tooltip: { callbacks: { label: (cholesterolLevel) => { const cholesterol = cholesterolLevel.raw if (cholesterol < 5) { return `Healthy Range (${cholesterol})` } else if (cholesterol < 6) { return `Increased health risk (${cholesterol})` } else if (cholesterol > 6) { return `Highest health risk (${cholesterol})` } } } } } });
-
-    const bpGraph = document.getElementById('blood-pressure');
-    const bpLabels = [[${charts.bloodPressureLabels}]];
-    const systolicData = [[${charts.systolicBPData}]];
-    const diastolicData = [[${charts.diastolicBPData}]];
-
-    const bloodPressureChart = new Chart(bpGraph, { type: 'line', data: { labels: bpLabels, datasets: [{ label: 'Systolic Blood Pressure', data: systolicData }, { label: 'Diastolic Blood Pressure', data: diastolicData }] } });
+            const colorBlind = accessibilityForm.querySelector('input[name="colorBlindMode"]');
+            if (colorBlind) {
+                document.body.dataset.colorBlind = colorBlind.checked ? 'on' : 'off';
+                document.body.classList.toggle('color-blind', colorBlind.checked);
+            }
+        });
+    }
 </div>
 
-<th:block th:with="pageTitle='Profile', pageStyles=~{::styles}, content=~{::content}, pageScripts=~{::pageScripts}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ~{::pageScripts})}"></th:block>
+</th:block>

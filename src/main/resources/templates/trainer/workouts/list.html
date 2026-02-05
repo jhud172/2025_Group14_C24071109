@@ -1,0 +1,45 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout(${pageTitle} ?: 'Library · Workouts', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Library · Workouts</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Your saved workout templates.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a th:href="@{/trainer/library}"
+                       class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70">
+                        Back
+                    </a>
+                    <a th:href="@{/trainer/library/workouts/create}"
+                       class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                        Create
+                    </a>
+                </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(workouts)}" class="mt-6 border border-dashed border-white/15 rounded-xl p-8 text-center">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">No workouts yet</h2>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Create a workout and add items.</p>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(workouts)}" class="mt-6 divide-y divide-white/10">
+                <div th:each="workout : ${workouts}" class="py-4 flex items-center justify-between gap-4">
+                    <div class="min-w-0">
+                        <div class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${workout.title}">Workout</div>
+                        <div class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${workout.summary}">Summary</div>
+                    </div>
+                    <div class="shrink-0">
+                        <a th:href="@{/trainer/library/workouts/{id}(id=${workout.id})}"
+                           class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70">
+                            View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>

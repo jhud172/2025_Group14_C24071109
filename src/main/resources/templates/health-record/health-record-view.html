@@ -1,53 +1,66 @@
-<div th:fragment="styles">
-    <link rel="stylesheet" href="/css/navBar.css">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-</div>
+<th:block th:replace="~{base :: layout('Health Record Details', null, ~{::content}, null)}">
 
-<div th:fragment="content">
-    <div class="mx-auto max-w-3xl px-4 py-8">
-        <div class="flex justify-between items-center mb-8"><h1 class="text-xl font-bold">Health Record Details</h1></div>
+    <div th:fragment="content">
+        <div class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col gap-2">
+                <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Health record details</h1>
+                <p class="text-sm text-slate-700 dark:text-slate-200">Review a specific record.</p>
+            </div>
 
-        <div class="bg-white p-6 rounded border border-gray-200">
-            <div class="space-y-8">
-                <div class="border-b border-gray-100 pb-4"><span class="font-semibold">Date Recorded:</span> <span th:text="${record.baselineDate}"></span></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <section class="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+                <div class="text-sm text-slate-700 dark:text-slate-200">
+                    <span class="font-semibold text-slate-900 dark:text-slate-100">Date recorded:</span>
+                    <span th:text="${record.baselineDate}"></span>
+                </div>
+
+                <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <div class="space-y-6">
-                        <div>
-                            <h3 class="font-bold mb-2">Cardiovascular</h3>
-                            <div class="space-y-2">
-                                <p><span class="font-semibold">Blood Pressure:</span> <span th:text="${record.systolicBloodPressure}"></span> / <span th:text="${record.diastolicBloodPressure}"></span> mmHg </p>
-                                <p><span class="font-semibold">Cholesterol:</span> <span th:text="${record.cholesterol}"></span> mmol/L </p>
+                        <div class="rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/30">
+                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Cardiovascular</h3>
+                            <div class="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
+                                <p>
+                                    <span class="font-semibold text-slate-900 dark:text-slate-100">Blood pressure:</span>
+                                    <span th:text="${record.systolicBloodPressure}"></span> / <span th:text="${record.diastolicBloodPressure}"></span> mmHg
+                                </p>
+                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Cholesterol:</span> <span th:text="${record.cholesterol}"></span> mmol/L</p>
                             </div>
                         </div>
-                        <div>
-                            <h3 class="font-bold mb-2">Body Measurements</h3>
-                            <div class="space-y-2">
-                                <p><span class="font-semibold">Weight:</span> <span th:text="${record.weightKg}"></span> kg</p>
-                                <p><span class="font-semibold">Height:</span> <span th:text="${record.heightCm}"></span> cm</p>
-                                <p><span class="font-semibold">Waist:</span> <span th:text="${record.waistCm}"></span> cm</p>
-                                <p><span class="font-semibold">BMI:</span> <span th:text="${record.bmi}"></span></p>
-                                <p><span class="font-semibold">Waist/Height Ratio:</span> <span th:text="${record.waistHeightRatio}"></span></p>
+
+                        <div class="rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/30">
+                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Body measurements</h3>
+                            <div class="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
+                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Weight:</span> <span th:text="${record.weightKg}"></span> kg</p>
+                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Height:</span> <span th:text="${record.heightCm}"></span> cm</p>
+                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Waist:</span> <span th:text="${record.waistCm}"></span> cm</p>
+                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">BMI:</span> <span th:text="${record.bmi}"></span></p>
+                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Waist/height ratio:</span> <span th:text="${record.waistHeightRatio}"></span></p>
                             </div>
                         </div>
                     </div>
+
                     <div class="space-y-6">
-                        <div>
-                            <h3 class="font-bold mb-2">Activity & Conditions</h3>
-                            <div class="space-y-2"><p><span class="font-semibold">Activity Level:</span> <span th:text="${record.activityLevel}"></span></p></div>
+                        <div class="rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/30">
+                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Activity</h3>
+                            <p class="mt-3 text-sm text-slate-700 dark:text-slate-200">
+                                <span class="font-semibold text-slate-900 dark:text-slate-100">Activity level:</span>
+                                <span th:text="${record.activityLevel}"></span>
+                            </p>
                         </div>
-                        <div>
-                            <h3 class="font-bold mb-2">Physical Conditions</h3>
-                            <ul class="list-disc list-inside">
+
+                        <div class="rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/30">
+                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Physical conditions</h3>
+                            <ul class="mt-3 list-disc list-inside text-sm text-slate-700 dark:text-slate-200">
                                 <li th:each="pc : ${record.physicalConditions}" th:text="${pc.name}"></li>
                             </ul>
-                            <p th:if="${#lists.isEmpty(record.physicalConditions)}">None recorded</p>
+                            <p th:if="${#lists.isEmpty(record.physicalConditions)}" class="mt-3 text-sm text-slate-700 dark:text-slate-200">None recorded</p>
                         </div>
                     </div>
                 </div>
-                <div class="pt-4 border-t border-gray-100"><a href="/health-record/list" class="text-blue-600 hover:underline">Back to list</a></div>
-            </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <a href="/health-record/list" class="text-sm font-semibold text-blue-700 hover:underline dark:text-blue-300">Back to list</a>
+                </div>
+            </section>
         </div>
     </div>
-</div>
-
-<th:block th:with="pageTitle='Health Record Details', pageStyles=~{::styles}, content=~{::content}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ${null})}"></th:block>
+</th:block>

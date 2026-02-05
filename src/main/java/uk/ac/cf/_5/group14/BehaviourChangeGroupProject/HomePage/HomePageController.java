@@ -1,8 +1,8 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.HomePage;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
@@ -12,21 +12,26 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Preference.Preference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreferenceService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLog;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLogService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.FeedbackData.AdaptiveFeedbackService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Inbox.ConversationParticipant;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Inbox.ConversationParticipantRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Inbox.RoleInConversation;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrence;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.SecurityUtils;
 
 @Controller
 public class HomePageController {
@@ -36,21 +41,28 @@ public class HomePageController {
     private final ScheduleOccurrenceRepository scheduleOccurrenceRepository;
     private final ConversationParticipantRepository conversationParticipantRepository;
     private final AuthHelper authHelper;
+    private final UserPreferenceService userPreferenceService;
+    private final AdaptiveFeedbackService adaptiveFeedbackService;
 
     private static final DateTimeFormatter PRETTY_DATE = DateTimeFormatter.ofPattern("d MMM", Locale.UK);
+    private static final DateTimeFormatter TASK_TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.UK);
 
     public HomePageController(
             ExerciseLogService exerciseLogService,
             CalendarTaskRepository calendarTaskRepository,
             ScheduleOccurrenceRepository scheduleOccurrenceRepository,
             ConversationParticipantRepository conversationParticipantRepository,
-            AuthHelper authHelper
+            AuthHelper authHelper,
+            UserPreferenceService userPreferenceService,
+            AdaptiveFeedbackService adaptiveFeedbackService
     ) {
         this.exerciseLogService = exerciseLogService;
         this.calendarTaskRepository = calendarTaskRepository;
         this.scheduleOccurrenceRepository = scheduleOccurrenceRepository;
         this.conversationParticipantRepository = conversationParticipantRepository;
         this.authHelper = authHelper;
+        this.userPreferenceService = userPreferenceService;
+        this.adaptiveFeedbackService = adaptiveFeedbackService;
     }
 
     @GetMapping("/")
@@ -58,117 +70,49 @@ public class HomePageController {
         User user = authHelper.getAuthenticatedUser();
 
         if (user == null) {
-            return new ModelAndView("home-public");
+            return new ModelAndView("home/public");
         }
 
-        ModelAndView modelAndView = new ModelAndView("home-auth");
+        return new ModelAndView("redirect:/dashboard");
+    }
 
-        modelAndView.addObject("userFirstName", user.getFirstName());
+    @GetMapping("/about")
+    public ModelAndView aboutPage() {
+        return new ModelAndView("about");
+    }
 
-        List<ExerciseLog> recentExerciseLogs = exerciseLogService.findTop5RecentExerciseLogs(user);
-        modelAndView.addObject("recentExerciseLogs", recentExerciseLogs);
+    @GetMapping("/home")
+    public ModelAndView roleHome(Authentication authentication) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) {
+            return new ModelAndView("redirect:/");
+        }
+
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("pageTitle", "Home");
+        mav.addObject("disableChatHistory", true);
+        mav.addObject("currentUser", user);
 
         LocalDate today = LocalDate.now();
-        List<ExerciseLog> allLogs = exerciseLogService.getLogsForUser(user);
+        CalendarTask nextTask = calendarTaskRepository
+            .findFirstByUserAndDateAndCompletedFalseOrderByTimeAsc(user, today)
+            .orElse(null);
 
-        long logsLast7DaysCount = allLogs.stream()
-            .map(ExerciseLog::getDate)
-            .filter(d -> d != null)
-            .filter(d -> !d.isBefore(today.minusDays(6)) && !d.isAfter(today))
-            .count();
+        mav.addObject("nextTaskTitle", nextTask != null ? nextTask.getTitle() : "No tasks scheduled");
+        mav.addObject("nextTaskTime", nextTask != null && nextTask.getTime() != null ? nextTask.getTime().format(TASK_TIME) : null);
+        mav.addObject("nextTaskDate", today);
+        mav.addObject("overdueCount", calendarTaskRepository.countByUserAndDateBeforeAndCompletedFalse(user, today));
+        mav.addObject("completedToday", calendarTaskRepository.countByUserAndDateAndCompletedTrue(user, today));
 
-        LocalDate weekStart = today.with(DayOfWeek.MONDAY);
-        LocalDate weekEnd = weekStart.plusDays(6);
-
-        long logsThisWeekCount = allLogs.stream()
-                .map(ExerciseLog::getDate)
-                .filter(d -> d != null)
-                .filter(d -> !d.isBefore(weekStart) && !d.isAfter(weekEnd))
-                .count();
-
-        Set<LocalDate> daysLoggedThisWeek = new HashSet<>();
-        for (ExerciseLog log : allLogs) {
-            LocalDate d = log.getDate();
-            if (d == null || d.isBefore(weekStart) || d.isAfter(weekEnd)) {
-                continue;
-            }
-            daysLoggedThisWeek.add(d);
+        if (SecurityUtils.hasRole(authentication, "GYM_ADMIN")) {
+            mav.setViewName("home/gym");
+        } else if (SecurityUtils.hasRole(authentication, "TRAINER")) {
+            mav.setViewName("home/trainer");
+        } else {
+            mav.setViewName("home/user");
         }
 
-        int bestMoodUplift = allLogs.stream()
-                .filter(l -> l.getDate() != null && !l.getDate().isBefore(weekStart) && !l.getDate().isAfter(weekEnd))
-                .filter(l -> l.getMoodBefore() != null && l.getMoodAfter() != null)
-                .mapToInt(l -> l.getMoodAfter() - l.getMoodBefore())
-                .max()
-                .orElse(0);
-
-        List<CalendarTask> weekTasks = calendarTaskRepository.findByUserAndDateBetween(user, weekStart, weekEnd);
-        List<ScheduleOccurrence> weekOccurrences = scheduleOccurrenceRepository.findByUserAndDateBetween(user, weekStart, weekEnd);
-
-        int weekPlannedCount = weekTasks.size() + weekOccurrences.size();
-        int weekCompletedCount = 0;
-        for (CalendarTask task : weekTasks) {
-            if (Boolean.TRUE.equals(task.getCompleted())) {
-                weekCompletedCount++;
-            }
-        }
-        for (ScheduleOccurrence occ : weekOccurrences) {
-            if (occ.isCompleted()) {
-                weekCompletedCount++;
-            }
-        }
-
-        int consistencyScore = weekPlannedCount == 0
-                ? 0
-                : (int) Math.round(100.0 * weekCompletedCount / weekPlannedCount);
-
-        Long trainerConversationId = findTrainerConversationId(user);
-        modelAndView.addObject("logsLast7DaysCount", logsLast7DaysCount);
-        modelAndView.addObject("trainerConversationId", trainerConversationId);
-
-        modelAndView.addObject("logsThisWeekCount", logsThisWeekCount);
-        modelAndView.addObject("daysLoggedThisWeek", daysLoggedThisWeek.size());
-        modelAndView.addObject("bestMoodUplift", bestMoodUplift);
-        modelAndView.addObject("weekPlannedCount", weekPlannedCount);
-        modelAndView.addObject("weekCompletedCount", weekCompletedCount);
-        modelAndView.addObject("consistencyScore", consistencyScore);
-
-        List<StreakDay> streakDays = new ArrayList<>(7);
-        for (int i = 0; i < 7; i++) {
-            LocalDate d = weekStart.plusDays(i);
-            String label = d.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.UK);
-            streakDays.add(new StreakDay(label, daysLoggedThisWeek.contains(d)));
-        }
-        modelAndView.addObject("streakDays", streakDays);
-        modelAndView.addObject("streakCount", daysLoggedThisWeek.size());
-
-        List<UpcomingItem> upcomingItems = buildUpcomingItems(user, today, today.plusDays(14));
-        modelAndView.addObject("upcomingItems", upcomingItems);
-
-        List<MiniWeekDay> miniWeek = new ArrayList<>(7);
-        for (int i = 0; i < 7; i++) {
-            LocalDate date = today.plusDays(i);
-            int taskCount = (int) calendarTaskRepository.countByUserAndDate(user, date);
-            int scheduledCount = (int) scheduleOccurrenceRepository.countByUserAndDate(user, date);
-            boolean isToday = i == 0;
-            boolean hasUncompletedWorkout = hasWorkoutToLog(user, date);
-
-            miniWeek.add(new MiniWeekDay(
-                    date,
-                    date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.UK),
-                    date.format(PRETTY_DATE),
-                    taskCount,
-                    scheduledCount,
-                    isToday,
-                    hasUncompletedWorkout
-            ));
-        }
-
-        boolean todayHasWorkoutToLog = miniWeek.get(0).hasUncompletedWorkout();
-        modelAndView.addObject("miniWeek", miniWeek);
-        modelAndView.addObject("todayHasWorkoutToLog", todayHasWorkoutToLog);
-
-        return modelAndView;
+        return mav;
     }
 
     private boolean hasWorkoutToLog(User user, LocalDate date) {

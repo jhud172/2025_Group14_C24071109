@@ -1,0 +1,16 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Home', null, ~{::content}, ~{fragments/AccountHomePage :: pageScripts})}">
+
+    <div th:fragment="content">
+        <div class="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6 lg:px-8">
+            <div th:if="${param.loggedout}" class="mb-4 rounded-xl ring-1 ring-white/10 bg-slate-900/40 px-4 py-3 text-sm text-slate-200">
+                You’ve been logged out.
+            </div>
+            <div th:if="${param.expired}" class="mb-4 rounded-xl ring-1 ring-white/10 bg-slate-900/40 px-4 py-3 text-sm text-slate-200">
+                Your session has expired. Please sign in again.
+            </div>
+        </div>
+        <div th:replace="~{fragments/AccountHomePage :: contentAuthenticated}"></div>
+    </div>
+
+</th:block>

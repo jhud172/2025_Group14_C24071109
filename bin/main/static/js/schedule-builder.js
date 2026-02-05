@@ -4,11 +4,11 @@ let sourceZone = null;
 
 function createItem(id, name) {
     const div = document.createElement("div");
-    div.className = "scheduled-item bg-blue-50 p-2 rounded shadow border border-blue-300 text-sm cursor-move";
+    div.className = "scheduled-item cursor-move rounded-lg border border-slate-300 bg-slate-50 p-2 text-sm text-slate-700 shadow-sm";
     div.draggable = true;
     div.dataset.id = id;
     div.dataset.name = name;
-    div.innerHTML = `<span class="font-semibold text-blue-800">${name}</span>`;
+    div.innerHTML = `<span class="font-semibold text-slate-900">${name}</span>`;
     addDragHandlers(div);
     div.addEventListener("contextmenu", e => {
         e.preventDefault();

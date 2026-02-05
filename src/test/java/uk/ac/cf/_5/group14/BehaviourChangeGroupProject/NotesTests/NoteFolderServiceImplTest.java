@@ -36,7 +36,7 @@ class NoteFolderServiceImplTest {
         user.setId(1L);
 
         when(folderRepository.findByUserAndNameIgnoreCase(any(), anyString())).thenReturn(Optional.empty());
-        when(folderRepository.findByUserOrderBySortOrderAscNameAsc(any())).thenReturn(List.of());
+        when(folderRepository.findByUserOrderByNameAsc(any())).thenReturn(List.of());
 
         service.ensureDefaults(user);
 

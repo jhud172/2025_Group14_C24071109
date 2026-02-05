@@ -1,0 +1,103 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Inbox', ~{::styles}, ~{::content}, null)}">
+
+<div th:fragment="styles"></div>
+
+<div th:fragment="content">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+            <!-- Sidebar: Conversations -->
+            <aside class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                <div class="border-b border-slate-200/70 px-5 py-4 dark:border-slate-800">
+                    <div class="flex items-center justify-between gap-3">
+                        <h1 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Inbox</h1>
+                        <a href="/inbox" class="text-sm font-semibold text-slate-900 hover:underline dark:text-slate-100">All</a>
+                    </div>
+                </div>
+
+                <div th:if="${conversations == null || conversations.isEmpty()}" class="px-5 py-6">
+                    <div class="rounded-2xl border border-slate-200/70 bg-slate-50 p-5 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/25 dark:text-slate-200">
+                        No conversations yet.
+                    </div>
+                </div>
+
+                <ul th:if="${conversations != null && !conversations.isEmpty()}" class="divide-y divide-slate-200/70 dark:divide-slate-800">
+                    <li th:each="c : ${conversations}">
+                        <a th:href="@{/inbox/{id}(id=${c.conversationId})}"
+                           class="group block px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-900/30"
+                           th:classappend="${c.conversationId == conversationId} ? ' bg-slate-50 dark:bg-slate-900/30' : ''">
+                            <div class="flex items-start gap-3">
+                                <div class="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-sm font-semibold text-slate-900 ring-1 ring-slate-200/70 dark:bg-slate-900/60 dark:text-slate-100 dark:ring-slate-800" aria-hidden="true">
+                                    <span th:text="${c.title != null ? #strings.toUpperCase(#strings.substring(c.title,0,1)) : '•'}"></span>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <p class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${c.title}"></p>
+                                        <span th:if="${c.unreadCount != null && c.unreadCount > 0}"
+                                              class="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-slate-900 px-1.5 text-xs font-semibold text-white dark:bg-slate-100 dark:text-slate-900"
+                                              th:text="${c.unreadCount}"></span>
+                                    </div>
+                                    <p class="mt-1 truncate text-sm text-slate-600 dark:text-slate-300" th:text="${c.lastMessageSnippet}"></p>
+                                    <p class="mt-1 text-xs text-slate-500" th:text="${c.lastMessageAt}"></p>
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Main: Thread -->
+            <section class="lg:col-span-2 overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                <div class="border-b border-slate-200/70 px-5 py-4 dark:border-slate-800">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div class="min-w-0">
+                            <h2 class="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">Conversation</h2>
+                            <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300" th:text="${conversationId}"></p>
+                        </div>
+                        <a href="/profile" class="text-sm font-semibold text-slate-900 hover:underline dark:text-slate-100">Dashboard</a>
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <div class="px-5 py-5">
+                        <div th:if="${messages == null || messages.isEmpty()}" class="rounded-2xl border border-slate-200/70 bg-slate-50 p-5 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/25 dark:text-slate-200">
+                            <p class="font-semibold text-slate-900 dark:text-slate-100">No messages yet</p>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Send the first message to start the conversation.</p>
+                        </div>
+
+                        <div th:if="${messages != null && !messages.isEmpty()}" class="space-y-3">
+                            <div th:each="m : ${messages}" class="flex">
+                                <div class="max-w-2xl rounded-2xl border border-slate-200/70 bg-white px-4 py-3 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                                    <p class="text-xs text-slate-500" th:text="${m.createdAt}"></p>
+                                    <p class="mt-1 whitespace-pre-wrap text-slate-800 dark:text-slate-200" th:text="${m.body}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-200/70 bg-white/80 px-5 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/30">
+                        <form class="flex items-end gap-3" th:action="@{/inbox/{id}/send(id=${conversationId})}" method="post">
+                            <input th:name="${_csrf.parameterName}" th:type="hidden" th:value="${_csrf.token}"/>
+
+                            <label class="block w-full">
+                                <span class="sr-only">Message</span>
+                                <textarea name="body" required rows="2"
+                                          class="block w-full resize-none rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100"
+                                          placeholder="Write a message..."></textarea>
+                            </label>
+
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
+                                Send
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</div>
+
+</th:block>

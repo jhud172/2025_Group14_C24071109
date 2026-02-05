@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskServiceImpl;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
@@ -23,6 +24,9 @@ public class CalendarTaskServiceImplTest {
 
     @Mock
     private CalendarTaskRepository repo;
+
+    @Mock
+    private CalendarTaskWarningService warningService;
 
     @InjectMocks
     private CalendarTaskServiceImpl calendarTaskService;
@@ -162,8 +166,13 @@ public class CalendarTaskServiceImplTest {
         calendarTaskService.toggleCompleted(1L, user);
         verify(repo).save(task);
         assertTrue(task.getCompleted());
+
+        verify(warningService, times(1)).onTaskCompleted(eq(task), any());
+
         calendarTaskService.toggleCompleted(1L, user);
         assertFalse(task.getCompleted());
+
+        verify(warningService, times(1)).onTaskCompleted(eq(task), any());
     }
 
     @Test

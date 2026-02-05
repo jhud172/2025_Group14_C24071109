@@ -1,42 +1,94 @@
-<div th:fragment="styles">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css">
-    <link rel="stylesheet" href="/css/navBar.css">
-</div>
+<th:block th:replace="~{base :: layout('Your Exercise Logs', null, ~{::content}, ~{::pageScripts})}">
 
-<div th:fragment="content">
-    <h1 class="text-4xl font-extrabold text-gray-900 mb-8 tracking-tight">Your Exercise Logs</h1>
-    <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center gap-3">
-            <input id="log-search" type="text" placeholder="Search logs..." class="p-2 w-64 rounded-lg border border-gray-300 shadow-sm focus:ring-blue-400 focus:border-blue-400">
-            <select id="sort-select" class="p-2 rounded-lg border border-gray-300 shadow-sm">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-            </select>
+    <div th:fragment="content">
+        <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
+
+            <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight text-slate-900">Your Exercise Logs</h1>
+                    <p class="mt-1 text-sm text-slate-600">Search, sort, and click a log to preview details.</p>
+                </div>
+                <a href="/exercise-log/export/pdf" class="inline-flex items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2">
+                    Download PDF
+                </a>
+            </div>
+
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <label for="log-search" class="sr-only">Search logs</label>
+                    <input id="log-search" type="text" placeholder="Search logs..." class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 sm:w-72">
+
+                    <label for="sort-select" class="sr-only">Sort logs</label>
+                    <select id="sort-select" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 sm:w-48">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <div id="log-grid" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div th:each="log : ${logs}"
+                         class="log-card cursor-pointer rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+                         th:attr="data-date=${log.date},data-before=${log.moodBefore},data-after=${log.moodAfter},data-confidence=${log.confidence},data-id=${log.id}">
+                        <h2 class="text-lg font-semibold text-slate-900" th:text="${#temporals.format(log.date,'dd MMM yyyy')}"></h2>
+                        <dl class="mt-3 space-y-1 text-sm text-slate-700">
+                            <div class="flex items-center justify-between gap-3">
+                                <dt class="font-medium">Mood Before</dt>
+                                <dd class="text-slate-900" th:text="${log.moodBefore}"></dd>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <dt class="font-medium">Mood After</dt>
+                                <dd class="text-slate-900" th:text="${log.moodAfter}"></dd>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <dt class="font-medium">Confidence</dt>
+                                <dd class="text-slate-900" th:text="${log.confidence}"></dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <div id="empty-state" th:if="${#lists.isEmpty(logs)}" class="mt-10 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+                    <p class="text-sm font-medium text-slate-900">No exercise logs yet.</p>
+                    <p class="mt-1 text-sm text-slate-600">Once you create logs, they’ll show up here.</p>
+                </div>
+
+                <div id="pagination-controls" class="mt-6 flex justify-center gap-2"></div>
+            </div>
+
+            <div id="preview-panel" class="hidden fixed right-0 top-0 z-50 h-full w-full max-w-md transform translate-x-full border-l border-slate-200 bg-white p-6 shadow-2xl transition-transform duration-300">
+                <div class="flex items-start justify-between gap-4">
+                    <h2 class="text-lg font-semibold text-slate-900">Preview</h2>
+                    <button id="close-preview" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-xl leading-none text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">×</button>
+                </div>
+
+                <h3 id="preview-date" class="mt-4 text-2xl font-bold tracking-tight text-slate-900"></h3>
+
+                <dl class="mt-6 space-y-3 text-sm">
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="font-medium text-slate-700">Mood Before</dt>
+                        <dd id="preview-before" class="text-slate-900"></dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="font-medium text-slate-700">Mood After</dt>
+                        <dd id="preview-after" class="text-slate-900"></dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="font-medium text-slate-700">Confidence</dt>
+                        <dd id="preview-confidence" class="text-slate-900"></dd>
+                    </div>
+                </dl>
+
+                <a id="preview-view-btn" class="mt-8 inline-flex w-full items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+                    Open Full Log
+                </a>
+            </div>
         </div>
-        <a href="/exercise-log/export/pdf" class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">Download PDF</a>
     </div>
-    <div id="log-grid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
-        <div th:each="log : ${logs}" class="log-card bg-white/90 backdrop-blur-xl border border-gray-200 shadow-xl rounded-2xl p-6 hover:shadow-2xl transition cursor-pointer" th:attr="data-date=${log.date},data-before=${log.moodBefore},data-after=${log.moodAfter},data-confidence=${log.confidence},data-id=${log.id}">
-            <h2 class="text-xl font-bold text-gray-900 mb-2" th:text="${#temporals.format(log.date,'dd MMM yyyy')}"></h2>
-            <p class="text-gray-700"><strong>Mood Before:</strong> <span th:text="${log.moodBefore}"></span></p>
-            <p class="text-gray-700"><strong>Mood After:</strong> <span th:text="${log.moodAfter}"></span></p>
-            <p class="text-gray-700"><strong>Confidence:</strong> <span th:text="${log.confidence}"></span></p>
-        </div>
-    </div>
-    <div id="empty-state" th:if="${#lists.isEmpty(logs)}" class="mt-12 text-center text-gray-600 text-lg italic"></div>
-    <div id="pagination-controls" class="mt-8 flex justify-center gap-3"></div>
-    <div id="preview-panel" class="hidden fixed right-0 top-0 w-96 h-full bg-white shadow-2xl border-l border-gray-300 p-6 z-50 transform translate-x-full transition-transform duration-300">
-        <button id="close-preview" class="text-right font-bold text-xl mb-4">×</button>
-        <h2 id="preview-date" class="text-2xl font-bold text-gray-900 mb-4"></h2>
-        <p class="text-gray-700"><strong>Mood Before:</strong> <span id="preview-before"></span></p>
-        <p class="text-gray-700"><strong>Mood After:</strong> <span id="preview-after"></span></p>
-        <p class="text-gray-700"><strong>Confidence:</strong> <span id="preview-confidence"></span></p>
-        <a id="preview-view-btn" class="mt-6 block px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 text-center transition">Open Full Log</a>
-    </div>
-</div>
 
-<div th:fragment="pageScripts">
-    <script src="/js/logs.js"></script>
-</div>
-
-<th:block th:with="pageTitle='Your Exercise Logs', pageStyles=~{::styles}, content=~{::content}, pageScripts=~{::pageScripts}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ~{::pageScripts})}"></th:block>
+    <div th:fragment="pageScripts">
+        <script src="/js/logs.js"></script>
+    </div>
+</th:block>

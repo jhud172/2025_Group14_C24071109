@@ -1,59 +1,339 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Profile;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Preference.Preference;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreference;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreferenceService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLog;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DataExport.DataExportRequestService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLogService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.HealthRecord;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.HealthRecordService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.HealthConditionType;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.UserHealthCondition;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.UserHealthConditionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelProgress;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscription;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
 
+import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Controller
 public class ProfileController {
 
-    private final ProfileService profileService;
     private final UserService userService;
-    private final HealthRecordService healthRecordService;
-    private final UserPreferenceService userPreferenceService;
     private final ExerciseLogService exerciseLogService;
+    private final PlatformSubscriptionService platformSubscriptionService;
+    private final UserSettingsService userSettingsService;
+    private final UserHealthConditionService conditionService;
+    private final DataExportRequestService dataExportRequestService;
+    private final LevelService levelService;
+    private final FileStorageService profileImageStorageService;
+    private final UserRepository userRepository;
+    private final Clock clock;
 
     @Autowired
     private AuthHelper authHelper;
 
 
-    public ProfileController(ProfileService profileService, UserService userService, HealthRecordService healthRecordService, UserPreferenceService userPreferenceService, ExerciseLogService exerciseLogService) {
-        this.profileService = profileService;
+    public ProfileController(UserService userService,
+                             ExerciseLogService exerciseLogService,
+                             PlatformSubscriptionService platformSubscriptionService,
+                             UserSettingsService userSettingsService,
+                             UserHealthConditionService conditionService,
+                             DataExportRequestService dataExportRequestService,
+                             LevelService levelService,
+                             FileStorageService profileImageStorageService,
+                             UserRepository userRepository,
+                             Clock clock) {
         this.userService = userService;
-        this.healthRecordService = healthRecordService;
-        this.userPreferenceService = userPreferenceService;
         this.exerciseLogService = exerciseLogService;
+        this.platformSubscriptionService = platformSubscriptionService;
+        this.userSettingsService = userSettingsService;
+        this.conditionService = conditionService;
+        this.dataExportRequestService = dataExportRequestService;
+        this.levelService = levelService;
+        this.profileImageStorageService = profileImageStorageService;
+        this.userRepository = userRepository;
+        this.clock = clock;
     }
 
     @GetMapping("/profile")
     public ModelAndView getProfile() {
         ModelAndView modelAndView = new ModelAndView("/profile/profile");
         User user = authHelper.getAuthenticatedUser();
-        ChartsDataDto charts = profileService.getChartData(user);
-        HealthRecord healthRecord = healthRecordService.getMostRecentHealthRecord(user);
-        Map<String, List<Preference>> userPreferenceList = userPreferenceService.getUserPreferencesByCategory(user);
-        List<ExerciseLog> recentExerciseLogs = exerciseLogService.findTop5RecentExerciseLogs(user);
+        PlatformSubscription platformSubscription = platformSubscriptionService.findByUserId(user.getId()).orElse(null);
+        UserSettings settings = userSettingsService.getOrCreate(user);
+        LevelProgress levelProgress = levelService.getProgress(user);
 
-        modelAndView.addObject("charts", charts);
-        modelAndView.addObject("healthRecord", healthRecord);
-        modelAndView.addObject("userPreferenceList", userPreferenceList);
-        modelAndView.addObject("recentExerciseLogs", recentExerciseLogs);
+        List<UserHealthCondition> permanentConditions = conditionService.getConditionsByType(user, HealthConditionType.PERMANENT);
+        List<UserHealthCondition> timedConditions = conditionService.getConditionsByType(user, HealthConditionType.TIMED);
 
+        int exerciseLogCount = exerciseLogService.getLogsByUser(user).size();
 
+        boolean canChangeUsername = canChangeUsername(user);
+        Instant nextUsernameChangeAt = getNextUsernameChangeAt(user);
+
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("platformSubscription", platformSubscription);
+        modelAndView.addObject("userSettings", settings);
+        modelAndView.addObject("levelProgress", levelProgress);
+        modelAndView.addObject("exerciseLogCount", exerciseLogCount);
+        modelAndView.addObject("permanentConditions", permanentConditions);
+        modelAndView.addObject("timedConditions", timedConditions);
+        modelAndView.addObject("canChangeUsername", canChangeUsername);
+        modelAndView.addObject("nextUsernameChangeAt", nextUsernameChangeAt);
+        modelAndView.addObject("recentExportRequests", dataExportRequestService.getRecentRequests(user));
+        modelAndView.addObject("today", LocalDate.now(clock));
         return modelAndView;
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(@ModelAttribute ProfileUpdateRequest request,
+                                RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        boolean changed = false;
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+
+        String username = request != null ? request.getUsername() : null;
+        String email = request != null ? request.getEmail() : null;
+        String phoneNumber = request != null ? request.getPhoneNumber() : null;
+        String bio = request != null ? request.getBio() : null;
+
+        if (bio != null) {
+            String trimmedBio = bio.trim();
+            if (trimmedBio.length() > 800) {
+                fieldErrors.put("bio", "Bio must be 800 characters or fewer.");
+            } else {
+                user.setBio(trimmedBio.isBlank() ? null : trimmedBio);
+                changed = true;
+            }
+        }
+
+        if (username != null && !username.isBlank()) {
+            String normalized = username.trim().toLowerCase(Locale.ROOT);
+            if (!normalized.equalsIgnoreCase(user.getUsername())) {
+                if (!canChangeUsername(user)) {
+                    fieldErrors.put("username", "Username can only be changed every 7 days.");
+                } else if (normalized.length() < 3 || normalized.length() > 100) {
+                    fieldErrors.put("username", "Username must be between 3 and 100 characters.");
+                } else if (userService.usernameExists(normalized)) {
+                    fieldErrors.put("username", "That username is already taken.");
+                } else {
+                    user.setUsername(normalized);
+                    user.setUsernameChangedAt(Instant.now(clock));
+                    changed = true;
+                }
+            }
+        }
+
+        if (email != null && !email.isBlank()) {
+            String normalizedEmail = email.trim().toLowerCase(Locale.ROOT);
+            if (!normalizedEmail.equalsIgnoreCase(user.getEmail())) {
+                if (!isValidEmail(normalizedEmail)) {
+                    fieldErrors.put("email", "Enter a valid email address.");
+                } else if (userService.emailExists(normalizedEmail)) {
+                    fieldErrors.put("email", "That email is already in use.");
+                } else {
+                    user.setEmail(normalizedEmail);
+                    user.setEmailVerified(false);
+                    user.setEmailVerifiedAt(null);
+                    changed = true;
+                }
+            }
+        }
+
+        if (phoneNumber != null) {
+            String normalizedPhone = phoneNumber.trim();
+            if (normalizedPhone.isBlank()) {
+                if (user.getPhoneNumber() != null && !user.getPhoneNumber().isBlank()) {
+                    user.setPhoneNumber(null);
+                    user.setPhoneVerified(false);
+                    user.setPhoneVerifiedAt(null);
+                    changed = true;
+                }
+            } else if (normalizedPhone.length() > 30) {
+                fieldErrors.put("phoneNumber", "Phone number must be 30 characters or fewer.");
+            } else if (!normalizedPhone.equals(user.getPhoneNumber())) {
+                user.setPhoneNumber(normalizedPhone);
+                user.setPhoneVerified(false);
+                user.setPhoneVerifiedAt(null);
+                changed = true;
+            }
+        }
+
+        if (!fieldErrors.isEmpty()) {
+            redirectAttributes.addFlashAttribute("profileFieldErrors", fieldErrors);
+            redirectAttributes.addFlashAttribute("profileError", "Please fix the highlighted fields.");
+            return "redirect:/profile";
+        }
+
+        if (changed) {
+            userRepository.save(user);
+            redirectAttributes.addFlashAttribute("profileUpdated", true);
+        }
+
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/image")
+    public String updateProfileImage(@RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+                                     RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        if (profileImage == null || profileImage.isEmpty()) {
+            redirectAttributes.addFlashAttribute("profileImageError", "Choose an image to upload.");
+            return "redirect:/profile";
+        }
+
+        try {
+            String imageUrl = profileImageStorageService.storeProfileImage(user.getId(), profileImage);
+            if (imageUrl != null) {
+                user.setProfileImageUrl(imageUrl);
+                userRepository.save(user);
+                redirectAttributes.addFlashAttribute("profileUpdated", true);
+            }
+        } catch (IllegalArgumentException | IOException ex) {
+            redirectAttributes.addFlashAttribute("profileImageError", ex.getMessage());
+        }
+
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/settings/accessibility")
+    public String updateAccessibility(@RequestParam(value = "colorBlindMode", required = false) String colorBlindMode,
+                                      @RequestParam(value = "disabilityHearing", required = false) String disabilityHearing,
+                                      @RequestParam(value = "disabilityMobility", required = false) String disabilityMobility,
+                                      @RequestParam(value = "disabilityVision", required = false) String disabilityVision,
+                                      RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        userSettingsService.updateAccessibility(
+                user,
+                colorBlindMode != null,
+                disabilityHearing != null,
+                disabilityMobility != null,
+                disabilityVision != null
+        );
+        redirectAttributes.addFlashAttribute("settingsUpdated", true);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/conditions/permanent")
+    public String addPermanentCondition(@RequestParam("conditionName") String conditionName,
+                                        RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        if (conditionName == null || conditionName.isBlank()) {
+            redirectAttributes.addFlashAttribute("conditionError", "Enter a condition name.");
+            return "redirect:/profile";
+        }
+        conditionService.addPermanentCondition(user, conditionName);
+        redirectAttributes.addFlashAttribute("conditionUpdated", true);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/conditions/timed")
+    public String addTimedCondition(@RequestParam("conditionName") String conditionName,
+                                    @RequestParam(value = "startDate", required = false)
+                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                    @RequestParam("durationDays") Integer durationDays,
+                                    RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        if (conditionName == null || conditionName.isBlank()) {
+            redirectAttributes.addFlashAttribute("conditionError", "Enter a condition name.");
+            return "redirect:/profile";
+        }
+        int safeDuration = durationDays != null ? durationDays : 1;
+        conditionService.addTimedCondition(user, conditionName, startDate, safeDuration);
+        redirectAttributes.addFlashAttribute("conditionUpdated", true);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/conditions/{id}/delete")
+    public String deleteCondition(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        conditionService.deleteCondition(user, id);
+        redirectAttributes.addFlashAttribute("conditionUpdated", true);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/conditions/{id}/recover")
+    public String recoverCondition(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        conditionService.markRecovered(user, id);
+        redirectAttributes.addFlashAttribute("conditionUpdated", true);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/conditions/{id}/extend")
+    public String extendCondition(@PathVariable Long id,
+                                  @RequestParam("extraDays") Integer extraDays,
+                                  RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        int safeExtra = extraDays != null ? extraDays : 1;
+        conditionService.extendTimedCondition(user, id, safeExtra);
+        redirectAttributes.addFlashAttribute("conditionUpdated", true);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/data-export")
+    public String requestDataExport(RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        dataExportRequestService.createRequest(user);
+        redirectAttributes.addFlashAttribute("exportRequested", true);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/delete")
+    public String deleteAccount(@RequestParam(value = "confirmText", required = false) String confirmText,
+                                RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        if (confirmText == null || !confirmText.trim().equalsIgnoreCase("DELETE")) {
+            redirectAttributes.addFlashAttribute("deleteError", "Type DELETE to confirm account deletion.");
+            return "redirect:/profile";
+        }
+        userRepository.delete(user);
+        return "redirect:/logout?deleted=1";
+    }
+
+    private boolean canChangeUsername(User user) {
+        if (user == null) {
+            return false;
+        }
+        Instant lastChanged = user.getUsernameChangedAt();
+        if (lastChanged == null) {
+            return true;
+        }
+        Instant now = Instant.now(clock);
+        return lastChanged.plus(7, ChronoUnit.DAYS).isBefore(now) || lastChanged.plus(7, ChronoUnit.DAYS).equals(now);
+    }
+
+    private Instant getNextUsernameChangeAt(User user) {
+        if (user == null || user.getUsernameChangedAt() == null) {
+            return null;
+        }
+        return user.getUsernameChangedAt().plus(7, ChronoUnit.DAYS);
+    }
+
+    private boolean isValidEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+        return pattern.matcher(email).matches();
     }
 }

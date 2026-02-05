@@ -1,0 +1,50 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Sign Up', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+            <div class="mb-6">
+                <h1 class="text-2xl font-semibold tracking-tight text-slate-900" th:text="#{auth.signupChoice.title}">Choose your account type</h1>
+                <p class="mt-1 text-sm text-slate-600" th:text="#{auth.signupChoice.subtitle}">Select how you plan to use Healthy Habits.</p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-3">
+                <a th:href="@{/signup/client}" class="group rounded-2xl border border-slate-200 p-5 transition hover:border-slate-300 hover:shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">C</span>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900" th:text="#{auth.role.client}">Client</h2>
+                            <p class="text-sm text-slate-600" th:text="#{auth.signupChoice.client}">Book trainers and track progress.</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a th:href="@{/signup/trainer}" class="group rounded-2xl border border-slate-200 p-5 transition hover:border-slate-300 hover:shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white">T</span>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900" th:text="#{auth.role.trainer}">Trainer</h2>
+                            <p class="text-sm text-slate-600" th:text="#{auth.signupChoice.trainer}">Showcase your profile and clients.</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a th:href="@{/signup/gym}" class="group rounded-2xl border border-slate-200 p-5 transition hover:border-slate-300 hover:shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">G</span>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900" th:text="#{auth.role.gym}">Gym</h2>
+                            <p class="text-sm text-slate-600" th:text="#{auth.signupChoice.gym}">Manage your gym and trainers.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <p class="mt-6 text-center text-sm text-slate-600">
+                <span th:text="#{auth.login.haveAccount}">Already have an account?</span>
+                <a th:href="@{/login}" class="font-semibold text-slate-900 underline underline-offset-4 hover:text-slate-700" th:text="#{auth.login.submit}">Log in</a>
+            </p>
+        </div>
+    </div>
+
+</th:block>

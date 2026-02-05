@@ -1,12 +1,23 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notes;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+
+import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Web controller for managing notes and folders.
@@ -33,8 +44,47 @@ public class NotesController {
     @GetMapping
     public String index(HttpSession session, Model model) {
         User user = authHelper.getAuthenticatedUser(session);
-        model.addAttribute("folders", folderService.getFoldersForUser(user));
-        return "notes/folders";
+        if (user == null) {
+            return "redirect:/login";
+        }
+        folderService.ensureDefaults(user);
+        List<NoteFolder> folders = folderService.getFoldersForUser(user);
+        model.addAttribute("folders", folders);
+
+        Long activeFolderId = folders.isEmpty() ? null : folders.get(0).getId();
+        model.addAttribute("activeFolderId", activeFolderId);
+        model.addAttribute("notes", activeFolderId != null ? noteService.search(user, activeFolderId, null) : List.of());
+        model.addAttribute("activeNote", null);
+        return "notes/index";
+    }
+
+    @GetMapping(params = {"folderId"})
+    public String indexFolder(@RequestParam Long folderId,
+                              @RequestParam(required = false) String q,
+                              @RequestParam(required = false) Long noteId,
+                              HttpSession session,
+                              Model model) {
+        User user = authHelper.getAuthenticatedUser(session);
+        if (user == null) {
+            return "redirect:/login";
+        }
+        folderService.ensureDefaults(user);
+        List<NoteFolder> folders = folderService.getFoldersForUser(user);
+        NoteFolder activeFolder = folderService.getFolderForUser(user, folderId);
+        List<Note> notes = noteService.search(user, folderId, q);
+        Note activeNote = null;
+        if (noteId != null) {
+            activeNote = noteService.getNoteForUser(user, noteId);
+        } else if (!notes.isEmpty()) {
+            activeNote = notes.get(0);
+        }
+
+        model.addAttribute("folders", folders);
+        model.addAttribute("activeFolderId", activeFolder.getId());
+        model.addAttribute("notes", notes);
+        model.addAttribute("activeNote", activeNote);
+        model.addAttribute("q", q);
+        return "notes/index";
     }
 
     @GetMapping("/folders/{id}")
@@ -148,5 +198,134 @@ public class NotesController {
         User user = authHelper.getAuthenticatedUser(session);
         noteService.delete(user, id);
         return "redirect:/notes";
+    }
+
+    // -------- Notes v2 API --------
+
+    @GetMapping("/api/folders")
+    @ResponseBody
+    public List<NoteFolderDto> listFolders(HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        if (user == null) {
+            return List.of();
+        }
+        folderService.ensureDefaults(user);
+        return folderService.getFoldersForUser(user).stream()
+                .map(NoteFolderDto::from)
+                .toList();
+    }
+
+    @PostMapping("/api/folders")
+    @ResponseBody
+    public NoteFolderDto createFolder(@RequestBody NoteFolderCreateRequest request, HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        NoteFolder folder = folderService.createFolder(user, request.getName(), request.getColour());
+        return NoteFolderDto.from(folder);
+    }
+
+    @PostMapping("/api/folders/{id}/rename")
+    @ResponseBody
+    public NoteFolderDto renameFolder(@PathVariable Long id,
+                                      @RequestBody NoteFolderRenameRequest request,
+                                      HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        NoteFolder folder = folderService.renameFolder(user, id, request.getName());
+        return NoteFolderDto.from(folder);
+    }
+
+    @DeleteMapping("/api/folders/{id}")
+    @ResponseBody
+    public void deleteFolderApi(@PathVariable Long id, HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        folderService.deleteFolder(user, id);
+    }
+
+    @GetMapping("/api/notes")
+    @ResponseBody
+    public List<NoteSummaryDto> listNotes(@RequestParam(required = false) Long folderId,
+                                          @RequestParam(required = false) String q,
+                                          HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        if (user == null) {
+            return List.of();
+        }
+        return noteService.search(user, folderId, q).stream()
+                .map(NoteSummaryDto::from)
+                .toList();
+    }
+
+    @GetMapping("/api/notes/{id}")
+    @ResponseBody
+    public NoteDetailDto getNote(@PathVariable Long id, HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        Note note = noteService.getNoteForUser(user, id);
+        return NoteDetailDto.from(note);
+    }
+
+    @PostMapping("/api/notes")
+    @ResponseBody
+    public NoteDetailDto createNote(@RequestBody NoteCreateRequest request, HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        Note note = noteService.create(user, request.getFolderId(), request.getTitle(), request.getContent(), request.getColour());
+        levelService.addPoints(user, 2);
+        return NoteDetailDto.from(note);
+    }
+
+    @PostMapping("/api/notes/{id}")
+    @ResponseBody
+    public NoteDetailDto updateNote(@PathVariable Long id,
+                                    @RequestBody NoteUpdateRequest request,
+                                    HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        Note note = noteService.update(user, id, request.getTitle(), request.getContent(), request.getFolderId(), request.getColour());
+        return NoteDetailDto.from(note);
+    }
+
+    @DeleteMapping("/api/notes/{id}")
+    @ResponseBody
+    public void deleteNoteApi(@PathVariable Long id, HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        noteService.delete(user, id);
+    }
+
+    @GetMapping("/export/{id}")
+    public ResponseEntity<byte[]> exportNote(@PathVariable Long id,
+                                             @RequestParam(defaultValue = "html") String format,
+                                             HttpSession session) {
+        User user = authHelper.getAuthenticatedUser(session);
+        Note note = noteService.getNoteForUser(user, id);
+
+        String safeTitle = note.getTitle() != null ? note.getTitle().trim().replaceAll("[^a-zA-Z0-9-_ ]", "") : "note";
+        String filename = safeTitle.isBlank() ? "note" : safeTitle;
+
+        if (!"html".equalsIgnoreCase(format)) {
+            format = "html";
+        }
+
+        String html = """
+                <!doctype html>
+                <html lang=\"en\">
+                <head><meta charset=\"utf-8\"><title>%s</title></head>
+                <body><h1>%s</h1><article>%s</article></body>
+                </html>
+                """.formatted(escapeHtml(note.getTitle()), escapeHtml(note.getTitle()), note.getContent());
+
+        byte[] bytes = html.getBytes(StandardCharsets.UTF_8);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + ".html\"")
+                .contentType(MediaType.TEXT_HTML)
+                .contentLength(bytes.length)
+                .body(bytes);
+    }
+
+    private String escapeHtml(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 }

@@ -15,10 +15,34 @@ public class NoteServiceImpl implements NoteService {
 
     private final NoteRepository noteRepository;
     private final NoteFolderRepository folderRepository;
+    private final NoteSanitizer noteSanitizer;
 
-    public NoteServiceImpl(NoteRepository noteRepository, NoteFolderRepository folderRepository) {
+    public NoteServiceImpl(NoteRepository noteRepository,
+                           NoteFolderRepository folderRepository,
+                           NoteSanitizer noteSanitizer) {
         this.noteRepository = noteRepository;
         this.folderRepository = folderRepository;
+        this.noteSanitizer = noteSanitizer;
+    }
+
+    // Backwards-compatible wrapper used by older tests
+    public Note createNote(User user, Long folderId, String title, String content, boolean isPublic) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Title required");
+        }
+        Note note = create(user, folderId, title, content, null);
+        note.setPublic(isPublic);
+        return noteRepository.save(note);
+    }
+
+    // Backwards-compatible wrapper used by older tests
+    public Note updateNote(User user, Long noteId, String title, String content, boolean isPublic) {
+        Note note = noteRepository.findByIdAndUser(noteId, user)
+                .orElseThrow(() -> new IllegalArgumentException("Note not found"));
+        note.setTitle(title);
+        note.setContent(content);
+        note.setPublic(isPublic);
+        return noteRepository.save(note);
     }
 
     @Override
@@ -29,7 +53,7 @@ public class NoteServiceImpl implements NoteService {
         note.setUser(user);
         note.setFolder(folder);
         note.setTitle(title);
-        note.setContent(content);
+        note.setContent(noteSanitizer.sanitize(content));
         note.setColour(noteColour);
         return noteRepository.save(note);
     }
@@ -39,7 +63,7 @@ public class NoteServiceImpl implements NoteService {
         Note note = noteRepository.findByIdAndUser(noteId, user)
                 .orElseThrow(() -> new IllegalArgumentException("Note not found"));
         note.setTitle(title);
-        note.setContent(content);
+        note.setContent(noteSanitizer.sanitize(content));
         note.setColour(noteColour);
         if (newFolderId != null && !note.getFolder().getId().equals(newFolderId)) {
             NoteFolder newFolder = folderRepository.findByIdAndUser(newFolderId, user)
@@ -66,14 +90,16 @@ public class NoteServiceImpl implements NoteService {
     public List<Note> getNotesForFolder(User user, Long folderId, String query) {
         NoteFolder folder = folderRepository.findByIdAndUser(folderId, user)
                 .orElseThrow(() -> new IllegalArgumentException("Folder not found"));
-        List<Note> notes = noteRepository.findByFolderOrderByUpdatedAtDesc(folder);
-        if (query == null || query.isBlank()) {
-            return notes;
+        return noteRepository.searchNotes(user, folder, query);
+    }
+
+    @Override
+    public List<Note> search(User user, Long folderId, String query) {
+        NoteFolder folder = null;
+        if (folderId != null) {
+            folder = folderRepository.findByIdAndUser(folderId, user)
+                    .orElseThrow(() -> new IllegalArgumentException("Folder not found"));
         }
-        String qLower = query.toLowerCase();
-        return notes.stream()
-                .filter(n -> (n.getTitle() != null && n.getTitle().toLowerCase().contains(qLower))
-                        || (n.getContent() != null && n.getContent().toLowerCase().contains(qLower)))
-                .toList();
+        return noteRepository.searchNotes(user, folder, query);
     }
 }

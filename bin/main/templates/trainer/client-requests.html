@@ -1,0 +1,59 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+          th:replace="~{base :: layout('Client Requests', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Client Requests</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Review and respond to new client requests.</p>
+                </div>
+                <a th:href="@{/trainer/clients}"
+                   class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+                    View active clients
+                </a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(requests)}" class="mt-6 border border-dashed border-white/15 rounded-xl p-8 text-center">
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">No pending requests</h2>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">When clients request you, they will appear here.</p>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(requests)}" class="mt-6 divide-y divide-white/10">
+                <div th:each="req : ${requests}" class="py-4 flex items-center justify-between gap-4">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-slate-900 dark:text-slate-100"
+                                  th:text="${clientsById[req.clientUserId] != null ? clientsById[req.clientUserId].fullName : ('Client #' + req.clientUserId)}">Client</span>
+                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs ring-1 ring-white/10 bg-amber-400/10 text-amber-300">PENDING</span>
+                        </div>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                            <span th:if="${clientsById[req.clientUserId] != null}" th:text="${'@' + clientsById[req.clientUserId].username + ' · ' + clientsById[req.clientUserId].email}"></span>
+                            <span th:if="${clientsById[req.clientUserId] == null}" th:text="${'Client ID ' + req.clientUserId}"></span>
+                            <span class="text-slate-500 dark:text-slate-400" th:text="${' · Requested ' + #temporals.format(req.createdAt, 'dd MMM yyyy HH:mm')}"></span>
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <form th:action="@{/trainer/requests/{id}/accept(id=${req.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit"
+                                    class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                                Accept
+                            </button>
+                        </form>
+                        <form th:action="@{/trainer/requests/{id}/decline(id=${req.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit"
+                                    class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+                                Decline
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>

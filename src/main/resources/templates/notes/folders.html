@@ -1,88 +1,131 @@
-<div th:fragment="styles">
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Notes', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+
     <div th:fragment="styles">
-        <link rel="stylesheet" href="/css/navBar.css">
-        <link rel="stylesheet" href="/css/notes.css">
     </div>
 
     <div th:fragment="content">
-        <div class="notes-shell">
-            <aside class="notes-sidebar">
-                <div class="sidebar-header">
-                    <div>
-                        <h3>Folders</h3>
-                        <form th:action="@{/notes/folders/new}" method="post" class="inline-form">
-                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                            <input type="text" name="name" placeholder="New folder…" maxlength="80" required>
-                            <button type="submit">+</button>
-                        </form>
-                    </div>
-                </div>
+        <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
 
-                <div class="folder-list">
-                    <a th:each="folder : ${folders}" th:href="@{/notes/folders/{id}(id=${folder.id})}" th:classappend="${activeFolder != null and folder.id == activeFolder.id} ? ' active' : ''" class="folder-item">
-                        <span class="folder-dot" th:classappend="' dot-' + ${folder.colour}"></span>
-                        <span th:text="${folder.name}">Folder</span>
-                    </a>
-                </div>
-
-                <div class="sidebar-footer" th:if="${activeFolder != null}">
-                    <form th:action="@{/notes/folders/{id}/rename(id=${activeFolder.id})}" method="post">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <input type="text" name="name" th:value="${activeFolder.name}" maxlength="80" required>
-                        <button type="submit">Rename</button>
-                    </form>
-
-                    <form th:action="@{/notes/folders/{id}/delete(id=${activeFolder.id})}" method="post" data-confirm data-confirm-title="Delete folder?" data-confirm-message="This will delete the folder and ALL notes inside it.">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button class="danger" type="submit">Delete</button>
-                    </form>
-                </div>
-            </aside>
-
-            <main class="notes-main">
-                <div class="notes-toolbar">
-                    <div class="breadcrumbs">
-                        <span>Notes</span>
-                        <span th:if="${activeFolder != null}"> / <span th:text="${activeFolder.name}">Folder</span></span>
-                    </div>
-
-                    <div class="toolbar-actions">
-                        <form th:if="${activeFolder != null}" th:action="@{/notes/folders/{id}(id=${activeFolder.id})}" method="get">
-                            <input type="text" name="q" placeholder="Search…" th:value="${q}">
-                            <button type="submit">Search</button>
-                        </form>
-
-                        <a th:if="${activeFolder != null}" class="primary-btn" th:href="@{/notes/folders/{id}/new(id=${activeFolder.id})}">New Note</a>
-                    </div>
-                </div>
-
-                <div th:if="${activeFolder == null}" class="empty big">Select a folder to view your notes.</div>
-
-                <div th:if="${activeFolder != null}" class="file-grid">
-                    <a th:each="note : ${notes}" th:href="@{/notes/{id}(id=${note.id})}" class="file-tile">
-                        <div class="file-icon">📄</div>
-                        <div class="file-info">
-                            <div class="file-title" th:text="${note.title}">Title</div>
-                            <div class="file-date" th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy')}">Date</div>
+            <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+                <aside class="lg:col-span-4">
+                    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 class="text-lg font-semibold text-slate-900">Folders</h2>
+                                <p class="mt-1 text-sm text-slate-600">Organise your notes.</p>
+                            </div>
                         </div>
-                    </a>
 
-                    <div class="empty" th:if="${notes == null or #lists.isEmpty(notes)}">
-                        <span th:if="${q != null and q.length() > 0}">No results for "<span th:text="${q}">query</span>".</span>
-                        <span th:if="${q == null or q.length() == 0}">No notes in this folder yet.</span>
+                        <form th:action="@{/notes/folders/new}" method="post" class="mt-4 flex gap-2">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <label class="sr-only" for="newFolderName">New folder name</label>
+                            <input id="newFolderName" type="text" name="name" placeholder="New folder…" maxlength="80" required
+                                   class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+                            <button type="submit" class="inline-flex items-center justify-center rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+                                +
+                            </button>
+                        </form>
+
+                        <nav class="mt-5 space-y-1">
+                            <a th:each="folder : ${folders}"
+                               th:href="@{/notes/folders/{id}(id=${folder.id})}"
+                               class="flex items-center gap-3 rounded-lg border border-transparent px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+                               th:classappend="${activeFolder != null and folder.id == activeFolder.id} ? ' bg-slate-900 text-white hover:bg-slate-900' : ''">
+
+                                <span class="h-2.5 w-2.5 rounded-full ring-4 ring-slate-100"
+                                      th:classappend="${folder.colour} == 'slate' ? ' bg-slate-400' : (${folder.colour} == 'purple' ? ' bg-purple-400' : (${folder.colour} == 'cyan' ? ' bg-cyan-400' : (${folder.colour} == 'green' ? ' bg-emerald-400' : (${folder.colour} == 'pink' ? ' bg-pink-400' : (${folder.colour} == 'orange' ? ' bg-orange-400' : (${folder.colour} == 'red' ? ' bg-red-500' : ' bg-slate-300'))))))"></span>
+                                <span class="truncate" th:text="${folder.name}">Folder</span>
+                            </a>
+                        </nav>
+
+                        <div class="mt-6 border-t border-slate-200 pt-4" th:if="${activeFolder != null}">
+                            <form th:action="@{/notes/folders/{id}/rename(id=${activeFolder.id})}" method="post" class="flex gap-2">
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <label class="sr-only" for="renameFolder">Rename folder</label>
+                                <input id="renameFolder" type="text" name="name" th:value="${activeFolder.name}" maxlength="80" required
+                                       class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+                                <button type="submit" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">Rename</button>
+                            </form>
+
+                            <form th:action="@{/notes/folders/{id}/delete(id=${activeFolder.id})}" method="post"
+                                  data-confirm data-confirm-title="Delete folder?" data-confirm-message="This will delete the folder and ALL notes inside it."
+                                  class="mt-3">
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button class="w-full inline-flex items-center justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600/20" type="submit">Delete folder</button>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            </main>
+                </aside>
+
+                <main class="lg:col-span-8">
+                    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <h1 class="text-xl font-semibold text-slate-900">Notes</h1>
+                                <p class="mt-1 text-sm text-slate-600">
+                                    <span th:if="${activeFolder == null}">Select a folder to view your notes.</span>
+                                    <span th:if="${activeFolder != null}">Folder: <span class="font-medium text-slate-900" th:text="${activeFolder.name}">Folder</span></span>
+                                </p>
+                            </div>
+
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                <form th:if="${activeFolder != null}" th:action="@{/notes/folders/{id}(id=${activeFolder.id})}" method="get" class="flex gap-2">
+                                    <label class="sr-only" for="noteSearch">Search notes</label>
+                                    <input id="noteSearch" type="text" name="q" placeholder="Search…" th:value="${q}"
+                                           class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 sm:w-64">
+                                    <button type="submit" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">Search</button>
+                                </form>
+
+                                <a th:if="${activeFolder != null}" th:href="@{/notes/folders/{id}/new(id=${activeFolder.id})}"
+                                   class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+                                    New Note
+                                </a>
+                            </div>
+                        </div>
+
+                        <div th:if="${activeFolder == null}" class="mt-6 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+                            <p class="text-sm font-medium text-slate-900">Select a folder to view your notes.</p>
+                            <p class="mt-1 text-sm text-slate-600">Create one on the left if you don’t have any yet.</p>
+                        </div>
+
+                        <div th:if="${activeFolder != null}" class="mt-6">
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                <a th:each="note : ${notes}" th:href="@{/notes/{id}(id=${note.id})}"
+                                   class="group rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">📄</div>
+                                        <div class="min-w-0">
+                                            <div class="truncate text-sm font-semibold text-slate-900" th:text="${note.title}">Title</div>
+                                            <div class="mt-1 text-xs text-slate-500" th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy')}">Date</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="mt-6 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center" th:if="${notes == null or #lists.isEmpty(notes)}">
+                                <p class="text-sm font-medium text-slate-900" th:if="${q != null and q.length() > 0}">
+                                    No results for "<span th:text="${q}">query</span>".
+                                </p>
+                                <p class="text-sm font-medium text-slate-900" th:if="${q == null or q.length() == 0}">No notes in this folder yet.</p>
+                                <p class="mt-1 text-sm text-slate-600">Create your first note to get started.</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
         </div>
 
         <!-- Confirm modal -->
-        <div id="confirmOverlay" class="modal-overlay">
-            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-                <h3 id="confirmTitle">Confirm</h3>
-                <p id="confirmMessage">Are you sure?</p>
-                <div class="modal-actions">
-                    <button id="confirmCancel" class="btn" type="button">Cancel</button>
-                    <button id="confirmOk" class="btn-danger" type="button">Delete</button>
+        <div id="confirmOverlay"
+             class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 opacity-0 pointer-events-none transition-opacity [&.show]:opacity-100 [&.show]:pointer-events-auto">
+            <div class="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+                <h3 id="confirmTitle" class="text-lg font-semibold text-slate-900">Confirm</h3>
+                <p id="confirmMessage" class="mt-2 text-sm text-slate-600">Are you sure?</p>
+                <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <button id="confirmCancel" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10" type="button">Cancel</button>
+                    <button id="confirmOk" class="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600/20" type="button">Delete</button>
                 </div>
             </div>
         </div>
@@ -92,7 +135,4 @@
         <script src="/js/notes.js" defer></script>
     </div>
 
-    <th:block th:with="pageTitle='Notes', pageStyles=~{::styles}, content=~{::content}, pageScripts=~{::pageScripts}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ~{::pageScripts})}"></th:block>
-</div>
-
-</div>
+</th:block>

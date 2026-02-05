@@ -17,4 +17,6 @@ public interface NoteFolderService {
     void deleteFolder(User user, Long folderId);
 
     NoteFolder getFolderForUser(User user, Long folderId);
+
+    void ensureDefaults(User user);
 }

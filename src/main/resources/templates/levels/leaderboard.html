@@ -1,29 +1,41 @@
-<div th:fragment="styles">
-    <link rel="stylesheet" href="/css/levels.css">
-</div>
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Leaderboard', null, ~{::content}, null)}">
 
 <div th:fragment="content">
-    <div class="leaderboard-page">
-        <h1>Leaderboard</h1>
-        <table class="leaderboard-table">
-            <thead>
-            <tr>
-                <th>Rank</th>
-                <th>User</th>
-                <th>Points</th>
-                <th>Level</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="progress, iterStat : ${leaderboard}">
-                <td th:text="${iterStat.index + 1}">1</td>
-                <td th:text="${progress.user.username}">username</td>
-                <td th:text="${progress.points}">0</td>
-                <td th:text="${progress.level}">1</td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
+
+        <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Leaderboard</h1>
+                    <p class="mt-1 text-sm text-slate-600">Rankings by points and level.</p>
+                </div>
+                <a href="/levels" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">Back to my level</a>
+            </div>
+
+            <div class="mt-6 overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                    <tr>
+                        <th scope="col" class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Rank</th>
+                        <th scope="col" class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">User</th>
+                        <th scope="col" class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Points</th>
+                        <th scope="col" class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">Level</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                    <tr th:each="progress, iterStat : ${leaderboard}" class="hover:bg-slate-50">
+                        <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900" th:text="${iterStat.index + 1}">1</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-slate-900" th:text="${progress.user.username}">username</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-slate-700" th:text="${progress.points}">0</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-slate-700" th:text="${progress.level}">1</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
-<th:block th:with="pageTitle='Leaderboard', pageStyles=~{::styles}, content=~{::content}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ${null})}"></th:block>
+</th:block>

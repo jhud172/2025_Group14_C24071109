@@ -24,8 +24,14 @@ public class CustomExercise {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "how_to", columnDefinition = "TEXT")
+    private String howTo;
+
     @Column(name = "video_url")
     private String videoUrl;
+
+    @Column(name = "color_tag", length = 40)
+    private String colorTag;
 
     private String type;
 

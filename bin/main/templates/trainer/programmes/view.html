@@ -1,0 +1,133 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout(${pageTitle} ?: 'Programme', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="${programme.title}">Programme</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${programme.weeks != null ? (programme.weeks + ' weeks') : ''}">Weeks</p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a th:href="@{/trainer/library/programmes}"
+                       class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70">Back</a>
+                    <a th:href="@{/trainer/library/programmes/{id}/edit(id=${programme.id})}"
+                       class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Edit</a>
+                    <button type="button"
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70"
+                            onclick="document.getElementById('shareDialog').showModal()">Share</button>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div class="rounded-xl border border-white/10 bg-white/5 p-5">
+                    <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Programme days</h2>
+
+                    <div th:if="${#lists.isEmpty(days)}" class="mt-3 text-sm text-slate-600 dark:text-slate-300">No days yet.</div>
+
+                    <div th:if="${!#lists.isEmpty(days)}" class="mt-3 space-y-2">
+                        <div th:each="d : ${days}" class="rounded-xl border border-white/10 bg-white/5 p-3">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${d.dayOfWeek}">Day</div>
+                                    <div class="mt-1 text-sm text-slate-600 dark:text-slate-300"
+                                         th:text="${workoutsById[d.workoutId] != null ? workoutsById[d.workoutId].title : ('Workout #' + d.workoutId)}">Workout</div>
+                                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400" th:text="${'Order: ' + d.orderIndex}">Order</div>
+                                </div>
+                                <form method="post" th:action="@{/trainer/library/programmes/{pid}/days/{did}/delete(pid=${programme.id},did=${d.id})}">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit"
+                                            class="inline-flex min-h-10 items-center justify-center rounded-xl border border-rose-300/30 bg-rose-400/10 px-3 py-2 text-xs font-semibold text-rose-200 hover:bg-rose-400/15">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-xl border border-white/10 bg-white/5 p-4">
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Add day</h3>
+                        <form class="mt-3 grid grid-cols-1 gap-3" method="post" th:action="@{/trainer/library/programmes/{id}/days(id=${programme.id})}" th:object="${dayForm}">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                            <div>
+                                <label class="block text-sm font-semibold" for="dayOfWeek">Day of week</label>
+                                <input id="dayOfWeek" type="text" th:field="*{dayOfWeek}"
+                                       class="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-slate-900 dark:text-white" />
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold" for="workoutId">Workout</label>
+                                <select id="workoutId" th:field="*{workoutId}"
+                                        class="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-slate-900 dark:text-white">
+                                    <option value="" selected>Select a workout…</option>
+                                    <option th:each="w : ${workouts}" th:value="${w.id}" th:text="${w.title}">Workout</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold" for="orderIndex">Order index</label>
+                                <input id="orderIndex" type="number" min="0" th:field="*{orderIndex}"
+                                       class="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-slate-900 dark:text-white" />
+                            </div>
+
+                            <div class="flex items-center justify-end">
+                                <button type="submit"
+                                        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Add</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-white/10 bg-white/5 p-5">
+                    <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Coaching notes</h2>
+                    <div th:if="${#lists.isEmpty(notes)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300">No notes.</div>
+                    <ul th:if="${!#lists.isEmpty(notes)}" class="mt-2 space-y-2">
+                        <li th:each="n : ${notes}" class="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-900 dark:text-slate-100" th:text="${n.noteText}">Note</li>
+                    </ul>
+
+                    <div class="mt-6 flex items-center justify-end">
+                        <form method="post" th:action="@{/trainer/library/programmes/{id}/delete(id=${programme.id})}">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit"
+                                    class="inline-flex min-h-11 items-center justify-center rounded-xl border border-rose-300/30 bg-rose-400/10 px-4 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-400/15">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <dialog id="shareDialog" class="rounded-2xl bg-slate-950/90 text-white p-0 ring-1 ring-white/10">
+            <div class="w-[min(92vw,28rem)] p-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <div class="text-sm font-semibold">Share to active client</div>
+                        <div class="mt-1 text-sm text-slate-300">Only active clients can be selected.</div>
+                    </div>
+                    <button type="button" class="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm hover:bg-white/10"
+                            onclick="document.getElementById('shareDialog').close()">Close</button>
+                </div>
+
+                <form class="mt-4 space-y-3" method="post" th:action="@{/trainer/library/share}" th:object="${shareForm}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:field="*{templateType}" />
+                    <input type="hidden" th:field="*{templateId}" />
+                    <input type="hidden" th:field="*{returnUrl}" />
+
+                    <div>
+                        <label class="block text-sm font-semibold" for="clientId">Client</label>
+                        <select id="clientId" th:field="*{clientId}"
+                                class="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
+                            <option value="" selected>Select a client…</option>
+                            <option th:each="c : ${activeClients}" th:value="${c.id}" th:text="${c.username != null ? c.username : ('Client #' + c.id)}">Client</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2">
+                        <button type="submit"
+                                class="inline-flex min-h-11 items-center justify-center rounded-xl bg-white text-slate-900 px-4 py-2 text-sm font-semibold hover:bg-slate-100">Share</button>
+                    </div>
+                </form>
+            </div>
+        </dialog>
+    </div>
+
+</th:block>

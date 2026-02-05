@@ -1,291 +1,1313 @@
-<div xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6" xmlns:th="http://www.thymeleaf.org" th:fragment="AccountHomePage">
-    <div sec:authorize="isAuthenticated()">
-        <div class="site-loggedInDashboard">
+<th:block xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+        xmlns:th="http://www.thymeleaf.org"
+        th:fragment="contentAuthenticated">
 
-            <div class="container mt-5 mb-5">
-                <!-- Welcome Header -->
-                <div class="site-welcome-header animate">
-                    <h2>Feeling the Progress yet?</h2>
-                    <p class="welcome-subtitle">Stay up to date with your next tasks and see what you've been working hard on!</p>
-                </div>
+    <!-- AUTHENTICATED VIEW -->
+    <section
+        sec:authorize="isAuthenticated()"
+        class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8"
+        th:with="
+            d0=${miniWeek != null and #lists.size(miniWeek) > 0 ? miniWeek[0] : null},
+            d1=${miniWeek != null and #lists.size(miniWeek) > 1 ? miniWeek[1] : null},
+            d2=${miniWeek != null and #lists.size(miniWeek) > 2 ? miniWeek[2] : null},
+            d3=${miniWeek != null and #lists.size(miniWeek) > 3 ? miniWeek[3] : null},
+            d4=${miniWeek != null and #lists.size(miniWeek) > 4 ? miniWeek[4] : null},
+            d5=${miniWeek != null and #lists.size(miniWeek) > 5 ? miniWeek[5] : null},
+            d6=${miniWeek != null and #lists.size(miniWeek) > 6 ? miniWeek[6] : null},
 
-                <!-- Dashboard Grid -->
-                <div class="site-dashboard-grid">
-                    <!-- Schedule Card -->
-                    <div class="site-dashboard-card animate delay-1 opacity-0">
-                        <div class="site-dashboard-header">
-                            <i class="fas fa-calendar-alt"></i> Your Schedule
-                        </div>
+            t0=${d0 != null ? d0.taskCount : 0}, w0=${d0 != null ? d0.scheduledCount : 0},
+            t1=${d1 != null ? d1.taskCount : 0}, w1=${d1 != null ? d1.scheduledCount : 0},
+            t2=${d2 != null ? d2.taskCount : 0}, w2=${d2 != null ? d2.scheduledCount : 0},
+            t3=${d3 != null ? d3.taskCount : 0}, w3=${d3 != null ? d3.scheduledCount : 0},
+            t4=${d4 != null ? d4.taskCount : 0}, w4=${d4 != null ? d4.scheduledCount : 0},
+            t5=${d5 != null ? d5.taskCount : 0}, w5=${d5 != null ? d5.scheduledCount : 0},
+            t6=${d6 != null ? d6.taskCount : 0}, w6=${d6 != null ? d6.scheduledCount : 0},
 
-                        <div th:if="${#lists.isEmpty(activeSchedules)}" class="p-6 bg-white/80 rounded-lg shadow text-gray-500 mb-8">You haven't created any schedules yet.</div>
-                        <div class="site-dashboard-body">
-                            <div th:each="applied : ${activeSchedules}" class="site-schedule-container">
-                                <!-- Today's Schedule -->
-                                <div class="site-schedule-day">
-                                    <div class="site-day-header">
-                                        <div class="site-day-date" th:text="${applied.dateApplied}"></div>
-                                    </div>
+            c0=${t0 + w0}, c1=${t1 + w1}, c2=${t2 + w2}, c3=${t3 + w3}, c4=${t4 + w4}, c5=${t5 + w5}, c6=${t6 + w6},
+            totalTasks=${t0 + t1 + t2 + t3 + t4 + t5 + t6},
+            totalWorkouts=${w0 + w1 + w2 + w3 + w4 + w5 + w6},
+            maxCount=${T(java.lang.Math).max(c0, T(java.lang.Math).max(c1, T(java.lang.Math).max(c2, T(java.lang.Math).max(c3, T(java.lang.Math).max(c4, T(java.lang.Math).max(c5, c6))))))},
+            busyDay=${c0 == maxCount ? d0 : (c1 == maxCount ? d1 : (c2 == maxCount ? d2 : (c3 == maxCount ? d3 : (c4 == maxCount ? d4 : (c5 == maxCount ? d5 : d6)))))} ,
+            minCount=${T(java.lang.Math).min(c0, T(java.lang.Math).min(c1, T(java.lang.Math).min(c2, T(java.lang.Math).min(c3, T(java.lang.Math).min(c4, T(java.lang.Math).min(c5, c6))))))},
+            lightDay=${c0 == minCount ? d0 : (c1 == minCount ? d1 : (c2 == minCount ? d2 : (c3 == minCount ? d3 : (c4 == minCount ? d4 : (c5 == minCount ? d5 : d6)))))} ,
+            nextUpCandidate=${miniWeek != null ? miniWeek.^[(taskCount + scheduledCount) > 0] : null},
+            nextUp=${nextUpCandidate != null ? nextUpCandidate : d0},
+            todayPath=${d0 != null ? '/calendar/day/' + #temporals.format(d0.date, 'yyyy-MM-dd') : '/calendar'},
+            nextUpPath=${nextUp != null ? '/calendar/day/' + #temporals.format(nextUp.date, 'yyyy-MM-dd') : '/calendar'},
+            busyDayPath=${busyDay != null ? '/calendar/day/' + #temporals.format(busyDay.date, 'yyyy-MM-dd') : '/calendar'},
+            lightDayPath=${lightDay != null ? '/calendar/day/' + #temporals.format(lightDay.date, 'yyyy-MM-dd') : '/calendar'}
+        ">
 
-                                    <div class="site-schedule-item">
-                                        <div class="site-time-badge">08:30 AM</div>
-                                        <div class="schedule-details">
-                                            <h4 th:text="${applied.schedule.name}"></h4>
-                                            <p th:if="${schedule.description}" class="text-gray-600 text-sm mt-1" th:text="${schedule.description}"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Next action (brain of the page) -->
+        <section aria-label="Next action" class="mb-6" th:if="${d0 != null}"
+                 th:with="
+                    hasNextUpWork=${nextUp != null and (nextUp.taskCount + nextUp.scheduledCount) > 0},
+                    actionKey=${todayHasWorkoutToLog ? 'log' : (t0 > 0 ? 'task' : (w0 > 0 ? 'prep' : (hasNextUpWork ? 'next' : 'plan')))},
+                    actionTitle=${actionKey == 'log' ? 'Log your workout' : (actionKey == 'task' ? 'Complete your next task' : (actionKey == 'prep' ? 'Prep your next session' : (actionKey == 'next' ? 'Open your next scheduled day' : 'Plan your week')))},
+                    actionDesc=${actionKey == 'log' ? 'You have a workout waiting to be completed. Logging it keeps your progress and streak accurate.' :
+                               (actionKey == 'task' ? 'You have tasks due today. Knock out the next one to keep momentum.' :
+                               (actionKey == 'prep' ? 'You’ve got sessions scheduled today. Preview the plan so you can execute cleanly.' :
+                               (actionKey == 'next' ? 'Your next scheduled day is coming up. Open it now to see what’s planned.' :
+                               'Nothing urgent is scheduled. Plan your week so the next step is obvious.')))},
+                    primaryLabel=${actionKey == 'log' ? 'Log today''s workout' : (actionKey == 'task' ? 'Open today''s tasks' : (actionKey == 'prep' ? 'Open today''s session' : (actionKey == 'next' ? 'Open next day' : 'Open calendar')))},
+                    primaryPath=${actionKey == 'plan' ? '/calendar' : (actionKey == 'next' ? nextUpPath : todayPath)},
+                    secondaryLabel=${actionKey == 'plan' ? 'Workout builder' : 'View full week'},
+                    secondaryPath=${actionKey == 'plan' ? '/workout' : '/calendar'}
+                 ">
+            <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Next action</p>
+                        <h1 class="mt-1 text-2xl font-semibold text-slate-900" th:text="${actionTitle}">Next action</h1>
+                        <p class="mt-1 text-sm text-slate-600" th:text="${actionDesc}">Description</p>
                     </div>
 
-                    <!-- Accomplishments Card -->
-                    <div class="site-dashboard-card animate delay-2 opacity-0">
-                        <div class="site-dashboard-header">
-                            <i class="fas fa-trophy"></i> Your Accomplishments
-                        </div>
-                        <div class="site-dashboard-body">
-                            <div class="site-accomplishments-container">
-                                <a th:href="@{/calendar}" class="action_button">
-                                    <i class="fas fa-plus-circle"></i> Log Exercise
-                                </a>
-
-                                <div class="log-placeholder">
-                                    <!-- Recent Accomplishments -->
-                                    <div th:if="${recentExerciseLogs.isEmpty()}"> You do not have any exercise logs yet.</div>
-                                    <section th:class="accomplishments" th:each="exerciseLog: ${recentExerciseLogs}">
-                                        <div class="site-accomplishment-card">
-                                            <div class="site-accomplishment-header">
-                                                <div class="site-accomplishment-title">Morning Run</div>
-                                                <div class="site-accomplishment-date" th:text="'Date: ' + ${exerciseLog.date}"></div>
-                                            </div>
-                                            <div class="site-accomplishment-details">
-                                                <div class="site-accomplishment-stat">
-                                                    <div class="site-stat-value" th:text="' Confidence: ' + ${exerciseLog.confidence} + '/4'"></div>
-                                                    <div class="site-stat-label" th:text="'Mood Before: ' + ${exerciseLog.moodBefore} + '/4'"></div>
-                                                    <div class="site-stat-label" th:text="'Mood After: ' + ${exerciseLog.moodAfter} + '/4'"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </section>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="flex items-center" aria-label="Next action status">
+                        <span class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium"
+                              th:classappend="${actionKey == 'log'} ? ' bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                             (${actionKey == 'task'} ? ' bg-amber-50 text-amber-800 border-amber-200' :
+                                             (${actionKey == 'prep'} ? ' bg-indigo-50 text-indigo-700 border-indigo-200' :
+                                             (${actionKey == 'next'} ? ' bg-slate-50 text-slate-700 border-slate-200' :
+                                             ' bg-slate-50 text-slate-700 border-slate-200')))"
+                              th:text="${actionKey == 'log'} ? 'Workout' : (${actionKey == 'task'} ? 'Task' : (${actionKey == 'prep'} ? 'Prep' : (${actionKey == 'next'} ? 'Next up' : 'Plan')))"
+                        >Plan</span>
                     </div>
                 </div>
 
+                <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Next action buttons">
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{${primaryPath}}"
+                        th:text="${primaryLabel}">
+                        Open
+                    </a>
+
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{${secondaryPath}}"
+                        th:text="${secondaryLabel}">
+                        View full week
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Snapshot -->
+        <header aria-label="Daily snapshot" th:if="${d0 != null}" class="mb-6">
+            <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Dashboard</p>
+                        <h1 class="mt-1 text-2xl font-semibold text-slate-900" th:text="${userFirstName != null ? 'Welcome back, ' + userFirstName : 'Welcome back'}">Welcome back</h1>
+                        <p class="mt-1 text-sm text-slate-600">
+                            <span class="font-medium text-slate-900">Today</span>
+                            <span aria-hidden="true"> · </span>
+                            <span th:text="${d0.prettyDate}">10 Jan</span>
+                            <span aria-hidden="true"> · </span>
+                            <span th:text="${t0} + ' tasks, ' + ${w0} + ' workouts'">0 tasks, 0 workouts</span>
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2" aria-label="Dashboard header status">
+                        <span
+                                class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium"
+                                th:classappend="${c0 >= 6} ? ' bg-rose-50 text-rose-700 border-rose-200' : (${c0 <= 1} ? ' bg-emerald-50 text-emerald-700 border-emerald-200' : ' bg-amber-50 text-amber-800 border-amber-200')"
+                                th:text="${c0 >= 6} ? 'Busy day' : (${c0 <= 1} ? 'Light day' : 'On track')">
+                            On track
+                        </span>
+
+                        <span
+                                class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700"
+                                th:text="'Logs (7d): ' + ${logsLast7DaysCount}">
+                            Logs (7d): 0
+                        </span>
+
+                        <a
+                                th:if="${trainerConversationId != null}"
+                                th:href="@{'/inbox/' + ${trainerConversationId}}"
+                                class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                                aria-label="Trainer linked. Open messages.">
+                            Trainer linked
+                        </a>
+
+                        <a
+                                th:if="${trainerConversationId == null}"
+                                th:href="@{/inbox}"
+                                class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                                aria-label="No trainer linked. Open inbox.">
+                            No trainer linked
+                        </a>
+                    </div>
+                </div>
+
+                <dl class="mt-5 grid grid-cols-2 gap-4" aria-label="Today totals">
+                    <div class="rounded-2xl bg-slate-50 p-4">
+                        <dt class="text-xs font-medium text-slate-600">Tasks due</dt>
+                        <dd class="mt-1 text-2xl font-semibold text-slate-900" th:text="${t0}">0</dd>
+                    </div>
+                    <div class="rounded-2xl bg-slate-50 p-4">
+                        <dt class="text-xs font-medium text-slate-600">Workouts scheduled</dt>
+                        <dd class="mt-1 text-2xl font-semibold text-slate-900" th:text="${w0}">0</dd>
+                    </div>
+                </dl>
+
+                <div class="mt-6 flex flex-col gap-3 sm:flex-row" aria-label="Primary actions">
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{${todayPath}}"
+                        th:text="${todayHasWorkoutToLog ? 'Log today''s workout' : 'Open today'}">
+                        Open today
+                    </a>
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{/calendar}">Open calendar</a>
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{/chat}">Chat coach</a>
+                </div>
+
+                <p class="mt-4 text-sm text-slate-600">Tip: log something small to keep your streak feeling real.</p>
+            </div>
+        </header>
+
+        <!-- Progress signals -->
+        <section aria-label="Progress signals" class="mb-6">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-4 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Logs</p>
+                    <p class="mt-1 text-2xl font-semibold text-slate-900" th:text="${logsThisWeekCount}">0</p>
+                    <p class="mt-1 text-sm text-slate-600" th:text="${daysLoggedThisWeek} + ' days this week'">0 days this week</p>
+                </div>
+
+                <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-4 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Planned vs completed</p>
+                    <p class="mt-1 text-2xl font-semibold text-slate-900" th:text="${weekCompletedCount} + ' / ' + ${weekPlannedCount}">0 / 0</p>
+                    <p class="mt-1 text-sm text-slate-600">This week</p>
+                </div>
+
+                <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-4 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Best mood uplift</p>
+                    <p class="mt-1 text-2xl font-semibold text-slate-900" th:text="'+' + ${bestMoodUplift}">+0</p>
+                    <p class="mt-1 text-sm text-slate-600">From one session</p>
+                </div>
+
+                <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-4 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Consistency score</p>
+                    <p class="mt-1 text-2xl font-semibold text-slate-900" th:text="${consistencyScore} + '%'">0%</p>
+                    <p class="mt-1 text-sm text-slate-600">Completion rate</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Consistency / streak -->
+        <section aria-label="Consistency" class="mb-6">
+            <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Consistency</p>
+                        <h2 class="mt-1 text-lg font-semibold text-slate-900">Days logged this week</h2>
+                        <p class="mt-1 text-sm text-slate-600" th:text="${streakCount} + ' / 7 days'">0 / 7 days</p>
+                    </div>
+
+                    <div class="flex items-center" aria-label="Streak status">
+                        <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700"
+                              th:text="${streakCount >= 5} ? 'Strong' : (${streakCount >= 3} ? 'Building' : 'Start small')">Start small</span>
+                    </div>
+                </div>
+
+                <div class="mt-5 flex items-center gap-2" aria-label="Days logged strip">
+                    <span
+                        th:each="d : ${streakDays}"
+                        class="h-3 w-3 rounded-full border"
+                        th:classappend="${d.logged} ? ' bg-slate-900 border-slate-900' : ' bg-white border-slate-300'"
+                        th:title="${d.dayLabel}"
+                        th:aria-label="${d.dayLabel} + (${d.logged} ? ': logged' : ': not logged')"
+                        role="img"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trainer connection status -->
+        <section aria-label="Trainer connection status" class="mb-6">
+            <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Trainer</p>
+                <h2 class="mt-1 text-lg font-semibold text-slate-900">Trainer connection</h2>
+                <p class="mt-1 text-sm text-slate-600" th:if="${trainerConversationId != null}">You’re linked to a trainer via your inbox.</p>
+                <p class="mt-1 text-sm text-slate-600" th:if="${trainerConversationId == null}">No trainer linked yet — connect when you’re ready.</p>
+                </div>
+
+                <div class="flex items-center" aria-label="Trainer link status">
+                <span
+                    th:if="${trainerConversationId != null}"
+                    class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">Linked</span>
+                <span
+                    th:if="${trainerConversationId == null}"
+                    class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700">Not linked</span>
+                </div>
             </div>
 
-            <script>
-                // Simple animation on scroll
-                document.addEventListener('DOMContentLoaded', function() {
-                    const animateElements = document.querySelectorAll('.animate');
+            <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Trainer connection actions">
+                <a
+                    class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    th:href="@{/explore}">Explore trainers</a>
 
-                    const observer = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                            if (entry.isIntersecting) {
-                                entry.target.classList.remove('opacity-0');
-                            }
-                        });
-                    }, {
-                        threshold: 0.1,
-                        rootMargin: '0px 0px -50px 0px'
-                    });
+                <a
+                    th:if="${trainerConversationId != null}"
+                    class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    th:href="@{'/inbox/' + ${trainerConversationId}}">Message trainer</a>
 
-                    animateElements.forEach(el => observer.observe(el));
+                <span
+                    th:if="${trainerConversationId == null}"
+                    class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white opacity-50 cursor-not-allowed"
+                    aria-disabled="true">Message trainer</span>
 
-                    // Add hover effect to cards
-                    const cards = document.querySelectorAll('.site-dashboard-card, .site-stat-card, .site-action-card, .site-accomplishment-card');
-                    cards.forEach(card => {
-                        card.addEventListener('mouseenter', function() {
-                            if (this.classList.contains('site-dashboard-card')) {
-                                this.style.transform = 'translateY(-5px)';
-                            } else if (this.classList.contains('site-accomplishment-card')) {
-                                this.style.transform = 'translateX(5px)';
-                            } else {
-                                this.style.transform = 'translateY(-5px)';
-                            }
-                        });
+                <a
+                    th:if="${trainerConversationId != null}"
+                    class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                    th:href="@{/explore}">Switch trainer</a>
 
-                        card.addEventListener('mouseleave', function() {
-                            this.style.transform = 'translateY(0)';
-                        });
-                    });
+                <span
+                    th:if="${trainerConversationId == null}"
+                    class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 opacity-50 cursor-not-allowed"
+                    aria-disabled="true">Switch trainer</span>
+            </div>
+            </div>
+        </section>
 
-                    // Simulate user name from authentication
-                    const usernameElement = document.querySelector('.username');
-                    // In a real application, this would come from your authentication system
-                    // For demo purposes, we'll use a sample name
-                    const sampleNames = ['Alex Johnson', 'Sam Wilson', 'Jordan Taylor', 'Casey Smith'];
-                    const randomName = sampleNames[Math.floor(Math.random() * sampleNames.length)];
-                    usernameElement.textContent = randomName;
-                });
-            </script>
+        <!-- “Plan health” / availability check -->
+        <section aria-label="Plan health and availability" class="mb-6">
+            <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Plan</p>
+                        <h2 class="mt-1 text-lg font-semibold text-slate-900">Health &amp; availability check</h2>
+                        <p class="mt-1 text-sm text-slate-600">Set your availability so your week stays realistic — then adjust sessions around it.</p>
+                    </div>
 
+                    <div class="flex items-center" aria-label="Time estimate">
+                        <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700">~2 min</span>
+                    </div>
+                </div>
+
+                <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Plan actions">
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{/calendar(view='week')}">Set availability</a>
+
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{/profile}">Review health profile</a>
+                </div>
+
+                <p class="mt-4 text-sm text-slate-600">Tip: plan recovery like it’s a workout — it protects consistency.</p>
+            </div>
+        </section>
+
+        <!-- Personalised suggestions (preferences + availability) -->
+        <section aria-label="Personalised suggestions" class="mb-6">
+            <div class="mb-3">
+                <h2 class="text-lg font-semibold text-slate-900">Personalised suggestions</h2>
+                <p class="mt-1 text-sm text-slate-600">A couple of nudges based on your preferences and week load.</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <article class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0" aria-label="Suggested workout">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Suggested workout</p>
+                    <h3 class="mt-1 text-base font-semibold text-slate-900">Build a session that fits you</h3>
+
+                    <p class="mt-1 text-sm text-slate-600" th:if="${userPreferencesCount == 0}">Pick a few training preferences to unlock better exercise suggestions.</p>
+                    <p class="mt-1 text-sm text-slate-600" th:if="${userPreferencesCount > 0}">
+                        Your workout builder will prioritise exercises that match what you’ve selected.
+                    </p>
+
+                    <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Suggested workout actions">
+                        <a
+                            th:if="${userPreferencesCount > 0}"
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            th:href="@{/workout}">Open workout builder</a>
+
+                        <a
+                            th:if="${userPreferencesCount == 0}"
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            th:href="@{/select-preferences}">Choose preferences</a>
+
+                        <a
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            th:href="@{/preferences}">View saved</a>
+                    </div>
+                </article>
+
+                <article class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0" aria-label="Recommended plan">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Recommended plan</p>
+                    <h3 class="mt-1 text-base font-semibold text-slate-900">Keep this week realistic</h3>
+
+                    <p class="mt-1 text-sm text-slate-600" th:if="${weekPlannedCount == 0}">Nothing planned yet. Add 2–3 small sessions that fit your availability.</p>
+                    <p class="mt-1 text-sm text-slate-600" th:if="${weekPlannedCount > 0}">
+                        You’ve planned <span class="font-semibold text-slate-900" th:text="${weekPlannedCount}">0</span> items and completed
+                        <span class="font-semibold text-slate-900" th:text="${weekCompletedCount}">0</span>. Aim to keep the next one short and doable.
+                    </p>
+
+                    <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Plan actions">
+                        <a
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            th:href="@{/calendar(view='week')}">Adjust week</a>
+                        <a
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            th:href="@{${todayPath}}">Open today</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- This week goal -->
+        <section aria-label="This week goal" class="mb-6">
+            <div class="mb-3">
+                <h2 class="text-lg font-semibold text-slate-900">This week goal</h2>
+                <p class="mt-1 text-sm text-slate-600">A small target that keeps momentum building.</p>
+            </div>
+
+            <div
+                class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                th:with="goalTarget=3, rawProgress=${logsThisWeekCount != null ? logsThisWeekCount : 0}, goalProgress=${rawProgress > goalTarget ? goalTarget : rawProgress}, goalPercent=${(goalProgress * 100) / goalTarget}">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Goal</p>
+                        <h3 class="mt-1 text-base font-semibold text-slate-900">3 workouts planned</h3>
+                        <p class="mt-1 text-sm text-slate-600" th:text="${'You’re on ' + goalProgress + '/' + goalTarget}">You’re on 1/3</p>
+                    </div>
+
+                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700" aria-label="Progress chip">
+                        <span th:text="${goalProgress + '/' + goalTarget}">0/3</span>
+                    </span>
+                </div>
+
+                <div class="mt-5" aria-label="Goal progress bar">
+                    <div class="h-2 w-full rounded-full bg-slate-100" aria-hidden="true">
+                        <div class="h-2 rounded-full bg-slate-900" th:style="'width:' + ${goalPercent} + '%'"></div>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-500" th:text="${goalProgress == goalTarget ? 'Goal hit — keep it light and consistent.' : 'Keep sessions short and doable.'}">Keep sessions short and doable.</p>
+                </div>
+
+                <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Goal actions">
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{/exercise-log}">Log a workout</a>
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{/calendar(view='week')}">Plan week</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- This week at a glance -->
+        <section aria-label="This week at a glance" th:if="${miniWeek != null}" class="mb-6">
+            <div class="mb-3">
+                <h2 class="text-lg font-semibold text-slate-900">This week at a glance</h2>
+                <p class="mt-1 text-sm text-slate-600">Tap a day to open your calendar.</p>
+            </div>
+
+            <div class="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0" role="list" aria-label="Week strip">
+                <a
+                    th:each="d : ${miniWeek}"
+                    role="listitem"
+                    th:href="@{'/calendar/day/' + ${#temporals.format(d.date, 'yyyy-MM-dd')}}"
+                    th:aria-label="${'Open calendar for ' + d.dayLabel + ' ' + d.prettyDate}"
+                    class="js-reveal group relative min-w-56 flex-shrink-0 snap-start rounded-3xl border border-slate-200 bg-white p-4 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                    th:classappend="${d.today} ? ' border-slate-900' : ''"
+                    th:with="
+                        load=${d.taskCount + d.scheduledCount},
+                        loadLevel=${load >= 6 ? 3 : (load >= 3 ? 2 : (load >= 1 ? 1 : 0))}
+                    ">
+
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="text-sm font-semibold text-slate-900" th:text="${d.dayLabel}">Mon</div>
+                            <div class="mt-0.5 text-sm text-slate-600" th:text="${d.prettyDate}">10 Jan</div>
+                        </div>
+
+                        <span
+                            class="inline-flex items-center rounded-full bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white"
+                            th:if="${d.today}">Today</span>
+
+                        <span
+                            class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
+                            th:if="${!d.today}"
+                            th:text="${d.taskCount + d.scheduledCount} + ' items'">0 items</span>
+                    </div>
+
+                    <div class="mt-4 flex flex-wrap gap-2" aria-label="Counts">
+                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700" th:text="${d.taskCount} + ' tasks'">0 tasks</span>
+                        <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700" th:text="${d.scheduledCount} + ' workouts'">0 workouts</span>
+                        <span
+                            th:if="${d.hasUncompletedWorkout}"
+                            class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">Log due</span>
+                    </div>
+
+                    <div class="mt-3" aria-label="Day load indicator">
+                        <div class="flex items-center gap-1" aria-hidden="true">
+                            <span class="h-1.5 w-6 rounded-full bg-slate-200" th:classappend="${loadLevel >= 1} ? ' bg-slate-900' : ''"></span>
+                            <span class="h-1.5 w-6 rounded-full bg-slate-200" th:classappend="${loadLevel >= 2} ? ' bg-slate-900' : ''"></span>
+                            <span class="h-1.5 w-6 rounded-full bg-slate-200" th:classappend="${loadLevel >= 3} ? ' bg-slate-900' : ''"></span>
+                        </div>
+                        <span class="sr-only" th:text="${loadLevel == 0 ? 'No load' : (loadLevel == 1 ? 'Light load' : (loadLevel == 2 ? 'Medium load' : 'Heavy load'))}">Light load</span>
+                    </div>
+
+                    <div class="mt-3 text-xs font-semibold text-slate-500 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0 motion-reduce:transition-none">
+                        Open day →
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Upcoming (next 3 items) -->
+        <section aria-label="Upcoming" th:if="${upcomingItems != null}" class="mb-6">
+            <div class="mb-3">
+                <h2 class="text-lg font-semibold text-slate-900">Upcoming</h2>
+                <p class="mt-1 text-sm text-slate-600">The next few things on your schedule.</p>
+            </div>
+
+            <div class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                <p class="text-sm text-slate-600" th:if="${#lists.isEmpty(upcomingItems)}">No upcoming items found.</p>
+
+                <ul th:if="${!#lists.isEmpty(upcomingItems)}" class="space-y-3" aria-label="Upcoming items">
+                    <li th:each="it : ${upcomingItems}" class="rounded-2xl bg-slate-50 px-4 py-3">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold"
+                                          th:classappend="${it.type == 'Session'} ? ' bg-indigo-50 text-indigo-700' : ' bg-slate-100 text-slate-700'"
+                                          th:text="${it.type}">Task</span>
+                                    <span class="text-xs font-medium text-slate-500" th:text="${it.dateLabel}">Mon 10 Jan</span>
+                                </div>
+                                <div class="mt-1 truncate text-sm font-semibold text-slate-900" th:text="${it.title}">Item title</div>
+                            </div>
+
+                            <a class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                               th:href="@{${it.href}}">Open day</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Momentum / Insights -->
+        <section aria-label="Momentum and insights" th:if="${miniWeek != null}" class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <article class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0" aria-label="Momentum">
+                <h2 class="text-lg font-semibold text-slate-900">Momentum</h2>
+                <dl class="mt-4 grid grid-cols-1 gap-3" aria-label="Week totals">
+                    <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                        <dt class="text-sm text-slate-700">Total tasks this week</dt>
+                        <dd class="text-sm font-semibold text-slate-900" th:text="${totalTasks}">0</dd>
+                    </div>
+                    <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+                        <dt class="text-sm text-slate-700">Total workouts scheduled</dt>
+                        <dd class="text-sm font-semibold text-slate-900" th:text="${totalWorkouts}">0</dd>
+                    </div>
+                </dl>
+                <p class="mt-4 text-sm text-slate-600">Small wins add up—aim for consistency over intensity.</p>
+            </article>
+
+            <article class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0" aria-label="Insights">
+                <h2 class="text-lg font-semibold text-slate-900">Insights</h2>
+
+                <div class="mt-4 space-y-3">
+                    <div class="flex items-center justify-between gap-4" aria-label="Busy day">
+                        <span class="text-sm text-slate-600">Busy day</span>
+                        <span class="min-w-0 text-sm font-semibold text-slate-900" th:text="${busyDay != null ? busyDay.dayLabel + ' ' + busyDay.prettyDate : '—'}">Mon 10 Jan</span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4" aria-label="Next up">
+                        <span class="text-sm text-slate-600">Next up</span>
+                        <span class="min-w-0 text-sm font-semibold text-slate-900" th:text="${nextUp != null ? nextUp.dayLabel + ' ' + nextUp.prettyDate : 'Today'}">Today</span>
+                    </div>
+
+                    <div class="rounded-2xl bg-slate-50 px-4 py-3" aria-label="Recommendation"
+                         th:with="
+                            recTitle=${maxCount >= 6 ? 'You’re overloaded' : (maxCount >= 3 ? 'Protect your consistency' : (maxCount >= 1 ? 'Keep it light' : 'Build momentum'))},
+                            recBody=${maxCount >= 6 ? 'Consider moving one item from ' + (busyDay != null ? busyDay.dayLabel : 'your busiest day') + ' to ' + (lightDay != null ? lightDay.dayLabel : 'a lighter day') + '.' :
+                                   (maxCount >= 3 ? 'Add 1 recovery slot this week so hard days stay doable.' :
+                                   (maxCount >= 1 ? 'You’re on track. Keep sessions short and finish what’s planned.' :
+                                   'Nothing planned yet. Add one small session to get started.'))},
+                            adaptiveBody=${(adaptiveFeedback != null and !#strings.isEmpty(adaptiveFeedback)) ? adaptiveFeedback : recBody}">
+                        <div class="text-sm font-semibold text-slate-900" th:text="${recTitle}">Protect your consistency</div>
+                        <div class="mt-0.5 text-sm text-slate-600" th:text="${adaptiveBody}">Recommendation text</div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-3 sm:flex-row"
+                     th:with="
+                        primaryHref=${maxCount >= 6 ? busyDayPath : (maxCount == 0 ? '/calendar?view=week' : nextUpPath)},
+                        primaryLabel=${maxCount >= 6 ? 'Review overloaded day' : (maxCount == 0 ? 'Plan this week' : 'Open next day')}">
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{${primaryHref}}"
+                        th:text="${primaryLabel}">Open next day</a>
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{/calendar(view='week')}">Adjust week</a>
+                </div>
+            </article>
+        </section>
+
+        <!-- Recent logs -->
+        <section aria-label="Recent exercise logs" class="mb-6">
+            <div class="mb-3">
+                <h2 class="text-lg font-semibold text-slate-900">Recent logs</h2>
+                <p class="mt-1 text-sm text-slate-600">Your latest 5 entries.</p>
+            </div>
+
+            <div
+                class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                th:if="${#lists.isEmpty(recentExerciseLogs)}"
+                role="note"
+                aria-label="No recent logs">
+                <h3 class="text-base font-semibold text-slate-900">No logs yet</h3>
+                <p class="mt-1 text-sm text-slate-600">Start with today—log a short workout or a small task to build momentum.</p>
+                <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{${todayPath}}">Open today</a>
+                    <a
+                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        th:href="@{/exercise-log}">Go to logs</a>
+                </div>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(recentExerciseLogs)}" class="space-y-3" aria-label="Exercise logs">
+                <!-- Featured latest log -->
+                <a
+                    class="js-reveal block rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                    th:href="@{/exercise-log}"
+                    th:with="latest=${recentExerciseLogs.get(0)}, moodDelta=${(latest.moodBefore != null && latest.moodAfter != null) ? (latest.moodAfter - latest.moodBefore) : null}"
+                    aria-label="Open latest exercise log">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Latest highlight</p>
+                            <h3
+                                class="mt-1 text-base font-semibold text-slate-900"
+                                th:text="${moodDelta == null ? 'Logged workout' : (moodDelta > 0 ? 'Mood improved +' + moodDelta : (moodDelta == 0 ? 'Mood steady' : 'Mood dropped ' + moodDelta))}">
+                                Mood improved +2
+                            </h3>
+                            <p class="mt-1 text-sm text-slate-600">
+                                <span class="font-semibold text-slate-900" th:text="${latest.date}">2026-01-10</span>
+                                <span aria-hidden="true"> · </span>
+                                <span th:text="${latest.confidence != null ? 'Confidence ' + latest.confidence + '/4' : 'Confidence —'}">Confidence 3/4</span>
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2" aria-label="Mood details">
+                            <span
+                                class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700"
+                                th:text="${latest.moodBefore != null ? 'Before ' + latest.moodBefore + '/4' : 'Before —'}">Before 0/4</span>
+                            <span
+                                class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"
+                                th:text="${latest.moodAfter != null ? 'After ' + latest.moodAfter + '/4' : 'After —'}">After 0/4</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-xs font-semibold text-slate-500">Open logs →</div>
+                </a>
+
+                <!-- Remaining logs -->
+                <ul class="space-y-3" aria-label="Exercise log list">
+                    <li th:each="exerciseLog, iter : ${recentExerciseLogs}" th:if="${iter.index > 0}">
+                        <a
+                            class="js-reveal flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white p-5 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0 sm:flex-row sm:items-center sm:justify-between"
+                            th:href="@{/exercise-log}"
+                            aria-label="Open exercise logs">
+                            <div class="min-w-0">
+                                <div class="text-sm font-semibold text-slate-900" th:text="${exerciseLog.date}">2026-01-10</div>
+                                <div class="mt-0.5 text-sm text-slate-600">Exercise log</div>
+                            </div>
+                            <div class="flex flex-wrap gap-2" aria-label="Confidence and mood">
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700" th:text="${exerciseLog.confidence != null ? 'Confidence ' + exerciseLog.confidence + '/4' : 'Confidence —'}">Confidence 0/4</span>
+                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700" th:text="${exerciseLog.moodBefore != null ? 'Before ' + exerciseLog.moodBefore + '/4' : 'Before —'}">Before 0/4</span>
+                                <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700" th:text="${exerciseLog.moodAfter != null ? 'After ' + exerciseLog.moodAfter + '/4' : 'After —'}">After 0/4</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Quick add -->
+        <section aria-label="Quick add" class="mb-2">
+            <div class="mb-3">
+                <h2 class="text-lg font-semibold text-slate-900">Quick add</h2>
+                <p class="mt-1 text-sm text-slate-600">Do the next small thing—fast.</p>
+            </div>
+
+            <nav aria-label="Quick add actions" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <a
+                    class="js-reveal inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white opacity-0 translate-y-2 transition-all duration-700 ease-out hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                    th:href="@{${todayPath}}"
+                    aria-label="Add a task for today">+ Add task</a>
+
+                <a
+                    class="js-reveal inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                    th:href="@{/workout}"
+                    aria-label="Add a workout in the workout builder">+ Add workout</a>
+
+                <a
+                    class="js-reveal inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                    th:href="@{/exercise-log}"
+                    aria-label="Log a workout">Log workout</a>
+
+                <a
+                    class="js-reveal inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                    th:if="${trainerConversationId != null}"
+                    th:href="@{'/inbox/' + ${trainerConversationId}}"
+                    aria-label="Message your trainer">Message trainer</a>
+
+                <span
+                    class="js-reveal inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-400 opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
+                    th:if="${trainerConversationId == null}"
+                    aria-disabled="true">Message trainer</span>
+            </nav>
+        </section>
+
+        <!-- Premium unlock teaser -->
+        <section aria-label="Premium unlock" class="mb-6">
+            <article class="js-reveal rounded-3xl border border-slate-200 bg-white p-6 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Premium unlock</p>
+                        <h2 class="mt-1 text-lg font-semibold text-slate-900">Deeper insights, less guesswork</h2>
+                        <p class="mt-1 text-sm text-slate-600">See extra signals that help you adjust your week before it slips.</p>
+                    </div>
+
+                    <span class="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700" aria-label="Premium locked">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M7 11V8a5 5 0 0110 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M7 11h10a2 2 0 012 2v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Locked
+                    </span>
+                </div>
+
+                <div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div class="space-y-2 select-none blur-sm" aria-hidden="true">
+                        <div class="flex items-center justify-between gap-4 rounded-xl bg-white px-3 py-2">
+                            <span class="text-sm font-semibold text-slate-900">Adherence score</span>
+                            <span class="text-sm text-slate-600">Trending up</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-4 rounded-xl bg-white px-3 py-2">
+                            <span class="text-sm font-semibold text-slate-900">Recovery balance</span>
+                            <span class="text-sm text-slate-600">Needs 1 slot</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-4 rounded-xl bg-white px-3 py-2">
+                            <span class="text-sm font-semibold text-slate-900">Plateau risk</span>
+                            <span class="text-sm text-slate-600">Low</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2">
+                        <span class="text-sm font-semibold text-slate-900">Premium insights</span>
+                        <span class="text-sm text-slate-600">Unlock to view</span>
+                    </div>
+                </div>
+
+                <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+                    <a class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                       th:href="@{/chat}">Unlock premium</a>
+                </div>
+                <p class="mt-2 text-xs text-slate-500">No pricing page — just a preview of what unlocks.</p>
+            </article>
+        </section>
+
+    </section>
+
+</th:block>
+
+<th:block xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+          xmlns:th="http://www.thymeleaf.org"
+          th:fragment="contentPublic">
+
+    <!-- NOT AUTHENTICATED VIEW (1 to 1 Landing) -->
+    <section sec:authorize="!isAuthenticated()" class="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
+    <!-- Optional intro splash -->
+    <div id="introSplash" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 px-6 text-center text-white backdrop-blur transition-opacity duration-1000 ease-out opacity-100">
+        <div class="max-w-xl">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/10 sm:h-20 sm:w-20 lg:h-24 lg:w-24">
+                <svg class="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M6 16c4-8 8-8 12 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M7 9h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="mt-4 text-sm text-white/80 sm:text-base lg:text-lg">Verified coaching. Structured training. Premium progress.</div>
         </div>
     </div>
 
-    <span sec:authorize="!isAuthenticated()">
-    <a class="content">
+    <!-- HERO -->
+    <header aria-label="Homepage hero" class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/70 p-7 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40 sm:p-10">
+        <!-- animated background layers (Tailwind-only) -->
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <!-- grid -->
+            <div class="absolute inset-0 opacity-35 dark:opacity-25 bg-[linear-gradient(to_right,rgba(148,163,184,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.18)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+            <!-- orbs -->
+            <div class="absolute -top-44 -right-48 h-[30rem] w-[30rem] rounded-full bg-emerald-500/15 blur-3xl mix-blend-multiply animate-pulse dark:mix-blend-screen"></div>
+            <div class="absolute -bottom-56 -left-56 h-[34rem] w-[34rem] rounded-full bg-sky-500/12 blur-3xl mix-blend-multiply animate-pulse dark:mix-blend-screen"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-slate-50/60 to-white/30 dark:from-slate-950/30 dark:to-slate-950/0"></div>
+            <!-- scanlines / shimmer-ish -->
+            <div class="absolute inset-0 opacity-25 mix-blend-overlay animate-pulse bg-[repeating-linear-gradient(to_bottom,rgba(255,255,255,0.08)_0,rgba(255,255,255,0.08)_1px,transparent_1px,transparent_7px)]"></div>
+            <div class="absolute inset-0 rounded-3xl ring-1 ring-slate-900/5 dark:ring-white/10"></div>
+        </div>
 
-<div class="content-wrapper">
-        <div class="corner-decoration top-left"></div>
-        <div class="corner-decoration bottom-right"></div>
+        <div class="relative grid gap-10 lg:grid-cols-12 lg:items-center">
+            <!-- Left: brand + copy -->
+            <div class="lg:col-span-7">
+                <div id="brandCrash" class="opacity-0 translate-y-3 scale-95 blur-sm transition-all duration-700 ease-out">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 ring-1 ring-slate-900/10 shadow-sm dark:bg-slate-950/50 dark:ring-white/10">
+                            <svg class="h-6 w-6 text-slate-900 dark:text-slate-100" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M6 16c4-8 8-8 12 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M7 9h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
 
-        <div class="content-container">
-            <!-- How Our App Helps -->
-            <section class="benefits-section">
-                <h2 class="section-title animate">How Our Exercise App Transforms Your Lifestyle</h2>
-                <p style="text-align: center; font-size: 1.2rem; color: #718096; margin-bottom: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
-                    After your GP consultation, our intelligent platform provides the tools and support needed to turn medical advice into sustainable daily habits.
+                        <div class="min-w-0">
+                            <div class="text-[11px] font-extrabold uppercase tracking-[0.35em] text-slate-900 dark:text-slate-100">ONE TO ONE</div>
+                            <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">Verified coaching. Structured training. Premium progress.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h1 class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out mt-6 text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">
+                    Structured training.
+                    <span class="text-slate-900/70 dark:text-slate-200/80">Verified coaching.</span>
+                    <span class="block">Progress that feels premium.</span>
+                </h1>
+
+                <p class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out mt-4 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                    ONE TO ONE is a premium platform for structured training: verified coaches, calendar-led planning, in-platform booking and payments,
+                    and progress analytics that stays practical — not noisy.
                 </p>
 
-                <div class="benefits-grid">
+                <div class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out mt-5 flex flex-wrap gap-2" aria-label="Trust signals">
+                    <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">Verified</span>
+                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950/30 dark:text-slate-200">Privacy-first</span>
+                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950/30 dark:text-slate-200">Calendar-led</span>
+                </div>
 
-                    <div class="benefit-card animate delay-2 opacity-0">
-                        <div class="benefit-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h3>Visual Progress Tracking</h3>
-                        <p>Beautiful dashboards showing your improvement over time. Track fitness milestones, health metrics, and celebrate achievements with visual rewards.</p>
-                    </div>
+                <ul class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out mt-6 grid gap-3 text-sm text-slate-700 dark:text-slate-200 sm:grid-cols-2" aria-label="Core value points">
+                    <li class="flex gap-3">
+                        <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">✓</span>
+                        <span><span class="font-semibold text-slate-900 dark:text-slate-100">Verified trainers only</span> — quality control built in.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">✓</span>
+                        <span><span class="font-semibold text-slate-900 dark:text-slate-100">Booking + payments</span> in-platform, not scattered.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">✓</span>
+                        <span><span class="font-semibold text-slate-900 dark:text-slate-100">Scheduling/occurrences</span> that matches real life.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">✓</span>
+                        <span><span class="font-semibold text-slate-900 dark:text-slate-100">Analytics + AI coaching</span> that stays actionable.</span>
+                    </li>
+                </ul>
 
-                    <div class="benefit-card animate delay-3 opacity-0">
-                        <div class="benefit-icon">
-                            <i class="fas fa-user-md"></i>
-                        </div>
-                        <h3>Medical Integration</h3>
-                        <p>Secure sharing of progress reports with your healthcare provider. Ensures your exercise plan aligns perfectly with medical guidance for optimal results.</p>
+                <div class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out mt-7 flex flex-col gap-3 sm:flex-row sm:items-center" aria-label="Primary actions">
+                    <a class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white dark:focus-visible:ring-slate-200/30 dark:focus-visible:ring-offset-slate-950"
+                       th:href="@{/login}">Get started</a>
+                    <a class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white/70 px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-950/30 dark:text-slate-100 dark:hover:bg-slate-950/50 dark:focus-visible:ring-slate-200/20 dark:focus-visible:ring-offset-slate-950"
+                       th:href="@{/explore}">Explore trainers &amp; gyms</a>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 sm:pl-2">
+                        One active coach at a time — switch anytime.
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- CTA Section -->
-            <section class="cta-section animate">
-                <h2>Ready to Start Your Health Journey?</h2>
-                <p>Book a lifestyle consultation with your GP today and get personalized exercise recommendations tailored to your health goals.</p>
-                <a href="https://www.nhsapp.service.nhs.uk/login" class="cta-button">
-                    <i class="fas fa-calendar-check"></i> Book GP Consultation
-                </a>
-            </section>
+            <!-- Right: premium preview stack -->
+            <div class="lg:col-span-5">
+                <div class="grid gap-4">
+                    <div class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-transparent p-[1px]">
+                        <div class="rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
+                            <div class="flex items-start justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Premium experience</p>
+                                    <h2 class="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">Everything stays organised</h2>
+                                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Calendar, workouts, booking, payments, and progress in one system.</p>
+                                </div>
+                                <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">Verified</span>
+                            </div>
 
-            <!-- Simple Steps -->
-            <section class="steps-section">
-                <h2 class="section-title animate">Your Path to Better Health</h2>
-                <div class="steps-container">
-                    <div class="step animate delay-1 opacity-0" style="font-family: 'Poppins', sans-serif;">
-                        <div class="step-number">1</div>
-                        <h3>GP Consultation</h3>
-                        <p>Begin with a professional lifestyle assessment from your local doctor to establish your health baseline and goals.</p>
-                    </div>
-
-                    <div class="step-connector connector-1"></div>
-
-                    <div class="step animate delay-2 opacity-0" style="font-family: 'Poppins', sans-serif;">
-                        <div class="step-number">2</div>
-                        <h3>Personalized Plan</h3>
-                        <p>Receive a custom exercise schedule in our app, designed around your doctor's recommendations and personal preferences.</p>
-                    </div>
-
-                    <div class="step-connector connector-2"></div>
-
-                    <div class="step animate delay-3 opacity-0" style="font-family: 'Poppins', sans-serif;">
-                        <div class="step-number">3</div>
-                        <h3>Track & Succeed</h3>
-                        <p>Follow your plan with guided support, track improvements, and adjust your routine as you progress toward your goals.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Features -->
-            <section class="features-section">
-                <h2 class="section-title animate">Premium Features for Lasting Change</h2>
-                <div class="features-list">
-                    <div class="feature-item animate delay-1 opacity-0">
-                        <div class="feature-icon">
-                            <i class="fas fa-dumbbell"></i>
-                        </div>
-                        <div class="feature-content" style="font-family: 'Poppins', sans-serif;">
-                            <h4>300+ Guided Workouts</h4>
-                            <p>From beginner routines to advanced training, all with proper form guidance and video demonstrations.</p>
+                            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/30">
+                                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">This week</p>
+                                    <p class="mt-1 font-semibold text-slate-900 dark:text-slate-100">3 sessions</p>
+                                    <p class="text-xs text-slate-600 dark:text-slate-300">+ habits</p>
+                                </div>
+                                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/30">
+                                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Signals</p>
+                                    <p class="mt-1 font-semibold text-slate-900 dark:text-slate-100">Adherence</p>
+                                    <p class="text-xs text-slate-600 dark:text-slate-300">trend + notes</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="feature-item animate delay-2 opacity-0">
-                        <div class="feature-icon">
-                            <i class="fas fa-bell"></i>
+                    <div class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Join as</p>
+                        <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                            <a th:href="@{/signup/client}"
+                               class="group rounded-2xl border border-slate-200 bg-white/70 p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 dark:border-slate-800 dark:bg-slate-950/30 dark:hover:bg-slate-950/50 dark:focus-visible:ring-slate-200/20">
+                                <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Client</p>
+                                <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Structured training</p>
+                            </a>
+                            <a th:href="@{/signup/trainer}"
+                               class="group rounded-2xl border border-slate-200 bg-white/70 p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 dark:border-slate-800 dark:bg-slate-950/30 dark:hover:bg-slate-950/50 dark:focus-visible:ring-slate-200/20">
+                                <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Trainer</p>
+                                <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Clients + planning</p>
+                            </a>
+                            <a th:href="@{/signup/gym}"
+                               class="group rounded-2xl border border-slate-200 bg-white/70 p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 dark:border-slate-800 dark:bg-slate-950/30 dark:hover:bg-slate-950/50 dark:focus-visible:ring-slate-200/20">
+                                <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Gym</p>
+                                <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Operations + leads</p>
+                            </a>
                         </div>
-                        <div class="feature-content" style="font-family: 'Poppins', sans-serif;">
-                            <h4>Adaptive Reminders</h4>
-                            <p>Smart notifications that learn your schedule and gently nudge you at optimal times for maximum consistency.</p>
-                        </div>
-                    </div>
-
-                    <div class="feature-item animate delay-3 opacity-0">
-                        <div class="feature-icon">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <div class="feature-content" style="font-family: 'Poppins', sans-serif;">
-                            <h4>Health Metrics Tracking</h4>
-                            <p>Monitor heart rate, steps, calories, sleep patterns, and other vital wellness indicators in one place.</p>
-                        </div>
-                    </div>
-
-                    <div class="feature-item animate delay-3 opacity-0">
-                        <div class="feature-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="feature-content" style="font-family: 'Poppins', sans-serif;">
-                            <h4>Privacy-First Design</h4>
-                            <p>Your health data is encrypted and never shared without your explicit permission. Complete control over your information.</p>
-                        </div>
+                        <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">Trainers are verified and can belong to multiple gyms or be self-employed.</p>
                     </div>
                 </div>
-            </section>
-
-            <!-- Final CTA -->
-            <section class="final-cta animate">
-                <h2>Transform Your Health Journey</h2>
-                <p style="font-family: 'Poppins', sans-serif;">Combine expert medical guidance with intelligent technology for sustainable lifestyle improvements. Start with a GP consultation and continue with our supportive exercise platform.</p>
-                <a href="https://www.nhs.uk/service-search/find-a-gp/" class="secondary-button">
-                    <i class="fas fa-stethoscope"></i> Find a GP Near You
-                </a>
-            </section>
+            </div>
         </div>
-    </div>
+    </header>
+
+    <!-- FEATURE GRID -->
+    <section aria-label="Key features" class="mt-8">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">What you can do</h2>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Designed to feel premium: clear structure, verified coaching, and measurable progress.</p>
+            </div>
+
+            <!-- Segmented control (tabs) -->
+            <div class="rounded-2xl border border-slate-200 bg-white/70 p-1 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
+                <div class="flex flex-wrap gap-1" role="tablist" aria-label="Feature detail tabs">
+                    <button type="button" class="px-3 py-1.5 text-xs font-semibold rounded-xl text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 dark:text-slate-200 dark:hover:bg-white/10 aria-selected:bg-slate-900 aria-selected:text-white aria-selected:shadow-sm dark:aria-selected:bg-slate-100 dark:aria-selected:text-slate-900" role="tab" aria-selected="true" aria-controls="feat-panel-calendar" data-tab="calendar">Calendar</button>
+                    <button type="button" class="px-3 py-1.5 text-xs font-semibold rounded-xl text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 dark:text-slate-200 dark:hover:bg-white/10 aria-selected:bg-slate-900 aria-selected:text-white aria-selected:shadow-sm dark:aria-selected:bg-slate-100 dark:aria-selected:text-slate-900" role="tab" aria-selected="false" aria-controls="feat-panel-workouts" data-tab="workouts">Workouts</button>
+                    <button type="button" class="px-3 py-1.5 text-xs font-semibold rounded-xl text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 dark:text-slate-200 dark:hover:bg-white/10 aria-selected:bg-slate-900 aria-selected:text-white aria-selected:shadow-sm dark:aria-selected:bg-slate-100 dark:aria-selected:text-slate-900" role="tab" aria-selected="false" aria-controls="feat-panel-marketplace" data-tab="marketplace">Marketplace</button>
+                    <button type="button" class="px-3 py-1.5 text-xs font-semibold rounded-xl text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 dark:text-slate-200 dark:hover:bg-white/10 aria-selected:bg-slate-900 aria-selected:text-white aria-selected:shadow-sm dark:aria-selected:bg-slate-100 dark:aria-selected:text-slate-900" role="tab" aria-selected="false" aria-controls="feat-panel-analytics" data-tab="analytics">Analytics</button>
+                    <button type="button" class="px-3 py-1.5 text-xs font-semibold rounded-xl text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 dark:text-slate-200 dark:hover:bg-white/10 aria-selected:bg-slate-900 aria-selected:text-white aria-selected:shadow-sm dark:aria-selected:bg-slate-100 dark:aria-selected:text-slate-900" role="tab" aria-selected="false" aria-controls="feat-panel-ai" data-tab="ai">AI Coach</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab panels -->
+        <div class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40" aria-label="Feature detail panel">
+            <div id="feat-panel-calendar" role="tabpanel" class="space-y-2" aria-label="Calendar panel">
+                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Calendar-led training</div>
+                <div class="text-sm text-slate-600 dark:text-slate-300">Plan workouts, tasks, and habits in one place. Your week becomes visible, not chaotic.</div>
+            </div>
+            <div id="feat-panel-workouts" role="tabpanel" class="space-y-2 hidden" aria-label="Workouts panel">
+                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Workout builder + logging</div>
+                <div class="text-sm text-slate-600 dark:text-slate-300">Create sessions that match your schedule, then log without friction to keep progress consistent.</div>
+            </div>
+            <div id="feat-panel-marketplace" role="tabpanel" class="space-y-2 hidden" aria-label="Marketplace panel">
+                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Verified marketplace</div>
+                <div class="text-sm text-slate-600 dark:text-slate-300">Connect with vetted trainers and gyms — verified profiles and a premium client experience.</div>
+            </div>
+            <div id="feat-panel-analytics" role="tabpanel" class="space-y-2 hidden" aria-label="Analytics panel">
+                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Progress analytics</div>
+                <div class="text-sm text-slate-600 dark:text-slate-300">See adherence signals and trend insights you can actually act on — not noise.</div>
+            </div>
+            <div id="feat-panel-ai" role="tabpanel" class="space-y-2 hidden" aria-label="AI panel">
+                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">AI coach (guided)</div>
+                <div class="text-sm text-slate-600 dark:text-slate-300">Get structured suggestions and reflection prompts that stay practical and on-plan.</div>
+            </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" role="list">
+            <!-- Card helper pattern: gradient border wrapper -->
+            <article class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-transparent p-[1px]">
+                <div class="group h-full rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40" role="listitem" aria-label="Calendar feature">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M7 3v3M17 3v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M5 8h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950/30 dark:text-slate-200">Free</span>
+                    </div>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-100">Calendar</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">A week-first view that keeps training structured and realistic.</p>
+                </div>
+            </article>
+
+            <article class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-transparent p-[1px]">
+                <div class="group h-full rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40" role="listitem" aria-label="Scheduling feature">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 8v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950/30 dark:text-slate-200">Free</span>
+                    </div>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-100">Scheduling / Occurrences</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Repeat sessions, track completion, and keep the plan stable.</p>
+                </div>
+            </article>
+
+            <article class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-transparent p-[1px]">
+                <div class="group h-full rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40" role="listitem" aria-label="Workout builder feature">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 10v4M20 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M7 9v6M17 9v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M7 12h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">Premium</span>
+                    </div>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-100">Workout Builder</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Build sessions with intent and keep training consistent week to week.</p>
+                </div>
+            </article>
+
+            <article class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-transparent p-[1px]">
+                <div class="group h-full rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40" role="listitem" aria-label="Marketplace feature">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M16 11a4 4 0 1 0-8 0v2a4 4 0 0 0 8 0v-2Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 3v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M8 21h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">Premium</span>
+                    </div>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-100">Verified Marketplace</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Match with verified trainers and gyms with a premium client flow.</p>
+                </div>
+            </article>
+
+            <article class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-transparent p-[1px]">
+                <div class="group h-full rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40" role="listitem" aria-label="Payments feature">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 7h18v10H3V7Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M3 10h18" stroke="currentColor" stroke-width="2"/>
+                                <path d="M7 14h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">Premium</span>
+                    </div>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-100">Booking &amp; Payments</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Simple sessions, clear receipts, and less admin friction.</p>
+                </div>
+            </article>
+
+            <article class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-transparent p-[1px]">
+                <div class="group h-full rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40" role="listitem" aria-label="Analytics feature">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M7 16l4-4 3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">Premium</span>
+                    </div>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-100">Progress Analytics</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">See adherence and momentum signals — designed for decisions.</p>
+                </div>
+            </article>
+
+            <article class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-transparent p-[1px]">
+                <div class="group h-full rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40" role="listitem" aria-label="AI coach feature">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M8 11h8M8 15h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M6 4h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H10l-4 3v-3H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">Premium</span>
+                    </div>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-100">AI Coach</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Guided prompts to keep training aligned and sustainable.</p>
+                </div>
+            </article>
+
+            <article class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/20 via-sky-400/10 to-transparent p-[1px]">
+                <div class="group h-full rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40" role="listitem" aria-label="Privacy feature">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 3l8 4v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V7l8-4Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M9 12l2 2 4-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950/30 dark:text-slate-200">Free</span>
+                    </div>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900 dark:text-slate-100">Privacy / GDPR</h3>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Privacy-first by design — keep coaching and progress data protected.</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- Free vs Premium teaser -->
+    <section aria-label="Free vs Premium teaser" class="mt-8">
+        <div class="mb-3">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Free vs Premium</h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Not a pricing page — a quick snapshot of what feels different.</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Free</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Core structure to plan and stay consistent.</p>
+                    </div>
+                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950/30 dark:text-slate-200">Free</span>
+                </div>
+                <ul class="mt-4 space-y-2 text-sm text-slate-700 dark:text-slate-200" aria-label="Free bullets">
+                    <li class="flex gap-3"><span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">✓</span><span>Calendar planning + task structure</span></li>
+                    <li class="flex gap-3"><span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">✓</span><span>Scheduling/occurrences baseline</span></li>
+                    <li class="flex gap-3"><span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white dark:bg-slate-100 dark:text-slate-900" aria-hidden="true">✓</span><span>Privacy-first, GDPR-minded defaults</span></li>
+                </ul>
+            </div>
+
+            <div class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl bg-gradient-to-br from-emerald-400/25 via-sky-400/10 to-transparent p-[1px]">
+                <div class="group rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:ring-1 hover:ring-emerald-400/25 dark:border-slate-800 dark:bg-slate-900/40">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Premium</h3>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Verified coaching, marketplace flow, and deeper analytics.</p>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">Premium</span>
+                    </div>
+                    <ul class="mt-4 space-y-2 text-sm text-slate-700 dark:text-slate-200" aria-label="Premium bullets">
+                        <li class="flex gap-3"><span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white" aria-hidden="true">✓</span><span>Verified trainer marketplace</span></li>
+                        <li class="flex gap-3"><span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white" aria-hidden="true">✓</span><span>In-platform booking + payments</span></li>
+                        <li class="flex gap-3"><span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white" aria-hidden="true">✓</span><span>Analytics + AI coaching prompts</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI demo bubble -->
+    <section aria-label="AI coach demo" class="mt-8">
+        <div class="mb-3">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">AI coach, but grounded</h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Tap a scenario and see how the coach keeps it structured.</p>
+        </div>
+
+        <div class="js-reveal opacity-0 translate-y-3 blur-sm transition-all duration-700 ease-out rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
+            <div class="space-y-3" aria-label="Chat bubbles">
+                <div class="flex justify-end">
+                    <div class="max-w-[42rem] rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white dark:bg-slate-100 dark:text-slate-900">
+                        I want a plan that feels premium but not overwhelming.
+                    </div>
+                </div>
+                <div class="flex justify-start">
+                    <div id="aiDemoBubble" class="max-w-[42rem] rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/30 dark:text-slate-200">
+                        Let’s pick a goal, then build a week-first plan. I’ll keep it structured: sessions, recovery, and a simple progress signal.
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 flex flex-col gap-2 sm:flex-row" aria-label="AI demo buttons">
+                <button type="button" class="ai-demo-btn inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white/70 px-4 text-sm font-semibold text-slate-900 shadow-sm hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-950/30 dark:text-slate-100 dark:hover:bg-slate-950/50 dark:focus-visible:ring-slate-200/20 dark:focus-visible:ring-offset-slate-950" data-ai="strength">Strength</button>
+                <button type="button" class="ai-demo-btn inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white/70 px-4 text-sm font-semibold text-slate-900 shadow-sm hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-950/30 dark:text-slate-100 dark:hover:bg-slate-950/50 dark:focus-visible:ring-slate-200/20 dark:focus-visible:ring-offset-slate-950" data-ai="fatloss">Fat loss</button>
+                <button type="button" class="ai-demo-btn inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white/70 px-4 text-sm font-semibold text-slate-900 shadow-sm hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-700 dark:bg-slate-950/30 dark:text-slate-100 dark:hover:bg-slate-950/50 dark:focus-visible:ring-slate-200/20 dark:focus-visible:ring-offset-slate-950" data-ai="busy">Busy week</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section aria-label="How it works" class="mt-8">
+        <div class="mb-3">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">How it works</h2>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Simple flow. Serious outcomes.</p>
+        </div>
+
+        <ol class="grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="How it works steps">
+            <li class="js-reveal reveal landing-card p-6">
+                <div class="flex items-start gap-3">
+                    <div class="landing-step-num" aria-hidden="true">1</div>
+                    <div class="min-w-0">
+                        <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Set your goal & availability</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Tell us what you’re aiming for and when you can realistically train.</p>
+                    </div>
+                </div>
+            </li>
+
+            <li class="js-reveal reveal landing-card p-6">
+                <div class="flex items-start gap-3">
+                    <div class="landing-step-num" aria-hidden="true">2</div>
+                    <div class="min-w-0">
+                        <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Get a plan you’ll stick to</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Build workouts, add them to your calendar, and keep it structured.</p>
+                    </div>
+                </div>
+            </li>
+
+            <li class="js-reveal reveal landing-card p-6">
+                <div class="flex items-start gap-3">
+                    <div class="landing-step-num" aria-hidden="true">3</div>
+                    <div class="min-w-0">
+                        <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Track progress & adjust</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">See what’s working and adapt with coaching support when needed.</p>
+                    </div>
+                </div>
+            </li>
+        </ol>
+    </section>
+
+    <!-- CTA -->
+    <section aria-label="Call to action" class="relative mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 p-7 shadow-sm sm:p-10">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="absolute -top-44 -right-48 h-[30rem] w-[30rem] rounded-full bg-white/10 blur-3xl"></div>
+            <div class="absolute -bottom-52 -left-52 h-[34rem] w-[34rem] rounded-full bg-emerald-500/25 blur-3xl"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent"></div>
+        </div>
+
+        <div class="relative max-w-3xl">
+            <h2 class="text-xl font-semibold text-white sm:text-2xl">Make consistency feel inevitable.</h2>
+            <p class="mt-2 text-sm text-slate-200">Verified coaching, structured planning, and progress signals — all in one premium system.</p>
+
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+                <a th:href="@{/login}"
+                   class="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Get started</a>
+                <a th:href="@{/explore}"
+                   class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Explore trainers &amp; gyms</a>
+            </div>
+
+            <p class="mt-4 text-xs text-slate-300">UK-first • Verified trainers only • Privacy-first • Premium experience</p>
+        </div>
+    </section>
+
+    </section>
+
+</th:block>
+
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="pageScripts">
+    <!-- Tailwind JIT safelist for JS-toggled utilities -->
+    <template class="hidden opacity-0 opacity-100 translate-y-0 translate-y-2 translate-y-3 scale-95 scale-100 blur-0 blur-sm pointer-events-none transition-none"></template>
 
     <script>
-        // Simple animation on scroll
-        document.addEventListener('DOMContentLoaded', function() {
-            const animateElements = document.querySelectorAll('.animate');
+        document.addEventListener('DOMContentLoaded', () => {
+            const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.remove('opacity-0');
-                    }
+            // Optional intro splash
+            const introSplash = document.getElementById('introSplash');
+            if (introSplash) {
+                if (prefersReducedMotion) {
+                    introSplash.remove();
+                } else {
+                    window.setTimeout(() => {
+                        introSplash.classList.add('pointer-events-none');
+                        introSplash.classList.remove('opacity-100');
+                        introSplash.classList.add('opacity-0');
+                        window.setTimeout(() => introSplash.remove(), 1200);
+                    }, 650);
+                }
+            }
+
+            // Brand crash-in
+            const brandCrash = document.getElementById('brandCrash');
+            if (brandCrash) {
+                if (prefersReducedMotion) {
+                    brandCrash.classList.remove('opacity-0', 'translate-y-3', 'scale-95', 'blur-sm');
+                    brandCrash.classList.add('opacity-100');
+                } else {
+                    window.setTimeout(() => {
+                        brandCrash.classList.remove('opacity-0', 'translate-y-3', 'scale-95', 'blur-sm');
+                        brandCrash.classList.add('opacity-100', 'translate-y-0', 'scale-100', 'blur-0');
+                    }, 120);
+                }
+            }
+
+            // Reveal-on-scroll (used by public landing)
+            const revealEls = Array.from(document.querySelectorAll('.js-reveal'));
+            if (revealEls.length) {
+                const revealNow = (el) => {
+                    el.classList.remove('opacity-0', 'translate-y-2', 'translate-y-3', 'blur-sm');
+                    el.classList.add('opacity-100', 'translate-y-0', 'blur-0');
+                };
+
+                if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+                    revealEls.forEach(revealNow);
+                } else {
+                    const observer = new IntersectionObserver((entries, obs) => {
+                        entries.forEach((entry) => {
+                            if (!entry.isIntersecting) return;
+                            const el = entry.target;
+                            const delay = el.dataset.revealDelay ? Number(el.dataset.revealDelay) : 0;
+                            el.style.transitionDelay = `${delay}ms`;
+                            revealNow(el);
+                            obs.unobserve(el);
+                        });
+                    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+
+                    revealEls.forEach((el, idx) => {
+                        el.dataset.revealDelay = String(Math.min(idx * 70, 420));
+                        observer.observe(el);
+                    });
+                }
+            }
+
+            // Segmented tabs (feature detail)
+            const tabButtons = Array.from(document.querySelectorAll('[role="tab"][data-tab]'));
+            const tabPanels = {
+                calendar: document.getElementById('feat-panel-calendar'),
+                workouts: document.getElementById('feat-panel-workouts'),
+                marketplace: document.getElementById('feat-panel-marketplace'),
+                analytics: document.getElementById('feat-panel-analytics'),
+                ai: document.getElementById('feat-panel-ai')
+            };
+
+            const setActiveTab = (key) => {
+                tabButtons.forEach((btn) => {
+                    const isActive = btn.dataset.tab === key;
+                    btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
                 });
-            }, {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            });
-
-            animateElements.forEach(el => observer.observe(el));
-
-            // Add hover effect to cards
-            const cards = document.querySelectorAll('.benefit-card, .feature-item');
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-10px)';
+                Object.entries(tabPanels).forEach(([panelKey, panelEl]) => {
+                    if (!panelEl) return;
+                    if (panelKey === key) panelEl.classList.remove('hidden');
+                    else panelEl.classList.add('hidden');
                 });
+            };
 
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
+            if (tabButtons.length) {
+                tabButtons.forEach((btn) => {
+                    btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
                 });
-            });
+            }
+
+            // AI demo bubble
+            const aiBubble = document.getElementById('aiDemoBubble');
+            const aiButtons = Array.from(document.querySelectorAll('.ai-demo-btn[data-ai]'));
+            const aiCopy = {
+                strength: 'Strength focus: 3 sessions/week, progressive overload, and one simple signal — reps at a fixed RPE. We’ll keep it structured and sustainable.',
+                fatloss: 'Fat loss focus: keep training consistent (2–3 sessions), pair it with simple habits, and track adherence first. Small weekly adjustments only.',
+                busy: 'Busy week: we’ll compress to two key sessions, keep intensity sensible, and set a “minimum effective” habit so momentum stays intact.'
+            };
+
+            if (aiBubble && aiButtons.length) {
+                aiButtons.forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const key = btn.dataset.ai;
+                        aiBubble.textContent = aiCopy[key] || aiCopy.strength;
+                    });
+                });
+            }
         });
     </script>
-
-
-    </a>
-</span>
-</div>
+</th:block>

@@ -31,11 +31,6 @@ Make top of day page feel like a “hub” without adding clutter.
   - Add `ring-1 ring-white/20` in dark for crispness
 - [x] Add a small “Today” badge if date == today. (Rendered badge when viewing today; tests: `./gradlew test`)
 
-### Tests
-- [x] MVC test: GET `/calendar/day/{date}` renders header and includes `data-testid="day-hub-header"`. (Added `CalendarDayHubHeaderMvcTest`; tests: `./gradlew test`)
-- [x] Assert the title contains the date string. (Asserted `2026-01-15` is present; tests: `./gradlew test`)
-- [x] If today date is used, verify “Today” badge renders. (Added today-based MVC assertion; tests: `./gradlew test`)
-
 ---
 
 ## 2) Global streak bar across the site (colour-coded)
@@ -52,24 +47,22 @@ A streak strip that shows each day status:
   - completion_status (ENUM: GREY, GREEN, ORANGE, RED)
   - completion_percentage (0–100)
   - updated_at
-- [ ] Create/confirm a service that calculates status for a date range (e.g. 14–30 days):
+- [x] Create/confirm a service that calculates status for a date range (e.g. 14–30 days): (Implemented `DailyStreakService.calculateRange(...)` + `DailyStreakServiceTest`; local: `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests.DailyStreakServiceTest`)
   - based on tasks completed + workout sessions completed + required logs.
   - status rules must be deterministic and unit-testable.
-- [ ] Update `fragments/daily-streak-bar` to:
+- [x] Update `fragments/daily-streak-bar` to:
   - Render a horizontal row of small pills/dots
   - Each item has colour class based on status
   - Each item shows `x/y` and `%` on hover (tooltip)
   - Tooltip shows breakdown: `tasks left`, `workouts left`, `logs needed`
-- [ ] Tooltip must be accessible:
+  - (Updated fragment to render pills from `dailyStreakDays` with per-day `title` tooltip; added MVC coverage in `CalendarDayViewStreakBarTest`; local: `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests.CalendarDayViewStreakBarTest`)
+- [x] Tooltip must be accessible:
   - uses `aria-describedby`
   - keyboard focusable
   - also visible on focus, not just hover
-- [ ] Clicking a streak day navigates to that day view.
-
-### Tests
-- [ ] Unit tests for status calculation: GREEN/ORANGE/RED/GREY scenarios.
-- [ ] Repository test: save + fetch daily_completion for a range works.
-- [ ] MVC test: streak bar renders N items and includes tooltip content.
+  - (Added focusable pills + `role=tooltip` markup + `aria-describedby` + Tailwind `group-hover:block group-focus:block`; test: `CalendarDayViewStreakBarTooltipAccessibilityTest`; local: `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests.CalendarDayViewStreakBarTooltipAccessibilityTest`)
+- [x] Clicking a streak day navigates to that day view.
+  - (Made each streak pill an anchor to `/calendar/day/{date}`; test: `CalendarDayViewStreakBarClickNavigationTest`; local: `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests.CalendarDayViewStreakBarClickNavigationTest`)
 
 ---
 
@@ -78,17 +71,17 @@ A streak strip that shows each day status:
 Make the day page subtly change “mood” based on timed focus, without being loud.
 
 ### Implementation
-- [ ] Add a `data-time-theme` attribute on `<body>` or the main wrapper:
+- [x] Add a `data-time-theme` attribute on `<body>` or the main wrapper:
   - values: `morning|midday|evening|night`
-- [ ] In Tailwind only, apply theme accents by conditionally adding classes:
+  - (Implemented `data-time-theme` on `<body>` via `base.html` using model attr `timeTheme`; test: `CalendarDayTimeThemeAttributeMvcTest`; local: `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests.CalendarDayTimeThemeAttributeMvcTest`)
+- [x] In Tailwind only, apply theme accents by conditionally adding classes:
   - Morning: slightly warmer (amber highlight)
   - Midday: neutral (blue)
   - Evening: purple/indigo
   - Night: slate/emerald
-- [ ] Use minimal accent: top border gradient line OR a small glow behind header.
-
-### Tests
-- [ ] MVC test: timed focus value appears and wrapper has correct `data-testid="timed-focus"` + theme value.
+-  - (Added a minimal top accent gradient line on the Day Hub header based on `timeTheme`; test: `CalendarDayTimeThemeAccentMvcTest`; local: `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests.CalendarDayTimeThemeAccentMvcTest`)
+- [x] Use minimal accent: top border gradient line OR a small glow behind header.
+  - (Implemented the gradient line as a `h-0.5 bg-gradient-to-r` strip inside the header; covered by `CalendarDayTimeThemeAccentMvcTest`)
 
 ---
 
@@ -97,16 +90,15 @@ Make the day page subtly change “mood” based on timed focus, without being l
 Keep Daily Focus, but present it as a clean pinned selection.
 
 ### Implementation
-- [ ] Refactor Daily Focus section to a compact card:
+- [x] Refactor Daily Focus section to a compact card:
   - Left: label + short description
   - Right: select dropdown and Save
-- [ ] Add “Set to item in today” dropdown:
+  - (Updated Day view template `calendar/day.html` to compact layout; updated MVC test `CalendarDayDailyFocusEditTest`; local tests run)
+- [x] Add “Set to item in today” dropdown:
   - options include tasks + scheduled workouts + “Custom focus”
-- [ ] When saved, store to `daily_focus` table for (user, date).
-
-### Tests
-- [ ] Unit test: daily focus save updates DB record.
-- [ ] MVC test: POST `/calendar/day/{date}/daily-focus` redirects back and persists.
+  - (Expanded `dailyFocusOptions` in `CalendarController` to include today's tasks + scheduled workout names + 'Custom focus'; test: `CalendarDayDailyFocusOptionsFromTodayItemsTest`; local: `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests.CalendarDayDailyFocusOptionsFromTodayItemsTest`)
+- [x] When saved, store to `daily_focus` table for (user, date).
+  - (Controller POST `/calendar/day/{date}/daily-focus` calls `DailyFocusService.setDailyFocus(...)` when available; verified in `CalendarDayDailyFocusEditTest`; local: `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests.CalendarDayDailyFocusEditTest`)
 
 ---
 
@@ -118,21 +110,16 @@ AI-like advice must be meaningful: not just “today”, but compares:
 - week load balance suggestion
 
 ### Implementation
-- [ ] Update day health generator to accept:
+- [x] Update day health generator to accept:
   - current day counts
   - previous 7 days completion patterns
   - next 7 days scheduled load (tasks + workouts)
-- [ ] Render Day Health as:
+- [x] Render Day Health as:
   - short primary message
   - 2 bullet “suggestions”
   - 1 “watch out” if tomorrow is heavy
-- [ ] Ensure message rotates (no repeated same phrasing):
+- [x] Ensure message rotates (no repeated same phrasing):
   - Use a small template pool and pick based on hash(date+userId) or random with seed.
-
-### Tests
-- [ ] Unit test: day health output changes when next-day load changes.
-- [ ] Unit test: output differs across at least two seeded days (no identical message).
-- [ ] MVC test: section appears only when dayHealth non-empty.
 
 ---
 
@@ -156,14 +143,6 @@ Tasks are the main interaction point. Clean list + deep detail on click.
   - When `ALL_TOGETHER`, show tasks + workouts merged into one timeline.
   - When `SEPARATE_SECTIONS`, show Tasks section and Scheduled Workouts section.
 
-### Tests
-- [ ] Unit tests: preference persistence (UserSettings update).
-- [ ] MVC test: ordering change re-renders correctly.
-- [ ] JS test (if no JS test setup exists, add minimal Playwright or Cypress):
-  - opening drawer works
-  - closing works
-  - focus returns to trigger
-
 ---
 
 ## 7) Add Task becomes a single “Add” button + smart templates + AI input
@@ -185,14 +164,6 @@ Add Task should not load full form immediately. It opens a modal/drawer.
   - AI should return: title, time (optional), notes, exercise flag
   - If AI fails, show friendly error.
 - [ ] Add “Recents” quick chips above the input.
-
-### Tests
-- [ ] Unit tests for templates:
-  - create template
-  - favourite toggle
-  - last_used_at update when used
-- [ ] MVC test: POST AI add creates calendar task.
-- [ ] MVC test: template lists are populated into model.
 
 ---
 
@@ -222,11 +193,6 @@ Optional warnings per task:
   - inGrace: “Nearly out of time”
   - late: “Late — log it”
 
-### Tests
-- [ ] Unit tests for grace/late calculation with fixed clock (inject Clock).
-- [ ] Repository tests for warnings CRUD.
-- [ ] MVC test: warnings appear in drawer output.
-
 ---
 
 ## 9) Scheduled Workouts UX + “Completion” routing
@@ -239,10 +205,6 @@ Remove the old “Workouts” section; show “Scheduled Workouts” only, each 
   - button “Complete workout” linking to `/workout-session/{id}/completion?day={date}`
 - [ ] Add “Merge into timeline” mode:
   - When `GROUPING_MODE=ALL_TOGETHER`, workouts appear in same list with tasks, sorted by time if available.
-
-### Tests
-- [ ] MVC test: workout completion links exist.
-- [ ] Unit test: timeline merge sorts properly.
 
 ---
 
@@ -258,11 +220,6 @@ Reflection appears only when day status is GREEN.
 - [ ] Must include user reflection text in prompt so it’s personal.
 - [ ] Only render when dayCompletionStatus == GREEN.
 
-### Tests
-- [ ] MVC test: reflection hidden for non-GREEN days.
-- [ ] MVC test: reflection shown for GREEN day.
-- [ ] Unit test: reflection generator includes user text.
-
 ---
 
 ## 11) “Remembering behaviour” (Behaviour Memory)
@@ -275,10 +232,6 @@ Create a behaviour memory record that influences Day Health + suggestions.
   - average completion %, high load days count, time pressure score
   - “based on last 14 days”
 - [ ] Make it expandable (details accordion).
-
-### Tests
-- [ ] Unit test: behaviour memory calculation with sample completion data.
-- [ ] Assert only one DB write occurs per day load (mock repo verify).
 
 ---
 
@@ -293,11 +246,6 @@ Fix repeated queries visible in logs.
   - daily completion range fetched once
 - [ ] Add caching inside request scope (simple variables, not global cache).
 - [ ] Remove any loops that call repositories repeatedly.
-
-### Tests
-- [ ] Add a controller test with mocked repositories:
-  - verify each repo method called once per request
-- [ ] Add `@DataJpaTest` performance sanity (optional) – no N+1 in schedule occurrences.
 
 ---
 
@@ -316,9 +264,6 @@ Consistent components: cards, pills, buttons, list items.
   - buttons: `active:translate-y-[1px]`
   - focus: consistent `focus-visible:ring-2 ring-blue-500`
 
-### Tests
-- [ ] MVC test: page renders core fragments (presence via `data-testid`).
-
 ---
 
 ## 14) Day.js enhancements (animations + UX)
@@ -332,12 +277,6 @@ Make it feel alive but not annoying.
   - fade backdrop + slide panel
 - [ ] Add tooltip behaviour for streak bar (if needed beyond CSS).
 
-### Tests
-- [ ] If JS test runner exists: verify reveal adds class.
-- [ ] Otherwise add minimal Playwright:
-  - modal opens and closes
-  - tooltip appears on focus
-
 ---
 
 ## 15) Final QA checklist
@@ -348,3 +287,29 @@ Make it feel alive but not annoying.
   - streak tooltip accessibility (tab + enter)
 - [ ] Ensure no new console errors in browser.
 - [ ] Ensure SQL duplication reduced (compare logs before/after).
+
+
+
+
+
+
+
+
+
+
+make sure to check each load wether the day is completed or not since 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,28 +1,41 @@
-<div th:fragment="styles">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css"/>
-    <link rel="stylesheet" href="/css/navBar.css">
-</div>
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Apply Schedule', null, ~{::content}, null)}">
 
 <div th:fragment="content">
-    <div class="bg-gray-100 p-10">
-        <h1 class="text-3xl font-bold mb-6">Apply Schedule</h1>
+    <div class="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex flex-col gap-2">
+            <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Apply schedule</h1>
+            <p class="text-sm text-slate-700 dark:text-slate-200">
+                Applying: <span class="font-semibold" th:text="${schedule.name}"></span>
+            </p>
+        </div>
 
-        <p class="mb-4 text-lg">Applying: <span class="font-semibold" th:text="${schedule.name}"></span></p>
+        <section class="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+            <form th:action="@{'/schedules/' + ${schedule.id} + '/apply'}" method="post" class="space-y-4">
+                <input type="hidden" th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}"/>
 
-        <form th:action="@{'/schedules/' + ${schedule.id} + '/apply'}" method="post" class="space-y-4 bg-white p-6 rounded shadow w-96">
-            <div>
-                <label class="block font-semibold mb-2">Start Date</label>
-                <input type="date" name="startDate" required class="border p-2 rounded w-full"/>
-            </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Start date</label>
+                    <input type="date" name="startDate" required
+                           class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
+                </div>
 
-            <div>
-                <label class="block font-semibold mb-2">Number of weeks</label>
-                <input type="number" name="weeks" value="4" min="1" class="border p-2 rounded w-full"/>
-            </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Number of weeks</label>
+                    <input type="number" name="weeks" value="4" min="1"
+                           class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
+                </div>
 
-            <button class="px-4 py-2 bg-blue-600 text-white rounded">Apply Schedule</button>
-        </form>
+                <div class="pt-2">
+                    <button class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                        Apply schedule
+                    </button>
+                </div>
+            </form>
+        </section>
     </div>
 </div>
 
-<th:block th:with="pageTitle='Apply Schedule', pageStyles=~{::styles}, content=~{::content}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ${null})}"></th:block>
+</th:block>

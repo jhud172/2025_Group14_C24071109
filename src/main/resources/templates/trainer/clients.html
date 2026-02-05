@@ -1,0 +1,106 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+          th:replace="~{base :: layout('Trainer Clients', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="grid gap-4 lg:grid-cols-2">
+            <section class="rounded-2xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Client Requests</h1>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Review and accept new trainer requests.</p>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(requests)}" class="mt-6 border border-dashed border-white/15 rounded-2xl p-8 text-center">
+                    <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">No pending requests</h2>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">When clients request you, they will appear here.</p>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(requests)}" class="mt-6 divide-y divide-white/10">
+                    <div th:each="req : ${requests}" class="py-4 flex items-center justify-between gap-4">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-slate-900 dark:text-slate-100"
+                                      th:text="${clientsById[req.clientUserId] != null ? clientsById[req.clientUserId].fullName : ('Client #' + req.clientUserId)}">Client</span>
+                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs ring-1 ring-white/10 bg-slate-400/10 text-slate-300">REQUESTED</span>
+                            </div>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                                <span th:if="${clientsById[req.clientUserId] != null}" th:text="${'@' + clientsById[req.clientUserId].username + ' · ' + clientsById[req.clientUserId].email}"></span>
+                                <span th:if="${clientsById[req.clientUserId] == null}" th:text="${'Client ID ' + req.clientUserId}"></span>
+                                <span class="text-slate-500 dark:text-slate-400" th:text="${req.requestedAt != null ? ' · Requested ' + #temporals.format(req.requestedAt, 'dd MMM yyyy HH:mm') : ''}"></span>
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <form th:action="@{/trainer/clients/{id}/accept(id=${req.clientUserId})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit"
+                                        class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                                    Accept
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rounded-2xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Current Clients</h2>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Active or paused relationships.</p>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(currentLinks)}" class="mt-6 border border-dashed border-white/15 rounded-2xl p-8 text-center">
+                    <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">No active clients</h2>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Accepted clients will show up here.</p>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(currentLinks)}" class="mt-6 divide-y divide-white/10">
+                    <div th:each="link : ${currentLinks}" class="py-4 flex items-center justify-between gap-4">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-slate-900 dark:text-slate-100"
+                                      th:text="${clientsById[link.clientUserId] != null ? clientsById[link.clientUserId].fullName : ('Client #' + link.clientUserId)}">Client</span>
+                                  <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs ring-1 ring-white/10"
+                                      th:classappend="${link.status.name() == 'ACTIVE'} ? ' bg-emerald-400/10 text-emerald-300' : (link.status.name() == 'PAUSED' ? ' bg-amber-400/10 text-amber-300' : (link.status.name() == 'ENDED' ? ' bg-rose-400/10 text-rose-300' : ' bg-slate-400/10 text-slate-300'))"
+                                      th:text="${link.status.name()}">STATUS</span>
+                            </div>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300"
+                               th:text="${clientsById[link.clientUserId] != null ? '@' + clientsById[link.clientUserId].username : ''}"></p>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <a th:if="${link.status.name() == 'ACTIVE'}" th:href="@{/trainer/clients/{id}/assessment(id=${link.clientUserId})}"
+                               class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+                                Assess
+                            </a>
+                            <a th:if="${link.status.name() == 'ACTIVE'}" th:href="@{/inbox/start/{id}(id=${link.clientUserId})}"
+                               class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                                Message
+                            </a>
+                            <form th:action="@{/trainer/clients/{id}/pause(id=${link.clientUserId})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit"
+                                        th:disabled="${link.status.name() != 'ACTIVE'}"
+                                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    Pause
+                                </button>
+                            </form>
+                            <form th:action="@{/trainer/clients/{id}/end(id=${link.clientUserId})}" method="post">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit"
+                                        class="inline-flex min-h-11 items-center justify-center rounded-xl border border-rose-200/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-600 dark:text-rose-200 hover:bg-rose-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/40">
+                                    End
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</th:block>

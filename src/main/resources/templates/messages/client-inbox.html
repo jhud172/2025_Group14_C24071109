@@ -1,0 +1,32 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Messages', null, ~{::content}, null)}">
+
+    <div th:fragment="content">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight">Inbox</h1>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Your messages with your trainer.</p>
+            </div>
+
+            <div class="mt-6 rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
+                <div th:if="${thread == null}" class="text-sm text-slate-600 dark:text-slate-300">
+                    No trainer thread yet. Once you have a pending or active trainer relationship, it will appear here.
+                </div>
+
+                <div th:if="${thread != null}" class="flex items-center justify-between gap-4">
+                    <div class="min-w-0">
+                        <div class="text-sm font-semibold text-slate-900 dark:text-slate-100"
+                             th:text="${trainerUser != null ? trainerUser.fullName : 'Trainer'}">Trainer</div>
+                        <div class="mt-1 text-sm text-slate-600 dark:text-slate-300"
+                             th:text="${trainerUser != null ? ('@' + trainerUser.username) : ''}"></div>
+                    </div>
+
+                    <a th:href="@{/messages/{id}(id=${thread.id})}"
+                       class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                        Open thread
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>

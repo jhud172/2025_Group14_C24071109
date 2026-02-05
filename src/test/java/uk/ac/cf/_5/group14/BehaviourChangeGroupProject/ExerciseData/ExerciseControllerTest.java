@@ -4,8 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean; // <--- NEW IMPORT
 import org.springframework.test.web.servlet.MockMvc;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
 
 import static org.mockito.BDDMockito.given;
@@ -14,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ExerciseController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 class ExerciseControllerTest {
 
     @Autowired
@@ -25,6 +29,8 @@ class ExerciseControllerTest {
     @MockitoBean private UserService userService;
     @MockitoBean private javax.sql.DataSource dataSource;
     @MockitoBean private org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+    @MockitoBean private AuthHelper authHelper;
+    @MockitoBean private UserSettingsService userSettingsService;
 
     @Test
     void getExerciseToReturnViewAndModel() throws Exception {

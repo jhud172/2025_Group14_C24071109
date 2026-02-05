@@ -41,10 +41,10 @@ insert into physical_conditions(name)
 values ('Asthma');
 
 -- Test user
-INSERT INTO users (email,first_name, last_name, username, password, enabled, subscription_status)
-VALUES ('Jane@gmail.com','Jane', 'Doe', 'user', '$2a$12$yOTznIO3eJBYmFckkJM.Xuu2qy59Rg4CQUhIrGpHzseNGj5KI5MSO', true, false);
-INSERT INTO users (email,first_name, last_name, username, password, enabled, subscription_status)
-VALUES ('John@gmail.com','John', 'Doe', 'user2', '$2a$12$yOTznIO3eJBYmFckkJM.Xuu2qy59Rg4CQUhIrGpHzseNGj5KI5MSO', true, false);
+INSERT INTO users (public_id, email,first_name, last_name, username, password, enabled, subscription_status)
+VALUES ('e7508f1f-1bfe-455a-bb63-2d7eb07a1c12','Jane@gmail.com','Jane', 'Doe', 'user', '$2a$12$yOTznIO3eJBYmFckkJM.Xuu2qy59Rg4CQUhIrGpHzseNGj5KI5MSO', true, false);
+INSERT INTO users (public_id, email,first_name, last_name, username, password, enabled, subscription_status)
+VALUES ('b3b5c7a7-b785-43c6-8a7b-3d7b26a69e1b','John@gmail.com','John', 'Doe', 'user2', '$2a$12$yOTznIO3eJBYmFckkJM.Xuu2qy59Rg4CQUhIrGpHzseNGj5KI5MSO', true, false);
 
 -- Roles
 insert into roles(role_id, name)

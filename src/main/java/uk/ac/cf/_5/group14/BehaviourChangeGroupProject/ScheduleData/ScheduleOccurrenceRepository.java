@@ -2,7 +2,6 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
@@ -11,6 +10,12 @@ import java.util.List;
 
 @Repository
 public interface ScheduleOccurrenceRepository extends JpaRepository<ScheduleOccurrence, Long> {
+
+    long countByUserAndDate(User user, LocalDate date);
+
+    boolean existsByUserAndDateAndCompletedFalse(User user, LocalDate date);
+
+    boolean existsByUserAndDateAndExerciseLogIsNull(User user, LocalDate date);
 
     @Query("""
         SELECT o FROM ScheduleOccurrence o

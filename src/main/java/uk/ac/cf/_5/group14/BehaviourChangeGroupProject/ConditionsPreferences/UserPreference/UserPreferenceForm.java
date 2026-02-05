@@ -13,4 +13,9 @@ import java.util.Set;
 public class UserPreferenceForm {
     Set<Long> selectedPreferenceIds = new HashSet<>();
     Set<Long> selectedConditionIds = new HashSet<>();
+
+    String language = "en";
+    String theme = "SYSTEM";
+    boolean easyMode = false;
+    boolean colorBlindMode = false;
 }

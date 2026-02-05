@@ -1,0 +1,127 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:with="pageTitle=${'Calendar — Task: ' + task.title}"
+          th:replace="~{base :: layout(${pageTitle}, null, ~{::content}, null)}">
+
+<div th:fragment="content">
+    <div class="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-6">
+        <header class="mb-6 rounded-2xl border border-slate-200 bg-white/70 px-5 py-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+            <p class="text-sm font-medium text-slate-600 dark:text-slate-300">Calendar</p>
+            <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl" th:text="${task.title}">
+                Task detail
+            </h1>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                Date: <span th:text="${date}"></span>
+            </p>
+        </header>
+
+        <div class="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+            <dl class="grid grid-cols-1 gap-4">
+                <div>
+                    <dt class="text-sm font-medium text-slate-600 dark:text-slate-300">Time</dt>
+                    <dd class="mt-1 text-slate-900 dark:text-slate-100" th:text="${task.time != null ? task.time : '—'}"></dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-slate-600 dark:text-slate-300">Type</dt>
+                    <dd class="mt-1 text-slate-900 dark:text-slate-100" th:text="${task.exercise ? 'Exercise task' : 'Other task'}"></dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-slate-600 dark:text-slate-300">Notes</dt>
+                    <dd class="mt-1 whitespace-pre-line text-slate-900 dark:text-slate-100" th:text="${task.notes != null && !#strings.isEmpty(task.notes) ? task.notes : '—'}"></dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-slate-600 dark:text-slate-300">Completed</dt>
+                    <dd class="mt-1 text-slate-900 dark:text-slate-100" th:text="${task.completed ? 'Yes' : 'No'}"></dd>
+                </div>
+
+                <div>
+                    <dt class="text-sm font-medium text-slate-600 dark:text-slate-300">Grace period</dt>
+                    <dd class="mt-1 text-slate-900 dark:text-slate-100" th:text="${task.gracePeriodMinutes != null ? task.gracePeriodMinutes + ' minutes' : '—'}"></dd>
+                </div>
+            </dl>
+
+            <div class="mt-6 space-y-4">
+                <div>
+                    <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Task warnings</h2>
+
+                    <div th:if="${taskWarnings == null || #lists.isEmpty(taskWarnings)}"
+                         class="mt-2 text-sm text-slate-600 dark:text-slate-300">No warnings configured.</div>
+
+                    <ul th:if="${taskWarnings != null && !#lists.isEmpty(taskWarnings)}" class="mt-2 space-y-2">
+                        <li th:each="w : ${taskWarnings}" class="rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
+                            <span class="font-semibold" th:text="${w.triggerType}"></span>
+                            <span th:if="${w.triggerType.name() == 'TIME'}"> • Time: <span th:text="${w.triggerTime}"></span></span>
+                            <span th:if="${w.triggerType.name() == 'ON_TASK_COMPLETE'}"> • On completion of: <span th:text="${w.triggerTask != null ? w.triggerTask.title : '—'}"></span></span>
+                            <span class="text-slate-500 dark:text-slate-400" th:text="${w.triggeredAt != null ? ' • Triggered' : ' • Pending'}"></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <form th:action="@{'/calendar/task/' + ${task.id} + '/warning-time'}" method="post" class="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
+                        <input type="hidden" th:if="${_csrf != null}"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}"/>
+
+                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Add time warning</p>
+                        <label class="mt-2 block text-sm font-medium text-slate-700 dark:text-slate-200" for="warning-time">Trigger time</label>
+                        <input id="warning-time" name="triggerTime" type="time" required
+                               class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
+
+                        <button class="mt-3 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
+                            Add
+                        </button>
+                    </form>
+
+                    <form th:action="@{'/calendar/task/' + ${task.id} + '/warning-on-complete'}" method="post" class="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
+                        <input type="hidden" th:if="${_csrf != null}"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}"/>
+
+                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Add completion warning</p>
+                        <label class="mt-2 block text-sm font-medium text-slate-700 dark:text-slate-200" for="warning-trigger-task">Trigger task</label>
+                        <select id="warning-trigger-task" name="triggerTaskId"
+                                class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                            <option th:if="${warningTriggerTasks == null || #lists.isEmpty(warningTriggerTasks)}" value="" selected disabled>No other tasks available</option>
+                            <option th:each="t : ${warningTriggerTasks}" th:value="${t.id}" th:text="${t.title}"></option>
+                        </select>
+
+                        <button class="mt-3 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+                                th:disabled="${warningTriggerTasks == null || #lists.isEmpty(warningTriggerTasks)}">
+                            Add
+                        </button>
+                    </form>
+                </div>
+
+                <form th:action="@{'/calendar/task/' + ${task.id} + '/grace-period'}" method="post" class="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
+                    <input type="hidden" th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}"/>
+
+                    <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Grace period (minutes)</p>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Optional. When a warning triggers, the task will show an orange glow during grace, then turn red.</p>
+
+                    <label class="mt-2 block text-sm font-medium text-slate-700 dark:text-slate-200" for="grace-minutes">Minutes</label>
+                    <input id="grace-minutes" name="gracePeriodMinutes" type="number" min="1" step="1"
+                           th:value="${task.gracePeriodMinutes}"
+                           class="mt-1 w-full max-w-xs rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
+
+                    <button class="mt-3 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
+                        Save
+                    </button>
+                </form>
+            </div>
+
+            <div class="mt-6 flex flex-wrap gap-3">
+                <a th:href="@{'/calendar/day/' + ${date}}"
+                   class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                    Back to day
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</th:block>

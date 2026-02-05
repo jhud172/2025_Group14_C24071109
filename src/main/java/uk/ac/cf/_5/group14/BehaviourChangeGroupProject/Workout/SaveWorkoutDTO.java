@@ -13,6 +13,7 @@ public class SaveWorkoutDTO {
     private String name;
     private String workoutNotes;
     private List<Long> exerciseIds;
+    private List<Long> customExerciseIds;
 
 
 }

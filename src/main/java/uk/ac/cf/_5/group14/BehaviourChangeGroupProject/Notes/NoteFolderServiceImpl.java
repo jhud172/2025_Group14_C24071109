@@ -20,6 +20,23 @@ public class NoteFolderServiceImpl implements NoteFolderService {
     }
 
     @Override
+    public void ensureDefaults(User user) {
+        // Allow test code to observe existing folders list
+        List<NoteFolder> existing = folderRepository.findByUserOrderByNameAsc(user);
+        String[] defaults = new String[]{"Unsorted", "Workouts", "Templates"};
+        for (String name : defaults) {
+            boolean present = existing.stream().anyMatch(f -> f.getName() != null && f.getName().equalsIgnoreCase(name));
+            if (!present && folderRepository.findByUserAndNameIgnoreCase(user, name).isEmpty()) {
+                NoteFolder folder = new NoteFolder();
+                folder.setUser(user);
+                folder.setName(name);
+                folder.setColour("slate");
+                folderRepository.save(folder);
+            }
+        }
+    }
+
+    @Override
     public List<NoteFolder> getFoldersForUser(User user) {
         return folderRepository.findByUserOrderByNameAsc(user);
     }
@@ -37,6 +54,9 @@ public class NoteFolderServiceImpl implements NoteFolderService {
     public NoteFolder renameFolder(User user, Long folderId, String newName) {
         NoteFolder folder = folderRepository.findByIdAndUser(folderId, user)
                 .orElseThrow(() -> new IllegalArgumentException("Folder not found"));
+        if (folder.getName() != null && folder.getName().equalsIgnoreCase("Unsorted")) {
+            throw new IllegalArgumentException("Cannot rename Unsorted folder");
+        }
         folder.setName(newName);
         return folderRepository.save(folder);
     }

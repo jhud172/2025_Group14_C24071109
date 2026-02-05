@@ -1,0 +1,81 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout(${exerciseSession.exercise.name}, null, ~{::content}, ~{::pageScripts})}">
+
+<div th:fragment="content">
+    <div class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="flex items-start justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900" th:text="${exerciseSession.exercise.name}">Exercise</h1>
+            <div class="text-sm text-slate-600" th:text="${exerciseSession.workoutSession.nameSnapshot}">Workout</div>
+        </div>
+        <div class="flex items-center gap-2">
+            <a th:href="@{'/workout-session/' + ${exerciseSession.workoutSession.id}}" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">Back to workout</a>
+            <span th:if="${exerciseState == 'NOT_STARTED'}" class="rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">Not started</span>
+            <span th:if="${exerciseState == 'IN_PROGRESS'}" class="rounded-md bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-800">In progress</span>
+            <span th:if="${exerciseState == 'COMPLETED'}" class="rounded-md bg-emerald-100 px-3 py-2 text-sm font-semibold text-emerald-800">Completed</span>
+        </div>
+    </div>
+
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-slate-900">Sets</h2>
+        <form th:action="@{'/exercise-session/' + ${exerciseSession.id} + '/add-set'}" method="post">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10">Add set</button>
+        </form>
+    </div>
+
+    <div th:if="${#lists.isEmpty(setLogs)}" class="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+        No sets yet. Click “Add set” to start logging.
+    </div>
+
+    <div th:if="${!#lists.isEmpty(setLogs)}" class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="grid grid-cols-12 gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+            <div class="col-span-1">Set</div>
+            <div class="col-span-2">Weight</div>
+            <div class="col-span-2">Reps</div>
+            <div class="col-span-4">Notes</div>
+            <div class="col-span-2">Done</div>
+            <div class="col-span-1"></div>
+        </div>
+
+        <div th:each="s : ${setLogs}" class="grid grid-cols-12 gap-2 px-4 py-3 border-b border-slate-100 items-center">
+            <div class="col-span-1 font-semibold text-slate-900" th:text="${s.setNumber}">1</div>
+
+            <form class="col-span-10 grid grid-cols-10 gap-2 items-center"
+                  th:action="@{'/set-log/' + ${s.id} + '/save'}" method="post">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                <div class="col-span-2">
+                    <input type="number" step="0.5" name="weight" th:value="${s.weight}" class="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" placeholder="kg">
+                </div>
+                <div class="col-span-2">
+                    <input type="number" name="reps" th:value="${s.reps}" class="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" placeholder="reps">
+                </div>
+                <div class="col-span-4">
+                    <input type="text" name="notes" th:value="${s.notes}" class="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" placeholder="notes">
+                </div>
+                <div class="col-span-1 flex items-center justify-center">
+                    <input type="checkbox" name="completed" th:checked="${s.completed}" class="h-4 w-4">
+                </div>
+                <div class="col-span-1 flex items-center justify-end">
+                    <button class="inline-flex items-center justify-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10">Save</button>
+                </div>
+            </form>
+
+            <form class="col-span-1 flex items-center justify-end"
+                  th:action="@{'/set-log/' + ${s.id} + '/delete'}" method="post">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="inline-flex items-center justify-center rounded-md bg-red-600 px-2 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600/20">X</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <a th:href="@{'/calendar/day/' + ${exerciseSession.workoutSession.date}}" class="text-sm font-semibold text-slate-900 hover:underline">Back to day view</a>
+    </div>
+    </div>
+</div>
+
+<div th:fragment="pageScripts"></div>
+
+</th:block>

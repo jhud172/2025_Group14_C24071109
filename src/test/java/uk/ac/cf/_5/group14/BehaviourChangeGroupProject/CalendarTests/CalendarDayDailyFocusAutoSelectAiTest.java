@@ -1,0 +1,110 @@
+package uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.FocusData.DailyFocusAiService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarController;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.WorkoutScheduleService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.WorkoutSessionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+
+import java.time.LocalDate;
+import java.util.Collections;
+
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(CalendarController.class)
+@ActiveProfiles("test")
+class CalendarDayDailyFocusAutoSelectAiTest {
+
+    @Autowired
+    private MockMvc mvc;
+
+    @MockitoBean
+    private CalendarTaskService taskService;
+
+    @MockitoBean
+    private CalendarTaskWarningService taskWarningService;
+
+    @MockitoBean
+    private TaskAiGenerationService taskAiGenerationService;
+
+    @MockitoBean
+    private TaskTemplateService taskTemplateService;
+
+    @MockitoBean
+    private ScheduleService scheduleService;
+
+    @MockitoBean
+    private ScheduleOccurrenceService scheduleOccurrenceService;
+
+    @MockitoBean
+    private WorkoutScheduleService workoutScheduleService;
+
+    @MockitoBean
+    private WorkoutSessionService workoutSessionService;
+
+    @MockitoBean
+    private AuthHelper authHelper;
+
+    @MockitoBean
+    private UserSettingsService userSettingsService;
+
+    @MockitoBean
+    private DailyFocusAiService dailyFocusAiService;
+
+    @Test
+    void dayViewAutoSelectsDailyFocusWhenMissing() throws Exception {
+        User sessionUser = new User();
+        sessionUser.setId(1L);
+        LocalDate date = LocalDate.of(2026, 1, 15);
+
+        given(taskService.getTasks(eq(sessionUser), eq(date))).willReturn(Collections.emptyList());
+        given(scheduleOccurrenceService.getOccurrencesForUserOnDate(eq(sessionUser), eq(date))).willReturn(Collections.emptyList());
+        given(workoutScheduleService.findByUserAndDayOfWeek(eq(sessionUser), anyInt())).willReturn(Collections.emptyList());
+
+        given(taskTemplateService.listRecents(eq(sessionUser), eq(6))).willReturn(Collections.emptyList());
+        given(taskTemplateService.listFavourites(eq(sessionUser))).willReturn(Collections.emptyList());
+        given(taskTemplateService.listAll(eq(sessionUser))).willReturn(Collections.emptyList());
+
+        given(dailyFocusAiService.suggestDailyFocus(eq(date), anyString(), anyInt(), anyInt())).willReturn("Hydrate");
+
+        mvc.perform(get("/calendar/day/2026-01-15").sessionAttr("user", sessionUser))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Daily Focus")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Hydrate")));
+    }
+
+    @TestConfiguration
+    static class TestSecurityConfig {
+        @Bean
+        SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+            return http
+                    .csrf(csrf -> csrf.disable())
+                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                    .build();
+        }
+    }
+}

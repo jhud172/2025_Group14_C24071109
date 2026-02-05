@@ -1,0 +1,55 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+          th:replace="~{base :: layout('Client Assessment', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
+            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Client Assessment</h1>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" 
+               th:text="'Private assessment for ' + ${client.firstName} + ' ' + ${client.lastName}">Client Assessment</p>
+            <p class="mt-1 text-xs text-slate-500">This assessment is private and only visible to you.</p>
+
+            <form th:action="@{/trainer/clients/{id}/assessment(id=${client.id})}" method="post" class="mt-6 space-y-6">
+                <!-- Reliability Score -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Reliability Score (1-5)</label>
+                    <p class="mt-1 text-xs text-slate-500">How reliable is this client with appointments and commitments?</p>
+                    <input type="number" name="reliabilityScore" min="1" max="5" 
+                           th:value="${assessment?.reliabilityScore}"
+                           class="mt-2 block w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"/>
+                </div>
+
+                <!-- Communication Score -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Communication Score (1-5)</label>
+                    <p class="mt-1 text-xs text-slate-500">How well does this client communicate?</p>
+                    <input type="number" name="communicationScore" min="1" max="5" 
+                           th:value="${assessment?.communicationScore}"
+                           class="mt-2 block w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"/>
+                </div>
+
+                <!-- Private Notes -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Private Notes</label>
+                    <p class="mt-1 text-xs text-slate-500">Your private notes about this client</p>
+                    <textarea name="privateNotes" rows="6"
+                             th:text="${assessment?.privateNotes}"
+                             class="mt-2 block w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                             placeholder="Notes about client's progress, behavior, preferences, etc."></textarea>
+                </div>
+
+                <!-- Submit -->
+                <div class="flex justify-end gap-3">
+                    <a th:href="@{/trainer/clients}"
+                       class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                           class="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30">
+                        Save Assessment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</th:block>
