@@ -3,9 +3,13 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationType;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLink;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkStatus;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 
 import java.util.List;
 
@@ -16,15 +20,21 @@ public class MessagingService {
     private final ThreadMessageRepository threadMessageRepository;
     private final TrainerClientLinkRepository linkRepository;
     private final OffPlatformPaymentAttemptRepository offPlatformPaymentAttemptRepository;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     public MessagingService(MessageThreadRepository threadRepository,
                             ThreadMessageRepository threadMessageRepository,
                             TrainerClientLinkRepository linkRepository,
-                            OffPlatformPaymentAttemptRepository offPlatformPaymentAttemptRepository) {
+                            OffPlatformPaymentAttemptRepository offPlatformPaymentAttemptRepository,
+                            NotificationService notificationService,
+                            UserRepository userRepository) {
         this.threadRepository = threadRepository;
         this.threadMessageRepository = threadMessageRepository;
         this.linkRepository = linkRepository;
         this.offPlatformPaymentAttemptRepository = offPlatformPaymentAttemptRepository;
+        this.notificationService = notificationService;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -79,6 +89,17 @@ public class MessagingService {
 
     @Transactional
     public void sendMessage(Long threadId, Long senderUserId, MessageType type, String bodyText) {
+        sendMessage(threadId, senderUserId, type, bodyText, null, null, null);
+    }
+
+    @Transactional
+    public void sendMessage(Long threadId,
+                            Long senderUserId,
+                            MessageType type,
+                            String bodyText,
+                            String attachmentName,
+                            String attachmentUrl,
+                            String attachmentType) {
         MessageThread thread = threadRepository.findById(threadId)
                 .orElseThrow(() -> new IllegalArgumentException("Thread not found"));
 
@@ -115,7 +136,23 @@ public class MessagingService {
             throw new IllegalStateException("OFF_PLATFORM_PAYMENT");
         }
 
-        threadMessageRepository.save(new Message(thread, senderUserId, type, trimmed));
+        Message saved = threadMessageRepository.save(new Message(
+                thread,
+                senderUserId,
+                type,
+                trimmed,
+                attachmentName,
+                attachmentUrl,
+                attachmentType
+        ));
+
+        Long recipientId = senderUserId.equals(thread.getTrainerId()) ? thread.getClientId() : thread.getTrainerId();
+        User recipient = userRepository.findById(recipientId).orElse(null);
+        User sender = userRepository.findById(senderUserId).orElse(null);
+        if (recipient != null) {
+            String senderName = sender != null ? sender.getFullName() : "Someone";
+            notificationService.create(recipient, NotificationType.SYSTEM, "New message", "New message from " + senderName + ".");
+        }
     }
 
     private void requireParticipant(MessageThread thread, Long userId) {

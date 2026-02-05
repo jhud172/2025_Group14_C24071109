@@ -1,8 +1,20 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Inbox;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Inbox.dto.ConversationListItemDto;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.Message;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageReadState;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageReadStateRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageThread;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageThreadRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageType;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessagingService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.ThreadMessageRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLink;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkStatus;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 
@@ -15,18 +27,24 @@ import java.util.Optional;
 @Service
 public class InboxServiceImpl implements InboxService {
 
-    private final ConversationRepository conversationRepository;
-    private final ConversationParticipantRepository participantRepository;
-    private final MessageRepository messageRepository;
+    private final MessageThreadRepository threadRepository;
+    private final ThreadMessageRepository messageRepository;
+    private final MessageReadStateRepository readStateRepository;
+    private final MessagingService messagingService;
+    private final TrainerClientLinkRepository linkRepository;
     private final UserRepository userRepository;
 
-    public InboxServiceImpl(ConversationRepository conversationRepository,
-                            ConversationParticipantRepository participantRepository,
-                            MessageRepository messageRepository,
+    public InboxServiceImpl(MessageThreadRepository threadRepository,
+                            ThreadMessageRepository messageRepository,
+                            MessageReadStateRepository readStateRepository,
+                            MessagingService messagingService,
+                            TrainerClientLinkRepository linkRepository,
                             UserRepository userRepository) {
-        this.conversationRepository = conversationRepository;
-        this.participantRepository = participantRepository;
+        this.threadRepository = threadRepository;
         this.messageRepository = messageRepository;
+        this.readStateRepository = readStateRepository;
+        this.messagingService = messagingService;
+        this.linkRepository = linkRepository;
         this.userRepository = userRepository;
     }
 
@@ -37,36 +55,24 @@ public class InboxServiceImpl implements InboxService {
             return List.of();
         }
 
-        List<ConversationParticipant> myParticipants = participantRepository.findByUser(user);
+        List<MessageThread> threads = threadRepository.findByUserId(user.getId());
         List<ConversationListItemDto> items = new ArrayList<>();
 
-        for (ConversationParticipant myParticipant : myParticipants) {
-            Long conversationId = myParticipant.getConversation().getId();
+        for (MessageThread thread : threads) {
+            Long otherUserId = user.getId().equals(thread.getClientId()) ? thread.getTrainerId() : thread.getClientId();
+            User otherUser = userRepository.findById(otherUserId).orElse(null);
+            String title = otherUser != null ? otherUser.getFullName() : "Conversation";
 
-            List<ConversationParticipant> participants = participantRepository.findAllByConversationId(conversationId);
-            String title = participants.stream()
-                    .map(ConversationParticipant::getUser)
-                    .filter(u -> u.getId() != null && !u.getId().equals(user.getId()))
-                    .map(User::getFullName)
-                    .findFirst()
-                    .orElse("Conversation");
-
-            Optional<Message> lastMessage = messageRepository.findTop1ByConversationIdOrderByCreatedAtDesc(conversationId);
-            String snippet = lastMessage.map(m -> m.getBody() == null ? "" : m.getBody())
+            Optional<Message> lastMessage = messageRepository.findTop1ByThread_IdOrderByCreatedAtDesc(thread.getId());
+            String snippet = lastMessage.map(m -> m.getBodyText() == null ? "" : m.getBodyText())
                     .map(s -> s.length() > 180 ? s.substring(0, 180) : s)
                     .orElse("");
 
             Instant lastAt = lastMessage.map(Message::getCreatedAt).orElse(null);
-
-            long unread;
-            if (myParticipant.getLastReadAt() == null) {
-                unread = messageRepository.countByConversationIdAndSenderUserIdNot(conversationId, user.getId());
-            } else {
-                unread = messageRepository.countByConversationIdAndCreatedAtAfterAndSenderUserIdNot(conversationId, myParticipant.getLastReadAt(), user.getId());
-            }
+            long unread = readStateRepository.countUnreadForThread(thread.getId(), user.getId());
 
             ConversationListItemDto dto = new ConversationListItemDto();
-            dto.setConversationId(conversationId);
+            dto.setConversationId(thread.getId());
             dto.setTitle(title);
             dto.setLastMessageSnippet(snippet);
             dto.setLastMessageAt(lastAt);
@@ -80,51 +86,47 @@ public class InboxServiceImpl implements InboxService {
 
     @Override
     @Transactional(readOnly = true)
-    public Conversation getConversationOrThrow(User user, Long conversationId) {
+    public MessageThread getConversationOrThrow(User user, Long threadId) {
         if (user == null || user.getId() == null) {
             throw new SecurityException("User not authenticated");
         }
-        participantRepository.findByConversationIdAndUserId(conversationId, user.getId())
-                .orElseThrow(() -> new SecurityException("Not a participant"));
-        return conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new IllegalArgumentException("Conversation not found"));
+        return messagingService.getThreadForUser(threadId, user.getId());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Message> getMessages(User user, Long conversationId) {
-        getConversationOrThrow(user, conversationId);
-        return messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
+    public List<Message> getMessages(User user, Long threadId) {
+        getConversationOrThrow(user, threadId);
+        return messageRepository.findByThread_IdOrderByCreatedAtAsc(threadId);
     }
 
     @Override
     @Transactional
-    public void markRead(User user, Long conversationId) {
+    public void markRead(User user, Long threadId) {
         if (user == null || user.getId() == null) {
             return;
         }
-        ConversationParticipant participant = participantRepository.findByConversationIdAndUserId(conversationId, user.getId())
-                .orElse(null);
-        if (participant == null) {
+        getConversationOrThrow(user, threadId);
+
+        List<Long> unreadMessageIds = messageRepository.findUnreadMessageIds(threadId, user.getId());
+        if (unreadMessageIds.isEmpty()) {
             return;
         }
-        participant.setLastReadAt(Instant.now());
-        participantRepository.save(participant);
+        Instant now = Instant.now();
+        for (Long messageId : unreadMessageIds) {
+            readStateRepository.save(new MessageReadState(messageId, threadId, user.getId(), now));
+        }
     }
 
     @Override
     @Transactional
-    public void sendMessage(User user, Long conversationId, String body) {
+    public Message sendMessage(User user, Long threadId, String body, String attachmentName, String attachmentUrl, String attachmentType) {
         if (body == null || body.isBlank()) {
-            return;
+            return null;
         }
-        Conversation conversation = getConversationOrThrow(user, conversationId);
-
-        Message message = new Message();
-        message.setConversation(conversation);
-        message.setSenderUser(user);
-        message.setBody(body.trim());
-        messageRepository.save(message);
+        MessageThread thread = getConversationOrThrow(user, threadId);
+        messagingService.sendMessage(thread.getId(), user.getId(), MessageType.TEXT, body.trim(), attachmentName, attachmentUrl, attachmentType);
+        return messageRepository.findTop1ByThread_IdOrderByCreatedAtDesc(thread.getId()).orElse(null);
     }
 
     @Override
@@ -136,31 +138,24 @@ public class InboxServiceImpl implements InboxService {
         if (otherUserId == null || otherUserId.equals(currentUser.getId())) {
             throw new IllegalArgumentException("Invalid user");
         }
+        TrainerClientLink link = findLinkBetween(currentUser.getId(), otherUserId)
+                .orElseThrow(() -> new AccessDeniedException("Active relationship required"));
+        return messagingService.ensureThreadForLink(link).getId();
+    }
 
-        List<Long> existing = participantRepository.findDirectConversationIdsBetween(currentUser.getId(), otherUserId);
-        if (!existing.isEmpty()) {
-            return existing.get(0);
+    private Optional<TrainerClientLink> findLinkBetween(Long userId, Long otherUserId) {
+        List<TrainerClientLinkStatus> statuses = List.of(
+                TrainerClientLinkStatus.ACTIVE,
+                TrainerClientLinkStatus.REQUESTED,
+                TrainerClientLinkStatus.PAUSED,
+                TrainerClientLinkStatus.ENDED
+        );
+        Optional<TrainerClientLink> asTrainer = linkRepository
+                .findFirstByTrainerUserIdAndClientUserIdAndStatusInOrderByUpdatedAtDesc(userId, otherUserId, statuses);
+        if (asTrainer.isPresent()) {
+            return asTrainer;
         }
-
-        User other = userRepository.findById(otherUserId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        Conversation convo = new Conversation();
-        convo = conversationRepository.save(convo);
-
-        ConversationParticipant a = new ConversationParticipant();
-        a.setConversation(convo);
-        a.setUser(currentUser);
-        a.setRoleInConversation(RoleInConversation.CLIENT);
-
-        ConversationParticipant b = new ConversationParticipant();
-        b.setConversation(convo);
-        b.setUser(other);
-        b.setRoleInConversation(RoleInConversation.TRAINER);
-
-        participantRepository.save(a);
-        participantRepository.save(b);
-
-        return convo.getId();
+        return linkRepository
+                .findFirstByTrainerUserIdAndClientUserIdAndStatusInOrderByUpdatedAtDesc(otherUserId, userId, statuses);
     }
 }

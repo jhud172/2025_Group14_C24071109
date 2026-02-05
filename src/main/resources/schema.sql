@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS trainer_profiles CASCADE;
 DROP TABLE IF EXISTS gym_profiles CASCADE;
 
 DROP TABLE IF EXISTS off_platform_payment_attempts CASCADE;
+DROP TABLE IF EXISTS message_read_states CASCADE;
 DROP TABLE IF EXISTS message_thread_messages CASCADE;
 DROP TABLE IF EXISTS message_threads CASCADE;
 
@@ -20,6 +21,8 @@ DROP TABLE IF EXISTS dashboard_layout CASCADE;
 DROP TABLE IF EXISTS user_settings CASCADE;
 DROP TABLE IF EXISTS data_export_requests CASCADE;
 DROP TABLE IF EXISTS user_health_conditions CASCADE;
+DROP TABLE IF EXISTS assigned_workouts CASCADE;
+DROP TABLE IF EXISTS assigned_schedules CASCADE;
 
 DROP TABLE IF EXISTS selected_preferences CASCADE;
 DROP TABLE IF EXISTS user_preference_conditions CASCADE;
@@ -63,6 +66,12 @@ DROP TABLE IF EXISTS coach_messages CASCADE;
 DROP TABLE IF EXISTS coach_conversations CASCADE;
 DROP TABLE IF EXISTS daily_usage CASCADE;
 DROP TABLE IF EXISTS chat_messages CASCADE;
+DROP TABLE IF EXISTS ai_form_feedback CASCADE;
+DROP TABLE IF EXISTS workout_set_videos CASCADE;
+DROP TABLE IF EXISTS workout_set_logs CASCADE;
+DROP TABLE IF EXISTS workout_player_sessions CASCADE;
+DROP TABLE IF EXISTS workout_template_exercises CASCADE;
+DROP TABLE IF EXISTS workout_templates CASCADE;
 DROP TABLE IF EXISTS set_logs CASCADE;
 DROP TABLE IF EXISTS exercise_sessions CASCADE;
 DROP TABLE IF EXISTS vault_notes CASCADE;
@@ -506,6 +515,66 @@ CREATE INDEX IF NOT EXISTS idx_tcl_status
     ON trainer_client_links (status);
 
 -- =========================
+-- TRAINER ASSIGNMENTS
+-- =========================
+CREATE TABLE IF NOT EXISTS assigned_workouts
+(
+    id                  BIGSERIAL PRIMARY KEY,
+    trainer_id          BIGINT       NOT NULL,
+    client_id           BIGINT       NOT NULL,
+    workout_template_id BIGINT       NOT NULL,
+    trainer_notes       VARCHAR(800) NULL,
+    client_notes        VARCHAR(1200) NULL,
+    client_feedback     VARCHAR(1200) NULL,
+    completed           BOOLEAN      NOT NULL DEFAULT FALSE,
+    assigned_at         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at        TIMESTAMP    NULL,
+    updated_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_assigned_workouts_trainer
+        FOREIGN KEY (trainer_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_assigned_workouts_client
+        FOREIGN KEY (client_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_assigned_workouts_template
+        FOREIGN KEY (workout_template_id) REFERENCES workout_templates (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_assigned_workouts_client
+    ON assigned_workouts (client_id, assigned_at);
+
+CREATE TABLE IF NOT EXISTS assigned_schedules
+(
+    id           BIGSERIAL PRIMARY KEY,
+    trainer_id   BIGINT       NOT NULL,
+    client_id    BIGINT       NOT NULL,
+    schedule_id  BIGINT       NOT NULL,
+    trainer_notes VARCHAR(800) NULL,
+    active       BOOLEAN      NOT NULL DEFAULT TRUE,
+    assigned_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_assigned_schedules_trainer
+        FOREIGN KEY (trainer_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_assigned_schedules_client
+        FOREIGN KEY (client_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_assigned_schedules_schedule
+        FOREIGN KEY (schedule_id) REFERENCES schedules (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_assigned_schedules_client
+    ON assigned_schedules (client_id, assigned_at);
+
+-- =========================
 -- TRAINER <-> CLIENT MESSAGING (relationship scoped)
 -- =========================
 CREATE TABLE IF NOT EXISTS message_threads
@@ -546,6 +615,9 @@ CREATE TABLE IF NOT EXISTS message_thread_messages
     sender_user_id BIGINT      NOT NULL,
     type           VARCHAR(20) NOT NULL,
     body_text      TEXT        NOT NULL,
+    attachment_name VARCHAR(200) NULL,
+    attachment_url  VARCHAR(500) NULL,
+    attachment_type VARCHAR(100) NULL,
     created_at     TIMESTAMP   NOT NULL,
 
     CONSTRAINT fk_mtm_thread
@@ -555,6 +627,30 @@ CREATE TABLE IF NOT EXISTS message_thread_messages
     CONSTRAINT fk_mtm_sender
         FOREIGN KEY (sender_user_id) REFERENCES users (id)
             ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS message_read_states
+(
+    id         BIGSERIAL PRIMARY KEY,
+    message_id BIGINT    NOT NULL,
+    thread_id  BIGINT    NOT NULL,
+    user_id    BIGINT    NOT NULL,
+    read_at    TIMESTAMP NOT NULL,
+
+    CONSTRAINT fk_mrs_message
+        FOREIGN KEY (message_id) REFERENCES message_thread_messages (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_mrs_thread
+        FOREIGN KEY (thread_id) REFERENCES message_threads (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_mrs_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT uq_message_read_state
+        UNIQUE (message_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS off_platform_payment_attempts
@@ -577,6 +673,9 @@ CREATE TABLE IF NOT EXISTS off_platform_payment_attempts
 
 CREATE INDEX IF NOT EXISTS idx_mtm_thread_created
     ON message_thread_messages (thread_id, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_mrs_thread_user
+    ON message_read_states (thread_id, user_id, read_at);
 
 -- =========================
 -- TRAINER PROFILES
@@ -1404,6 +1503,135 @@ CREATE TABLE IF NOT EXISTS workouts_custom_exercises
 
     CONSTRAINT fk_workouts_custom_exercises_custom
         FOREIGN KEY (custom_exercise_id) REFERENCES custom_exercises (id)
+);
+
+-- =========================
+-- WORKOUT BUILDER + PLAYER
+-- =========================
+CREATE TABLE IF NOT EXISTS workout_templates
+(
+    id            BIGSERIAL PRIMARY KEY,
+    owner_user_id BIGINT       NOT NULL,
+    owner_role    VARCHAR(30)  NOT NULL,
+    name          VARCHAR(200) NOT NULL,
+    description   VARCHAR(600) NULL,
+    created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_workout_templates_owner
+        FOREIGN KEY (owner_user_id) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_templates_owner_updated
+    ON workout_templates (owner_user_id, updated_at);
+
+CREATE TABLE IF NOT EXISTS workout_template_exercises
+(
+    id                 BIGSERIAL PRIMARY KEY,
+    template_id        BIGINT       NOT NULL,
+    exercise_id        BIGINT       NULL,
+    custom_exercise_id BIGINT       NULL,
+    exercise_name      VARCHAR(200) NOT NULL,
+    sets               INT          NOT NULL DEFAULT 3,
+    reps               INT          NOT NULL DEFAULT 10,
+    rest_seconds       INT          NOT NULL DEFAULT 60,
+    notes              VARCHAR(500) NULL,
+    order_index        INT          NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_wte_template
+        FOREIGN KEY (template_id) REFERENCES workout_templates (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_wte_exercise
+        FOREIGN KEY (exercise_id) REFERENCES exercises (id)
+            ON DELETE SET NULL,
+
+    CONSTRAINT fk_wte_custom_exercise
+        FOREIGN KEY (custom_exercise_id) REFERENCES custom_exercises (id)
+            ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_wte_template_order
+    ON workout_template_exercises (template_id, order_index);
+
+CREATE TABLE IF NOT EXISTS workout_player_sessions
+(
+    id            BIGSERIAL PRIMARY KEY,
+    user_id       BIGINT       NOT NULL,
+    template_id   BIGINT       NOT NULL,
+    name_snapshot VARCHAR(200) NULL,
+    completed     BOOLEAN      NOT NULL DEFAULT FALSE,
+    total_volume  DOUBLE PRECISION NULL,
+    started_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at  TIMESTAMP    NULL,
+
+    CONSTRAINT fk_workout_player_sessions_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_workout_player_sessions_template
+        FOREIGN KEY (template_id) REFERENCES workout_templates (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_player_sessions_user_started
+    ON workout_player_sessions (user_id, started_at);
+
+CREATE TABLE IF NOT EXISTS workout_set_logs
+(
+    id             BIGSERIAL PRIMARY KEY,
+    session_id     BIGINT       NOT NULL,
+    exercise_name  VARCHAR(200) NOT NULL,
+    exercise_order INT          NOT NULL DEFAULT 0,
+    set_number     INT          NOT NULL DEFAULT 1,
+    target_reps    INT          NULL,
+    rest_seconds   INT          NULL,
+    weight         DOUBLE PRECISION NULL,
+    reps           INT          NULL,
+    notes          VARCHAR(500) NULL,
+    completed      BOOLEAN      NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_workout_set_logs_session
+        FOREIGN KEY (session_id) REFERENCES workout_player_sessions (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_set_logs_session
+    ON workout_set_logs (session_id);
+
+CREATE TABLE IF NOT EXISTS workout_set_videos
+(
+    id          BIGSERIAL PRIMARY KEY,
+    set_log_id  BIGINT       NOT NULL,
+    status      VARCHAR(20)  NOT NULL,
+    path        VARCHAR(500) NOT NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_workout_set_videos_set
+        FOREIGN KEY (set_log_id) REFERENCES workout_set_logs (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_set_videos_set
+    ON workout_set_videos (set_log_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS ai_form_feedback
+(
+    id         BIGSERIAL PRIMARY KEY,
+    video_id   BIGINT       NOT NULL,
+    rep_count  INT          NULL,
+    tempo      VARCHAR(40)  NULL,
+    flags_json TEXT         NULL,
+    confidence DOUBLE PRECISION NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_ai_form_feedback_video
+        FOREIGN KEY (video_id) REFERENCES workout_set_videos (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT uq_ai_form_feedback_video
+        UNIQUE (video_id)
 );
 
 -- =========================

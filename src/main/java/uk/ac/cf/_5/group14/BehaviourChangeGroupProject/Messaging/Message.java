@@ -26,6 +26,15 @@ public class Message {
     @Column(name = "body_text", nullable = false, columnDefinition = "TEXT")
     private String bodyText;
 
+    @Column(name = "attachment_name", length = 200)
+    private String attachmentName;
+
+    @Column(name = "attachment_url", length = 500)
+    private String attachmentUrl;
+
+    @Column(name = "attachment_type", length = 100)
+    private String attachmentType;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -37,6 +46,22 @@ public class Message {
         this.senderUserId = senderUserId;
         this.type = type;
         this.bodyText = bodyText;
+    }
+
+    public Message(MessageThread thread,
+                   Long senderUserId,
+                   MessageType type,
+                   String bodyText,
+                   String attachmentName,
+                   String attachmentUrl,
+                   String attachmentType) {
+        this.thread = thread;
+        this.senderUserId = senderUserId;
+        this.type = type;
+        this.bodyText = bodyText;
+        this.attachmentName = attachmentName;
+        this.attachmentUrl = attachmentUrl;
+        this.attachmentType = attachmentType;
     }
 
     @PrePersist
@@ -64,6 +89,18 @@ public class Message {
 
     public String getBodyText() {
         return bodyText;
+    }
+
+    public String getAttachmentName() {
+        return attachmentName;
+    }
+
+    public String getAttachmentUrl() {
+        return attachmentUrl;
+    }
+
+    public String getAttachmentType() {
+        return attachmentType;
     }
 
     public Instant getCreatedAt() {

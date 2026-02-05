@@ -300,3 +300,34 @@ The `EmailServiceImpl` currently logs email notifications to the console. To int
 ✅ **Schema updates completed**
 
 The core functionality for both features is fully implemented and tested. UI templates are the remaining work to provide a complete user experience.
+
+---
+
+# Template Summary (Recent Updates)
+
+## Notes v2
+- templates/notes/index.html - Notes list + rich text editor shell
+
+## Workout Builder + Player
+- templates/workouts/index.html - Workout templates list
+- templates/workouts/edit.html - Builder editor for exercises/sets
+- templates/workouts/start.html - Workout player (set logging + rest timer + AI form feedback UI)
+
+## Trainer Assignments + Client Plan
+- templates/trainer/clients.html - Client list with plan link
+- templates/trainer/active-clients.html - Active client list with plan link
+- templates/trainer/client-detail.html - Trainer assignment detail
+- templates/client/plan.html - Client plan overview
+
+## Inbox (Trainer-Client Messaging)
+- templates/inbox/index.html - Conversation list with unread counts
+- templates/inbox/thread.html - Thread view with polling hooks and attachment stub
+
+## ChatV2
+- templates/chat/thread.html - Instructions drawer + presets + active badge
+- templates/chat/hub.html - Chatv2 hub
+- templates/chat/folder.html - Folder view
+- templates/fragments/chat/sidebar.html - Chatv2 sidebar
+
+## Coach Chat Widget
+- templates/fragments/chat/chat-widget.html - Floating chat + notifications panel + inbox shortcut

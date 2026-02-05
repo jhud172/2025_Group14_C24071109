@@ -24,14 +24,14 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Use
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLog;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLogService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.FeedbackData.AdaptiveFeedbackService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Inbox.ConversationParticipant;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Inbox.ConversationParticipantRepository;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Inbox.RoleInConversation;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessagingService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrence;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.SecurityUtils;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLink;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkRepository;
 
 @Controller
 public class HomePageController {
@@ -39,7 +39,8 @@ public class HomePageController {
     private final ExerciseLogService exerciseLogService;
     private final CalendarTaskRepository calendarTaskRepository;
     private final ScheduleOccurrenceRepository scheduleOccurrenceRepository;
-    private final ConversationParticipantRepository conversationParticipantRepository;
+    private final TrainerClientLinkRepository trainerClientLinkRepository;
+    private final MessagingService messagingService;
     private final AuthHelper authHelper;
     private final UserPreferenceService userPreferenceService;
     private final AdaptiveFeedbackService adaptiveFeedbackService;
@@ -51,7 +52,8 @@ public class HomePageController {
             ExerciseLogService exerciseLogService,
             CalendarTaskRepository calendarTaskRepository,
             ScheduleOccurrenceRepository scheduleOccurrenceRepository,
-            ConversationParticipantRepository conversationParticipantRepository,
+            TrainerClientLinkRepository trainerClientLinkRepository,
+            MessagingService messagingService,
             AuthHelper authHelper,
             UserPreferenceService userPreferenceService,
             AdaptiveFeedbackService adaptiveFeedbackService
@@ -59,7 +61,8 @@ public class HomePageController {
         this.exerciseLogService = exerciseLogService;
         this.calendarTaskRepository = calendarTaskRepository;
         this.scheduleOccurrenceRepository = scheduleOccurrenceRepository;
-        this.conversationParticipantRepository = conversationParticipantRepository;
+        this.trainerClientLinkRepository = trainerClientLinkRepository;
+        this.messagingService = messagingService;
         this.authHelper = authHelper;
         this.userPreferenceService = userPreferenceService;
         this.adaptiveFeedbackService = adaptiveFeedbackService;
@@ -177,24 +180,14 @@ public class HomePageController {
     }
 
     private Long findTrainerConversationId(User user) {
-        List<ConversationParticipant> mine = conversationParticipantRepository.findByUser(user);
-        for (ConversationParticipant myParticipant : mine) {
-            Long conversationId = myParticipant.getConversation().getId();
-            List<ConversationParticipant> participants = conversationParticipantRepository.findAllByConversationId(conversationId);
-
-            for (ConversationParticipant participant : participants) {
-                if (participant.getUser() == null || participant.getUser().getId() == null) {
-                    continue;
-                }
-
-                boolean isOtherUser = !participant.getUser().getId().equals(user.getId());
-                boolean isTrainer = participant.getRoleInConversation() == RoleInConversation.TRAINER;
-                if (isOtherUser && isTrainer) {
-                    return conversationId;
-                }
-            }
+        if (user == null || user.getId() == null) {
+            return null;
         }
-        return null;
+        TrainerClientLink link = trainerClientLinkRepository.findActiveByClientId(user.getId()).orElse(null);
+        if (link == null) {
+            return null;
+        }
+        return messagingService.ensureThreadForLink(link).getId();
     }
 
 }

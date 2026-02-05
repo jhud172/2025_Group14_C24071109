@@ -225,7 +225,8 @@ public class ChatV2Controller {
         }
 
         ChatContext ctx = chatContextService.build(user, null);
-        String systemPrompt = ChatPromptBuilder.buildSystemPrompt(ctx, thread.getCustomInstructions());
+        String systemPrompt = ChatPromptBuilder.buildSystemPrompt(ctx, thread.getCustomInstructions())
+            + "\n" + buildStructuredResponseSpec();
         List<ChatService.Message> msgs = new ArrayList<>();
         msgs.add(new ChatService.Message("system", systemPrompt));
         List<ChatMessage> history = threadService.listMessages(thread);
@@ -317,5 +318,25 @@ public class ChatV2Controller {
             throw new ResponseStatusException(UNAUTHORIZED);
         }
         return user;
+    }
+
+    private String buildStructuredResponseSpec() {
+        return String.join("\n",
+                "When helpful, respond with a JSON object that matches this schema:",
+                "{",
+                "  \"assistantText\": \"...\",",
+                "  \"actions\": [",
+                "    { \"type\": \"TASK_CREATE\", \"payload\": { \"title\": \"...\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\" } },",
+                "    { \"type\": \"TASK_COMPLETE\", \"payload\": { \"taskId\": \"123\" } },",
+                "    { \"type\": \"NOTE_CREATE\", \"payload\": { \"title\": \"...\", \"content\": \"...\" } },",
+                "    { \"type\": \"SCHEDULE_APPLY\", \"payload\": { \"scheduleId\": \"456\" } }",
+                "  ],",
+                "  \"blocks\": [",
+                "    { \"type\": \"tasks\", \"title\": \"Today\", \"items\": [ { \"label\": \"Task\", \"value\": \"2026-02-05 09:00\", \"status\": \"open\", \"id\": 1 } ] },",
+                "    { \"type\": \"notes\", \"title\": \"Notes\", \"items\": [ { \"label\": \"Title\", \"value\": \"Body\", \"status\": \"draft\", \"id\": null } ] },",
+                "    { \"type\": \"schedule\", \"title\": \"Upcoming\", \"items\": [ { \"label\": \"Session\", \"value\": \"2026-02-05\", \"status\": \"open\", \"id\": 99 } ] }",
+                "  ]",
+                "}",
+                "Return ONLY valid JSON when using this structured format.");
     }
 }
