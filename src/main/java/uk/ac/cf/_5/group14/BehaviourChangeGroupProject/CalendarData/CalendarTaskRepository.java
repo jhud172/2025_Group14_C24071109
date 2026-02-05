@@ -29,6 +29,8 @@ public interface CalendarTaskRepository extends CrudRepository<CalendarTask, Lon
 
     Optional<CalendarTask> findFirstByUserAndDateAndCompletedFalseOrderByTimeAsc(User user, LocalDate date);
 
+    boolean existsByUserAndDateAndTrainerTemplateEntryId(User user, LocalDate date, Long trainerTemplateEntryId);
+
     long countByUserAndDateBeforeAndCompletedFalse(User user, LocalDate date);
 
     long countByUserAndDateAndCompletedTrue(User user, LocalDate date);

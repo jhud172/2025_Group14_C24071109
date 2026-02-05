@@ -8,6 +8,10 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.Custom
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExerciseService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Exercise;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.ExerciseService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkSource;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalStatus;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
@@ -25,15 +29,21 @@ public class WorkoutBuilderController {
     private final ExerciseService exerciseService;
     private final CustomExerciseService customExerciseService;
     private final AuthHelper authHelper;
+    private final GoalService goalService;
+    private final GoalLinkService goalLinkService;
 
     public WorkoutBuilderController(WorkoutBuilderService workoutBuilderService,
                                     ExerciseService exerciseService,
                                     CustomExerciseService customExerciseService,
-                                    AuthHelper authHelper) {
+                                    AuthHelper authHelper,
+                                    GoalService goalService,
+                                    GoalLinkService goalLinkService) {
         this.workoutBuilderService = workoutBuilderService;
         this.exerciseService = exerciseService;
         this.customExerciseService = customExerciseService;
         this.authHelper = authHelper;
+        this.goalService = goalService;
+        this.goalLinkService = goalLinkService;
     }
 
     @GetMapping
@@ -107,7 +117,35 @@ public class WorkoutBuilderController {
         WorkoutSession session = workoutBuilderService.startSession(user, id);
         model.addAttribute("session", session);
         model.addAttribute("exerciseViews", buildPlayerViews(session));
+        model.addAttribute("goalOptions", goalService.listGoalsForViewer(user, null, GoalStatus.ACTIVE, null, false));
+        model.addAttribute("selectedGoal", goalLinkService.findGoalForWorkoutSession(user, session.getId()));
         return "workouts/start";
+    }
+
+    @GetMapping("/session/{sessionId}")
+    public String viewSession(@PathVariable Long sessionId, Model model) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) {
+            return "redirect:/login";
+        }
+        WorkoutSession session = workoutBuilderService.getSession(user, sessionId);
+        model.addAttribute("session", session);
+        model.addAttribute("exerciseViews", buildPlayerViews(session));
+        model.addAttribute("goalOptions", goalService.listGoalsForViewer(user, null, GoalStatus.ACTIVE, null, false));
+        model.addAttribute("selectedGoal", goalLinkService.findGoalForWorkoutSession(user, session.getId()));
+        return "workouts/start";
+    }
+
+    @PostMapping("/session/{sessionId}/goal")
+    public String updateSessionGoal(@PathVariable Long sessionId,
+                                    @RequestParam(required = false) Long goalId) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) {
+            return "redirect:/login";
+        }
+        workoutBuilderService.getSession(user, sessionId);
+        goalLinkService.replaceWorkoutSessionLink(user, goalId, sessionId, GoalLinkSource.SELF);
+        return "redirect:/workouts/session/" + sessionId;
     }
 
     @PostMapping("/session/{sessionId}/sets/{setId}")

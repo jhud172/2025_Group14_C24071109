@@ -6,6 +6,7 @@ import lombok.Setter;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.time.Instant;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "user_settings")
@@ -55,6 +56,12 @@ public class UserSettings {
     @Enumerated(EnumType.STRING)
     @Column(name = "calendar_workout_ordering", nullable = false, length = 30)
     private CalendarWorkoutOrderingPreference calendarWorkoutOrdering = CalendarWorkoutOrderingPreference.SCHEDULE_ORDER;
+
+    @Column(name = "quiet_hours_start")
+    private LocalTime quietHoursStart;
+
+    @Column(name = "quiet_hours_end")
+    private LocalTime quietHoursEnd;
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;

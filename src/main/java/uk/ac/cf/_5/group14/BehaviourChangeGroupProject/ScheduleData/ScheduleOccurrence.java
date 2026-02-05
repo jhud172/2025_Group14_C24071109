@@ -9,6 +9,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Exercise;
 
 import java.time.LocalDate;
+import java.time.Instant;
 
 @Entity
 @Table(name = "schedule_occurrences")
@@ -48,5 +49,17 @@ public class ScheduleOccurrence {
 
     @Column(name = "completed")
     private boolean completed = false;
+
+    @Column(nullable = false)
+    private boolean missed = false;
+
+    @Column(name = "missed_at")
+    private Instant missedAt;
+
+    @Column(name = "trainer_template_id")
+    private Long trainerTemplateId;
+
+    @Column(name = "trainer_template_entry_id")
+    private Long trainerTemplateEntryId;
 
 }

@@ -17,6 +17,8 @@ public interface ScheduleOccurrenceRepository extends JpaRepository<ScheduleOccu
 
     boolean existsByUserAndDateAndExerciseLogIsNull(User user, LocalDate date);
 
+    boolean existsByUserAndDateAndTrainerTemplateEntryId(User user, LocalDate date, Long trainerTemplateEntryId);
+
     @Query("""
         SELECT o FROM ScheduleOccurrence o
         LEFT JOIN FETCH o.exercise

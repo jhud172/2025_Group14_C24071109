@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Entity(name = "WorkoutPlayerSession")
 @Table(name = "workout_player_sessions")
 @Getter
 @Setter

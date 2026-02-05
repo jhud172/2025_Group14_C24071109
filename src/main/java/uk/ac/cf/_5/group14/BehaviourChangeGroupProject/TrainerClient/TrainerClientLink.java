@@ -40,6 +40,19 @@ public class TrainerClientLink {
     @Column(name = "ended_at")
     private Instant endedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "coaching_phase", length = 30)
+    private CoachingPhase coachingPhase;
+
+    @Column(name = "coaching_phase_label", length = 120)
+    private String coachingPhaseLabel;
+
+    @Column(name = "coaching_phase_started_at")
+    private Instant coachingPhaseStartedAt;
+
+    @Column(name = "coaching_phase_updated_at")
+    private Instant coachingPhaseUpdatedAt;
+
     public TrainerClientLink() {
     }
 
@@ -129,5 +142,37 @@ public class TrainerClientLink {
 
     public void setEndedAt(Instant endedAt) {
         this.endedAt = endedAt;
+    }
+
+    public CoachingPhase getCoachingPhase() {
+        return coachingPhase;
+    }
+
+    public void setCoachingPhase(CoachingPhase coachingPhase) {
+        this.coachingPhase = coachingPhase;
+    }
+
+    public String getCoachingPhaseLabel() {
+        return coachingPhaseLabel;
+    }
+
+    public void setCoachingPhaseLabel(String coachingPhaseLabel) {
+        this.coachingPhaseLabel = coachingPhaseLabel;
+    }
+
+    public Instant getCoachingPhaseStartedAt() {
+        return coachingPhaseStartedAt;
+    }
+
+    public void setCoachingPhaseStartedAt(Instant coachingPhaseStartedAt) {
+        this.coachingPhaseStartedAt = coachingPhaseStartedAt;
+    }
+
+    public Instant getCoachingPhaseUpdatedAt() {
+        return coachingPhaseUpdatedAt;
+    }
+
+    public void setCoachingPhaseUpdatedAt(Instant coachingPhaseUpdatedAt) {
+        this.coachingPhaseUpdatedAt = coachingPhaseUpdatedAt;
     }
 }

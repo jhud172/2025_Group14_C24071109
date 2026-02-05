@@ -1,8 +1,10 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
@@ -19,10 +21,26 @@ public class UserSettingsModelAdvice {
 
     @ModelAttribute("userSettings")
     public UserSettings userSettings() {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        if (!(attributes instanceof ServletRequestAttributes servletAttributes)) {
+            return null;
+        }
+
+        if (UserSettingsRequestSupport.shouldSkip(servletAttributes.getRequest())) {
+            return null;
+        }
+
+        UserSettings cached = UserSettingsRequestCache.getFromCurrentRequest();
+        if (cached != null) {
+            return cached;
+        }
+
         User user = authHelper.getAuthenticatedUser();
         if (user == null) {
             return null;
         }
-        return userSettingsService.getOrCreate(user);
+        UserSettings settings = userSettingsService.getOrCreate(user);
+        UserSettingsRequestCache.setOnCurrentRequest(settings);
+        return settings;
     }
 }

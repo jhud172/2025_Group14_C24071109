@@ -34,6 +34,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyStreakS
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayHealthData.DayHealthPersistenceService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionResult;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionService;
@@ -103,6 +104,9 @@ public class CalendarController {
 
     @Autowired
     private ObjectProvider<uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreferenceService> userPreferenceServiceProvider;
+
+    @Autowired
+    private GoalLinkService goalLinkService;
 
     @GetMapping("")
     public String calendarView(
@@ -301,6 +305,7 @@ public class CalendarController {
             .filter(Objects::nonNull)
             .toList();
         model.addAttribute("taskWarningsByTaskId", taskWarningService.listWarningsForTasks(taskIds));
+        model.addAttribute("taskGoalsById", goalLinkService.goalsByTaskIds(user, taskIds));
 
         model.addAttribute("occurrences",
                 scheduleOccurrenceService.getOccurrencesForUserOnDate(user, date));

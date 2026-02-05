@@ -25,10 +25,17 @@ public class UserSettingsLocaleInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        if (UserSettingsRequestSupport.shouldSkip(request)) {
+            return true;
+        }
         User user = authHelper.getAuthenticatedUser();
         String language = "en";
         if (user != null) {
-            UserSettings settings = userSettingsService.getOrCreate(user);
+            UserSettings settings = UserSettingsRequestCache.get(request);
+            if (settings == null) {
+                settings = userSettingsService.getOrCreate(user);
+                UserSettingsRequestCache.set(request, settings);
+            }
             if (settings != null && settings.getLanguage() != null && !settings.getLanguage().isBlank()) {
                 language = settings.getLanguage();
             }

@@ -8,6 +8,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "calendar_tasks")
@@ -40,6 +41,12 @@ public class CalendarTask {
     @Column(nullable = false)
     private Boolean completed = false;
 
+    @Column(nullable = false)
+    private boolean missed = false;
+
+    @Column(name = "missed_at")
+    private Instant missedAt;
+
     @Column(name = "grace_period_minutes")
     private Integer gracePeriodMinutes;
 
@@ -58,5 +65,11 @@ public class CalendarTask {
 
     @Column(name = "requires_log")
     private boolean requiresLog;
+
+    @Column(name = "trainer_template_id")
+    private Long trainerTemplateId;
+
+    @Column(name = "trainer_template_entry_id")
+    private Long trainerTemplateEntryId;
 
 }

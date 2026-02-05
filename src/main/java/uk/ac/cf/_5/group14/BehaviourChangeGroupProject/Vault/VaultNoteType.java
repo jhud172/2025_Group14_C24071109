@@ -5,5 +5,6 @@ public enum VaultNoteType {
     NUTRITION,
     INJURY,
     GOAL,
-    REFLECTION
+    REFLECTION,
+    CHECKIN
 }

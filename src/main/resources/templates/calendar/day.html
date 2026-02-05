@@ -278,6 +278,11 @@
                            th:text="${task.title}"></a>
                         <p data-testid="task-time" class="mt-1 text-sm text-slate-600 dark:text-slate-300"
                            th:text="${task.time != null ? #temporals.format(task.time, 'HH:mm') : '—'}"></p>
+                        <div class="mt-2 flex flex-wrap gap-2"
+                             th:if="${taskGoalsById != null && taskGoalsById.get(task.id) != null}">
+                            <span th:each="goal : ${taskGoalsById.get(task.id)}"
+                                th:replace="~{fragments/goals/goal-chip :: goalChip(${goal})}"></span>
+                        </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <span data-testid="task-status-chip"
@@ -423,6 +428,11 @@
                            th:text="${task.title}"></a>
                         <p data-testid="task-time" class="mt-1 text-sm text-slate-600 dark:text-slate-300"
                            th:text="${task.time != null ? #temporals.format(task.time, 'HH:mm') : '—'}"></p>
+                        <div class="mt-2 flex flex-wrap gap-2"
+                             th:if="${taskGoalsById != null && taskGoalsById.get(task.id) != null}">
+                            <span th:each="goal : ${taskGoalsById.get(task.id)}"
+                                th:replace="~{fragments/goals/goal-chip :: goalChip(${goal})}"></span>
+                        </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <span data-testid="task-status-chip"
@@ -565,6 +575,11 @@
                            th:text="${task.title}"></a>
                         <p data-testid="task-time" class="mt-1 text-sm text-slate-600 dark:text-slate-300"
                            th:text="${task.time != null ? #temporals.format(task.time, 'HH:mm') : '—'}"></p>
+                        <div class="mt-2 flex flex-wrap gap-2"
+                             th:if="${taskGoalsById != null && taskGoalsById.get(task.id) != null}">
+                            <span th:each="goal : ${taskGoalsById.get(task.id)}"
+                                th:replace="~{fragments/goals/goal-chip :: goalChip(${goal})}"></span>
+                        </div>
                     </div>
                     <div class="flex items-center gap-2">
                         <span data-testid="task-status-chip"

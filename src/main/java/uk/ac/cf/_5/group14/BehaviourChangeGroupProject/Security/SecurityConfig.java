@@ -74,7 +74,7 @@ public class SecurityConfig {
                     .successHandler(successHandler))
 
                 .logout((l) -> l
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
                     .addLogoutHandler(logoutHandler)
                     .logoutSuccessUrl("/")
                     .invalidateHttpSession(true)

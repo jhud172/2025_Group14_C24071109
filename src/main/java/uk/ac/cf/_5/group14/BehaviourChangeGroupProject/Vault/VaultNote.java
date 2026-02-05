@@ -32,6 +32,12 @@ public class VaultNote {
     @Column(name = "linked_workout_session_id")
     private Long linkedWorkoutSessionId;
 
+    @Column(name = "trainer_template_id")
+    private Long trainerTemplateId;
+
+    @Column(name = "trainer_template_entry_id")
+    private Long trainerTemplateEntryId;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -114,6 +120,22 @@ public class VaultNote {
 
     public void setLinkedWorkoutSessionId(Long linkedWorkoutSessionId) {
         this.linkedWorkoutSessionId = linkedWorkoutSessionId;
+    }
+
+    public Long getTrainerTemplateId() {
+        return trainerTemplateId;
+    }
+
+    public void setTrainerTemplateId(Long trainerTemplateId) {
+        this.trainerTemplateId = trainerTemplateId;
+    }
+
+    public Long getTrainerTemplateEntryId() {
+        return trainerTemplateEntryId;
+    }
+
+    public void setTrainerTemplateEntryId(Long trainerTemplateEntryId) {
+        this.trainerTemplateEntryId = trainerTemplateEntryId;
     }
 
     public Instant getCreatedAt() {

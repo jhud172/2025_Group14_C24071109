@@ -1,131 +1,76 @@
-# Gym Membership Products and Trainer Verification Implementation Summary
+# One-to-One Implementation Summary
 
-## Overview
-This document summarizes the implementation of two major features:
-1. **Gym Membership Products** - Allows gym admins to create membership offerings with controlled price changes, audit logging, and email notifications
-2. **Trainer Verification Workflow** - Allows gym admins to create/request trainer accounts that require Super Admin verification before activation
+## 1. Platform Overview
+The platform currently supports gym membership products with price-change auditing and notifications, trainer verification workflows, advanced goals with check-ins and adherence logic, trainer templates with coaching phases, weekly check-ins, workouts, notes, inbox messaging, and ChatV2 with a coach chat widget.
+Legacy and v2 systems exist in parallel.
+Build status at last update: build successful, all 24 tests passing, no compilation errors, schema updates completed.
 
-## Features Implemented
+## 2. Implementation Timeline (Ordered)
 
-### 1. Gym Membership Products
+### Phase 0 — Gym Membership Products & Trainer Verification
+#### Scope Delivered
+- Gym admins can create and manage membership offerings with controlled price changes, audit logging, and member notifications.
+- Gym admins can create/request trainer accounts that require Super Admin verification before activation.
+- Trainer verification workflow supports approval, rejection, and needs-info cycles with notes and notifications.
 
-#### Entities Created
-- **GymMembershipProduct**: Represents membership offerings
-  - Fields: id, gymId, name, description, priceCents, billingPeriod, active, timestamps
-  - Helper method: `getPriceDollars()` for price display
-  
-- **GymMemberSubscription**: Links users to membership products
-  - Fields: id, userId, gymId, productId, status, startedAt, renewsAt, cancelledAt, timestamps
-  - Unique constraint on (user_id, gym_id) - one active subscription per gym
-  
-- **PriceChangeEvent**: Audit log for price changes
-  - Fields: id, gymId, productId, oldPriceCents, newPriceCents, effectiveAt, reason, changedByUserId, affectedMemberCount, createdAt
-  - Captures complete audit trail of price changes
-  
-- **BillingPeriod**: Enum with MONTHLY value
-- **SubscriptionStatus**: Enum with ACTIVE, CANCELLED, EXPIRED values
+#### Entities / Enums / DTOs
+- GymMembershipProduct (includes `getPriceDollars()` helper).
+- GymMemberSubscription (unique constraint on user and gym).
+- PriceChangeEvent (audit trail for price changes).
+- BillingPeriod enum (MONTHLY).
+- SubscriptionStatus enum (ACTIVE, CANCELLED, EXPIRED).
+- TrainerVerificationRequest.
+- VerificationStatus enum (PENDING, APPROVED, REJECTED, NEEDS_INFO).
+- users: added `trainerVerified` boolean (default false).
 
-#### Services Implemented
-- **EmailService Interface**: Defines methods for sending notifications
-  - `sendPriceChangeNotification()`: Notifies members of price changes
-  - `sendTrainerVerificationUpdate()`: Notifies trainers of verification status
-  
-- **EmailServiceImpl**: Stub implementation that logs to console (ready for real email integration)
-  
-- **MembershipProductService**: Core business logic for memberships
-  - `createProduct()`: Create new membership products
-  - `updateProduct()`: Update existing products (name, description, active status)
-  - `initiatePriceChange()`: Manage price changes with full audit trail
-    - Validates reason and effective date are provided
-    - Validates effective date is not in the past
-    - Counts affected active subscribers
-    - Creates PriceChangeEvent for audit trail
-    - Updates product price
-    - Sends email notifications to all affected members
-  - `getPriceChangeHistory()`: View complete price change audit log
-  - `createSubscription()`: Subscribe user to membership
-  - `cancelSubscription()`: Cancel subscription (expires at period end)
+#### Services / Business Logic
+- EmailService interface: `sendPriceChangeNotification()`, `sendTrainerVerificationUpdate()`.
+- EmailServiceImpl logs email notifications to the console (ready for real integration).
+- MembershipProductService: `createProduct()`, `updateProduct()`, `initiatePriceChange()`, `getPriceChangeHistory()`, `createSubscription()`, `cancelSubscription()`.
+- Membership price-change rules: reason and effective date required, effective date not in the past, price must change, price applies at renewal, notifications sent to affected subscribers, audit trail recorded.
+- TrainerVerificationService: `createVerificationRequest()`, `getPendingRequests()`, `getRequestsByGym()`, `approveTrainer()`, `rejectTrainer()`, `requestMoreInfo()`, `updateTrainerNotes()`, `isTrainerVerified()`.
+- Verification rules: trainers start unverified, only one pending request per trainer, status transitions PENDING to APPROVED/REJECTED/NEEDS_INFO and NEEDS_INFO back to PENDING, notifications on all status changes.
+- Repositories: GymMembershipProductRepository, GymMemberSubscriptionRepository, PriceChangeEventRepository, TrainerVerificationRequestRepository.
+- Email integration guidance: replace EmailServiceImpl log statements with real email sends, consider Spring Mail or third-party providers, add email templates, add retry logic for failed sends.
 
-#### Controllers Implemented
-- **GymAdminMembershipController**: `/gym/admin/memberships`
-  - `GET /` - List all membership products for gym
-  - `GET /create` - Show create product form
-  - `POST /create` - Create new product
-  - `GET /{id}/edit` - Show edit product form
-  - `POST /{id}/edit` - Update product (name/description/active only)
-  - `GET /{id}/price-change` - Show price change confirmation with affected member count
-  - `POST /{id}/price-change` - Execute price change with validation
-  - `GET /{id}/price-history` - View price change audit log
+#### Controllers & Routes
+- GymAdminMembershipController:
+  - GET /gym/admin/memberships
+  - GET /gym/admin/memberships/create
+  - POST /gym/admin/memberships/create
+  - GET /gym/admin/memberships/{id}/edit
+  - POST /gym/admin/memberships/{id}/edit
+  - GET /gym/admin/memberships/{id}/price-change
+  - POST /gym/admin/memberships/{id}/price-change
+  - GET /gym/admin/memberships/{id}/price-history
+- GymAdminTrainerController:
+  - GET /gym/admin/trainers
+  - POST /gym/admin/trainers/create
+  - POST /gym/admin/trainers/{id}/update-notes
+- SuperAdminVerificationController:
+  - GET /super-admin/verification/queue
+  - GET /super-admin/verification/{id}
+  - POST /super-admin/verification/{id}/approve
+  - POST /super-admin/verification/{id}/reject
+  - POST /super-admin/verification/{id}/request-info
 
-#### Key Business Rules
-- Price changes require a reason and effective date
-- Effective date cannot be in the past
-- New price must be different from current price
-- Price changes apply at renewal date (not current billing period)
-- All affected active subscribers receive email notification
-- Complete audit trail maintained for all price changes
+#### Templates / Fragments
+- None documented for this phase (see Open UI Template Gaps).
 
-### 2. Trainer Verification Workflow
+#### Security / Ownership Rules
+- Gym admin endpoints check `admin.getGymId()` to ensure admins only manage their own gym data.
+- Super admin endpoints protected with `@PreAuthorize("hasRole('SUPER_ADMIN')")`.
+- Trainers cannot accept clients or appear in the marketplace until verified.
+- Validation on all user inputs (reason, effective date, etc.).
+- Audit trail captures who made changes and when.
+- Foreign key constraints prevent orphaned records.
 
-#### Entities Created
-- **TrainerVerificationRequest**: Tracks trainer verification requests
-  - Fields: id, trainerUserId, gymId, status, notes, adminNotes, submittedAt, reviewedAt, reviewedByUserId, timestamps
-  - Supports full approval workflow with notes/feedback
-  
-- **VerificationStatus**: Enum with PENDING, APPROVED, REJECTED, NEEDS_INFO values
-
-#### User Entity Updates
-- Added `trainerVerified` boolean field (default false)
-- Trainers cannot accept clients or appear in marketplace until verified
-
-#### Services Implemented
-- **TrainerVerificationService**: Manages trainer verification workflow
-  - `createVerificationRequest()`: Gym admin submits trainer for verification
-  - `getPendingRequests()`: Super admin views pending verifications
-  - `getRequestsByGym()`: Gym admin views their verification requests
-  - `approveTrainer()`: Super admin approves trainer
-    - Sets trainer.trainerVerified = true
-    - Records reviewer and timestamp
-    - Sends email notification
-  - `rejectTrainer()`: Super admin rejects trainer
-    - Keeps trainer.trainerVerified = false
-    - Records rejection reason
-    - Sends email notification
-  - `requestMoreInfo()`: Super admin requests additional information
-    - Sets status to NEEDS_INFO
-    - Sends email with admin notes
-  - `updateTrainerNotes()`: Trainer/gym admin provides additional info
-    - Resets status to PENDING for review
-  - `isTrainerVerified()`: Check if trainer is verified
-
-#### Controllers Implemented
-- **GymAdminTrainerController**: `/gym/admin/trainers`
-  - `GET /` - List trainers and verification requests for gym
-  - `POST /create` - Create trainer and submit for verification
-  - `POST /{id}/update-notes` - Update notes in response to NEEDS_INFO request
-  
-- **SuperAdminVerificationController**: `/super-admin/verification`
-  - `GET /queue` - View all pending verification requests
-  - `GET /{id}` - View details of specific request
-  - `POST /{id}/approve` - Approve trainer verification
-  - `POST /{id}/reject` - Reject trainer verification
-  - `POST /{id}/request-info` - Request more information
-
-#### Key Business Rules
-- Trainers start unverified (trainerVerified = false)
-- Only one pending verification request per trainer at a time
-- Super admins can approve, reject, or request more info
-- Approved trainers have trainerVerified set to true
-- Email notifications sent for all status changes
-- Verification status transitions:
-  - PENDING → APPROVED (trainer becomes verified)
-  - PENDING → REJECTED (trainer remains unverified)
-  - PENDING → NEEDS_INFO (awaits additional information)
-  - NEEDS_INFO → PENDING (when trainer provides more info)
-
-## Database Schema Updates
-
-### New Tables Created
+#### Database Changes
+- New tables: gym_membership_products, gym_member_subscriptions, price_change_events, trainer_verification_requests.
+- Updated tables: users (added `trainer_verified BOOLEAN NOT NULL DEFAULT FALSE`).
+- Constraints and integrity: unique constraint on (user_id, gym_id) for subscriptions; foreign keys for users/products/reviewers.
+- Performance: indexed foreign keys for efficient queries; price change operations are transactional.
+- Pagination should be added for large product/subscription/audit lists.
 
 ```sql
 -- Gym Membership Products
@@ -192,142 +137,264 @@ CREATE TABLE trainer_verification_requests (
 );
 ```
 
-### Updated Tables
-- **users**: Added `trainer_verified BOOLEAN NOT NULL DEFAULT FALSE` column
+#### Tests Added
+- MembershipProductServiceTest (11 tests): create product, price change validation and flow, subscription creation/duplication, cancellation.
+- TrainerVerificationServiceTest (13 tests): request creation, duplicate prevention, approval/rejection/needs-info flows, status checks.
+- All 24 tests passing successfully.
+- Build successful, no compilation errors, schema updates completed.
 
-## Repository Interfaces Created
-- `GymMembershipProductRepository`
-- `GymMemberSubscriptionRepository`
-- `PriceChangeEventRepository`
-- `TrainerVerificationRequestRepository`
+#### Manual Test Checklist
+1. Create a membership product and verify it appears in the gym admin list.
+2. Edit the product name/description/active status and confirm changes persist.
+3. Initiate a price change with a valid reason and future effective date; verify the affected member count and audit entry.
+4. Attempt a price change with a past date or unchanged price and confirm validation errors appear.
+5. Create a trainer via gym admin and submit for verification.
+6. As super admin, approve the trainer and confirm trainerVerified is set and notifications are logged.
+7. As super admin, reject a trainer and confirm the trainer remains unverified with rejection notes.
+8. Request more info, submit updated notes, and confirm the request returns to PENDING.
 
-## Tests Implemented
+### Phase 1 — Advanced Goals System
+#### Scope Delivered
+- Introduced goals domain: Goal, GoalLink, GoalCheckIn with enums for type, status, link type, and source.
+- Enforced ownership and trainer visibility rules at the service layer (client-only access, trainer access only with ACTIVE link).
+- Added weekly adherence engine aggregating linked tasks, schedule occurrences, and workout player sessions.
+- Added goals UI (list/create/edit/detail/check-ins) plus reusable goal chip fragment.
+- Integrated goal chips into calendar day tasks, goal selection into workout player sessions, and active goals summary into trainer client detail.
 
-### MembershipProductServiceTest (11 tests)
-- `testCreateProduct()`: Verify product creation
-- `testInitiatePriceChange_Success()`: Verify full price change flow with emails
-- `testInitiatePriceChange_MissingReason()`: Validate reason requirement
-- `testInitiatePriceChange_MissingEffectiveDate()`: Validate effective date requirement
-- `testInitiatePriceChange_PastEffectiveDate()`: Prevent past dates
-- `testInitiatePriceChange_SamePrice()`: Require different price
-- `testInitiatePriceChange_NoAffectedMembers()`: Handle zero subscribers
-- `testCreateSubscription_Success()`: Verify subscription creation
-- `testCreateSubscription_DuplicateActiveSubscription()`: Prevent duplicate subscriptions
-- `testCancelSubscription()`: Verify cancellation logic
+#### Entities / Enums / DTOs
+- Goal, GoalLink, GoalCheckIn.
+- Enums for goal type, goal status, link type, and source.
 
-### TrainerVerificationServiceTest (13 tests)
-- `testCreateVerificationRequest_Success()`: Verify request creation
-- `testCreateVerificationRequest_TrainerNotFound()`: Handle missing trainer
-- `testCreateVerificationRequest_DuplicatePendingRequest()`: Prevent duplicate requests
-- `testApproveTrainer_Success()`: Verify approval workflow
-- `testApproveTrainer_AlreadyApproved()`: Prevent re-approval
-- `testRejectTrainer_Success()`: Verify rejection workflow
-- `testRequestMoreInfo_Success()`: Verify needs-info workflow
-- `testRequestMoreInfo_MissingAdminNotes()`: Validate admin notes requirement
-- `testUpdateTrainerNotes_Success()`: Verify trainer response workflow
-- `testUpdateTrainerNotes_InvalidStatus()`: Prevent invalid status transitions
-- `testGetPendingRequests()`: Verify queue retrieval
-- `testIsTrainerVerified_True/False()`: Verify verification check
-- `testIsTrainerVerified_UserNotFound()`: Handle missing user
+#### Services / Business Logic
+- Weekly adherence engine aggregates linked tasks, schedule occurrences, and workout player sessions.
+- Ownership and trainer visibility rules enforced in the service layer (client-only access, trainer access only with ACTIVE link).
 
-**All 24 tests passing successfully!**
+#### Controllers & Routes
+- Goals (controller name not specified in previous summary):
+  - GET /goals
+  - GET /goals/create
+  - POST /goals/create
+  - GET /goals/{id}
+  - GET /goals/{id}/edit
+  - POST /goals/{id}/edit
+  - GET /goals/{id}/checkins
+  - POST /goals/{id}/checkins
+  - POST /goals/{id}/links
+- Workout sessions (controller name not specified in previous summary):
+  - GET /workouts/session/{sessionId}
+  - POST /workouts/session/{sessionId}/goal
 
-## API Endpoints Summary
+#### Templates / Fragments
+- templates/goals/index.html
+- templates/goals/create.html
+- templates/goals/edit.html
+- templates/goals/detail.html
+- templates/goals/checkins.html
+- templates/fragments/goals/goal-chip.html
 
-### Gym Admin - Memberships
-- `GET /gym/admin/memberships` - List products
-- `GET /gym/admin/memberships/create` - Create form
-- `POST /gym/admin/memberships/create` - Create product
-- `GET /gym/admin/memberships/{id}/edit` - Edit form
-- `POST /gym/admin/memberships/{id}/edit` - Update product
-- `GET /gym/admin/memberships/{id}/price-change` - Price change form
-- `POST /gym/admin/memberships/{id}/price-change` - Execute price change
-- `GET /gym/admin/memberships/{id}/price-history` - View audit log
+#### Security / Ownership Rules
+- Client-only access enforced for goal ownership.
+- Trainer access only with ACTIVE trainer-client link.
 
-### Gym Admin - Trainers
-- `GET /gym/admin/trainers` - List verification requests
-- `POST /gym/admin/trainers/create` - Submit trainer for verification
-- `POST /gym/admin/trainers/{id}/update-notes` - Respond to NEEDS_INFO
+#### Database Changes
+- Clarification: Database changes for Phase 1 were not listed in the previous summary.
 
-### Super Admin - Verification
-- `GET /super-admin/verification/queue` - View pending requests
-- `GET /super-admin/verification/{id}` - View request details
-- `POST /super-admin/verification/{id}/approve` - Approve trainer
-- `POST /super-admin/verification/{id}/reject` - Reject trainer
-- `POST /super-admin/verification/{id}/request-info` - Request more info
+#### Tests Added
+- GoalsTests/GoalAccessControlTest.
+- GoalsTests/GoalAdherenceServiceTest.
 
-## Next Steps (UI Templates Needed)
+#### Manual Test Checklist
+1. Create a goal as a client and confirm it appears in the goals list.
+2. Edit the goal and verify trainer-owned fields respect guardrails.
+3. Add a goal link and verify it appears in the goal detail view.
+4. Submit a weekly check-in and confirm it appears in the check-ins history.
+5. View a workout session and attach a goal; confirm the link is saved.
+6. Validate trainer access to a client goal only when the trainer-client link is ACTIVE.
 
-The following Thymeleaf templates should be created to complete the UI:
+### Phase 3 — Advanced Trainer Power Tools
+#### Scope Delivered
+- Trainer-scale tooling: reusable schedule templates with preview/apply, coaching phases with audit, and weekly check-ins linking goals, notes, and notifications.
 
-1. **gym-admin-memberships.html** - Product list with create/edit/price change buttons
-2. **gym-admin-membership-form.html** - Create/edit product form
-3. **gym-admin-price-change.html** - Price change confirmation with affected member count
-4. **gym-admin-price-history.html** - Timeline view of price changes
-5. **gym-admin-trainers.html** - Trainer list and verification request status
-6. **super-admin-verification-queue.html** - Pending requests queue with approve/reject/request-info actions
-7. **super-admin-verification-detail.html** - Detailed view of verification request
+#### Entities / Enums / DTOs
+- TrainerScheduleTemplate.
+- TrainerScheduleTemplateEntry.
+- TrainerScheduleTemplateEntryType (TASK, WORKOUT, NOTE).
+- TrainerCheckInQuestion.
+- WeeklyCheckIn.
+- WeeklyCheckInStatus (SUBMITTED, RESPONDED).
+- CoachingPhase (ONBOARDING, BUILD, PEAK, RECOVERY, MAINTENANCE, CUSTOM).
+- CoachingPhaseChange.
+- TrainerClientLink (added coaching phase fields).
+- CalendarTask, ScheduleOccurrence, VaultNote (added template tracking fields).
 
-## Email Integration
+#### Services / Business Logic
+- TrainerScheduleTemplateServiceImpl: `createTemplate()`, `updateTemplate()`, `addEntry()`, `deleteEntry()`, `cloneTemplate()`, `previewApply()`, `applyTemplate()` (idempotent option).
+- WeeklyCheckInServiceImpl: `submitCheckIn()`, `respondToCheckIn()`, `addQuestion()`, `deleteQuestion()`.
+- TrainerClientLinkService: `changeCoachingPhase()` (writes audit and updates link).
 
-The `EmailServiceImpl` currently logs email notifications to the console. To integrate with a real email service:
+#### Controllers & Routes
+- Trainer Templates:
+  - GET /trainer/templates
+  - GET /trainer/templates/create
+  - POST /trainer/templates/create
+  - GET /trainer/templates/{id}/edit
+  - POST /trainer/templates/{id}/edit
+  - POST /trainer/templates/{id}/clone
+  - POST /trainer/templates/{id}/entries
+  - POST /trainer/templates/{id}/entries/{entryId}/delete
+  - POST /trainer/templates/{id}/questions
+  - POST /trainer/templates/{id}/questions/{questionId}/delete
+  - GET /trainer/templates/{id}/apply
+  - POST /trainer/templates/{id}/apply
+- Coaching Phase:
+  - POST /trainer/clients/{id}/phase
+- Weekly Check-ins:
+  - GET /checkins/client-submit
+  - POST /checkins/client-submit
+  - GET /checkins/trainer-review/{id}
+  - POST /checkins/trainer-review/{id}
 
-1. Replace the log statements in `EmailServiceImpl` with actual email sending code
-2. Consider using Spring Mail or a third-party service (SendGrid, Mailgun, etc.)
-3. Add email templates for professional-looking notifications
-4. Add retry logic for failed email sends
+#### Templates / Fragments
+- templates/trainer/templates/index.html
+- templates/trainer/templates/edit.html
+- templates/trainer/templates/apply.html
+- templates/checkins/client-submit.html
+- templates/checkins/trainer-review.html
 
-## Security Considerations
+#### Security / Ownership Rules
+- Trainers can only manage their own templates; enforced in TrainerScheduleTemplateServiceImpl and TrainerScheduleTemplateController.
+- Templates can only be applied to ACTIVE trainer-client links; enforced via AccessGuard in TrainerScheduleTemplateServiceImpl.
+- Coaching phase updates require trainer role and ACTIVE link; enforced in TrainerClientLinkService and TrainerClientsController.
+- Weekly check-in submission requires an ACTIVE trainer link; trainer review requires ACTIVE link to client; enforced in WeeklyCheckInServiceImpl and AccessGuard.
 
-- All gym admin endpoints check `admin.getGymId()` to ensure admins can only manage their own gym's data
-- Super admin endpoints protected with `@PreAuthorize("hasRole('SUPER_ADMIN')")`
-- Validation on all user inputs (reason, effective date, etc.)
-- Audit trail captures who made changes and when
-- Foreign key constraints prevent orphaned records
+#### Database Changes
+- New tables: trainer_schedule_templates, trainer_schedule_template_entries, trainer_checkin_questions, weekly_check_ins, coaching_phase_changes.
+- New columns: trainer_client_links.coaching_phase* (phase, label, timestamps).
+- Template tracking: calendar_tasks.trainer_template_id, calendar_tasks.trainer_template_entry_id, schedule_occurrences.trainer_template_id, schedule_occurrences.trainer_template_entry_id, vault_notes.trainer_template_id, vault_notes.trainer_template_entry_id.
+- Accountability alignment: added user_streaks, weekly_summaries, and quiet hours/missed columns in user_settings, calendar_tasks, and schedule_occurrences.
+- Clarification: These DB items appear to belong to Phase 2/7 in the roadmap, but are listed here because they were present in the previous summary.
 
-## Performance Considerations
+#### Tests Added
+- TrainerTemplates/TrainerScheduleTemplateServiceTest: apply creates schedule occurrences, blocked without ACTIVE link, idempotent apply prevents duplicates.
 
-- Price change operations are transactional to ensure data consistency
-- Batch email sending for price changes (consider async processing for large subscriber lists)
-- Indexed foreign keys for efficient queries
-- Pagination should be added for large product/subscription/audit lists
+#### Manual Test Checklist
+1. As trainer, create a template and add TASK/WORKOUT/NOTE entries.
+2. Add weekly check-in questions to the template.
+3. Preview apply for a client and verify duplicates are flagged.
+4. Apply the template with idempotent checked; re-apply and confirm no duplicates.
+5. Visit trainer client detail and update coaching phase and label.
+6. As client, submit a weekly check-in using the template.
+7. As trainer, review the check-in and respond with next-week focus.
+8. Confirm notifications appear for both submission and response.
+9. Verify applied workout occurrences and tasks appear in the client calendar.
 
-## Build Status
+## 3. Consolidated Indexes (Canonical)
 
-✅ **Build successful**
-✅ **All 24 tests passing**
-✅ **No compilation errors**
-✅ **Schema updates completed**
+### 3.1 Templates Index (All Known Templates)
+- Memberships: None documented.
+- Verification: None documented.
+- Goals:
+  - templates/goals/index.html
+  - templates/goals/create.html
+  - templates/goals/edit.html
+  - templates/goals/detail.html
+  - templates/goals/checkins.html
+- Trainer Templates:
+  - templates/trainer/templates/index.html
+  - templates/trainer/templates/edit.html
+  - templates/trainer/templates/apply.html
+  - templates/trainer/clients.html
+  - templates/trainer/active-clients.html
+  - templates/trainer/client-detail.html
+  - templates/client/plan.html
+- Check-ins:
+  - templates/checkins/client-submit.html
+  - templates/checkins/trainer-review.html
+- Workouts:
+  - templates/workouts/index.html
+  - templates/workouts/edit.html
+  - templates/workouts/start.html
+- Notes:
+  - templates/notes/index.html
+- ChatV2:
+  - templates/chat/thread.html
+  - templates/chat/hub.html
+  - templates/chat/folder.html
+- Inbox:
+  - templates/inbox/index.html
+  - templates/inbox/thread.html
+- Fragments:
+  - templates/fragments/goals/goal-chip.html
+  - templates/fragments/chat/sidebar.html
+  - templates/fragments/chat/chat-widget.html
 
-The core functionality for both features is fully implemented and tested. UI templates are the remaining work to provide a complete user experience.
+### 3.2 Endpoints Index (All Known Routes)
+- Gym Admin:
+  - GET /gym/admin/memberships
+  - GET /gym/admin/memberships/create
+  - POST /gym/admin/memberships/create
+  - GET /gym/admin/memberships/{id}/edit
+  - POST /gym/admin/memberships/{id}/edit
+  - GET /gym/admin/memberships/{id}/price-change
+  - POST /gym/admin/memberships/{id}/price-change
+  - GET /gym/admin/memberships/{id}/price-history
+  - GET /gym/admin/trainers
+  - POST /gym/admin/trainers/create
+  - POST /gym/admin/trainers/{id}/update-notes
+- Super Admin:
+  - GET /super-admin/verification/queue
+  - GET /super-admin/verification/{id}
+  - POST /super-admin/verification/{id}/approve
+  - POST /super-admin/verification/{id}/reject
+  - POST /super-admin/verification/{id}/request-info
+- Trainer:
+  - GET /trainer/templates
+  - GET /trainer/templates/create
+  - POST /trainer/templates/create
+  - GET /trainer/templates/{id}/edit
+  - POST /trainer/templates/{id}/edit
+  - POST /trainer/templates/{id}/clone
+  - POST /trainer/templates/{id}/entries
+  - POST /trainer/templates/{id}/entries/{entryId}/delete
+  - POST /trainer/templates/{id}/questions
+  - POST /trainer/templates/{id}/questions/{questionId}/delete
+  - GET /trainer/templates/{id}/apply
+  - POST /trainer/templates/{id}/apply
+  - POST /trainer/clients/{id}/phase
+  - GET /checkins/trainer-review/{id}
+  - POST /checkins/trainer-review/{id}
+- Client:
+  - GET /checkins/client-submit
+  - POST /checkins/client-submit
+- Shared:
+  - GET /goals
+  - GET /goals/create
+  - POST /goals/create
+  - GET /goals/{id}
+  - GET /goals/{id}/edit
+  - POST /goals/{id}/edit
+  - GET /goals/{id}/checkins
+  - POST /goals/{id}/checkins
+  - POST /goals/{id}/links
+  - GET /workouts/session/{sessionId}
+  - POST /workouts/session/{sessionId}/goal
 
----
+### 3.3 Tests Index (All Known Tests)
+- Memberships:
+  - MembershipProductServiceTest
+- Trainer Verification:
+  - TrainerVerificationServiceTest
+- Goals:
+  - GoalsTests/GoalAccessControlTest
+  - GoalsTests/GoalAdherenceServiceTest
+- Trainer Templates:
+  - TrainerTemplates/TrainerScheduleTemplateServiceTest
 
-# Template Summary (Recent Updates)
-
-## Notes v2
-- templates/notes/index.html - Notes list + rich text editor shell
-
-## Workout Builder + Player
-- templates/workouts/index.html - Workout templates list
-- templates/workouts/edit.html - Builder editor for exercises/sets
-- templates/workouts/start.html - Workout player (set logging + rest timer + AI form feedback UI)
-
-## Trainer Assignments + Client Plan
-- templates/trainer/clients.html - Client list with plan link
-- templates/trainer/active-clients.html - Active client list with plan link
-- templates/trainer/client-detail.html - Trainer assignment detail
-- templates/client/plan.html - Client plan overview
-
-## Inbox (Trainer-Client Messaging)
-- templates/inbox/index.html - Conversation list with unread counts
-- templates/inbox/thread.html - Thread view with polling hooks and attachment stub
-
-## ChatV2
-- templates/chat/thread.html - Instructions drawer + presets + active badge
-- templates/chat/hub.html - Chatv2 hub
-- templates/chat/folder.html - Folder view
-- templates/fragments/chat/sidebar.html - Chatv2 sidebar
-
-## Coach Chat Widget
-- templates/fragments/chat/chat-widget.html - Floating chat + notifications panel + inbox shortcut
+## 4. Open UI Template Gaps (If Mentioned)
+1. gym-admin-memberships.html - Product list with create/edit/price change buttons
+2. gym-admin-membership-form.html - Create/edit product form
+3. gym-admin-price-change.html - Price change confirmation with affected member count
+4. gym-admin-price-history.html - Timeline view of price changes
+5. gym-admin-trainers.html - Trainer list and verification request status
+6. super-admin-verification-queue.html - Pending requests queue with approve/reject/request-info actions
+7. super-admin-verification-detail.html - Detailed view of verification request

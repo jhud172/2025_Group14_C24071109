@@ -23,15 +23,18 @@ public class TrainerClientLinkService {
     private final UserRepository userRepository;
     private final MessagingService messagingService;
     private final NotificationService notificationService;
+    private final CoachingPhaseChangeRepository coachingPhaseChangeRepository;
 
     public TrainerClientLinkService(TrainerClientLinkRepository trainerClientLinkRepository,
                                    UserRepository userRepository,
                                    MessagingService messagingService,
-                                   NotificationService notificationService) {
+                                   NotificationService notificationService,
+                                   CoachingPhaseChangeRepository coachingPhaseChangeRepository) {
         this.trainerClientLinkRepository = trainerClientLinkRepository;
         this.userRepository = userRepository;
         this.messagingService = messagingService;
         this.notificationService = notificationService;
+        this.coachingPhaseChangeRepository = coachingPhaseChangeRepository;
     }
 
     public TrainerClientLink getActiveLinkForClient(Long clientUserId) {
@@ -50,6 +53,15 @@ public class TrainerClientLinkService {
 
     public List<TrainerClientLink> getActiveClientsForTrainer(Long trainerUserId) {
         return trainerClientLinkRepository.findByTrainerUserIdAndStatusOrderByUpdatedAtDesc(trainerUserId, TrainerClientLinkStatus.ACTIVE);
+    }
+
+    public TrainerClientLink getActiveLinkForTrainerClient(Long trainerUserId, Long clientUserId) {
+        return trainerClientLinkRepository
+                .findFirstByTrainerUserIdAndClientUserIdAndStatusOrderByUpdatedAtDesc(
+                        trainerUserId,
+                        clientUserId,
+                        TrainerClientLinkStatus.ACTIVE)
+                .orElse(null);
     }
 
     @Transactional
@@ -198,5 +210,52 @@ public class TrainerClientLinkService {
 
     public List<TrainerClientLink> listClientTrainerLinks(Long clientUserId) {
         return trainerClientLinkRepository.findByClientIdOrderByUpdatedAtDesc(clientUserId);
+    }
+
+    @Transactional
+    public TrainerClientLink changeCoachingPhase(Long trainerUserId,
+                                                 Long clientUserId,
+                                                 CoachingPhase newPhase,
+                                                 String customLabel,
+                                                 String notes) {
+        User trainer = userRepository.findById(trainerUserId)
+                .orElseThrow(() -> new IllegalArgumentException("Trainer not found"));
+        if (trainer.getRole() != Role.TRAINER) {
+            throw new AccessDeniedException("User is not a trainer");
+        }
+
+        TrainerClientLink link = trainerClientLinkRepository
+                .findFirstByTrainerUserIdAndClientUserIdAndStatusOrderByUpdatedAtDesc(
+                        trainerUserId,
+                        clientUserId,
+                        TrainerClientLinkStatus.ACTIVE)
+                .orElseThrow(() -> new IllegalArgumentException("Active link not found"));
+
+        CoachingPhase oldPhase = link.getCoachingPhase();
+        CoachingPhaseChange change = new CoachingPhaseChange();
+        change.setLinkId(link.getId());
+        change.setTrainerId(trainerUserId);
+        change.setOldPhase(oldPhase);
+        change.setOldLabel(link.getCoachingPhaseLabel());
+        change.setNewPhase(newPhase);
+        change.setNewLabel(trimToNull(customLabel));
+        change.setNotes(trimToNull(notes));
+        coachingPhaseChangeRepository.save(change);
+
+        link.setCoachingPhase(newPhase);
+        link.setCoachingPhaseLabel(trimToNull(customLabel));
+        if (link.getCoachingPhaseStartedAt() == null || oldPhase != newPhase) {
+            link.setCoachingPhaseStartedAt(Instant.now());
+        }
+        link.setCoachingPhaseUpdatedAt(Instant.now());
+        return trainerClientLinkRepository.save(link);
+    }
+
+    private String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isBlank() ? null : trimmed;
     }
 }

@@ -14,4 +14,6 @@ public interface VaultNoteRepository extends JpaRepository<VaultNote, Long> {
     Optional<VaultNote> findByIdAndUserId(Long id, Long userId);
 
     List<VaultNote> findByIdInAndUserId(List<Long> ids, Long userId);
+
+    boolean existsByUserIdAndLinkedDateAndTrainerTemplateEntryId(Long userId, java.time.LocalDate linkedDate, Long trainerTemplateEntryId);
 }

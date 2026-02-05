@@ -19,6 +19,31 @@
                            th:href="@{/workouts}">Back to templates</a>
                     </div>
 
+                    <form class="mt-4 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+                          method="post"
+                          th:action="@{/workouts/session/{sessionId}/goal(sessionId=${session.id})}">
+                        <input type="hidden" th:if="${_csrf != null}"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}"/>
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Session goal</p>
+                            <p class="text-sm text-slate-600">Link this workout to a goal for adherence tracking.</p>
+                        </div>
+                        <div class="flex-1 min-w-[12rem]">
+                            <label class="sr-only" for="session-goal-select">Session goal</label>
+                            <select id="session-goal-select"
+                                    name="goalId"
+                                    onchange="this.form.submit()"
+                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
+                                <option value="">No goal</option>
+                                <option th:each="goal : ${goalOptions}"
+                                        th:value="${goal.id}"
+                                        th:text="${goal.title}"
+                                        th:selected="${selectedGoal != null && selectedGoal.id == goal.id}"></option>
+                            </select>
+                        </div>
+                    </form>
+
                     <div class="mt-6 space-y-4" th:if="${exerciseViews != null and !exerciseViews.isEmpty()}">
                         <div th:each="exercise : ${exerciseViews}" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                             <div class="flex items-center justify-between">
