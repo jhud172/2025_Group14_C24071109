@@ -41,18 +41,7 @@ public class GymAdminTrainerController {
             return "error/403";
         }
 
-        List<User> trainers = userRepository.findByRoleAndGymId(Role.TRAINER, admin.getGymId());
-        Map<Long, TrainerVerificationRequest> latestRequests = new HashMap<>();
-        for (User trainer : trainers) {
-            TrainerVerificationRequest latest = verificationService.getLatestRequestForTrainer(trainer.getId());
-            if (latest != null) {
-                latestRequests.put(trainer.getId(), latest);
-            }
-        }
-
-        model.addAttribute("trainers", trainers);
-        model.addAttribute("latestRequests", latestRequests);
-        model.addAttribute("newRequest", new TrainerVerificationRequestForm());
+        populateTrainerModel(admin, model);
         
         return "gym-admin/trainers";
     }
@@ -63,9 +52,10 @@ public class GymAdminTrainerController {
     @PostMapping("/create")
     public String createTrainer(
         @AuthenticationPrincipal UserDetails userDetails,
-        @Valid @ModelAttribute TrainerVerificationRequestForm form,
+        @Valid @ModelAttribute("newRequest") TrainerVerificationRequestForm form,
         BindingResult result,
-        RedirectAttributes redirectAttributes
+        RedirectAttributes redirectAttributes,
+        Model model
     ) {
         User admin = getUserFromDetails(userDetails);
         
@@ -73,22 +63,20 @@ public class GymAdminTrainerController {
             redirectAttributes.addFlashAttribute("errorMessage", "You must be associated with a gym");
             return "redirect:/gym/admin/trainers";
         }
-        
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Please correct the form errors");
-            return "redirect:/gym/admin/trainers";
-        }
-        
-        try {
-            if (userService.emailExists(form.getEmail())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Email already registered");
-                return "redirect:/gym/admin/trainers";
-            }
-            if (userService.usernameExists(form.getUsername())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Username already taken");
-                return "redirect:/gym/admin/trainers";
-            }
 
+        if (userService.emailExists(form.getEmail())) {
+            result.rejectValue("email", "Duplicate", "Email already registered");
+        }
+        if (userService.usernameExists(form.getUsername())) {
+            result.rejectValue("username", "Duplicate", "Username already taken");
+        }
+        if (result.hasErrors()) {
+            populateTrainerModel(admin, model);
+            model.addAttribute("errorMessage", "Please correct the form errors");
+            return "gym-admin/trainers";
+        }
+
+        try {
             User trainer = new User(
                 form.getEmail(),
                 form.getFirstName(),
@@ -112,7 +100,9 @@ public class GymAdminTrainerController {
                 "Trainer invite created and submitted for verification.");
         } catch (Exception e) {
             log.error("Error creating trainer verification request", e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            populateTrainerModel(admin, model);
+            model.addAttribute("errorMessage", e.getMessage());
+            return "gym-admin/trainers";
         }
         
         return "redirect:/gym/admin/trainers";
@@ -124,9 +114,11 @@ public class GymAdminTrainerController {
     @PostMapping("/{id}/update-notes")
     public String updateNotes(
         @PathVariable Long id,
-        @RequestParam String notes,
+        @Valid @ModelAttribute("updateNotesForm") UpdateTrainerNotesForm form,
+        BindingResult result,
         @AuthenticationPrincipal UserDetails userDetails,
-        RedirectAttributes redirectAttributes
+        RedirectAttributes redirectAttributes,
+        Model model
     ) {
         User admin = getUserFromDetails(userDetails);
         
@@ -134,14 +126,35 @@ public class GymAdminTrainerController {
             redirectAttributes.addFlashAttribute("errorMessage", "Access denied");
             return "redirect:/gym/admin/trainers";
         }
-        
+
+        TrainerVerificationRequest request;
         try {
-            verificationService.updateTrainerNotes(id, notes);
+            request = verificationService.getRequestForGym(id, admin.getGymId());
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("error", "Access denied");
+            return "error/403";
+        }
+
+        if (result.hasErrors()) {
+            populateTrainerModel(admin, model);
+            model.addAttribute("updateNotesRequestId", id);
+            model.addAttribute("updateNotesTrainerName", resolveTrainerName(request.getTrainerUserId()));
+            model.addAttribute("updateNotesNotes", form.getNotes());
+            return "gym-admin/trainers";
+        }
+
+        try {
+            verificationService.updateTrainerNotes(id, form.getNotes());
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Notes updated. Request resubmitted for review.");
         } catch (Exception e) {
             log.error("Error updating trainer notes", e);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            populateTrainerModel(admin, model);
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("updateNotesRequestId", id);
+            model.addAttribute("updateNotesTrainerName", resolveTrainerName(request.getTrainerUserId()));
+            model.addAttribute("updateNotesNotes", form.getNotes());
+            return "gym-admin/trainers";
         }
         
         return "redirect:/gym/admin/trainers";
@@ -150,5 +163,31 @@ public class GymAdminTrainerController {
     private User getUserFromDetails(UserDetails userDetails) {
         return userRepository.findByUsername(userDetails.getUsername())
             .orElseThrow(() -> new IllegalStateException("User not found"));
+    }
+
+    private void populateTrainerModel(User admin, Model model) {
+        List<User> trainers = userRepository.findByRoleAndGymId(Role.TRAINER, admin.getGymId());
+        Map<Long, TrainerVerificationRequest> latestRequests = new HashMap<>();
+        for (User trainer : trainers) {
+            TrainerVerificationRequest latest = verificationService.getLatestRequestForTrainer(trainer.getId());
+            if (latest != null) {
+                latestRequests.put(trainer.getId(), latest);
+            }
+        }
+
+        model.addAttribute("trainers", trainers);
+        model.addAttribute("latestRequests", latestRequests);
+        if (!model.containsAttribute("newRequest")) {
+            model.addAttribute("newRequest", new TrainerVerificationRequestForm());
+        }
+        if (!model.containsAttribute("updateNotesForm")) {
+            model.addAttribute("updateNotesForm", new UpdateTrainerNotesForm());
+        }
+    }
+
+    private String resolveTrainerName(Long trainerUserId) {
+        return userRepository.findById(trainerUserId)
+            .map(user -> user.getFirstName() + " " + user.getLastName())
+            .orElse("Trainer");
     }
 }

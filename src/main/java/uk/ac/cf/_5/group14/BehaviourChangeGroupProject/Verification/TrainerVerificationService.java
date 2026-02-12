@@ -86,6 +86,16 @@ public class TrainerVerificationService {
         return verificationRepository.findTopByTrainerUserIdOrderBySubmittedAtDesc(trainerUserId)
             .orElse(null);
     }
+
+    public TrainerVerificationRequest getRequestById(Long requestId) {
+        return verificationRepository.findById(requestId)
+            .orElseThrow(() -> new IllegalArgumentException("Verification request not found"));
+    }
+
+    public TrainerVerificationRequest getRequestForGym(Long requestId, Long gymId) {
+        return verificationRepository.findByIdAndGymId(requestId, gymId)
+            .orElseThrow(() -> new IllegalArgumentException("Verification request not found"));
+    }
     
     /**
      * Approve a trainer (called by super admin)

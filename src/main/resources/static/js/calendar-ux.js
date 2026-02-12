@@ -18,14 +18,34 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay?.addEventListener("click", closeDrawer);
     closeBtn?.addEventListener("click", closeDrawer);
 
-    document.querySelectorAll(".calendar-day-card").forEach(card => {
-        card.addEventListener("click", (event) => {
-            if (event.target.closest("a, button, input, textarea, select, .calendar-item")) {
-                return;
-            }
-            const href = card.getAttribute("data-day-link");
-            if (href) {
-                window.location.href = href;
+    document.addEventListener("click", (event) => {
+        const card = event.target.closest(".calendar-day-card");
+        if (!card) return;
+        if (event.target.closest("a, button, input, textarea, select, .calendar-item")) {
+            return;
+        }
+        const href = card.getAttribute("data-day-link");
+        if (href) {
+            window.location.href = href;
+        }
+    });
+
+    document.querySelectorAll("[data-heatmap-legend-toggle]").forEach((toggle) => {
+        const wrapper = toggle.closest("[data-heatmap-legend-wrapper]");
+        const legend = wrapper?.querySelector("[data-heatmap-legend]");
+        if (!legend) return;
+
+        toggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const isHidden = legend.classList.contains("hidden");
+            legend.classList.toggle("hidden", !isHidden);
+            toggle.setAttribute("aria-expanded", String(isHidden));
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!wrapper.contains(event.target)) {
+                legend.classList.add("hidden");
+                toggle.setAttribute("aria-expanded", "false");
             }
         });
     });

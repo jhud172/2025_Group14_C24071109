@@ -138,7 +138,19 @@ public class GymMembershipProduct {
     /**
      * Get price in dollars for display.
      */
-    public double getPriceDollars() {
+    @Transient
+    public Double getPriceDollars() {
+        if (priceCents == null) {
+            return null;
+        }
         return priceCents / 100.0;
+    }
+
+    public void setPriceDollars(Double priceDollars) {
+        if (priceDollars == null) {
+            this.priceCents = null;
+            return;
+        }
+        this.priceCents = (int) Math.round(priceDollars * 100.0);
     }
 }

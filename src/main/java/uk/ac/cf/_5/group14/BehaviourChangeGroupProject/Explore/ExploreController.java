@@ -56,7 +56,7 @@ public class ExploreController {
                           @RequestParam(value = "minRating", required = false) Double minRating,
                           @RequestParam(value = "sort", required = false, defaultValue = "recommended") String sort,
                           Model model) {
-        List<User> verifiedTrainers = userRepository.findByRoleAndTrainerVerifiedTrue(Role.TRAINER);
+        List<User> verifiedTrainers = userRepository.findByRoleAndTrainerVerifiedTrueAndEnabledTrue(Role.TRAINER);
         List<TrainerDirectoryCard> cards = verifiedTrainers.stream()
                 .map(trainer -> buildCard(trainer))
                 .filter(Objects::nonNull)

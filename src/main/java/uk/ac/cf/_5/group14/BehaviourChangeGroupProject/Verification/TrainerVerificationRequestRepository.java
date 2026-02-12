@@ -17,5 +17,7 @@ public interface TrainerVerificationRequestRepository extends JpaRepository<Trai
     
     Optional<TrainerVerificationRequest> findTopByTrainerUserIdOrderBySubmittedAtDesc(Long trainerUserId);
 
+    Optional<TrainerVerificationRequest> findByIdAndGymId(Long id, Long gymId);
+
     long countByStatus(VerificationStatus status);
 }

@@ -26,6 +26,9 @@ public class LoggingEmailService implements EmailService {
         String reason,
         String manageUrl
     ) {
+        logNotificationQueued("PRICE_CHANGE", user,
+            "product=", productName,
+            "effectiveAt=", DATE_FORMATTER.format(effectiveAt));
         log.info("=== PRICE CHANGE NOTIFICATION ===");
         log.info("To: {} <{}>", user.getEmail(), user.getEmail());
         log.info("Subject: Price Change Notice for {}", productName);
@@ -51,6 +54,7 @@ public class LoggingEmailService implements EmailService {
 
     @Override
     public void sendTrainerVerificationUpdate(User user, String status, String adminNotes) {
+        logNotificationQueued("TRAINER_VERIFICATION", user, "status=", status);
         log.info("=== TRAINER VERIFICATION UPDATE ===");
         log.info("To: {} <{}>", user.getEmail(), user.getEmail());
         log.info("Subject: Trainer Verification Status Update");
@@ -71,6 +75,7 @@ public class LoggingEmailService implements EmailService {
 
     @Override
     public void sendPasswordReset(User user, String resetUrl, Instant expiresAt) {
+        logNotificationQueued("PASSWORD_RESET", user, "expiresAt=", DATE_FORMATTER.format(expiresAt));
         log.info("=== PASSWORD RESET ===");
         log.info("To: {} <{}>", user.getEmail(), user.getEmail());
         log.info("Subject: Reset your password");
@@ -87,6 +92,7 @@ public class LoggingEmailService implements EmailService {
 
     @Override
     public void sendEmailVerification(User user, String verifyUrl, Instant expiresAt) {
+        logNotificationQueued("EMAIL_VERIFICATION", user, "expiresAt=", DATE_FORMATTER.format(expiresAt));
         log.info("=== EMAIL VERIFICATION ===");
         log.info("To: {} <{}>", user.getEmail(), user.getEmail());
         log.info("Subject: Verify your email");
@@ -99,5 +105,20 @@ public class LoggingEmailService implements EmailService {
         log.info("");
         log.info("If you did not request this, you can ignore this email.");
         log.info("===========================");
+    }
+
+    private void logNotificationQueued(String type, User user, String... details) {
+        StringBuilder extra = new StringBuilder();
+        for (int i = 0; i + 1 < details.length; i += 2) {
+            if (extra.length() > 0) {
+                extra.append(" ");
+            }
+            extra.append(details[i]).append(details[i + 1]);
+        }
+        log.info("NOTIFICATION_QUEUED type={} userId={} email={} {}",
+            type,
+            user != null ? user.getId() : null,
+            user != null ? user.getEmail() : null,
+            extra.toString().trim());
     }
 }

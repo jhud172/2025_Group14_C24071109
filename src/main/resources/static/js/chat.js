@@ -216,13 +216,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function setNavUnreadBadges(count) {
+        const badges = document.querySelectorAll(".nav-notification-badge");
+        if (!badges.length) return;
+        badges.forEach((badge) => {
+            if (count > 0) {
+                badge.textContent = count > 99 ? "99+" : `${count}`;
+                badge.classList.remove("hidden");
+                badge.classList.add("inline-flex");
+            } else {
+                badge.textContent = "";
+                badge.classList.add("hidden");
+                badge.classList.remove("inline-flex");
+            }
+        });
+    }
+
     async function refreshUnreadCount() {
         if (!isAuthenticated) return;
         try {
             const res = await fetch("/api/notifications/unread-count");
             if (!res.ok) return;
             const data = await res.json();
-            setUnreadBadge(Number(data?.count || 0));
+            const count = Number(data?.count || 0);
+            setUnreadBadge(count);
+            setNavUnreadBadges(count);
         } catch {
             // ignore
         }
@@ -276,9 +294,26 @@ document.addEventListener("DOMContentLoaded", () => {
         const time = document.createElement("div");
         time.className = "mt-2 text-[10px] text-slate-400";
         // Simple relative time approximation or date parse could go here
-        
+
         row.appendChild(header);
         row.appendChild(message);
+
+        if (notification.ctaUrl) {
+            const cta = document.createElement("a");
+            cta.href = notification.ctaUrl;
+            cta.className = "mt-2 inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200";
+            cta.textContent = "Open";
+            cta.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                if (isUnread) {
+                    const headers = {};
+                    if (csrfToken) headers[csrfHeader] = csrfToken;
+                    await fetch(`/api/notifications/${notification.id}/read`, { method: "POST", headers });
+                    await refreshUnreadCount();
+                }
+            });
+            row.appendChild(cta);
+        }
         
         // Mark as read on click if unread
         if (isUnread) {

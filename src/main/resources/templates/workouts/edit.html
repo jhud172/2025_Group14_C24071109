@@ -18,7 +18,8 @@
                        th:href="@{/workouts}">Back to list</a>
                 </div>
 
-                <form class="mt-6 space-y-6" method="post" th:action="@{/workouts/{id}/edit(id=${template.id})}" th:object="${form}" data-workout-builder>
+                    <form class="mt-6 space-y-6" method="post" th:action="@{/workouts/{id}/edit(id=${template.id})}" th:object="${form}" data-workout-builder
+                        th:attr="data-default-sets=${defaultSets}, data-default-rep-min=${defaultRepMin}, data-default-rep-max=${defaultRepMax}">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
                     <div class="grid gap-4 md:grid-cols-2">
@@ -114,12 +115,12 @@
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-500">Sets</label>
-                                        <input name="__name__.sets" type="number" min="1" value="3"
+                                        <input name="__name__.sets" type="number" min="1" th:attr="value=${defaultSets}"
                                                class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-700" />
                                     </div>
                                     <div>
                                         <label class="text-[11px] font-semibold text-slate-500">Reps</label>
-                                        <input name="__name__.reps" type="number" min="1" value="10"
+                                             <input name="__name__.reps" type="number" min="1" th:attr="value=${defaultRepMin}, placeholder=${defaultRepMin + '-' + defaultRepMax}"
                                                class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-700" />
                                     </div>
                                     <div>

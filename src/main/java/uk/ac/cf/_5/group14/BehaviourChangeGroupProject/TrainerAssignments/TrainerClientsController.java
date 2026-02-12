@@ -12,11 +12,20 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalAdherenceServic
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalAdherenceWeek;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalStatus;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.HealthRecord;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.HealthRecordRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Nutrition.DailyNutritionLog;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Nutrition.DailyNutritionLogRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Nutrition.DailyNutritionLogService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.AccessGuard;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayHealthData.DayHealth;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayHealthData.DayHealthRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.CoachingPhase;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLink;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.Role;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
@@ -43,6 +52,11 @@ public class TrainerClientsController {
     private final GoalService goalService;
     private final GoalAdherenceService goalAdherenceService;
     private final TrainerClientLinkService trainerClientLinkService;
+    private final UserSettingsService userSettingsService;
+    private final DayHealthRepository dayHealthRepository;
+    private final DailyNutritionLogRepository dailyNutritionLogRepository;
+    private final DailyNutritionLogService dailyNutritionLogService;
+    private final HealthRecordRepository healthRecordRepository;
 
     public TrainerClientsController(AuthHelper authHelper,
                                     UserService userService,
@@ -53,7 +67,12 @@ public class TrainerClientsController {
                                     AccessGuard accessGuard,
                                     GoalService goalService,
                                     GoalAdherenceService goalAdherenceService,
-                                    TrainerClientLinkService trainerClientLinkService) {
+                                    TrainerClientLinkService trainerClientLinkService,
+                                    UserSettingsService userSettingsService,
+                                    DayHealthRepository dayHealthRepository,
+                                    DailyNutritionLogRepository dailyNutritionLogRepository,
+                                    DailyNutritionLogService dailyNutritionLogService,
+                                    HealthRecordRepository healthRecordRepository) {
         this.authHelper = authHelper;
         this.userService = userService;
         this.userRepository = userRepository;
@@ -64,6 +83,11 @@ public class TrainerClientsController {
         this.goalService = goalService;
         this.goalAdherenceService = goalAdherenceService;
         this.trainerClientLinkService = trainerClientLinkService;
+        this.userSettingsService = userSettingsService;
+        this.dayHealthRepository = dayHealthRepository;
+        this.dailyNutritionLogRepository = dailyNutritionLogRepository;
+        this.dailyNutritionLogService = dailyNutritionLogService;
+        this.healthRecordRepository = healthRecordRepository;
     }
 
     private User currentUserOrThrow() {
@@ -89,6 +113,9 @@ public class TrainerClientsController {
         if (trainer.getRole() != Role.TRAINER) {
             return new ModelAndView("redirect:/access-denied");
         }
+        if (!trainer.isTrainerVerified() || !trainer.isEnabled()) {
+            return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
+        }
         accessGuard.requireTrainerAccessClient(trainer.getId(), clientId);
 
         User client = userRepository.findById(clientId).orElse(null);
@@ -113,6 +140,44 @@ public class TrainerClientsController {
         TrainerClientLink activeLink = trainerClientLinkService.getActiveLinkForTrainerClient(trainer.getId(), clientId);
         mav.addObject("activeLink", activeLink);
         mav.addObject("coachingPhases", CoachingPhase.values());
+
+        UserSettings clientSettings = userSettingsService.getOrCreate(client);
+        boolean shareRecovery = clientSettings != null && clientSettings.isShareRecoverySignals();
+        boolean shareNutrition = clientSettings != null && clientSettings.isShareNutritionSignals();
+        boolean shareSleep = clientSettings != null && clientSettings.isShareSleepSignals();
+        boolean shareFatigue = clientSettings != null && clientSettings.isShareFatigueSignals();
+        boolean shareWeight = clientSettings != null && clientSettings.isShareWeightTrend();
+        boolean hasSharedSignals = shareRecovery || shareNutrition || shareSleep || shareFatigue || shareWeight;
+
+        mav.addObject("shareRecoverySignals", shareRecovery);
+        mav.addObject("shareNutritionSignals", shareNutrition);
+        mav.addObject("shareSleepSignals", shareSleep);
+        mav.addObject("shareFatigueSignals", shareFatigue);
+        mav.addObject("shareWeightTrend", shareWeight);
+        mav.addObject("hasSharedSignals", hasSharedSignals);
+
+        if (shareRecovery) {
+            DayHealth latestRecovery = dayHealthRepository.findTopByUserOrderByDateDesc(client).orElse(null);
+            mav.addObject("latestRecovery", latestRecovery);
+        }
+
+        if (shareNutrition) {
+            DailyNutritionLog latestNutrition = dailyNutritionLogRepository.findTopByUserOrderByDateDescIdDesc(client).orElse(null);
+            mav.addObject("latestNutritionSummary", dailyNutritionLogService.summarize(latestNutrition));
+        }
+
+        if (shareWeight) {
+            List<HealthRecord> records = healthRecordRepository.findTop2ByUserOrderByBaselineDateDescIdDesc(client);
+            HealthRecord latest = records.isEmpty() ? null : records.get(0);
+            HealthRecord previous = records.size() > 1 ? records.get(1) : null;
+            Double delta = null;
+            if (latest != null && previous != null && latest.getWeightKg() != null && previous.getWeightKg() != null) {
+                delta = latest.getWeightKg() - previous.getWeightKg();
+            }
+            mav.addObject("latestWeightRecord", latest);
+            mav.addObject("weightDelta", delta);
+        }
+
         return mav;
     }
 
@@ -125,7 +190,14 @@ public class TrainerClientsController {
         if (trainer.getRole() != Role.TRAINER) {
             return new ModelAndView("redirect:/access-denied");
         }
-        trainerClientLinkService.changeCoachingPhase(trainer.getId(), clientId, phase, customLabel, notes);
+        try {
+            trainerClientLinkService.changeCoachingPhase(trainer.getId(), clientId, phase, customLabel, notes);
+        } catch (IllegalStateException ex) {
+            if (TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
+                return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
+            }
+            throw ex;
+        }
         return new ModelAndView("redirect:/trainer/clients/" + clientId);
     }
 
@@ -136,6 +208,9 @@ public class TrainerClientsController {
         User trainer = currentUserOrThrow();
         if (trainer.getRole() != Role.TRAINER) {
             return new ModelAndView("redirect:/access-denied");
+        }
+        if (!trainer.isTrainerVerified() || !trainer.isEnabled()) {
+            return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
         }
         trainerAssignmentService.assignWorkout(trainer, clientId, templateId, trainerNotes);
         return new ModelAndView("redirect:/trainer/clients/" + clientId);
@@ -148,6 +223,9 @@ public class TrainerClientsController {
         User trainer = currentUserOrThrow();
         if (trainer.getRole() != Role.TRAINER) {
             return new ModelAndView("redirect:/access-denied");
+        }
+        if (!trainer.isTrainerVerified() || !trainer.isEnabled()) {
+            return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
         }
         trainerAssignmentService.assignSchedule(trainer, clientId, scheduleId, trainerNotes);
         return new ModelAndView("redirect:/trainer/clients/" + clientId);

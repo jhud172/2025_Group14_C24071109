@@ -17,6 +17,8 @@ public interface HealthRecordRepository extends JpaRepository<HealthRecord, Long
 
     Optional<HealthRecord> findTopByUserOrderByBaselineDateDescIdDesc(User user);
 
+        List<HealthRecord> findTop2ByUserOrderByBaselineDateDescIdDesc(User user);
+
     @Query("select hr.bmi as BMI, " +
             "hr.baselineDate as dateRated " +
             "from HealthRecord hr " +

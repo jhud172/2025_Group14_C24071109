@@ -1,0 +1,14 @@
+ALTER TABLE user_settings
+    ADD COLUMN IF NOT EXISTS share_recovery_signals BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE user_settings
+    ADD COLUMN IF NOT EXISTS share_nutrition_signals BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE user_settings
+    ADD COLUMN IF NOT EXISTS share_sleep_signals BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE user_settings
+    ADD COLUMN IF NOT EXISTS share_fatigue_signals BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE user_settings
+    ADD COLUMN IF NOT EXISTS share_weight_trend BOOLEAN NOT NULL DEFAULT FALSE;

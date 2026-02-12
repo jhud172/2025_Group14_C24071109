@@ -2,6 +2,8 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Membership;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,15 @@ public class MembershipProductService {
      */
     public List<GymMembershipProduct> getProductsByGymId(Long gymId) {
         List<GymMembershipProduct> products = productRepository.findByGymIdOrderByCreatedAtDesc(gymId);
+        products.forEach(this::applyDuePriceChangesForProduct);
+        return products;
+    }
+
+    /**
+     * Get paginated products for a gym
+     */
+    public Page<GymMembershipProduct> getProductsByGymId(Long gymId, Pageable pageable) {
+        Page<GymMembershipProduct> products = productRepository.findByGymIdOrderByCreatedAtDesc(gymId, pageable);
         products.forEach(this::applyDuePriceChangesForProduct);
         return products;
     }
@@ -189,6 +200,10 @@ public class MembershipProductService {
      */
     public List<PriceChangeEvent> getPriceChangeHistory(Long productId) {
         return priceChangeEventRepository.findByProductIdOrderByCreatedAtDesc(productId);
+    }
+
+    public Page<PriceChangeEvent> getPriceChangeHistory(Long productId, Pageable pageable) {
+        return priceChangeEventRepository.findByProductIdOrderByCreatedAtDesc(productId, pageable);
     }
     
     /**

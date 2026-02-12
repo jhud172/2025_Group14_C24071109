@@ -100,7 +100,7 @@ public class TrainerClientLinkController {
     }
 
     @GetMapping("/trainer/clients")
-    public ModelAndView trainerClients() {
+    public ModelAndView trainerClients(@RequestParam(value = "error", required = false) String error) {
         User trainer = currentUserOrThrow();
         ModelAndView mav = new ModelAndView("trainer/clients");
         mav.addObject("pageTitle", "Trainer Clients");
@@ -121,6 +121,7 @@ public class TrainerClientLinkController {
                 .stream()
                 .collect(Collectors.toMap(User::getId, u -> u));
         mav.addObject("clientsById", clientsById);
+        mav.addObject("error", error);
         return mav;
     }
 
@@ -154,7 +155,12 @@ public class TrainerClientLinkController {
             redirectAttributes.addFlashAttribute("successMessage", "Client relationship paused.");
         } catch (org.springframework.security.access.AccessDeniedException ex) {
             return new ModelAndView("redirect:/access-denied");
-        } catch (IllegalStateException | IllegalArgumentException ex) {
+        } catch (IllegalStateException ex) {
+            if (TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
+                return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
+            }
+            return new ModelAndView("redirect:/trainer/clients?error=invalid");
+        } catch (IllegalArgumentException ex) {
             return new ModelAndView("redirect:/trainer/clients?error=invalid");
         }
         return new ModelAndView("redirect:/trainer/clients");
@@ -168,7 +174,12 @@ public class TrainerClientLinkController {
             redirectAttributes.addFlashAttribute("successMessage", "Client relationship ended.");
         } catch (org.springframework.security.access.AccessDeniedException ex) {
             return new ModelAndView("redirect:/access-denied");
-        } catch (IllegalStateException | IllegalArgumentException ex) {
+        } catch (IllegalStateException ex) {
+            if (TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
+                return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
+            }
+            return new ModelAndView("redirect:/trainer/clients?error=invalid");
+        } catch (IllegalArgumentException ex) {
             return new ModelAndView("redirect:/trainer/clients?error=invalid");
         }
         return new ModelAndView("redirect:/trainer/clients");
@@ -196,7 +207,7 @@ public class TrainerClientLinkController {
             mav.addObject("trainer", null);
         }
 
-        List<User> trainers = userRepository.findByRoleAndTrainerVerifiedTrue(Role.TRAINER);
+        List<User> trainers = userRepository.findByRoleAndTrainerVerifiedTrueAndEnabledTrue(Role.TRAINER);
         if (q != null && !q.isBlank()) {
             String query = q.trim().toLowerCase();
             trainers = trainers.stream()

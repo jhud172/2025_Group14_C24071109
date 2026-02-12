@@ -104,9 +104,7 @@ public class TrainerClientLinkService {
         if (trainer.getRole() != Role.TRAINER) {
             throw new AccessDeniedException("User is not a trainer");
         }
-        if (!trainer.isTrainerVerified()) {
-            throw new IllegalStateException(ERROR_TRAINER_NOT_VERIFIED);
-        }
+        requireVerifiedTrainer(trainer);
 
         TrainerClientLink link = trainerClientLinkRepository
                 .findFirstByTrainerUserIdAndClientUserIdAndStatusOrderByUpdatedAtDesc(
@@ -159,6 +157,7 @@ public class TrainerClientLinkService {
         if (trainer.getRole() != Role.TRAINER) {
             throw new AccessDeniedException("User is not a trainer");
         }
+        requireVerifiedTrainer(trainer);
         TrainerClientLink link = trainerClientLinkRepository
                 .findFirstByTrainerUserIdAndClientUserIdAndStatusOrderByUpdatedAtDesc(
                         trainerUserId,
@@ -183,6 +182,7 @@ public class TrainerClientLinkService {
         if (trainer.getRole() != Role.TRAINER) {
             throw new AccessDeniedException("User is not a trainer");
         }
+        requireVerifiedTrainer(trainer);
         TrainerClientLink link = trainerClientLinkRepository
                 .findFirstByTrainerUserIdAndClientUserIdAndStatusInOrderByUpdatedAtDesc(
                         trainerUserId,
@@ -223,6 +223,7 @@ public class TrainerClientLinkService {
         if (trainer.getRole() != Role.TRAINER) {
             throw new AccessDeniedException("User is not a trainer");
         }
+        requireVerifiedTrainer(trainer);
 
         TrainerClientLink link = trainerClientLinkRepository
                 .findFirstByTrainerUserIdAndClientUserIdAndStatusOrderByUpdatedAtDesc(
@@ -257,5 +258,11 @@ public class TrainerClientLinkService {
         }
         String trimmed = value.trim();
         return trimmed.isBlank() ? null : trimmed;
+    }
+
+    private void requireVerifiedTrainer(User trainer) {
+        if (trainer == null || !trainer.isTrainerVerified() || !trainer.isEnabled()) {
+            throw new IllegalStateException(ERROR_TRAINER_NOT_VERIFIED);
+        }
     }
 }

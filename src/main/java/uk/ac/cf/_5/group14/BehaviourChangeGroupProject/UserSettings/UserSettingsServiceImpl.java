@@ -33,6 +33,24 @@ public class UserSettingsServiceImpl implements UserSettingsService {
                     settings.setDisabilityHearing(false);
                     settings.setDisabilityMobility(false);
                     settings.setDisabilityVision(false);
+                    settings.setShareRecoverySignals(false);
+                    settings.setShareNutritionSignals(false);
+                    settings.setShareSleepSignals(false);
+                    settings.setShareFatigueSignals(false);
+                    settings.setShareWeightTrend(false);
+                    settings.setDefaultSets(3);
+                    settings.setDefaultRepMin(8);
+                    settings.setDefaultRepMax(12);
+                    settings.setPreferredEquipmentBodyweight(false);
+                    settings.setPreferredEquipmentDumbbell(false);
+                    settings.setPreferredEquipmentBarbell(false);
+                    settings.setPreferredEquipmentMachine(false);
+                    settings.setPreferredEquipmentBands(false);
+                    settings.setPreferredEquipmentKettlebell(false);
+                    settings.setMacroTargetCalories(null);
+                    settings.setMacroTargetProtein(null);
+                    settings.setMacroTargetCarbs(null);
+                    settings.setMacroTargetFat(null);
                     return userSettingsRepository.save(settings);
                 });
     }
@@ -111,5 +129,114 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         settings.setDisabilityVision(disabilityVision);
 
         return userSettingsRepository.save(settings);
+    }
+
+    @Override
+    @Transactional
+    public UserSettings updateTrainerSharing(User user,
+                                             boolean shareRecoverySignals,
+                                             boolean shareNutritionSignals,
+                                             boolean shareSleepSignals,
+                                             boolean shareFatigueSignals,
+                                             boolean shareWeightTrend) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+
+        settings.setShareRecoverySignals(shareRecoverySignals);
+        settings.setShareNutritionSignals(shareNutritionSignals);
+        settings.setShareSleepSignals(shareSleepSignals);
+        settings.setShareFatigueSignals(shareFatigueSignals);
+        settings.setShareWeightTrend(shareWeightTrend);
+
+        return userSettingsRepository.save(settings);
+    }
+
+    @Override
+    @Transactional
+    public UserSettings updateSmartDefaults(User user,
+                                            Integer defaultSets,
+                                            Integer defaultRepMin,
+                                            Integer defaultRepMax,
+                                            boolean preferredEquipmentBodyweight,
+                                            boolean preferredEquipmentDumbbell,
+                                            boolean preferredEquipmentBarbell,
+                                            boolean preferredEquipmentMachine,
+                                            boolean preferredEquipmentBands,
+                                            boolean preferredEquipmentKettlebell,
+                                            Integer macroTargetCalories,
+                                            Integer macroTargetProtein,
+                                            Integer macroTargetCarbs,
+                                            Integer macroTargetFat) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+
+        int sets = clamp(defaultSets, 1, 20, settings.getDefaultSets());
+        int repMin = clamp(defaultRepMin, 1, 30, settings.getDefaultRepMin());
+        int repMax = clamp(defaultRepMax, repMin, 50, Math.max(repMin, settings.getDefaultRepMax()));
+
+        settings.setDefaultSets(sets);
+        settings.setDefaultRepMin(repMin);
+        settings.setDefaultRepMax(repMax);
+        settings.setPreferredEquipmentBodyweight(preferredEquipmentBodyweight);
+        settings.setPreferredEquipmentDumbbell(preferredEquipmentDumbbell);
+        settings.setPreferredEquipmentBarbell(preferredEquipmentBarbell);
+        settings.setPreferredEquipmentMachine(preferredEquipmentMachine);
+        settings.setPreferredEquipmentBands(preferredEquipmentBands);
+        settings.setPreferredEquipmentKettlebell(preferredEquipmentKettlebell);
+        settings.setMacroTargetCalories(normalizeOptional(macroTargetCalories, 0, 20000));
+        settings.setMacroTargetProtein(normalizeOptional(macroTargetProtein, 0, 1000));
+        settings.setMacroTargetCarbs(normalizeOptional(macroTargetCarbs, 0, 1000));
+        settings.setMacroTargetFat(normalizeOptional(macroTargetFat, 0, 1000));
+
+        return userSettingsRepository.save(settings);
+    }
+
+    @Override
+    @Transactional
+    public UserSettings resetSmartDefaults(User user) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+
+        settings.setDefaultSets(3);
+        settings.setDefaultRepMin(8);
+        settings.setDefaultRepMax(12);
+        settings.setPreferredEquipmentBodyweight(false);
+        settings.setPreferredEquipmentDumbbell(false);
+        settings.setPreferredEquipmentBarbell(false);
+        settings.setPreferredEquipmentMachine(false);
+        settings.setPreferredEquipmentBands(false);
+        settings.setPreferredEquipmentKettlebell(false);
+        settings.setMacroTargetCalories(null);
+        settings.setMacroTargetProtein(null);
+        settings.setMacroTargetCarbs(null);
+        settings.setMacroTargetFat(null);
+
+        return userSettingsRepository.save(settings);
+    }
+
+    private int clamp(Integer value, int min, int max, int fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        return Math.min(Math.max(value, min), max);
+    }
+
+    private Integer normalizeOptional(Integer value, int min, int max) {
+        if (value == null) {
+            return null;
+        }
+        if (value < min) {
+            return min;
+        }
+        if (value > max) {
+            return max;
+        }
+        return value;
     }
 }

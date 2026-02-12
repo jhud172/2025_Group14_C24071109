@@ -18,4 +18,20 @@ public class UserPreferenceForm {
     String theme = "SYSTEM";
     boolean easyMode = false;
     boolean colorBlindMode = false;
+
+    Integer defaultSets;
+    Integer defaultRepMin;
+    Integer defaultRepMax;
+
+    boolean preferredEquipmentBodyweight = false;
+    boolean preferredEquipmentDumbbell = false;
+    boolean preferredEquipmentBarbell = false;
+    boolean preferredEquipmentMachine = false;
+    boolean preferredEquipmentBands = false;
+    boolean preferredEquipmentKettlebell = false;
+
+    Integer macroTargetCalories;
+    Integer macroTargetProtein;
+    Integer macroTargetCarbs;
+    Integer macroTargetFat;
 }

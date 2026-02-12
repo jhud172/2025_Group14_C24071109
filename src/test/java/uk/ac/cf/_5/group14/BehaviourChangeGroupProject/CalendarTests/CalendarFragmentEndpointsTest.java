@@ -1,0 +1,138 @@
+package uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests;
+
+import java.time.Clock;
+import java.util.Collections;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarController;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.WorkoutScheduleService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.WorkoutSessionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(CalendarController.class)
+@ActiveProfiles("test")
+class CalendarFragmentEndpointsTest {
+
+    @Autowired
+    private MockMvc mvc;
+
+    @MockitoBean
+    private CalendarTaskService taskService;
+
+    @MockitoBean
+    private CalendarTaskWarningService taskWarningService;
+
+    @MockitoBean
+    private TaskAiGenerationService taskAiGenerationService;
+
+    @MockitoBean
+    private TaskTemplateService taskTemplateService;
+
+    @MockitoBean
+    private UserSettingsService userSettingsService;
+
+    @MockitoBean
+    private PlatformSubscriptionService platformSubscriptionService;
+
+    @MockitoBean
+    private ScheduleService scheduleService;
+
+    @MockitoBean
+    private ScheduleOccurrenceService scheduleOccurrenceService;
+
+    @MockitoBean
+    private WorkoutScheduleService workoutScheduleService;
+
+    @MockitoBean
+    private WorkoutSessionService workoutSessionService;
+
+    @MockitoBean
+    private GoalLinkService goalLinkService;
+
+    @MockitoBean
+    private Clock clock;
+
+    @Test
+    void monthFragmentRendersMonthPane() throws Exception {
+        User sessionUser = new User();
+        sessionUser.setId(1L);
+
+        UserSettings settings = new UserSettings();
+        settings.setUser(sessionUser);
+        settings.setUserId(sessionUser.getId());
+
+        given(userSettingsService.getOrCreate(eq(sessionUser))).willReturn(settings);
+        given(platformSubscriptionService.isPremium(eq(sessionUser.getId()), any(Clock.class))).willReturn(false);
+        given(taskService.getTasksGroupedByDate(eq(sessionUser))).willReturn(Collections.emptyMap());
+        given(scheduleOccurrenceService.getOccurrencesForUserInMonth(eq(sessionUser), eq(2026), eq(1))).willReturn(Collections.emptyMap());
+        given(scheduleService.findByUser(eq(sessionUser))).willReturn(Collections.emptyList());
+
+        mvc.perform(get("/calendar/month-fragment")
+                        .param("month", "1")
+                        .param("year", "2026")
+                        .sessionAttr("user", sessionUser))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-month-pane")));
+    }
+
+    @Test
+    void weekFragmentRendersWeekPane() throws Exception {
+        User sessionUser = new User();
+        sessionUser.setId(1L);
+
+        UserSettings settings = new UserSettings();
+        settings.setUser(sessionUser);
+        settings.setUserId(sessionUser.getId());
+
+        given(userSettingsService.getOrCreate(eq(sessionUser))).willReturn(settings);
+        given(platformSubscriptionService.isPremium(eq(sessionUser.getId()), any(Clock.class))).willReturn(false);
+        given(taskService.getTasksByRange(eq(sessionUser), any(), any())).willReturn(Collections.emptyMap());
+        given(scheduleOccurrenceService.getOccurrencesByRange(eq(sessionUser), any(), any())).willReturn(Collections.emptyMap());
+        given(scheduleService.findByUser(eq(sessionUser))).willReturn(Collections.emptyList());
+
+        mvc.perform(get("/calendar/week-fragment")
+                        .param("week", "3")
+                        .param("weekYear", "2026")
+                        .sessionAttr("user", sessionUser))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-week-pane")));
+    }
+
+    @TestConfiguration
+    static class TestSecurityConfig {
+        @Bean
+        SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+            return http
+                    .csrf(csrf -> csrf.disable())
+                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                    .build();
+        }
+    }
+}

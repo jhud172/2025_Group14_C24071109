@@ -26,6 +26,11 @@ public class NotificationService {
 
     @Transactional
     public Notification create(User user, NotificationType type, String title, String message) {
+        return create(user, type, title, message, null);
+    }
+
+    @Transactional
+    public Notification create(User user, NotificationType type, String title, String message, String ctaUrl) {
         if (user == null || user.getId() == null || message == null || message.isBlank() || type == null) {
             return null;
         }
@@ -35,6 +40,7 @@ public class NotificationService {
         notification.setType(type);
         notification.setTitle(title != null && !title.isBlank() ? title.trim() : null);
         notification.setMessage(message.trim());
+        notification.setCtaUrl(ctaUrl != null && !ctaUrl.isBlank() ? ctaUrl.trim() : null);
         notification.setCreatedAt(Instant.now(clock));
 
         Notification saved = repository.save(notification);
@@ -98,5 +104,11 @@ public class NotificationService {
     public boolean existsRecent(User user, NotificationType type, String message, Instant after) {
         if (user == null || type == null || message == null || after == null) return false;
         return repository.existsByUserAndTypeAndMessageAndCreatedAtAfter(user, type, message, after);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsRecentByType(User user, NotificationType type, Instant after) {
+        if (user == null || type == null || after == null) return false;
+        return repository.existsByUserAndTypeAndCreatedAtAfter(user, type, after);
     }
 }

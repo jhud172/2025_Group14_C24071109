@@ -110,6 +110,66 @@
             <section class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
+                        <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Shared signals</h2>
+                        <p class="mt-1 text-xs text-slate-500">Only signals the client has opted into sharing are visible.</p>
+                    </div>
+                    <span class="text-xs text-slate-500">Client controls these in profile settings.</span>
+                </div>
+
+                <div th:if="${!hasSharedSignals}" class="mt-4 text-sm text-slate-600 dark:text-slate-300">
+                    Client has not shared sensitive signals yet.
+                </div>
+
+                <div th:if="${hasSharedSignals}" class="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    <div th:if="${shareRecoverySignals}" class="rounded-xl border border-white/10 bg-white/5 p-4">
+                        <div class="text-xs uppercase text-slate-500">Recovery signals</div>
+                        <div th:if="${latestRecovery != null}" class="mt-2">
+                            <div class="text-xs text-slate-500" th:text="${#temporals.format(latestRecovery.date, 'dd MMM yyyy')}">Date</div>
+                            <p class="mt-2 text-sm text-slate-900 dark:text-slate-100" th:text="${latestRecovery.primaryMessage}">Recovery insight</p>
+                        </div>
+                        <div th:if="${latestRecovery == null}" class="mt-2 text-xs text-slate-500">No recovery notes saved yet.</div>
+                    </div>
+
+                    <div th:if="${shareNutritionSignals}" class="rounded-xl border border-white/10 bg-white/5 p-4">
+                        <div class="text-xs uppercase text-slate-500">Nutrition</div>
+                        <div th:if="${latestNutritionSummary != null}" class="mt-2">
+                            <div class="text-xs text-slate-500" th:text="${#temporals.format(latestNutritionSummary.date, 'dd MMM yyyy')}">Date</div>
+                            <div class="mt-2 text-sm text-slate-900 dark:text-slate-100"
+                                 th:text="${latestNutritionSummary.calories != null ? latestNutritionSummary.calories + ' kcal' : 'Calories: n/a'}">Calories</div>
+                            <div class="mt-1 text-xs text-slate-500"
+                                 th:text="${latestNutritionSummary.proteinGrams != null ? 'Protein: ' + latestNutritionSummary.proteinGrams + 'g' : 'Protein: n/a'}">Protein</div>
+                        </div>
+                        <div th:if="${latestNutritionSummary == null}" class="mt-2 text-xs text-slate-500">No nutrition logs shared yet.</div>
+                    </div>
+
+                    <div th:if="${shareWeightTrend}" class="rounded-xl border border-white/10 bg-white/5 p-4">
+                        <div class="text-xs uppercase text-slate-500">Weight trend</div>
+                        <div th:if="${latestWeightRecord != null && latestWeightRecord.weightKg != null}" class="mt-2">
+                            <div class="text-xs text-slate-500" th:text="${#temporals.format(latestWeightRecord.baselineDate, 'dd MMM yyyy')}">Date</div>
+                            <div class="mt-2 text-sm text-slate-900 dark:text-slate-100"
+                                 th:text="${#numbers.formatDecimal(latestWeightRecord.weightKg, 1, 1)} + ' kg'">0 kg</div>
+                            <div th:if="${weightDelta != null}" class="mt-1 text-xs text-slate-500"
+                                   th:text="${(weightDelta > 0 ? '+' : '') + #numbers.formatDecimal(weightDelta, 1, 1) + ' kg since last entry'}">Delta</div>
+                            <div th:if="${weightDelta == null}" class="mt-1 text-xs text-slate-500">No prior weight entry.</div>
+                        </div>
+                        <div th:if="${latestWeightRecord == null || latestWeightRecord.weightKg == null}" class="mt-2 text-xs text-slate-500">No weight records yet.</div>
+                    </div>
+
+                    <div th:if="${shareSleepSignals}" class="rounded-xl border border-white/10 bg-white/5 p-4">
+                        <div class="text-xs uppercase text-slate-500">Sleep</div>
+                        <div class="mt-2 text-xs text-slate-500">No sleep data logged yet.</div>
+                    </div>
+
+                    <div th:if="${shareFatigueSignals}" class="rounded-xl border border-white/10 bg-white/5 p-4">
+                        <div class="text-xs uppercase text-slate-500">Fatigue</div>
+                        <div class="mt-2 text-xs text-slate-500">No fatigue data logged yet.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
                         <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Active goals</h2>
                         <p class="mt-1 text-xs text-slate-500">Weekly adherence snapshot for this client.</p>
                     </div>

@@ -50,6 +50,10 @@
                                 <h2 class="text-lg font-semibold text-slate-900" th:text="${exercise.name}">Exercise</h2>
                                 <span class="text-xs text-slate-500">Sets: <span th:text="${#lists.size(exercise.sets)}">0</span></span>
                             </div>
+                            <div class="mt-1 flex flex-wrap gap-2 text-[11px] text-slate-500" th:if="${exercise.lastSummary != null || exercise.bestSummary != null}">
+                                <span th:if="${exercise.lastSummary != null}" th:text="${exercise.lastSummary}">Last time: —</span>
+                                <span th:if="${exercise.bestSummary != null}" th:text="${exercise.bestSummary}">Best: —</span>
+                            </div>
 
                             <div class="mt-3 space-y-2">
                                 <div th:each="set : ${exercise.sets}"

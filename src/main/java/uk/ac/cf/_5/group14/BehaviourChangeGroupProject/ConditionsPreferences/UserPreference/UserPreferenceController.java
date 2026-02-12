@@ -67,6 +67,19 @@ public class UserPreferenceController {
             userPreferenceForm.setTheme(settings.getTheme() != null ? settings.getTheme().name() : "SYSTEM");
             userPreferenceForm.setEasyMode(settings.isEasyMode());
             userPreferenceForm.setColorBlindMode(settings.isColorBlindMode());
+            userPreferenceForm.setDefaultSets(settings.getDefaultSets());
+            userPreferenceForm.setDefaultRepMin(settings.getDefaultRepMin());
+            userPreferenceForm.setDefaultRepMax(settings.getDefaultRepMax());
+            userPreferenceForm.setPreferredEquipmentBodyweight(settings.isPreferredEquipmentBodyweight());
+            userPreferenceForm.setPreferredEquipmentDumbbell(settings.isPreferredEquipmentDumbbell());
+            userPreferenceForm.setPreferredEquipmentBarbell(settings.isPreferredEquipmentBarbell());
+            userPreferenceForm.setPreferredEquipmentMachine(settings.isPreferredEquipmentMachine());
+            userPreferenceForm.setPreferredEquipmentBands(settings.isPreferredEquipmentBands());
+            userPreferenceForm.setPreferredEquipmentKettlebell(settings.isPreferredEquipmentKettlebell());
+            userPreferenceForm.setMacroTargetCalories(settings.getMacroTargetCalories());
+            userPreferenceForm.setMacroTargetProtein(settings.getMacroTargetProtein());
+            userPreferenceForm.setMacroTargetCarbs(settings.getMacroTargetCarbs());
+            userPreferenceForm.setMacroTargetFat(settings.getMacroTargetFat());
         }
         Map<String, List<Preference>> preferencesByCategory = preferenceService.getPreferencesByCategory();
         Set<Long> lockedConditions = userPreferenceService.getLockedConditions(user);
@@ -113,12 +126,39 @@ public class UserPreferenceController {
             boolean mobility = updated.isDisabilityMobility();
             boolean vision = updated.isDisabilityVision();
             userSettingsService.updateAccessibility(user, userPreferenceForm.isColorBlindMode(), hearing, mobility, vision);
+            userSettingsService.updateSmartDefaults(
+                    user,
+                    userPreferenceForm.getDefaultSets(),
+                    userPreferenceForm.getDefaultRepMin(),
+                    userPreferenceForm.getDefaultRepMax(),
+                    userPreferenceForm.isPreferredEquipmentBodyweight(),
+                    userPreferenceForm.isPreferredEquipmentDumbbell(),
+                    userPreferenceForm.isPreferredEquipmentBarbell(),
+                    userPreferenceForm.isPreferredEquipmentMachine(),
+                    userPreferenceForm.isPreferredEquipmentBands(),
+                    userPreferenceForm.isPreferredEquipmentKettlebell(),
+                    userPreferenceForm.getMacroTargetCalories(),
+                    userPreferenceForm.getMacroTargetProtein(),
+                    userPreferenceForm.getMacroTargetCarbs(),
+                    userPreferenceForm.getMacroTargetFat()
+            );
 
             String language = updated.getLanguage() != null ? updated.getLanguage() : "en";
             localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
         }
 
         return new ModelAndView("redirect:/select-preferences?saved=1");
+    }
+
+    @PostMapping("/select-preferences/reset")
+    public ModelAndView resetSmartDefaults(HttpServletRequest request, HttpServletResponse response) {
+        User user = authHelper.getAuthenticatedUser();
+        UserSettings updated = userSettingsService.resetSmartDefaults(user);
+        if (updated != null) {
+            String language = updated.getLanguage() != null ? updated.getLanguage() : "en";
+            localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+        }
+        return new ModelAndView("redirect:/select-preferences?reset=1");
     }
 
     @GetMapping("/preferences")

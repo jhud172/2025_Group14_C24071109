@@ -65,24 +65,30 @@ public class TrainerScheduleTemplateController {
         return user;
     }
 
-    @GetMapping
-    public ModelAndView index() {
+    private User currentTrainerOrThrow() {
         User trainer = currentUserOrThrow();
         if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
+            throw new AccessDeniedException("Not a trainer");
         }
+        if (!trainer.isTrainerVerified() || !trainer.isEnabled()) {
+            throw new IllegalStateException("TRAINER_NOT_VERIFIED");
+        }
+        return trainer;
+    }
+
+    @GetMapping
+    public ModelAndView index(@RequestParam(value = "error", required = false) String error) {
+        User trainer = currentTrainerOrThrow();
         ModelAndView mav = new ModelAndView("trainer/templates/index");
         mav.addObject("pageTitle", "Trainer Templates");
         mav.addObject("templates", templateService.listForTrainer(trainer));
+        mav.addObject("error", error);
         return mav;
     }
 
     @GetMapping("/create")
     public ModelAndView createForm() {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         ModelAndView mav = new ModelAndView("trainer/templates/edit");
         mav.addObject("pageTitle", "Create Template");
         mav.addObject("template", new TrainerScheduleTemplate());
@@ -97,20 +103,14 @@ public class TrainerScheduleTemplateController {
     public ModelAndView create(@RequestParam String name,
                                @RequestParam(required = false) String description,
                                @RequestParam(required = false) String tags) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         TrainerScheduleTemplate template = templateService.createTemplate(trainer, name, description, tags);
         return new ModelAndView("redirect:/trainer/templates/" + template.getId() + "/edit");
     }
 
     @GetMapping("/{id}/edit")
     public ModelAndView edit(@PathVariable Long id) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         TrainerScheduleTemplate template = templateService.getForTrainer(trainer, id);
         ModelAndView mav = new ModelAndView("trainer/templates/edit");
         mav.addObject("pageTitle", "Edit Template");
@@ -128,20 +128,14 @@ public class TrainerScheduleTemplateController {
                                @RequestParam(required = false) String description,
                                @RequestParam(required = false) String tags,
                                @RequestParam(defaultValue = "false") boolean archived) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         templateService.updateTemplate(trainer, id, name, description, tags, archived);
         return new ModelAndView("redirect:/trainer/templates/" + id + "/edit");
     }
 
     @PostMapping("/{id}/clone")
     public ModelAndView cloneTemplate(@PathVariable Long id) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         TrainerScheduleTemplate clone = templateService.cloneTemplate(trainer, id);
         return new ModelAndView("redirect:/trainer/templates/" + clone.getId() + "/edit");
     }
@@ -158,10 +152,7 @@ public class TrainerScheduleTemplateController {
                                  @RequestParam(required = false) Integer intensityLevel,
                                  @RequestParam(required = false) Long exerciseId,
                                  @RequestParam(required = false) Long customExerciseId) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         TrainerScheduleTemplateEntry entry = new TrainerScheduleTemplateEntry();
         entry.setDayOfWeek(dayOfWeek);
         entry.setTimeWindowStart(parseTime(timeWindowStart));
@@ -184,10 +175,7 @@ public class TrainerScheduleTemplateController {
 
     @PostMapping("/{id}/entries/{entryId}/delete")
     public ModelAndView deleteEntry(@PathVariable Long id, @PathVariable Long entryId) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         templateService.deleteEntry(trainer, id, entryId);
         return new ModelAndView("redirect:/trainer/templates/" + id + "/edit");
     }
@@ -196,20 +184,14 @@ public class TrainerScheduleTemplateController {
     public ModelAndView addQuestion(@PathVariable Long id,
                                     @RequestParam String prompt,
                                     @RequestParam(defaultValue = "true") boolean required) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         weeklyCheckInService.addQuestion(trainer, id, prompt, required);
         return new ModelAndView("redirect:/trainer/templates/" + id + "/edit");
     }
 
     @PostMapping("/{id}/questions/{questionId}/delete")
     public ModelAndView deleteQuestion(@PathVariable Long id, @PathVariable Long questionId) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         weeklyCheckInService.deleteQuestion(trainer, id, questionId);
         return new ModelAndView("redirect:/trainer/templates/" + id + "/edit");
     }
@@ -220,10 +202,7 @@ public class TrainerScheduleTemplateController {
                                   @RequestParam(required = false) String start,
                                   @RequestParam(required = false) String end,
                                   @RequestParam(required = false) String idempotent) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         TrainerScheduleTemplate template = templateService.getForTrainer(trainer, id);
         List<TrainerClientLink> activeLinks = trainerClientLinkService.getActiveClientsForTrainer(trainer.getId());
         ModelAndView mav = new ModelAndView("trainer/templates/apply");
@@ -250,15 +229,20 @@ public class TrainerScheduleTemplateController {
                                       @RequestParam String start,
                                       @RequestParam String end,
                                       @RequestParam(required = false, defaultValue = "false") String idempotent) {
-        User trainer = currentUserOrThrow();
-        if (trainer.getRole() != Role.TRAINER) {
-            return new ModelAndView("redirect:/access-denied");
-        }
+        User trainer = currentTrainerOrThrow();
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
         boolean idempotentFlag = Boolean.parseBoolean(idempotent);
         templateService.applyTemplate(trainer, id, clientId, startDate, endDate, idempotentFlag);
         return new ModelAndView("redirect:/trainer/templates/" + id + "/apply?clientId=" + clientId + "&start=" + start + "&end=" + end + "&idempotent=" + idempotentFlag);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ModelAndView handleIllegalState(IllegalStateException ex) {
+        if ("TRAINER_NOT_VERIFIED".equals(ex.getMessage())) {
+            return new ModelAndView("redirect:/trainer/templates?error=trainer-unverified");
+        }
+        throw ex;
     }
 
     private LocalTime parseTime(String value) {

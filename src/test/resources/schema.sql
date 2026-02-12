@@ -16,6 +16,7 @@ DROP TABLE IF EXISTS gym_membership_products CASCADE;
 DROP TABLE IF EXISTS off_platform_payment_attempts CASCADE;
 DROP TABLE IF EXISTS message_thread_messages CASCADE;
 DROP TABLE IF EXISTS message_threads CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
 
 DROP TABLE IF EXISTS message CASCADE;
 DROP TABLE IF EXISTS conversation_participant CASCADE;
@@ -66,6 +67,7 @@ DROP TABLE IF EXISTS schedules CASCADE;
 DROP TABLE IF EXISTS exercise_log CASCADE;
 DROP TABLE IF EXISTS calendar_tasks CASCADE;
 DROP TABLE IF EXISTS day_health CASCADE;
+DROP TABLE IF EXISTS daily_nutrition_logs CASCADE;
 DROP TABLE IF EXISTS daily_focus CASCADE;
 DROP TABLE IF EXISTS adaptive_feedback CASCADE;
 DROP TABLE IF EXISTS daily_completion CASCADE;
@@ -122,6 +124,50 @@ CREATE TABLE IF NOT EXISTS users
     CONSTRAINT uq_users_username UNIQUE (username),
     CONSTRAINT uq_users_public_id UNIQUE (public_id)
 );
+
+-- =========================
+-- NOTIFICATIONS
+-- =========================
+CREATE TABLE IF NOT EXISTS notifications
+(
+    id           BIGSERIAL PRIMARY KEY,
+    user_id      BIGINT      NOT NULL,
+    type         VARCHAR(20) NOT NULL,
+    title        VARCHAR(255),
+    message      TEXT        NOT NULL,
+    cta_url      VARCHAR(500),
+    created_at   TIMESTAMP   NOT NULL,
+    read_at      TIMESTAMP   NULL,
+    dismissed_at TIMESTAMP   NULL,
+
+    CONSTRAINT fk_notifications_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS quick_action_definitions
+(
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    name VARCHAR(120) NOT NULL,
+    action_key VARCHAR(60),
+    prompt VARCHAR(2000),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_quick_action_user
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_quick_action_user
+    ON quick_action_definitions (user_id, sort_order);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created
+    ON notifications (user_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_status
+    ON notifications (user_id, read_at, dismissed_at);
 
 -- =========================
 -- PLATFORM SUBSCRIPTIONS
@@ -268,9 +314,27 @@ CREATE TABLE IF NOT EXISTS user_settings
     disability_hearing BOOLEAN NOT NULL DEFAULT FALSE,
     disability_mobility BOOLEAN NOT NULL DEFAULT FALSE,
     disability_vision BOOLEAN NOT NULL DEFAULT FALSE,
+    share_recovery_signals BOOLEAN NOT NULL DEFAULT FALSE,
+    share_nutrition_signals BOOLEAN NOT NULL DEFAULT FALSE,
+    share_sleep_signals BOOLEAN NOT NULL DEFAULT FALSE,
+    share_fatigue_signals BOOLEAN NOT NULL DEFAULT FALSE,
+    share_weight_trend BOOLEAN NOT NULL DEFAULT FALSE,
     calendar_task_ordering VARCHAR(30) NOT NULL DEFAULT 'CHRONOLOGICAL',
     calendar_task_layout   VARCHAR(30) NOT NULL DEFAULT 'COMBINED_LIST',
     calendar_workout_ordering VARCHAR(30) NOT NULL DEFAULT 'SCHEDULE_ORDER',
+    default_sets INT NOT NULL DEFAULT 3,
+    default_rep_min INT NOT NULL DEFAULT 8,
+    default_rep_max INT NOT NULL DEFAULT 12,
+    preferred_equipment_bodyweight BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_dumbbell BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_barbell BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_machine BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_bands BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_kettlebell BOOLEAN NOT NULL DEFAULT FALSE,
+    macro_target_calories INT NULL,
+    macro_target_protein INT NULL,
+    macro_target_carbs INT NULL,
+    macro_target_fat INT NULL,
     quiet_hours_start TIME NULL,
     quiet_hours_end   TIME NULL,
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1634,6 +1698,37 @@ CREATE TABLE IF NOT EXISTS day_health
         FOREIGN KEY (user_id) REFERENCES users (id)
             ON DELETE CASCADE
 );
+
+-- =========================
+-- DAILY NUTRITION LOGS
+-- =========================
+CREATE TABLE IF NOT EXISTS daily_nutrition_logs
+(
+    id            BIGSERIAL PRIMARY KEY,
+    user_id       BIGINT      NOT NULL,
+    log_date      DATE        NOT NULL,
+    calories      INTEGER     NOT NULL,
+    protein_grams INTEGER     NOT NULL,
+    carbs_grams   INTEGER     NOT NULL,
+    fat_grams     INTEGER     NOT NULL,
+    fibre_grams   INTEGER     NULL,
+    water_ml      INTEGER     NULL,
+    notes         VARCHAR(1000) NULL,
+    updated_at    TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_daily_nutrition_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT uq_daily_nutrition_user_date
+        UNIQUE (user_id, log_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_nutrition_user
+    ON daily_nutrition_logs (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_daily_nutrition_user_date
+    ON daily_nutrition_logs (user_id, log_date);
 
 -- =========================
 -- WORKOUTS

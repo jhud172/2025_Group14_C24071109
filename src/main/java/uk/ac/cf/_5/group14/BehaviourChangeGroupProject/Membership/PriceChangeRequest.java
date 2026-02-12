@@ -19,7 +19,8 @@ public class PriceChangeRequest {
     @NotBlank(message = "Reason for price change is required")
     @Size(max = 500, message = "Reason must not exceed 500 characters")
     private String reason;
-    
+
+    @NotNull(message = "Effective date is required")
     private LocalDate effectiveDate;
 
     public Integer toNewPriceCents() {

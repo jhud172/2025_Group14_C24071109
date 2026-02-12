@@ -15,6 +15,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Use
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreferenceService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.PhysicalCondition.PhysicalConditionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.ThemePreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
@@ -55,6 +56,12 @@ public class UserPreferenceControllerOnlyTest {
 
         given(authHelper.getAuthenticatedUser()).willReturn(testUser);
         UserPreferenceForm testForm = new UserPreferenceForm();
+        UserSettings settings = new UserSettings();
+        settings.setUser(testUser);
+        settings.setLanguage("en");
+        settings.setTheme(ThemePreference.SYSTEM);
+
+        given(userSettingsService.update(testUser, "en", ThemePreference.SYSTEM, false)).willReturn(settings);
 
         // When the user does not select any preferences and submits the select preferences form.
         MvcResult when = mvc
@@ -69,7 +76,23 @@ public class UserPreferenceControllerOnlyTest {
 
         then(userPreferenceService).should().selectPreferences(testUser, testForm);
         then(userPreferenceService).should().selectConditions(testUser, testForm);
-                then(userSettingsService).should().update(testUser, "en", ThemePreference.SYSTEM, false);
+        then(userSettingsService).should().update(testUser, "en", ThemePreference.SYSTEM, false);
+        then(userSettingsService).should().updateSmartDefaults(
+                testUser,
+                null,
+                null,
+                null,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                null,
+                null,
+                null,
+                null
+        );
     }
 
     @Test

@@ -233,6 +233,26 @@ public class ProfileController {
         return "redirect:/profile";
     }
 
+    @PostMapping("/profile/settings/trainer-sharing")
+    public String updateTrainerSharing(@RequestParam(value = "shareRecoverySignals", required = false) String shareRecoverySignals,
+                                       @RequestParam(value = "shareNutritionSignals", required = false) String shareNutritionSignals,
+                                       @RequestParam(value = "shareSleepSignals", required = false) String shareSleepSignals,
+                                       @RequestParam(value = "shareFatigueSignals", required = false) String shareFatigueSignals,
+                                       @RequestParam(value = "shareWeightTrend", required = false) String shareWeightTrend,
+                                       RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        userSettingsService.updateTrainerSharing(
+                user,
+                shareRecoverySignals != null,
+                shareNutritionSignals != null,
+                shareSleepSignals != null,
+                shareFatigueSignals != null,
+                shareWeightTrend != null
+        );
+        redirectAttributes.addFlashAttribute("settingsUpdated", true);
+        return "redirect:/profile";
+    }
+
     @PostMapping("/profile/conditions/permanent")
     public String addPermanentCondition(@RequestParam("conditionName") String conditionName,
                                         RedirectAttributes redirectAttributes) {

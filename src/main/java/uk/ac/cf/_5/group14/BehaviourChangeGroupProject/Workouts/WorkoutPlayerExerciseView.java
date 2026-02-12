@@ -12,4 +12,6 @@ public class WorkoutPlayerExerciseView {
     private String name;
     private int orderIndex;
     private List<WorkoutSetLog> sets = new ArrayList<>();
+    private String lastSummary;
+    private String bestSummary;
 }

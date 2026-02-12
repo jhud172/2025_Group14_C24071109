@@ -45,6 +45,21 @@ public class UserSettings {
     @Column(name = "disability_vision", nullable = false)
     private boolean disabilityVision = false;
 
+    @Column(name = "share_recovery_signals", nullable = false)
+    private boolean shareRecoverySignals = false;
+
+    @Column(name = "share_nutrition_signals", nullable = false)
+    private boolean shareNutritionSignals = false;
+
+    @Column(name = "share_sleep_signals", nullable = false)
+    private boolean shareSleepSignals = false;
+
+    @Column(name = "share_fatigue_signals", nullable = false)
+    private boolean shareFatigueSignals = false;
+
+    @Column(name = "share_weight_trend", nullable = false)
+    private boolean shareWeightTrend = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "calendar_task_ordering", nullable = false, length = 30)
     private CalendarTaskOrderingPreference calendarTaskOrdering = CalendarTaskOrderingPreference.CHRONOLOGICAL;
@@ -56,6 +71,45 @@ public class UserSettings {
     @Enumerated(EnumType.STRING)
     @Column(name = "calendar_workout_ordering", nullable = false, length = 30)
     private CalendarWorkoutOrderingPreference calendarWorkoutOrdering = CalendarWorkoutOrderingPreference.SCHEDULE_ORDER;
+
+    @Column(name = "default_sets", nullable = false)
+    private int defaultSets = 3;
+
+    @Column(name = "default_rep_min", nullable = false)
+    private int defaultRepMin = 8;
+
+    @Column(name = "default_rep_max", nullable = false)
+    private int defaultRepMax = 12;
+
+    @Column(name = "preferred_equipment_bodyweight", nullable = false)
+    private boolean preferredEquipmentBodyweight = false;
+
+    @Column(name = "preferred_equipment_dumbbell", nullable = false)
+    private boolean preferredEquipmentDumbbell = false;
+
+    @Column(name = "preferred_equipment_barbell", nullable = false)
+    private boolean preferredEquipmentBarbell = false;
+
+    @Column(name = "preferred_equipment_machine", nullable = false)
+    private boolean preferredEquipmentMachine = false;
+
+    @Column(name = "preferred_equipment_bands", nullable = false)
+    private boolean preferredEquipmentBands = false;
+
+    @Column(name = "preferred_equipment_kettlebell", nullable = false)
+    private boolean preferredEquipmentKettlebell = false;
+
+    @Column(name = "macro_target_calories")
+    private Integer macroTargetCalories;
+
+    @Column(name = "macro_target_protein")
+    private Integer macroTargetProtein;
+
+    @Column(name = "macro_target_carbs")
+    private Integer macroTargetCarbs;
+
+    @Column(name = "macro_target_fat")
+    private Integer macroTargetFat;
 
     @Column(name = "quiet_hours_start")
     private LocalTime quietHoursStart;

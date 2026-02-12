@@ -3,7 +3,7 @@
 ## 1. Platform Overview
 The platform currently supports gym membership products with price-change auditing and notifications, trainer verification workflows, advanced goals with check-ins and adherence logic, trainer templates with coaching phases, weekly check-ins, workouts, notes, inbox messaging, and ChatV2 with a coach chat widget.
 Legacy and v2 systems exist in parallel.
-Build status at last update: build successful, all 24 tests passing, no compilation errors, schema updates completed.
+Build status at last update: not re-verified after the latest gym admin membership list updates.
 
 ## 2. Implementation Timeline (Ordered)
 
@@ -26,9 +26,11 @@ Build status at last update: build successful, all 24 tests passing, no compilat
 #### Services / Business Logic
 - EmailService interface: `sendPriceChangeNotification()`, `sendTrainerVerificationUpdate()`.
 - EmailServiceImpl logs email notifications to the console (ready for real integration).
+- Stub email logging uses `NOTIFICATION_QUEUED` lines so UI messaging can stay consistent while real email remains unintegrated.
 - MembershipProductService: `createProduct()`, `updateProduct()`, `initiatePriceChange()`, `getPriceChangeHistory()`, `createSubscription()`, `cancelSubscription()`.
-- Membership price-change rules: reason and effective date required, effective date not in the past, price must change, price applies at renewal, notifications sent to affected subscribers, audit trail recorded.
+- Membership price-change rules: reason and effective date required, effective date must be in the future, price must change, price applies at renewal, notifications sent to affected subscribers, audit trail recorded.
 - TrainerVerificationService: `createVerificationRequest()`, `getPendingRequests()`, `getRequestsByGym()`, `approveTrainer()`, `rejectTrainer()`, `requestMoreInfo()`, `updateTrainerNotes()`, `isTrainerVerified()`.
+- Trainer directory gating: explore and client trainer lists only return trainers with `trainerVerified=true` and `enabled=true` via repository query.
 - Verification rules: trainers start unverified, only one pending request per trainer, status transitions PENDING to APPROVED/REJECTED/NEEDS_INFO and NEEDS_INFO back to PENDING, notifications on all status changes.
 - Repositories: GymMembershipProductRepository, GymMemberSubscriptionRepository, PriceChangeEventRepository, TrainerVerificationRequestRepository.
 - Email integration guidance: replace EmailServiceImpl log statements with real email sends, consider Spring Mail or third-party providers, add email templates, add retry logic for failed sends.
@@ -36,6 +38,7 @@ Build status at last update: build successful, all 24 tests passing, no compilat
 #### Controllers & Routes
 - GymAdminMembershipController:
   - GET /gym/admin/memberships
+  - POST /gym/admin/memberships/{id}/status
   - GET /gym/admin/memberships/create
   - POST /gym/admin/memberships/create
   - GET /gym/admin/memberships/{id}/edit
@@ -55,7 +58,13 @@ Build status at last update: build successful, all 24 tests passing, no compilat
   - POST /super-admin/verification/{id}/request-info
 
 #### Templates / Fragments
-- None documented for this phase (see Open UI Template Gaps).
+- templates/gym-admin/memberships/list.html (paginated list with subscriber counts and activate/deactivate action).
+- templates/gym-admin/memberships/form.html (create/edit form; fields: name, description, price (create only), billing period (create only), active).
+- templates/gym-admin/memberships/price-change.html (shows current price, affected subscriber count, new price, effective date, reason, confirmation banner, and inline validation).
+- templates/gym-admin/memberships/price-history.html (timeline of price changes with old/new price, effective date, reason, changed by, affected members, created date, plus pagination).
+- templates/gym-admin/trainers.html (trainer list with verification status chips, submitted notes, admin notes, create trainer form, needs-info update notes modal, and validation banners).
+- templates/super-admin/verification-queue.html (verification queue with trainer identity, gym, submitted date, status, notes, details panel, and approval/reject/request-info actions).
+- templates/super-admin/verification-detail.html (full request detail view with trainer/admin notes, timestamps, reviewer, and approve/reject/request-info forms).
 
 #### Security / Ownership Rules
 - Gym admin endpoints check `admin.getGymId()` to ensure admins only manage their own gym data.
@@ -70,7 +79,7 @@ Build status at last update: build successful, all 24 tests passing, no compilat
 - Updated tables: users (added `trainer_verified BOOLEAN NOT NULL DEFAULT FALSE`).
 - Constraints and integrity: unique constraint on (user_id, gym_id) for subscriptions; foreign keys for users/products/reviewers.
 - Performance: indexed foreign keys for efficient queries; price change operations are transactional.
-- Pagination should be added for large product/subscription/audit lists.
+- Pagination added for gym admin membership list; other large lists may still need pagination.
 
 ```sql
 -- Gym Membership Products
@@ -140,7 +149,14 @@ CREATE TABLE trainer_verification_requests (
 #### Tests Added
 - MembershipProductServiceTest (11 tests): create product, price change validation and flow, subscription creation/duplication, cancellation.
 - TrainerVerificationServiceTest (13 tests): request creation, duplicate prevention, approval/rejection/needs-info flows, status checks.
-- All 24 tests passing successfully.
+- GymAdminMembershipControllerTest (4 tests): list pagination/subscriber counts, activate/deactivate action, create/edit validation errors.
+- GymAdminMembershipPriceChangeControllerTest (4 tests): price change validation errors and service invocation.
+- GymAdminTrainerControllerTest (2 tests): ownership denial for update notes, needs-info to pending transition.
+- SuperAdminVerificationControllerSecurityTest (1 test): non-super-admin access denied for queue.
+- SuperAdminVerificationControllerValidationTest (3 tests): approve optional notes, reject/request-info require notes.
+- ExploreDirectoryVisibilityTest (1 test): explore lists only verified + enabled trainers.
+- ClientTrainerDirectoryVisibilityTest (1 test): client trainer directory lists only verified + enabled trainers.
+ - Test status not re-verified after adding the controller tests.
 - Build successful, no compilation errors, schema updates completed.
 
 #### Manual Test Checklist
@@ -152,6 +168,7 @@ CREATE TABLE trainer_verification_requests (
 6. As super admin, approve the trainer and confirm trainerVerified is set and notifications are logged.
 7. As super admin, reject a trainer and confirm the trainer remains unverified with rejection notes.
 8. Request more info, submit updated notes, and confirm the request returns to PENDING.
+9. Confirm success banners mention queued notifications even with stub emails.
 
 ### Phase 1 — Advanced Goals System
 #### Scope Delivered
@@ -266,6 +283,7 @@ CREATE TABLE trainer_verification_requests (
 - Templates can only be applied to ACTIVE trainer-client links; enforced via AccessGuard in TrainerScheduleTemplateServiceImpl.
 - Coaching phase updates require trainer role and ACTIVE link; enforced in TrainerClientLinkService and TrainerClientsController.
 - Weekly check-in submission requires an ACTIVE trainer link; trainer review requires ACTIVE link to client; enforced in WeeklyCheckInServiceImpl and AccessGuard.
+- Trainer-only actions (client management, library CRUD/share, template CRUD/apply) require `trainerVerified=true` and `enabled=true`; unverified trainers are redirected with banners on trainer clients, library, and template pages.
 
 #### Database Changes
 - New tables: trainer_schedule_templates, trainer_schedule_template_entries, trainer_checkin_questions, weekly_check_ins, coaching_phase_changes.
@@ -276,6 +294,9 @@ CREATE TABLE trainer_verification_requests (
 
 #### Tests Added
 - TrainerTemplates/TrainerScheduleTemplateServiceTest: apply creates schedule occurrences, blocked without ACTIVE link, idempotent apply prevents duplicates.
+- TrainerTemplates/TrainerScheduleTemplateServiceTest: unverified trainer blocked from creating templates.
+- TrainerClient/TrainerClientLinkServiceTest: unverified trainer blocked from accepting requests.
+- TrainerLibrary/TrainerLibrarySecurityTest: unverified trainer blocked from library creation.
 
 #### Manual Test Checklist
 1. As trainer, create a template and add TASK/WORKOUT/NOTE entries.
@@ -398,3 +419,7 @@ CREATE TABLE trainer_verification_requests (
 5. gym-admin-trainers.html - Trainer list and verification request status
 6. super-admin-verification-queue.html - Pending requests queue with approve/reject/request-info actions
 7. super-admin-verification-detail.html - Detailed view of verification request
+
+## 5. Docs Update
+- Updated [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md) template catalogue to match the filesystem, including conditions preference pages, goal chip fragment, and the duplicate logout template path.
+- Updated [UI_TEMPLATES_SUMMARY.md](UI_TEMPLATES_SUMMARY.md) with conditions preference pages, goal chip fragment, and explicit duplicate logout template documentation.

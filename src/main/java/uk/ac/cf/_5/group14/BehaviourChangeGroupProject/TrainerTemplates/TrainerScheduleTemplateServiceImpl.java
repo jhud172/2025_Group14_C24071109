@@ -242,6 +242,9 @@ public class TrainerScheduleTemplateServiceImpl implements TrainerScheduleTempla
         if (trainer == null || trainer.getRole() != Role.TRAINER) {
             throw new AccessDeniedException("Trainer role required");
         }
+        if (!trainer.isTrainerVerified() || !trainer.isEnabled()) {
+            throw new AccessDeniedException("TRAINER_NOT_VERIFIED");
+        }
     }
 
     private User loadClientForTrainer(User trainer, Long clientId) {

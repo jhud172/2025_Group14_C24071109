@@ -41,6 +41,9 @@ public class Notification {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
+    @Column(name = "cta_url", length = 500)
+    private String ctaUrl;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

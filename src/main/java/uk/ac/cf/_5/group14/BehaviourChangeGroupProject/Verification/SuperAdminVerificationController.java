@@ -55,20 +55,27 @@ public class SuperAdminVerificationController {
      */
     @GetMapping("/{id}")
     public String viewRequest(@PathVariable Long id, Model model) {
-        TrainerVerificationRequest request = verificationService.getLatestRequestForTrainer(id);
-        
-        if (request == null) {
+        TrainerVerificationRequest request;
+        try {
+            request = verificationService.getRequestById(id);
+        } catch (IllegalArgumentException ex) {
             model.addAttribute("error", "Verification request not found");
             return "error/404";
         }
         
         User trainer = userRepository.findById(request.getTrainerUserId())
             .orElseThrow(() -> new IllegalArgumentException("Trainer not found"));
+
+        User reviewer = null;
+        if (request.getReviewedByUserId() != null) {
+            reviewer = userRepository.findById(request.getReviewedByUserId()).orElse(null);
+        }
         
         model.addAttribute("request", request);
         model.addAttribute("trainer", trainer);
-        
-        return "super-admin-verification-detail";
+        model.addAttribute("reviewer", reviewer);
+
+        return "super-admin/verification-detail";
     }
     
     /**
@@ -85,7 +92,7 @@ public class SuperAdminVerificationController {
         
         try {
             verificationService.approveTrainer(id, admin.getId(), adminNotes);
-            redirectAttributes.addFlashAttribute("successMessage", "Trainer approved successfully");
+            redirectAttributes.addFlashAttribute("successMessage", "Trainer approved successfully. Notification queued.");
         } catch (Exception e) {
             log.error("Error approving trainer", e);
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -105,10 +112,15 @@ public class SuperAdminVerificationController {
         RedirectAttributes redirectAttributes
     ) {
         User admin = getUserFromDetails(userDetails);
+
+        if (adminNotes == null || adminNotes.isBlank()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please provide a rejection reason");
+            return "redirect:/super-admin/verification/queue";
+        }
         
         try {
             verificationService.rejectTrainer(id, admin.getId(), adminNotes);
-            redirectAttributes.addFlashAttribute("successMessage", "Trainer verification rejected");
+            redirectAttributes.addFlashAttribute("successMessage", "Trainer verification rejected. Notification queued.");
         } catch (Exception e) {
             log.error("Error rejecting trainer", e);
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -136,7 +148,7 @@ public class SuperAdminVerificationController {
         
         try {
             verificationService.requestMoreInfo(id, admin.getId(), adminNotes);
-            redirectAttributes.addFlashAttribute("successMessage", "Information requested from trainer");
+            redirectAttributes.addFlashAttribute("successMessage", "Information requested from trainer. Notification queued.");
         } catch (Exception e) {
             log.error("Error requesting more info", e);
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

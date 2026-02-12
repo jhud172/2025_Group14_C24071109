@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -17,13 +18,16 @@ public class WorkoutBuilderServiceImpl implements WorkoutBuilderService {
     private final WorkoutTemplateRepository templateRepository;
     private final WorkoutSessionRepository sessionRepository;
     private final WorkoutSetLogRepository setLogRepository;
+    private final WorkoutPerformanceService workoutPerformanceService;
 
     public WorkoutBuilderServiceImpl(WorkoutTemplateRepository templateRepository,
                                      WorkoutSessionRepository sessionRepository,
-                                     WorkoutSetLogRepository setLogRepository) {
+                                     WorkoutSetLogRepository setLogRepository,
+                                     WorkoutPerformanceService workoutPerformanceService) {
         this.templateRepository = templateRepository;
         this.sessionRepository = sessionRepository;
         this.setLogRepository = setLogRepository;
+        this.workoutPerformanceService = workoutPerformanceService;
     }
 
     @Override
@@ -102,6 +106,10 @@ public class WorkoutBuilderServiceImpl implements WorkoutBuilderService {
         WorkoutSetLog setLog = setLogRepository.findByIdAndSession(setId, session)
                 .orElseThrow(() -> new IllegalArgumentException("Set not found"));
 
+        boolean wasCompleted = setLog.isCompleted();
+        Double previousWeight = setLog.getWeight();
+        Integer previousReps = setLog.getReps();
+
         if (request == null) {
             return setLog;
         }
@@ -121,6 +129,12 @@ public class WorkoutBuilderServiceImpl implements WorkoutBuilderService {
 
         setLogRepository.save(setLog);
         rollupSession(session);
+
+        boolean weightChanged = request.getWeight() != null && !Objects.equals(previousWeight, setLog.getWeight());
+        boolean repsChanged = request.getReps() != null && !Objects.equals(previousReps, setLog.getReps());
+        boolean completionChanged = request.getCompleted() != null && request.getCompleted() && !wasCompleted;
+        boolean shouldEvaluate = completionChanged || weightChanged || repsChanged;
+        workoutPerformanceService.maybeNotifyPr(user, session, setLog, shouldEvaluate);
         return setLog;
     }
 

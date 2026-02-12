@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const threadRoot = document.getElementById("inboxThreadRoot");
     const listRoot = document.getElementById("inboxThreadList");
     const emptyState = document.getElementById("inboxEmptyState");
+    const notificationList = document.getElementById("notificationInboxList");
+    const notificationEmpty = document.getElementById("notificationInboxEmpty");
+    const notificationReadAll = document.getElementById("notificationInboxReadAll");
 
     const csrfToken = document.getElementById("inbox_csrf")?.value || null;
     const csrfHeader = document.getElementById("inbox_csrf_header")?.value || "X-CSRF-TOKEN";
@@ -23,6 +26,19 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await res.json();
             if (!Array.isArray(data)) return;
             renderThreads(data);
+        } catch {
+            // ignore
+        }
+    }
+
+    async function fetchNotifications() {
+        if (!notificationList || !notificationEmpty) return;
+        try {
+            const res = await fetch("/api/notifications?limit=50", { method: "GET" });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (!Array.isArray(data)) return;
+            renderNotifications(data);
         } catch {
             // ignore
         }
@@ -108,6 +124,103 @@ document.addEventListener("DOMContentLoaded", () => {
         listRoot.appendChild(list);
     }
 
+    function renderNotifications(notifications) {
+        if (!notificationList || !notificationEmpty) return;
+        notificationList.innerHTML = "";
+
+        if (!notifications.length) {
+            notificationEmpty.classList.remove("hidden");
+            return;
+        }
+
+        notificationEmpty.classList.add("hidden");
+        notifications.forEach((notification) => {
+            notificationList.appendChild(buildNotificationRow(notification));
+        });
+    }
+
+    function buildNotificationRow(notification) {
+        const row = document.createElement("div");
+        const isUnread = !notification.readAt && !notification.dismissedAt;
+        row.className = `flex flex-col gap-2 px-6 py-4 transition ${
+            isUnread
+                ? "bg-emerald-500/5"
+                : "bg-white dark:bg-slate-950/10"
+        }`;
+
+        const header = document.createElement("div");
+        header.className = "flex items-start justify-between gap-3";
+
+        const titleWrap = document.createElement("div");
+        titleWrap.className = "flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100";
+
+        if (isUnread) {
+            const dot = document.createElement("span");
+            dot.className = "h-2 w-2 rounded-full bg-emerald-500";
+            titleWrap.appendChild(dot);
+        }
+
+        const title = document.createElement("span");
+        title.textContent = notification.title || "Notification";
+        titleWrap.appendChild(title);
+
+        const actions = document.createElement("div");
+        actions.className = "flex items-center gap-2";
+
+        if (isUnread) {
+            const markRead = document.createElement("button");
+            markRead.type = "button";
+            markRead.className = "text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200";
+            markRead.textContent = "Mark read";
+            markRead.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                await markNotificationRead(notification.id);
+                await fetchNotifications();
+            });
+            actions.appendChild(markRead);
+        }
+
+        header.appendChild(titleWrap);
+        header.appendChild(actions);
+
+        const message = document.createElement("p");
+        message.className = "text-sm text-slate-600 dark:text-slate-300";
+        message.textContent = notification.message || "";
+
+        const meta = document.createElement("div");
+        meta.className = "text-xs text-slate-400";
+        meta.textContent = formatDate(notification.createdAt);
+
+        row.appendChild(header);
+        row.appendChild(message);
+
+        if (notification.ctaUrl) {
+            const cta = document.createElement("a");
+            cta.href = notification.ctaUrl;
+            cta.className = "inline-flex w-fit items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200";
+            cta.textContent = "Open";
+            cta.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                if (isUnread) {
+                    await markNotificationRead(notification.id);
+                }
+            });
+            row.appendChild(cta);
+        }
+
+        row.appendChild(meta);
+
+        if (isUnread) {
+            row.addEventListener("click", async () => {
+                await markNotificationRead(notification.id);
+                await fetchNotifications();
+            });
+            row.style.cursor = "pointer";
+        }
+
+        return row;
+    }
+
     async function fetchThread(threadId) {
         try {
             const res = await fetch(`/api/inbox/threads/${threadId}`, { method: "GET" });
@@ -182,6 +295,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    async function markNotificationRead(id) {
+        if (!id) return;
+        try {
+            await fetch(`/api/notifications/${id}/read`, { method: "POST", headers });
+        } catch {
+            // ignore
+        }
+    }
+
     async function sendMessage(threadId, bodyText, attachmentUrl) {
         const payload = {
             bodyText,
@@ -200,6 +322,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (listRoot) {
         fetchThreads();
         setInterval(fetchThreads, 8000);
+    }
+
+    if (notificationList) {
+        fetchNotifications();
+    }
+
+    if (notificationReadAll) {
+        notificationReadAll.addEventListener("click", async () => {
+            await fetch("/api/notifications/read-all", { method: "POST", headers });
+            await fetchNotifications();
+        });
     }
 
     if (threadRoot) {

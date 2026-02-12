@@ -7,6 +7,7 @@ public record NotificationDto(
         NotificationType type,
         String title,
         String message,
+    String ctaUrl,
         Instant createdAt,
         Instant readAt,
         Instant dismissedAt
@@ -18,6 +19,7 @@ public record NotificationDto(
                 n.getType(),
                 n.getTitle(),
                 n.getMessage(),
+            n.getCtaUrl(),
                 n.getCreatedAt(),
                 n.getReadAt(),
                 n.getDismissedAt()

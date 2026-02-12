@@ -12,6 +12,8 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkSource;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalStatus;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
@@ -31,19 +33,25 @@ public class WorkoutBuilderController {
     private final AuthHelper authHelper;
     private final GoalService goalService;
     private final GoalLinkService goalLinkService;
+    private final WorkoutPerformanceService workoutPerformanceService;
+    private final UserSettingsService userSettingsService;
 
     public WorkoutBuilderController(WorkoutBuilderService workoutBuilderService,
                                     ExerciseService exerciseService,
                                     CustomExerciseService customExerciseService,
                                     AuthHelper authHelper,
                                     GoalService goalService,
-                                    GoalLinkService goalLinkService) {
+                                    GoalLinkService goalLinkService,
+                                    WorkoutPerformanceService workoutPerformanceService,
+                                    UserSettingsService userSettingsService) {
         this.workoutBuilderService = workoutBuilderService;
         this.exerciseService = exerciseService;
         this.customExerciseService = customExerciseService;
         this.authHelper = authHelper;
         this.goalService = goalService;
         this.goalLinkService = goalLinkService;
+        this.workoutPerformanceService = workoutPerformanceService;
+        this.userSettingsService = userSettingsService;
     }
 
     @GetMapping
@@ -81,6 +89,7 @@ public class WorkoutBuilderController {
         model.addAttribute("template", template);
         model.addAttribute("form", form);
         hydrateExerciseOptions(model, user);
+        applySmartDefaults(model, user);
         return "workouts/edit";
     }
 
@@ -173,6 +182,16 @@ public class WorkoutBuilderController {
         model.addAttribute("customExercises", customExercises);
     }
 
+    private void applySmartDefaults(Model model, User user) {
+        UserSettings settings = userSettingsService.getOrCreate(user);
+        int defaultSets = settings != null ? settings.getDefaultSets() : 3;
+        int repMin = settings != null ? settings.getDefaultRepMin() : 8;
+        int repMax = settings != null ? settings.getDefaultRepMax() : 12;
+        model.addAttribute("defaultSets", defaultSets);
+        model.addAttribute("defaultRepMin", repMin);
+        model.addAttribute("defaultRepMax", repMax);
+    }
+
     private WorkoutTemplateForm toForm(WorkoutTemplate template) {
         WorkoutTemplateForm form = new WorkoutTemplateForm();
         form.setName(template.getName());
@@ -263,6 +282,15 @@ public class WorkoutBuilderController {
         list.sort(Comparator.comparingInt(WorkoutPlayerExerciseView::getOrderIndex));
         for (WorkoutPlayerExerciseView view : list) {
             view.getSets().sort(Comparator.comparingInt(WorkoutSetLog::getSetNumber));
+            WorkoutPerformanceHint hint = workoutPerformanceService.buildHint(
+                    session.getUser(),
+                    view.getName(),
+                    session.getStartedAt()
+            );
+            if (hint != null) {
+                view.setLastSummary(hint.lastSummary());
+                view.setBestSummary(hint.bestSummary());
+            }
         }
         return list;
     }

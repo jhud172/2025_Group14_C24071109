@@ -3,6 +3,9 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerLibrary;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.Role;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLink;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkStatus;
@@ -11,6 +14,8 @@ import java.util.*;
 
 @Service
 public class TrainerLibraryService {
+
+    public static final String ERROR_TRAINER_NOT_VERIFIED = "TRAINER_NOT_VERIFIED";
 
     private final TrainerLibraryExerciseRepository exerciseRepository;
     private final TrainerLibraryExerciseNoteRepository exerciseNoteRepository;
@@ -22,6 +27,7 @@ public class TrainerLibraryService {
     private final TrainerLibraryProgrammeNoteRepository programmeNoteRepository;
     private final TrainerLibrarySharedTemplateRepository sharedTemplateRepository;
     private final TrainerClientLinkRepository trainerClientLinkRepository;
+    private final UserRepository userRepository;
 
     public TrainerLibraryService(TrainerLibraryExerciseRepository exerciseRepository,
                                 TrainerLibraryExerciseNoteRepository exerciseNoteRepository,
@@ -32,7 +38,8 @@ public class TrainerLibraryService {
                                 TrainerLibraryProgrammeDayRepository programmeDayRepository,
                                 TrainerLibraryProgrammeNoteRepository programmeNoteRepository,
                                 TrainerLibrarySharedTemplateRepository sharedTemplateRepository,
-                                TrainerClientLinkRepository trainerClientLinkRepository) {
+                                TrainerClientLinkRepository trainerClientLinkRepository,
+                                UserRepository userRepository) {
         this.exerciseRepository = exerciseRepository;
         this.exerciseNoteRepository = exerciseNoteRepository;
         this.workoutTemplateRepository = workoutTemplateRepository;
@@ -43,22 +50,27 @@ public class TrainerLibraryService {
         this.programmeNoteRepository = programmeNoteRepository;
         this.sharedTemplateRepository = sharedTemplateRepository;
         this.trainerClientLinkRepository = trainerClientLinkRepository;
+        this.userRepository = userRepository;
     }
 
     public List<TrainerLibraryExercise> listExercises(Long trainerId) {
+        requireVerifiedTrainer(trainerId);
         return exerciseRepository.findByTrainerIdOrderByCreatedAtDesc(trainerId);
     }
 
     public List<TrainerLibraryWorkoutTemplate> listWorkouts(Long trainerId) {
+        requireVerifiedTrainer(trainerId);
         return workoutTemplateRepository.findByTrainerIdOrderByCreatedAtDesc(trainerId);
     }
 
     public List<TrainerLibraryProgrammeTemplate> listProgrammes(Long trainerId) {
+        requireVerifiedTrainer(trainerId);
         return programmeTemplateRepository.findByTrainerIdOrderByCreatedAtDesc(trainerId);
     }
 
     @Transactional
     public TrainerLibraryExercise createExercise(Long trainerId, TrainerLibraryExerciseForm form) {
+        requireVerifiedTrainer(trainerId);
         TrainerLibraryExercise exercise = new TrainerLibraryExercise(trainerId);
         applyExerciseForm(exercise, form);
         exercise = exerciseRepository.save(exercise);
@@ -68,6 +80,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public TrainerLibraryExercise updateExercise(Long trainerId, Long exerciseId, TrainerLibraryExerciseForm form) {
+        requireVerifiedTrainer(trainerId);
         TrainerLibraryExercise exercise = exerciseRepository.findByIdAndTrainerId(exerciseId, trainerId)
                 .orElseThrow(() -> new AccessDeniedException("Not owner"));
         applyExerciseForm(exercise, form);
@@ -77,6 +90,7 @@ public class TrainerLibraryService {
     }
 
     public TrainerLibraryExercise getExerciseOwned(Long trainerId, Long exerciseId) {
+        requireVerifiedTrainer(trainerId);
         return exerciseRepository.findByIdAndTrainerId(exerciseId, trainerId)
                 .orElseThrow(() -> new AccessDeniedException("Not owner"));
     }
@@ -87,6 +101,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public void deleteExercise(Long trainerId, Long exerciseId) {
+        requireVerifiedTrainer(trainerId);
         TrainerLibraryExercise exercise = exerciseRepository.findByIdAndTrainerId(exerciseId, trainerId)
                 .orElseThrow(() -> new AccessDeniedException("Not owner"));
         exerciseRepository.delete(exercise);
@@ -94,6 +109,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public TrainerLibraryWorkoutTemplate createWorkout(Long trainerId, TrainerLibraryWorkoutTemplateForm form) {
+        requireVerifiedTrainer(trainerId);
         TrainerLibraryWorkoutTemplate wt = new TrainerLibraryWorkoutTemplate(trainerId);
         wt.setTitle(form.getTitle());
         wt.setSummary(form.getSummary());
@@ -104,6 +120,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public TrainerLibraryWorkoutTemplate updateWorkout(Long trainerId, Long workoutId, TrainerLibraryWorkoutTemplateForm form) {
+        requireVerifiedTrainer(trainerId);
         TrainerLibraryWorkoutTemplate wt = workoutTemplateRepository.findByIdAndTrainerId(workoutId, trainerId)
                 .orElseThrow(() -> new AccessDeniedException("Not owner"));
         wt.setTitle(form.getTitle());
@@ -114,6 +131,7 @@ public class TrainerLibraryService {
     }
 
     public TrainerLibraryWorkoutTemplate getWorkoutOwned(Long trainerId, Long workoutId) {
+        requireVerifiedTrainer(trainerId);
         return workoutTemplateRepository.findByIdAndTrainerId(workoutId, trainerId)
                 .orElseThrow(() -> new AccessDeniedException("Not owner"));
     }
@@ -128,6 +146,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public TrainerLibraryWorkoutItem addWorkoutItem(Long trainerId, Long workoutId, TrainerLibraryWorkoutItemForm form) {
+        requireVerifiedTrainer(trainerId);
         getWorkoutOwned(trainerId, workoutId);
 
         TrainerLibraryExercise exercise = exerciseRepository.findById(form.getExerciseId())
@@ -149,6 +168,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public void deleteWorkoutItem(Long trainerId, Long workoutId, Long itemId) {
+        requireVerifiedTrainer(trainerId);
         getWorkoutOwned(trainerId, workoutId);
         TrainerLibraryWorkoutItem item = workoutItemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found"));
@@ -160,6 +180,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public void deleteWorkout(Long trainerId, Long workoutId) {
+        requireVerifiedTrainer(trainerId);
         TrainerLibraryWorkoutTemplate wt = workoutTemplateRepository.findByIdAndTrainerId(workoutId, trainerId)
                 .orElseThrow(() -> new AccessDeniedException("Not owner"));
         workoutTemplateRepository.delete(wt);
@@ -167,6 +188,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public TrainerLibraryProgrammeTemplate createProgramme(Long trainerId, TrainerLibraryProgrammeTemplateForm form) {
+        requireVerifiedTrainer(trainerId);
         TrainerLibraryProgrammeTemplate pt = new TrainerLibraryProgrammeTemplate(trainerId);
         pt.setTitle(form.getTitle());
         pt.setWeeks(form.getWeeks());
@@ -177,6 +199,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public TrainerLibraryProgrammeTemplate updateProgramme(Long trainerId, Long programmeId, TrainerLibraryProgrammeTemplateForm form) {
+        requireVerifiedTrainer(trainerId);
         TrainerLibraryProgrammeTemplate pt = programmeTemplateRepository.findByIdAndTrainerId(programmeId, trainerId)
                 .orElseThrow(() -> new AccessDeniedException("Not owner"));
         pt.setTitle(form.getTitle());
@@ -187,6 +210,7 @@ public class TrainerLibraryService {
     }
 
     public TrainerLibraryProgrammeTemplate getProgrammeOwned(Long trainerId, Long programmeId) {
+        requireVerifiedTrainer(trainerId);
         return programmeTemplateRepository.findByIdAndTrainerId(programmeId, trainerId)
                 .orElseThrow(() -> new AccessDeniedException("Not owner"));
     }
@@ -201,6 +225,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public TrainerLibraryProgrammeDay addProgrammeDay(Long trainerId, Long programmeId, TrainerLibraryProgrammeDayForm form) {
+        requireVerifiedTrainer(trainerId);
         getProgrammeOwned(trainerId, programmeId);
         TrainerLibraryWorkoutTemplate workout = workoutTemplateRepository.findById(form.getWorkoutId())
                 .orElseThrow(() -> new IllegalArgumentException("Workout not found"));
@@ -218,6 +243,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public void deleteProgrammeDay(Long trainerId, Long programmeId, Long dayId) {
+        requireVerifiedTrainer(trainerId);
         getProgrammeOwned(trainerId, programmeId);
         TrainerLibraryProgrammeDay day = programmeDayRepository.findById(dayId)
                 .orElseThrow(() -> new IllegalArgumentException("Day not found"));
@@ -229,6 +255,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public void deleteProgramme(Long trainerId, Long programmeId) {
+        requireVerifiedTrainer(trainerId);
         TrainerLibraryProgrammeTemplate pt = programmeTemplateRepository.findByIdAndTrainerId(programmeId, trainerId)
                 .orElseThrow(() -> new AccessDeniedException("Not owner"));
         programmeTemplateRepository.delete(pt);
@@ -236,6 +263,7 @@ public class TrainerLibraryService {
 
     @Transactional
     public void shareTemplate(Long trainerId, TrainerLibraryShareForm form) {
+        requireVerifiedTrainer(trainerId);
         boolean activeLink = trainerClientLinkRepository
                 .existsByTrainerUserIdAndClientUserIdAndStatus(trainerId, form.getClientId(), TrainerClientLinkStatus.ACTIVE);
         if (!activeLink) {
@@ -404,6 +432,17 @@ public class TrainerLibraryService {
                 }
             }
             default -> throw new IllegalArgumentException("Unknown type");
+        }
+    }
+
+    private void requireVerifiedTrainer(Long trainerId) {
+        User trainer = userRepository.findById(trainerId)
+                .orElseThrow(() -> new AccessDeniedException("Trainer not found"));
+        if (trainer.getRole() != Role.TRAINER) {
+            throw new AccessDeniedException("User is not a trainer");
+        }
+        if (!trainer.isTrainerVerified() || !trainer.isEnabled()) {
+            throw new AccessDeniedException(ERROR_TRAINER_NOT_VERIFIED);
         }
     }
 }

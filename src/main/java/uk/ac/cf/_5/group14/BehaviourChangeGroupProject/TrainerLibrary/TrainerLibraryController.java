@@ -64,6 +64,9 @@ public class TrainerLibraryController {
         if (user.getRole() != Role.TRAINER) {
             throw new AccessDeniedException("Not a trainer");
         }
+        if (!user.isTrainerVerified() || !user.isEnabled()) {
+            throw new IllegalStateException(TrainerLibraryService.ERROR_TRAINER_NOT_VERIFIED);
+        }
         return user;
     }
 
@@ -81,7 +84,7 @@ public class TrainerLibraryController {
     }
 
     @GetMapping
-    public ModelAndView overview() {
+    public ModelAndView overview(@RequestParam(value = "error", required = false) String error) {
         Long trainerId = currentTrainerIdOrThrow();
 
         ModelAndView mav = new ModelAndView("trainer/library");
@@ -89,7 +92,16 @@ public class TrainerLibraryController {
         mav.addObject("exerciseCount", trainerLibraryService.listExercises(trainerId).size());
         mav.addObject("workoutCount", trainerLibraryService.listWorkouts(trainerId).size());
         mav.addObject("programmeCount", trainerLibraryService.listProgrammes(trainerId).size());
+        mav.addObject("error", error);
         return mav;
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ModelAndView handleIllegalState(IllegalStateException ex) {
+        if (TrainerLibraryService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
+            return new ModelAndView("redirect:/trainer/library?error=trainer-unverified");
+        }
+        throw ex;
     }
 
     // -------------------------

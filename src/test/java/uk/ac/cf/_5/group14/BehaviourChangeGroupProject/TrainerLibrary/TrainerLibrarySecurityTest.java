@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLink;
@@ -17,6 +18,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -97,10 +99,12 @@ class TrainerLibrarySecurityTest {
 
         trainerA = new User("trainerA+" + suffix + "@example.com", "Trainer", "A", "tl_trainer_a_" + suffix, "password123");
         trainerA.setRole(Role.TRAINER);
+        trainerA.setTrainerVerified(true);
         trainerA = userRepository.save(trainerA);
 
         trainerB = new User("trainerB+" + suffix + "@example.com", "Trainer", "B", "tl_trainer_b_" + suffix, "password123");
         trainerB.setRole(Role.TRAINER);
+        trainerB.setTrainerVerified(true);
         trainerB = userRepository.save(trainerB);
     }
 
@@ -190,5 +194,23 @@ class TrainerLibrarySecurityTest {
                 .param("templateId", String.valueOf(created.getId()))
                 .param("returnUrl", "/trainer/library/exercises/" + created.getId()))
             .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void unverifiedTrainerCannotCreateExercise() {
+        String suffix = UUID.randomUUID().toString().replace("-", "");
+        User unverified = new User("trainerU+" + suffix + "@example.com", "Trainer", "U", "tl_trainer_u_" + suffix, "password123");
+        unverified.setRole(Role.TRAINER);
+        unverified = userRepository.save(unverified);
+
+        TrainerLibraryExerciseForm form = new TrainerLibraryExerciseForm();
+        form.setName("Push Up");
+        form.setPrimaryMuscles("Chest");
+        form.setEquipment("Bodyweight");
+        form.setDifficulty("Easy");
+
+        assertThatThrownBy(() -> trainerLibraryService.createExercise(unverified.getId(), form))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage(TrainerLibraryService.ERROR_TRAINER_NOT_VERIFIED);
     }
 }

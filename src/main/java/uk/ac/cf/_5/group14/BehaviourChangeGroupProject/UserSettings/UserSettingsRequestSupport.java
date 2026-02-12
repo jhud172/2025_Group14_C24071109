@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
-final class UserSettingsRequestSupport {
+public final class UserSettingsRequestSupport {
     private static final List<String> SKIP_PREFIXES = List.of(
             "/api/",
             "/css/",
@@ -17,7 +17,7 @@ final class UserSettingsRequestSupport {
     private UserSettingsRequestSupport() {
     }
 
-    static boolean shouldSkip(HttpServletRequest request) {
+    public static boolean shouldSkip(HttpServletRequest request) {
         String path = request.getRequestURI();
         if (path == null) {
             return false;

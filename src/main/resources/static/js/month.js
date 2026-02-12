@@ -151,6 +151,94 @@
 
     const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    const heatmapCache = new Map();
+
+    function formatDate(year, month, day) {
+        const mm = String(month).padStart(2, '0');
+        const dd = String(day).padStart(2, '0');
+        return `${year}-${mm}-${dd}`;
+    }
+
+    function heatClassFor(loadScore) {
+        if (loadScore <= 0) return 'heat-none';
+        if (loadScore <= 3) return 'heat-low';
+        if (loadScore <= 7) return 'heat-med';
+        return 'heat-high';
+    }
+
+    function applySummaryToPane(pane, summaries) {
+        if (!pane) return;
+        const summaryMap = new Map(summaries.map((item) => [item.date, item]));
+
+        pane.querySelectorAll('.calendar-day-card[data-date]').forEach((card) => {
+            const date = card.getAttribute('data-date');
+            const summary = summaryMap.get(date);
+            const loadScore = summary ? summary.loadScore : 0;
+            card.setAttribute('data-load', String(loadScore));
+            card.classList.remove('heat-none', 'heat-low', 'heat-med', 'heat-high');
+            card.classList.add(heatClassFor(loadScore));
+
+            const workoutIcon = card.querySelector('.calendar-icon-workout');
+            const nutritionIcon = card.querySelector('.calendar-icon-nutrition');
+            const prIcon = card.querySelector('.calendar-icon-pr');
+            const prCount = card.querySelector('[data-pr-count]');
+
+            if (workoutIcon) workoutIcon.classList.toggle('hidden', !(summary && summary.hasWorkout));
+            if (nutritionIcon) nutritionIcon.classList.toggle('hidden', !(summary && summary.hasNutrition));
+
+            if (prIcon) {
+                const count = summary ? summary.prHitCount : 0;
+                prIcon.classList.toggle('hidden', count <= 0);
+                if (prCount) {
+                    prCount.textContent = count > 1 ? String(count) : '';
+                    prCount.classList.toggle('hidden', count <= 1);
+                }
+            }
+        });
+    }
+
+    async function fetchHeatmapSummary(start, end) {
+        const cacheKey = `${start}|${end}`;
+        if (heatmapCache.has(cacheKey)) return heatmapCache.get(cacheKey);
+
+        const url = new URL('/api/calendar/summary', window.location.origin);
+        url.searchParams.set('start', start);
+        url.searchParams.set('end', end);
+        const res = await fetch(url, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error(`Failed to load calendar summary: ${res.status}`);
+        const data = await res.json();
+        heatmapCache.set(cacheKey, data);
+        return data;
+    }
+
+    async function updateHeatmapForPane(pane) {
+        if (!pane) return;
+        const year = parseInt(pane.getAttribute('data-year') || '', 10);
+        const month = parseInt(pane.getAttribute('data-month') || '', 10);
+        if (!Number.isFinite(year) || !Number.isFinite(month)) return;
+
+        const lastDay = new Date(year, month, 0).getDate();
+        const start = formatDate(year, month, 1);
+        const end = formatDate(year, month, lastDay);
+        try {
+            const summary = await fetchHeatmapSummary(start, end);
+            applySummaryToPane(pane, summary);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function refreshHeatmaps() {
+        const panes = [
+            prevSlot.querySelector('[data-month-pane]'),
+            currentSlot.querySelector('[data-month-pane]'),
+            nextSlot.querySelector('[data-month-pane]')
+        ].filter(Boolean);
+        panes.forEach((pane) => {
+            updateHeatmapForPane(pane);
+        });
+    }
+
     function ymKey(year, month) {
         return `${year}-${String(month).padStart(2, '0')}`;
     }
@@ -174,11 +262,9 @@
     }
 
     function monthPaneUrl(year, month) {
-        const url = new URL('/calendar', window.location.origin);
-        url.searchParams.set('view', 'month');
+        const url = new URL('/calendar/month-fragment', window.location.origin);
         url.searchParams.set('month', String(month));
         url.searchParams.set('year', String(year));
-        url.searchParams.set('fragment', 'monthPane');
         return url.toString();
     }
 
@@ -288,6 +374,7 @@
         updateMonthHeader();
         slider.dataset.year = String(currentYear);
         slider.dataset.month = String(currentMonth);
+        refreshHeatmaps();
     }
 
     function animateTo(offsetPercent) {
@@ -383,6 +470,16 @@
     slider.addEventListener('pointercancel', () => {
         pointerActive = false;
         pointerStartX = null;
+    });
+
+    slider.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            go(-1);
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            go(1);
+        }
     });
 
     window.addEventListener('popstate', async () => {

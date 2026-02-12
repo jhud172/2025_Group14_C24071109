@@ -223,6 +223,26 @@ public class CalendarController {
         return "calendar/month";
     }
 
+    @GetMapping("/month-fragment")
+    public String monthFragment(
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
+            @SessionAttribute("user") User user,
+            Model model
+    ) {
+        return calendarView("month", month, year, null, null, "monthPane", user, model);
+    }
+
+    @GetMapping("/week-fragment")
+    public String weekFragment(
+            @RequestParam(required = false) Integer week,
+            @RequestParam(required = false) Integer weekYear,
+            @SessionAttribute("user") User user,
+            Model model
+    ) {
+        return calendarView("week", null, null, week, weekYear, "weekPane", user, model);
+    }
+
     @PostMapping("/preferences")
     public String updateCalendarPreferences(
             @SessionAttribute(name = "user") User user,

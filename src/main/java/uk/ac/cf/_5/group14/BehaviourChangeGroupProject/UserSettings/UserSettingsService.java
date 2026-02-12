@@ -24,4 +24,32 @@ public interface UserSettingsService {
             boolean disabilityMobility,
             boolean disabilityVision
     );
+
+        UserSettings updateTrainerSharing(
+            User user,
+            boolean shareRecoverySignals,
+            boolean shareNutritionSignals,
+            boolean shareSleepSignals,
+            boolean shareFatigueSignals,
+            boolean shareWeightTrend
+        );
+
+            UserSettings updateSmartDefaults(
+                User user,
+                Integer defaultSets,
+                Integer defaultRepMin,
+                Integer defaultRepMax,
+                boolean preferredEquipmentBodyweight,
+                boolean preferredEquipmentDumbbell,
+                boolean preferredEquipmentBarbell,
+                boolean preferredEquipmentMachine,
+                boolean preferredEquipmentBands,
+                boolean preferredEquipmentKettlebell,
+                Integer macroTargetCalories,
+                Integer macroTargetProtein,
+                Integer macroTargetCarbs,
+                Integer macroTargetFat
+            );
+
+            UserSettings resetSmartDefaults(User user);
 }

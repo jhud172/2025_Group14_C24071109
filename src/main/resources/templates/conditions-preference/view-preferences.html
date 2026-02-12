@@ -37,6 +37,43 @@
             </div>
         </section>
 
+        <section class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+            <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Smart defaults</h2>
+            <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div class="rounded-lg border border-slate-200/70 bg-slate-50 p-3 text-sm dark:border-slate-800 dark:bg-slate-900/30">
+                    <p class="text-xs text-slate-500">Default sets</p>
+                    <p class="mt-1 font-medium text-slate-700 dark:text-slate-200" th:text="${userSettings != null ? userSettings.defaultSets : 3}">3</p>
+                </div>
+                <div class="rounded-lg border border-slate-200/70 bg-slate-50 p-3 text-sm dark:border-slate-800 dark:bg-slate-900/30">
+                    <p class="text-xs text-slate-500">Rep range</p>
+                          <p class="mt-1 font-medium text-slate-700 dark:text-slate-200"
+                              th:text="${userSettings != null ? (userSettings.defaultRepMin + '-' + userSettings.defaultRepMax) : '8-12'}">8-12</p>
+                </div>
+                <div class="rounded-lg border border-slate-200/70 bg-slate-50 p-3 text-sm dark:border-slate-800 dark:bg-slate-900/30">
+                    <p class="text-xs text-slate-500">Macro targets</p>
+                          <p class="mt-1 font-medium text-slate-700 dark:text-slate-200"
+                              th:text="${userSettings != null && userSettings.macroTargetCalories != null ? userSettings.macroTargetCalories + ' kcal' : 'Not set'}">Not set</p>
+                          <p class="mt-1 text-xs text-slate-500"
+                              th:if="${userSettings != null && (userSettings.macroTargetProtein != null || userSettings.macroTargetCarbs != null || userSettings.macroTargetFat != null)}"
+                              th:text="${'P ' + (userSettings.macroTargetProtein != null ? userSettings.macroTargetProtein : '-') + 'g | C ' + (userSettings.macroTargetCarbs != null ? userSettings.macroTargetCarbs : '-') + 'g | F ' + (userSettings.macroTargetFat != null ? userSettings.macroTargetFat : '-') + 'g'}">P -g | C -g | F -g</p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <p class="text-xs font-semibold text-slate-500">Preferred equipment</p>
+                <div class="mt-2 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-200">
+                    <span th:if="${userSettings != null && userSettings.preferredEquipmentBodyweight}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Bodyweight</span>
+                    <span th:if="${userSettings != null && userSettings.preferredEquipmentDumbbell}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Dumbbells</span>
+                    <span th:if="${userSettings != null && userSettings.preferredEquipmentBarbell}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Barbells</span>
+                    <span th:if="${userSettings != null && userSettings.preferredEquipmentMachine}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Machines</span>
+                    <span th:if="${userSettings != null && userSettings.preferredEquipmentBands}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Bands</span>
+                    <span th:if="${userSettings != null && userSettings.preferredEquipmentKettlebell}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Kettlebells</span>
+                    <span th:if="${userSettings == null || (!userSettings.preferredEquipmentBodyweight && !userSettings.preferredEquipmentDumbbell && !userSettings.preferredEquipmentBarbell && !userSettings.preferredEquipmentMachine && !userSettings.preferredEquipmentBands && !userSettings.preferredEquipmentKettlebell)}"
+                          class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">No equipment preferences</span>
+                </div>
+            </div>
+        </section>
+
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <section class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                 <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Training preferences</h2>

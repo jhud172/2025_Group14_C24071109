@@ -74,6 +74,7 @@ class TrainerScheduleTemplateServiceTest {
 
         trainer = new User("trainer+" + suffix + "@example.com", "Trainer", "One", "trainer_template_" + suffix, "password123");
         trainer.setRole(Role.TRAINER);
+        trainer.setTrainerVerified(true);
         trainer = userRepository.save(trainer);
 
         client = new User("client+" + suffix + "@example.com", "Client", "One", "client_template_" + suffix, "password123");
@@ -140,5 +141,16 @@ class TrainerScheduleTemplateServiceTest {
         templateService.applyTemplate(trainer, template.getId(), client.getId(), today, today, true);
 
         assertThat(scheduleOccurrenceRepository.findByUserAndDate(client, today)).hasSize(1);
+    }
+
+    @Test
+    void createTemplateBlockedForUnverifiedTrainer() {
+        String suffix = UUID.randomUUID().toString().replace("-", "");
+        User unverified = new User("trainerU+" + suffix + "@example.com", "Trainer", "U", "trainer_unverified_" + suffix, "password123");
+        unverified.setRole(Role.TRAINER);
+        unverified = userRepository.save(unverified);
+
+        assertThatThrownBy(() -> templateService.createTemplate(unverified, "Week X", "", ""))
+                .isInstanceOf(AccessDeniedException.class);
     }
 }

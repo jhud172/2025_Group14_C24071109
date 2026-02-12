@@ -4007,3 +4007,36 @@ body.profile-editing #profile-shell .profile-editor {
 body.profile-editing [data-avatar-button] .profile-avatar-overlay {
   opacity: 1;
 }
+
+/* Day mode theming */
+body {
+  --day-accent-hue: 215;
+  --day-accent-saturation: 68%;
+  --day-accent-lightness: 54%;
+  --day-accent-strength: 0.1;
+  --day-glow-strength: 0.14;
+  background-image:
+    radial-gradient(1200px 600px at 12% -10%, hsla(var(--day-accent-hue) var(--day-accent-saturation) 60% / var(--day-glow-strength)) 0%, transparent 60%),
+    radial-gradient(900px 500px at 85% 0%, hsla(var(--day-accent-hue) var(--day-accent-saturation) 55% / calc(var(--day-glow-strength) * 0.7)) 0%, transparent 70%);
+  background-attachment: fixed;
+}
+
+body[data-day-mode="REST_DAY"] {
+  --day-accent-strength: 0.06;
+  --day-glow-strength: 0.08;
+}
+
+body[data-day-mode="TRAINING_DAY"] {
+  --day-accent-strength: 0.12;
+  --day-glow-strength: 0.18;
+}
+
+body[data-day-mode="TRAINING_DAY"] .shadow-sm,
+body[data-day-mode="TRAINING_DAY"] .shadow {
+  box-shadow: 0 1px 2px 0 rgb(15 23 42 / calc(0.08 + var(--day-accent-strength))), 0 0 0 1px rgb(15 23 42 / 0.04);
+}
+
+body[data-day-mode="REST_DAY"] .shadow-sm,
+body[data-day-mode="REST_DAY"] .shadow {
+  box-shadow: 0 1px 2px 0 rgb(15 23 42 / calc(0.05 + var(--day-accent-strength))), 0 0 0 1px rgb(15 23 42 / 0.03);
+}

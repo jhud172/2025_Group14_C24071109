@@ -23,6 +23,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     boolean existsByUserAndTypeAndMessageAndCreatedAtAfter(User user, NotificationType type, String message, Instant after);
 
+    boolean existsByUserAndTypeAndCreatedAtAfter(User user, NotificationType type, Instant after);
+
     @Modifying
     @Query("update Notification n set n.readAt = :now where n.user = :user and n.readAt is null and n.dismissedAt is null")
     int markAllRead(@Param("user") User user, @Param("now") Instant now);
