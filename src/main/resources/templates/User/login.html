@@ -1,27 +1,36 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout('Login', null, ~{::content}, null)}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-md px-4 py-10 sm:px-6 lg:px-8">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+    <div th:fragment="content" class="mx-auto w-full max-w-md px-4 py-10 sm:px-6 lg:px-8 animate-fade-in">
+        <!-- Decorative neon glow elements -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-neon-cyan/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-neon-purple/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="relative card-neon p-6 sm:p-8">
+            <!-- Neon accent line -->
+            <div class="neon-bar mb-6"></div>
+
             <div class="mb-6">
-                <h1 class="text-2xl font-semibold tracking-tight text-slate-900" th:text="#{auth.login.title}">Welcome back</h1>
-                <p class="mt-1 text-sm text-slate-600" th:text="#{auth.login.subtitle}">Log in to continue.</p>
+                <h1 class="text-3xl font-bold tracking-tight gradient-text" th:text="#{auth.login.title}">Welcome back</h1>
+                <p class="mt-2 text-sm text-slate-400" th:text="#{auth.login.subtitle}">Log in to continue.</p>
             </div>
 
             <div class="mb-6">
-                <div class="inline-flex w-full rounded-full bg-slate-100 p-1 text-sm font-medium text-slate-600">
-                    <span class="flex-1 rounded-full bg-white px-3 py-2 text-center text-slate-900 shadow-sm" th:text="#{auth.role.client}">Client</span>
+                <div class="inline-flex w-full rounded-full bg-cyber-800 p-1 text-sm font-medium text-slate-400 border border-neon-cyan/20">
+                    <span class="flex-1 rounded-full bg-gradient-to-r from-neon-cyan to-neon-blue text-cyber-900 px-3 py-2 text-center font-bold shadow-glow-sm" th:text="#{auth.role.client}">Client</span>
                     <span class="flex-1 px-3 py-2 text-center" th:text="#{auth.role.trainer}">Trainer</span>
                     <span class="flex-1 px-3 py-2 text-center" th:text="#{auth.role.gym}">Gym</span>
                 </div>
                 <p class="mt-2 text-xs text-slate-500" th:text="#{auth.login.sameLogin}">All accounts use the same login.</p>
             </div>
 
-            <div th:if="${success}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <div th:if="${success}" class="mb-4 rounded-2xl border border-neon-green/40 bg-neon-green/10 px-4 py-3 text-sm text-neon-green" role="alert">
                 <span th:text="${success}"></span>
             </div>
 
-            <div th:if="${param.error}" class="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
+            <div th:if="${param.error}" class="mb-4 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400" role="alert">
                 <span th:switch="${param.error[0]}">
                     <span th:case="'disabled'" th:text="#{auth.error.disabled}">Account disabled. Contact support.</span>
                     <span th:case="'locked'" th:text="#{auth.error.locked}">Too many attempts. Try again later.</span>
@@ -30,19 +39,19 @@
                 </span>
             </div>
 
-            <div th:if="${param.logout}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <div th:if="${param.logout}" class="mb-4 rounded-2xl border border-neon-green/40 bg-neon-green/10 px-4 py-3 text-sm text-neon-green" role="alert">
                 <span th:text="#{auth.logout}">You've been signed out.</span>
             </div>
 
-            <div th:if="${param.expired}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <div th:if="${param.expired}" class="mb-4 rounded-2xl border border-neon-green/40 bg-neon-green/10 px-4 py-3 text-sm text-neon-green" role="alert">
                 <span th:text="#{auth.logout}">You've been signed out.</span>
             </div>
 
-            <div th:if="${param.registered}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <div th:if="${param.registered}" class="mb-4 rounded-2xl border border-neon-green/40 bg-neon-green/10 px-4 py-3 text-sm text-neon-green" role="alert">
                 <span th:text="#{auth.registered}">Registration successful! Please login.</span>
             </div>
 
-            <div th:if="${param.reset}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <div th:if="${param.reset}" class="mb-4 rounded-2xl border border-neon-green/40 bg-neon-green/10 px-4 py-3 text-sm text-neon-green" role="alert">
                 <span th:text="#{auth.reset.success}">Password updated. Please log in with your new password.</span>
             </div>
 
@@ -51,20 +60,20 @@
                 <input type="hidden" name="next" th:if="${param.next}" th:value="${param.next}" />
 
                 <div>
-                    <label for="username" class="block text-sm font-medium text-slate-800" th:text="#{auth.login.username}">Email or username</label>
+                    <label for="username" class="field__label" th:text="#{auth.login.username}">Email or username</label>
                     <input
                         type="text"
                         id="username"
                         name="username"
                         required
                         autocomplete="username"
-                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
+                        class="field__input" />
                 </div>
 
                 <div>
-                    <div class="flex items-center justify-between">
-                        <label for="password" class="block text-sm font-medium text-slate-800" th:text="#{auth.login.password}">Password</label>
-                        <a th:href="@{/forgot-password}" class="text-xs font-semibold text-slate-600 hover:text-slate-800" th:text="#{auth.login.forgot}">Forgot password?</a>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="password" class="field__label !mb-0" th:text="#{auth.login.password}">Password</label>
+                        <a th:href="@{/forgot-password}" class="text-xs font-semibold text-neon-cyan hover:text-neon-purple transition-colors" th:text="#{auth.login.forgot}">Forgot password?</a>
                     </div>
                     <input
                         type="password"
@@ -72,18 +81,21 @@
                         name="password"
                         required
                         autocomplete="current-password"
-                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
+                        class="field__input" />
                 </div>
 
                 <button
                     type="submit"
-                    class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                    class="btn btn--primary btn--md w-full">
                     <span th:text="#{auth.login.submit}">Log in</span>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                 </button>
 
-                <p class="text-center text-sm text-slate-600">
+                <p class="text-center text-sm text-slate-400">
                     <span th:text="#{auth.login.noAccount}">Don't have an account?</span>
-                    <a th:href="@{/signup}" class="font-semibold text-slate-900 underline underline-offset-4 hover:text-slate-700" th:text="#{auth.login.signup}">Sign up</a>
+                    <a th:href="@{/signup}" class="font-semibold text-neon-cyan hover:text-neon-purple transition-colors underline underline-offset-4" th:text="#{auth.login.signup}">Sign up</a>
                 </p>
             </form>
         </div>
