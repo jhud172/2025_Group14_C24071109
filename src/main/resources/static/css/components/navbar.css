@@ -112,9 +112,21 @@
 }
 
 @layer base {
-    @media (max-width: 1125px) {
+    /* Reduce text size progressively on smaller screens */
+    @media (max-width: 1400px) {
         .navheader {
             --nav-text-size: 0.8125rem; /* small */
+        }
+    }
+
+    /* Hide text labels on medium screens (show icons only) */
+    @media (max-width: 1200px) and (min-width: 1126px) {
+        .navheader nav[aria-label="Primary navigation"] .navlink span:not(.nav-notification-badge) {
+            @apply sr-only;
+        }
+        
+        .navheader nav[aria-label="Primary navigation"] .navlink {
+            @apply px-3;
         }
     }
 
@@ -127,12 +139,17 @@
     /* Dropdown menu centering for collapsed navbar */
     @media (max-width: 1125px) {
         .navheader [data-mobile-nav] .navlink {
+            @apply flex-col gap-1 py-3;
             justify-content: center;
             text-align: center;
         }
 
         .navheader [data-mobile-links] .navlink {
-            min-width: 8.75rem;
+            width: 100%;
+        }
+        
+        .navheader [data-mobile-nav] .navicon {
+            @apply h-5 w-5;
         }
     }
 }
