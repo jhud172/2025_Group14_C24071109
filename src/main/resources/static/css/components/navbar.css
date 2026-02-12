@@ -1,41 +1,43 @@
 @layer components {
     .navheader {
-        @apply sticky top-0 z-50 w-full glass-strong shadow-lg;
-        border-bottom: 2px solid rgba(0, 243, 255, 0.3);
+        @apply sticky top-0 z-50 w-full;
+        background: rgba(249, 250, 251, 0.85);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(229, 231, 235, 0.6);
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        min-height: 72px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         
         /* Single source of truth for navbar text sizing */
-        --nav-text-size: 0.875rem; /* normal (Tailwind text-sm) */
+        --nav-text-size: 0.9375rem; /* slightly larger for premium feel */
+    }
+
+    .navheader.scrolled {
+        background: rgba(249, 250, 251, 0.95);
+        box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
     }
 
     .accentstrip {
-        @apply h-1 w-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink;
-        box-shadow: 0 2px 10px rgba(0, 243, 255, 0.5);
-        animation: pulse-glow-bar 3s ease-in-out infinite;
-    }
-
-    @keyframes pulse-glow-bar {
-        0%, 100% {
-            box-shadow: 0 2px 10px rgba(0, 243, 255, 0.5);
-        }
-        50% {
-            box-shadow: 0 2px 15px rgba(0, 243, 255, 0.8), 0 2px 25px rgba(181, 55, 242, 0.6);
-        }
+        @apply h-0.5 w-full;
+        background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+        opacity: 0.15;
     }
 
     .navsurface {
-        @apply rounded-2xl border border-neon-cyan/20 glass p-1.5 shadow-md transition-all duration-300;
+        @apply rounded-2xl border border-gray-200 bg-white/80 p-1.5 shadow-sm transition-all duration-300;
+        backdrop-filter: blur(8px);
     }
 
     .navsurface:hover {
-        @apply border-neon-cyan/30;
-        box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        @apply border-gray-300;
+        box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
     }
 
     .navlink {
-        @apply inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 font-semibold 
-        text-slate-300 transition-all duration-200
-        hover:bg-neon-cyan/10 hover:text-neon-cyan hover:shadow-glow-sm
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-neon-cyan/30;
+        @apply inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 font-medium 
+        text-slate-700 transition-all duration-200
+        hover:bg-gray-50 hover:text-slate-900
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20;
         
         font-size: var(--nav-text-size);
         position: relative;
@@ -43,8 +45,9 @@
 
     .navlink::after {
         content: '';
-        @apply absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-neon-cyan to-neon-purple;
-        transition: all 0.3s ease;
+        @apply absolute bottom-0 left-1/2 w-0 h-0.5;
+        background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         transform: translateX(-50%);
     }
 
@@ -53,8 +56,7 @@
     }
 
     .navlink-active {
-        @apply bg-gradient-to-r from-neon-cyan/20 to-neon-purple/20 text-neon-cyan shadow-glow-sm;
-        border: 1px solid rgba(0, 243, 255, 0.3);
+        @apply text-emerald-600 bg-emerald-50;
     }
 
     .navlink-active::after {
@@ -68,34 +70,44 @@
     .navlink:hover .navicon,
     .navicon-active {
         @apply opacity-100;
-        filter: drop-shadow(0 0 5px currentColor);
     }
 
     .authsurface {
-        @apply flex items-center rounded-2xl border border-neon-cyan/20 glass p-1.5 shadow-sm;
+        @apply flex items-center rounded-2xl border border-gray-200 bg-white/80 p-1.5 shadow-sm;
+        backdrop-filter: blur(8px);
     }
 
     .authbtn {
-        @apply inline-flex h-10 items-center justify-center rounded-xl px-4 font-semibold 
-        transition-all duration-300 shadow-sm bg-cyber-800 text-neon-cyan border border-neon-cyan/30
-        hover:bg-neon-cyan/10 hover:border-neon-cyan hover:shadow-glow-sm
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-cyan/30;
+        @apply inline-flex h-10 items-center justify-center rounded-xl px-5 font-semibold 
+        transition-all duration-300 shadow-sm text-white border
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30;
         
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        border-color: #10b981;
         font-size: var(--nav-text-size);
     }
 
-    /* Light mode overrides */
-    body:not(.dark) .navheader {
-        @apply bg-white/90;
-        border-bottom-color: rgba(0, 243, 255, 0.2);
+    .authbtn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px -4px rgba(16, 185, 129, 0.4);
     }
 
-    body:not(.dark) .navlink {
-        @apply text-slate-700;
+    /* Dark mode overrides (keeping for compatibility) */
+    html.dark .navheader {
+        background: rgba(15, 23, 42, 0.85);
+        border-bottom-color: rgba(30, 41, 59, 0.6);
     }
 
-    body:not(.dark) .navlink:hover {
-        @apply text-neon-blue bg-neon-cyan/5;
+    html.dark .navlink {
+        @apply text-slate-300;
+    }
+
+    html.dark .navlink:hover {
+        @apply text-emerald-400 bg-slate-800/50;
+    }
+
+    html.dark .navlink-active {
+        @apply text-emerald-400 bg-slate-800;
     }
 
     body:not(.dark) .navlink-active {
