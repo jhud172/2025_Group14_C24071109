@@ -9,30 +9,30 @@
 
     <button type="button"
             id="quickActionsToggle"
-            class="fixed bottom-6 left-6 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-white text-lg text-slate-900 shadow-lg transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 active:translate-y-px dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+            class="fixed bottom-6 left-6 sm:bottom-8 z-50 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl text-slate-900 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:bg-slate-950 dark:text-slate-100"
             aria-label="Toggle quick actions"
             aria-controls="quickActionsShelf"
             aria-expanded="false">
         <span aria-hidden="true">⚡</span>
     </button>
 
-    <div id="quickActionsOverlay" class="fixed inset-0 z-40 hidden bg-slate-950/20"></div>
+    <div id="quickActionsOverlay" class="fixed inset-0 z-40 hidden bg-slate-950/10 dark:bg-slate-950/30"></div>
 
     <aside id="quickActionsShelf"
-           class="fixed bottom-24 left-6 z-50 w-[22rem] max-w-[calc(100vw-3rem)] translate-y-2 rounded-2xl border border-slate-200 bg-white shadow-xl opacity-0 pointer-events-none transition duration-200 ease-out dark:border-slate-800 dark:bg-slate-950">
-        <div class="flex items-center justify-between border-b border-slate-200 px-4 py-4 dark:border-slate-800">
+           class="fixed bottom-24 left-6 z-50 w-[22rem] max-w-[calc(100vw-3rem)] translate-y-2 rounded-3xl border border-slate-100 bg-white shadow-lg opacity-0 pointer-events-none transition duration-300 ease-out dark:border-slate-800 dark:bg-slate-950 sm:left-4 sm:right-4 sm:w-auto sm:px-2">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
             <div>
-                <h2 class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-300">Quick actions</h2>
-                <p class="text-xs text-slate-400">One-tap moves for today</p>
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">Quick actions</h2>
+                <p class="text-[11px] font-light text-slate-400 mt-0.5">One-tap moves for today</p>
             </div>
             <div class="flex items-center gap-2">
                 <button type="button" id="quickActionsCustomizeToggle"
-                        class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+                        class="quick-actions-header-icon inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900"
                         aria-label="Customize quick actions">
                     <span aria-hidden="true">⚙️</span>
                 </button>
                 <button type="button" id="quickActionsClose"
-                        class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+                        class="quick-actions-header-icon inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900"
                         aria-label="Close quick actions">
                     ✕
                 </button>
@@ -40,39 +40,45 @@
         </div>
 
         <div class="flex max-h-[70vh] flex-col">
-            <div id="quickActionsView" class="flex-1 overflow-auto px-4 py-4">
-                <div class="mb-3 flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+            <div id="quickActionsView" class="flex-1 overflow-auto px-6 py-5">
+                <div class="mb-4 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                     <span>Active</span>
                     <span>Tap to run</span>
                 </div>
                 <div id="quickActionsList" class="grid grid-cols-2 gap-3"></div>
-                <p id="quickActionsEmpty" class="mt-3 hidden text-xs text-slate-500">No quick actions active.</p>
+                <div id="quickActionsEmpty" class="quick-actions-empty-state hidden mt-8">
+                    <div class="quick-actions-empty-icon">📋</div>
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">No actions yet</p>
+                    <p class="text-xs text-slate-400 mt-1.5">Tap the gear icon to get started</p>
+                </div>
                 <div id="quickActionsMessage" class="mt-3 hidden rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700"></div>
             </div>
 
             <div id="quickActionsCustomize" class="hidden flex-1 flex-col overflow-hidden">
-                <div class="border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+                <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
                     <input id="quickActionsSearch" type="search" placeholder="Search actions"
-                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200" />
+                           class="quick-actions-smooth w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200" />
                 </div>
-                <div class="flex-1 overflow-auto px-4 py-4">
+                <div class="flex-1 overflow-auto px-6 py-4">
                     <ul id="quickActionsCustomizeList" class="space-y-2"></ul>
                 </div>
-                <div class="border-t border-slate-200 px-4 py-4 text-xs text-slate-600 dark:border-slate-800 dark:text-slate-300">
-                    <div class="flex items-center justify-between">
-                        <span class="font-semibold">Custom AI actions</span>
-                        <span id="quickActionsCustomLimit" class="text-[10px] text-slate-400">0/2</span>
+                <div class="border-t border-slate-100 px-6 py-6 dark:border-slate-800">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Custom AI actions</span>
+                        <span id="quickActionsCustomLimit" class="text-xs text-slate-400">0/2</span>
                     </div>
-                    <div class="mt-3 space-y-2">
+                    <div class="space-y-3">
                         <input id="quickActionsCustomName" type="text" placeholder="Action name"
-                               class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200" />
+                               class="quick-actions-smooth w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200" />
                         <textarea id="quickActionsCustomPrompt" rows="3" placeholder="Task prompt (what should AI do?)"
-                                  class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"></textarea>
+                                  class="quick-actions-smooth w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none resize-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"></textarea>
                         <button type="button" id="quickActionsCustomCreate"
-                                class="w-full rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
+                                class="w-full rounded-full bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700">
                             Create custom action
                         </button>
-                        <p id="quickActionsCustomLock" class="hidden text-[10px] text-slate-400">Premium required for custom actions.</p>
+                        <p id="quickActionsCustomLock" class="quick-actions-premium-text hidden text-center">
+                            <span class="quick-actions-premium-highlight">Premium</span> required for custom actions.
+                        </p>
                     </div>
                 </div>
             </div>
