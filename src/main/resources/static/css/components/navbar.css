@@ -1,54 +1,113 @@
 @layer components {
     .navheader {
-        @apply sticky top-0 z-50 w-full border-b border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-50 text-slate-900 shadow-sm
-        dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100;
-
+        @apply sticky top-0 z-50 w-full glass-strong shadow-lg;
+        border-bottom: 2px solid rgba(0, 243, 255, 0.3);
+        
         /* Single source of truth for navbar text sizing */
         --nav-text-size: 0.875rem; /* normal (Tailwind text-sm) */
     }
 
     .accentstrip {
-        @apply h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500;
+        @apply h-1 w-full bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink;
+        box-shadow: 0 2px 10px rgba(0, 243, 255, 0.5);
+        animation: pulse-glow-bar 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow-bar {
+        0%, 100% {
+            box-shadow: 0 2px 10px rgba(0, 243, 255, 0.5);
+        }
+        50% {
+            box-shadow: 0 2px 15px rgba(0, 243, 255, 0.8), 0 2px 25px rgba(181, 55, 242, 0.6);
+        }
     }
 
     .navsurface {
-        @apply rounded-2xl border border-slate-300 bg-gradient-to-br from-white via-slate-50 to-white p-1.5 shadow-md ring-1 ring-black/5
-        dark:border-slate-700 dark:from-slate-950 dark:via-slate-950/30 dark:to-slate-950 dark:ring-white/10;
+        @apply rounded-2xl border border-neon-cyan/20 glass p-1.5 shadow-md transition-all duration-300;
+    }
+
+    .navsurface:hover {
+        @apply border-neon-cyan/30;
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
     }
 
     .navlink {
-        @apply inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-150
-        hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 hover:shadow-md
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30
-        dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-white dark:focus-visible:ring-emerald-400/30;
-
+        @apply inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 font-semibold 
+        text-slate-300 transition-all duration-200
+        hover:bg-neon-cyan/10 hover:text-neon-cyan hover:shadow-glow-sm
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-neon-cyan/30;
+        
         font-size: var(--nav-text-size);
+        position: relative;
+    }
+
+    .navlink::after {
+        content: '';
+        @apply absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-neon-cyan to-neon-purple;
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+    }
+
+    .navlink:hover::after {
+        @apply w-3/4;
     }
 
     .navlink-active {
-        @apply bg-emerald-50 text-slate-900 shadow-sm ring-2 ring-emerald-500/25 hover:bg-emerald-50
-        dark:bg-slate-950 dark:text-white dark:ring-emerald-400/25 dark:hover:bg-slate-950;
+        @apply bg-gradient-to-r from-neon-cyan/20 to-neon-purple/20 text-neon-cyan shadow-glow-sm;
+        border: 1px solid rgba(0, 243, 255, 0.3);
+    }
+
+    .navlink-active::after {
+        @apply w-full;
     }
 
     .navicon {
-        @apply h-4 w-4 shrink-0 opacity-70 transition-opacity group-hover:opacity-90;
+        @apply h-4 w-4 shrink-0 opacity-70 transition-all duration-200;
     }
 
+    .navlink:hover .navicon,
     .navicon-active {
         @apply opacity-100;
+        filter: drop-shadow(0 0 5px currentColor);
     }
 
     .authsurface {
-        @apply flex items-center rounded-2xl border border-slate-200 bg-white/70 p-1.5 shadow-sm
-        dark:border-slate-800 dark:bg-slate-900/40;
+        @apply flex items-center rounded-2xl border border-neon-cyan/20 glass p-1.5 shadow-sm;
     }
 
     .authbtn {
-        @apply inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition shadow-sm
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100
-        dark:focus-visible:ring-white/30 dark:focus-visible:ring-offset-slate-900;
-
+        @apply inline-flex h-10 items-center justify-center rounded-xl px-4 font-semibold 
+        transition-all duration-300 shadow-sm bg-cyber-800 text-neon-cyan border border-neon-cyan/30
+        hover:bg-neon-cyan/10 hover:border-neon-cyan hover:shadow-glow-sm
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-cyan/30;
+        
         font-size: var(--nav-text-size);
+    }
+
+    /* Light mode overrides */
+    body:not(.dark) .navheader {
+        @apply bg-white/90;
+        border-bottom-color: rgba(0, 243, 255, 0.2);
+    }
+
+    body:not(.dark) .navlink {
+        @apply text-slate-700;
+    }
+
+    body:not(.dark) .navlink:hover {
+        @apply text-neon-blue bg-neon-cyan/5;
+    }
+
+    body:not(.dark) .navlink-active {
+        @apply text-neon-blue;
+    }
+
+    body:not(.dark) .authbtn {
+        @apply bg-slate-100 text-slate-900 border-slate-300;
+    }
+
+    body:not(.dark) .authbtn:hover {
+        @apply bg-slate-200 border-neon-cyan/50;
     }
 }
 
