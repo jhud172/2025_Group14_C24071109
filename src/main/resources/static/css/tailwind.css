@@ -6,5 +6,176 @@
 
 @tailwind base;
 @tailwind components;
-
 @tailwind utilities;
+
+/* Futuristic Gym Theme - Neon & Cyber Styling */
+@layer base {
+  * {
+    @apply border-cyber-700;
+  }
+
+  body {
+    @apply bg-cyber-900 text-slate-100;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(0, 243, 255, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(181, 55, 242, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  /* Custom scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-cyber-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-neon-cyan to-neon-purple rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply opacity-80;
+  }
+
+  /* Selection styling */
+  ::selection {
+    @apply bg-neon-cyan text-cyber-900;
+  }
+
+  /* Focus visible rings with neon glow */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-neon-cyan;
+  }
+}
+
+@layer utilities {
+  /* Neon text effects */
+  .text-neon {
+    color: #00f3ff;
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.8), 0 0 20px rgba(0, 243, 255, 0.5);
+  }
+
+  .text-neon-purple {
+    color: #b537f2;
+    text-shadow: 0 0 10px rgba(181, 55, 242, 0.8), 0 0 20px rgba(181, 55, 242, 0.5);
+  }
+
+  .text-neon-green {
+    color: #39ff14;
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.8), 0 0 20px rgba(57, 255, 20, 0.5);
+  }
+
+  /* Neon border effects */
+  .border-neon {
+    border-color: #00f3ff;
+    box-shadow: 0 0 5px rgba(0, 243, 255, 0.5), inset 0 0 5px rgba(0, 243, 255, 0.2);
+  }
+
+  .border-neon-purple {
+    border-color: #b537f2;
+    box-shadow: 0 0 5px rgba(181, 55, 242, 0.5), inset 0 0 5px rgba(181, 55, 242, 0.2);
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    background: rgba(26, 26, 46, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-strong {
+    background: rgba(26, 26, 46, 0.8);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  /* Neon bar/divider */
+  .neon-bar {
+    @apply h-1 w-full bg-gradient-to-r from-transparent via-neon-cyan to-transparent;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.6);
+  }
+
+  .neon-bar-vertical {
+    @apply w-1 h-full bg-gradient-to-b from-transparent via-neon-cyan to-transparent;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.6);
+  }
+
+  /* Card with neon glow */
+  .card-neon {
+    @apply glass rounded-xl p-6 transition-all duration-300;
+    border: 1px solid rgba(0, 243, 255, 0.3);
+  }
+
+  .card-neon:hover {
+    border-color: rgba(0, 243, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3), 0 0 40px rgba(0, 243, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink bg-clip-text text-transparent;
+  }
+
+  /* Pulse animation for interactive elements */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(0, 243, 255, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.8), 0 0 25px rgba(0, 243, 255, 0.4);
+    }
+  }
+
+  /* Energy bar effect */
+  .energy-bar {
+    @apply relative overflow-hidden rounded-full bg-cyber-800;
+  }
+
+  .energy-bar::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-pink;
+    animation: energy-flow 2s linear infinite;
+  }
+
+  @keyframes energy-flow {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}
+
+/* Dark mode adjustments */
+.dark {
+  /* Dark mode is the default for this theme */
+}
+
+/* Light mode overrides for accessibility */
+html:not(.dark) body {
+  @apply bg-slate-50 text-slate-900;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(0, 243, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(181, 55, 242, 0.03) 0%, transparent 50%);
+}
+
+html:not(.dark) body .glass {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+html:not(.dark) body .card-neon {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 243, 255, 0.2);
+}

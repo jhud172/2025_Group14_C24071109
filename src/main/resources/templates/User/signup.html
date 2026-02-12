@@ -1,111 +1,114 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout('Sign Up', null, ~{::content}, null)}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+    <div th:fragment="content" class="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 lg:px-8 animate-fade-in">
+        <!-- Decorative neon glow elements -->
+        <div class="absolute inset-0 pointer-events-none overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-neon-cyan/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-neon-purple/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="relative card-neon p-6 sm:p-8">
+            <!-- Neon accent line -->
+            <div class="neon-bar mb-6"></div>
+
             <div class="mb-6">
-                <h1 class="text-2xl font-semibold tracking-tight text-slate-900" th:text="#{auth.signup.title}">Create account</h1>
-                <p class="mt-1 text-sm text-slate-600" th:text="#{auth.signup.subtitle}">Set up your details to get started.</p>
+                <h1 class="text-3xl font-bold tracking-tight gradient-text" th:text="#{auth.signup.title}">Create account</h1>
+                <p class="mt-2 text-sm text-slate-400" th:text="#{auth.signup.subtitle}">Set up your details to get started.</p>
             </div>
 
             <form th:action="@{/signup}" th:object="${signupForm}" method="post" class="space-y-5">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                <div th:if="${#fields.hasAnyErrors()}" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert" th:text="#{auth.form.fixErrors}">
+                <div th:if="${#fields.hasAnyErrors()}" class="mb-4 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400" role="alert" th:text="#{auth.form.fixErrors}">
                     Please correct the highlighted fields below.
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label for="firstName" class="block text-sm font-medium text-slate-800" th:text="#{auth.firstName}">First Name *</label>
+                        <label for="firstName" class="field__label" th:text="#{auth.firstName}">First Name *</label>
                         <input
                             type="text"
                             id="firstName"
                             th:field="*{firstName}"
                             required
                             autocomplete="given-name"
-                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                            th:classappend="${#fields.hasErrors('firstName')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                        <div th:if="${#fields.hasErrors('firstName')}" class="mt-1 text-sm text-rose-700">
+                            class="field__input" />
+                        <div th:if="${#fields.hasErrors('firstName')}" class="mt-1 text-sm text-red-400">
                             <span th:errors="*{firstName}"></span>
                         </div>
                     </div>
 
                     <div>
-                        <label for="lastName" class="block text-sm font-medium text-slate-800" th:text="#{auth.lastName}">Last Name *</label>
+                        <label for="lastName" class="field__label" th:text="#{auth.lastName}">Last Name *</label>
                         <input
                             type="text"
                             id="lastName"
                             th:field="*{lastName}"
                             required
                             autocomplete="family-name"
-                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                            th:classappend="${#fields.hasErrors('lastName')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                        <div th:if="${#fields.hasErrors('lastName')}" class="mt-1 text-sm text-rose-700">
+                            class="field__input" />
+                        <div th:if="${#fields.hasErrors('lastName')}" class="mt-1 text-sm text-red-400">
                             <span th:errors="*{lastName}"></span>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-slate-800" th:text="#{auth.email}">Email Address *</label>
+                    <label for="email" class="field__label" th:text="#{auth.email}">Email Address *</label>
                     <input
                         type="email"
                         id="email"
                         th:field="*{email}"
                         required
                         autocomplete="email"
-                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                        th:classappend="${#fields.hasErrors('email')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                    <div th:if="${#fields.hasErrors('email')}" class="mt-1 text-sm text-rose-700">
+                        class="field__input" />
+                    <div th:if="${#fields.hasErrors('email')}" class="mt-1 text-sm text-red-400">
                         <span th:errors="*{email}"></span>
                     </div>
                 </div>
 
                 <div>
-                    <label for="username" class="block text-sm font-medium text-slate-800" th:text="#{auth.username}">Username *</label>
+                    <label for="username" class="field__label" th:text="#{auth.username}">Username *</label>
                     <input
                         type="text"
                         id="username"
                         th:field="*{username}"
                         required
                         autocomplete="username"
-                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                        th:classappend="${#fields.hasErrors('username')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                    <p class="mt-1 text-sm text-slate-600" th:text="#{auth.username.hint}">3–20 characters. Letters, numbers, underscore only.</p>
-                    <div th:if="${#fields.hasErrors('username')}" class="mt-1 text-sm text-rose-700">
+                        class="field__input" />
+                    <p class="mt-1 text-xs text-slate-500" th:text="#{auth.username.hint}">3–20 characters. Letters, numbers, underscore only.</p>
+                    <div th:if="${#fields.hasErrors('username')}" class="mt-1 text-sm text-red-400">
                         <span th:errors="*{username}"></span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label for="password" class="block text-sm font-medium text-slate-800" th:text="#{auth.password}">Password *</label>
+                        <label for="password" class="field__label" th:text="#{auth.password}">Password *</label>
                         <input
                             type="password"
                             id="password"
                             th:field="*{password}"
                             required
                             autocomplete="new-password"
-                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                            th:classappend="${#fields.hasErrors('password')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                        <p class="mt-1 text-sm text-slate-600" th:text="#{auth.password.hint}">Min 8, with upper, lower, number, and special character.</p>
-                        <div th:if="${#fields.hasErrors('password')}" class="mt-1 text-sm text-rose-700">
+                            class="field__input" />
+                        <p class="mt-1 text-xs text-slate-500" th:text="#{auth.password.hint}">Min 8, with upper, lower, number, and special character.</p>
+                        <div th:if="${#fields.hasErrors('password')}" class="mt-1 text-sm text-red-400">
                             <span th:errors="*{password}"></span>
                         </div>
                     </div>
 
                     <div>
-                        <label for="confirmPassword" class="block text-sm font-medium text-slate-800" th:text="#{auth.confirmPassword}">Confirm Password *</label>
+                        <label for="confirmPassword" class="field__label" th:text="#{auth.confirmPassword}">Confirm Password *</label>
                         <input
                             type="password"
                             id="confirmPassword"
                             th:field="*{confirmPassword}"
                             required
                             autocomplete="new-password"
-                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                            th:classappend="${#fields.hasErrors('confirmPassword')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="mt-1 text-sm text-rose-700">
+                            class="field__input" />
+                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="mt-1 text-sm text-red-400">
                             <span th:errors="*{confirmPassword}"></span>
                         </div>
                     </div>
@@ -113,13 +116,16 @@
 
                 <button
                     type="submit"
-                    class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                    class="btn btn--primary btn--md w-full">
                     <span th:text="#{auth.signup.submit}">Sign up</span>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                 </button>
 
-                <p class="text-center text-sm text-slate-600">
+                <p class="text-center text-sm text-slate-400">
                     Already have an account?
-                    <a th:href="@{/login}" class="font-semibold text-slate-900 underline underline-offset-4 hover:text-slate-700">Log in</a>
+                    <a th:href="@{/login}" class="font-semibold text-neon-cyan hover:text-neon-purple transition-colors underline underline-offset-4">Log in</a>
                 </p>
             </form>
         </div>
