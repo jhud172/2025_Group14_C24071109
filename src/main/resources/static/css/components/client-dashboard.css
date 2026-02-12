@@ -1,0 +1,312 @@
+@layer components {
+    /* Client Dashboard - Performance Command Centre */
+    
+    /* Main container with increased spacing */
+    .dashboard-container {
+        @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+    
+    /* Header Section - Emotional Anchor */
+    .dashboard-header {
+        @apply rounded-2xl p-8 sm:p-10 mb-10;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .dashboard-header__label {
+        @apply text-xs font-medium uppercase tracking-wider;
+        color: rgba(0, 0, 0, 0.4);
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-header__greeting {
+        @apply text-4xl sm:text-5xl font-bold mb-3;
+        color: #1a1a1a;
+        line-height: 1.2;
+    }
+    
+    .dashboard-header__subtitle {
+        @apply text-lg;
+        color: rgba(0, 0, 0, 0.6);
+        margin-bottom: 1.5rem;
+    }
+    
+    .dashboard-header__cta {
+        @apply inline-flex items-center justify-center px-8 py-4 rounded-xl font-semibold text-base;
+        @apply transition-all duration-300;
+        background: linear-gradient(135deg, rgb(16, 185, 129) 0%, rgb(5, 150, 105) 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+    
+    .dashboard-header__cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+    }
+    
+    /* Grid Layout with better spacing */
+    .dashboard-grid {
+        @apply grid gap-8;
+        grid-template-columns: 1fr;
+    }
+    
+    @media (min-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 2rem;
+        }
+    }
+    
+    /* Zone Cards - Clean and Deliberate */
+    .dashboard-zone {
+        @apply rounded-2xl p-8;
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .dashboard-zone:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    
+    .dashboard-zone__header {
+        @apply flex items-center gap-3 mb-6;
+    }
+    
+    .dashboard-zone__icon {
+        @apply p-3 rounded-xl;
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .dashboard-zone__icon svg {
+        @apply h-6 w-6;
+        color: rgb(16, 185, 129);
+    }
+    
+    .dashboard-zone__title {
+        @apply text-lg font-semibold;
+        color: #1a1a1a;
+    }
+    
+    /* Today Focus Section - Most Important */
+    .focus-card {
+        @apply p-6 rounded-xl mb-4;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+        border: 1.5px solid rgba(16, 185, 129, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .focus-card:hover {
+        border-color: rgba(16, 185, 129, 0.4);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
+        transform: translateY(-1px);
+    }
+    
+    .focus-card__number {
+        @apply inline-flex items-center justify-center rounded-full font-bold text-sm;
+        width: 2rem;
+        height: 2rem;
+        background: rgba(16, 185, 129, 0.15);
+        color: rgb(5, 150, 105);
+    }
+    
+    .focus-card__content {
+        @apply text-base;
+        color: rgba(0, 0, 0, 0.8);
+        line-height: 1.6;
+    }
+    
+    .focus-card__time {
+        @apply text-sm font-semibold mt-2;
+        color: rgb(59, 130, 246);
+    }
+    
+    .focus-card--empty {
+        @apply text-center py-12;
+        background: rgba(0, 0, 0, 0.02);
+        border: 1px dashed rgba(0, 0, 0, 0.15);
+    }
+    
+    .focus-card--empty__message {
+        @apply text-base mb-4;
+        color: rgba(0, 0, 0, 0.6);
+    }
+    
+    .focus-card--empty__actions {
+        @apply flex items-center justify-center gap-3 flex-wrap;
+    }
+    
+    .focus-card--empty__link {
+        @apply text-sm font-medium;
+        color: rgb(16, 185, 129);
+    }
+    
+    .focus-card--empty__link:hover {
+        text-decoration: underline;
+    }
+    
+    .focus-card--empty__separator {
+        @apply text-sm;
+        color: rgba(0, 0, 0, 0.3);
+    }
+    
+    html.dark .focus-card--empty__separator {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Performance Snapshot - Analytics Feel */
+    .stat-card {
+        @apply p-6 rounded-xl;
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        border-color: rgba(16, 185, 129, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    
+    .stat-card__label {
+        @apply text-sm font-medium mb-3;
+        color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .stat-card__value {
+        @apply text-3xl font-bold;
+        color: #1a1a1a;
+    }
+    
+    .stat-card__value--accent {
+        color: rgb(16, 185, 129);
+    }
+    
+    .stat-card__value--warning {
+        color: rgb(234, 88, 12);
+    }
+    
+    .stat-card__time {
+        @apply text-2xl font-bold mt-2;
+        color: rgb(59, 130, 246);
+    }
+    
+    /* Quick Actions - Modular and Tappable */
+    .action-tile {
+        @apply flex flex-col p-5 rounded-xl;
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .action-tile:hover {
+        border-color: rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.03);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .action-tile__icon {
+        @apply mb-3;
+    }
+    
+    .action-tile__icon svg {
+        @apply h-7 w-7;
+        color: rgb(16, 185, 129);
+    }
+    
+    .action-tile__title {
+        @apply text-base font-semibold mb-1;
+        color: #1a1a1a;
+    }
+    
+    .action-tile__subtitle {
+        @apply text-xs font-medium;
+        color: rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Responsive Mobile Stacking */
+    @media (max-width: 1023px) {
+        .dashboard-grid {
+            gap: 2rem;
+        }
+        
+        .dashboard-header {
+            padding: 2rem 1.5rem;
+        }
+        
+        .dashboard-header__greeting {
+            font-size: 2rem;
+        }
+        
+        .dashboard-zone {
+            padding: 1.5rem;
+        }
+    }
+    
+    /* Dark mode support */
+    html.dark .dashboard-header {
+        background: linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(26, 26, 46, 0.9) 100%);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    html.dark .dashboard-header__greeting {
+        @apply gradient-text;
+    }
+    
+    html.dark .dashboard-header__subtitle {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    html.dark .dashboard-zone {
+        @apply glass;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    html.dark .dashboard-zone__title {
+        color: #ffffff;
+    }
+    
+    html.dark .focus-card {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-color: rgba(16, 185, 129, 0.3);
+    }
+    
+    html.dark .focus-card__content {
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    html.dark .stat-card {
+        @apply glass;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    html.dark .stat-card__label {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    html.dark .stat-card__value {
+        color: #ffffff;
+    }
+    
+    html.dark .action-tile {
+        @apply glass;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    html.dark .action-tile:hover {
+        border-color: rgba(16, 185, 129, 0.4);
+        background: rgba(16, 185, 129, 0.1);
+    }
+    
+    html.dark .action-tile__title {
+        color: #ffffff;
+    }
+}
