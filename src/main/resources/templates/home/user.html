@@ -2,112 +2,155 @@
           th:replace="~{base :: layout('Home', null, ~{::content}, null)}">
 
     <div th:fragment="content">
-        <div class="relative overflow-hidden">
-            <div class="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-neon-purple/20 blur-3xl"></div>
-            <div class="pointer-events-none absolute -bottom-44 left-0 h-96 w-96 rounded-full bg-neon-green/15 blur-3xl"></div>
-
-            <div class="relative z-10 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-                <div class="card-neon mb-6 p-6">
-                    <div class="neon-bar mb-4"></div>
-                    <div class="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-neon-green">User home</p>
-                            <h1 class="mt-2 text-2xl font-bold gradient-text">
-                                Welcome back, <span th:text="${currentUser.firstName}">Friend</span>
-                            </h1>
-                            <p class="mt-1 text-sm text-slate-400">Your day at a glance, with everything you need to stay on track.</p>
-                        </div>
-                        <a th:href="@{/calendar/day/{date}(date=${#temporals.format(nextTaskDate, 'yyyy-MM-dd')})}"
-                           class="btn btn--primary">
-                            Open today
-                        </a>
+        <div class="dashboard-container">
+            <!-- Header Section - Emotional Anchor -->
+            <header class="dashboard-header">
+                <div class="flex flex-wrap items-end justify-between gap-6">
+                    <div class="flex-1">
+                        <h1 class="dashboard-header__greeting">
+                            Welcome back, <span th:text="${currentUser.firstName}">Friend</span>
+                        </h1>
+                        <p class="dashboard-header__subtitle">Here's your performance overview.</p>
                     </div>
+                    <a th:href="@{/calendar/day/{date}(date=${#temporals.format(nextTaskDate, 'yyyy-MM-dd')})}"
+                       class="dashboard-header__cta">
+                        View Today's Plan
+                    </a>
                 </div>
+            </header>
 
-                <div class="mt-6 grid gap-4 lg:grid-cols-3">
-                    <section class="card-neon card--green">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="p-2 rounded-lg bg-neon-green/10 border border-neon-green/30">
-                                <svg class="h-6 w-6 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+            <!-- Three Clear Zones -->
+            <div class="dashboard-grid">
+                
+                <!-- Zone 1: Today Focus (Most Important) -->
+                <section class="dashboard-zone dashboard-zone--primary">
+                    <div class="dashboard-zone__header">
+                        <div class="dashboard-zone__icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                        </div>
+                        <h2 class="dashboard-zone__title">Today Focus</h2>
+                    </div>
+                    
+                    <!-- Display tasks or empty state -->
+                    <div th:if="${nextTaskTitle != 'No tasks scheduled'}">
+                        <div class="focus-card">
+                            <div class="flex items-start gap-4">
+                                <span class="focus-card__number">1</span>
+                                <div class="flex-1">
+                                    <p class="focus-card__content" th:text="${nextTaskTitle}">Review today's schedule and mark any tasks complete.</p>
+                                    <p th:if="${nextTaskTime != null}" class="focus-card__time">
+                                        <span th:text="${nextTaskTime}">08:30</span>
+                                    </p>
+                                </div>
                             </div>
-                            <h2 class="text-sm font-semibold text-neon-green">Quick Actions</h2>
                         </div>
-                        <div class="mt-4 grid gap-2 text-sm">
-                            <a th:href="@{/calendar}" class="flex items-center justify-between p-3 rounded-lg bg-cyber-800/50 border border-cyber-700 hover:border-neon-green/50 hover:bg-neon-green/5 transition-all duration-300 group">
-                                <span class="font-semibold text-slate-300 group-hover:text-neon-green">Open calendar</span>
-                                <span class="text-xs text-slate-500">Week</span>
-                            </a>
-                            <a th:href="@{/workout}" class="flex items-center justify-between p-3 rounded-lg bg-cyber-800/50 border border-cyber-700 hover:border-neon-green/50 hover:bg-neon-green/5 transition-all duration-300 group">
-                                <span class="font-semibold text-slate-300 group-hover:text-neon-green">Plan workout</span>
-                                <span class="text-xs text-slate-500">Library</span>
-                            </a>
-                            <a th:href="@{/client/plan}" class="flex items-center justify-between p-3 rounded-lg bg-cyber-800/50 border border-cyber-700 hover:border-neon-green/50 hover:bg-neon-green/5 transition-all duration-300 group">
-                                <span class="font-semibold text-slate-300 group-hover:text-neon-green">View assigned plan</span>
-                                <span class="text-xs text-slate-500">Coach</span>
-                            </a>
-                            <a th:href="@{/client/messages}" class="flex items-center justify-between p-3 rounded-lg bg-cyber-800/50 border border-cyber-700 hover:border-neon-green/50 hover:bg-neon-green/5 transition-all duration-300 group">
-                                <span class="font-semibold text-slate-300 group-hover:text-neon-green">Message trainer</span>
-                                <span class="text-xs text-slate-500">Inbox</span>
-                            </a>
+                        <div class="focus-card">
+                            <div class="flex items-start gap-4">
+                                <span class="focus-card__number">2</span>
+                                <p class="focus-card__content">Log a workout or add a new session for later this week.</p>
+                            </div>
                         </div>
-                    </section>
+                        <div class="focus-card">
+                            <div class="flex items-start gap-4">
+                                <span class="focus-card__number">3</span>
+                                <p class="focus-card__content">Send a quick check-in to your trainer with today's focus.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Empty state -->
+                    <div th:if="${nextTaskTitle == 'No tasks scheduled'}" class="focus-card focus-card--empty">
+                        <p class="focus-card--empty__message">You're clear today!</p>
+                        <div class="focus-card--empty__actions">
+                            <a th:href="@{/exercise-log}" class="focus-card--empty__link">Log a session</a>
+                            <span class="focus-card--empty__separator">or</span>
+                            <a th:href="@{/client/plan}" class="focus-card--empty__link">review your plan</a>
+                        </div>
+                    </div>
+                </section>
 
-                    <section class="card-neon card--cyan">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="p-2 rounded-lg bg-neon-cyan/10 border border-neon-cyan/30">
-                                <svg class="h-6 w-6 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                            </div>
-                            <h2 class="text-sm font-semibold text-neon-cyan">Today's Snapshot</h2>
+                <!-- Zone 2: Performance Snapshot -->
+                <section class="dashboard-zone">
+                    <div class="dashboard-zone__header">
+                        <div class="dashboard-zone__icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
                         </div>
-                        <div class="mt-4 space-y-3 text-sm">
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-800/50 border border-cyber-700">
-                                <span class="text-slate-400">Next task</span>
-                                <span class="font-semibold text-neon-cyan" th:text="${nextTaskTitle}">No tasks scheduled</span>
-                            </div>
-                            <div th:if="${nextTaskTime != null}" class="flex items-center justify-between p-3 rounded-lg bg-cyber-800/50 border border-cyber-700">
-                                <span class="text-slate-400">Time</span>
-                                <span class="font-bold text-xl text-neon-blue" th:text="${nextTaskTime}">08:30</span>
-                            </div>
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-800/50 border border-cyber-700">
-                                <span class="text-slate-400">Overdue</span>
-                                <span class="font-bold text-xl text-neon-pink" th:text="${overdueCount}">0</span>
-                            </div>
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-cyber-800/50 border border-cyber-700">
-                                <span class="text-slate-400">Completed today</span>
-                                <span class="font-bold text-xl text-neon-green" th:text="${completedToday}">0</span>
-                            </div>
-                        </div>
-                    </section>
+                        <h2 class="dashboard-zone__title">Performance</h2>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card__label">Next Up</div>
+                        <div class="stat-card__value stat-card__value--accent" th:text="${nextTaskTitle}">No tasks scheduled</div>
+                        <div th:if="${nextTaskTime != null}" class="stat-card__time" th:text="${nextTaskTime}">08:30</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card__label">Needs Attention</div>
+                        <div class="stat-card__value stat-card__value--warning" th:text="${overdueCount}">0</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card__label">Completed Today</div>
+                        <div class="stat-card__value stat-card__value--accent" th:text="${completedToday}">0</div>
+                    </div>
+                </section>
 
-                    <section class="card-neon card--purple">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="p-2 rounded-lg bg-neon-purple/10 border border-neon-purple/30">
-                                <svg class="h-6 w-6 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
-                            </div>
-                            <h2 class="text-sm font-semibold text-neon-purple">What To Do Next</h2>
+                <!-- Zone 3: Tools & Navigation -->
+                <section class="dashboard-zone">
+                    <div class="dashboard-zone__header">
+                        <div class="dashboard-zone__icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
                         </div>
-                        <ol class="mt-4 space-y-3 text-sm">
-                            <li class="flex items-start gap-3 p-3 rounded-lg bg-cyber-800/50 border border-cyber-700">
-                                <span class="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-neon-green/20 border border-neon-green/40 text-xs font-bold text-neon-green">1</span>
-                                <span class="text-slate-300">Review today&#39;s schedule and mark any tasks complete.</span>
-                            </li>
-                            <li class="flex items-start gap-3 p-3 rounded-lg bg-cyber-800/50 border border-cyber-700">
-                                <span class="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-neon-purple/20 border border-neon-purple/40 text-xs font-bold text-neon-purple">2</span>
-                                <span class="text-slate-300">Log a workout or add a new session for later this week.</span>
-                            </li>
-                            <li class="flex items-start gap-3 p-3 rounded-lg bg-cyber-800/50 border border-cyber-700">
-                                <span class="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-neon-cyan/20 border border-neon-cyan/40 text-xs font-bold text-neon-cyan">3</span>
-                                <span class="text-slate-300">Send a quick check-in to your trainer with today&#39;s focus.</span>
-                            </li>
-                        </ol>
-                    </section>
-                </div>
+                        <h2 class="dashboard-zone__title">Quick Access</h2>
+                    </div>
+                    
+                    <a th:href="@{/calendar}" class="action-tile">
+                        <div class="action-tile__icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="action-tile__title">Open Calendar</div>
+                        <div class="action-tile__subtitle">View your weekly plan</div>
+                    </a>
+                    
+                    <a th:href="@{/workout}" class="action-tile">
+                        <div class="action-tile__icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <div class="action-tile__title">Plan Workout</div>
+                        <div class="action-tile__subtitle">Browse exercise library</div>
+                    </a>
+                    
+                    <a th:href="@{/client/plan}" class="action-tile">
+                        <div class="action-tile__icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div class="action-tile__title">Your Training Plan</div>
+                        <div class="action-tile__subtitle">View coach assignments</div>
+                    </a>
+                    
+                    <a th:href="@{/client/messages}" class="action-tile">
+                        <div class="action-tile__icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                        </div>
+                        <div class="action-tile__title">Message Trainer</div>
+                        <div class="action-tile__subtitle">Chat and get support</div>
+                    </a>
+                </section>
+                
             </div>
         </div>
     </div>
