@@ -492,6 +492,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Mobile notifications toggle button
+    const notificationsToggleMobile = document.getElementById("chatNotificationsToggleMobile");
+    if (notificationsToggleMobile && notificationsView && chatView) {
+        notificationsToggleMobile.addEventListener("click", async () => {
+            const showingNotifications = !notificationsView.classList.contains("hidden");
+            if (showingNotifications) {
+                notificationsView.classList.add("hidden");
+                chatView.classList.remove("hidden");
+            } else {
+                chatView.classList.add("hidden");
+                notificationsView.classList.remove("hidden");
+                await loadNotifications();
+            }
+        });
+    }
+
     if (notificationsReadAll) {
         notificationsReadAll.addEventListener("click", async () => {
             if (!isAuthenticated) return;
