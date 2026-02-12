@@ -16,6 +16,16 @@
         animation: shimmer 1.5s ease-in-out infinite;
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        .btn:hover::before {
+            animation: none;
+        }
+        
+        .btn--primary, .btn--secondary, .btn--ghost, .btn--danger, .btn--success, .btn--purple {
+            @apply hover:scale-100;
+        }
+    }
+
     @keyframes shimmer {
         0% {
             transform: translateX(-100%);
