@@ -1,192 +1,223 @@
 @layer components {
-  /* Footer - Clean, white-based, structured footer with emerald micro-accents */
+  /* Footer - Professional, clean design with clear section dividers */
   
   .footer-redesign {
     @apply bg-white;
-    border-top: 1px solid #e5e7eb;
+    border-top: 2px solid #e5e7eb;
     position: relative;
   }
 
-  /* Subtle emerald gradient glow on top divider - Option A */
+  /* Professional top accent stripe */
   .footer-redesign::before {
     content: '';
     position: absolute;
-    top: 0;
+    top: -2px;
     left: 0;
     right: 0;
-    height: 1px;
+    height: 2px;
     background: linear-gradient(
       90deg,
-      transparent 0%,
-      rgba(16, 185, 129, 0.3) 25%,
-      rgba(16, 185, 129, 0.5) 50%,
-      rgba(16, 185, 129, 0.3) 75%,
-      transparent 100%
+      rgba(16, 185, 129, 0.6) 0%,
+      rgba(16, 185, 129, 0.8) 50%,
+      rgba(16, 185, 129, 0.6) 100%
     );
-    opacity: 0.6;
   }
 
-  /* Footer container with generous padding */
+  /* Footer container - more compact, professional spacing */
   .footer-container {
-    @apply mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20;
+    @apply mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-14;
   }
 
-  /* Main footer grid */
+  /* Main footer grid with visual separation */
   .footer-grid {
-    @apply grid gap-12 lg:grid-cols-12 lg:gap-16;
+    @apply grid gap-10 lg:grid-cols-12 lg:gap-12;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
   }
 
-  /* Brand block - left side */
+  /* Brand block - left side, more compact */
   .footer-brand {
-    @apply space-y-6 lg:col-span-5;
+    @apply space-y-4 lg:col-span-4;
+    padding-right: 2rem;
+    border-right: 1px solid #e5e7eb;
   }
 
-  /* Logo with emerald accent */
+  /* Logo container - cleaner, smaller */
   .footer-logo-container {
-    @apply flex items-center gap-3;
-    position: relative;
+    @apply flex items-center gap-2;
   }
 
   .footer-logo {
-    @apply grid h-8 w-8 place-items-center rounded-lg text-sm font-bold text-white shadow-sm;
+    @apply grid h-6 w-6 place-items-center rounded text-xs font-bold text-white;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  }
-
-  /* Subtle emerald accent line near brand */
-  .footer-logo-container::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 0;
-    width: 48px;
-    height: 2px;
-    background: linear-gradient(90deg, #10b981 0%, transparent 100%);
-    opacity: 0.5;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
   }
 
   .footer-brand-name {
-    @apply text-lg font-semibold tracking-wide text-slate-900;
+    @apply text-base font-semibold text-slate-900;
+    letter-spacing: -0.01em;
   }
 
-  /* Shortened, confident brand description */
+  /* Tagline - more concise */
   .footer-brand-description {
-    @apply max-w-xs text-sm leading-relaxed text-slate-600;
+    @apply text-xs leading-relaxed text-slate-600;
+    max-width: 280px;
   }
 
-  /* Social icons - spaced apart, muted, emerald on hover */
+  /* Social icons - smaller, more refined */
   .footer-social {
-    @apply flex gap-6;
+    @apply flex gap-4;
   }
 
   .footer-social-link {
-    @apply text-slate-400 transition-all duration-300;
+    @apply flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition-all duration-200;
   }
 
   .footer-social-link:hover {
-    @apply text-emerald-500;
-    transform: translateY(-2px);
+    @apply border-emerald-500 bg-emerald-50 text-emerald-600;
   }
 
   .footer-social-link svg {
-    @apply h-4 w-4;
+    @apply h-3.5 w-3.5;
   }
 
-  /* Link columns - right side */
+  /* Link columns - right side with vertical dividers */
   .footer-links {
-    @apply grid grid-cols-2 gap-8 lg:col-span-7 md:grid-cols-3 md:gap-10;
+    @apply grid grid-cols-3 gap-8 lg:col-span-8;
   }
 
   .footer-link-group {
-    @apply space-y-4;
+    @apply space-y-3;
+    position: relative;
   }
 
-  /* Section headings - slightly larger, cleaner */
+  /* Add vertical dividers between link columns */
+  .footer-link-group:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -1rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      #e5e7eb 10%,
+      #e5e7eb 90%,
+      transparent 100%
+    );
+  }
+
+  /* Section headings - professional, understated */
   .footer-section-heading {
-    @apply text-sm font-semibold uppercase tracking-wider text-slate-900;
-    letter-spacing: 0.05em;
+    @apply text-xs font-semibold uppercase tracking-widest text-slate-800;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid #10b981;
+    display: inline-block;
   }
 
-  /* Links - cleaner, well-spaced */
+  /* Links - clean typography */
   .footer-link-list {
-    @apply mt-5 space-y-3;
+    @apply space-y-2;
   }
 
   .footer-link {
-    @apply block text-sm font-normal text-slate-600 transition-colors duration-200;
+    @apply block text-sm text-slate-600 transition-colors duration-150;
   }
 
   .footer-link:hover {
     @apply text-emerald-600;
+    padding-left: 4px;
   }
 
-  /* Legal section - bottom bar */
+  /* Legal section - minimal bottom bar */
   .footer-legal {
-    @apply mt-16 border-t border-slate-200 pt-10;
+    @apply mt-8 pt-6;
   }
 
   .footer-legal-container {
-    @apply flex flex-col items-center justify-between gap-6 md:flex-row;
+    @apply flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left;
   }
 
-  /* Copyright - smaller, lighter */
+  /* Copyright - minimal */
   .footer-copyright {
     @apply text-xs text-slate-500;
   }
 
-  /* Legal links - horizontal row, minimal */
+  /* Legal links - separated with bullets */
   .footer-legal-links {
-    @apply flex flex-wrap items-center gap-6;
+    @apply flex flex-wrap items-center gap-4;
   }
 
   .footer-legal-link {
-    @apply text-xs text-slate-600 transition-all duration-200;
-    position: relative;
-  }
-
-  /* Subtle hover underline animation */
-  .footer-legal-link::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background-color: #10b981;
-    transition: width 0.3s ease;
-  }
-
-  .footer-legal-link:hover::after {
-    width: 100%;
+    @apply text-xs text-slate-500 transition-colors duration-150;
   }
 
   .footer-legal-link:hover {
     @apply text-emerald-600;
   }
 
-  /* System status tag - productized language */
+  /* Add separators between legal links */
+  .footer-legal-link:not(:last-child)::after {
+    content: '•';
+    margin-left: 1rem;
+    color: #cbd5e1;
+  }
+
+  /* System status - compact */
   .footer-system-status {
-    @apply flex items-center gap-2 text-xs text-slate-500;
+    @apply flex items-center gap-1.5 text-xs text-slate-500;
   }
 
   .footer-system-indicator {
     @apply h-1.5 w-1.5 rounded-full bg-emerald-500;
-    box-shadow: 0 0 4px rgba(16, 185, 129, 0.6);
-    animation: pulse-subtle 3s ease-in-out infinite;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+    animation: pulse-subtle 2s ease-in-out infinite;
   }
 
   @keyframes pulse-subtle {
     0%, 100% {
       opacity: 1;
+      transform: scale(1);
     }
     50% {
-      opacity: 0.6;
+      opacity: 0.7;
+      transform: scale(1.1);
     }
   }
 
-  /* Mobile responsive adjustments */
+  /* Mobile responsive - stack sections */
   @media (max-width: 1023px) {
+    .footer-brand {
+      @apply border-r-0 border-b pb-8;
+      padding-right: 0;
+    }
+
     .footer-grid {
-      @apply gap-10;
+      @apply gap-8;
+    }
+
+    .footer-links {
+      @apply gap-6;
+    }
+
+    .footer-link-group:not(:last-child)::after {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .footer-links {
+      @apply grid-cols-1 gap-6;
+    }
+
+    .footer-link-group {
+      @apply text-center;
+    }
+
+    .footer-section-heading {
+      width: 100%;
     }
 
     .footer-brand {
@@ -197,61 +228,41 @@
       @apply justify-center;
     }
 
-    .footer-logo-container::after {
-      @apply left-1/2;
-      transform: translateX(-50%);
+    .footer-social {
+      @apply justify-center;
     }
 
     .footer-brand-description {
       @apply mx-auto;
     }
-
-    .footer-social {
-      @apply justify-center;
-    }
-
-    .footer-links {
-      @apply mt-8;
-    }
-  }
-
-  @media (max-width: 767px) {
-    .footer-links {
-      @apply grid-cols-2 gap-8;
-    }
-  }
-
-  @media (max-width: 639px) {
-    .footer-links {
-      @apply grid-cols-1 gap-8;
-    }
-
-    .footer-link-group {
-      @apply text-center;
-    }
   }
 }
 
-/* Dark mode overrides - maintain white footer in light mode */
+/* Dark mode overrides */
 html:not(.dark) .footer-redesign {
   @apply bg-white;
 }
 
-/* In dark mode, adjust footer to match but keep it distinct */
 .dark .footer-redesign {
   @apply bg-slate-900;
-  border-top: 1px solid rgba(100, 116, 139, 0.2);
+  border-top: 2px solid rgba(100, 116, 139, 0.3);
 }
 
 .dark .footer-redesign::before {
   background: linear-gradient(
     90deg,
-    transparent 0%,
-    rgba(16, 185, 129, 0.2) 25%,
-    rgba(16, 185, 129, 0.4) 50%,
-    rgba(16, 185, 129, 0.2) 75%,
-    transparent 100%
+    rgba(16, 185, 129, 0.4) 0%,
+    rgba(16, 185, 129, 0.6) 50%,
+    rgba(16, 185, 129, 0.4) 100%
   );
+}
+
+.dark .footer-grid {
+  border-bottom-color: rgba(100, 116, 139, 0.3);
+}
+
+.dark .footer-brand {
+  border-right-color: rgba(100, 116, 139, 0.3);
 }
 
 .dark .footer-brand-name {
@@ -262,8 +273,17 @@ html:not(.dark) .footer-redesign {
   @apply text-slate-400;
 }
 
+.dark .footer-social-link {
+  @apply border-slate-700 text-slate-400;
+}
+
+.dark .footer-social-link:hover {
+  @apply border-emerald-500 bg-emerald-900/20 text-emerald-400;
+}
+
 .dark .footer-section-heading {
-  @apply text-slate-100;
+  @apply text-slate-200;
+  border-bottom-color: #10b981;
 }
 
 .dark .footer-link {
@@ -274,30 +294,28 @@ html:not(.dark) .footer-redesign {
   @apply text-emerald-400;
 }
 
-.dark .footer-legal {
-  @apply border-slate-800;
-}
-
 .dark .footer-copyright {
   @apply text-slate-500;
 }
 
 .dark .footer-legal-link {
-  @apply text-slate-400;
+  @apply text-slate-500;
 }
 
 .dark .footer-legal-link:hover {
   @apply text-emerald-400;
 }
 
+.dark .footer-legal-link:not(:last-child)::after {
+  color: #475569;
+}
+
 .dark .footer-system-status {
   @apply text-slate-500;
 }
 
-.dark .footer-social-link {
-  @apply text-slate-500;
-}
-
-.dark .footer-social-link:hover {
-  @apply text-emerald-400;
+@media (max-width: 1023px) {
+  .dark .footer-brand {
+    border-bottom-color: rgba(100, 116, 139, 0.3);
+  }
 }
