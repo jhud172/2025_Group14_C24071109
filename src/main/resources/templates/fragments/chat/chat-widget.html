@@ -18,16 +18,16 @@
 
     <!-- Floating button -->
     <button type="button"
-            class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-lg transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 active:translate-y-px dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+            class="chat-fab-premium"
             id="chatFab"
             aria-label="Open chat"
             aria-controls="chatPanel"
             aria-expanded="false">
-        <span class="chat-fab-dot absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-slate-900 opacity-0 shadow-[0_0_0_6px_rgba(15,23,42,0.10)] transition [&.on]:opacity-100 dark:bg-slate-100 dark:shadow-[0_0_0_6px_rgba(226,232,240,0.10)]"></span>
+        <span class="chat-fab-notification-dot" id="chatNotificationDot"></span>
         <span id="chatUnreadBadge"
               class="pointer-events-none absolute -right-1 -top-1 hidden min-w-[1.25rem] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold text-white shadow-lg"
               aria-live="polite"></span>
-        <span class="text-base sm:text-lg" aria-hidden="true">💬</span>
+        <span class="chat-fab-icon" aria-hidden="true">💬</span>
     </button>
 
     <div id="chatToastRegion"
@@ -36,87 +36,94 @@
 
     <!-- Chat panel -->
     <section id="chatPanel" aria-hidden="true"
-             class="fixed bottom-[4.5rem] right-4 sm:bottom-24 sm:right-6 z-50 h-[calc(100vh-6rem)] max-h-[32rem] sm:h-[34rem] sm:max-h-[calc(100vh-8rem)] w-full max-w-[calc(100vw-2rem)] sm:w-[22.5rem] sm:max-w-[calc(100vw-3rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl opacity-0 pointer-events-none translate-y-2 transition duration-200 ease-out [&.open]:opacity-100 [&.open]:pointer-events-auto [&.open]:translate-y-0 dark:border-slate-800 dark:bg-slate-950">
-        <header class="flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-3 border-b border-slate-200 px-3 sm:px-4 py-2 sm:py-3 dark:border-slate-800">
-            <div class="flex items-start gap-2 sm:gap-3 w-full sm:w-auto">
-                <div class="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-xs font-black tracking-wide text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">AI</div>
-                <div class="flex-1 sm:flex-initial">
-                    <div class="text-sm font-bold text-slate-900 dark:text-slate-100">Coach Bot</div>
-                    <div class="text-xs text-slate-600 dark:text-slate-400">Training, notes, scheduling help</div>
-                    <div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-                        <a href="/inbox"
-                           class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
-                            Inbox
-                        </a>
-                        <button type="button"
-                                id="chatProChatBtn"
-                                th:attr="data-locked=${!isPremium}"
-                                class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
-                            <span>Pro Chat</span>
-                            <span th:if="${!isPremium}" aria-hidden="true">🔒</span>
-                        </button>
-                        <span id="chatProChatHint" th:if="${!isPremium}" class="text-[10px] text-slate-400">Premium feature</span>
+             class="chat-panel-premium">
+        <header class="chat-header-premium">
+            <div class="chat-header-top">
+                <div class="chat-title-section">
+                    <div class="chat-badge-premium">AI</div>
+                    <div class="chat-title-text">
+                        <div class="chat-title-main">Coach Bot</div>
+                        <div class="chat-title-subtitle">Training, notes, scheduling help</div>
                     </div>
                 </div>
+                
+                <div class="chat-header-actions">
+                    <button type="button"
+                            class="chat-icon-btn-premium hidden sm:flex"
+                            id="chatNotificationsToggle"
+                            title="Notifications"
+                            aria-label="Toggle notifications">🔔</button>
+                    <button type="button"
+                            class="chat-icon-btn-premium"
+                            id="chatClear"
+                            title="Clear"
+                            aria-label="Clear chat">🧹</button>
+                    <button type="button"
+                            class="chat-icon-btn-premium"
+                            id="chatClose"
+                            title="Close"
+                            aria-label="Close chat">✕</button>
+                </div>
             </div>
-
-            <div class="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-end">
+            
+            <div class="chat-tabs-premium">
+                <a href="/inbox"
+                   class="chat-tab-btn">
+                    Inbox
+                </a>
                 <button type="button"
-                        class="hidden sm:inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900"
-                        id="chatNotificationsToggle">Notifications</button>
-                <button type="button"
-                        class="inline-flex sm:hidden h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
-                        id="chatNotificationsToggleMobile" title="Notifications" aria-label="Toggle notifications">🔔</button>
-                <button type="button"
-                        class="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
-                        id="chatClear" title="Clear" aria-label="Clear chat">🧹</button>
-                <button type="button"
-                        class="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
-                        id="chatClose" title="Close" aria-label="Close chat">✕</button>
+                        id="chatProChatBtn"
+                        th:attr="data-locked=${!isPremium}"
+                        class="chat-tab-btn active"
+                        :class="{ 'active': currentTab === 'chat' }">
+                    <span>Pro Chat</span>
+                    <span th:if="${!isPremium}" aria-hidden="true" class="ml-1">🔒</span>
+                </button>
+                <span th:if="${!isPremium}" class="text-[10px] text-slate-400 dark:text-slate-500">Premium feature</span>
             </div>
         </header>
 
-        <div id="chatInlineToast" class="hidden border-b border-slate-200 bg-slate-50 px-3 sm:px-4 py-2 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"></div>
+        <div id="chatInlineToast" class="hidden border-b border-slate-200/60 bg-slate-50 px-4 py-2 text-xs text-slate-600 dark:border-slate-700/60 dark:bg-slate-900 dark:text-slate-200"></div>
 
-        <div class="flex h-[calc(100%-64px)] flex-col">
+        <div class="chat-panel-content-wrapper">
             <div id="chatChatView" class="flex h-full flex-col">
-                <div class="flex-1 overflow-auto px-3 sm:px-4 py-2 sm:py-3 text-sm" id="chatBody">
-                    <div class="chat-msg flex justify-start" sec:authorize="isAuthenticated()">
-                        <div class="bubble max-w-[82%] whitespace-pre-wrap rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+                <div class="chat-conversation-premium" id="chatBody">
+                    <div class="chat-message-wrapper assistant" sec:authorize="isAuthenticated()">
+                        <div class="chat-message-bubble">
                             Ask me anything about your workouts, progress, notes, or what to do today.
                         </div>
                     </div>
 
-                    <div class="chat-msg flex justify-start" sec:authorize="!isAuthenticated()">
-                        <div class="bubble max-w-[82%] whitespace-pre-wrap rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+                    <div class="chat-message-wrapper assistant" sec:authorize="!isAuthenticated()">
+                        <div class="chat-message-bubble">
                             Please log in to use chat.
                         </div>
                     </div>
                 </div>
 
-                <form class="flex items-center gap-1.5 sm:gap-2 border-t border-slate-200 p-2 sm:p-3 dark:border-slate-800" id="chatForm" autocomplete="off">
+                <form class="chat-input-container" id="chatForm" autocomplete="off">
                     <input id="chatInput" type="text" maxlength="800" required
-                           class="h-10 sm:h-11 flex-1 rounded-xl border border-slate-300 bg-white px-2.5 sm:px-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:disabled:bg-slate-900"
+                           class="chat-input-premium"
                            th:disabled="${!(#authentication != null and #authentication.authenticated)}"
                            th:placeholder="${(#authentication != null and #authentication.authenticated) ? 'Message…' : 'Log in to use chat'}" />
 
                     <button type="submit"
-                            class="inline-flex h-10 sm:h-11 items-center justify-center rounded-xl bg-slate-900 px-3 sm:px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
+                            class="chat-send-btn-premium"
                             id="chatSend"
                             th:disabled="${!(#authentication != null and #authentication.authenticated)}">Send</button>
                 </form>
             </div>
 
-            <div id="chatNotificationsView" class="hidden h-full flex-col">
-                <div class="flex items-center justify-between border-b border-slate-200 px-3 sm:px-4 py-2 text-xs dark:border-slate-800">
+            <div id="chatNotificationsView" class="chat-notifications-view hidden">
+                <div class="flex items-center justify-between border-b border-slate-200/60 px-4 py-3 text-xs dark:border-slate-700/60">
                     <span class="font-semibold text-slate-700 dark:text-slate-200">Notifications</span>
                     <button id="chatNotificationsReadAll"
-                            class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                            class="chat-icon-btn-premium h-auto w-auto px-3 py-1.5 text-[11px]">
                         Mark all read
                     </button>
                 </div>
-                <div id="chatNotificationsList" class="flex-1 overflow-auto px-3 sm:px-4 py-2 sm:py-3 text-sm">
-                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
+                <div id="chatNotificationsList" class="flex-1 overflow-auto px-4 py-3 text-sm">
+                    <div class="rounded-xl border border-dashed border-slate-200/80 bg-slate-50 px-3 py-4 text-center text-xs text-slate-500 dark:border-slate-700/80 dark:bg-slate-900/40 dark:text-slate-400">
                         No notifications yet.
                     </div>
                 </div>
