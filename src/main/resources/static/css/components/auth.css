@@ -1,0 +1,251 @@
+@layer components {
+    /* Auth page container - clean white background with emerald accents */
+    .auth-container {
+        @apply mx-auto w-full max-w-md px-4 py-10 sm:px-6 lg:px-8;
+    }
+
+    .auth-container--wide {
+        @apply max-w-2xl;
+    }
+
+    /* Auth card with clean design */
+    .auth-card {
+        @apply relative rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-lg;
+    }
+
+    /* Emerald accent bar */
+    .auth-accent-bar {
+        @apply h-1 w-full rounded-t-2xl;
+        background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+    }
+
+    /* Auth headings */
+    .auth-heading {
+        @apply text-3xl font-bold tracking-tight text-gray-900;
+    }
+
+    .auth-subheading {
+        @apply mt-2 text-sm text-gray-600;
+    }
+
+    /* Role slider for login */
+    .role-slider {
+        @apply inline-flex w-full rounded-full bg-gray-100 p-1 text-sm font-medium text-gray-500 border border-gray-200;
+    }
+
+    .role-slider__option {
+        @apply flex-1 px-3 py-2 text-center cursor-pointer rounded-full transition-all duration-300;
+    }
+
+    .role-slider__option.active {
+        @apply bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold shadow-md;
+    }
+
+    .role-slider__option:not(.active):hover {
+        @apply bg-gray-200;
+    }
+
+    /* Password toggle button */
+    .password-toggle {
+        @apply absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-500 transition-colors cursor-pointer;
+    }
+
+    /* Auth form fields */
+    .auth-field__label {
+        @apply block text-sm font-medium text-gray-700 mb-2;
+    }
+
+    .auth-field__input {
+        @apply w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3 text-gray-900
+        placeholder:text-gray-400 transition-all duration-300
+        focus-visible:outline-none focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/30
+        hover:border-gray-400;
+    }
+
+    .auth-field__input:focus {
+        @apply bg-white border-emerald-500;
+    }
+
+    /* Input with icon */
+    .auth-field__input-wrapper {
+        @apply relative;
+    }
+
+    .auth-field__input--with-icon {
+        @apply pr-12;
+    }
+
+    /* Code input styling for trainer/gym codes */
+    .auth-field__code-input {
+        @apply text-center font-mono text-lg tracking-widest;
+    }
+
+    /* Multi-part code input (e.g., ****-****-****) */
+    .code-input-group {
+        @apply flex gap-2 items-center;
+    }
+
+    .code-input-part {
+        @apply flex-1 text-center font-mono text-lg tracking-widest rounded-xl border-2 border-gray-300 bg-white px-3 py-3 text-gray-900
+        placeholder:text-gray-400 transition-all duration-300
+        focus-visible:outline-none focus-visible:border-emerald-500 focus-visible:ring-2 focus-visible:ring-emerald-500/30
+        hover:border-gray-400;
+    }
+
+    .code-input-separator {
+        @apply text-gray-400 font-bold text-xl;
+    }
+
+    /* Auth buttons */
+    .auth-btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-300
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2
+        w-full h-12 px-6 text-base;
+    }
+
+    .auth-btn--primary {
+        @apply bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold shadow-md
+        hover:shadow-lg hover:scale-105;
+    }
+
+    .auth-btn--secondary {
+        @apply bg-gray-100 text-gray-700 border-2 border-gray-300
+        hover:bg-gray-200 hover:border-gray-400;
+    }
+
+    /* Alert messages */
+    .auth-alert {
+        @apply mb-4 rounded-xl px-4 py-3 text-sm border-2;
+    }
+
+    .auth-alert--success {
+        @apply border-emerald-500/40 bg-emerald-50 text-emerald-700;
+    }
+
+    .auth-alert--error {
+        @apply border-red-500/40 bg-red-50 text-red-700;
+    }
+
+    .auth-alert--info {
+        @apply border-blue-500/40 bg-blue-50 text-blue-700;
+    }
+
+    /* Auth links */
+    .auth-link {
+        @apply font-semibold text-emerald-600 hover:text-emerald-700 transition-colors underline underline-offset-4;
+    }
+
+    /* Choice cards for signup selection */
+    .auth-choice-card {
+        @apply relative rounded-2xl border-2 border-gray-200 bg-white p-6 transition-all duration-300
+        hover:border-emerald-500 hover:shadow-lg hover:scale-105 cursor-pointer;
+    }
+
+    .auth-choice-card__icon {
+        @apply flex h-12 w-12 items-center justify-center rounded-xl font-bold text-xl shadow-md transition-all duration-300;
+    }
+
+    .auth-choice-card__icon--client {
+        @apply bg-gradient-to-br from-emerald-500 to-emerald-400 text-white;
+    }
+
+    .auth-choice-card__icon--trainer {
+        @apply bg-gradient-to-br from-blue-500 to-blue-400 text-white;
+    }
+
+    .auth-choice-card__icon--gym {
+        @apply bg-gradient-to-br from-purple-500 to-purple-400 text-white;
+    }
+
+    .auth-choice-card:hover .auth-choice-card__icon {
+        @apply scale-110;
+    }
+
+    .auth-choice-card__title {
+        @apply text-xl font-bold text-gray-900 mb-2;
+    }
+
+    .auth-choice-card__description {
+        @apply text-sm text-gray-600;
+    }
+
+    /* Dark mode support */
+    html.dark .auth-card {
+        @apply border-gray-700 bg-gray-800;
+    }
+
+    html.dark .auth-heading {
+        @apply text-white;
+    }
+
+    html.dark .auth-subheading {
+        @apply text-gray-400;
+    }
+
+    html.dark .role-slider {
+        @apply bg-gray-700 border-gray-600 text-gray-400;
+    }
+
+    html.dark .role-slider__option:not(.active):hover {
+        @apply bg-gray-600;
+    }
+
+    html.dark .auth-field__label {
+        @apply text-gray-300;
+    }
+
+    html.dark .auth-field__input,
+    html.dark .code-input-part {
+        @apply border-gray-600 bg-gray-700 text-white placeholder:text-gray-500;
+    }
+
+    html.dark .auth-field__input:focus,
+    html.dark .code-input-part:focus {
+        @apply bg-gray-700 border-emerald-500;
+    }
+
+    html.dark .auth-field__input:hover,
+    html.dark .code-input-part:hover {
+        @apply border-gray-500;
+    }
+
+    html.dark .password-toggle {
+        @apply text-gray-500 hover:text-emerald-400;
+    }
+
+    html.dark .auth-alert--success {
+        @apply border-emerald-500/40 bg-emerald-900/20 text-emerald-400;
+    }
+
+    html.dark .auth-alert--error {
+        @apply border-red-500/40 bg-red-900/20 text-red-400;
+    }
+
+    html.dark .auth-alert--info {
+        @apply border-blue-500/40 bg-blue-900/20 text-blue-400;
+    }
+
+    html.dark .auth-link {
+        @apply text-emerald-400 hover:text-emerald-300;
+    }
+
+    html.dark .auth-choice-card {
+        @apply border-gray-700 bg-gray-800;
+    }
+
+    html.dark .auth-choice-card:hover {
+        @apply border-emerald-500;
+    }
+
+    html.dark .auth-choice-card__title {
+        @apply text-white;
+    }
+
+    html.dark .auth-choice-card__description {
+        @apply text-gray-400;
+    }
+
+    html.dark .auth-btn--secondary {
+        @apply bg-gray-700 text-gray-200 border-gray-600 hover:bg-gray-600 hover:border-gray-500;
+    }
+}

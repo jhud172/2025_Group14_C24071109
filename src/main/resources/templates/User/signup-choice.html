@@ -1,57 +1,50 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout('Sign Up', null, ~{::content}, null)}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8 animate-fade-in">
-        <!-- Decorative neon glow elements -->
-        <div class="absolute inset-0 pointer-events-none overflow-hidden">
-            <div class="absolute -top-40 -right-40 w-80 h-80 bg-neon-cyan/10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-neon-purple/10 rounded-full blur-3xl"></div>
-        </div>
+    <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
+        <div class="auth-card">
+            <div class="auth-accent-bar"></div>
 
-        <div class="relative card-neon p-6 sm:p-8">
-            <!-- Neon accent line -->
-            <div class="neon-bar mb-6"></div>
-
-            <div class="mb-6">
-                <h1 class="text-3xl font-bold tracking-tight gradient-text" th:text="#{auth.signupChoice.title}">Choose your account type</h1>
-                <p class="mt-2 text-sm text-slate-400" th:text="#{auth.signupChoice.subtitle}">Select how you plan to use Healthy Habits.</p>
+            <div class="mb-8 mt-6">
+                <h1 class="auth-heading text-center" th:text="#{auth.signupChoice.title}">Choose your account type</h1>
+                <p class="auth-subheading text-center" th:text="#{auth.signupChoice.subtitle}">Select how you plan to use Healthy Habits.</p>
             </div>
 
             <div class="grid gap-6 md:grid-cols-3">
-                <a th:href="@{/signup/client}" class="group relative rounded-2xl border border-neon-cyan/30 bg-cyber-800/50 p-6 transition-all hover:border-neon-cyan hover:shadow-glow-md hover:scale-105">
+                <a th:href="@{/signup/client}" class="auth-choice-card">
                     <div class="flex flex-col gap-4">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-neon-cyan to-neon-blue text-cyber-900 font-bold text-xl shadow-glow-sm">C</div>
+                        <div class="auth-choice-card__icon auth-choice-card__icon--client">C</div>
                         <div>
-                            <h2 class="text-xl font-bold text-white mb-2" th:text="#{auth.role.client}">Client</h2>
-                            <p class="text-sm text-slate-400" th:text="#{auth.signupChoice.client}">Book trainers and track progress.</p>
+                            <h2 class="auth-choice-card__title" th:text="#{auth.role.client}">Client</h2>
+                            <p class="auth-choice-card__description" th:text="#{auth.signupChoice.client}">Book trainers and track progress.</p>
                         </div>
                     </div>
                 </a>
 
-                <a th:href="@{/signup/trainer}" class="group relative rounded-2xl border border-neon-purple/30 bg-cyber-800/50 p-6 transition-all hover:border-neon-purple hover:shadow-glow-md hover:scale-105">
+                <a th:href="@{/signup/trainer}" class="auth-choice-card">
                     <div class="flex flex-col gap-4">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-neon-purple to-neon-pink text-white font-bold text-xl shadow-glow-sm">T</div>
+                        <div class="auth-choice-card__icon auth-choice-card__icon--trainer">T</div>
                         <div>
-                            <h2 class="text-xl font-bold text-white mb-2" th:text="#{auth.role.trainer}">Trainer</h2>
-                            <p class="text-sm text-slate-400" th:text="#{auth.signupChoice.trainer}">Showcase your profile and clients.</p>
+                            <h2 class="auth-choice-card__title" th:text="#{auth.role.trainer}">Trainer</h2>
+                            <p class="auth-choice-card__description" th:text="#{auth.signupChoice.trainer}">Showcase your profile and clients.</p>
                         </div>
                     </div>
                 </a>
 
-                <a th:href="@{/signup/gym}" class="group relative rounded-2xl border border-neon-green/30 bg-cyber-800/50 p-6 transition-all hover:border-neon-green hover:shadow-glow-md hover:scale-105">
+                <a th:href="@{/signup/gym}" class="auth-choice-card">
                     <div class="flex flex-col gap-4">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-neon-green to-neon-cyan text-cyber-900 font-bold text-xl shadow-glow-sm">G</div>
+                        <div class="auth-choice-card__icon auth-choice-card__icon--gym">G</div>
                         <div>
-                            <h2 class="text-xl font-bold text-white mb-2" th:text="#{auth.role.gym}">Gym</h2>
-                            <p class="text-sm text-slate-400" th:text="#{auth.signupChoice.gym}">Manage your gym and trainers.</p>
+                            <h2 class="auth-choice-card__title" th:text="#{auth.role.gym}">Gym</h2>
+                            <p class="auth-choice-card__description" th:text="#{auth.signupChoice.gym}">Manage your gym and trainers.</p>
                         </div>
                     </div>
                 </a>
             </div>
 
-            <p class="mt-6 text-center text-sm text-slate-400">
+            <p class="mt-8 text-center text-sm text-gray-600">
                 <span th:text="#{auth.login.haveAccount}">Already have an account?</span>
-                <a th:href="@{/login}" class="font-semibold text-neon-cyan hover:text-neon-purple transition-colors underline underline-offset-4" th:text="#{auth.login.submit}">Log in</a>
+                <a th:href="@{/login}" class="auth-link" th:text="#{auth.login.submit}">Log in</a>
             </p>
         </div>
     </div>
