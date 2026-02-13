@@ -36,8 +36,9 @@ public class DashboardSummaryService {
     @Transactional(readOnly = true)
     public DashboardSummaryDto getSummary(User user) {
         LocalDate today = LocalDate.now();
-        LocalDate startOfWeek = today.with(WeekFields.ISO.dayOfWeek(), 1);
-        LocalDate endOfWeek = startOfWeek.plusDays(6);
+        // Show next 7 days starting from today (not ISO week)
+        LocalDate startOfWeek = today;
+        LocalDate endOfWeek = today.plusDays(6);
 
         List<CalendarTask> weekTasks = calendarTaskRepository.findByUserAndDateBetween(user, startOfWeek, endOfWeek);
         List<ScheduleOccurrence> weekWorkouts = scheduleOccurrenceRepository.findByUserAndDateBetween(user, startOfWeek, endOfWeek);
