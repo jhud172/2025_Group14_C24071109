@@ -1,66 +1,155 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Build Schedule', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('Build Weekly Schedule', null, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="content">
     <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex flex-col gap-2">
-            <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Build your weekly workout schedule</h1>
-            <p class="text-sm text-slate-700 dark:text-slate-200">Drag workouts onto days, then save.</p>
+        <!-- Breadcrumb Navigation -->
+        <nav class="workout-breadcrumb">
+            <a th:href="@{/}" class="workout-breadcrumb-item">
+                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Home
+            </a>
+            <span class="workout-breadcrumb-separator">›</span>
+            <a th:href="@{/schedules}" class="workout-breadcrumb-item">Schedules</a>
+            <span class="workout-breadcrumb-separator">›</span>
+            <span class="workout-breadcrumb-item active">Build Schedule</span>
+        </nav>
+
+        <!-- Header Section -->
+        <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 mb-6">
+            <div class="flex flex-col gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Build Weekly Schedule</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Drag and drop workouts onto days to create your weekly training schedule</p>
+                </div>
+
+                <!-- Schedule Form -->
+                <form id="saveForm" method="post" action="/schedules/builder/save" class="space-y-4">
+                    <div class="flex flex-col sm:flex-row gap-4 sm:items-end">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1.5">
+                                Schedule Name
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="name" required placeholder="e.g., Push Pull Legs, Full Body Split..."
+                                   class="workout-search-input"/>
+                        </div>
+                        <div class="shrink-0">
+                            <button form="saveForm" type="submit"
+                                    class="workout-btn-primary w-full sm:w-auto">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Save Schedule
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" name="payload" id="payloadField"/>
+                </form>
+            </div>
         </div>
 
-        <form id="saveForm" method="post" action="/schedules/builder/save" class="mt-6">
-            <div class="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-end">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Schedule name</label>
-                        <input type="text" name="name" required placeholder="e.g. Push / Pull / Legs"
-                               class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Sidebar: Workout Library -->
+            <aside class="lg:col-span-3">
+                <div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 sticky top-4">
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">
+                            Your Workouts
+                        </h2>
+                        <a href="/workout"
+                           class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 transition-colors"
+                           title="Create a new workout">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </a>
                     </div>
-                    <div class="flex items-center justify-start sm:justify-end">
-                        <button form="saveForm" type="submit"
-                                class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
-                            Save schedule
-                        </button>
+
+                    <!-- Search -->
+                    <div class="mb-4">
+                        <input id="workout-search" type="text" placeholder="Search workouts..."
+                               class="workout-search-input text-sm py-2"/>
+                    </div>
+
+                    <!-- Workout List -->
+                    <div id="workout-list" class="space-y-2 overflow-y-auto pr-1 max-h-[500px]">
+                        <div th:if="${#lists.isEmpty(workouts)}" class="text-center py-8">
+                            <svg class="w-12 h-12 mx-auto text-slate-300 dark:text-slate-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-2">No workouts yet</p>
+                            <a href="/workout" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">Create one now →</a>
+                        </div>
+
+                        <div th:each="w : ${workouts}"
+                             class="workout-item draggable-ex cursor-move rounded-lg border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-500/5 dark:to-slate-900/50 p-3 shadow-sm transition-all hover:shadow-md hover:border-emerald-400 dark:hover:border-emerald-600 group"
+                             draggable="true"
+                             th:attr="data-id=${w.id},data-name=${w.name}">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-4 h-4 mt-0.5 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-sm font-semibold text-emerald-900 dark:text-emerald-100 block" th:text="${w.name}">Workout</span>
+                                    <span class="text-xs text-emerald-700 dark:text-emerald-300 mt-0.5 block">Drag to a day →</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </aside>
 
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <input type="hidden" name="payload" id="payloadField"/>
-            </div>
-        </form>
-
-        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <section class="lg:col-span-3 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
-                <div class="flex items-center justify-between gap-3">
-                    <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Your workouts</h2>
-                    <a href="/workout"
-                       class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                       aria-label="Create a workout">+</a>
-                </div>
-
-                <div class="mt-4">
-                    <label class="sr-only" for="workout-search">Search workouts</label>
-                    <input id="workout-search" type="text" placeholder="Search workouts..."
-                           class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
-                </div>
-
-                <div id="workout-list" class="mt-4 space-y-2 overflow-y-auto pr-1 max-h-[500px]">
-                    <div th:each="w : ${workouts}"
-                         class="workout-item draggable-ex cursor-move rounded-xl border border-blue-200 bg-blue-50 p-2 shadow-sm transition hover:bg-blue-100 dark:border-slate-800 dark:bg-slate-950/40"
-                         draggable="true"
-                         th:attr="data-id=${w.id},data-name=${w.name}">
-                        <span class="text-sm font-semibold text-blue-800 dark:text-blue-300" th:text="${w.name}"></span>
-                    </div>
-                </div>
-            </section>
-
+            <!-- Main Area: Weekly Calendar -->
             <section class="lg:col-span-9">
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-7">
+                <!-- Info Banner -->
+                <div class="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-500/5 dark:to-slate-900/50 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 mb-4">
+                    <div class="flex gap-3">
+                        <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm text-slate-900 dark:text-slate-100">
+                                <strong>How to use:</strong> Drag workouts from the left panel onto any day. You can add multiple workouts per day. Right-click on a workout in the calendar to remove it.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Week Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
                     <div th:each="day : ${days}"
-                         class="day-column rounded-2xl border border-slate-200 bg-white/80 p-3 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50"
+                         class="schedule-day-column"
                          th:attr="data-day=${day}">
-                        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${day}"></h3>
-                        <div class="drop-zone mt-2 min-h-[240px] flex-1 space-y-2 rounded-xl border-2 border-dashed border-slate-300 bg-white/60 p-2 transition dark:border-slate-700 dark:bg-slate-950/30"></div>
+                        <h3 class="schedule-day-header">
+                            <span th:text="${day}">Day</span>
+                            <span class="schedule-day-count" data-count="0">0</span>
+                        </h3>
+                        <div class="schedule-drop-zone"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="workout-stat-card">
+                        <div class="workout-stat-label">Total Workouts</div>
+                        <div class="workout-stat-value" id="totalWorkouts">0</div>
+                    </div>
+                    <div class="workout-stat-card">
+                        <div class="workout-stat-label">Active Days</div>
+                        <div class="workout-stat-value" id="activeDays">0</div>
+                    </div>
+                    <div class="workout-stat-card">
+                        <div class="workout-stat-label">Rest Days</div>
+                        <div class="workout-stat-value" id="restDays">7</div>
+                    </div>
+                    <div class="workout-stat-card">
+                        <div class="workout-stat-label">Avg Per Day</div>
+                        <div class="workout-stat-value" id="avgPerDay">0.0</div>
                     </div>
                 </div>
             </section>
@@ -70,6 +159,56 @@
 
 <div th:fragment="pageScripts">
     <script src="/js/schedule-builder.js"></script>
+    <script>
+        // Enhanced stats tracking
+        function updateScheduleStats() {
+            const allWorkouts = document.querySelectorAll('.schedule-drop-zone > div');
+            const totalWorkouts = allWorkouts.length;
+            
+            const daysWithWorkouts = new Set();
+            document.querySelectorAll('.schedule-drop-zone').forEach(zone => {
+                if (zone.children.length > 0) {
+                    daysWithWorkouts.add(zone.closest('[data-day]').dataset.day);
+                }
+            });
+            
+            const activeDays = daysWithWorkouts.size;
+            const restDays = 7 - activeDays;
+            const avgPerDay = activeDays > 0 ? (totalWorkouts / activeDays).toFixed(1) : '0.0';
+            
+            document.getElementById('totalWorkouts').textContent = totalWorkouts;
+            document.getElementById('activeDays').textContent = activeDays;
+            document.getElementById('restDays').textContent = restDays;
+            document.getElementById('avgPerDay').textContent = avgPerDay;
+            
+            // Update day counts
+            document.querySelectorAll('.schedule-day-column').forEach(column => {
+                const dropZone = column.querySelector('.schedule-drop-zone');
+                const countBadge = column.querySelector('.schedule-day-count');
+                const count = dropZone.children.length;
+                
+                countBadge.textContent = count;
+                countBadge.dataset.count = count;
+                
+                if (count > 0) {
+                    dropZone.classList.add('has-workouts');
+                } else {
+                    dropZone.classList.remove('has-workouts');
+                }
+            });
+        }
+        
+        // Call on page load and after any drag/drop
+        document.addEventListener('DOMContentLoaded', function() {
+            updateScheduleStats();
+            
+            // Add mutation observer to track changes
+            document.querySelectorAll('.schedule-drop-zone').forEach(zone => {
+                const observer = new MutationObserver(updateScheduleStats);
+                observer.observe(zone, { childList: true });
+            });
+        });
+    </script>
 </div>
 
 </th:block>
