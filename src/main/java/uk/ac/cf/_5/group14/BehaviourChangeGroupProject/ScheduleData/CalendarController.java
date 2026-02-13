@@ -268,6 +268,8 @@ public class CalendarController {
         model.addAttribute("isToday", date.equals(LocalDate.now()));
 
         model.addAttribute("date", date);
+        model.addAttribute("prevDate", date.minusDays(1).format(DATE_FORMAT));
+        model.addAttribute("nextDate", date.plusDays(1).format(DATE_FORMAT));
 
         var timedFocusService = timedFocusServiceProvider.getIfAvailable();
         var timedFocus = (timedFocusService != null)
