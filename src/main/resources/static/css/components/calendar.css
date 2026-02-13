@@ -1,0 +1,197 @@
+/* Calendar Component Styles */
+
+/* Calendar day cards - improved styling */
+.calendar-day-card {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.calendar-day-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+html:not(.dark) .calendar-day-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .calendar-day-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+/* Today indicator with emerald accent */
+.calendar-day-card.ring-2.ring-blue-500\/80 {
+  border-color: rgb(16, 185, 129) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+/* Tomorrow indicator */
+.calendar-day-card.ring-2.ring-emerald-500\/70 {
+  border-color: rgb(16, 185, 129) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+}
+
+/* Calendar items - task/event cards */
+.calendar-item {
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.calendar-item:hover {
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.1);
+}
+
+html:not(.dark) .calendar-item {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(226, 232, 240, 0.6);
+}
+
+.dark .calendar-item {
+  background: rgba(30, 41, 59, 0.4);
+  border-color: rgba(71, 85, 105, 0.4);
+}
+
+html:not(.dark) .calendar-item:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.dark .calendar-item:hover {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+/* Completed items with emerald accent */
+.calendar-item.border-emerald-400\/40 {
+  background: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.dark .calendar-item.border-emerald-400\/40 {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Schedule items */
+html:not(.dark) .calendar-item.bg-slate-50\/70 {
+  background: rgba(241, 245, 249, 0.8);
+}
+
+.dark .calendar-item.bg-slate-50\/70 {
+  background: rgba(51, 65, 85, 0.3);
+}
+
+html:not(.dark) .calendar-item.bg-slate-50\/70:hover {
+  background: rgba(236, 254, 255, 0.9);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.dark .calendar-item.bg-slate-50\/70:hover {
+  background: rgba(8, 47, 73, 0.4);
+  border-color: rgba(6, 182, 212, 0.4);
+}
+
+/* Improved hover effects for mobile */
+@media (hover: none) {
+  .calendar-day-card:hover {
+    transform: none;
+  }
+  
+  .calendar-item:hover {
+    transform: none;
+  }
+}
+
+/* Better mobile responsiveness - using Tailwind's sm breakpoint (640px) */
+@media (max-width: 640px) {
+  .calendar-day-card {
+    padding: 0.75rem;
+    min-height: 10rem;
+  }
+  
+  .calendar-item {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Prevent text selection on day cards (improves touch interaction) */
+.calendar-day-card {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+/* But allow text selection inside items */
+.calendar-item {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  user-select: text;
+}
+
+/* Navigation buttons with emerald theme */
+.btn--primary {
+  background: rgb(16, 185, 129);
+  color: white;
+  border: none;
+}
+
+.btn--primary:hover {
+  background: rgb(5, 150, 105);
+}
+
+.dark .btn--primary {
+  background: rgb(16, 185, 129);
+}
+
+.dark .btn--primary:hover {
+  background: rgb(5, 150, 105);
+}
+
+/* Week strip improvements */
+#week-strip > div {
+  transition: all 0.2s ease;
+}
+
+#week-strip > div:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+/* Smooth scrolling for calendar containers */
+#month-slider,
+#week-slider {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+.calendar-day-card:focus,
+.calendar-item:focus {
+  outline: 2px solid rgb(16, 185, 129);
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.calendar-day-card[data-loading="true"] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.calendar-day-card[data-loading="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
