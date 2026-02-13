@@ -82,7 +82,12 @@ document.querySelectorAll(".schedule-drop-zone").forEach(zone => {
         zone.classList.remove('drag-over');
         
         if (!draggedItem) return;
-        if (!draggedItem.parentElement || draggedItem.parentElement.id === "workout-list") {
+        
+        // Check if dragging from sidebar (workout-item) or from another day (schedule-workout-item)
+        const isFromSidebar = draggedItem.classList.contains('workout-item') || 
+                             draggedItem.classList.contains('draggable-ex');
+        
+        if (isFromSidebar) {
             zone.appendChild(createItem(draggedItem.dataset.id, draggedItem.dataset.name));
         } else {
             zone.appendChild(draggedItem);
