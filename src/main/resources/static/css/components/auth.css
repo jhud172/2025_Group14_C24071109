@@ -1,0 +1,471 @@
+@layer components {
+    /* Auth page container - clean white background with emerald accents */
+    .auth-container {
+        @apply mx-auto w-full max-w-md px-4 py-10 sm:px-6 lg:px-8 min-h-screen flex items-center;
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(52, 211, 153, 0.03) 0%, transparent 50%);
+    }
+
+    .auth-container--wide {
+        @apply max-w-2xl;
+    }
+
+    /* Auth card with enhanced design */
+    .auth-card {
+        @apply relative rounded-3xl border border-gray-200 bg-white p-8 sm:p-10 w-full;
+        box-shadow: 
+            0 20px 25px -5px rgba(0, 0, 0, 0.05),
+            0 10px 10px -5px rgba(0, 0, 0, 0.02),
+            0 0 0 1px rgba(16, 185, 129, 0.05);
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Emerald accent bar with glow */
+    .auth-accent-bar {
+        @apply h-1.5 w-full rounded-t-3xl absolute -top-0 left-0;
+        background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #10b981 100%);
+        background-size: 200% 100%;
+        animation: shimmer 3s linear infinite;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    /* Auth headings with better centering */
+    .auth-heading {
+        @apply text-3xl sm:text-4xl font-bold text-gray-900 text-center;
+        letter-spacing: -0.025em;
+        line-height: 1.2;
+    }
+
+    .auth-subheading {
+        @apply mt-3 text-sm text-gray-600 text-center;
+        letter-spacing: 0.01em;
+    }
+
+    /* Role slider for login with enhanced animations */
+    .role-slider {
+        @apply inline-flex w-full rounded-full bg-gray-100 p-1.5 text-sm font-medium text-gray-500 border border-gray-200 relative;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .role-slider__option {
+        @apply flex-1 px-4 py-2.5 text-center cursor-pointer rounded-full transition-all duration-300 relative z-10;
+        transform-origin: center;
+    }
+
+    .role-slider__option.active {
+        @apply bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold;
+        box-shadow: 
+            0 4px 6px -1px rgba(16, 185, 129, 0.3),
+            0 2px 4px -1px rgba(16, 185, 129, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes popIn {
+        0% {
+            transform: scale(0.95);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .role-slider__option:not(.active):hover {
+        @apply bg-gray-200;
+        transform: scale(1.02);
+    }
+
+    .role-slider__option:not(.active):active {
+        transform: scale(0.98);
+    }
+
+    /* Password toggle button with smooth transitions */
+    .password-toggle {
+        @apply absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-all duration-300 cursor-pointer p-1.5 rounded-lg;
+    }
+
+    .password-toggle:hover {
+        @apply text-emerald-500 bg-emerald-50;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .password-toggle:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    /* Auth form fields with floating labels */
+    .auth-field__label {
+        @apply block text-sm font-medium text-gray-700 mb-2 transition-all duration-300;
+        letter-spacing: 0.01em;
+    }
+
+    .auth-field__input {
+        @apply w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3.5 text-gray-900
+        placeholder:text-gray-400 transition-all duration-300
+        focus-visible:outline-none focus-visible:border-emerald-500
+        hover:border-gray-400;
+    }
+
+    .auth-field__input:focus {
+        @apply bg-white border-emerald-500;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .auth-field__input:hover:not(:focus) {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Input with icon */
+    .auth-field__input-wrapper {
+        @apply relative;
+    }
+
+    .auth-field__input--with-icon {
+        @apply pr-12;
+    }
+
+    /* Code input styling for trainer/gym codes */
+    .auth-field__code-input {
+        @apply text-center font-mono text-lg tracking-widest;
+    }
+
+    /* Multi-part code input with enhanced styling */
+    .code-input-group {
+        @apply flex gap-2 items-center justify-center;
+    }
+
+    .code-input-part {
+        @apply flex-1 text-center font-mono text-lg tracking-widest rounded-xl border-2 border-gray-300 bg-white px-3 py-3.5 text-gray-900
+        placeholder:text-gray-400 transition-all duration-300
+        focus-visible:outline-none focus-visible:border-emerald-500
+        hover:border-gray-400 max-w-[80px];
+    }
+
+    .code-input-part:focus {
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        transform: translateY(-1px) scale(1.02);
+    }
+
+    .code-input-separator {
+        @apply text-emerald-400 font-bold text-xl;
+        text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Auth buttons with ripple effect */
+    .auth-btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-300
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2
+        w-full h-12 px-6 text-base relative overflow-hidden;
+    }
+
+    .auth-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .auth-btn:active::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .auth-btn--primary {
+        @apply bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold;
+        box-shadow: 
+            0 4px 6px -1px rgba(16, 185, 129, 0.3),
+            0 2px 4px -1px rgba(16, 185, 129, 0.2);
+        position: relative;
+    }
+
+    .auth-btn--primary:hover {
+        box-shadow: 
+            0 10px 15px -3px rgba(16, 185, 129, 0.4),
+            0 4px 6px -2px rgba(16, 185, 129, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .auth-btn--primary:active {
+        transform: translateY(0);
+    }
+
+    .auth-btn--secondary {
+        @apply bg-gray-100 text-gray-700 border-2 border-gray-300
+        hover:bg-gray-200 hover:border-gray-400 hover:shadow-md;
+    }
+
+    /* Alert messages with icons and better styling */
+    .auth-alert {
+        @apply mb-4 rounded-xl px-4 py-3.5 text-sm border-2 flex items-start gap-3;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .auth-alert--success {
+        @apply border-emerald-500/40 bg-emerald-50 text-emerald-700;
+        box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.1);
+    }
+
+    .auth-alert--error {
+        @apply border-red-500/40 bg-red-50 text-red-700;
+        box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.1);
+    }
+
+    .auth-alert--info {
+        @apply border-blue-500/40 bg-blue-50 text-blue-700;
+        box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Auth links with underline animation */
+    .auth-link {
+        @apply font-semibold text-emerald-600 transition-all duration-300 relative inline-block;
+        text-decoration: none;
+    }
+
+    .auth-link::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background: linear-gradient(90deg, #10b981, #34d399);
+        transform: scaleX(1);
+        transform-origin: bottom left;
+        transition: transform 0.3s ease-out;
+    }
+
+    .auth-link:hover {
+        @apply text-emerald-700;
+    }
+
+    .auth-link:hover::after {
+        transform: scaleX(1.05);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Choice cards for signup selection with enhanced interactions */
+    .auth-choice-card {
+        @apply relative rounded-2xl border-2 border-gray-200 bg-white p-6 transition-all duration-300 cursor-pointer;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .auth-choice-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 1rem;
+        padding: 2px;
+        background: linear-gradient(135deg, transparent 0%, rgba(16, 185, 129, 0.3) 100%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .auth-choice-card:hover {
+        @apply border-emerald-500;
+        box-shadow: 
+            0 20px 25px -5px rgba(0, 0, 0, 0.1),
+            0 10px 10px -5px rgba(0, 0, 0, 0.04),
+            0 0 0 1px rgba(16, 185, 129, 0.2);
+        transform: translateY(-4px);
+    }
+
+    .auth-choice-card:hover::before {
+        opacity: 1;
+    }
+
+    .auth-choice-card:active {
+        transform: translateY(-2px);
+    }
+
+    .auth-choice-card__icon {
+        @apply flex h-14 w-14 items-center justify-center rounded-xl font-bold text-xl shadow-md transition-all duration-300;
+    }
+
+    .auth-choice-card__icon--client {
+        @apply bg-gradient-to-br from-emerald-500 to-emerald-400 text-white;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    }
+
+    .auth-choice-card__icon--trainer {
+        @apply bg-gradient-to-br from-blue-500 to-blue-400 text-white;
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    }
+
+    .auth-choice-card__icon--gym {
+        @apply bg-gradient-to-br from-purple-500 to-purple-400 text-white;
+        box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4);
+    }
+
+    .auth-choice-card:hover .auth-choice-card__icon {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .auth-choice-card__title {
+        @apply text-xl font-bold text-gray-900 mb-2;
+        letter-spacing: -0.01em;
+    }
+
+    .auth-choice-card__description {
+        @apply text-sm text-gray-600;
+        letter-spacing: 0.01em;
+    }
+
+    /* Dark mode support with enhanced polish */
+    html.dark .auth-container {
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(52, 211, 153, 0.08) 0%, transparent 50%);
+    }
+
+    html.dark .auth-card {
+        @apply border-gray-700 bg-gray-800;
+        box-shadow: 
+            0 20px 25px -5px rgba(0, 0, 0, 0.3),
+            0 10px 10px -5px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(16, 185, 129, 0.1);
+    }
+
+    html.dark .auth-heading {
+        @apply text-white;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    html.dark .auth-subheading {
+        @apply text-gray-400;
+    }
+
+    html.dark .role-slider {
+        @apply bg-gray-700 border-gray-600 text-gray-400;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    html.dark .role-slider__option:not(.active):hover {
+        @apply bg-gray-600;
+    }
+
+    html.dark .auth-field__label {
+        @apply text-gray-300;
+    }
+
+    html.dark .auth-field__input,
+    html.dark .code-input-part {
+        @apply border-gray-600 bg-gray-700 text-white placeholder:text-gray-500;
+    }
+
+    html.dark .auth-field__input:focus,
+    html.dark .code-input-part:focus {
+        @apply bg-gray-700 border-emerald-500;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+
+    html.dark .auth-field__input:hover,
+    html.dark .code-input-part:hover {
+        @apply border-gray-500;
+    }
+
+    html.dark .password-toggle {
+        @apply text-gray-500;
+    }
+
+    html.dark .password-toggle:hover {
+        @apply text-emerald-400 bg-emerald-900/30;
+    }
+
+    html.dark .auth-alert--success {
+        @apply border-emerald-500/40 bg-emerald-900/20 text-emerald-400;
+    }
+
+    html.dark .auth-alert--error {
+        @apply border-red-500/40 bg-red-900/20 text-red-400;
+    }
+
+    html.dark .auth-alert--info {
+        @apply border-blue-500/40 bg-blue-900/20 text-blue-400;
+    }
+
+    html.dark .auth-link {
+        @apply text-emerald-400;
+    }
+
+    html.dark .auth-link:hover {
+        @apply text-emerald-300;
+    }
+
+    html.dark .auth-choice-card {
+        @apply border-gray-700 bg-gray-800;
+    }
+
+    html.dark .auth-choice-card:hover {
+        @apply border-emerald-500;
+        box-shadow: 
+            0 20px 25px -5px rgba(0, 0, 0, 0.3),
+            0 10px 10px -5px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(16, 185, 129, 0.3);
+    }
+
+    html.dark .auth-choice-card__title {
+        @apply text-white;
+    }
+
+    html.dark .auth-choice-card__description {
+        @apply text-gray-400;
+    }
+
+    html.dark .auth-btn--secondary {
+        @apply bg-gray-700 text-gray-200 border-gray-600 hover:bg-gray-600 hover:border-gray-500;
+    }
+
+    html.dark .code-input-separator {
+        @apply text-emerald-400;
+    }
+}

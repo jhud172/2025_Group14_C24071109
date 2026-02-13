@@ -3,15 +3,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const drawer = document.getElementById("scheduleDrawer");
     const overlay = drawer?.querySelector("[data-drawer-overlay]");
     const closeBtn = drawer?.querySelector("[data-drawer-close]");
+    const panel = drawer?.querySelector("[data-drawer-panel]");
 
     function openDrawer() {
-        if (!drawer) return;
+        if (!drawer || !panel) return;
         drawer.classList.remove("hidden");
+        drawer.setAttribute("aria-hidden", "false");
+        
+        // Trigger animation after a brief delay to ensure the element is rendered
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                panel.style.transform = "translateX(0)";
+                overlay.style.opacity = "1";
+            });
+        });
     }
 
     function closeDrawer() {
-        if (!drawer) return;
-        drawer.classList.add("hidden");
+        if (!drawer || !panel) return;
+        panel.style.transform = "translateX(100%)";
+        overlay.style.opacity = "0";
+        
+        // Wait for animation to complete before hiding
+        setTimeout(() => {
+            drawer.classList.add("hidden");
+            drawer.setAttribute("aria-hidden", "true");
+        }, 300);
     }
 
     drawerButton?.addEventListener("click", openDrawer);

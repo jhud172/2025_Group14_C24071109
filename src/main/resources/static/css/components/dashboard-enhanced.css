@@ -1,0 +1,186 @@
+@layer components {
+    /* Enhanced Dashboard Styles - More Engaging and Interactive */
+    
+    .dashboard-enhanced {
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Stat Cards with Pulse Animation */
+    .stat-pulse-card {
+        @apply p-6 rounded-xl transition-all duration-300;
+        background: rgba(26, 26, 46, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .stat-pulse-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0, 243, 255, 0.3);
+        box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+    }
+    
+    /* Week Day Cards - Interactive and Engaging */
+    .week-day-card {
+        @apply p-4 rounded-xl transition-all duration-300 cursor-pointer;
+        background: rgba(26, 26, 46, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        min-height: 140px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .week-day-card:hover {
+        transform: translateY(-4px) scale(1.02);
+        border-color: rgba(0, 243, 255, 0.5);
+        box-shadow: 0 8px 24px rgba(0, 243, 255, 0.2);
+        background: rgba(26, 26, 46, 0.8);
+    }
+    
+    /* Active day (today) styling */
+    .week-day-card:has(.text-neon-cyan) {
+        border-color: rgba(0, 243, 255, 0.5);
+        background: linear-gradient(135deg, rgba(0, 243, 255, 0.1) 0%, rgba(181, 55, 242, 0.05) 100%);
+    }
+    
+    .week-day-card:has(.text-neon-purple) {
+        border-color: rgba(181, 55, 242, 0.5);
+        background: linear-gradient(135deg, rgba(181, 55, 242, 0.1) 0%, rgba(255, 105, 180, 0.05) 100%);
+    }
+    
+    /* Quick Action Cards */
+    .quick-action-card {
+        @apply p-5 rounded-xl transition-all duration-300 cursor-pointer text-center;
+        background: rgba(26, 26, 46, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(0, 243, 255, 0.4);
+        box-shadow: 0 8px 24px rgba(0, 243, 255, 0.15);
+    }
+    
+    /* Card Variants with Different Color Themes */
+    .card--cyan {
+        border-color: rgba(0, 243, 255, 0.3);
+    }
+    
+    .card--cyan:hover {
+        border-color: rgba(0, 243, 255, 0.6);
+        box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+    }
+    
+    .card--purple {
+        border-color: rgba(181, 55, 242, 0.3);
+    }
+    
+    .card--purple:hover {
+        border-color: rgba(181, 55, 242, 0.6);
+        box-shadow: 0 0 30px rgba(181, 55, 242, 0.3);
+    }
+    
+    .card--green {
+        border-color: rgba(57, 255, 20, 0.3);
+    }
+    
+    .card--green:hover {
+        border-color: rgba(57, 255, 20, 0.6);
+        box-shadow: 0 0 30px rgba(57, 255, 20, 0.3);
+    }
+    
+    /* Pulse Glow Animation */
+    @keyframes pulse-glow {
+        0%, 100% {
+            box-shadow: 0 0 5px rgba(0, 243, 255, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.8), 0 0 30px rgba(0, 243, 255, 0.4);
+        }
+    }
+    
+    .pulse-glow {
+        animation: pulse-glow 3s ease-in-out infinite;
+    }
+    
+    /* Stagger Animation for Cards */
+    .week-day-card:nth-child(1) { animation-delay: 0s; }
+    .week-day-card:nth-child(2) { animation-delay: 0.05s; }
+    .week-day-card:nth-child(3) { animation-delay: 0.1s; }
+    .week-day-card:nth-child(4) { animation-delay: 0.15s; }
+    .week-day-card:nth-child(5) { animation-delay: 0.2s; }
+    .week-day-card:nth-child(6) { animation-delay: 0.25s; }
+    .week-day-card:nth-child(7) { animation-delay: 0.3s; }
+    
+    .quick-action-card:nth-child(1) { animation-delay: 0s; }
+    .quick-action-card:nth-child(2) { animation-delay: 0.05s; }
+    .quick-action-card:nth-child(3) { animation-delay: 0.1s; }
+    .quick-action-card:nth-child(4) { animation-delay: 0.15s; }
+    .quick-action-card:nth-child(5) { animation-delay: 0.2s; }
+    
+    .week-day-card,
+    .quick-action-card {
+        animation: slideUp 0.5s ease-out backwards;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 640px) {
+        .week-day-card {
+            min-height: 120px;
+            padding: 0.75rem;
+        }
+        
+        .quick-action-card {
+            padding: 1rem;
+        }
+    }
+    
+    /* Light Mode Support */
+    html:not(.dark) .stat-pulse-card,
+    html:not(.dark) .week-day-card,
+    html:not(.dark) .quick-action-card {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    html:not(.dark) .stat-pulse-card:hover,
+    html:not(.dark) .week-day-card:hover,
+    html:not(.dark) .quick-action-card:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(0, 243, 255, 0.3);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+    
+    html:not(.dark) .week-day-card:has(.text-neon-cyan) {
+        background: linear-gradient(135deg, rgba(0, 243, 255, 0.08) 0%, rgba(181, 55, 242, 0.04) 100%);
+        border-color: rgba(0, 243, 255, 0.3);
+    }
+    
+    html:not(.dark) .week-day-card:has(.text-neon-purple) {
+        background: linear-gradient(135deg, rgba(181, 55, 242, 0.08) 0%, rgba(255, 105, 180, 0.04) 100%);
+        border-color: rgba(181, 55, 242, 0.3);
+    }
+}
