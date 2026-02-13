@@ -4,6 +4,33 @@
 
 <div th:fragment="content">
     <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Day Navigation -->
+        <div class="mb-4 flex items-center justify-between gap-3">
+            <a th:href="@{'/calendar/day/' + ${prevDate}}" 
+               class="btn btn--secondary btn--md flex items-center gap-2"
+               aria-label="Previous day">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span class="hidden sm:inline">Previous</span>
+            </a>
+            
+            <a href="/calendar?view=month" 
+               class="btn btn--ghost btn--sm"
+               aria-label="Back to calendar">
+                Calendar
+            </a>
+            
+            <a th:href="@{'/calendar/day/' + ${nextDate}}" 
+               class="btn btn--secondary btn--md flex items-center gap-2"
+               aria-label="Next day">
+                <span class="hidden sm:inline">Next</span>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+
         <div data-testid="day-status-bar"
              class="mb-4 h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800"
              th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' bg-green-500 dark:bg-green-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' bg-yellow-200 dark:bg-yellow-900/40' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-slate-950 dark:bg-slate-950' : ' bg-slate-200 dark:bg-slate-800'))">
@@ -954,6 +981,7 @@
     </div>
 
     <script src="/js/day.js"></script>
+    <script src="/js/day-navigation.js"></script>
 </div>
 
 </th:block>
