@@ -1,22 +1,28 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications;
 
-import org.springframework.core.env.Environment;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.SecurityUtils;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
-
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.env.Environment;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.SecurityUtils;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -77,8 +83,8 @@ public class NotificationsController {
 
     @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(Principal principal) {
-        User user = requireUser(principal);
-        return sseRegistry.register(user.getId());
+        String username = requireUsername(principal);
+        return sseRegistry.register(username);
     }
 
     @PostMapping("/dev-send")
@@ -107,13 +113,18 @@ public class NotificationsController {
     }
 
     private User requireUser(Principal principal) {
+        String username = requireUsername(principal);
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "User not found"));
+    }
+
+    private String requireUsername(Principal principal) {
         String username = principal != null ? principal.getName() : null;
         if (username == null || username.isBlank()) {
             throw new ResponseStatusException(UNAUTHORIZED, "Unauthenticated");
         }
-
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "User not found"));
+        return username;
     }
 
     public record ManualNotificationRequest(Long userId, String title, String message) {}
