@@ -1,13 +1,14 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 @Service
 public class NotificationService {
@@ -44,7 +45,7 @@ public class NotificationService {
         notification.setCreatedAt(Instant.now(clock));
 
         Notification saved = repository.save(notification);
-        sseRegistry.send(user.getId(), NotificationDto.from(saved));
+        sseRegistry.send(user.getUsername(), NotificationDto.from(saved));
         return saved;
     }
 
