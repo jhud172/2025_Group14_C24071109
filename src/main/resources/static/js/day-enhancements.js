@@ -20,8 +20,10 @@
         
         // Count tasks
         const totalTasks = document.querySelectorAll('[data-task-item]').length;
-        const completedTasks = document.querySelectorAll('[data-task-item].bg-green-50, [data-task-item].dark\\:bg-green-950\\/20').length;
-        const lateTasks = document.querySelectorAll('[data-task-item].bg-red-50, [data-task-item].dark\\:bg-red-950\\/20').length;
+        const completedTasks = document.querySelectorAll('[data-task-item][data-task-completed="true"]').length || 
+                              document.querySelectorAll('[data-task-item].bg-green-50').length;
+        const lateTasks = document.querySelectorAll('[data-task-item][data-task-late="true"]').length ||
+                         document.querySelectorAll('[data-task-item].bg-red-50').length;
         
         // Add quick stats if there are tasks
         if (totalTasks > 0 && tasksPanel) {
@@ -214,7 +216,7 @@
             <div class="mx-4 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-950">
                 <div class="flex items-start justify-between">
                     <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Keyboard Shortcuts</h3>
-                    <button class="rounded-lg bg-slate-100 px-3 py-1 text-sm font-medium text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700" onclick="this.closest('#keyboard-help-modal').remove()">Close</button>
+                    <button class="close-help-btn rounded-lg bg-slate-100 px-3 py-1 text-sm font-medium text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">Close</button>
                 </div>
                 <div class="mt-4 space-y-2 text-sm">
                     <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900">
@@ -238,16 +240,28 @@
         `;
         
         document.body.appendChild(modal);
+        
+        function closeModal() {
+            modal.remove();
+            document.removeEventListener('keydown', handleEscape);
+        }
+        
+        function handleEscape(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        }
+        
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.remove();
+            if (e.target === modal) closeModal();
         });
         
-        document.addEventListener('keydown', function closeOnEscape(e) {
-            if (e.key === 'Escape') {
-                modal.remove();
-                document.removeEventListener('keydown', closeOnEscape);
-            }
-        });
+        const closeBtn = modal.querySelector('.close-help-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
+        
+        document.addEventListener('keydown', handleEscape);
     }
     
     // ==================== Add Help Button ====================

@@ -131,10 +131,10 @@
 
                     <div class="mt-3 flex flex-wrap items-center justify-between gap-3"
                          th:with="filledDotClass=${(dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN') ? ' bg-green-500 dark:bg-green-400' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE') ? ' bg-yellow-400 dark:bg-yellow-300' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'RED') ? ' bg-slate-950 dark:bg-slate-100' : ' bg-slate-400 dark:bg-slate-500'))}">
-                        <div class="completion-dots-container flex items-center gap-1" aria-hidden="true">
+                         <div class="completion-dots-container flex items-center gap-1" aria-hidden="true">
                             <span th:each="i : ${#numbers.sequence(1, 10)}"
                                   class="completion-dot h-2.5 w-2.5 rounded-full"
-                                  th:classappend="${pct >= (i * 10)} ? ('filled' + ${filledDotClass}) : ' bg-slate-200 dark:bg-slate-800'"></span>
+                                  th:classappend="${pct >= (i * 10)} ? (' filled' + ${filledDotClass}) : ' bg-slate-200 dark:bg-slate-800'"></span>
                         </div>
 
                         <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">
