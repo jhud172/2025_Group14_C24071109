@@ -1,6 +1,6 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout(${pageTitle} ?: 'Super Admin · Trainer Verification Queue', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(${pageTitle} ?: 'Super Admin · Trainer Verification Queue', null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
@@ -309,6 +309,9 @@
         </div>
 
         <!-- JavaScript for Modals -->
+    </div>
+
+    <th:block th:fragment="pageScripts">
         <script th:inline="javascript">
             function selectRequest(row) {
                 const name = row.getAttribute('data-trainer-name') || 'Unknown';
@@ -389,6 +392,6 @@
                 }
             });
         </script>
-    </div>
+    </th:block>
 
 </th:block>

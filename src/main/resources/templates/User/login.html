@@ -1,5 +1,9 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Login', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Login', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+
+    <th:block th:fragment="pageStyles">
+        <link rel="stylesheet" th:href="@{/css/components/auth.css}">
+    </th:block>
 
     <div th:fragment="content" class="auth-container animate-fade-in">
         <div class="auth-card">
@@ -174,6 +178,7 @@
         </div>
     </div>
 
+    <th:block th:fragment="pageScripts">
     <script th:inline="javascript">
         // Role slider functionality
         const roleOptions = document.querySelectorAll('.role-slider__option');
@@ -303,5 +308,6 @@
             });
         });
     </script>
+    </th:block>
 
 </th:block>

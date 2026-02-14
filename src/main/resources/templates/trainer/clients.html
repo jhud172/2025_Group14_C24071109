@@ -1,6 +1,6 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout('Trainer Clients', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Trainer Clients', null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div th:if="${error} == 'trainer-unverified'" class="mb-4 rounded-2xl border border-amber-200/30 bg-amber-500/10 p-4 text-sm text-amber-200">
@@ -113,6 +113,9 @@
                 </div>
             </section>
         </div>
+    </div>
+
+    <th:block th:fragment="pageScripts">
         <script>
             document.addEventListener("DOMContentLoaded", () => {
                 const search = document.getElementById("clientSearch");
@@ -129,6 +132,6 @@
                 });
             });
         </script>
-    </div>
+    </th:block>
 
 </th:block>

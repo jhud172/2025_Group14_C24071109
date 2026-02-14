@@ -2,6 +2,7 @@
           th:replace="~{base :: layout('Profile', ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="styles">
+    <link rel="stylesheet" th:href="@{/css/components/profile.css}">
 </div>
 
 <div th:fragment="content">
@@ -399,7 +400,8 @@
     </div>
 </div>
 
-<div th:fragment="pageScripts" th:inline="javascript">
+<th:block th:fragment="pageScripts">
+<script th:inline="javascript">
     const toggleButton = document.getElementById('toggle-profile-edit');
     const cancelButton = document.getElementById('cancel-profile-edit');
     const profileShell = document.getElementById('profile-shell');
@@ -516,6 +518,7 @@
             }
         });
     }
-</div>
+</script>
+</th:block>
 
 </th:block>

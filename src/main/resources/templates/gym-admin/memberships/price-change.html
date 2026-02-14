@@ -1,6 +1,6 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout(${pageTitle} ?: 'Gym · Change Membership Price', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(${pageTitle} ?: 'Gym · Change Membership Price', null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
@@ -234,6 +234,9 @@
         </div>
     </div>
 
+    </div>
+
+    <th:block th:fragment="pageScripts">
     <script>
         const modal = document.getElementById('confirmModal');
         const openModalBtn = document.getElementById('openConfirmModal');
@@ -268,5 +271,6 @@
             }
         });
     </script>
+    </th:block>
 
 </th:block>
