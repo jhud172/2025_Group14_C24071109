@@ -3,80 +3,84 @@
 
 <div th:fragment="styles"></div>
 
-<div th:fragment="content">
-    <div class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
-        <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
+<div th:fragment="content" class="detail-container">
+    <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
 
-        <div class="mt-6" th:if="${note != null}">
-            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="min-w-0">
-                        <a class="text-sm font-semibold text-slate-900 hover:underline" th:href="@{/vault}">← Back</a>
-
-                        <div class="mt-3 flex flex-wrap items-center gap-2">
-                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
-                                  th:text="${note.noteType != null ? note.noteType.name() : 'NOTE'}">TYPE</span>
-                            <span class="text-xs text-slate-500" th:if="${note.linkedDate != null}" th:text="${'Date: ' + note.linkedDate}">Date</span>
-                            <span class="text-xs text-slate-500" th:if="${linkedSession != null}">
-                                <span th:text="${'Workout: ' + (linkedSession.nameSnapshot != null ? linkedSession.nameSnapshot : (linkedSession.workout != null ? linkedSession.workout.name : 'Session'))}">Workout</span>
-                            </span>
-                        </div>
-
-                        <h1 class="mt-2 truncate text-2xl font-bold tracking-tight text-slate-900" th:text="${note.title}">Title</h1>
-                        <p class="mt-1 text-sm text-slate-600" th:if="${note.updatedAt != null}" th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy HH:mm')}">Date</p>
+    <div th:if="${note != null}">
+        <!-- Header with key metadata at top -->
+        <div class="detail-header">
+            <div class="detail-header-content">
+                <div class="detail-header-meta">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200"
+                              th:text="${note.noteType != null ? note.noteType.name() : 'NOTE'}">TYPE</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400" th:if="${note.linkedDate != null}" th:text="${'Date: ' + note.linkedDate}">Date</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400" th:if="${linkedSession != null}">
+                            <span th:text="${'Workout: ' + (linkedSession.nameSnapshot != null ? linkedSession.nameSnapshot : (linkedSession.workout != null ? linkedSession.workout.name : 'Session'))}">Workout</span>
+                        </span>
                     </div>
-
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                           th:href="@{/vault/{id}/edit(id=${note.id})}">Edit</a>
-
-                        <form th:action="@{/vault/{id}/delete(id=${note.id})}" method="post"
-                              data-confirm data-confirm-title="Delete note?" data-confirm-message="This will permanently remove the vault note.">
-                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                            <button class="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600/20" type="submit">Delete</button>
-                        </form>
-                    </div>
+                    <h1 class="detail-title" th:text="${note.title}">Title</h1>
+                    <p class="detail-subtitle" th:if="${note.updatedAt != null}" th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy HH:mm')}">Date</p>
                 </div>
+                <!-- Primary actions - sticky on larger screens -->
+                <div class="detail-actions-sticky">
+                    <a th:href="@{/vault}" class="detail-btn-secondary">← Back</a>
+                    <a class="detail-btn-secondary" th:href="@{/vault/{id}/edit(id=${note.id})}">Edit</a>
+                    <form th:action="@{/vault/{id}/delete(id=${note.id})}" method="post"
+                          data-confirm data-confirm-title="Delete note?" data-confirm-message="This will permanently remove the vault note.">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button class="detail-btn-destructive" type="submit">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-                <article class="mt-6 whitespace-pre-wrap text-sm leading-6 text-slate-800" th:text="${note.content}">
-                    Content
-                </article>
+        <!-- Structured content sections -->
+        <div class="detail-sections">
+            <section class="detail-section">
+                <h2 class="detail-section-title">Note content</h2>
+                <div class="detail-section-content">
+                    <article class="whitespace-pre-wrap text-sm leading-6 text-slate-800 dark:text-slate-200" th:text="${note.content}">
+                        Content
+                    </article>
+                </div>
+            </section>
 
-                <!-- AI actions -->
-                <div class="mt-8 border-t border-slate-200 pt-6">
-                    <h2 class="text-sm font-bold tracking-tight text-slate-900">AI actions</h2>
-                    <p class="mt-1 text-sm text-slate-600">Use these to summarise or rewrite your notes.</p>
+            <section class="detail-section">
+                <h2 class="detail-section-title">AI actions</h2>
+                <div class="detail-section-content">
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Use these to summarise or rewrite your notes.</p>
 
                     <div class="mt-4 flex flex-col gap-2 sm:flex-row">
                         <form th:action="@{/vault/ai/summarise-week}" method="post">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="noteIds" th:value="${note.id}">
                             <input type="hidden" name="returnTo" th:value="@{/vault/{id}(id=${note.id})}">
-                            <button type="submit"
-                                    class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">Summarise week</button>
+                            <button type="submit" class="detail-btn-secondary">Summarise week</button>
                         </form>
 
                         <form th:action="@{/vault/ai/rewrite-checkin}" method="post">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="noteIds" th:value="${note.id}">
                             <input type="hidden" name="returnTo" th:value="@{/vault/{id}(id=${note.id})}">
-                            <button type="submit"
-                                    class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/20">Rewrite as check-in</button>
+                            <button type="submit" class="detail-btn-primary">Rewrite as check-in</button>
                         </form>
                     </div>
 
-                    <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-5" th:if="${aiResult != null}">
-                        <div class="text-sm font-bold text-slate-900" th:text="${aiResultTitle} ?: 'AI Result'">AI Result</div>
-                        <div class="mt-2 whitespace-pre-wrap text-sm text-slate-800" th:text="${aiResult}">Result</div>
+                    <div class="mt-5 detail-info-box" th:if="${aiResult != null}">
+                        <div class="detail-info-box-title" th:text="${aiResultTitle} ?: 'AI Result'">AI Result</div>
+                        <div class="detail-info-box-content whitespace-pre-wrap" th:text="${aiResult}">Result</div>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
+    </div>
 
-        <div class="mt-6 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center" th:if="${note == null}">
-            <p class="text-sm font-medium text-slate-900">Note not found.</p>
-            <p class="mt-1 text-sm text-slate-600">It may have been deleted, or you may not have access.</p>
-            <a class="mt-4 inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10" th:href="@{/vault}">Back to vault</a>
+    <div class="detail-empty" th:if="${note == null}">
+        <div class="rounded-xl border border-dashed border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900/40 p-8 text-center">
+            <p class="text-sm font-medium text-slate-900 dark:text-slate-100">Note not found.</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">It may have been deleted, or you may not have access.</p>
+            <a class="mt-4 detail-btn-secondary" th:href="@{/vault}">Back to vault</a>
         </div>
     </div>
 

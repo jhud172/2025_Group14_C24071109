@@ -2,119 +2,136 @@
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
           th:replace="~{base :: layout(${pageTitle} ?: 'Super Admin · Verification Detail', null, ~{::content}, null)}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-        <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
-            <div class="flex items-start justify-between gap-4 mb-6">
-                <div>
-                    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Verification Request</h1>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Review trainer verification details and take action.</p>
+    <div th:fragment="content" class="detail-container">
+        <!-- Header with key metadata at top -->
+        <div class="detail-header">
+            <div class="detail-header-content">
+                <div class="detail-header-meta">
+                    <p class="detail-label">Super Admin</p>
+                    <h1 class="detail-title">Verification Request</h1>
+                    <p class="detail-subtitle">Review trainer verification details and take action.</p>
                 </div>
-                <a th:href="@{/super-admin/verification/queue}"
-                   class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70">
-                    Back to Queue
-                </a>
+                <!-- Primary actions - sticky on larger screens -->
+                <div class="detail-actions-sticky">
+                    <a th:href="@{/super-admin/verification/queue}" class="detail-btn-secondary">Back to Queue</a>
+                </div>
             </div>
+        </div>
 
-            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div class="rounded-xl border border-white/10 bg-white dark:bg-slate-900 p-5 lg:col-span-2">
-                    <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Request Details</h2>
+        <!-- Structured content sections -->
+        <div class="detail-sections">
 
-                    <div class="mt-4 space-y-4">
-                        <div>
-                            <div class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${trainer.firstName + ' ' + trainer.lastName}">Trainer Name</div>
-                            <div class="text-xs text-slate-600 dark:text-slate-400" th:text="${trainer.email}">trainer@example.com</div>
-                            <div class="text-xs text-slate-500 dark:text-slate-500">Trainer ID: <span th:text="${request.trainerUserId}">0</span></div>
-                        </div>
+            <div class="detail-grid-sidebar">
+                <!-- Request Details Section -->
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Request Details</h2>
 
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm text-slate-600 dark:text-slate-400">
+                    <div class="detail-section-content">
+                        <div class="space-y-4">
                             <div>
-                                <span class="font-semibold">Gym:</span>
-                                <span th:if="${request.gymId} != null">Gym ID <span th:text="${request.gymId}">0</span></span>
-                                <span th:if="${request.gymId} == null">Independent</span>
+                                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${trainer.firstName + ' ' + trainer.lastName}">Trainer Name</div>
+                                <div class="text-xs text-slate-600 dark:text-slate-400" th:text="${trainer.email}">trainer@example.com</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-500">Trainer ID: <span th:text="${request.trainerUserId}">0</span></div>
                             </div>
-                            <div>
-                                <span class="font-semibold">Status:</span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                      th:classappend="${request.status.name()} == 'PENDING' ? ' bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                      (${request.status.name()} == 'NEEDS_INFO' ? ' bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400' :
-                                      (${request.status.name()} == 'APPROVED' ? ' bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                                      ' bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'))"
-                                      th:text="${request.status.name().replace('_', ' ')}">PENDING</span>
-                            </div>
-                            <div>
-                                <span class="font-semibold">Submitted:</span>
-                                <span th:text="${#temporals.format(request.submittedAt, 'MMM dd, yyyy HH:mm')}">Jan 1, 2024 12:00</span>
-                            </div>
-                            <div>
-                                <span class="font-semibold">Reviewed:</span>
-                                <span th:if="${request.reviewedAt != null}" th:text="${#temporals.format(request.reviewedAt, 'MMM dd, yyyy HH:mm')}">Jan 2, 2024 08:00</span>
-                                <span th:if="${request.reviewedAt == null}">—</span>
-                            </div>
-                            <div>
-                                <span class="font-semibold">Reviewer:</span>
-                                <span th:if="${reviewer != null}" th:text="${reviewer.firstName + ' ' + reviewer.lastName}">Reviewer</span>
-                                <span th:if="${reviewer == null}">—</span>
-                            </div>
-                        </div>
 
-                        <div>
-                            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Trainer Notes</div>
-                            <p class="mt-1 text-sm text-slate-700 dark:text-slate-300" th:text="${request.notes} ?: '—'">Notes</p>
-                        </div>
-                        <div>
-                            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Admin Notes</div>
-                            <p class="mt-1 text-sm text-slate-700 dark:text-slate-300" th:text="${request.adminNotes} ?: '—'">Admin notes</p>
+                            <div class="detail-metadata">
+                                <div class="detail-metadata-item">
+                                    <p class="detail-metadata-label">Gym</p>
+                                    <p class="detail-metadata-value">
+                                        <span th:if="${request.gymId} != null">Gym ID <span th:text="${request.gymId}">0</span></span>
+                                        <span th:if="${request.gymId} == null">Independent</span>
+                                    </p>
+                                </div>
+                                <div class="detail-metadata-item">
+                                    <p class="detail-metadata-label">Status</p>
+                                    <p class="detail-metadata-value">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                              th:classappend="${request.status.name()} == 'PENDING' ? ' bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                              (${request.status.name()} == 'NEEDS_INFO' ? ' bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400' :
+                                              (${request.status.name()} == 'APPROVED' ? ' bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                                              ' bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'))"
+                                              th:text="${request.status.name().replace('_', ' ')}">PENDING</span>
+                                    </p>
+                                </div>
+                                <div class="detail-metadata-item">
+                                    <p class="detail-metadata-label">Submitted</p>
+                                    <p class="detail-metadata-value" th:text="${#temporals.format(request.submittedAt, 'MMM dd, yyyy HH:mm')}">Jan 1, 2024 12:00</p>
+                                </div>
+                                <div class="detail-metadata-item">
+                                    <p class="detail-metadata-label">Reviewed</p>
+                                    <p class="detail-metadata-value">
+                                        <span th:if="${request.reviewedAt != null}" th:text="${#temporals.format(request.reviewedAt, 'MMM dd, yyyy HH:mm')}">Jan 2, 2024 08:00</span>
+                                        <span th:if="${request.reviewedAt == null}">—</span>
+                                    </p>
+                                </div>
+                                <div class="detail-metadata-item">
+                                    <p class="detail-metadata-label">Reviewer</p>
+                                    <p class="detail-metadata-value">
+                                        <span th:if="${reviewer != null}" th:text="${reviewer.firstName + ' ' + reviewer.lastName}">Reviewer</span>
+                                        <span th:if="${reviewer == null}">—</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="detail-metadata-label">Trainer Notes</div>
+                                <p class="mt-1 text-sm text-slate-700 dark:text-slate-300" th:text="${request.notes} ?: '—'">Notes</p>
+                            </div>
+                            <div>
+                                <div class="detail-metadata-label">Admin Notes</div>
+                                <p class="mt-1 text-sm text-slate-700 dark:text-slate-300" th:text="${request.adminNotes} ?: '—'">Admin notes</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div class="rounded-xl border border-white/10 bg-white dark:bg-slate-900 p-5">
-                    <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Actions</h2>
+                <!-- Actions Section -->
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Actions</h2>
 
-                    <div class="mt-4 space-y-4">
-                        <form th:action="@{/super-admin/verification/{id}/approve(id=${request.id})}" method="post" class="space-y-3">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <div>
-                                <label for="approveAdminNotes" class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Approval Notes (Optional)</label>
-                                <textarea id="approveAdminNotes" name="adminNotes" rows="3" maxlength="1000"
-                                          class="mt-2 block w-full rounded-xl border border-white/20 bg-white/5 dark:bg-slate-800/50 px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                                          placeholder="Optional note to include in the approval email..."></textarea>
-                            </div>
-                            <button type="submit"
-                                    class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-green-600 px-6 py-2 text-sm font-semibold text-white hover:bg-green-700">
-                                Approve Trainer
-                            </button>
-                        </form>
+                    <div class="detail-section-content">
+                        <div class="space-y-4">
+                            <form th:action="@{/super-admin/verification/{id}/approve(id=${request.id})}" method="post" class="space-y-3">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <div>
+                                    <label for="approveAdminNotes" class="detail-metadata-label">Approval Notes (Optional)</label>
+                                    <textarea id="approveAdminNotes" name="adminNotes" rows="3" maxlength="1000"
+                                              class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-white/5 px-4 py-2.5 text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400"
+                                              placeholder="Optional note to include in the approval email..."></textarea>
+                                </div>
+                                <button type="submit" class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-green-600 px-6 py-2 text-sm font-semibold text-white hover:bg-green-700">
+                                    Approve Trainer
+                                </button>
+                            </form>
 
-                        <form th:action="@{/super-admin/verification/{id}/reject(id=${request.id})}" method="post" class="space-y-3">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <div>
-                                <label for="rejectAdminNotes" class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Rejection Reason <span class="text-red-500">*</span></label>
-                                <textarea id="rejectAdminNotes" name="adminNotes" rows="3" required maxlength="1000"
-                                          class="mt-2 block w-full rounded-xl border border-white/20 bg-white/5 dark:bg-slate-800/50 px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                                          placeholder="Explain why this trainer is being rejected..."></textarea>
-                            </div>
-                            <button type="submit"
-                                    class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-red-600 px-6 py-2 text-sm font-semibold text-white hover:bg-red-700">
-                                Reject Trainer
-                            </button>
-                        </form>
+                            <form th:action="@{/super-admin/verification/{id}/reject(id=${request.id})}" method="post" class="space-y-3">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <div>
+                                    <label for="rejectAdminNotes" class="detail-metadata-label">Rejection Reason <span class="text-red-500">*</span></label>
+                                    <textarea id="rejectAdminNotes" name="adminNotes" rows="3" required maxlength="1000"
+                                              class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-white/5 px-4 py-2.5 text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400"
+                                              placeholder="Explain why this trainer is being rejected..."></textarea>
+                                </div>
+                                <button type="submit" class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-red-600 px-6 py-2 text-sm font-semibold text-white hover:bg-red-700">
+                                    Reject Trainer
+                                </button>
+                            </form>
 
-                        <form th:action="@{/super-admin/verification/{id}/request-info(id=${request.id})}" method="post" class="space-y-3">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <div>
-                                <label for="requestInfoAdminNotes" class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Request Information <span class="text-red-500">*</span></label>
-                                <textarea id="requestInfoAdminNotes" name="adminNotes" rows="3" required maxlength="1000"
-                                          class="mt-2 block w-full rounded-xl border border-white/20 bg-white/5 dark:bg-slate-800/50 px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                                          placeholder="Describe what additional information is needed..."></textarea>
-                            </div>
-                            <button type="submit"
-                                    class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-orange-600 px-6 py-2 text-sm font-semibold text-white hover:bg-orange-700">
-                                Request Info
-                            </button>
-                        </form>
+                            <form th:action="@{/super-admin/verification/{id}/request-info(id=${request.id})}" method="post" class="space-y-3">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <div>
+                                    <label for="requestInfoAdminNotes" class="detail-metadata-label">Request Information <span class="text-red-500">*</span></label>
+                                    <textarea id="requestInfoAdminNotes" name="adminNotes" rows="3" required maxlength="1000"
+                                              class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-white/5 px-4 py-2.5 text-slate-700 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400"
+                                              placeholder="Describe what additional information is needed..."></textarea>
+                                </div>
+                                <button type="submit" class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-orange-600 px-6 py-2 text-sm font-semibold text-white hover:bg-orange-700">
+                                    Request Info
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </div>

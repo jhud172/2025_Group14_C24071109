@@ -1,65 +1,77 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout(${pageTitle} ?: 'Exercise', null, ~{::content}, null)}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-        <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
-            <div class="flex items-start justify-between gap-4">
-                <div class="min-w-0">
-                    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="${exercise.name}">Exercise</h1>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${exercise.primaryMuscles}">Primary muscles</p>
+    <div th:fragment="content" class="detail-container">
+        <!-- Header with key metadata at top -->
+        <div class="detail-header">
+            <div class="detail-header-content">
+                <div class="detail-header-meta">
+                    <p class="detail-label">Exercise</p>
+                    <h1 class="detail-title" th:text="${exercise.name}">Exercise</h1>
+                    <p class="detail-subtitle" th:text="${exercise.primaryMuscles}">Primary muscles</p>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    <a th:href="@{/trainer/library/exercises}"
-                       class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70">Back</a>
-                    <a th:href="@{/trainer/library/exercises/{id}/edit(id=${exercise.id})}"
-                       class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Edit</a>
-
-                    <button type="button"
-                            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70"
-                            onclick="document.getElementById('shareDialog').showModal()">
-                        Share
-                    </button>
+                <!-- Primary actions - sticky on larger screens -->
+                <div class="detail-actions-sticky">
+                    <a th:href="@{/trainer/library/exercises}" class="detail-btn-secondary">Back</a>
+                    <a th:href="@{/trainer/library/exercises/{id}/edit(id=${exercise.id})}" class="detail-btn-primary">Edit</a>
+                    <button type="button" class="detail-btn-secondary"
+                            onclick="document.getElementById('shareDialog').showModal()">Share</button>
                 </div>
             </div>
+        </div>
 
-            <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div class="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Equipment</div>
-                    <div class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${exercise.equipment}">Equipment</div>
-                </div>
-                <div class="rounded-xl border border-white/10 bg-white/5 p-4">
-                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Difficulty</div>
-                    <div class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${exercise.difficulty}">Difficulty</div>
-                </div>
-            </div>
+        <!-- Structured content sections -->
+        <div class="detail-sections">
+            <!-- Main content in grid layout -->
+            <div class="detail-grid-2">
+                <!-- Exercise Details Section -->
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Exercise details</h2>
+                    <div class="detail-section-content">
+                        <div class="detail-metadata">
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Equipment</p>
+                                <p class="detail-metadata-value" th:text="${exercise.equipment}">Equipment</p>
+                            </div>
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Difficulty</p>
+                                <p class="detail-metadata-value" th:text="${exercise.difficulty}">Difficulty</p>
+                            </div>
+                        </div>
 
-            <div class="mt-4 rounded-xl border border-white/10 bg-white/5 p-4" th:if="${exercise.description != null and !#strings.isEmpty(exercise.description)}">
-                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Description</div>
-                <div class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${exercise.description}">Description</div>
-            </div>
+                        <div class="mt-4" th:if="${exercise.description != null and !#strings.isEmpty(exercise.description)}">
+                            <p class="detail-metadata-label">Description</p>
+                            <p class="detail-metadata-value mt-1" th:text="${exercise.description}">Description</p>
+                        </div>
 
-            <div class="mt-4 rounded-xl border border-white/10 bg-white/5 p-4" th:if="${exercise.videoUrl != null and !#strings.isEmpty(exercise.videoUrl)}">
-                <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Video</div>
-                <a class="mt-1 inline-block text-sm font-semibold text-slate-900 dark:text-white underline"
-                   th:href="${exercise.videoUrl}" th:text="${exercise.videoUrl}" target="_blank" rel="noreferrer">Video URL</a>
-            </div>
+                        <div class="mt-4" th:if="${exercise.videoUrl != null and !#strings.isEmpty(exercise.videoUrl)}">
+                            <p class="detail-metadata-label">Video</p>
+                            <a class="detail-metadata-value mt-1 inline-block underline"
+                               th:href="${exercise.videoUrl}" th:text="${exercise.videoUrl}" target="_blank" rel="noreferrer">Video URL</a>
+                        </div>
+                    </div>
+                </section>
 
-            <div class="mt-6">
-                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Coaching notes</h2>
-                <div th:if="${#lists.isEmpty(notes)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300">No notes.</div>
-                <ul th:if="${!#lists.isEmpty(notes)}" class="mt-2 space-y-2">
-                    <li th:each="n : ${notes}" class="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-900 dark:text-slate-100" th:text="${n.noteText}">Note</li>
-                </ul>
-            </div>
+                <!-- Coaching Notes Section -->
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Coaching notes</h2>
+                    <div class="detail-section-content">
+                        <div th:if="${#lists.isEmpty(notes)}" class="detail-empty">No notes.</div>
+                        <ul th:if="${!#lists.isEmpty(notes)}" class="detail-list">
+                            <li th:each="n : ${notes}" class="detail-list-item">
+                                <span class="detail-list-item-description" th:text="${n.noteText}">Note</span>
+                            </li>
+                        </ul>
+                    </div>
 
-            <div class="mt-6 flex items-center justify-end">
-                <form method="post" th:action="@{/trainer/library/exercises/{id}/delete(id=${exercise.id})}">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button type="submit"
-                            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-rose-300/30 bg-rose-400/10 px-4 py-2 text-sm font-semibold text-rose-200 hover:bg-rose-400/15">
-                        Delete
-                    </button>
-                </form>
+                    <!-- Delete Action -->
+                    <div class="detail-section-content border-t border-slate-200 dark:border-white/10 pt-4 flex items-center justify-end">
+                        <form method="post" th:action="@{/trainer/library/exercises/{id}/delete(id=${exercise.id})}">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit" class="detail-btn-destructive">Delete Exercise</button>
+                        </form>
+                    </div>
+                </section>
             </div>
         </div>
 
