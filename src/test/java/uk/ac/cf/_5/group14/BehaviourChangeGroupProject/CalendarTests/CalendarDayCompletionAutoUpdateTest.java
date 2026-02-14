@@ -23,7 +23,11 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.Worko
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayMode.DayModeService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +35,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -69,10 +74,16 @@ public class CalendarDayCompletionAutoUpdateTest {
     private WorkoutSessionService workoutSessionService;
 
     @MockitoBean
-    private AuthHelper authHelper;
+    private UserSettingsService userSettingsService;
 
     @MockitoBean
-    private UserSettingsService userSettingsService;
+    private DayModeService dayModeService;
+
+    @MockitoBean
+    private Clock clock;
+
+    @MockitoBean
+    private GoalLinkService goalLinkService;
 
     @Test
     public void streakBarSummaryShouldUpdateAfterTaskToggle() throws Exception {
@@ -124,6 +135,21 @@ public class CalendarDayCompletionAutoUpdateTest {
                     .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .build();
+        }
+
+        @Bean
+        public Clock systemClock() {
+            return Clock.systemDefaultZone();
+        }
+
+        @Bean
+        public AuthHelper authHelper() {
+            return mock(AuthHelper.class);
+        }
+
+        @Bean
+        public PlatformSubscriptionService platformSubscriptionService() {
+            return mock(PlatformSubscriptionService.class);
         }
     }
 }
