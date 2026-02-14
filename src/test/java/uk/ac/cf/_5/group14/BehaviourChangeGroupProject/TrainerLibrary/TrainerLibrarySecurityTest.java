@@ -201,7 +201,7 @@ class TrainerLibrarySecurityTest {
         String suffix = UUID.randomUUID().toString().replace("-", "");
         User unverified = new User("trainerU+" + suffix + "@example.com", "Trainer", "U", "tl_trainer_u_" + suffix, "password123");
         unverified.setRole(Role.TRAINER);
-        unverified = userRepository.save(unverified);
+        final User savedUnverified = userRepository.save(unverified);
 
         TrainerLibraryExerciseForm form = new TrainerLibraryExerciseForm();
         form.setName("Push Up");
@@ -209,7 +209,7 @@ class TrainerLibrarySecurityTest {
         form.setEquipment("Bodyweight");
         form.setDifficulty("Easy");
 
-        assertThatThrownBy(() -> trainerLibraryService.createExercise(unverified.getId(), form))
+        assertThatThrownBy(() -> trainerLibraryService.createExercise(savedUnverified.getId(), form))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage(TrainerLibraryService.ERROR_TRAINER_NOT_VERIFIED);
     }

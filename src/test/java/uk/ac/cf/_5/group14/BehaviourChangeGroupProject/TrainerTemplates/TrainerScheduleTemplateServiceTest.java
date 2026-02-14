@@ -148,9 +148,9 @@ class TrainerScheduleTemplateServiceTest {
         String suffix = UUID.randomUUID().toString().replace("-", "");
         User unverified = new User("trainerU+" + suffix + "@example.com", "Trainer", "U", "trainer_unverified_" + suffix, "password123");
         unverified.setRole(Role.TRAINER);
-        unverified = userRepository.save(unverified);
+        final User savedUnverified = userRepository.save(unverified);
 
-        assertThatThrownBy(() -> templateService.createTemplate(unverified, "Week X", "", ""))
+        assertThatThrownBy(() -> templateService.createTemplate(savedUnverified, "Week X", "", ""))
                 .isInstanceOf(AccessDeniedException.class);
     }
 }
