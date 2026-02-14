@@ -1,17 +1,18 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Payments;
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformPlan;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscription;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-
-import java.util.List;
 
 @Controller
 public class PricingController {
@@ -37,7 +38,7 @@ public class PricingController {
             new CheckoutPlanInfo(PlatformPlan.YEARLY, "Yearly", "£108 / year", "Recommended",
                 List.of("2 months free", "Premium dashboards", "Weekly insights", "Priority support"))
         ));
-        return "pricing";
+        return "payments/pricing";
     }
 
     @GetMapping("/pricing/checkout")
@@ -71,7 +72,7 @@ public class PricingController {
         PlatformSubscription subscription = platformSubscriptionService.findByUserId(user.getId()).orElse(null);
         model.addAttribute("platformSubscription", subscription);
 
-        return "pricing-checkout";
+        return "payments/pricing-checkout";
     }
 
     private boolean isAccountIncomplete(User user) {
