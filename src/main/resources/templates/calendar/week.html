@@ -141,13 +141,20 @@
                                         <span th:if="${isPremium and day.isEqual(tomorrow)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">Tomorrow</span>
                                     </div>
                                     <div th:with="tasks=${tasksByDate[T(java.time.LocalDate).parse(day.toString())]}, tTotal=${tasks!=null?tasks.size():0}, sched=${occurrences[day]}, sTotal=${sched!=null?sched.size():0}, grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
+                                        <!-- Empty state when no tasks or schedules -->
+                                        <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
+                                            <svg class="calendar-empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                            </svg>
+                                            <span class="text-xs text-slate-500 dark:text-slate-400">Free day</span>
+                                        </div>
                                         <div th:if="${!grouped}" class="space-y-2 overflow-y-auto pr-1" style="max-height:260px;">
                                             <div th:each="task, iter : ${tasks}"
                                                  th:if="${iter.index < 4}"
-                                                 class="calendar-item flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/80 p-2 text-xs shadow-sm transition hover:bg-white/90 dark:bg-white/5"
+                                                 class="calendar-item relative flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/80 p-2 text-xs shadow-sm transition hover:bg-white/90 dark:bg-white/5"
                                                  th:classappend="${task.completed} ? ' border-emerald-400/40 bg-emerald-500/10' : ''"
-                                                 th:attr="data-type='task',data-date=${day},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-exercise=${task.exercise},data-completed=${task.completed},data-id=${task.id}">
-                                                <div class="flex min-w-0 flex-col leading-tight">
+                                                 th:attr="data-type='task',data-date=${day},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-exercise=${task.exercise},data-completed=${task.completed},data-id=${task.id},data-priority=${task.priority != null ? task.priority.toString().toLowerCase() : 'medium'}">
+                                                <div class="flex min-w-0 flex-1 flex-col leading-tight">
                                                     <span class="truncate font-semibold text-slate-900 dark:text-slate-100" th:classappend="${task.completed}?' line-through':''" th:text="${task.title}"></span>
                                                     <span class="truncate text-slate-600 dark:text-slate-300" th:classappend="${task.completed}?' line-through':''" th:text="${task.time!=null?task.time:'—'}"></span>
                                                 </div>
@@ -159,11 +166,11 @@
                                             <div th:if="${tTotal > 0 and sTotal > 0}" class="my-1 border-t border-white/10"></div>
                                             <div th:each="occ, iter : ${sched}"
                                                  th:if="${iter.index < 3}"
-                                                 class="calendar-item flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-slate-50/70 p-2 text-xs shadow-sm transition hover:bg-blue-100/70 dark:bg-white/5"
-                                                 th:attr="data-type='occurrence',data-date=${day},data-title=${occ.exercise!=null?occ.exercise.name:(occ.customExercise!=null?occ.customExercise.name:'Unknown')},data-notes=${occ.scheduleName}">
-                                                <div class="flex min-w-0 flex-col leading-tight">
+                                                 class="calendar-item relative flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-slate-50/70 p-2 text-xs shadow-sm transition hover:bg-blue-100/70 dark:bg-white/5"
+                                                 th:attr="data-type='workout',data-date=${day},data-title=${occ.exercise!=null?occ.exercise.name:(occ.customExercise!=null?occ.customExercise.name:'Unknown')},data-notes=${occ.scheduleName}">
+                                                <div class="flex min-w-0 flex-1 flex-col leading-tight">
                                                     <span class="truncate font-semibold text-slate-900 dark:text-slate-100" th:text="${occ.exercise!=null?occ.exercise.name:(occ.customExercise!=null?occ.customExercise.name:'Unknown')}"></span>
-                                                    <span class="truncate text-slate-700 dark:text-slate-300" th:text="'From: ' + ${occ.scheduleName}"></span>
+                                                    <span class="truncate text-[10px] text-slate-600 dark:text-slate-400" th:text="'From: ' + ${occ.scheduleName}"></span>
                                                 </div>
                                             </div>
                                             <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}"
