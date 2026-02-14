@@ -1,16 +1,13 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.HomePage;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -19,19 +16,17 @@ import org.springframework.web.servlet.ModelAndView;
 
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Preference.Preference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreferenceService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLog;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLogService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.FeedbackData.AdaptiveFeedbackService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessagingService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrence;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.SecurityUtils;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLink;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 @Controller
 public class HomePageController {
@@ -81,7 +76,7 @@ public class HomePageController {
 
     @GetMapping("/about")
     public ModelAndView aboutPage() {
-        return new ModelAndView("about");
+        return new ModelAndView("public/about");
     }
 
     @GetMapping("/home")

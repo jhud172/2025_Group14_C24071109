@@ -1,97 +1,210 @@
-/* Calendar Component Styles */
+/* Calendar Component Styles - Enhanced for Clean, Personal Design */
 
-/* Calendar day cards - improved styling */
+/* Calendar day cards - premium glass morphism design */
 .calendar-day-card {
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.calendar-day-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    rgba(16, 185, 129, 0) 0%, 
+    rgba(16, 185, 129, 0.6) 50%, 
+    rgba(16, 185, 129, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.calendar-day-card:hover::before {
+  opacity: 1;
 }
 
 .calendar-day-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.15), 
+              0 10px 20px -10px rgba(0, 0, 0, 0.1);
 }
 
 html:not(.dark) .calendar-day-card {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(248, 250, 252, 0.9) 100%);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  backdrop-filter: blur(10px);
 }
 
 .dark .calendar-day-card {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.6);
+  background: linear-gradient(135deg, 
+    rgba(15, 23, 42, 0.7) 0%, 
+    rgba(30, 41, 59, 0.5) 100%);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+  backdrop-filter: blur(12px);
 }
 
-/* Today indicator with emerald accent */
+/* Today indicator with emerald accent - enhanced glow effect */
 .calendar-day-card.ring-2.ring-blue-500\/80 {
   border-color: rgb(16, 185, 129) !important;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25),
+              0 0 20px rgba(16, 185, 129, 0.15),
+              0 8px 32px -8px rgba(16, 185, 129, 0.2);
+  animation: pulse-today 2s ease-in-out infinite;
 }
 
-/* Tomorrow indicator */
+@keyframes pulse-today {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25),
+                0 0 20px rgba(16, 185, 129, 0.15),
+                0 8px 32px -8px rgba(16, 185, 129, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3),
+                0 0 25px rgba(16, 185, 129, 0.2),
+                0 8px 32px -8px rgba(16, 185, 129, 0.25);
+  }
+}
+
+/* Tomorrow indicator - subtle emerald hint */
 .calendar-day-card.ring-2.ring-emerald-500\/70 {
-  border-color: rgb(16, 185, 129) !important;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15),
+              0 4px 16px -4px rgba(16, 185, 129, 0.1);
 }
 
-/* Calendar items - task/event cards */
+/* Calendar items - enhanced task/event cards with modern design */
 .calendar-item {
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle gradient overlay on hover */
+.calendar-item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(16, 185, 129, 0.03) 0%, 
+    rgba(16, 185, 129, 0.01) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.calendar-item:hover::after {
+  opacity: 1;
 }
 
 .calendar-item:hover {
-  transform: translateX(2px);
-  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.1);
+  transform: translateX(4px) scale(1.02);
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.1),
+              0 2px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 html:not(.dark) .calendar-item {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(226, 232, 240, 0.6);
+  background: linear-gradient(to right, 
+    rgba(255, 255, 255, 0.98) 0%, 
+    rgba(249, 250, 251, 0.95) 100%);
+  border-color: rgba(226, 232, 240, 0.5);
+  border-left-width: 3px;
+  border-left-color: rgba(148, 163, 184, 0.3);
 }
 
 .dark .calendar-item {
-  background: rgba(30, 41, 59, 0.4);
-  border-color: rgba(71, 85, 105, 0.4);
+  background: linear-gradient(to right,
+    rgba(30, 41, 59, 0.5) 0%,
+    rgba(51, 65, 85, 0.4) 100%);
+  border-color: rgba(71, 85, 105, 0.3);
+  border-left-width: 3px;
+  border-left-color: rgba(100, 116, 139, 0.4);
 }
 
 html:not(.dark) .calendar-item:hover {
-  background: rgba(255, 255, 255, 1);
-  border-color: rgba(16, 185, 129, 0.3);
+  background: linear-gradient(to right,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(236, 254, 255, 0.98) 100%);
+  border-color: rgba(16, 185, 129, 0.25);
+  border-left-color: rgba(16, 185, 129, 0.6);
 }
 
 .dark .calendar-item:hover {
-  background: rgba(30, 41, 59, 0.6);
-  border-color: rgba(16, 185, 129, 0.4);
+  background: linear-gradient(to right,
+    rgba(30, 41, 59, 0.7) 0%,
+    rgba(6, 78, 59, 0.2) 100%);
+  border-color: rgba(16, 185, 129, 0.3);
+  border-left-color: rgba(16, 185, 129, 0.7);
 }
 
-/* Completed items with emerald accent */
+/* Completed items with emerald accent - celebration style */
 .calendar-item.border-emerald-400\/40 {
-  background: rgba(16, 185, 129, 0.08) !important;
-  border-color: rgba(16, 185, 129, 0.3) !important;
+  background: linear-gradient(135deg,
+    rgba(16, 185, 129, 0.1) 0%,
+    rgba(16, 185, 129, 0.05) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  border-left-color: rgba(16, 185, 129, 0.8) !important;
+  position: relative;
+}
+
+.calendar-item.border-emerald-400\/40::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom,
+    rgba(16, 185, 129, 0.8) 0%,
+    rgba(5, 150, 105, 0.6) 100%);
 }
 
 .dark .calendar-item.border-emerald-400\/40 {
-  background: rgba(16, 185, 129, 0.12) !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
+  background: linear-gradient(135deg,
+    rgba(16, 185, 129, 0.15) 0%,
+    rgba(16, 185, 129, 0.08) 100%) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  border-left-color: rgba(16, 185, 129, 0.9) !important;
 }
 
-/* Schedule items */
+/* Schedule items - distinct styling for workout/schedule cards */
 html:not(.dark) .calendar-item.bg-slate-50\/70 {
-  background: rgba(241, 245, 249, 0.8);
+  background: linear-gradient(to right,
+    rgba(241, 245, 249, 0.9) 0%,
+    rgba(248, 250, 252, 0.85) 100%);
+  border-left-color: rgba(100, 116, 139, 0.4);
 }
 
 .dark .calendar-item.bg-slate-50\/70 {
-  background: rgba(51, 65, 85, 0.3);
+  background: linear-gradient(to right,
+    rgba(51, 65, 85, 0.4) 0%,
+    rgba(71, 85, 105, 0.3) 100%);
+  border-left-color: rgba(148, 163, 184, 0.4);
 }
 
 html:not(.dark) .calendar-item.bg-slate-50\/70:hover {
-  background: rgba(236, 254, 255, 0.9);
+  background: linear-gradient(to right,
+    rgba(224, 242, 254, 0.95) 0%,
+    rgba(240, 249, 255, 0.9) 100%);
   border-color: rgba(6, 182, 212, 0.3);
+  border-left-color: rgba(6, 182, 212, 0.7);
 }
 
 .dark .calendar-item.bg-slate-50\/70:hover {
-  background: rgba(8, 47, 73, 0.4);
+  background: linear-gradient(to right,
+    rgba(8, 47, 73, 0.5) 0%,
+    rgba(7, 89, 133, 0.3) 100%);
   border-color: rgba(6, 182, 212, 0.4);
+  border-left-color: rgba(6, 182, 212, 0.8);
 }
 
 /* Improved hover effects for mobile */
@@ -105,16 +218,30 @@ html:not(.dark) .calendar-item.bg-slate-50\/70:hover {
   }
 }
 
-/* Better mobile responsiveness - using Tailwind's sm breakpoint (640px) */
+/* Better mobile responsiveness - enhanced for touch devices */
 @media (max-width: 640px) {
   .calendar-day-card {
-    padding: 0.75rem;
-    min-height: 10rem;
+    padding: 0.875rem;
+    min-height: 11rem;
+    border-radius: 1rem;
   }
   
   .calendar-item {
-    padding: 0.5rem;
-    font-size: 0.75rem;
+    padding: 0.625rem;
+    font-size: 0.8125rem;
+    border-radius: 0.75rem;
+  }
+  
+  /* Improve touch targets */
+  .calendar-item {
+    min-height: 2.5rem;
+  }
+}
+
+/* Better tablet responsiveness */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .calendar-day-card {
+    min-height: 12rem;
   }
 }
 
@@ -132,32 +259,72 @@ html:not(.dark) .calendar-item.bg-slate-50\/70:hover {
   user-select: text;
 }
 
-/* Navigation buttons with emerald theme */
+/* Navigation buttons with emerald theme - enhanced premium style */
 .btn--primary {
-  background: rgb(16, 185, 129);
+  background: linear-gradient(135deg, rgb(16, 185, 129) 0%, rgb(5, 150, 105) 100%);
   color: white;
   border: none;
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.3),
+              0 2px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn--primary:hover {
-  background: rgb(5, 150, 105);
+  background: linear-gradient(135deg, rgb(5, 150, 105) 0%, rgb(4, 120, 87) 100%);
+  box-shadow: 0 6px 16px -3px rgba(16, 185, 129, 0.4),
+              0 3px 8px -2px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.btn--primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px -2px rgba(16, 185, 129, 0.3);
 }
 
 .dark .btn--primary {
-  background: rgb(16, 185, 129);
+  background: linear-gradient(135deg, rgb(16, 185, 129) 0%, rgb(5, 150, 105) 100%);
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.4),
+              0 2px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
 .dark .btn--primary:hover {
-  background: rgb(5, 150, 105);
+  background: linear-gradient(135deg, rgb(5, 150, 105) 0%, rgb(4, 120, 87) 100%);
+  box-shadow: 0 6px 16px -3px rgba(16, 185, 129, 0.5),
+              0 3px 8px -2px rgba(0, 0, 0, 0.25);
 }
 
-/* Week strip improvements */
+/* Week strip improvements - more interactive */
 #week-strip > div {
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0.75rem;
+  position: relative;
 }
 
 #week-strip > div:hover {
-  background: rgba(16, 185, 129, 0.1);
+  background: linear-gradient(135deg,
+    rgba(16, 185, 129, 0.12) 0%,
+    rgba(16, 185, 129, 0.08) 100%);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px -2px rgba(16, 185, 129, 0.2);
+}
+
+#week-strip > div::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgb(16, 185, 129) 50%,
+    transparent 100%);
+  transition: width 0.3s ease;
+}
+
+#week-strip > div:hover::after {
+  width: 80%;
 }
 
 /* Smooth scrolling for calendar containers */
@@ -166,11 +333,18 @@ html:not(.dark) .calendar-item.bg-slate-50\/70:hover {
   scroll-behavior: smooth;
 }
 
-/* Focus styles for accessibility */
+/* Focus styles for accessibility - enhanced visibility */
 .calendar-day-card:focus,
 .calendar-item:focus {
-  outline: 2px solid rgb(16, 185, 129);
-  outline-offset: 2px;
+  outline: 3px solid rgba(16, 185, 129, 0.6);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.15);
+}
+
+.calendar-day-card:focus-visible,
+.calendar-item:focus-visible {
+  outline: 3px solid rgb(16, 185, 129);
+  outline-offset: 3px;
 }
 
 /* Loading states */
@@ -193,5 +367,295 @@ html:not(.dark) .calendar-item.bg-slate-50\/70:hover {
   }
   100% {
     transform: translateX(100%);
+  }
+}
+
+/* Empty state for calendar days - personal and friendly */
+.calendar-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.calendar-empty-state:hover {
+  opacity: 0.9;
+}
+
+.calendar-empty-state-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: rgba(148, 163, 184, 0.5);
+}
+
+.dark .calendar-empty-state-icon {
+  color: rgba(148, 163, 184, 0.3);
+}
+
+/* Calendar item type indicators - better visual distinction */
+.calendar-item[data-type="task"] {
+  border-left-color: rgba(59, 130, 246, 0.6);
+}
+
+.calendar-item[data-type="workout"] {
+  border-left-color: rgba(16, 185, 129, 0.6);
+}
+
+.calendar-item[data-type="nutrition"] {
+  border-left-color: rgba(234, 179, 8, 0.6);
+}
+
+.calendar-item[data-type="event"] {
+  border-left-color: rgba(168, 85, 247, 0.6);
+}
+
+/* Priority indicators for tasks */
+.calendar-item[data-priority="high"] {
+  border-left-width: 4px;
+  border-left-color: rgba(239, 68, 68, 0.7);
+}
+
+.calendar-item[data-priority="medium"] {
+  border-left-width: 4px;
+  border-left-color: rgba(245, 158, 11, 0.7);
+}
+
+.calendar-item[data-priority="low"] {
+  border-left-width: 4px;
+  border-left-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Time slot indicators - for better day planning */
+.calendar-time-indicator {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(4px);
+}
+
+.dark .calendar-time-indicator {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Category badges for calendar items */
+.calendar-category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(16, 185, 129, 0.1);
+  color: rgb(5, 150, 105);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.dark .calendar-category-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: rgb(52, 211, 153);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Streak indicator for consistent days */
+.calendar-streak-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, 
+    rgba(245, 158, 11, 0.15) 0%, 
+    rgba(251, 191, 36, 0.1) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: rgb(180, 83, 9);
+  backdrop-filter: blur(4px);
+}
+
+.dark .calendar-streak-badge {
+  background: linear-gradient(135deg,
+    rgba(245, 158, 11, 0.2) 0%,
+    rgba(251, 191, 36, 0.15) 100%);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: rgb(251, 191, 36);
+}
+
+.calendar-streak-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* Overdue indicator - subtle but noticeable */
+.calendar-item[data-overdue="true"] {
+  border-left-color: rgba(239, 68, 68, 0.7) !important;
+  background: linear-gradient(to right,
+    rgba(254, 226, 226, 0.4) 0%,
+    rgba(255, 255, 255, 0.95) 100%) !important;
+}
+
+.dark .calendar-item[data-overdue="true"] {
+  background: linear-gradient(to right,
+    rgba(127, 29, 29, 0.2) 0%,
+    rgba(30, 41, 59, 0.5) 100%) !important;
+}
+
+/* Quick action buttons on calendar items */
+.calendar-item-actions {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.calendar-item:hover .calendar-item-actions {
+  opacity: 1;
+}
+
+.calendar-item-action-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  color: rgb(71, 85, 105);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.dark .calendar-item-action-btn {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(71, 85, 105, 0.5);
+  color: rgb(203, 213, 225);
+}
+
+.calendar-item-action-btn:hover {
+  background: rgb(16, 185, 129);
+  border-color: rgb(5, 150, 105);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Day summary card - personalized insights */
+.calendar-day-summary {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg,
+    rgba(239, 246, 255, 0.8) 0%,
+    rgba(243, 244, 246, 0.6) 100%);
+  border: 1px solid rgba(191, 219, 254, 0.5);
+  font-size: 0.75rem;
+  color: rgb(71, 85, 105);
+}
+
+.dark .calendar-day-summary {
+  background: linear-gradient(135deg,
+    rgba(30, 58, 138, 0.15) 0%,
+    rgba(51, 65, 85, 0.1) 100%);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: rgb(203, 213, 225);
+}
+
+/* Celebration effect for completed days */
+@keyframes celebrate {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.05) rotate(-2deg);
+  }
+  75% {
+    transform: scale(1.05) rotate(2deg);
+  }
+}
+
+.calendar-day-card[data-completion="100"] {
+  animation: celebrate 0.5s ease-out;
+}
+
+/* Calendar view mode transitions */
+.calendar-view-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Personal touches - motivational quotes container */
+.calendar-motivation {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg,
+    rgba(253, 224, 71, 0.1) 0%,
+    rgba(252, 211, 77, 0.05) 100%);
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  font-style: italic;
+  text-align: center;
+  font-size: 0.875rem;
+  color: rgb(113, 63, 18);
+}
+
+.dark .calendar-motivation {
+  background: linear-gradient(135deg,
+    rgba(253, 224, 71, 0.15) 0%,
+    rgba(252, 211, 77, 0.08) 100%);
+  border-color: rgba(250, 204, 21, 0.4);
+  color: rgb(253, 224, 71);
+}
+
+/* Enhanced card shadows for depth */
+.calendar-card-shadow-sm {
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06),
+              0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+.calendar-card-shadow-md {
+  box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.08),
+              0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-card-shadow-lg {
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1),
+              0 4px 8px -4px rgba(0, 0, 0, 0.06);
+}
+
+/* Responsive grid improvements */
+@media (min-width: 1280px) {
+  .calendar-day-card {
+    min-height: 13rem;
+  }
+}
+
+/* Print styles for calendar */
+@media print {
+  .calendar-day-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .calendar-item-actions {
+    display: none;
   }
 }

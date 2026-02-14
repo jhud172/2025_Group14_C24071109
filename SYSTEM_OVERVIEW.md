@@ -64,6 +64,9 @@ Data export request tracking with status handling. Includes request entity, repo
 ### DayHealthData
 Daily health metrics and AI summaries. Provides entities, repositories, and services for daily health logging and aggregation.
 
+### DayMode
+Daily mode selection and context handling for personalised UX and behavioural flow adjustments. Includes day-mode entities, services, and related orchestration.
+
 ### ExerciseData
 Core exercise catalogue (non-custom). Contains exercise entities, tags, repository, service, and controller for catalogue access.
 
@@ -132,6 +135,9 @@ User profile data, profile image storage, and tracker DTOs. Includes controller,
 
 ### PublicProfile
 Public trainer profile presentation. Controller serves public profile view based on trainer data.
+
+### QuickActions
+Quick action shortcuts and contextual action surfacing for dashboards/home experiences. Includes models/services used to compose actionable UI prompts.
 
 ### ReflectionData
 Reflection and journalling data with AI-derived results. Includes entities and services for reflection analysis.
@@ -205,13 +211,14 @@ Thymeleaf is used for server-rendered HTML to keep UI state aligned with server-
 
 ### Public and Marketing
 - templates/index.html — Public landing page. Access: Public. Data: public homepage content and CTA flags.
-- templates/about.html — About page. Access: Public. Data: static content.
-- templates/pricing.html — Pricing tiers. Access: Public. Data: plan list and pricing text.
-- templates/pricing-checkout.html — Checkout flow. Access: Public/Authenticated. Data: selected plan and pricing details.
+- templates/public/about.html — About page. Access: Public. Data: static content.
+- templates/payments/pricing.html — Pricing tiers. Access: Public. Data: plan list and pricing text.
+- templates/payments/pricing-checkout.html — Checkout flow. Access: Public/Authenticated. Data: selected plan and pricing details.
 - templates/home/public.html — Public home variant. Access: Public. Data: public homepage content.
 
 ### Authentication and Verification
 - templates/User/login.html — Login form. Access: Public. Data: login form model and error flags.
+- templates/User/signup.html — Unified signup form entry point. Access: Public. Data: signup form model.
 - templates/User/signup-choice.html — Role selection. Access: Public. Data: role options.
 - templates/User/signup-client.html — Client sign-up. Access: Public. Data: client signup form.
 - templates/User/signup-trainer.html — Trainer sign-up with verification fields. Access: Public. Data: trainer signup form.
@@ -219,7 +226,6 @@ Thymeleaf is used for server-rendered HTML to keep UI state aligned with server-
 - templates/User/forgot-password.html — Password reset request. Access: Public. Data: email input model.
 - templates/User/reset-password.html — Password reset form. Access: Public. Data: reset token and password form.
 - templates/auth/confirm-logout.html — Logout confirmation. Access: Authenticated. Data: session state.
-- templates/confirm-logout.html — Logout confirmation (alternate template path). Access: Authenticated. Data: session state.
 - templates/verify/email-confirm.html — Email verification confirmation. Access: Public. Data: verification outcome.
 
 ### Home and Dashboards
@@ -274,6 +280,10 @@ Thymeleaf is used for server-rendered HTML to keep UI state aligned with server-
 - templates/conditions-preference/preference-form.html — Condition preferences form. Access: Authenticated. Data: preference form fields.
 - templates/conditions-preference/view-preferences.html — View saved condition preferences. Access: Authenticated. Data: saved preferences and summaries.
 
+### Explore and Nutrition
+- templates/explore/index.html — Trainer explore/discovery view. Access: Public/Auth (as configured). Data: trainer browse list and filters.
+- templates/nutrition/daily-log.html — Daily nutrition tracker. Access: Authenticated. Data: day entries and nutrition summary.
+
 ### Notes and Vault
 - templates/notes/index.html — Notes list. Access: Authenticated. Data: notes list.
 - templates/notes/folders.html — Notes folder view. Access: Authenticated. Data: folder list and counts.
@@ -321,6 +331,7 @@ Thymeleaf is used for server-rendered HTML to keep UI state aligned with server-
 - templates/gym-admin/memberships/price-change.html — Price change form. Access: Gym admin. Data: product and audit details.
 - templates/gym-admin/memberships/price-history.html — Price change audit. Access: Gym admin. Data: audit history.
 - templates/super-admin/verification-queue.html — Verification queue. Access: Super admin. Data: pending requests.
+- templates/super-admin/verification-detail.html — Verification review detail. Access: Super admin. Data: verification submission details and decision actions.
 - templates/admin/off-platform-payments.html — Off-platform payment review. Access: Admin/Super admin. Data: flagged attempts list.
 
 ### Messaging and Inbox
@@ -361,6 +372,7 @@ Thymeleaf is used for server-rendered HTML to keep UI state aligned with server-
 - templates/fragments/banner.html — Global banners. Access: Shared. Data: banner message state.
 - templates/fragments/username-logout.html — User menu. Access: Shared. Data: username.
 - templates/fragments/profile-modules.html — Profile modules. Access: Shared. Data: profile sections.
+- templates/fragments/quick-actions.html — Quick actions panel fragment. Access: Shared. Data: action shortcuts and state.
 - templates/fragments/chat/chat-widget.html — Chat widget. Access: Shared. Data: chat status and notifications.
 - templates/fragments/chat/sidebar.html — ChatV2 sidebar. Access: Shared. Data: folders/threads list.
 - templates/fragments/chat/blocks.html — ChatV2 block rendering. Access: Shared. Data: structured block items.
@@ -399,6 +411,6 @@ Clients and trainers exchange messages. Off-platform payment keywords are detect
 - Notifications and check-ins are scoped to authenticated users and their relationships.
 
 ## 9. Current State Summary
-Core coaching workflows, membership products, trainer verification, messaging, and notification systems are implemented and operational in the codebase. The UI is fully server-rendered with a comprehensive template set. Stubbed integrations remain for email delivery and payment processing, which are intentionally incomplete in the current repository.
+Core coaching workflows, membership products, trainer verification, messaging, notifications, nutrition logging, and trainer discovery are implemented and operational in the codebase. The UI is fully server-rendered with a comprehensive template set, including quick-action fragments and expanded verification/admin review pages. Stubbed integrations remain for email delivery and payment processing, which are intentionally incomplete in the current repository.
 
 
