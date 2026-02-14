@@ -7,76 +7,83 @@
     <input type="hidden" id="quick_actions_csrf" th:value="${_csrf != null ? _csrf.token : ''}" />
     <input type="hidden" id="quick_actions_csrf_header" th:value="${_csrf != null ? _csrf.headerName : ''}" />
 
+    <!-- Floating button - positioned bottom-right, aligned with chat widget -->
     <button type="button"
             id="quickActionsToggle"
-            class="fixed bottom-6 left-6 sm:bottom-8 z-50 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl text-slate-900 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:bg-slate-950 dark:text-slate-100"
+            class="quick-actions-fab-premium"
             aria-label="Toggle quick actions"
             aria-controls="quickActionsShelf"
             aria-expanded="false">
-        <span aria-hidden="true">⚡</span>
+        <span class="quick-actions-fab-icon" aria-hidden="true">⚡</span>
     </button>
 
-    <div id="quickActionsOverlay" class="fixed inset-0 z-40 hidden bg-slate-950/10 dark:bg-slate-950/30"></div>
-
+    <!-- Quick Actions Panel - popup style -->
     <aside id="quickActionsShelf"
-           class="fixed bottom-24 left-6 z-50 w-[22rem] max-w-[calc(100vw-3rem)] translate-y-2 rounded-3xl border border-slate-100 bg-white shadow-lg opacity-0 pointer-events-none transition duration-300 ease-out dark:border-slate-800 dark:bg-slate-950 sm:left-4 sm:right-4 sm:w-auto sm:px-2">
-        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
-            <div>
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">Quick actions</h2>
-                <p class="text-[11px] font-light text-slate-400 mt-0.5">One-tap moves for today</p>
+           class="quick-actions-panel-premium"
+           aria-hidden="true">
+        <!-- Header section - similar to chat widget -->
+        <header class="quick-actions-header-premium">
+            <div class="quick-actions-header-top">
+                <div class="quick-actions-title-section">
+                    <div class="quick-actions-badge-premium">⚡</div>
+                    <div class="quick-actions-title-text">
+                        <div class="quick-actions-title-main">Quick Actions</div>
+                        <div class="quick-actions-title-subtitle">One-tap moves for today</div>
+                    </div>
+                </div>
+                
+                <div class="quick-actions-header-actions">
+                    <button type="button" id="quickActionsCustomizeToggle"
+                            class="quick-actions-icon-btn-premium"
+                            title="Customize"
+                            aria-label="Customize quick actions">⚙️</button>
+                    <button type="button" id="quickActionsClose"
+                            class="quick-actions-icon-btn-premium"
+                            title="Close"
+                            aria-label="Close quick actions">✕</button>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button type="button" id="quickActionsCustomizeToggle"
-                        class="quick-actions-header-icon inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900"
-                        aria-label="Customize quick actions">
-                    <span aria-hidden="true">⚙️</span>
-                </button>
-                <button type="button" id="quickActionsClose"
-                        class="quick-actions-header-icon inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900"
-                        aria-label="Close quick actions">
-                    ✕
-                </button>
-            </div>
-        </div>
+        </header>
 
-        <div class="flex max-h-[70vh] flex-col">
-            <div id="quickActionsView" class="flex-1 overflow-auto px-6 py-5">
-                <div class="mb-4 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+        <!-- Content wrapper -->
+        <div class="quick-actions-content-wrapper">
+            <div id="quickActionsView" class="quick-actions-main-view">
+                <div class="quick-actions-actions-list-header">
                     <span>Active</span>
                     <span>Tap to run</span>
                 </div>
-                <div id="quickActionsList" class="grid grid-cols-2 gap-3"></div>
-                <div id="quickActionsEmpty" class="quick-actions-empty-state hidden mt-8">
+                <div id="quickActionsList" class="quick-actions-grid"></div>
+                <div id="quickActionsEmpty" class="quick-actions-empty-state hidden">
                     <div class="quick-actions-empty-icon">📋</div>
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">No actions yet</p>
-                    <p class="text-xs text-slate-400 mt-1.5">Tap the gear icon to get started</p>
+                    <p class="quick-actions-empty-text">No actions yet</p>
+                    <p class="quick-actions-empty-subtext">Tap the gear icon to get started</p>
                 </div>
-                <div id="quickActionsMessage" class="mt-3 hidden rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700"></div>
+                <div id="quickActionsMessage" class="quick-actions-message hidden"></div>
             </div>
 
-            <div id="quickActionsCustomize" class="hidden flex-1 flex-col overflow-hidden">
-                <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+            <div id="quickActionsCustomize" class="quick-actions-customize-view hidden">
+                <div class="quick-actions-search-section">
                     <input id="quickActionsSearch" type="search" placeholder="Search actions"
-                           class="quick-actions-smooth w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200" />
+                           class="quick-actions-input-premium" />
                 </div>
-                <div class="flex-1 overflow-auto px-6 py-4">
-                    <ul id="quickActionsCustomizeList" class="space-y-2"></ul>
+                <div class="quick-actions-customize-list-wrapper">
+                    <ul id="quickActionsCustomizeList" class="quick-actions-customize-list"></ul>
                 </div>
-                <div class="border-t border-slate-100 px-6 py-6 dark:border-slate-800">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">Custom AI actions</span>
-                        <span id="quickActionsCustomLimit" class="text-xs text-slate-400">0/2</span>
+                <div class="quick-actions-custom-ai-section">
+                    <div class="quick-actions-custom-ai-header">
+                        <span class="quick-actions-custom-ai-title">Custom AI actions</span>
+                        <span id="quickActionsCustomLimit" class="quick-actions-custom-ai-limit">0/2</span>
                     </div>
-                    <div class="space-y-3">
+                    <div class="quick-actions-custom-ai-form">
                         <input id="quickActionsCustomName" type="text" placeholder="Action name"
-                               class="quick-actions-smooth w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200" />
+                               class="quick-actions-input-premium" />
                         <textarea id="quickActionsCustomPrompt" rows="3" placeholder="Task prompt (what should AI do?)"
-                                  class="quick-actions-smooth w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none resize-none dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"></textarea>
+                                  class="quick-actions-input-premium quick-actions-textarea"></textarea>
                         <button type="button" id="quickActionsCustomCreate"
-                                class="w-full rounded-full bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700">
+                                class="quick-actions-btn-premium">
                             Create custom action
                         </button>
-                        <p id="quickActionsCustomLock" class="quick-actions-premium-text hidden text-center">
+                        <p id="quickActionsCustomLock" class="quick-actions-premium-text hidden">
                             <span class="quick-actions-premium-highlight">Premium</span> required for custom actions.
                         </p>
                     </div>

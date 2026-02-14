@@ -472,6 +472,32 @@
                         <!-- Mobile nav: 2 columns by default, 3 columns on screens >= 640px (sm:) -->
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" data-mobile-links>
                             <th:block th:replace="~{fragments/navbar :: navLinks}"></th:block>
+                            
+                            <!-- Quick Actions - Only show on mobile for authenticated users -->
+                            <button type="button" id="mobileQuickActionsToggle"
+                                    sec:authorize="isAuthenticated()"
+                                    class="navlink group text-left sm:hidden"
+                                    aria-label="Quick Actions">
+                                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     class="navicon">
+                                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                                </svg>
+                                <span>Quick Actions</span>
+                            </button>
+                            
+                            <!-- Chat - Only show on mobile for authenticated users -->
+                            <button type="button" id="mobileChatToggle"
+                                    sec:authorize="isAuthenticated()"
+                                    class="navlink group text-left sm:hidden"
+                                    aria-label="Chat">
+                                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     class="navicon">
+                                    <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+                                </svg>
+                                <span>Chat</span>
+                            </button>
                         </div>
                         <div class="pt-2 mt-2 border-t border-slate-200 dark:border-slate-800">
                             <div class="authsurface w-full justify-center">
@@ -512,6 +538,30 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && isOpen()) setOpen(false);
             });
+            
+            // Mobile Quick Actions toggle
+            const mobileQuickActionsToggle = document.getElementById('mobileQuickActionsToggle');
+            if (mobileQuickActionsToggle) {
+                mobileQuickActionsToggle.addEventListener('click', () => {
+                    const quickActionsToggle = document.getElementById('quickActionsToggle');
+                    if (quickActionsToggle) {
+                        quickActionsToggle.click();
+                        setOpen(false); // Close mobile menu
+                    }
+                });
+            }
+            
+            // Mobile Chat toggle
+            const mobileChatToggle = document.getElementById('mobileChatToggle');
+            if (mobileChatToggle) {
+                mobileChatToggle.addEventListener('click', () => {
+                    const chatFab = document.getElementById('chatFab');
+                    if (chatFab) {
+                        chatFab.click();
+                        setOpen(false); // Close mobile menu
+                    }
+                });
+            }
         })();
     </script>
 </header>
