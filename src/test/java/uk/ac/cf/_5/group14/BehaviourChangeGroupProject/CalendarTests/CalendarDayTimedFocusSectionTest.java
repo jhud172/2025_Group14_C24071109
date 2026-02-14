@@ -76,11 +76,10 @@ class CalendarDayTimedFocusSectionTest {
     private UserSettingsService userSettingsService;
 
     @MockitoBean
-    private DayModeService dayModeService;@MockitoBean
-    private GoalLinkService goalLinkService;
+    private DayModeService dayModeService;
 
     @MockitoBean
-    private PlatformSubscriptionService platformSubscriptionService;
+    private GoalLinkService goalLinkService;
 
     @Test
     void dayViewRendersTimedFocusSection() throws Exception {
@@ -111,5 +110,21 @@ class CalendarDayTimedFocusSectionTest {
                     .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .build();
-        }}
+        }
+
+        @Bean
+        AuthHelper authHelper() {
+            return mock(AuthHelper.class);
+        }
+
+        @Bean
+        PlatformSubscriptionService platformSubscriptionService() {
+            return mock(PlatformSubscriptionService.class);
+        }
+
+        @Bean
+        Clock systemClock() {
+            return Clock.systemDefaultZone();
+        }
+    }
 }

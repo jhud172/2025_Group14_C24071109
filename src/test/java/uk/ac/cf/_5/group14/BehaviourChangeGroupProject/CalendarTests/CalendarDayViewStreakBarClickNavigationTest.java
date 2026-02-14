@@ -83,11 +83,10 @@ public class CalendarDayViewStreakBarClickNavigationTest {
     private DailyStreakService dailyStreakService;
 
     @MockitoBean
-    private DayModeService dayModeService;@MockitoBean
-    private GoalLinkService goalLinkService;
+    private DayModeService dayModeService;
 
     @MockitoBean
-    private PlatformSubscriptionService platformSubscriptionService;
+    private GoalLinkService goalLinkService;
 
     @Test
     public void clickingAStreakDayShouldLinkToThatDayView() throws Exception {
@@ -141,5 +140,21 @@ public class CalendarDayViewStreakBarClickNavigationTest {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .build();
-        }}
+        }
+
+        @Bean
+        AuthHelper authHelper() {
+            return mock(AuthHelper.class);
+        }
+
+        @Bean
+        PlatformSubscriptionService platformSubscriptionService() {
+            return mock(PlatformSubscriptionService.class);
+        }
+
+        @Bean
+        Clock systemClock() {
+            return Clock.systemDefaultZone();
+        }
+    }
 }

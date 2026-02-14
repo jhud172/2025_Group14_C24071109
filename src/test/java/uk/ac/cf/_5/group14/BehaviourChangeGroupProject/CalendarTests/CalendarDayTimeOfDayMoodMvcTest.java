@@ -81,7 +81,9 @@ class CalendarDayTimeOfDayMoodMvcTest {
     private TimedFocusService timedFocusService;
 
     @MockitoBean
-    private DayModeService dayModeService;@MockitoBean
+    private DayModeService dayModeService;
+
+    @MockitoBean
     private GoalLinkService goalLinkService;
 
     @MockitoBean
@@ -136,5 +138,21 @@ class CalendarDayTimeOfDayMoodMvcTest {
                     .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .build();
-        }}
+        }
+
+        @Bean
+        public Clock systemClock() {
+            return Clock.systemDefaultZone();
+        }
+
+        @Bean
+        public AuthHelper authHelper() {
+            return mock(AuthHelper.class);
+        }
+
+        @Bean
+        public PlatformSubscriptionService platformSubscriptionService() {
+            return mock(PlatformSubscriptionService.class);
+        }
+    }
 }

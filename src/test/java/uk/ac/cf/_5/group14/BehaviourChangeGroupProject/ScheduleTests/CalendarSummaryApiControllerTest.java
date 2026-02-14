@@ -11,18 +11,24 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayMode.DayModeService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarSummaryApiController;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarSummaryService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarSummaryService.CalendarDaySummary;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,6 +45,15 @@ class CalendarSummaryApiControllerTest {
 
     @MockitoBean
     private AuthHelper authHelper;
+
+    @MockitoBean
+    private DayModeService dayModeService;
+
+    @MockitoBean
+    private GoalLinkService goalLinkService;
+
+    @MockitoBean
+    private UserSettingsService userSettingsService;
 
     @Test
     void summaryReturnsRangeDetails() throws Exception {
@@ -74,6 +89,21 @@ class CalendarSummaryApiControllerTest {
                     .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .build();
+        }
+
+        @Bean
+        public Clock systemClock() {
+            return Clock.systemDefaultZone();
+        }
+
+        @Bean
+        public AuthHelper authHelper() {
+            return mock(AuthHelper.class);
+        }
+
+        @Bean
+        public PlatformSubscriptionService platformSubscriptionService() {
+            return mock(PlatformSubscriptionService.class);
         }
     }
 }
