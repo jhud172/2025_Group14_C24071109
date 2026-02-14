@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Gym Sign Up', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Gym Sign Up', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
         <div class="auth-card">
@@ -164,6 +164,11 @@
         </div>
     </div>
 
+    <th:block th:fragment="pageStyles">
+        <link rel="stylesheet" th:href="@{/css/components/auth.css}">
+    </th:block>
+
+    <th:block th:fragment="pageScripts">
     <script>
         // Password visibility toggle
         const passwordInput = document.getElementById('password');
@@ -197,5 +202,6 @@
             }
         });
     </script>
+    </th:block>
 
 </th:block>

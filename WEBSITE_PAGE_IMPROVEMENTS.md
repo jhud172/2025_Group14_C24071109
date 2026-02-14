@@ -1,0 +1,159 @@
+﻿# Website-wide HTML Improvement Suggestions
+
+This document lists **every HTML template** and suggests practical improvements to improve consistency, clarity, accessibility, and UX across the whole website.
+
+## Global consistency improvements (apply broadly)
+- Standardize heading hierarchy so each page has one clear H1 and nested H2/H3 sections.
+- Add consistent empty states with action buttons for lists, inboxes, and dashboards.
+- Improve accessibility: explicit labels, focus styles, `aria-live` for async updates, and keyboard-friendly controls.
+- Unify button styles and wording (primary action first, destructive action separated, same verb patterns).
+- Add lightweight inline helper text and validation summaries for all forms.
+
+## Per-template suggestions
+
+- **src/main/resources/templates/admin/off-platform-payments.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/auth/confirm-logout.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/base.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/calendar/day.html**  Improve scheduling UX with clearer time grouping, stronger contrast for state badges, and more explicit completion/status affordances.
+- **src/main/resources/templates/calendar/month.html**  Improve scheduling UX with clearer time grouping, stronger contrast for state badges, and more explicit completion/status affordances.
+- **src/main/resources/templates/calendar/task-detail.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/calendar/week.html**  Improve scheduling UX with clearer time grouping, stronger contrast for state badges, and more explicit completion/status affordances.
+- **src/main/resources/templates/chat/chat.html**  Enhance conversation flow: clearer unread/read states, sticky composer behavior, and better separation between system vs user content.
+- **src/main/resources/templates/chat/folder.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/chat/hub.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/chat/thread.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/checkins/client-submit.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/checkins/trainer-review.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/client/assessment-form.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/client/assigned-plan.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/client/my-trainer.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/client/plan.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/client/trainers.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/conditions-preference/preference-form.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/conditions-preference/view-preferences.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/dashboard/client-dashboard.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/dashboard/gym-dashboard.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/dashboard/trainer-dashboard.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/error/403.html**  Provide recovery-oriented messaging: explain why access failed and offer direct links to safe next actions.
+- **src/main/resources/templates/exercise-log/exercise-log-form.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/exercise-log/exercise-log-list.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/exercise-log/exercise-log-view.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/exercise-log/ExerciseTutorial.html**  Add clearer progress feedback, actionable next steps, and contextual coaching hints tied to the users current status.
+- **src/main/resources/templates/explore/index.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/fragments/AccountHomePage.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/fragments/banner.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/chat/blocks.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/chat/chat-widget.html**  Enhance conversation flow: clearer unread/read states, sticky composer behavior, and better separation between system vs user content.
+- **src/main/resources/templates/fragments/chat/sidebar.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/chatbot.html**  Enhance conversation flow: clearer unread/read states, sticky composer behavior, and better separation between system vs user content.
+- **src/main/resources/templates/fragments/daily-streak-bar.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/edit-task.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/fragments/footer.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/goals/goal-chip.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/navbar.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/profile-modules.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/fragments/quick-actions.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/slimselectCss.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/slimselectJs.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/tailwind-components.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/ui-shell.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/username-logout.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/workout/searchbar.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/fragments/workout/workout-frags.html**  Add clearer progress feedback, actionable next steps, and contextual coaching hints tied to the users current status.
+- **src/main/resources/templates/goals/checkins.html**  Add clearer progress feedback, actionable next steps, and contextual coaching hints tied to the users current status.
+- **src/main/resources/templates/goals/create.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/goals/detail.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/goals/edit.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/goals/index.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/gym-admin/memberships/form.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/gym-admin/memberships/list.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/gym-admin/memberships/price-change.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/gym-admin/memberships/price-history.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/gym-admin/trainers.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/health-record/health-record-form.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/health-record/health-record-list.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/health-record/health-record-view.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/home/auth.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/home/public.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/home/user.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/homepage/HomePage.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/inbox/index.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/inbox/thread.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/index.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/levels/leaderboard.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/levels/me.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/messages/client-inbox.html**  Enhance conversation flow: clearer unread/read states, sticky composer behavior, and better separation between system vs user content.
+- **src/main/resources/templates/messages/thread.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/messages/trainer-inbox.html**  Enhance conversation flow: clearer unread/read states, sticky composer behavior, and better separation between system vs user content.
+- **src/main/resources/templates/notes/folders.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/notes/index.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/notes/note-form.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/notes/note-view.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/nutrition/daily-log.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/payments/pricing.html**  Improve purchase clarity with transparent pricing breakdown, plan comparison cues, and stronger trust/microcopy around billing actions.
+- **src/main/resources/templates/payments/pricing-checkout.html**  Improve purchase clarity with transparent pricing breakdown, plan comparison cues, and stronger trust/microcopy around billing actions.
+- **src/main/resources/templates/policies/payments.html**  Improve purchase clarity with transparent pricing breakdown, plan comparison cues, and stronger trust/microcopy around billing actions.
+- **src/main/resources/templates/policies/subscription-terms.html**  Improve purchase clarity with transparent pricing breakdown, plan comparison cues, and stronger trust/microcopy around billing actions.
+- **src/main/resources/templates/policies/terms.html**  Improve legibility with anchored table of contents, concise summaries per section, and clearer date/version metadata.
+- **src/main/resources/templates/profile/profile.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/public/about.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/public/profile.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/review/form.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/schedule/add-entry.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/schedule/apply.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/schedule/builder.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/schedule/list.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/schedule/select-schedule.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/schedule/workout.html**  Add clearer progress feedback, actionable next steps, and contextual coaching hints tied to the users current status.
+- **src/main/resources/templates/strengthlog/completion.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/strengthlog/exercise-session.html**  Add clearer progress feedback, actionable next steps, and contextual coaching hints tied to the users current status.
+- **src/main/resources/templates/strengthlog/workout-session.html**  Add clearer progress feedback, actionable next steps, and contextual coaching hints tied to the users current status.
+- **src/main/resources/templates/super-admin/verification-detail.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/super-admin/verification-queue.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/trainer/active-clients.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/trainer/client-detail.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/trainer/client-requests.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/trainer/clients.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/trainer/exercises/create.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/trainer/exercises/edit.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/trainer/exercises/list.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/trainer/exercises/view.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/trainer/library.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+- **src/main/resources/templates/trainer/profile/edit.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/trainer/profile/view.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/trainer/programmes/create.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/trainer/programmes/edit.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/trainer/programmes/list.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/trainer/programmes/view.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/trainer/templates/apply.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/trainer/templates/edit.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/trainer/templates/index.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/trainer/workouts/create.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/trainer/workouts/edit.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/trainer/workouts/list.html**  Improve scannability: add clearer column labels/card metadata, consistent sorting/filter cues, and better empty/no-result states.
+- **src/main/resources/templates/trainer/workouts/view.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/User/forgot-password.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/User/login.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/User/reset-password.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/User/signup.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/User/signup-choice.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/User/signup-client.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/User/signup-gym.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/User/signup-trainer.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/vault/index.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/vault/note-form.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/vault/note-view.html**  Increase readability and context: emphasize key metadata, sticky primary actions, and clearer section dividers for long content.
+- **src/main/resources/templates/verify/email-confirm.html**  Improve trust and conversion: clearer form guidance, password requirements, inline errors, and a stronger post-submit success/next-step message.
+- **src/main/resources/templates/workouts/edit.html**  Optimize form usability: grouped fields, progressive disclosure for advanced options, persistent save/cancel controls, and stronger validation hints.
+- **src/main/resources/templates/workouts/index.html**  Strengthen information hierarchy: prioritize top metrics/actions first, reduce visual noise, and add meaningful empty/loading states.
+- **src/main/resources/templates/workouts/start.html**  Refine spacing rhythm, improve helper text, and tighten action hierarchy so primary actions are more obvious.
+
+## Priority pages to improve first
+- `src/main/resources/templates/index.html`
+- `src/main/resources/templates/home/user.html`
+- `src/main/resources/templates/dashboard/client-dashboard.html`
+- `src/main/resources/templates/calendar/day.html`
+- `src/main/resources/templates/messages/thread.html`
+- `src/main/resources/templates/payments/pricing-checkout.html`
+- `src/main/resources/templates/User/login.html`
+- `src/main/resources/templates/User/signup-choice.html`
