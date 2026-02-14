@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Sign Up', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Sign Up', ~{::pageStyles}, ~{::content}, null)}">
 
     <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
         <div class="auth-card">
@@ -60,5 +60,9 @@
             </p>
         </div>
     </div>
+
+    <th:block th:fragment="pageStyles">
+        <link rel="stylesheet" th:href="@{/css/components/auth.css}">
+    </th:block>
 
 </th:block>
