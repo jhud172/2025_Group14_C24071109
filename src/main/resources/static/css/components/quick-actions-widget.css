@@ -1,0 +1,429 @@
+/* Quick Actions Widget - Premium Design (Aligned with Chat Widget) */
+
+@layer components {
+  /* === FLOATING ACTION BUTTON === */
+  .quick-actions-fab-premium {
+    /* Position - Fixed bottom-right, just to the left of chat button */
+    @apply fixed z-[9999];
+    bottom: 1.5rem;
+    right: 5.5rem; /* Positioned to the left of chat button */
+    
+    /* Size - Match chat button */
+    @apply h-16 w-16;
+    
+    /* Shape - Fully circular */
+    @apply rounded-full;
+    
+    /* Base styling - Clean white with soft shadow */
+    @apply bg-white;
+    @apply border border-slate-200/60;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.06);
+    
+    /* Content centering */
+    @apply flex items-center justify-center;
+    
+    /* Smooth transitions */
+    @apply transition-all duration-300 ease-out;
+    
+    /* Dark mode */
+    @apply dark:bg-slate-900 dark:border-slate-700/60;
+  }
+  
+  .quick-actions-fab-premium:hover {
+    /* Lift upward */
+    transform: translateY(-4px) scale(1.05);
+    
+    /* Emerald glow ring */
+    box-shadow: 
+      0 6px 24px rgba(0, 0, 0, 0.12), 
+      0 4px 12px rgba(0, 0, 0, 0.08),
+      0 0 0 4px rgba(16, 185, 129, 0.15);
+    
+    @apply border-emerald-500/40;
+  }
+  
+  .quick-actions-fab-premium:active {
+    /* Scale down micro interaction */
+    transform: translateY(-2px) scale(0.97);
+    @apply transition-all duration-150;
+  }
+  
+  .quick-actions-fab-icon {
+    @apply text-2xl;
+  }
+  
+  /* === QUICK ACTIONS PANEL CONTAINER === */
+  .quick-actions-panel-premium {
+    /* Position - Bottom-right, above the toggle button */
+    @apply fixed z-[9998];
+    bottom: 5.5rem;
+    right: 1.5rem;
+    
+    /* Size - Match chat panel */
+    @apply w-full;
+    max-width: 400px;
+    @apply h-auto;
+    max-height: calc(100vh - 8rem);
+    
+    /* Shape - Rounded corners */
+    @apply rounded-2xl;
+    
+    /* Background - White with subtle border */
+    @apply bg-white;
+    @apply border border-slate-200/80;
+    
+    /* Elevation - Soft shadow for floating console feel */
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.08),
+      0 4px 16px rgba(0, 0, 0, 0.04);
+    
+    /* Hide initially */
+    @apply opacity-0 pointer-events-none;
+    transform: translateY(12px);
+    
+    /* Smooth transitions */
+    @apply transition-all duration-300 ease-out;
+    
+    /* Dark mode */
+    @apply dark:bg-slate-900 dark:border-slate-700/80;
+  }
+  
+  .quick-actions-panel-premium.open {
+    /* Slide up and fade in */
+    @apply opacity-100 pointer-events-auto;
+    transform: translateY(0);
+  }
+  
+  /* === HEADER SECTION === */
+  .quick-actions-header-premium {
+    /* Spacing - Increased padding */
+    @apply px-5 py-4;
+    
+    /* Layout */
+    @apply flex flex-col gap-3;
+    
+    /* Separator - Subtle line */
+    @apply border-b border-slate-200/60;
+    
+    @apply dark:border-slate-700/60;
+  }
+  
+  .quick-actions-header-top {
+    @apply flex items-center justify-between gap-3;
+  }
+  
+  .quick-actions-title-section {
+    @apply flex items-center gap-3;
+  }
+  
+  .quick-actions-badge-premium {
+    /* Size */
+    @apply h-10 w-10;
+    
+    /* Shape */
+    @apply rounded-xl;
+    
+    /* Styling - Subtle emerald tint */
+    @apply bg-emerald-50 border border-emerald-200/60;
+    
+    /* Content */
+    @apply flex items-center justify-center;
+    @apply text-xl;
+    
+    @apply dark:bg-emerald-950/40 dark:border-emerald-800/60;
+  }
+  
+  .quick-actions-title-text {
+    @apply flex flex-col gap-0.5;
+  }
+  
+  .quick-actions-title-main {
+    /* Larger and more confident */
+    @apply text-base font-bold text-slate-900;
+    @apply dark:text-slate-100;
+  }
+  
+  .quick-actions-title-subtitle {
+    /* Reduced weight */
+    @apply text-xs font-normal text-slate-500;
+    @apply dark:text-slate-400;
+  }
+  
+  .quick-actions-header-actions {
+    @apply flex items-center gap-2;
+  }
+  
+  .quick-actions-icon-btn-premium {
+    /* Size */
+    @apply h-9 w-9;
+    
+    /* Shape */
+    @apply rounded-xl;
+    
+    /* Styling - Minimal border */
+    @apply bg-transparent border border-slate-200/60;
+    @apply text-slate-600;
+    
+    /* Layout */
+    @apply flex items-center justify-center;
+    
+    /* Transitions */
+    @apply transition-all duration-200;
+    
+    @apply dark:border-slate-700/60 dark:text-slate-400;
+  }
+  
+  .quick-actions-icon-btn-premium:hover {
+    /* Emerald tint on hover */
+    @apply bg-emerald-50 border-emerald-200/60 text-emerald-600;
+    transform: translateY(-1px);
+    
+    @apply dark:bg-emerald-950/30 dark:border-emerald-800/60 dark:text-emerald-400;
+  }
+  
+  .quick-actions-icon-btn-premium:active {
+    transform: translateY(0) scale(0.98);
+  }
+  
+  /* === CONTENT WRAPPER === */
+  .quick-actions-content-wrapper {
+    @apply flex flex-col;
+    height: calc(100% - 80px);
+  }
+  
+  /* === MAIN VIEW (Actions List) === */
+  .quick-actions-main-view {
+    /* Spacing */
+    @apply px-4 py-4;
+    
+    /* Layout */
+    @apply flex flex-col gap-3;
+    
+    /* Scroll */
+    @apply overflow-y-auto;
+    min-height: 320px;
+    max-height: calc(100vh - 16rem);
+  }
+  
+  .quick-actions-actions-list-header {
+    @apply flex items-center justify-between;
+    @apply text-xs font-semibold uppercase tracking-wide text-slate-400;
+    @apply mb-2;
+    
+    @apply dark:text-slate-500;
+  }
+  
+  .quick-actions-grid {
+    @apply grid grid-cols-2 gap-3;
+  }
+  
+  /* Empty state */
+  .quick-actions-empty-state {
+    @apply flex flex-col items-center justify-center;
+    @apply py-12 px-6 text-center;
+  }
+  
+  .quick-actions-empty-icon {
+    @apply text-5xl opacity-30 mb-3;
+  }
+  
+  .quick-actions-empty-text {
+    @apply text-sm font-medium text-slate-500;
+    @apply dark:text-slate-400;
+  }
+  
+  .quick-actions-empty-subtext {
+    @apply text-xs text-slate-400 mt-1.5;
+    @apply dark:text-slate-500;
+  }
+  
+  /* Message banner */
+  .quick-actions-message {
+    @apply mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700;
+    @apply dark:border-amber-800/40 dark:bg-amber-950/40 dark:text-amber-400;
+  }
+  
+  /* === CUSTOMIZE VIEW === */
+  .quick-actions-customize-view {
+    @apply flex flex-col;
+    height: 100%;
+  }
+  
+  .quick-actions-search-section {
+    @apply border-b border-slate-200/60 px-4 py-3;
+    @apply dark:border-slate-700/60;
+  }
+  
+  .quick-actions-customize-list-wrapper {
+    @apply flex-1 overflow-auto px-4 py-3;
+  }
+  
+  .quick-actions-customize-list {
+    @apply space-y-2;
+  }
+  
+  .quick-actions-custom-ai-section {
+    @apply border-t border-slate-200/60 px-4 py-4;
+    @apply dark:border-slate-700/60;
+  }
+  
+  .quick-actions-custom-ai-header {
+    @apply flex items-center justify-between mb-3;
+  }
+  
+  .quick-actions-custom-ai-title {
+    @apply text-sm font-semibold text-slate-700;
+    @apply dark:text-slate-200;
+  }
+  
+  .quick-actions-custom-ai-limit {
+    @apply text-xs text-slate-400;
+    @apply dark:text-slate-500;
+  }
+  
+  .quick-actions-custom-ai-form {
+    @apply space-y-3;
+  }
+  
+  /* === INPUT FIELDS === */
+  .quick-actions-input-premium {
+    /* Size - Increased height */
+    @apply w-full h-12;
+    
+    /* Shape - Rounded and soft */
+    @apply rounded-xl;
+    
+    /* Styling - Reduced border weight */
+    @apply bg-white border border-slate-200/80;
+    @apply text-sm text-slate-900 placeholder:text-slate-400;
+    
+    /* Padding */
+    @apply px-4;
+    
+    /* Transitions */
+    @apply transition-all duration-200;
+    
+    /* Remove default focus */
+    @apply outline-none;
+    
+    @apply dark:bg-slate-950 dark:border-slate-700/80 dark:text-slate-100 dark:placeholder:text-slate-500;
+  }
+  
+  .quick-actions-input-premium:focus {
+    /* Subtle focus ring - Emerald accent */
+    @apply border-emerald-500/60;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+  }
+  
+  .quick-actions-textarea {
+    @apply h-auto resize-none;
+    @apply py-3;
+  }
+  
+  /* === PRIMARY BUTTON === */
+  .quick-actions-btn-premium {
+    /* Size */
+    @apply w-full h-12 px-5;
+    
+    /* Shape - Rounded */
+    @apply rounded-xl;
+    
+    /* Styling - Emerald primary accent */
+    @apply bg-emerald-500 border border-emerald-600/20;
+    @apply text-sm font-semibold text-white;
+    
+    /* Layout */
+    @apply flex items-center justify-center;
+    
+    /* Transitions */
+    @apply transition-all duration-200;
+    
+    /* Remove outline */
+    @apply outline-none;
+  }
+  
+  .quick-actions-btn-premium:hover {
+    /* Subtle glow on hover */
+    @apply bg-emerald-600;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    
+    /* Slight lift */
+    transform: translateY(-1px);
+  }
+  
+  .quick-actions-btn-premium:active {
+    transform: translateY(0) scale(0.98);
+  }
+  
+  .quick-actions-btn-premium:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+  
+  /* === PREMIUM TEXT === */
+  .quick-actions-premium-text {
+    @apply text-xs text-center text-slate-400 font-light;
+    @apply dark:text-slate-500;
+  }
+  
+  .quick-actions-premium-highlight {
+    @apply text-emerald-500 underline;
+    text-decoration-color: rgba(16, 185, 129, 0.3);
+    text-underline-offset: 2px;
+  }
+  
+  /* === RESPONSIVE DESIGN === */
+  @media (max-width: 640px) {
+    .quick-actions-fab-premium {
+      /* Stack buttons vertically on mobile */
+      bottom: 5.5rem;
+      right: 1.25rem;
+    }
+    
+    .quick-actions-panel-premium {
+      /* Expand nearly full width */
+      left: 1rem;
+      right: 1rem;
+      max-width: calc(100vw - 2rem);
+      bottom: 9.5rem;
+    }
+    
+    .quick-actions-input-premium,
+    .quick-actions-btn-premium {
+      /* Increase tap targets */
+      @apply h-11;
+    }
+  }
+  
+  /* Medium screens - side by side */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .quick-actions-fab-premium {
+      /* Keep side by side on tablets */
+      right: 5.5rem;
+    }
+  }
+  
+  /* === ANIMATIONS === */
+  @keyframes quick-actions-slide-up-fade {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* === UTILITY CLASSES === */
+  .quick-actions-item.dragging {
+    @apply opacity-60;
+  }
+  
+  .quick-actions-handle {
+    cursor: grab;
+  }
+  
+  .quick-actions-handle:active {
+    cursor: grabbing;
+  }
+}

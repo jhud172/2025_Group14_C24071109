@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const isAuthenticated = root.dataset.auth === "true";
 
     const shelf = document.getElementById("quickActionsShelf");
-    const overlay = document.getElementById("quickActionsOverlay");
     const toggleBtn = document.getElementById("quickActionsToggle");
     const closeBtn = document.getElementById("quickActionsClose");
     const customizeToggle = document.getElementById("quickActionsCustomizeToggle");
@@ -55,13 +54,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function openShelf() {
         shelf?.classList.add("open");
-        overlay?.classList.add("show");
+        shelf?.setAttribute("aria-hidden", "false");
         toggleBtn?.setAttribute("aria-expanded", "true");
     }
 
     function closeShelf() {
         shelf?.classList.remove("open");
-        overlay?.classList.remove("show");
+        shelf?.setAttribute("aria-hidden", "true");
         toggleBtn?.setAttribute("aria-expanded", "false");
     }
 
@@ -75,7 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toggleBtn?.addEventListener("click", toggleShelf);
     closeBtn?.addEventListener("click", closeShelf);
-    overlay?.addEventListener("click", closeShelf);
 
     function setCustomizeMode(enabled) {
         customizeOpen = enabled;
