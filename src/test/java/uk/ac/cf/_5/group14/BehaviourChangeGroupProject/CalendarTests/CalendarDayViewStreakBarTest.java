@@ -3,9 +3,11 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.time.Clock;
 
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyStreakD
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyStreakService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayMode.DayModeService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarController;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleService;
@@ -77,6 +82,13 @@ public class CalendarDayViewStreakBarTest {
 
     @MockitoBean
     private DailyStreakService dailyStreakService;
+
+    @MockitoBean
+    private DayModeService dayModeService;@MockitoBean
+    private GoalLinkService goalLinkService;
+
+    @MockitoBean
+    private PlatformSubscriptionService platformSubscriptionService;
 
     @Test
     public void dayViewShouldRenderDailyStreakBar() throws Exception {
@@ -144,12 +156,11 @@ public class CalendarDayViewStreakBarTest {
 
     @TestConfiguration
     static class TestSecurityConfig {
-        @Bean
+        @Bean("testSecurityFilterChain")
         SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
             return http
                     .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .build();
-        }
-    }
+        }}
 }

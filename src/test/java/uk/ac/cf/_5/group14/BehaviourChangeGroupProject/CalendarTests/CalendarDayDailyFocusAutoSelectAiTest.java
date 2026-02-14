@@ -110,7 +110,7 @@ class CalendarDayDailyFocusAutoSelectAiTest {
 
     @TestConfiguration
     static class TestSecurityConfig {
-        @Bean
+        @Bean("testSecurityFilterChain")
         SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
             return http
                     .csrf(csrf -> csrf.disable())
