@@ -1,12 +1,12 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Verification;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.Role;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 class GymAdminTrainerControllerTest {
 
     @Autowired
@@ -37,11 +38,7 @@ class GymAdminTrainerControllerTest {
     @Autowired
     private TrainerVerificationRequestRepository requestRepository;
 
-    @BeforeEach
-    void setup() {
-        requestRepository.deleteAll();
-        userRepository.deleteAll();
-    }
+
 
     @Test
     void updateNotesDeniesOtherGymRequest() throws Exception {
@@ -94,7 +91,7 @@ class GymAdminTrainerControllerTest {
         request.setNotes("Old notes");
         request.setSubmittedAt(Instant.now());
         request.setReviewedAt(Instant.now());
-        request.setReviewedByUserId(999L);
+        request.setReviewedByUserId(admin.getId());
         request = requestRepository.save(request);
 
         mockMvc.perform(post("/gym/admin/trainers/" + request.getId() + "/update-notes")

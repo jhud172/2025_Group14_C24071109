@@ -2,8 +2,12 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
@@ -11,6 +15,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayMode.DayModeService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionResult;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarController;
@@ -22,16 +29,18 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CalendarController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 class CalendarDayReflectionPostMvcTest {
 
     @Autowired
@@ -47,9 +56,13 @@ class CalendarDayReflectionPostMvcTest {
     @MockitoBean private WorkoutScheduleService workoutScheduleService;
     @MockitoBean private WorkoutSessionService workoutSessionService;
     @MockitoBean private ReflectionService reflectionService;
+    @MockitoBean private DayModeService dayModeService;@MockitoBean
+    private GoalLinkService goalLinkService;
+
+    @MockitoBean
+    private PlatformSubscriptionService platformSubscriptionService;
 
     // Required by UserSettingsModelAdvice
-    @MockitoBean private AuthHelper authHelper;
 
     @Test
     void shouldStoreAiResultInFlashAttributes() throws Exception {
@@ -78,5 +91,32 @@ class CalendarDayReflectionPostMvcTest {
                 .andExpect(redirectedUrl("/calendar/day/2026-01-15"))
                 .andExpect(flash().attribute("reflectionPerformanceSummary", "Summary"))
                 .andExpect(flash().attribute("reflectionImprovementSuggestions", "Suggestions"));
+    }
+
+    @TestConfiguration
+    static class TestSecurityConfig {
+        @Bean("testSecurityFilterChain")
+        SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+            return http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .build();
+        }
+
+
+        @Bean
+        public Clock systemClock() {
+            return Clock.systemDefaultZone();
+        }
+
+        @Bean
+        public AuthHelper authHelper() {
+            return mock(AuthHelper.class);
+        }
+
+        @Bean
+        public PlatformSubscriptionService platformSubscriptionService() {
+            return mock(PlatformSubscriptionService.class);
+        }
     }
 }

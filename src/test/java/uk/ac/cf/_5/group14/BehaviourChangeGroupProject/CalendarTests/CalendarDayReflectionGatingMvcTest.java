@@ -2,8 +2,12 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
@@ -11,6 +15,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayMode.DayModeService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarController;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleService;
@@ -20,10 +27,12 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.Mockito.mock;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -32,11 +41,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CalendarController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 class CalendarDayReflectionGatingMvcTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private AuthHelper authHelper;
 
     @MockitoBean private CalendarTaskService taskService;
     @MockitoBean private CalendarTaskWarningService taskWarningService;
@@ -47,9 +59,13 @@ class CalendarDayReflectionGatingMvcTest {
     @MockitoBean private ScheduleOccurrenceService scheduleOccurrenceService;
     @MockitoBean private WorkoutScheduleService workoutScheduleService;
     @MockitoBean private WorkoutSessionService workoutSessionService;
+    @MockitoBean private DayModeService dayModeService;@MockitoBean
+    private GoalLinkService goalLinkService;
+
+    @MockitoBean
+    private PlatformSubscriptionService platformSubscriptionService;
 
     // Required by UserSettingsModelAdvice
-    @MockitoBean private AuthHelper authHelper;
 
     @Test
     void shouldShowReflectionOnlyWhenGreen() throws Exception {
@@ -103,5 +119,32 @@ class CalendarDayReflectionGatingMvcTest {
         mockMvc.perform(get("/calendar/day/2026-01-15").sessionAttr("user", sessionUser))
                 .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("How was today?"))));
+    }
+
+    @TestConfiguration
+    static class TestSecurityConfig {
+        @Bean("testSecurityFilterChain")
+        SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+            return http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .build();
+        }
+
+
+        @Bean
+        public Clock systemClock() {
+            return Clock.systemDefaultZone();
+        }
+
+        @Bean
+        public AuthHelper authHelper() {
+            return mock(AuthHelper.class);
+        }
+
+        @Bean
+        public PlatformSubscriptionService platformSubscriptionService() {
+            return mock(PlatformSubscriptionService.class);
+        }
     }
 }
