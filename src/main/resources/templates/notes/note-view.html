@@ -4,53 +4,58 @@
 <div th:fragment="styles">
 </div>
 
-<div th:fragment="content">
-    <div class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
+<div th:fragment="content" class="detail-container">
         <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
 
         <div class="mt-6" th:if="${note != null}">
-            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="min-w-0">
-                        <a class="text-sm font-semibold text-slate-900 hover:underline" th:if="${note.folder != null}" th:href="@{/notes/folders/{id}(id=${note.folder.id})}">← Back</a>
-                        <h1 class="mt-2 truncate text-2xl font-bold tracking-tight text-slate-900" th:text="${note.title}">Title</h1>
-                        <p class="mt-1 text-sm text-slate-600" th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy HH:mm')}">Date</p>
+            <!-- Header with key metadata at top -->
+            <div class="detail-header">
+                <div class="detail-header-content">
+                    <div class="detail-header-meta">
+                        <a class="detail-label hover:underline" th:if="${note.folder != null}" th:href="@{/notes/folders/{id}(id=${note.folder.id})}">← Back to folder</a>
+                        <h1 class="detail-title" th:text="${note.title}">Title</h1>
+                        <p class="detail-subtitle" th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy HH:mm')}">Date</p>
                     </div>
 
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                           th:href="@{/notes/{id}/edit(id=${note.id})}">Edit</a>
-
+                    <!-- Primary actions - sticky on larger screens -->
+                    <div class="detail-actions-sticky">
+                        <a class="detail-btn-secondary" th:href="@{/notes/{id}/edit(id=${note.id})}">Edit</a>
                         <form th:action="@{/notes/{id}/delete(id=${note.id})}" method="post"
                               data-confirm data-confirm-title="Delete note?" data-confirm-message="This will permanently remove the note.">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                            <button class="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600/20" type="submit">Delete</button>
+                            <button class="detail-btn-destructive" type="submit">Delete</button>
                         </form>
                     </div>
                 </div>
+            </div>
 
-                <article class="mt-6 text-sm leading-6 text-slate-800"
-                         th:utext="${note.content}">
-                </article>
-
-                <style>
-                    /* Intentionally minimal: only scopes to note content rendering */
-                </style>
-
-                <div class="mt-6 border-t border-slate-200 pt-6">
-                    <div class="text-sm text-slate-600">
-                        <span class="font-medium text-slate-900">Tip:</span> Use headings, lists, and links for readability.
+            <!-- Structured content sections -->
+            <div class="detail-sections">
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Content</h2>
+                    <div class="detail-section-content">
+                        <article class="text-sm leading-6 text-slate-800 dark:text-slate-300" th:utext="${note.content}"></article>
                     </div>
-                </div>
+                </section>
+
+                <section class="detail-section">
+                    <div class="detail-info-box">
+                        <p class="detail-info-box-title">Tip</p>
+                        <p class="detail-info-box-content">Use headings, lists, and links for readability.</p>
+                    </div>
+                </section>
             </div>
         </div>
 
-        <div class="mt-6 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center" th:if="${note == null}">
-            <p class="text-sm font-medium text-slate-900">Note not found.</p>
-            <p class="mt-1 text-sm text-slate-600">It may have been deleted, or you may not have access.</p>
-            <a class="mt-4 inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10" href="/notes">Back to notes</a>
+        <div class="mt-6" th:if="${note == null}">
+            <div class="detail-section">
+                <div class="detail-empty">
+                    <p class="text-sm font-medium text-slate-900 dark:text-slate-100">Note not found.</p>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">It may have been deleted, or you may not have access.</p>
+                    <a class="detail-btn-secondary mt-4 inline-flex" href="/notes">Back to notes</a>
+                </div>
+            </div>
         </div>
-    </div>
 
     <!-- Confirm modal -->
     <div id="confirmOverlay"
