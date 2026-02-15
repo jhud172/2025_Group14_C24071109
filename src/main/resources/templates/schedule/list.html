@@ -56,7 +56,8 @@
                     <h3 class="tcc-active-empty-title">No Active Schedule</h3>
                     <p class="tcc-active-empty-text">Apply a schedule to your calendar to start tracking your training</p>
                     <button onclick="document.querySelector('.tcc-tab[data-tab=my-schedules]')?.click()" 
-                            class="tcc-btn-primary">
+                            class="tcc-btn-primary"
+                            aria-label="Browse and select from your available schedules">
                         Browse Your Schedules
                     </button>
                 </div>
@@ -212,7 +213,7 @@
                                 Description of the schedule
                             </p>
 
-                            <div class="tcc-card-meta" id="schedule-meta" th:attr="data-schedule-id=${schedule.id}">
+                            <div class="tcc-card-meta schedule-meta" th:attr="data-schedule-id=${schedule.id}">
                                 <div class="tcc-card-meta-item">
                                     <svg class="tcc-card-meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -341,7 +342,7 @@
                             </div>
                         </a>
 
-                        <button onclick="document.querySelector('.tcc-tab[data-tab=templates]')?.click(); hideCreateModal();" 
+                        <button onclick="handleTemplateNavigation()" 
                                 th:if="${sharedSchedules != null and !#lists.isEmpty(sharedSchedules)}"
                                 class="group p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-lg transition-all duration-200">
                             <div class="flex flex-col items-center text-center gap-3">
@@ -436,7 +437,7 @@
 
             // Load schedule metadata (frequency, days)
             async function loadScheduleMetadata() {
-                const scheduleMetaElements = document.querySelectorAll('[id="schedule-meta"]');
+                const scheduleMetaElements = document.querySelectorAll('.schedule-meta');
                 
                 for (const metaEl of scheduleMetaElements) {
                     const scheduleId = metaEl.getAttribute('data-schedule-id');
@@ -453,7 +454,7 @@
                                 freqEl.textContent = data.sessionsPerWeek ? `${data.sessionsPerWeek} sessions/week` : 'Custom';
                             }
                             if (daysEl) {
-                                freqEl.textContent = data.activeDays ? `${data.activeDays} active days` : 'Not set';
+                                daysEl.textContent = data.activeDays ? `${data.activeDays} active days` : 'Not set';
                             }
                         }
                     } catch (e) {
@@ -470,14 +471,13 @@
             function calculateInsights() {
                 const activeSchedules = document.querySelectorAll('.tcc-active-panel');
                 
-                // For now, use placeholder calculations
-                // In a real implementation, this would fetch data from the server
                 const weeklyFreqEl = document.getElementById('weekly-frequency');
                 const restDaysEl = document.getElementById('rest-days');
                 
+                // Display placeholders until proper backend calculation is implemented
                 if (activeSchedules.length > 0) {
-                    if (weeklyFreqEl) weeklyFreqEl.textContent = '4-5';
-                    if (restDaysEl) restDaysEl.textContent = '2-3';
+                    if (weeklyFreqEl) weeklyFreqEl.textContent = '—';
+                    if (restDaysEl) restDaysEl.textContent = '—';
                 } else {
                     if (weeklyFreqEl) weeklyFreqEl.textContent = '—';
                     if (restDaysEl) restDaysEl.textContent = '—';
@@ -493,6 +493,14 @@
             function hideCreateModal() {
                 document.getElementById('create-modal')?.classList.add('tcc-hidden');
                 document.body.style.overflow = '';
+            }
+
+            function handleTemplateNavigation() {
+                const templatesTab = document.querySelector('.tcc-tab[data-tab=templates]');
+                if (templatesTab) {
+                    templatesTab.click();
+                    hideCreateModal();
+                }
             }
 
             // Preview Modal Functions

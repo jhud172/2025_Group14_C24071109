@@ -20,24 +20,25 @@ public class ScheduleApiController {
     @Autowired
     private ScheduleEntryService scheduleEntryService;
 
-    @Autowired
-    private ScheduleRepository scheduleRepository;
-
     /**
      * Get schedule metadata (frequency, active days, etc.)
      */
     @GetMapping("/{id}/metadata")
     public ResponseEntity<Map<String, Object>> getScheduleMetadata(
             @PathVariable Long id,
-            @SessionAttribute("user") User user) {
+            @SessionAttribute(value = "user", required = false) User user) {
+        
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
         
         Schedule schedule = scheduleService.findById(id);
         if (schedule == null) {
             return ResponseEntity.notFound().build();
         }
 
-        // Check access rights
-        if (!canAccessSchedule(user, schedule)) {
+        // Check access rights - only owner can access for now
+        if (!schedule.getUser().getId().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 
@@ -66,15 +67,19 @@ public class ScheduleApiController {
     @GetMapping("/{id}/preview")
     public ResponseEntity<Map<String, Object>> getSchedulePreview(
             @PathVariable Long id,
-            @SessionAttribute("user") User user) {
+            @SessionAttribute(value = "user", required = false) User user) {
+        
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
         
         Schedule schedule = scheduleService.findById(id);
         if (schedule == null) {
             return ResponseEntity.notFound().build();
         }
 
-        // Check access rights
-        if (!canAccessSchedule(user, schedule)) {
+        // Check access rights - only owner can access for now
+        if (!schedule.getUser().getId().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 
@@ -119,7 +124,11 @@ public class ScheduleApiController {
     @PostMapping("/{id}/duplicate")
     public ResponseEntity<Map<String, Object>> duplicateSchedule(
             @PathVariable Long id,
-            @SessionAttribute("user") User user) {
+            @SessionAttribute(value = "user", required = false) User user) {
+        
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
         
         Schedule original = scheduleService.findById(id);
         if (original == null) {
@@ -157,20 +166,5 @@ public class ScheduleApiController {
         response.put("success", true);
         
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Check if user can access a schedule
-     */
-    private boolean canAccessSchedule(User user, Schedule schedule) {
-        // Can access if it's their own schedule
-        if (schedule.getUser().getId().equals(user.getId())) {
-            return true;
-        }
-        
-        // Can access if it's a trainer-shared schedule
-        // For now, we'll allow access if the schedule exists
-        // In a real implementation, check trainer-client relationship
-        return true;
     }
 }
