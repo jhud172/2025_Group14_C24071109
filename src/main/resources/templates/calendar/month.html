@@ -12,12 +12,15 @@
     <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex flex-col gap-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <div class="flex flex-wrap gap-3">
-                    <a href="/calendar?view=month" class="btn btn--primary btn--md">Month view</a>
-                    <a href="/calendar?view=week" class="btn btn--secondary btn--md">Week view</a>
+                <div class="calendar-view-toggle">
+                    <a href="/calendar?view=month" class="calendar-view-btn active">Month view</a>
+                    <a href="/calendar?view=week" class="calendar-view-btn">Week view</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <button type="button" id="scheduleDrawerButton" class="btn btn--secondary btn--md">Schedules</button>
+                    <div class="calendar-mode-indicator">
+                        Month View — <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
+                    </div>
                     <form method="post" action="/calendar/preferences" class="flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" id="month-redirect" name="redirect" th:value="${'/calendar?view=month&month=' + month + '&year=' + year}" />
@@ -29,6 +32,10 @@
                                 class="rounded-full px-2 py-1"
                                 th:classappend="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY} ? ' bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ' hover:bg-slate-100 dark:hover:bg-slate-800'">Grouped</button>
                     </form>
+                    <button type="button" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200" data-mode-info-toggle aria-label="View mode information">
+                        <span class="sr-only">Mode information</span>
+                        <span class="flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-[11px] font-bold dark:border-slate-700">i</span>
+                    </button>
                     <div class="relative" data-heatmap-legend-wrapper>
                         <button type="button" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200" data-heatmap-legend-toggle aria-expanded="false" aria-label="Toggle workout heatmap legend">
                             <span class="sr-only">Heatmap legend</span>
@@ -70,15 +77,13 @@
                 </div>
             </div>
 
-            <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <a id="month-prev" th:href="@{'/calendar?view=month&month=' + ${prevMonth} + '&year=' + ${prevYear}}" class="btn btn--secondary btn--md">← Prev</a>
-                <div class="text-center">
-                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
-                        <span id="month-name" class="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-300" th:text="${T(java.time.Month).of(month).getDisplayName(T(java.time.format.TextStyle).FULL, T(java.util.Locale).UK)}"></span>
-                        <span id="month-year" class="text-slate-500 dark:text-slate-400" th:text="${year}"></span>
-                    </h1>
+            <div class="calendar-nav-controls">
+                <a id="month-prev" th:href="@{'/calendar?view=month&month=' + ${prevMonth} + '&year=' + ${prevYear}}" class="calendar-nav-btn">← Prev</a>
+                <div class="calendar-month-title">
+                    <span id="month-name" class="calendar-month-name" th:text="${T(java.time.Month).of(month).getDisplayName(T(java.time.format.TextStyle).FULL, T(java.util.Locale).UK)}"></span>
+                    <span id="month-year" class="calendar-month-year" th:text="${year}"></span>
                 </div>
-                <a id="month-next" th:href="@{'/calendar?view=month&month=' + ${nextMonth} + '&year=' + ${nextYear}}" class="btn btn--secondary btn--md">Next →</a>
+                <a id="month-next" th:href="@{'/calendar?view=month&month=' + ${nextMonth} + '&year=' + ${nextYear}}" class="calendar-nav-btn">Next →</a>
             </div>
 
             <div id="month-slider" th:attr="data-year=${year},data-month=${month}" class="mt-6 overflow-hidden" tabindex="0" role="region" aria-label="Calendar month navigation">
@@ -86,133 +91,132 @@
                     <div class="flex-shrink-0" style="width:33.333333%;" data-month-pane-slot="prev"></div>
                     <div class="flex-shrink-0" style="width:33.333333%;" data-month-pane-slot="current">
                         <div th:fragment="monthPane" th:attr="data-year=${year},data-month=${month}" data-month-pane class="min-w-full w-full">
-                            <div class="grid w-full grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm">
-                                <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
-                            </div>
-                            <div class="mt-3 grid w-full grid-cols-7 gap-3">
-                                <div th:each="i : ${#numbers.sequence(1, offset - 1)}"></div>
-                                <div th:each="day : ${#numbers.sequence(1, lengthOfMonth)}"
-                                     th:with="dateObj=${T(java.time.LocalDate).of(year,month,day)}"
-                                     class="calendar-day-card heat-none relative h-44 overflow-hidden rounded-2xl ring-1 ring-white/10 bg-white/70 p-3 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.5)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_22px_48px_-32px_rgba(15,23,42,0.6)] dark:bg-white/5 sm:h-48 sm:p-4"
-                                      data-load="0"
-                                      th:attr="data-day-link=@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}"
-                                      th:classappend="${(dateObj.isBefore(today) ? ' opacity-60' : '') +
-                                      (dateObj.isEqual(today) ? ' ring-2 ring-blue-500/80' : '') +
-                                      (isPremium and dateObj.isEqual(today) ? ' bg-blue-500/10' : '') +
-                                      (isPremium and dateObj.isEqual(tomorrow) ? ' ring-2 ring-emerald-500/70 bg-emerald-500/10' : '')}">
-                                    <div class="calendar-heat-overlay"></div>
-                                    <div class="calendar-heat-icons">
-                                        <span class="calendar-icon calendar-icon-workout hidden" aria-label="Workout completed" title="Workout completed">
-                                            <span class="calendar-icon-dot"></span>
-                                        </span>
-                                        <span class="calendar-icon calendar-icon-nutrition hidden" aria-label="Nutrition logged" title="Nutrition logged">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M5 3v7"></path>
-                                                <path d="M9 3v7"></path>
-                                                <path d="M5 10h4"></path>
-                                                <path d="M14 3c0 4 0 7 4 7v11"></path>
-                                            </svg>
-                                        </span>
-                                        <span class="calendar-icon calendar-icon-pr hidden" aria-label="PR hit" title="PR hit">
-                                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                <path d="M12 2l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 16.9 6.19 19.87 7.3 13.4 2.6 8.82l6.5-.94L12 2z"/>
-                                            </svg>
-                                            <span class="calendar-icon-count hidden" data-pr-count></span>
-                                        </span>
-                                    </div>
-                                    <div class="mb-2 flex items-center justify-between">
-                                        <a th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
-                                           class="block text-sm font-semibold text-slate-900 hover:underline dark:text-slate-100 sm:text-base" th:text="${day}"></a>
-                                        <span th:if="${dateObj.isEqual(today)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600">Today</span>
-                                        <span th:if="${isPremium and dateObj.isEqual(tomorrow)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">Tomorrow</span>
-                                    </div>
-                                    <div th:with="tasks=${tasksByDate[dateObj]}, tTotal=${tasks!=null?#lists.size(tasks):0}, sched=${occurrences[dateObj]}, sTotal=${sched!=null?#lists.size(sched):0}, grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
-                                        <!-- Empty state when no tasks or schedules -->
-                                        <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
-                                            <svg class="calendar-empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                            </svg>
-                                            <span class="text-xs text-slate-500 dark:text-slate-400">Free day</span>
+                            <div class="calendar-month-container">
+                                <div class="calendar-day-headers">
+                                    <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                                </div>
+                                <div class="calendar-month-grid grid grid-cols-7">
+                                    <div th:each="i : ${#numbers.sequence(1, offset - 1)}"></div>
+                                    <div th:each="day : ${#numbers.sequence(1, lengthOfMonth)}"
+                                         th:with="dateObj=${T(java.time.LocalDate).of(year,month,day)},
+                                                  tasks=${tasksByDate[dateObj]},
+                                                  tTotal=${tasks!=null?#lists.size(tasks):0},
+                                                  sched=${occurrences[dateObj]},
+                                                  sTotal=${sched!=null?#lists.size(sched):0},
+                                                  tasksComplete=${tasks != null ? #lists.size(#lists.select(tasks, 't', t.completed)) : 0},
+                                                  schedComplete=${sched != null ? #lists.size(#lists.select(sched, 's', s.completed)) : 0},
+                                                  allComplete=${(tTotal + sTotal) > 0 && (tasksComplete + schedComplete) == (tTotal + sTotal)},
+                                                  hasIncomplete=${(tTotal + sTotal) > 0 && (tasksComplete + schedComplete) < (tTotal + sTotal)},
+                                                  statusValue=${dateObj.isEqual(today) ? 'today' : (isPremium and dateObj.isEqual(tomorrow) ? 'tomorrow' : (dateObj.isBefore(today) ? (hasIncomplete ? 'past-incomplete' : ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-complete')) : 'future'))}"
+                                         class="calendar-day-card heat-none"
+                                         data-load="0"
+                                         th:attr="data-day-link=@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}},
+                                                  data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
+                                                  data-status=${statusValue},
+                                                  data-is-past=${dateObj.isBefore(today)}">
+                                        <div class="calendar-status-bar"></div>
+                                        <div class="calendar-heat-overlay"></div>
+                                        <div class="calendar-heat-icons">
+                                            <span class="calendar-icon calendar-icon-workout hidden" aria-label="Workout completed" title="Workout completed">
+                                                <span class="calendar-icon-dot"></span>
+                                            </span>
+                                            <span class="calendar-icon calendar-icon-nutrition hidden" aria-label="Nutrition logged" title="Nutrition logged">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M5 3v7"></path>
+                                                    <path d="M9 3v7"></path>
+                                                    <path d="M5 10h4"></path>
+                                                    <path d="M14 3c0 4 0 7 4 7v11"></path>
+                                                </svg>
+                                            </span>
+                                            <span class="calendar-icon calendar-icon-pr hidden" aria-label="PR hit" title="PR hit">
+                                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                    <path d="M12 2l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 16.9 6.19 19.87 7.3 13.4 2.6 8.82l6.5-.94L12 2z"/>
+                                                </svg>
+                                                <span class="calendar-icon-count hidden" data-pr-count></span>
+                                            </span>
                                         </div>
-                                        <div th:if="${!grouped}" class="space-y-2 overflow-y-auto pr-1" style="max-height:140px; position:relative;">
-                                            <div th:each="task,iter : ${tasks}"
-                                                 th:if="${iter.index < 4}"
-                                                 class="calendar-item relative flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/80 p-2 text-xs shadow-sm transition hover:bg-white/90 dark:bg-white/5"
-                                                 th:classappend="${task.completed} ? ' border-emerald-400/40 bg-emerald-500/10' : ''"
-                                                 th:attr="
-                                                    data-type='task',
-                                                    data-id=${task.id},
-                                                    data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
-                                                    data-title=${task.title},
-                                                    data-time=${task.time},
-                                                    data-notes=${task.notes},
-                                                    data-completed=${task.completed},
-                                                    data-priority=${task.priority != null ? task.priority.toString().toLowerCase() : 'medium'}
-                                                ">
-                                                <div class="flex min-w-0 flex-1 flex-col leading-tight">
-                                                    <div class="flex items-start gap-1.5">
-                                                        <span class="truncate font-semibold text-slate-900 dark:text-slate-100" th:classappend="${task.completed} ? ' line-through' : ''" th:text="${task.title}"></span>
-                                                    </div>
-                                                    <div class="mt-0.5 flex items-center gap-2">
-                                                        <span class="truncate text-slate-600 dark:text-slate-300" th:classappend="${task.completed} ? ' line-through' : ''" th:text="${task.time != null ? task.time : '—'}"></span>
-                                                    </div>
-                                                </div>
-                                                <div class="flex flex-shrink-0 items-center gap-1">
-                                                    <div th:if="${task.completed}" class="text-base font-bold text-emerald-600">✓</div>
-                                                </div>
-                                            </div>
-                                            <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="block rounded-xl border border-white/10 bg-white/70 p-1 text-center text-xs font-semibold text-slate-700 shadow-sm hover:underline dark:bg-white/5 dark:text-slate-200" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
-                                            <div th:if="${tTotal > 0 and sTotal > 0}" class="my-1 border-t border-white/10"></div>
-                                            <div th:each="occ,iter : ${sched}"
-                                                 th:if="${iter.index < 3}"
-                                                 th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
-                                                 class="calendar-item relative flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-slate-50/70 p-2 text-xs shadow-sm transition hover:bg-blue-100/70 dark:bg-white/5 dark:hover:bg-blue-500/10"
-                                                 th:classappend="${occ.completed} ? ' border-emerald-400/40 bg-emerald-500/10' : ''"
-                                                 th:attr="
-                                                    data-id=${occ.id},
-                                                    data-type='workout',
-                                                    data-title=${occTitle},
-                                                    data-notes=${occ.scheduleName},
-                                                    data-time='—',
-                                                    data-completed=${occ.completed},
-                                                    data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}
-                                                 ">
-                                                <div class="flex min-w-0 flex-1 flex-col leading-tight">
-                                                    <span class="truncate font-semibold text-slate-900 dark:text-slate-100"
-                                                          th:classappend="${occ.completed} ? ' line-through' : ''"
-                                                          th:text="${occTitle}"></span>
-                                                    <span class="truncate text-[10px] text-slate-600 dark:text-slate-400"
-                                                          th:classappend="${occ.completed} ? ' line-through' : ''"
-                                                          th:text="'From: ' + ${occ.scheduleName}"></span>
-                                                </div>
-                                                <div th:if="${occ.completed}" class="flex-shrink-0 text-base font-bold text-emerald-600">✓</div>
-                                            </div>
-                                            <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="block rounded-xl border border-white/10 bg-white/60 p-1 text-center text-xs font-semibold text-slate-700 shadow-sm hover:underline dark:bg-white/5 dark:text-slate-200" th:text="${'+' + (sTotal - 3) + ' more schedules'}"></a>
+                                        <div class="calendar-day-header">
+                                            <a th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
+                                               class="calendar-day-number" th:text="${day}"></a>
+                                            <span th:if="${dateObj.isEqual(today)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600">Today</span>
+                                            <span th:if="${isPremium and dateObj.isEqual(tomorrow)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">Tomorrow</span>
                                         </div>
-                                        <div th:if="${grouped}" class="space-y-3 text-xs">
-                                            <div>
-                                                <div class="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                                                    <span>Tasks</span><span th:text="${tTotal}"></span>
+                                        <div class="calendar-day-content" th:with="grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
+                                            <!-- Empty state when no tasks or schedules -->
+                                            <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
+                                                <svg class="calendar-empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                                <span class="text-xs text-slate-500 dark:text-slate-400">Free day</span>
+                                            </div>
+                                            <!-- Detailed mode (COMBINED_LIST) -->
+                                            <div th:if="${!grouped}" class="calendar-singular-list">
+                                                <div th:each="task,iter : ${tasks}"
+                                                     th:if="${iter.index < 4}"
+                                                     class="calendar-item"
+                                                     th:classappend="${task.completed} ? ' calendar-item--complete' : ''"
+                                                     th:attr="data-type='task',
+                                                              data-id=${task.id},
+                                                              data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
+                                                              data-title=${task.title},
+                                                              data-time=${task.time},
+                                                              data-notes=${task.notes},
+                                                              data-completed=${task.completed},
+                                                              data-priority=${task.priority != null ? task.priority.toString().toLowerCase() : 'medium'}">
+                                                    <div class="calendar-item-content">
+                                                        <div class="calendar-item-title" th:text="${task.title}"></div>
+                                                        <div class="calendar-item-meta" th:text="${task.time != null ? task.time : '—'}"></div>
+                                                    </div>
+                                                    <div th:if="${task.completed}" class="calendar-item-check">✓</div>
                                                 </div>
-                                                <div class="mt-1 space-y-1">
-                                                    <div th:each="task,iter : ${tasks}" th:if="${iter.index < 2}"
-                                                         class="calendar-item rounded-xl border border-white/10 bg-white/70 px-2 py-1 text-slate-700 dark:bg-white/5 dark:text-slate-200"
-                                                         th:classappend="${task.completed} ? ' line-through text-emerald-600' : ''"
-                                                         th:attr="data-type='task',data-id=${task.id},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-completed=${task.completed}">
-                                                        <span class="truncate" th:text="${task.title}"></span>
+                                                <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="calendar-item-more" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
+                                                <div th:if="${tTotal > 0 and sTotal > 0}" class="my-1 border-t border-white/10"></div>
+                                                <div th:each="occ,iter : ${sched}"
+                                                     th:if="${iter.index < 3}"
+                                                     th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
+                                                     class="calendar-item calendar-item--workout"
+                                                     th:classappend="${occ.completed} ? ' calendar-item--complete' : ''"
+                                                     th:attr="data-id=${occ.id},
+                                                              data-type='workout',
+                                                              data-title=${occTitle},
+                                                              data-notes=${occ.scheduleName},
+                                                              data-time='—',
+                                                              data-completed=${occ.completed},
+                                                              data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
+                                                    <div class="calendar-item-content">
+                                                        <div class="calendar-item-title" th:text="${occTitle}"></div>
+                                                        <div class="calendar-item-meta" th:text="'From: ' + ${occ.scheduleName}"></div>
+                                                    </div>
+                                                    <div th:if="${occ.completed}" class="calendar-item-check">✓</div>
+                                                </div>
+                                                <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="calendar-item-more" th:text="${'+' + (sTotal - 3) + ' more schedules'}"></a>
+                                            </div>
+                                            <!-- Grouped mode (SEPARATED_BY_CATEGORY) -->
+                                            <div th:if="${grouped}" class="space-y-3">
+                                                <div class="calendar-grouped-section">
+                                                    <div class="calendar-grouped-header">
+                                                        <span>Tasks</span><span th:text="${tTotal}"></span>
+                                                    </div>
+                                                    <div class="calendar-grouped-items">
+                                                        <div th:each="task,iter : ${tasks}" th:if="${iter.index < 2}"
+                                                             class="calendar-grouped-item"
+                                                             th:classappend="${task.completed} ? ' line-through text-emerald-600' : ''"
+                                                             th:attr="data-type='task',data-id=${task.id},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-completed=${task.completed}">
+                                                            <span class="truncate" th:text="${task.title}"></span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div>
-                                                <div class="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                                                    <span>Schedules</span><span th:text="${sTotal}"></span>
-                                                </div>
-                                                <div class="mt-1 space-y-1">
-                                                    <div th:each="occ,iter : ${sched}" th:if="${iter.index < 2}"
-                                                         th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
-                                                         class="calendar-item rounded-xl border border-white/10 bg-slate-50/70 px-2 py-1 text-slate-700 dark:bg-white/5 dark:text-slate-200"
-                                                         th:attr="data-type='occurrence',data-id=${occ.id},data-title=${occTitle},data-notes=${occ.scheduleName},data-time='—',data-completed=${occ.completed},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
-                                                        <span class="truncate" th:text="${occTitle}"></span>
+                                                <div class="calendar-grouped-section">
+                                                    <div class="calendar-grouped-header">
+                                                        <span>Schedules</span><span th:text="${sTotal}"></span>
+                                                    </div>
+                                                    <div class="calendar-grouped-items">
+                                                        <div th:each="occ,iter : ${sched}" th:if="${iter.index < 2}"
+                                                             th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
+                                                             class="calendar-grouped-item"
+                                                             th:attr="data-type='occurrence',data-id=${occ.id},data-title=${occTitle},data-notes=${occ.scheduleName},data-time='—',data-completed=${occ.completed},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
+                                                            <span class="truncate" th:text="${occTitle}"></span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -230,20 +234,16 @@
         </div>
     </div>
 
-    <div id="scheduleDrawer" class="fixed inset-0 z-40 hidden" aria-hidden="true">
-        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity duration-300" data-drawer-overlay></div>
-        <div class="absolute right-0 top-0 h-full w-[22rem] max-w-[85vw] transform overflow-hidden border-l border-slate-200 bg-white shadow-2xl transition-transform duration-300 ease-out dark:border-slate-800 dark:bg-slate-950" 
-             data-drawer-panel 
-             style="transform: translateX(100%);">
-            <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
-                <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Schedules</h2>
-                <button type="button" 
-                        class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800" 
-                        data-drawer-close>
+    <div id="scheduleDrawer" class="calendar-schedule-shelf" aria-hidden="true">
+        <div class="calendar-schedule-overlay" data-drawer-overlay></div>
+        <div class="calendar-schedule-panel" data-drawer-panel>
+            <div class="calendar-schedule-header">
+                <h2>Schedules</h2>
+                <button type="button" class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800" data-drawer-close>
                     Close
                 </button>
             </div>
-            <div class="h-[calc(100%-73px)] overflow-y-auto px-5 py-4">
+            <div class="calendar-schedule-body">
                 <label class="sr-only" for="schedule-search">Search schedules</label>
                 <input id="schedule-search" 
                        type="text" 
@@ -265,6 +265,34 @@
                 </ul>
                 <a href="/schedules" class="btn btn--primary btn--md mt-4 w-full">View all schedules</a>
                 <a href="/schedules/builder" class="btn btn--ghost btn--sm mt-3 w-full">+ Create new schedule</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="modeInfoModal" class="calendar-mode-modal" aria-hidden="true">
+        <div class="calendar-mode-modal-overlay" data-mode-modal-overlay></div>
+        <div class="calendar-mode-modal-content" data-mode-modal-panel>
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-800">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Display Modes</h2>
+                <button type="button" class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800" data-mode-modal-close>
+                    Close
+                </button>
+            </div>
+            <div class="mt-4 space-y-4">
+                <div>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Detailed Mode</h3>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                        Shows all tasks and schedules in a single, combined list with full details including time, completion status, and notes. 
+                        Perfect for viewing all your activities at a glance with maximum information density.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Grouped Mode</h3>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                        Organizes tasks and schedules into separate categories for cleaner visual separation. 
+                        Ideal for quickly distinguishing between different types of activities and maintaining a focused view.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
