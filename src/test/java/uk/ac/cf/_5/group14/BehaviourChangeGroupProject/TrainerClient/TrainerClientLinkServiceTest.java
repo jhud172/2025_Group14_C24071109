@@ -95,14 +95,14 @@ class TrainerClientLinkServiceTest {
         String suffix = UUID.randomUUID().toString().replace("-", "");
         User unverified = new User("trainerU+" + suffix + "@example.com", "Trainer", "U", "tcl_trainer_u_" + suffix, "password123");
         unverified.setRole(Role.TRAINER);
-        unverified = userRepository.save(unverified);
+        final User savedUnverified = userRepository.save(unverified);
 
-        TrainerClientLink requested = new TrainerClientLink(client.getId(), unverified.getId(), TrainerClientLinkStatus.REQUESTED);
+        TrainerClientLink requested = new TrainerClientLink(client.getId(), savedUnverified.getId(), TrainerClientLinkStatus.REQUESTED);
         requested.setRequestedAt(Instant.now());
         linkRepository.save(requested);
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> trainerClientLinkService.acceptRequest(unverified.getId(), client.getId()));
+                () -> trainerClientLinkService.acceptRequest(savedUnverified.getId(), client.getId()));
         assertThat(ex.getMessage()).isEqualTo(TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED);
     }
 }

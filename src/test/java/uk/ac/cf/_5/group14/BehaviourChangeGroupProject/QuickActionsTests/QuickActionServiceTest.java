@@ -32,7 +32,7 @@ class QuickActionServiceTest {
         action.setActive(false);
 
         when(repository.findByIdAndUser(eq(10L), eq(user))).thenReturn(Optional.of(action));
-        when(repository.countByUserAndActiveTrue(eq(user))).thenReturn(QuickActionService.MAX_ACTIVE);
+        when(repository.countByUserAndActiveTrue(eq(user))).thenReturn(10L);
         when(repository.save(any(QuickActionDefinition.class))).thenAnswer(inv -> inv.getArgument(0));
 
         assertThrows(IllegalStateException.class, () -> service.setActive(user, 10L, true, true));

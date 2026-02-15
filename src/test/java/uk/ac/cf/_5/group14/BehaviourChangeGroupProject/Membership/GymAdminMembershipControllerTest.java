@@ -1,12 +1,12 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Membership;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.Role;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 class GymAdminMembershipControllerTest {
 
     @Autowired
@@ -40,12 +41,7 @@ class GymAdminMembershipControllerTest {
     @Autowired
     private GymMemberSubscriptionRepository subscriptionRepository;
 
-    @BeforeEach
-    void setup() {
-        subscriptionRepository.deleteAll();
-        productRepository.deleteAll();
-        userRepository.deleteAll();
-    }
+
 
     @Test
     void listShowsOnlyAdminGymProductsWithPaginationAndCounts() throws Exception {

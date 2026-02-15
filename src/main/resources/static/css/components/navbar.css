@@ -24,6 +24,17 @@
         opacity: 0.15;
     }
 
+    /* Desktop navigation container - hidden on mobile, flex on desktop */
+    .desktop-nav {
+        display: none;
+    }
+
+    @media (min-width: 1125px) {
+        .desktop-nav {
+            display: flex;
+        }
+    }
+
     .navsurface {
         @apply rounded-2xl border border-gray-200 bg-white/80 p-1.5 shadow-sm transition-all duration-300;
         backdrop-filter: blur(8px);
@@ -74,23 +85,7 @@
     }
 
     .authsurface {
-        @apply flex items-center rounded-2xl border border-gray-200 bg-white/80 p-1.5 shadow-sm;
-        backdrop-filter: blur(8px);
-    }
-
-    .authbtn {
-        @apply inline-flex h-10 items-center justify-center rounded-xl px-5 font-semibold 
-        transition-all duration-300 shadow-sm text-white border
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30;
-        
-        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-        border-color: #10b981;
-        font-size: var(--nav-text-size);
-    }
-
-    .authbtn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px -4px rgba(16, 185, 129, 0.4);
+        @apply flex items-center gap-2;
     }
 
     /* Dark mode overrides (keeping for compatibility) */
@@ -113,14 +108,6 @@
 
     body:not(.dark) .navlink-active {
         @apply text-emerald-500;
-    }
-
-    body:not(.dark) .authbtn {
-        @apply bg-slate-100 text-slate-900 border-slate-300;
-    }
-
-    body:not(.dark) .authbtn:hover {
-        @apply bg-slate-200 border-neon-cyan/50;
     }
 }
 

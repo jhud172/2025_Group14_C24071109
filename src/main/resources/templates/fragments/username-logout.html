@@ -1,37 +1,39 @@
 <div xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
      xmlns:th="http://www.thymeleaf.org"
      th:fragment="usernameLogout"
-     class="flex items-center gap-2">
+     class="flex items-center gap-3">
 
-    <span sec:authorize="isAuthenticated()"
-          class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-        <span sec:authentication="name">user</span>
-        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10">
-            <span sec:authorize="hasRole('SUPER_ADMIN')">SUPER_ADMIN</span>
-            <span sec:authorize="hasRole('PLATFORM_ADMIN')">PLATFORM_ADMIN</span>
-            <span sec:authorize="hasRole('GYM_ADMIN')">GYM_ADMIN</span>
-            <span sec:authorize="hasRole('TRAINER')">TRAINER</span>
-            <span sec:authorize="hasRole('CLIENT')">CLIENT</span>
-            <span sec:authorize="!hasAnyRole('SUPER_ADMIN','PLATFORM_ADMIN','GYM_ADMIN','TRAINER','CLIENT')">USER</span>
-        </span>
-    </span>
-
-    <span sec:authorize="isAuthenticated()" class="inline-flex">
-        <form th:action="@{/logout}" method="post" class="m-0 flex items-center">
+    <!-- Authenticated: Username, Role Badge, and Logout -->
+    <div sec:authorize="isAuthenticated()" class="flex items-center gap-3">
+        <!-- Username and Role Badge -->
+        <div class="hidden sm:flex items-center gap-2">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-200" sec:authentication="name">user</span>
+            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-500/30">
+                <span sec:authorize="hasRole('SUPER_ADMIN')">Super Admin</span>
+                <span sec:authorize="hasRole('PLATFORM_ADMIN') and !hasRole('SUPER_ADMIN')">Platform Admin</span>
+                <span sec:authorize="hasRole('GYM_ADMIN') and !hasAnyRole('SUPER_ADMIN','PLATFORM_ADMIN')">Gym Admin</span>
+                <span sec:authorize="hasRole('TRAINER') and !hasAnyRole('SUPER_ADMIN','PLATFORM_ADMIN','GYM_ADMIN')">Trainer</span>
+                <span sec:authorize="hasRole('CLIENT') and !hasAnyRole('SUPER_ADMIN','PLATFORM_ADMIN','GYM_ADMIN','TRAINER')">Client</span>
+                <span sec:authorize="!hasAnyRole('SUPER_ADMIN','PLATFORM_ADMIN','GYM_ADMIN','TRAINER','CLIENT')">User</span>
+            </span>
+        </div>
+        
+        <!-- Logout Button -->
+        <form th:action="@{/logout}" method="post" class="m-0">
             <input type="hidden" th:if="${_csrf != null}"
                    th:name="${_csrf.parameterName}"
                    th:value="${_csrf.token}"/>
             <button type="submit"
-                    class="authbtn bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
+                    class="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500/20 transition-colors duration-200 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
                 Logout
             </button>
         </form>
-    </span>
+    </div>
 
-    <span sec:authorize="!isAuthenticated()" class="inline-flex">
-        <a th:href="@{/login}"
-           class="authbtn bg-white text-slate-900 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900/50 dark:text-slate-100 dark:ring-slate-800 dark:hover:bg-slate-900/70">
-            Login
-        </a>
-    </span>
+    <!-- Not Authenticated: Login Button -->
+    <a sec:authorize="!isAuthenticated()" 
+       th:href="@{/login}"
+       class="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 transition-colors duration-200 shadow-sm">
+        Login
+    </a>
 </div>

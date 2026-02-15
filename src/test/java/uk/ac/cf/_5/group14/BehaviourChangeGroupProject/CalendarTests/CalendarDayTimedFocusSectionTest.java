@@ -14,6 +14,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayMode.DayModeService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarController;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleService;
@@ -22,11 +25,13 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.Worko
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import java.time.Clock;
 
 import java.time.LocalDate;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -70,6 +75,12 @@ class CalendarDayTimedFocusSectionTest {
     @MockitoBean
     private UserSettingsService userSettingsService;
 
+    @MockitoBean
+    private DayModeService dayModeService;
+
+    @MockitoBean
+    private GoalLinkService goalLinkService;
+
     @Test
     void dayViewRendersTimedFocusSection() throws Exception {
         User sessionUser = new User();
@@ -93,12 +104,27 @@ class CalendarDayTimedFocusSectionTest {
 
     @TestConfiguration
     static class TestSecurityConfig {
-        @Bean
+        @Bean("testSecurityFilterChain")
         SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
             return http
                     .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .build();
+        }
+
+        @Bean
+        AuthHelper authHelper() {
+            return mock(AuthHelper.class);
+        }
+
+        @Bean
+        PlatformSubscriptionService platformSubscriptionService() {
+            return mock(PlatformSubscriptionService.class);
+        }
+
+        @Bean
+        Clock systemClock() {
+            return Clock.systemDefaultZone();
         }
     }
 }
