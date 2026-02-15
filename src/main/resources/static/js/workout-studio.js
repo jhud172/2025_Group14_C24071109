@@ -471,11 +471,11 @@
     }
 
     function initDragAndDrop() {
+        // TODO: Implement drag-and-drop for exercise reordering
+        // Tracking: Future enhancement for desktop power users
+        // Basic implementation deferred to maintain focus on core functionality
         const list = document.querySelector('[data-exercise-list]');
         if (!list) return;
-
-        // Drag and drop will be implemented for desktop
-        // For now, we'll skip the complex implementation
     }
 
     // ============================================

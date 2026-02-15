@@ -1,15 +1,16 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.FavouriteData;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/favourites")
+@PreAuthorize("isAuthenticated()")
 public class FavouriteApiController {
 
     private final FavouriteService favouriteService;
@@ -34,14 +35,14 @@ public class FavouriteApiController {
     }
 
     @PostMapping
-    public ResponseEntity<Favourite> addFavourite(@RequestBody Map<String, Long> body) {
+    public ResponseEntity<Favourite> addFavourite(@RequestBody AddFavouriteRequest request) {
         User user = authHelper.getAuthenticatedUser();
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
 
-        Long exerciseId = body.get("exerciseId");
-        Long customExerciseId = body.get("customExerciseId");
+        Long exerciseId = request.getExerciseId();
+        Long customExerciseId = request.getCustomExerciseId();
 
         if (exerciseId == null && customExerciseId == null) {
             return ResponseEntity.badRequest().build();
@@ -74,12 +75,8 @@ public class FavouriteApiController {
             return ResponseEntity.status(401).build();
         }
 
-        // Find and delete the favourite
-        List<Favourite> favourites = favouriteService.getFavouritesByUser(user.getId());
-        favourites.stream()
-            .filter(f -> exerciseId.equals(f.getExerciseId()))
-            .findFirst()
-            .ifPresent(f -> favouriteService.deleteFavourite(f.getId()));
+        // Use efficient repository method for deletion
+        favouriteRepository.deleteByUserIdAndExerciseId(user.getId(), exerciseId);
 
         return ResponseEntity.ok().build();
     }
