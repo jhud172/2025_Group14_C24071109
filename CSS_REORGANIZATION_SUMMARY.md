@@ -104,6 +104,7 @@ Some CSS was loaded twice:
 <!-- Core styles (compiled Tailwind + all component styles) -->
 <link rel="stylesheet" th:href="@{/css/app.css}">
 ```
+```
 
 #### 3. Template Files (9 files updated)
 Removed redundant CSS links from templates that use base layout:
