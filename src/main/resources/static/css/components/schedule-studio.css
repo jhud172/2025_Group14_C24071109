@@ -1,0 +1,570 @@
+/* Schedule Studio (Training Flow Editor) Component Styles */
+/* Professional, intelligent schedule editing interface */
+
+/* ========================================
+   Studio Container & Layout
+   ======================================== */
+.studio-container {
+    @apply mx-auto w-full max-w-[1800px] px-4 sm:px-6 lg:px-8 py-6;
+}
+
+.studio-layout {
+    @apply grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6;
+}
+
+.studio-main {
+    @apply space-y-6;
+}
+
+.studio-sidebar {
+    @apply space-y-6;
+}
+
+/* ========================================
+   Studio Header (Document Editor Style)
+   ======================================== */
+.studio-header {
+    @apply bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6;
+}
+
+.studio-header-top {
+    @apply flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4;
+}
+
+.studio-header-identity {
+    @apply flex-1;
+}
+
+.studio-header-actions {
+    @apply flex items-center gap-2;
+}
+
+.studio-schedule-name {
+    @apply text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2;
+    @apply border-2 border-transparent rounded-lg px-2 py-1 -ml-2;
+    @apply transition-all duration-200;
+}
+
+.studio-schedule-name:hover {
+    @apply border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50;
+}
+
+.studio-schedule-name:focus {
+    @apply border-emerald-500 bg-white dark:bg-slate-900 outline-none ring-2 ring-emerald-500/20;
+}
+
+.studio-schedule-name[contenteditable="true"] {
+    @apply cursor-text;
+}
+
+.studio-status-bar {
+    @apply flex flex-wrap items-center gap-3 text-sm;
+}
+
+.studio-status-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium;
+}
+
+.studio-status-badge.draft {
+    @apply bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400;
+}
+
+.studio-status-badge.applied {
+    @apply bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400;
+}
+
+.studio-status-dot {
+    @apply w-2 h-2 rounded-full;
+}
+
+.studio-status-badge.draft .studio-status-dot {
+    @apply bg-amber-500;
+}
+
+.studio-status-badge.applied .studio-status-dot {
+    @apply bg-emerald-500;
+}
+
+.studio-timestamp {
+    @apply text-slate-600 dark:text-slate-400;
+}
+
+/* ========================================
+   Weekly Flow Builder (Visual Calendar)
+   ======================================== */
+.flow-builder-container {
+    @apply bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6;
+}
+
+.flow-builder-header {
+    @apply flex items-center justify-between mb-6;
+}
+
+.flow-builder-title {
+    @apply text-lg font-semibold text-slate-900 dark:text-slate-100;
+}
+
+.flow-builder-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4;
+}
+
+/* Day Column */
+.flow-day-column {
+    @apply bg-slate-50 dark:bg-slate-800/30 rounded-xl border-2 border-slate-200 dark:border-slate-700;
+    @apply transition-all duration-200;
+}
+
+.flow-day-column.active {
+    @apply border-emerald-500 shadow-lg shadow-emerald-500/10;
+}
+
+.flow-day-header {
+    @apply px-4 py-3 border-b border-slate-200 dark:border-slate-700;
+    @apply flex items-center justify-between;
+}
+
+.flow-day-name {
+    @apply font-bold text-sm text-slate-900 dark:text-slate-100 uppercase tracking-wide;
+}
+
+.flow-day-count {
+    @apply flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold;
+    @apply bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300;
+}
+
+.flow-day-column.has-workouts .flow-day-count {
+    @apply bg-emerald-500 text-white;
+}
+
+.flow-day-content {
+    @apply p-3 min-h-[280px] space-y-2;
+}
+
+/* Workout Chip in Day Column */
+.flow-workout-chip {
+    @apply relative bg-white dark:bg-slate-900 rounded-lg border-2 border-slate-200 dark:border-slate-700;
+    @apply p-3 cursor-move transition-all duration-200;
+    @apply hover:border-emerald-500 hover:shadow-md;
+}
+
+.flow-workout-chip.dragging {
+    @apply opacity-40;
+}
+
+.flow-workout-chip:hover {
+    @apply scale-[1.02];
+}
+
+.flow-workout-chip-header {
+    @apply flex items-start justify-between gap-2 mb-2;
+}
+
+.flow-workout-chip-name {
+    @apply font-semibold text-sm text-slate-900 dark:text-slate-100;
+}
+
+.flow-workout-chip-actions {
+    @apply flex items-center gap-1 opacity-0 transition-opacity;
+}
+
+.flow-workout-chip:hover .flow-workout-chip-actions {
+    @apply opacity-100;
+}
+
+.flow-workout-chip-btn {
+    @apply w-6 h-6 rounded-md flex items-center justify-center;
+    @apply text-slate-400 hover:text-slate-600 dark:hover:text-slate-200;
+    @apply hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors;
+}
+
+.flow-workout-chip-btn.delete {
+    @apply hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10;
+}
+
+.flow-workout-chip-preview {
+    @apply text-xs text-slate-600 dark:text-slate-400 space-y-1;
+}
+
+.flow-workout-chip-preview.expanded {
+    @apply space-y-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700;
+}
+
+.flow-workout-chip-stat {
+    @apply flex items-center gap-1.5;
+}
+
+.flow-workout-chip-stat-icon {
+    @apply w-3.5 h-3.5 text-emerald-500;
+}
+
+/* Rest Day Indicator */
+.flow-rest-day {
+    @apply flex flex-col items-center justify-center py-8 text-center;
+    @apply border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg;
+}
+
+.flow-rest-day-icon {
+    @apply w-10 h-10 text-slate-300 dark:text-slate-600 mb-2;
+}
+
+.flow-rest-day-label {
+    @apply text-sm font-medium text-slate-500 dark:text-slate-400;
+}
+
+/* Add Entry Button */
+.flow-add-entry-btn {
+    @apply w-full py-2.5 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600;
+    @apply text-sm font-medium text-slate-600 dark:text-slate-400;
+    @apply hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400;
+    @apply hover:bg-emerald-50 dark:hover:bg-emerald-500/5;
+    @apply transition-all duration-200 cursor-pointer;
+}
+
+.flow-add-entry-btn:active {
+    @apply scale-95;
+}
+
+/* Drop Zone Feedback */
+.flow-day-content.drag-over {
+    @apply bg-emerald-50 dark:bg-emerald-500/5 border-emerald-500;
+    @apply ring-2 ring-emerald-500/20;
+}
+
+/* ========================================
+   Insights Panel (Right Sidebar)
+   ======================================== */
+.insights-panel {
+    @apply bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-500/5 dark:to-slate-900/50;
+    @apply rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm p-6;
+}
+
+.insights-header {
+    @apply flex items-center gap-2 mb-4 pb-4 border-b border-emerald-200 dark:border-emerald-800;
+}
+
+.insights-icon {
+    @apply w-5 h-5 text-emerald-600 dark:text-emerald-400;
+}
+
+.insights-title {
+    @apply text-base font-semibold text-slate-900 dark:text-slate-100;
+}
+
+.insights-grid {
+    @apply space-y-4;
+}
+
+.insight-metric {
+    @apply bg-white dark:bg-slate-900/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700;
+}
+
+.insight-metric-header {
+    @apply flex items-center justify-between mb-2;
+}
+
+.insight-metric-label {
+    @apply text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide;
+}
+
+.insight-metric-value {
+    @apply text-2xl font-bold text-emerald-600 dark:text-emerald-400;
+}
+
+.insight-metric-description {
+    @apply text-xs text-slate-600 dark:text-slate-400 mt-1;
+}
+
+.insight-warning {
+    @apply flex items-start gap-2 p-3 rounded-lg;
+    @apply bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-800;
+}
+
+.insight-warning-icon {
+    @apply w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5;
+}
+
+.insight-warning-text {
+    @apply text-xs text-amber-900 dark:text-amber-200;
+}
+
+.insight-success {
+    @apply flex items-start gap-2 p-3 rounded-lg;
+    @apply bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800;
+}
+
+.insight-success-icon {
+    @apply w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5;
+}
+
+.insight-success-text {
+    @apply text-xs text-emerald-900 dark:text-emerald-200;
+}
+
+/* ========================================
+   Apply to Calendar Modal
+   ======================================== */
+.modal-overlay {
+    @apply fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50;
+    @apply flex items-center justify-center p-4;
+    @apply opacity-0 transition-opacity duration-300;
+}
+
+.modal-overlay.show {
+    @apply opacity-100;
+}
+
+.modal-container {
+    @apply bg-white dark:bg-slate-900 rounded-2xl shadow-2xl;
+    @apply max-w-lg w-full max-h-[90vh] overflow-y-auto;
+    @apply transform scale-95 transition-transform duration-300;
+}
+
+.modal-overlay.show .modal-container {
+    @apply scale-100;
+}
+
+.modal-header {
+    @apply px-6 py-5 border-b border-slate-200 dark:border-slate-800;
+    @apply flex items-center justify-between;
+}
+
+.modal-title {
+    @apply text-xl font-bold text-slate-900 dark:text-slate-100;
+}
+
+.modal-close-btn {
+    @apply w-8 h-8 rounded-lg flex items-center justify-center;
+    @apply text-slate-400 hover:text-slate-600 dark:hover:text-slate-200;
+    @apply hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors;
+}
+
+.modal-body {
+    @apply px-6 py-5 space-y-5;
+}
+
+.modal-description {
+    @apply text-sm text-slate-600 dark:text-slate-400;
+}
+
+.modal-option-group {
+    @apply space-y-3;
+}
+
+.modal-option-label {
+    @apply block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2;
+}
+
+.modal-option-radio {
+    @apply flex items-start gap-3 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700;
+    @apply cursor-pointer transition-all duration-200;
+    @apply hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/5;
+}
+
+.modal-option-radio.selected {
+    @apply border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10;
+}
+
+.modal-option-radio-input {
+    @apply mt-0.5 w-4 h-4 text-emerald-600 border-slate-300 dark:border-slate-600;
+    @apply focus:ring-emerald-500 focus:ring-2;
+}
+
+.modal-option-content {
+    @apply flex-1;
+}
+
+.modal-option-title {
+    @apply font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1;
+}
+
+.modal-option-description {
+    @apply text-xs text-slate-600 dark:text-slate-400;
+}
+
+.modal-footer {
+    @apply px-6 py-5 border-t border-slate-200 dark:border-slate-800;
+    @apply flex items-center justify-end gap-3;
+}
+
+/* ========================================
+   Version Control Panel
+   ======================================== */
+.version-control-panel {
+    @apply bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-4;
+}
+
+.version-control-actions {
+    @apply flex flex-wrap items-center gap-2;
+}
+
+.version-control-btn {
+    @apply inline-flex items-center gap-1.5 px-3 py-2 rounded-lg;
+    @apply text-xs font-medium text-slate-700 dark:text-slate-300;
+    @apply border border-slate-300 dark:border-slate-600;
+    @apply hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors;
+}
+
+.version-control-btn.undo {
+    @apply hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400;
+}
+
+.version-control-btn.reset {
+    @apply hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400;
+}
+
+.version-control-btn:disabled {
+    @apply opacity-50 cursor-not-allowed;
+}
+
+/* ========================================
+   Advanced Controls Dropdown
+   ======================================== */
+.advanced-controls-dropdown {
+    @apply absolute right-0 top-full mt-2 w-64;
+    @apply bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800;
+    @apply opacity-0 invisible transform scale-95 transition-all duration-200 origin-top-right;
+    @apply z-50;
+}
+
+.advanced-controls-dropdown.show {
+    @apply opacity-100 visible scale-100;
+}
+
+.advanced-controls-menu {
+    @apply py-2;
+}
+
+.advanced-controls-item {
+    @apply flex items-center gap-3 px-4 py-2.5 text-sm font-medium;
+    @apply text-slate-700 dark:text-slate-300;
+    @apply hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer;
+    @apply transition-colors;
+}
+
+.advanced-controls-item-icon {
+    @apply w-4 h-4 text-slate-400;
+}
+
+.advanced-controls-item.danger {
+    @apply text-red-600 dark:text-red-400;
+    @apply hover:bg-red-50 dark:hover:bg-red-500/10;
+}
+
+.advanced-controls-item.danger .advanced-controls-item-icon {
+    @apply text-red-500;
+}
+
+.advanced-controls-divider {
+    @apply my-2 border-t border-slate-200 dark:border-slate-700;
+}
+
+/* ========================================
+   Action Buttons
+   ======================================== */
+.studio-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl;
+    @apply text-sm font-semibold text-white;
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700;
+    @apply shadow-sm hover:shadow-md transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2;
+}
+
+.studio-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg;
+    @apply text-sm font-medium text-slate-700 dark:text-slate-300;
+    @apply border border-slate-300 dark:border-slate-600;
+    @apply hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors;
+}
+
+.studio-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg;
+    @apply text-sm font-medium text-slate-600 dark:text-slate-400;
+    @apply hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors;
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+.animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+.animate-slide-out {
+    animation: slideOut 0.3s ease-out;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-out;
+}
+
+/* ========================================
+   Mobile Optimizations
+   ======================================== */
+@media (max-width: 1024px) {
+    .studio-layout {
+        @apply grid-cols-1;
+    }
+    
+    .studio-sidebar {
+        @apply order-first;
+    }
+}
+
+@media (max-width: 640px) {
+    .flow-builder-grid {
+        @apply grid-cols-1;
+    }
+    
+    .flow-day-content {
+        @apply min-h-[200px];
+    }
+    
+    .studio-header {
+        @apply p-4;
+    }
+    
+    .flow-builder-container {
+        @apply p-4;
+    }
+    
+    .insights-panel {
+        @apply p-4;
+    }
+}
