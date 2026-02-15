@@ -4338,6 +4338,15 @@ html:not(.dark) body .card:hover {
         background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
         opacity: 0.15;
 }
+/* Desktop navigation container - hidden on mobile, flex on desktop */
+.desktop-nav {
+        display: none;
+    }
+@media (min-width: 1125px) {
+        .desktop-nav {
+            display: flex;
+        }
+    }
 .navsurface {
   border-radius: 1rem;
   border-width: 1px;
@@ -9979,19 +9988,6 @@ html.dark .profile-badge-unverified {
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-@keyframes pulse-neon {
-  0%, 100% {
-    opacity: 1;
-    box-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
-  }
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.8);
-  }
-}
-.animate-pulse-neon {
-  animation: pulse-neon 2s ease-in-out infinite;
-}
 .cursor-move {
   cursor: move;
 }
@@ -10327,6 +10323,10 @@ html.dark .profile-badge-unverified {
   --tw-border-opacity: 1;
   border-color: rgb(243 244 246 / var(--tw-border-opacity, 1));
 }
+.border-gray-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(229 231 235 / var(--tw-border-opacity, 1));
+}
 .border-gray-300 {
   --tw-border-opacity: 1;
   border-color: rgb(209 213 219 / var(--tw-border-opacity, 1));
@@ -10348,9 +10348,6 @@ html.dark .profile-badge-unverified {
 }
 .border-neon-blue\/30 {
   border-color: rgb(0 102 255 / 0.3);
-}
-.border-neon-cyan\/20 {
-  border-color: rgb(0 243 255 / 0.2);
 }
 .border-neon-cyan\/30 {
   border-color: rgb(0 243 255 / 0.3);
@@ -10548,10 +10545,6 @@ html.dark .profile-badge-unverified {
   --tw-bg-opacity: 1;
   background-color: rgb(34 211 238 / var(--tw-bg-opacity, 1));
 }
-.bg-cyber-800 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(18 18 26 / var(--tw-bg-opacity, 1));
-}
 .bg-cyber-800\/30 {
   background-color: rgb(18 18 26 / 0.3);
 }
@@ -10587,6 +10580,9 @@ html.dark .profile-badge-unverified {
 .bg-emerald-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(236 253 245 / var(--tw-bg-opacity, 1));
+}
+.bg-emerald-50\/80 {
+  background-color: rgb(236 253 245 / 0.8);
 }
 .bg-emerald-500 {
   --tw-bg-opacity: 1;
@@ -10670,10 +10666,6 @@ html.dark .profile-badge-unverified {
 }
 .bg-neon-cyan\/10 {
   background-color: rgb(0 243 255 / 0.1);
-}
-.bg-neon-green {
-  --tw-bg-opacity: 1;
-  background-color: rgb(57 255 20 / var(--tw-bg-opacity, 1));
 }
 .bg-neon-green\/10 {
   background-color: rgb(57 255 20 / 0.1);
@@ -11782,11 +11774,6 @@ html.dark .profile-badge-unverified {
   --tw-shadow-colored: 0 0 15px var(--tw-shadow-color), 0 0 30px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
-.shadow-glow-sm {
-  --tw-shadow: 0 0 5px rgba(0, 243, 255, 0.3);
-  --tw-shadow-colored: 0 0 5px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
 .shadow-lg {
   --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
@@ -11864,8 +11851,9 @@ html.dark .profile-badge-unverified {
 .ring-emerald-500\/70 {
   --tw-ring-color: rgb(16 185 129 / 0.7);
 }
-.ring-neon-cyan\/10 {
-  --tw-ring-color: rgb(0 243 255 / 0.1);
+.ring-gray-200 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(229 231 235 / var(--tw-ring-opacity, 1));
 }
 .ring-orange-400\/60 {
   --tw-ring-color: rgb(251 146 60 / 0.6);
@@ -11933,6 +11921,10 @@ html.dark .profile-badge-unverified {
 }
 .backdrop-blur {
   --tw-backdrop-blur: blur(8px);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+.backdrop-blur-md {
+  --tw-backdrop-blur: blur(12px);
   backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
 .backdrop-blur-sm {
@@ -12097,12 +12089,6 @@ html.dark .profile-badge-unverified {
   }
 /* Neon border effects */
 /* Glassmorphism effect */
-.glass {
-    background: rgba(26, 26, 46, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
 /* Neon bar/divider */
 .neon-bar {
   height: 0.25rem;
@@ -12449,6 +12435,10 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
   --tw-border-opacity: 1;
   border-color: rgb(147 197 253 / var(--tw-border-opacity, 1));
 }
+.hover\:border-emerald-300:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(110 231 183 / var(--tw-border-opacity, 1));
+}
 .hover\:border-emerald-400:hover {
   --tw-border-opacity: 1;
   border-color: rgb(52 211 153 / var(--tw-border-opacity, 1));
@@ -12463,10 +12453,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 }
 .hover\:border-neon-blue\/30:hover {
   border-color: rgb(0 102 255 / 0.3);
-}
-.hover\:border-neon-cyan:hover {
-  --tw-border-opacity: 1;
-  border-color: rgb(0 243 255 / var(--tw-border-opacity, 1));
 }
 .hover\:border-slate-300:hover {
   --tw-border-opacity: 1;
@@ -12508,9 +12494,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 }
 .hover\:bg-neon-blue\/10:hover {
   background-color: rgb(0 102 255 / 0.1);
-}
-.hover\:bg-neon-cyan\/10:hover {
-  background-color: rgb(0 243 255 / 0.1);
 }
 .hover\:bg-neon-green\/20:hover {
   background-color: rgb(57 255 20 / 0.2);
@@ -12655,11 +12638,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
   --tw-shadow-colored: 0 22px 48px -32px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
-.hover\:shadow-glow-md:hover {
-  --tw-shadow: 0 0 10px rgba(0, 243, 255, 0.4), 0 0 20px rgba(0, 243, 255, 0.2);
-  --tw-shadow-colored: 0 0 10px var(--tw-shadow-color), 0 0 20px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
 .hover\:shadow-md:hover {
   --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
@@ -12786,8 +12764,8 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(16 185 129 / var(--tw-ring-opacity, 1));
 }
-.focus-visible\:ring-neon-cyan\/30:focus-visible {
-  --tw-ring-color: rgb(0 243 255 / 0.3);
+.focus-visible\:ring-emerald-500\/20:focus-visible {
+  --tw-ring-color: rgb(16 185 129 / 0.2);
 }
 .focus-visible\:ring-orange-500:focus-visible {
   --tw-ring-opacity: 1;
@@ -13020,6 +12998,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 }
 .dark\:bg-emerald-900\/20:is(.dark *) {
   background-color: rgb(6 78 59 / 0.2);
+}
+.dark\:bg-emerald-900\/30:is(.dark *) {
+  background-color: rgb(6 78 59 / 0.3);
 }
 .dark\:bg-emerald-950\/30:is(.dark *) {
   background-color: rgb(2 44 34 / 0.3);
@@ -13489,6 +13470,10 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:ring-slate-100\/30:is(.dark *) {
   --tw-ring-color: rgb(241 245 249 / 0.3);
 }
+.dark\:ring-slate-700:is(.dark *) {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(51 65 85 / var(--tw-ring-opacity, 1));
+}
 .dark\:ring-slate-800:is(.dark *) {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(30 41 59 / var(--tw-ring-opacity, 1));
@@ -13537,6 +13522,10 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:hover\:border-emerald-600:hover:is(.dark *) {
   --tw-border-opacity: 1;
   border-color: rgb(5 150 105 / var(--tw-border-opacity, 1));
+}
+.dark\:hover\:border-emerald-700:hover:is(.dark *) {
+  --tw-border-opacity: 1;
+  border-color: rgb(4 120 87 / var(--tw-border-opacity, 1));
 }
 .dark\:hover\:bg-amber-600:hover:is(.dark *) {
   --tw-bg-opacity: 1;
@@ -14058,9 +14047,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 @media (min-width: 1125px) {
   .nav\:block {
     display: block;
-  }
-  .nav\:flex {
-    display: flex;
   }
   .nav\:inline-flex {
     display: inline-flex;
