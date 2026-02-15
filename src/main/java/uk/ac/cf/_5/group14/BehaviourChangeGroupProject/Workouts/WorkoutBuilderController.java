@@ -61,6 +61,11 @@ public class WorkoutBuilderController {
             return "redirect:/login";
         }
         model.addAttribute("templates", workoutBuilderService.listTemplates(user));
+        
+        // Add exercises and custom exercises for the builder mode
+        model.addAttribute("exercises", exerciseService.getAllExercises());
+        model.addAttribute("customExercises", customExerciseService.getCustomExercisesByUser(user.getId()));
+        
         return "workouts/index";
     }
 

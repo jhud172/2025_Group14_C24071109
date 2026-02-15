@@ -1,73 +1,390 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Workouts', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('Workout Studio', ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="styles"></div>
 
     <div th:fragment="content">
-        <div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-            <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
+        <div class="workout-studio">
+            <!-- Mode Navigation -->
+            <nav class="studio-mode-nav">
+                <div class="studio-mode-tab active" data-mode="my-workouts">
+                    <svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    My Workouts
+                </div>
+                <div class="studio-mode-tab" data-mode="library">
+                    <svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    Exercise Library
+                </div>
+                <div class="studio-mode-tab" data-mode="builder">
+                    <svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Builder
+                </div>
+            </nav>
 
-            <div class="mt-6 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-                <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div class="flex items-center justify-between gap-3">
-                        <div>
-                            <h1 class="text-2xl font-bold text-slate-900">Workout Builder</h1>
-                            <p class="mt-1 text-sm text-slate-600">Create templates and launch sessions.</p>
+            <!-- MY WORKOUTS MODE -->
+            <div class="studio-mode-panel active" data-mode="my-workouts">
+                <div class="mb-6 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-900">My Workouts</h1>
+                        <p class="mt-1 text-sm text-slate-600">Your personal workout templates</p>
+                    </div>
+                    <button class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-600"
+                            onclick="document.querySelector('[data-mode=builder]').click()">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Create New
+                    </button>
+                </div>
+
+                <div class="my-workouts-grid" th:if="${templates != null and !templates.isEmpty()}">
+                    <div th:each="template : ${templates}" class="workout-card group">
+                        <div class="workout-card-header">
+                            <h3 class="workout-card-title" th:text="${template.name}">Workout Name</h3>
+                            <span class="workout-card-date" th:text="${#temporals.format(template.updatedAt, 'dd MMM')}">12 Feb</span>
                         </div>
-                        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Templates</span>
+                        <p class="workout-card-description" th:text="${template.description ?: 'No description'}">Description</p>
+                        <div class="workout-card-metadata">
+                            <div class="workout-card-metadata-item">
+                                <svg class="workout-card-metadata-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                <span th:text="${template.exercises.size() + ' exercises'}">5 exercises</span>
+                            </div>
+                            <div class="workout-card-metadata-item">
+                                <svg class="workout-card-metadata-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>~45 min</span>
+                            </div>
+                        </div>
+                        <div class="workout-card-actions">
+                            <a class="workout-card-btn workout-card-btn-primary" 
+                               th:href="@{/workouts/{id}/start(id=${template.id})}">
+                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Start
+                            </a>
+                            <a class="workout-card-btn workout-card-btn-secondary"
+                               th:href="@{/workouts/{id}/edit(id=${template.id})}">
+                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Edit
+                            </a>
+                            <form th:action="@{/workouts/{id}/delete(id=${template.id})}" method="post" style="display: inline;">
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button class="workout-card-btn workout-card-btn-danger" type="submit"
+                                        onclick="return confirm('Delete this workout?')">
+                                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="workout-empty-state" th:if="${templates == null or templates.isEmpty()}">
+                    <svg class="workout-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <h3 class="workout-empty-title">No workouts yet</h3>
+                    <p class="workout-empty-description">Create your first workout template to get started</p>
+                    <button class="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-600"
+                            onclick="document.querySelector('[data-mode=builder]').click()">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Create Workout
+                    </button>
+                </div>
+            </div>
+
+            <!-- EXERCISE LIBRARY MODE -->
+            <div class="studio-mode-panel" data-mode="library">
+                <div class="mb-6">
+                    <h1 class="text-3xl font-bold text-slate-900">Exercise Library</h1>
+                    <p class="mt-1 text-sm text-slate-600">Browse and search exercises to build your workouts</p>
+                </div>
+
+                <div class="library-container">
+                    <!-- Search Bar -->
+                    <div class="library-search-bar">
+                        <div class="library-search-input-wrapper">
+                            <svg class="library-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input type="text" class="library-search-input" placeholder="Search exercises by name or muscle group...">
+                        </div>
+                        
+                        <!-- Filters -->
+                        <div class="library-filters">
+                            <div class="library-filter-tag" data-filter="chest">Chest</div>
+                            <div class="library-filter-tag" data-filter="back">Back</div>
+                            <div class="library-filter-tag" data-filter="shoulders">Shoulders</div>
+                            <div class="library-filter-tag" data-filter="legs">Legs</div>
+                            <div class="library-filter-tag" data-filter="arms">Arms</div>
+                            <div class="library-filter-tag" data-filter="core">Core</div>
+                            <div class="library-filter-tag" data-filter="1">Beginner</div>
+                            <div class="library-filter-tag" data-filter="2">Intermediate</div>
+                            <div class="library-filter-tag" data-filter="3">Advanced</div>
+                        </div>
                     </div>
 
-                    <div class="mt-5 grid gap-4 sm:grid-cols-2" th:if="${templates != null and !templates.isEmpty()}">
-                        <div th:each="template : ${templates}"
-                             class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0">
-                                    <h2 class="truncate text-lg font-semibold text-slate-900" th:text="${template.name}">Workout</h2>
-                                    <p class="mt-1 line-clamp-2 text-sm text-slate-600" th:text="${template.description}">Description</p>
+                    <!-- Exercise Grid (populated by JavaScript) -->
+                    <div class="library-grid">
+                        <!-- Exercises will be loaded here by JavaScript -->
+                        <div class="text-center py-12">
+                            <p class="text-sm text-slate-600">Loading exercises...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BUILDER MODE (using existing edit page structure) -->
+            <div class="studio-mode-panel" data-mode="builder">
+                <div class="mb-6 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-900">Workout Builder</h1>
+                        <p class="mt-1 text-sm text-slate-600">Create a new workout template</p>
+                    </div>
+                    <button class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-50"
+                            data-open-custom-exercise>
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Custom Exercise
+                    </button>
+                </div>
+
+                <div class="builder-container">
+                    <!-- Builder Main -->
+                    <div class="builder-main">
+                        <form method="post" th:action="@{/workouts}" data-workout-builder>
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            
+                            <!-- Workout Info -->
+                            <div class="builder-form-section">
+                                <div class="grid gap-4 md:grid-cols-2">
+                                    <div>
+                                        <label class="builder-label">Workout Name</label>
+                                        <input type="text" name="name" required placeholder="Upper Body Strength"
+                                               class="builder-input">
+                                    </div>
+                                    <div>
+                                        <label class="builder-label">Description</label>
+                                        <input type="text" name="description" placeholder="Push + pull, 45 minutes"
+                                               class="builder-input">
+                                    </div>
                                 </div>
-                                <span class="text-xs text-slate-400" th:text="${#temporals.format(template.updatedAt, 'dd MMM')}">Updated</span>
                             </div>
-                            <div class="mt-4 flex flex-wrap gap-2">
-                                <a class="inline-flex items-center rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800"
-                                   th:href="@{/workouts/{id}/start(id=${template.id})}">Start</a>
-                                <a class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-                                   th:href="@{/workouts/{id}/edit(id=${template.id})}">Edit</a>
-                                <form th:action="@{/workouts/{id}/delete(id=${template.id})}" method="post">
-                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                    <button class="inline-flex items-center rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100" type="submit">Delete</button>
-                                </form>
+
+                            <!-- Exercises Section -->
+                            <div class="builder-exercises-section">
+                                <div class="builder-exercises-header">
+                                    <div>
+                                        <h2 class="builder-exercises-title">Exercises</h2>
+                                        <p class="text-xs text-slate-500">Add exercises from the library or create custom ones</p>
+                                    </div>
+                                    <button type="button" class="builder-add-exercise-btn" data-add-exercise>
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                        Add Exercise
+                                    </button>
+                                </div>
+
+                                <div class="builder-exercises-list" data-exercise-list>
+                                    <!-- Exercise rows will be added here -->
+                                </div>
+
+                                <template data-exercise-template>
+                                    <div class="builder-exercise-item group">
+                                        <div class="builder-exercise-drag-handle">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
+                                            </svg>
+                                        </div>
+                                        <div class="builder-exercise-grid">
+                                            <div>
+                                                <label class="builder-exercise-label">Exercise</label>
+                                                <select name="__name__.exerciseRef" class="builder-exercise-select">
+                                                    <option value="">Manual entry</option>
+                                                    <optgroup label="Library">
+                                                        <option th:each="ex : ${exercises}" th:value="${'e:' + ex.id}" th:text="${ex.name}"></option>
+                                                    </optgroup>
+                                                    <optgroup label="Custom">
+                                                        <option th:each="cx : ${customExercises}" th:value="${'c:' + cx.id}" th:text="${cx.name}"></option>
+                                                    </optgroup>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="builder-exercise-label">Name</label>
+                                                <input name="__name__.exerciseName" type="text" placeholder="Bench Press"
+                                                       class="builder-exercise-input">
+                                            </div>
+                                            <div>
+                                                <label class="builder-exercise-label">Sets</label>
+                                                <input name="__name__.sets" type="number" min="1" value="3"
+                                                       class="builder-exercise-input">
+                                            </div>
+                                            <div>
+                                                <label class="builder-exercise-label">Reps</label>
+                                                <input name="__name__.reps" type="number" min="1" value="10"
+                                                       class="builder-exercise-input">
+                                            </div>
+                                            <div>
+                                                <label class="builder-exercise-label">Rest (sec)</label>
+                                                <input name="__name__.restSeconds" type="number" min="0" value="60"
+                                                       class="builder-exercise-input">
+                                            </div>
+                                            <div class="flex items-end">
+                                                <button type="button" class="builder-exercise-remove-btn" data-remove-exercise>
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="builder-exercise-notes">
+                                            <label class="builder-exercise-label">Notes</label>
+                                            <input name="__name__.notes" type="text" placeholder="Tempo: 3-1-1"
+                                                   class="builder-exercise-input">
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Save Section -->
+                            <div class="builder-save-section">
+                                <p class="text-xs text-slate-500">Click save to create your workout template</p>
+                                <button type="submit" class="builder-save-btn">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Save Workout
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Builder Sidebar -->
+                    <div class="builder-sidebar">
+                        <!-- Stats -->
+                        <div class="builder-sidebar-card">
+                            <h3 class="builder-sidebar-card-title">Workout Stats</h3>
+                            <div class="builder-stats-grid">
+                                <div class="builder-stat-item">
+                                    <div class="builder-stat-value" data-stat="exercises">0</div>
+                                    <div class="builder-stat-label">Exercises</div>
+                                </div>
+                                <div class="builder-stat-item">
+                                    <div class="builder-stat-value" data-stat="duration">0</div>
+                                    <div class="builder-stat-label">Est. Minutes</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="builder-sidebar-card">
+                            <h3 class="builder-sidebar-card-title">Preview</h3>
+                            <div class="builder-preview-list">
+                                <p class="text-xs text-slate-400 text-center py-4">Add exercises to see preview</p>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-10 text-center"
-                         th:if="${templates == null or templates.isEmpty()}">
-                        <p class="text-sm font-semibold text-slate-900">No templates yet.</p>
-                        <p class="mt-1 text-sm text-slate-600">Create your first workout to begin logging sessions.</p>
+        <!-- Custom Exercise Panel (Slide-in) -->
+        <div class="custom-exercise-overlay"></div>
+        <div class="custom-exercise-panel">
+            <div class="custom-exercise-header">
+                <div class="custom-exercise-header-content">
+                    <h2 class="custom-exercise-title">Create Custom Exercise</h2>
+                    <button class="custom-exercise-close-btn" type="button">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="custom-exercise-body">
+                <form class="custom-exercise-form">
+                    <div class="custom-exercise-form-group">
+                        <label class="custom-exercise-label">Exercise Name</label>
+                        <input type="text" class="custom-exercise-input" placeholder="Barbell Squat">
                     </div>
-                </section>
-
-                <aside class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 class="text-lg font-semibold text-slate-900">New template</h2>
-                    <p class="mt-1 text-sm text-slate-600">Start with a name and description, then add exercises.</p>
-
-                    <form class="mt-5 space-y-4" method="post" th:action="@{/workouts}">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <div>
-                            <label class="text-xs font-semibold text-slate-600">Name</label>
-                            <input name="name" type="text" placeholder="Upper Body Strength" required
-                                   class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" />
+                    <div class="custom-exercise-form-group">
+                        <label class="custom-exercise-label">Category</label>
+                        <select class="custom-exercise-select">
+                            <option value="">Select category</option>
+                            <option value="Chest">Chest</option>
+                            <option value="Back">Back</option>
+                            <option value="Shoulders">Shoulders</option>
+                            <option value="Legs">Legs</option>
+                            <option value="Arms">Arms</option>
+                            <option value="Core">Core</option>
+                        </select>
+                    </div>
+                    <div class="custom-exercise-form-group">
+                        <label class="custom-exercise-label">Description</label>
+                        <textarea class="custom-exercise-textarea" rows="3" placeholder="Brief description of the exercise"></textarea>
+                    </div>
+                    <div class="custom-exercise-form-group">
+                        <label class="custom-exercise-label">How To</label>
+                        <textarea class="custom-exercise-textarea" rows="4" placeholder="Step-by-step instructions"></textarea>
+                    </div>
+                    <div class="custom-exercise-form-group">
+                        <label class="custom-exercise-label">Video URL (YouTube)</label>
+                        <input type="url" class="custom-exercise-input" placeholder="https://youtube.com/watch?v=...">
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="custom-exercise-form-group">
+                            <label class="custom-exercise-label">Equipment</label>
+                            <select class="custom-exercise-select">
+                                <option value="Bodyweight">Bodyweight</option>
+                                <option value="Barbell">Barbell</option>
+                                <option value="Dumbbell">Dumbbell</option>
+                                <option value="Machine">Machine</option>
+                                <option value="Cable">Cable</option>
+                                <option value="Kettlebell">Kettlebell</option>
+                                <option value="Bands">Bands</option>
+                            </select>
                         </div>
-                        <div>
-                            <label class="text-xs font-semibold text-slate-600">Description</label>
-                            <textarea name="description" rows="4" placeholder="Push + pull, 45 minutes" class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"></textarea>
+                        <div class="custom-exercise-form-group">
+                            <label class="custom-exercise-label">Difficulty</label>
+                            <select class="custom-exercise-select">
+                                <option value="1">Beginner</option>
+                                <option value="2">Intermediate</option>
+                                <option value="3">Advanced</option>
+                                <option value="4">Expert</option>
+                            </select>
                         </div>
-                        <button class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800" type="submit">Create and edit</button>
-                    </form>
-                </aside>
+                    </div>
+                </form>
+            </div>
+            <div class="custom-exercise-footer">
+                <div class="custom-exercise-actions">
+                    <button type="button" class="custom-exercise-btn-cancel">Cancel</button>
+                    <button type="button" class="custom-exercise-btn-save">Save Exercise</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div th:fragment="pageScripts"></div>
+    <div th:fragment="pageScripts">
+        <script src="/js/workout-studio.js" defer></script>
+    </div>
 </th:block>
