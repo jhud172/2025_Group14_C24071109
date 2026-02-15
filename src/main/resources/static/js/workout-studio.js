@@ -419,13 +419,21 @@
                 const name = item.querySelector('[name*="exerciseName"]')?.value || 'Unnamed';
                 const sets = item.querySelector('[name*="sets"]')?.value || '0';
                 const reps = item.querySelector('[name*="reps"]')?.value || '0';
-                
+
                 const previewItem = document.createElement('div');
                 previewItem.className = 'builder-preview-item';
-                previewItem.innerHTML = `
-                    <span class="builder-preview-exercise-name">${name}</span>
-                    <span class="builder-preview-exercise-sets">${sets}×${reps}</span>
-                `;
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'builder-preview-exercise-name';
+                nameSpan.textContent = name;
+
+                const setsRepsSpan = document.createElement('span');
+                setsRepsSpan.className = 'builder-preview-exercise-sets';
+                setsRepsSpan.textContent = `${sets}×${reps}`;
+
+                previewItem.appendChild(nameSpan);
+                previewItem.appendChild(setsRepsSpan);
+
                 previewList.appendChild(previewItem);
             });
         }
