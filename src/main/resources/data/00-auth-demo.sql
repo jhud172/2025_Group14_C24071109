@@ -24,15 +24,15 @@ SELECT 'GYM_ADMIN'
 WHERE NOT EXISTS (SELECT 1 FROM roles WHERE name = 'GYM_ADMIN');
 
 INSERT INTO users (public_id, email, first_name, last_name, username, password, enabled, subscription_status, role)
-SELECT '3a7b6f1b-2bd7-4e5d-a70e-1b4a7a9d93a2', 'demo@example.com', 'Demo', 'User', 'demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, false, 'CLIENT'
+SELECT '3a7b6f1b-2bd7-4e5d-a70e-1b4a7a9d93a2', 'demo@example.com', 'Demo', 'User', 'demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, true, 'CLIENT'
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'demo');
 
 INSERT INTO users (public_id, email, first_name, last_name, username, password, enabled, subscription_status, role)
-SELECT 'a7f5c9e0-2b8f-4f7b-ae59-5b6d0f7f1a63', 'trainer_demo@example.com', 'Trainer', 'Demo', 'trainer_demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, false, 'TRAINER'
+SELECT 'a7f5c9e0-2b8f-4f7b-ae59-5b6d0f7f1a63', 'trainer_demo@example.com', 'Trainer', 'Demo', 'trainer_demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, true, 'TRAINER'
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'trainer_demo');
 
 INSERT INTO users (public_id, email, first_name, last_name, username, password, enabled, subscription_status, role)
-SELECT '0f2e9fd2-1e38-4d55-9b4c-2a77c8122e0b', 'gymadmin_demo@example.com', 'Gym', 'Admin', 'gymadmin_demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, false, 'GYM_ADMIN'
+SELECT '0f2e9fd2-1e38-4d55-9b4c-2a77c8122e0b', 'gymadmin_demo@example.com', 'Gym', 'Admin', 'gymadmin_demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, true, 'GYM_ADMIN'
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'gymadmin_demo');
 
 INSERT INTO users_roles (username, role_id)
