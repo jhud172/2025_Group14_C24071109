@@ -336,16 +336,20 @@ public class ScheduleController {
         schedule.setName(name);
         schedule.setUser(user);
         
-        // Set schedule type and rotation mode
+        // Set schedule type and rotation mode with error handling
         try {
             schedule.setScheduleType(ScheduleType.valueOf(scheduleType));
         } catch (IllegalArgumentException e) {
+            // Log warning and default to WEEKLY for invalid schedule type
+            System.err.println("Warning: Invalid schedule type '" + scheduleType + "', defaulting to WEEKLY");
             schedule.setScheduleType(ScheduleType.WEEKLY);
         }
         
         try {
             schedule.setRotationMode(RotationMode.valueOf(rotationMode));
         } catch (IllegalArgumentException e) {
+            // Log warning and default to WEEKLY_REPEAT for invalid rotation mode
+            System.err.println("Warning: Invalid rotation mode '" + rotationMode + "', defaulting to WEEKLY_REPEAT");
             schedule.setRotationMode(RotationMode.WEEKLY_REPEAT);
         }
         

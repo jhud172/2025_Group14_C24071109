@@ -650,10 +650,6 @@ const ScheduleDesigner = {
      * Apply a template
      */
     applyTemplate(templateId) {
-        // This is a placeholder - in production you'd fetch template data from server
-        // or have it embedded in the page
-        console.log('Applying template:', templateId);
-        
         this.templateId = templateId;
         document.getElementById('templateIdField').value = templateId;
         
@@ -668,6 +664,7 @@ const ScheduleDesigner = {
      * Clear all workouts
      */
     clearAll() {
+        // TODO: Replace with custom modal for better UX and accessibility
         if (!confirm('Are you sure you want to clear all workouts from the schedule?')) {
             return;
         }
