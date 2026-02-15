@@ -249,6 +249,18 @@ const ScheduleDesigner = {
     },
     
     /**
+     * Safely escape text for insertion into HTML.
+     */
+    escapeHtml(text) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    },
+    
+    /**
      * Create a workout chip element
      */
     createWorkoutChip(id, name) {
@@ -258,12 +270,14 @@ const ScheduleDesigner = {
         chip.dataset.id = id;
         chip.dataset.name = name;
         
+        const safeName = this.escapeHtml(String(name));
+        
         chip.innerHTML = `
             <svg class="schedule-workout-chip-drag-handle w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
             <div class="schedule-workout-chip-content">
-                <div class="schedule-workout-chip-name">${name}</div>
+                <div class="schedule-workout-chip-name">${safeName}</div>
                 <div class="schedule-workout-chip-meta">Tap to preview</div>
             </div>
             <div class="schedule-workout-chip-actions">
