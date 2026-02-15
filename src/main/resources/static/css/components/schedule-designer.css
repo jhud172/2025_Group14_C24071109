@@ -1,0 +1,628 @@
+/* ========================================
+   Training Structure Designer Component
+   Premium Schedule Builder Redesign
+   ======================================== */
+
+/* Base Container */
+.schedule-designer {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
+}
+
+/* ========================================
+   Schedule Type Selector
+   ======================================== */
+.schedule-type-selector {
+    @apply bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 mb-6;
+}
+
+.schedule-type-options {
+    @apply flex flex-col sm:flex-row gap-3;
+}
+
+.schedule-type-option {
+    @apply flex-1 relative cursor-pointer transition-all duration-300;
+}
+
+.schedule-type-option input[type="radio"] {
+    @apply sr-only;
+}
+
+.schedule-type-card {
+    @apply block w-full p-5 rounded-xl border-2 border-slate-200 dark:border-slate-700 
+           bg-white dark:bg-slate-900 transition-all duration-300;
+}
+
+.schedule-type-card:hover {
+    @apply border-emerald-300 dark:border-emerald-700 shadow-md;
+}
+
+.schedule-type-option input[type="radio"]:checked + .schedule-type-card {
+    @apply border-emerald-500 bg-gradient-to-br from-emerald-50 to-white 
+           dark:from-emerald-500/10 dark:to-slate-900 shadow-lg;
+}
+
+.schedule-type-header {
+    @apply flex items-center gap-3 mb-2;
+}
+
+.schedule-type-icon {
+    @apply w-10 h-10 rounded-lg flex items-center justify-center 
+           bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400
+           transition-colors duration-300;
+}
+
+.schedule-type-option input[type="radio"]:checked + .schedule-type-card .schedule-type-icon {
+    @apply bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400;
+}
+
+.schedule-type-title {
+    @apply font-semibold text-base text-slate-900 dark:text-slate-100;
+}
+
+.schedule-type-description {
+    @apply text-sm text-slate-600 dark:text-slate-400 leading-relaxed;
+}
+
+.schedule-type-badge {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+           bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300;
+}
+
+/* Custom Day Count Controls */
+.custom-day-controls {
+    @apply mt-4 flex items-center gap-3;
+}
+
+.custom-day-input {
+    @apply w-20 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700
+           bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-center
+           focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500;
+}
+
+.custom-day-label {
+    @apply text-sm font-medium text-slate-700 dark:text-slate-300;
+}
+
+/* ========================================
+   Template Library Modal/Section
+   ======================================== */
+.template-library-trigger {
+    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-xl 
+           border-2 border-dashed border-emerald-300 dark:border-emerald-700
+           text-emerald-600 dark:text-emerald-400 font-medium
+           hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:border-solid
+           transition-all duration-200;
+}
+
+.template-library {
+    @apply bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 
+           shadow-sm p-6 mb-6;
+}
+
+.template-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.template-card {
+    @apply relative p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700
+           bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900
+           cursor-pointer transition-all duration-300;
+    /* Note: Add 'group' class directly in HTML for group-hover functionality */
+}
+
+.template-card:hover {
+    @apply border-emerald-400 dark:border-emerald-600 shadow-lg transform scale-[1.02];
+}
+
+.template-card-header {
+    @apply flex items-start justify-between gap-3 mb-3;
+}
+
+.template-card-title {
+    @apply font-semibold text-slate-900 dark:text-slate-100;
+}
+
+.template-card-badge {
+    @apply px-2 py-0.5 rounded-full text-xs font-medium shrink-0
+           bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300;
+}
+
+.template-card-description {
+    @apply text-sm text-slate-600 dark:text-slate-400 mb-3;
+}
+
+.template-preview-days {
+    @apply space-y-1;
+}
+
+.template-preview-day {
+    @apply flex items-center gap-2 text-xs;
+}
+
+.template-preview-day-label {
+    @apply font-medium text-slate-700 dark:text-slate-300 min-w-[60px];
+}
+
+.template-preview-day-workout {
+    @apply text-slate-600 dark:text-slate-400 truncate;
+}
+
+.template-select-btn {
+    @apply mt-3 w-full px-3 py-2 rounded-lg bg-emerald-600 text-white font-medium
+           opacity-0 group-hover:opacity-100 transition-opacity duration-200
+           hover:bg-emerald-700;
+}
+
+/* ========================================
+   Enhanced Day Cards
+   ======================================== */
+.schedule-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4;
+}
+
+.schedule-grid.custom-schedule {
+    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5;
+}
+
+.schedule-grid.daily-schedule {
+    @apply grid-cols-1 max-w-md mx-auto;
+}
+
+.schedule-day-card {
+    @apply bg-white dark:bg-slate-900/50 rounded-xl border-2 border-slate-200 dark:border-slate-800 
+           shadow-sm transition-all duration-300 overflow-hidden;
+}
+
+.schedule-day-card:hover {
+    @apply border-emerald-300 dark:border-emerald-700 shadow-md;
+}
+
+.schedule-day-card.has-workouts {
+    @apply border-emerald-200 dark:border-emerald-800;
+}
+
+.schedule-day-card-header {
+    @apply px-4 py-3 bg-gradient-to-r from-slate-50 to-slate-100 
+           dark:from-slate-800/50 dark:to-slate-800
+           border-b border-slate-200 dark:border-slate-700;
+}
+
+.schedule-day-card.has-workouts .schedule-day-card-header {
+    @apply from-emerald-50 to-emerald-100/50 dark:from-emerald-500/10 dark:to-emerald-500/5
+           border-emerald-200 dark:border-emerald-800;
+}
+
+.schedule-day-header-content {
+    @apply flex items-center justify-between;
+}
+
+.schedule-day-title {
+    @apply font-bold text-base text-slate-900 dark:text-slate-100;
+}
+
+.schedule-day-badge {
+    @apply inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-semibold
+           bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300;
+}
+
+.schedule-day-card.has-workouts .schedule-day-badge {
+    @apply bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300;
+}
+
+.schedule-day-badge-dot {
+    @apply w-2 h-2 rounded-full bg-current;
+}
+
+/* Drop Zone */
+.schedule-drop-zone {
+    @apply min-h-[220px] p-3 space-y-2.5;
+}
+
+.schedule-drop-zone.drag-over {
+    @apply bg-gradient-to-br from-emerald-50 to-emerald-100/50 
+           dark:from-emerald-500/10 dark:to-emerald-500/20;
+}
+
+.schedule-drop-zone.drag-over::before {
+    content: '+ Drop workout here';
+    @apply absolute inset-0 flex items-center justify-center
+           text-emerald-600 dark:text-emerald-400 font-semibold text-sm
+           pointer-events-none;
+}
+
+/* Rest Day State */
+.schedule-day-rest-state {
+    @apply flex flex-col items-center justify-center py-8 px-4 text-center;
+}
+
+.schedule-day-rest-icon {
+    @apply w-12 h-12 mb-3 text-slate-300 dark:text-slate-700;
+}
+
+.schedule-day-rest-label {
+    @apply text-sm font-medium text-slate-500 dark:text-slate-400 mb-2;
+}
+
+.schedule-day-rest-action {
+    @apply text-xs text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer;
+}
+
+/* ========================================
+   Workout Chips in Schedule
+   ======================================== */
+.schedule-workout-chip {
+    @apply relative flex items-center gap-2.5 p-3 rounded-lg
+           bg-gradient-to-br from-emerald-100 to-emerald-50 
+           dark:from-emerald-500/15 dark:to-emerald-500/5
+           border border-emerald-300 dark:border-emerald-700
+           cursor-move transition-all duration-200;
+    /* Note: Add 'group' class directly in HTML for group-hover functionality */
+}
+
+.schedule-workout-chip:hover {
+    @apply shadow-md border-emerald-400 dark:border-emerald-600 
+           from-emerald-200 to-emerald-100 dark:from-emerald-500/25 dark:to-emerald-500/10;
+}
+
+.schedule-workout-chip.dragging {
+    @apply opacity-40 scale-95;
+}
+
+.schedule-workout-chip-drag-handle {
+    @apply text-emerald-500 shrink-0;
+}
+
+.schedule-workout-chip-content {
+    @apply flex-1 min-w-0;
+}
+
+.schedule-workout-chip-name {
+    @apply font-semibold text-sm text-emerald-900 dark:text-emerald-100 truncate;
+}
+
+.schedule-workout-chip-meta {
+    @apply text-xs text-emerald-700 dark:text-emerald-300 mt-0.5;
+}
+
+.schedule-workout-chip-actions {
+    @apply flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity;
+}
+
+.schedule-workout-chip-action {
+    @apply p-1 rounded hover:bg-emerald-200 dark:hover:bg-emerald-500/20 
+           text-emerald-700 dark:text-emerald-300 transition-colors;
+}
+
+.schedule-workout-chip-remove {
+    @apply hover:text-red-600 dark:hover:text-red-400;
+}
+
+/* Workout Preview Tooltip */
+.workout-preview-tooltip {
+    @apply absolute z-50 hidden group-hover:block
+           bg-slate-900 dark:bg-slate-800 text-white rounded-lg p-3 shadow-xl
+           w-64 -top-2 left-full ml-2;
+}
+
+.workout-preview-tooltip::before {
+    content: '';
+    @apply absolute right-full top-4 border-8 border-transparent border-r-slate-900 dark:border-r-slate-800;
+}
+
+.workout-preview-title {
+    @apply font-semibold mb-2 text-sm;
+}
+
+.workout-preview-stat {
+    @apply flex items-center gap-2 text-xs text-slate-300 mb-1;
+}
+
+/* ========================================
+   Intelligence Panel
+   ======================================== */
+.schedule-intelligence-panel {
+    @apply bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 
+           shadow-sm p-6 mt-6;
+}
+
+.intelligence-panel-header {
+    @apply flex items-center gap-3 mb-5;
+}
+
+.intelligence-panel-icon {
+    @apply w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 
+           flex items-center justify-center text-white;
+}
+
+.intelligence-panel-title {
+    @apply font-bold text-lg text-slate-900 dark:text-slate-100;
+}
+
+.intelligence-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5;
+}
+
+.intelligence-stat {
+    @apply bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/50 dark:to-slate-900
+           border border-slate-200 dark:border-slate-700 rounded-xl p-4;
+}
+
+.intelligence-stat-label {
+    @apply text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-1;
+}
+
+.intelligence-stat-value {
+    @apply text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-1;
+}
+
+.intelligence-stat-description {
+    @apply text-xs text-slate-500 dark:text-slate-400;
+}
+
+.intelligence-insights {
+    @apply space-y-3;
+}
+
+.intelligence-insight {
+    @apply flex items-start gap-3 p-3 rounded-lg;
+}
+
+.intelligence-insight.warning {
+    @apply bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-800;
+}
+
+.intelligence-insight.info {
+    @apply bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-800;
+}
+
+.intelligence-insight.success {
+    @apply bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-800;
+}
+
+.intelligence-insight-icon {
+    @apply w-5 h-5 shrink-0 mt-0.5;
+}
+
+.intelligence-insight.warning .intelligence-insight-icon {
+    @apply text-amber-600 dark:text-amber-400;
+}
+
+.intelligence-insight.info .intelligence-insight-icon {
+    @apply text-blue-600 dark:text-blue-400;
+}
+
+.intelligence-insight.success .intelligence-insight-icon {
+    @apply text-emerald-600 dark:text-emerald-400;
+}
+
+.intelligence-insight-content {
+    @apply flex-1;
+}
+
+.intelligence-insight-title {
+    @apply font-semibold text-sm mb-1;
+}
+
+.intelligence-insight.warning .intelligence-insight-title {
+    @apply text-amber-900 dark:text-amber-100;
+}
+
+.intelligence-insight.info .intelligence-insight-title {
+    @apply text-blue-900 dark:text-blue-100;
+}
+
+.intelligence-insight.success .intelligence-insight-title {
+    @apply text-emerald-900 dark:text-emerald-100;
+}
+
+.intelligence-insight-description {
+    @apply text-xs;
+}
+
+.intelligence-insight.warning .intelligence-insight-description {
+    @apply text-amber-700 dark:text-amber-300;
+}
+
+.intelligence-insight.info .intelligence-insight-description {
+    @apply text-blue-700 dark:text-blue-300;
+}
+
+.intelligence-insight.success .intelligence-insight-description {
+    @apply text-emerald-700 dark:text-emerald-300;
+}
+
+/* ========================================
+   Advanced Controls Panel
+   ======================================== */
+.schedule-advanced-controls {
+    @apply flex flex-wrap items-center gap-3 mt-4;
+}
+
+.advanced-control-btn {
+    @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
+           border border-slate-300 dark:border-slate-700 
+           text-slate-700 dark:text-slate-300
+           hover:bg-slate-100 dark:hover:bg-slate-800
+           transition-all duration-200;
+}
+
+.advanced-control-btn:hover {
+    @apply border-emerald-400 dark:border-emerald-600 text-emerald-600 dark:text-emerald-400;
+}
+
+.advanced-control-btn.destructive {
+    @apply border-red-300 dark:border-red-700 text-red-600 dark:text-red-400;
+}
+
+.advanced-control-btn.destructive:hover {
+    @apply bg-red-50 dark:bg-red-500/10 border-red-500;
+}
+
+/* ========================================
+   Save Panel with Timestamp
+   ======================================== */
+.schedule-save-panel {
+    @apply bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 
+           shadow-sm p-6 mb-6 sticky top-4 z-10;
+}
+
+.save-panel-content {
+    @apply flex flex-col sm:flex-row gap-4 items-start sm:items-end;
+}
+
+.save-panel-input-group {
+    @apply flex-1;
+}
+
+.save-panel-label {
+    @apply block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2;
+}
+
+.save-panel-input {
+    @apply w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700
+           bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100
+           placeholder:text-slate-400 dark:placeholder:text-slate-500
+           focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500;
+}
+
+.save-panel-actions {
+    @apply flex items-center gap-3;
+}
+
+.save-timestamp {
+    @apply text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2;
+}
+
+.save-success-indicator {
+    @apply w-2 h-2 rounded-full bg-emerald-500 animate-pulse;
+}
+
+/* ========================================
+   Rotation Mode Controls
+   ======================================== */
+.rotation-mode-selector {
+    @apply mt-4 p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700;
+}
+
+.rotation-mode-options {
+    @apply flex flex-col gap-2;
+}
+
+.rotation-mode-option {
+    @apply flex items-center gap-3 cursor-pointer;
+}
+
+.rotation-mode-radio {
+    @apply w-4 h-4 text-emerald-600 focus:ring-emerald-500;
+}
+
+.rotation-mode-label {
+    @apply text-sm font-medium text-slate-700 dark:text-slate-300;
+}
+
+.rotation-mode-description {
+    @apply text-xs text-slate-500 dark:text-slate-400 ml-7;
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.schedule-day-card {
+    animation: scaleIn 0.3s ease-out;
+}
+
+.schedule-workout-chip {
+    animation: fadeIn 0.2s ease-out;
+}
+
+.intelligence-insight {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* ========================================
+   Responsive Adjustments
+   ======================================== */
+@media (max-width: 1024px) {
+    .schedule-grid {
+        @apply grid-cols-1 sm:grid-cols-2;
+    }
+    
+    .workout-preview-tooltip {
+        @apply hidden;
+    }
+}
+
+@media (max-width: 640px) {
+    .schedule-type-options {
+        @apply flex-col;
+    }
+    
+    .schedule-grid {
+        @apply grid-cols-1;
+    }
+    
+    .intelligence-grid {
+        @apply grid-cols-1;
+    }
+    
+    .schedule-advanced-controls {
+        @apply flex-col items-stretch;
+    }
+    
+    .advanced-control-btn {
+        @apply w-full justify-center;
+    }
+}
+
+/* ========================================
+   Accessibility
+   ======================================== */
+.schedule-type-option input[type="radio"]:focus + .schedule-type-card {
+    @apply ring-2 ring-emerald-500 ring-offset-2 dark:ring-offset-slate-900;
+}
+
+.schedule-workout-chip:focus {
+    @apply ring-2 ring-emerald-500 ring-offset-2 dark:ring-offset-slate-900;
+}
+
+/* ========================================
+   Loading States
+   ======================================== */
+.schedule-loading {
+    @apply animate-pulse;
+}
+
+.schedule-skeleton {
+    @apply bg-slate-200 dark:bg-slate-800 rounded;
+}
