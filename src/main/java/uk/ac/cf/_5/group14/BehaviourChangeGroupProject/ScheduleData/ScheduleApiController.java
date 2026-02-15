@@ -38,14 +38,47 @@ public class ScheduleApiController {
         }
 
         // Check access rights - only owner can access for now
-        if (!schedule.getUser().getId().equals(user.getId())) {
+        if (schedule.getUser() == null || !schedule.getUser().getId().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 
+        Map<String, Object> metadata = calculateMetadata(schedule);
+        return ResponseEntity.ok(metadata);
+    }
+
+    /**
+     * Get metadata for multiple schedules in a single request (batch)
+     */
+    @GetMapping("/metadata/batch")
+    public ResponseEntity<Map<String, Map<String, Object>>> getBatchMetadata(
+            @RequestParam List<Long> ids,
+            @SessionAttribute(value = "user", required = false) User user) {
+        
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Map<String, Map<String, Object>> result = new HashMap<>();
+        
+        for (Long id : ids) {
+            Schedule schedule = scheduleService.findById(id);
+            if (schedule != null && schedule.getUser() != null && 
+                schedule.getUser().getId().equals(user.getId())) {
+                result.put(id.toString(), calculateMetadata(schedule));
+            }
+        }
+        
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Calculate metadata for a schedule
+     */
+    private Map<String, Object> calculateMetadata(Schedule schedule) {
         List<ScheduleEntry> entries = scheduleEntryService.getEntriesBySchedule(schedule);
         
         // Calculate metadata
-        long uniqueDays = entries.stream()
+        long activeDaysCount = entries.stream()
                 .map(ScheduleEntry::getDayOfWeek)
                 .distinct()
                 .count();
@@ -53,12 +86,12 @@ public class ScheduleApiController {
         int totalExercises = entries.size();
         
         Map<String, Object> metadata = new HashMap<>();
-        metadata.put("sessionsPerWeek", uniqueDays);
-        metadata.put("activeDays", uniqueDays);
+        metadata.put("sessionsPerWeek", activeDaysCount);
+        metadata.put("activeDays", activeDaysCount);
         metadata.put("totalExercises", totalExercises);
-        metadata.put("restDays", 7 - uniqueDays);
+        metadata.put("restDays", 7 - activeDaysCount);
         
-        return ResponseEntity.ok(metadata);
+        return metadata;
     }
 
     /**
@@ -79,7 +112,7 @@ public class ScheduleApiController {
         }
 
         // Check access rights - only owner can access for now
-        if (!schedule.getUser().getId().equals(user.getId())) {
+        if (schedule.getUser() == null || !schedule.getUser().getId().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 
@@ -136,7 +169,7 @@ public class ScheduleApiController {
         }
 
         // Check access rights - can only duplicate own schedules
-        if (!original.getUser().getId().equals(user.getId())) {
+        if (original.getUser() == null || !original.getUser().getId().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 

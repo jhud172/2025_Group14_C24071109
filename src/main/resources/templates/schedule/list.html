@@ -435,35 +435,52 @@
                 calculateInsights();
             });
 
-            // Load schedule metadata (frequency, days)
+            // Load schedule metadata (frequency, days) using batch endpoint
             async function loadScheduleMetadata() {
                 const scheduleMetaElements = document.querySelectorAll('.schedule-meta');
                 
-                for (const metaEl of scheduleMetaElements) {
-                    const scheduleId = metaEl.getAttribute('data-schedule-id');
-                    if (!scheduleId) continue;
+                // Collect all schedule IDs
+                const scheduleIds = Array.from(scheduleMetaElements)
+                    .map(el => el.getAttribute('data-schedule-id'))
+                    .filter(id => id);
+                
+                if (scheduleIds.length === 0) return;
+                
+                try {
+                    // Use batch endpoint to get all metadata in one request
+                    const params = new URLSearchParams();
+                    scheduleIds.forEach(id => params.append('ids', id));
                     
-                    try {
-                        const response = await fetch(`/api/schedules/${scheduleId}/metadata`);
-                        if (response.ok) {
-                            const data = await response.json();
-                            const freqEl = metaEl.querySelector('.schedule-frequency');
-                            const daysEl = metaEl.querySelector('.schedule-days');
+                    const response = await fetch(`/api/schedules/metadata/batch?${params.toString()}`);
+                    if (response.ok) {
+                        const batchData = await response.json();
+                        
+                        // Update each card with its metadata
+                        scheduleMetaElements.forEach(metaEl => {
+                            const scheduleId = metaEl.getAttribute('data-schedule-id');
+                            const data = batchData[scheduleId];
                             
-                            if (freqEl) {
-                                freqEl.textContent = data.sessionsPerWeek ? `${data.sessionsPerWeek} sessions/week` : 'Custom';
+                            if (data) {
+                                const freqEl = metaEl.querySelector('.schedule-frequency');
+                                const daysEl = metaEl.querySelector('.schedule-days');
+                                
+                                if (freqEl) {
+                                    freqEl.textContent = data.sessionsPerWeek ? `${data.sessionsPerWeek} sessions/week` : 'Custom';
+                                }
+                                if (daysEl) {
+                                    daysEl.textContent = data.activeDays ? `${data.activeDays} active days` : 'Not set';
+                                }
                             }
-                            if (daysEl) {
-                                daysEl.textContent = data.activeDays ? `${data.activeDays} active days` : 'Not set';
-                            }
-                        }
-                    } catch (e) {
-                        // Silently fail - use placeholder text
+                        });
+                    }
+                } catch (e) {
+                    // Silently fail - use placeholder text
+                    scheduleMetaElements.forEach(metaEl => {
                         const freqEl = metaEl.querySelector('.schedule-frequency');
                         const daysEl = metaEl.querySelector('.schedule-days');
                         if (freqEl) freqEl.textContent = 'Custom schedule';
                         if (daysEl) daysEl.textContent = 'View details';
-                    }
+                    });
                 }
             }
 
