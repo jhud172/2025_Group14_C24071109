@@ -792,6 +792,10 @@ CREATE TABLE IF NOT EXISTS schedules
     user_id     BIGINT       NOT NULL,
     name        VARCHAR(200) NOT NULL,
     description VARCHAR(500),
+    schedule_type VARCHAR(20) NOT NULL DEFAULT 'WEEKLY',
+    rotation_mode VARCHAR(30) NOT NULL DEFAULT 'WEEKLY_REPEAT',
+    custom_day_count INT NOT NULL DEFAULT 7,
+    template_id VARCHAR(100),
 
     CONSTRAINT fk_schedules_user
         FOREIGN KEY (user_id) REFERENCES users (id)
