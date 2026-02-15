@@ -1,193 +1,405 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Your Schedules', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('Training Control Centre', null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content">
-        <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-6">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="tcc-container">
+            <!-- Page Header -->
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
                 <div>
-                    <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Your schedules</h1>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Manage active plans, shared routines, and apply new schedules.</p>
+                    <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Training Control Centre</h1>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Strategic overview of your training system</p>
                 </div>
-                <a href="/schedules/builder"
-                   class="workout-btn-primary">
+                <button onclick="showCreateModal()"
+                   class="tcc-btn-primary">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
                     Create New Schedule
-                </a>
+                </button>
             </div>
 
-            <section class="mt-8">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Active schedules</h2>
-                    <span class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Live on your calendar</span>
+            <!-- Insights Bar -->
+            <div class="tcc-insights-bar">
+                <div class="tcc-insights-grid">
+                    <div class="tcc-insight-item">
+                        <div class="tcc-insight-value" th:text="${#lists.size(schedules)}">0</div>
+                        <div class="tcc-insight-label">Total Schedules</div>
+                    </div>
+                    <div class="tcc-insight-item">
+                        <div class="tcc-insight-value" th:text="${#lists.size(activeSchedules)}">0</div>
+                        <div class="tcc-insight-label">Active Now</div>
+                    </div>
+                    <div class="tcc-insight-item">
+                        <div class="tcc-insight-value" id="weekly-frequency">—</div>
+                        <div class="tcc-insight-label">Weekly Sessions</div>
+                    </div>
+                    <div class="tcc-insight-item">
+                        <div class="tcc-insight-value" th:text="${sharedSchedules != null ? #lists.size(sharedSchedules) : 0}">0</div>
+                        <div class="tcc-insight-label">Shared Templates</div>
+                    </div>
+                    <div class="tcc-insight-item">
+                        <div class="tcc-insight-value" id="rest-days">—</div>
+                        <div class="tcc-insight-label">Rest Days/Week</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Schedule Status Panel -->
+            <section class="mb-8">
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Active Schedule Status</h2>
+                
+                <div th:if="${#lists.isEmpty(activeSchedules)}" class="tcc-active-empty">
+                    <svg class="tcc-active-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <h3 class="tcc-active-empty-title">No Active Schedule</h3>
+                    <p class="tcc-active-empty-text">Apply a schedule to your calendar to start tracking your training</p>
+                    <button onclick="document.querySelector('.tcc-tab[data-tab=my-schedules]')?.click()" 
+                            class="tcc-btn-primary">
+                        Browse Your Schedules
+                    </button>
                 </div>
 
-                <div th:if="${#lists.isEmpty(activeSchedules)}"
-                     class="mt-4 rounded-2xl border border-slate-200 bg-white/70 p-6 text-slate-600 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
-                    You currently have no active schedules.
-                </div>
-
-                <div class="mt-4 space-y-4">
-                    <div th:each="applied : ${activeSchedules}"
-                         class="rounded-2xl border border-emerald-200 bg-white/90 p-5 shadow-sm backdrop-blur dark:border-emerald-900/40 dark:bg-slate-900/50">
-                        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div th:if="${!#lists.isEmpty(activeSchedules)}">
+                    <div th:each="applied : ${activeSchedules}" class="tcc-active-panel">
+                        <div class="tcc-active-header">
                             <div>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100" th:text="${applied.schedule.name}"></h3>
-                                    <span th:if="${applied.schedule.user != null and applied.schedule.user.id != currentUserId}"
-                                          class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
-                                        Trainer-shared
-                                    </span>
-                                </div>
-                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                                    Applied on <span class="font-semibold" th:text="${applied.dateApplied}"></span>
-                                    <span th:if="${applied.schedule.user != null and applied.schedule.user.id != currentUserId}">
-                                        · Shared by <span class="font-semibold" th:text="${applied.schedule.user.username}"></span>
-                                    </span>
-                                </p>
+                                <h3 class="tcc-active-title" th:text="${applied.schedule.name}">Schedule Name</h3>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1" th:if="${applied.schedule.description}" th:text="${applied.schedule.description}">Description</p>
                             </div>
-
-                            <div class="flex flex-wrap gap-2">
-                                <a th:if="${applied.schedule.user != null and applied.schedule.user.id == currentUserId}"
-                                   th:href="@{'/schedules/' + ${applied.schedule.id} + '/entries'}"
-                                   class="inline-flex items-center justify-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900/50 dark:text-slate-100 dark:ring-slate-800">
-                                    Edit
-                                </a>
-                                <a th:href="@{'/schedules/applied/' + ${applied.id} + '/remove'}"
-                                   class="inline-flex items-center justify-center rounded-xl bg-yellow-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-yellow-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500">
-                                    Remove
-                                </a>
+                            <div class="tcc-active-badge">
+                                <span>Live on Calendar</span>
                             </div>
                         </div>
 
-                        <form th:action="@{'/schedules/applied/' + ${applied.id} + '/settings'}" method="post" class="mt-4 flex flex-col gap-4 border-t border-emerald-100 pt-4 dark:border-emerald-900/40 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="tcc-active-meta">
+                            <div class="tcc-active-meta-item">
+                                <span class="tcc-active-meta-label">Applied On</span>
+                                <span class="tcc-active-meta-value" th:text="${applied.dateApplied}">—</span>
+                            </div>
+                            <div class="tcc-active-meta-item">
+                                <span class="tcc-active-meta-label">Duration</span>
+                                <span class="tcc-active-meta-value" th:text="${applied.durationWeeks} + ' weeks'">—</span>
+                            </div>
+                            <div class="tcc-active-meta-item" th:if="${applied.schedule.user != null and applied.schedule.user.id != currentUserId}">
+                                <span class="tcc-active-meta-label">Shared By</span>
+                                <span class="tcc-active-meta-value">
+                                    <span class="inline-flex items-center gap-2">
+                                        <span th:text="${applied.schedule.user.username}">Trainer</span>
+                                        <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200 text-xs font-semibold">
+                                            Trainer
+                                        </span>
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="tcc-active-actions">
+                            <a th:if="${applied.schedule.user != null and applied.schedule.user.id == currentUserId}"
+                               th:href="@{'/schedules/' + ${applied.schedule.id} + '/entries'}"
+                               class="tcc-btn-secondary">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Edit Schedule
+                            </a>
+                            <button onclick="showSchedulePreview(this)" 
+                                    th:attr="data-schedule-id=${applied.schedule.id}"
+                                    class="tcc-btn-secondary">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Preview
+                            </button>
+                            <a th:href="@{'/schedules/applied/' + ${applied.id} + '/remove'}"
+                               class="tcc-btn-danger"
+                               onclick="return confirm('Remove this schedule from your calendar?')">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                                Remove
+                            </a>
+                        </div>
+
+                        <form th:action="@{'/schedules/applied/' + ${applied.id} + '/settings'}" method="post" 
+                              class="mt-5 pt-5 border-t border-slate-200 dark:border-slate-800 flex flex-wrap gap-4">
                             <input type="hidden" th:if="${_csrf != null}"
                                    th:name="${_csrf.parameterName}"
                                    th:value="${_csrf.token}"/>
                             <input type="hidden" name="shownOnCalendar" value="false" />
                             <input type="hidden" name="requiresLogging" value="false" />
 
-                            <div class="flex flex-wrap gap-4">
-                                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
-                                    <input type="checkbox" name="shownOnCalendar" value="true" th:checked="${applied.shownOnCalendar}"
-                                           class="peer sr-only" onchange="this.form.submit()">
-                                    <span class="relative inline-flex h-5 w-9 items-center rounded-full bg-slate-200 transition peer-checked:bg-emerald-500 dark:bg-slate-700">
-                                        <span class="inline-block h-4 w-4 translate-x-0.5 rounded-full bg-white transition peer-checked:translate-x-4"></span>
-                                    </span>
-                                    Shown on calendar
-                                </label>
-                                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
-                                    <input type="checkbox" name="requiresLogging" value="true" th:checked="${applied.requiresLogging}"
-                                           class="peer sr-only" onchange="this.form.submit()">
-                                    <span class="relative inline-flex h-5 w-9 items-center rounded-full bg-slate-200 transition peer-checked:bg-blue-500 dark:bg-slate-700">
-                                        <span class="inline-block h-4 w-4 translate-x-0.5 rounded-full bg-white transition peer-checked:translate-x-4"></span>
-                                    </span>
-                                    Requires logging
-                                </label>
-                            </div>
-
-                            <div class="text-xs text-slate-500 dark:text-slate-400">
+                            <label class="tcc-toggle-label">
+                                <input type="checkbox" name="shownOnCalendar" value="true" th:checked="${applied.shownOnCalendar}"
+                                       class="sr-only peer" onchange="this.form.submit()">
+                                <span class="tcc-toggle-switch" th:classappend="${applied.shownOnCalendar} ? 'checked' : ''">
+                                    <span class="tcc-toggle-dot" th:classappend="${applied.shownOnCalendar} ? 'checked' : ''"></span>
+                                </span>
+                                Shown on calendar
+                            </label>
+                            <label class="tcc-toggle-label">
+                                <input type="checkbox" name="requiresLogging" value="true" th:checked="${applied.requiresLogging}"
+                                       class="sr-only peer" onchange="this.form.submit()">
+                                <span class="tcc-toggle-switch" th:classappend="${applied.requiresLogging} ? 'checked' : ''">
+                                    <span class="tcc-toggle-dot" th:classappend="${applied.requiresLogging} ? 'checked' : ''"></span>
+                                </span>
+                                Requires logging
+                            </label>
+                            <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center">
                                 Changes save automatically
-                            </div>
+                            </span>
                         </form>
                     </div>
                 </div>
             </section>
 
-            <section class="mt-10">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">All schedules</h2>
-                    <div class="w-full sm:max-w-xs">
-                        <label class="sr-only" for="schedule-search">Search schedules</label>
+            <!-- Status Tabs and Schedule Cards Section -->
+            <section>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">All Schedules</h2>
+                    <div class="tcc-search-bar">
                         <input id="schedule-search" type="text" placeholder="Search schedules..."
-                               class="workout-search-input text-sm" />
+                               class="tcc-search-input" />
                     </div>
                 </div>
 
+                <!-- Status Tabs -->
+                <div class="tcc-tabs">
+                    <button class="tcc-tab active" data-tab="my-schedules" onclick="switchTab('my-schedules')">
+                        My Schedules
+                        <span class="tcc-tab-count" th:text="${#lists.size(schedules)}">0</span>
+                    </button>
+                    <button class="tcc-tab" data-tab="templates" onclick="switchTab('templates')" 
+                            th:if="${sharedSchedules != null and !#lists.isEmpty(sharedSchedules)}">
+                        Shared Templates
+                        <span class="tcc-tab-count" th:text="${#lists.size(sharedSchedules)}">0</span>
+                    </button>
+                </div>
+
+                <!-- Empty search state -->
                 <div id="schedule-search-empty"
-                     class="mt-4 hidden rounded-2xl border border-dashed border-slate-200 bg-white/70 p-6 text-sm text-slate-600 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
+                     class="tcc-hidden mt-4 rounded-2xl border border-dashed border-slate-200 bg-white/70 p-6 text-sm text-slate-600 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
                     No schedules match your search.
                 </div>
 
-                <div class="mt-6 space-y-6">
-                    <div>
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">My schedules</h3>
-                            <span class="text-xs text-slate-500 dark:text-slate-400" th:text="${#lists.size(schedules)} + ' total'"></span>
-                        </div>
+                <!-- My Schedules Tab Content -->
+                <div id="tab-my-schedules" class="tab-content">
+                    <div th:if="${#lists.isEmpty(schedules)}"
+                         class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">No schedules yet</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">Create your first training schedule to get started</p>
+                        <button onclick="showCreateModal()" class="tcc-btn-primary">Create New Schedule</button>
+                    </div>
 
-                        <div th:if="${#lists.isEmpty(schedules)}"
-                             class="mt-3 rounded-2xl border border-slate-200 bg-white/70 p-6 text-sm text-slate-600 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
-                            You haven't created any schedules yet.
-                        </div>
+                    <div class="mt-4 tcc-card-grid">
+                        <div th:each="schedule : ${schedules}"
+                             class="tcc-card schedule-card"
+                             th:attr="data-schedule-name=${#strings.toLowerCase(schedule.name)}">
+                            <div class="tcc-card-header">
+                                <h4 class="tcc-card-title" th:text="${schedule.name}">Schedule Name</h4>
+                                <span class="tcc-card-status-badge status-draft">Draft</span>
+                            </div>
 
-                        <div class="mt-3 grid gap-4 lg:grid-cols-2">
-                            <div th:each="schedule : ${schedules}"
-                                 class="schedule-card rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900/50"
-                                 th:attr="data-schedule-name=${#strings.toLowerCase(schedule.name)}">
-                                <div class="flex flex-col gap-3">
-                                    <div>
-                                        <h4 class="text-base font-semibold text-slate-900 dark:text-slate-100" th:text="${schedule.name}"></h4>
-                                        <p th:if="${schedule.description}" class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${schedule.description}"></p>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2">
-                                        <a th:href="@{'/schedules/' + ${schedule.id} + '/entries'}"
-                                           class="inline-flex items-center justify-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900/50 dark:text-slate-100 dark:ring-slate-800">
-                                            Edit
-                                        </a>
-                                        <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}"
-                                           class="workout-btn-primary py-1.5 px-3 text-xs">
-                                            Apply to Calendar
-                                        </a>
-                                        <a th:href="@{'/schedules/' + ${schedule.id} + '/delete'}"
-                                           class="inline-flex items-center justify-center rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">
-                                            Delete
-                                        </a>
-                                    </div>
+                            <p th:if="${schedule.description}" 
+                               class="tcc-card-description" 
+                               th:text="${schedule.description}">
+                                Description of the schedule
+                            </p>
+
+                            <div class="tcc-card-meta" id="schedule-meta" th:attr="data-schedule-id=${schedule.id}">
+                                <div class="tcc-card-meta-item">
+                                    <svg class="tcc-card-meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span class="tcc-card-meta-text schedule-frequency">Loading...</span>
                                 </div>
+                                <div class="tcc-card-meta-item">
+                                    <svg class="tcc-card-meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                    <span class="tcc-card-meta-text schedule-days">Loading...</span>
+                                </div>
+                            </div>
+
+                            <div class="tcc-card-footer">
+                                <a th:href="@{'/schedules/' + ${schedule.id} + '/entries'}"
+                                   class="tcc-card-action-secondary">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    Edit
+                                </a>
+                                <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}"
+                                   class="tcc-card-action-primary">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Apply
+                                </a>
+                                <button onclick="duplicateSchedule(this)" 
+                                        th:attr="data-schedule-id=${schedule.id}"
+                                        class="tcc-card-action-secondary">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                    Duplicate
+                                </button>
+                                <a th:href="@{'/schedules/' + ${schedule.id} + '/delete'}"
+                                   class="tcc-card-action-danger"
+                                   onclick="return confirm('Delete this schedule? This cannot be undone.')">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Delete
+                                </a>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div th:if="${sharedSchedules != null and !#lists.isEmpty(sharedSchedules)}">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Trainer-shared schedules</h3>
-                            <span class="text-xs text-slate-500 dark:text-slate-400">Shared with you</span>
-                        </div>
+                <!-- Shared Templates Tab Content -->
+                <div id="tab-templates" class="tab-content tcc-hidden" th:if="${sharedSchedules != null and !#lists.isEmpty(sharedSchedules)}">
+                    <div class="mt-4 tcc-card-grid">
+                        <div th:each="schedule : ${sharedSchedules}"
+                             class="tcc-template-card schedule-card"
+                             th:attr="data-schedule-name=${#strings.toLowerCase(schedule.name)}">
+                            <div class="tcc-card-header">
+                                <h4 class="tcc-card-title" th:text="${schedule.name}">Template Name</h4>
+                                <span class="tcc-template-badge">
+                                    <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                    Trainer Template
+                                </span>
+                            </div>
 
-                        <div class="mt-3 grid gap-4 lg:grid-cols-2">
-                            <div th:each="schedule : ${sharedSchedules}"
-                                 class="schedule-card rounded-2xl border border-indigo-200 bg-indigo-50/70 p-5 shadow-sm backdrop-blur transition hover:shadow-md dark:border-indigo-900/40 dark:bg-indigo-950/30"
-                                 th:attr="data-schedule-name=${#strings.toLowerCase(schedule.name)}">
-                                <div class="flex flex-col gap-3">
-                                    <div>
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <h4 class="text-base font-semibold text-slate-900 dark:text-slate-100" th:text="${schedule.name}"></h4>
-                                            <span class="rounded-full bg-indigo-200 px-2 py-0.5 text-xs font-semibold text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-200">Trainer-shared</span>
-                                        </div>
-                                        <p class="mt-1 text-sm text-slate-700 dark:text-slate-200">
-                                            Shared by <span class="font-semibold" th:text="${schedule.user.username}"></span>
-                                        </p>
-                                        <p th:if="${schedule.description}" class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${schedule.description}"></p>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2">
-                                        <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}"
-                                           class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-                                            Apply
-                                        </a>
-                                    </div>
-                                </div>
+                            <p class="text-sm text-slate-700 dark:text-slate-300 mb-2">
+                                Shared by <span class="font-semibold" th:text="${schedule.user.username}">Trainer</span>
+                            </p>
+
+                            <p th:if="${schedule.description}" 
+                               class="tcc-card-description" 
+                               th:text="${schedule.description}">
+                                Template description
+                            </p>
+
+                            <div class="tcc-card-footer">
+                                <button onclick="showSchedulePreview(this)" 
+                                        th:attr="data-schedule-id=${schedule.id}"
+                                        class="tcc-card-action-secondary">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    Preview
+                                </button>
+                                <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}"
+                                   class="tcc-card-action-primary">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Apply Template
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
         </div>
+
+        <!-- Create Schedule Modal -->
+        <div id="create-modal" class="tcc-preview-overlay tcc-hidden" onclick="if(event.target === this) hideCreateModal()">
+            <div class="tcc-preview-modal max-w-2xl" onclick="event.stopPropagation()">
+                <div class="tcc-preview-header">
+                    <h3 class="tcc-preview-title">Create New Schedule</h3>
+                    <button onclick="hideCreateModal()" class="tcc-preview-close">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="tcc-preview-body">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <a href="/schedules/builder" 
+                           class="group p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-emerald-500 dark:hover:border-emerald-500 hover:shadow-lg transition-all duration-200">
+                            <div class="flex flex-col items-center text-center gap-3">
+                                <div class="w-14 h-14 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500 transition-all duration-200">
+                                    <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 dark:text-slate-100 mb-1">Create from Scratch</h4>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400">Build a custom schedule using the builder</p>
+                                </div>
+                            </div>
+                        </a>
+
+                        <button onclick="document.querySelector('.tcc-tab[data-tab=templates]')?.click(); hideCreateModal();" 
+                                th:if="${sharedSchedules != null and !#lists.isEmpty(sharedSchedules)}"
+                                class="group p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-lg transition-all duration-200">
+                            <div class="flex flex-col items-center text-center gap-3">
+                                <div class="w-14 h-14 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500 transition-all duration-200">
+                                    <svg class="w-7 h-7 text-indigo-600 dark:text-indigo-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 dark:text-slate-100 mb-1">Use a Template</h4>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400">Start from a trainer-shared template</p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Preview Modal (placeholder for future implementation) -->
+        <div id="preview-modal" class="tcc-preview-overlay tcc-hidden" onclick="if(event.target === this) hidePreviewModal()">
+            <div class="tcc-preview-modal" onclick="event.stopPropagation()">
+                <div class="tcc-preview-header">
+                    <h3 class="tcc-preview-title" id="preview-title">Schedule Preview</h3>
+                    <button onclick="hidePreviewModal()" class="tcc-preview-close">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="tcc-preview-body">
+                    <div id="preview-content" class="text-center py-8">
+                        <div class="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p class="mt-4 text-slate-600 dark:text-slate-400">Loading preview...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <th:block th:fragment="pageScripts">
         <script>
+            // Tab Switching
+            function switchTab(tabName) {
+                // Update tab buttons
+                document.querySelectorAll('.tcc-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`.tcc-tab[data-tab="${tabName}"]`)?.classList.add('active');
+                
+                // Update tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('tcc-hidden');
+                });
+                document.getElementById(`tab-${tabName}`)?.classList.remove('tcc-hidden');
+            }
+
+            // Search Functionality
             document.addEventListener("DOMContentLoaded", () => {
                 const input = document.getElementById("schedule-search");
                 const cards = document.querySelectorAll("[data-schedule-name]");
@@ -200,19 +412,233 @@
                     cards.forEach(card => {
                         const name = card.getAttribute("data-schedule-name") || "";
                         const show = term.length === 0 || name.includes(term);
-                        card.classList.toggle("hidden", !show);
+                        card.classList.toggle("tcc-hidden", !show);
                         if (show) {
                             visible += 1;
                         }
                     });
 
                     if (emptyState) {
-                        emptyState.classList.toggle("hidden", term.length === 0 || visible > 0);
+                        emptyState.classList.toggle("tcc-hidden", term.length === 0 || visible > 0);
                     }
                 };
 
                 if (input) {
                     input.addEventListener("input", runFilter);
+                }
+
+                // Load schedule metadata
+                loadScheduleMetadata();
+                
+                // Calculate insights
+                calculateInsights();
+            });
+
+            // Load schedule metadata (frequency, days)
+            async function loadScheduleMetadata() {
+                const scheduleMetaElements = document.querySelectorAll('[id="schedule-meta"]');
+                
+                for (const metaEl of scheduleMetaElements) {
+                    const scheduleId = metaEl.getAttribute('data-schedule-id');
+                    if (!scheduleId) continue;
+                    
+                    try {
+                        const response = await fetch(`/api/schedules/${scheduleId}/metadata`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            const freqEl = metaEl.querySelector('.schedule-frequency');
+                            const daysEl = metaEl.querySelector('.schedule-days');
+                            
+                            if (freqEl) {
+                                freqEl.textContent = data.sessionsPerWeek ? `${data.sessionsPerWeek} sessions/week` : 'Custom';
+                            }
+                            if (daysEl) {
+                                freqEl.textContent = data.activeDays ? `${data.activeDays} active days` : 'Not set';
+                            }
+                        }
+                    } catch (e) {
+                        // Silently fail - use placeholder text
+                        const freqEl = metaEl.querySelector('.schedule-frequency');
+                        const daysEl = metaEl.querySelector('.schedule-days');
+                        if (freqEl) freqEl.textContent = 'Custom schedule';
+                        if (daysEl) daysEl.textContent = 'View details';
+                    }
+                }
+            }
+
+            // Calculate insights from active schedules
+            function calculateInsights() {
+                const activeSchedules = document.querySelectorAll('.tcc-active-panel');
+                
+                // For now, use placeholder calculations
+                // In a real implementation, this would fetch data from the server
+                const weeklyFreqEl = document.getElementById('weekly-frequency');
+                const restDaysEl = document.getElementById('rest-days');
+                
+                if (activeSchedules.length > 0) {
+                    if (weeklyFreqEl) weeklyFreqEl.textContent = '4-5';
+                    if (restDaysEl) restDaysEl.textContent = '2-3';
+                } else {
+                    if (weeklyFreqEl) weeklyFreqEl.textContent = '—';
+                    if (restDaysEl) restDaysEl.textContent = '—';
+                }
+            }
+
+            // Create Modal Functions
+            function showCreateModal() {
+                document.getElementById('create-modal')?.classList.remove('tcc-hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function hideCreateModal() {
+                document.getElementById('create-modal')?.classList.add('tcc-hidden');
+                document.body.style.overflow = '';
+            }
+
+            // Preview Modal Functions
+            function showSchedulePreview(button) {
+                const scheduleId = button.getAttribute('data-schedule-id');
+                const modal = document.getElementById('preview-modal');
+                
+                if (!modal) return;
+                
+                modal.classList.remove('tcc-hidden');
+                document.body.style.overflow = 'hidden';
+                
+                // Load preview data
+                loadSchedulePreview(scheduleId);
+            }
+
+            function hidePreviewModal() {
+                document.getElementById('preview-modal')?.classList.add('tcc-hidden');
+                document.body.style.overflow = '';
+            }
+
+            async function loadSchedulePreview(scheduleId) {
+                const contentEl = document.getElementById('preview-content');
+                const titleEl = document.getElementById('preview-title');
+                
+                if (!contentEl) return;
+                
+                try {
+                    const response = await fetch(`/api/schedules/${scheduleId}/preview`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (titleEl) {
+                            titleEl.textContent = data.name || 'Schedule Preview';
+                        }
+                        
+                        // Render weekly preview
+                        contentEl.innerHTML = renderWeeklyPreview(data);
+                    } else {
+                        contentEl.innerHTML = `
+                            <div class="text-center py-8">
+                                <p class="text-slate-600 dark:text-slate-400">Preview not available</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-500 mt-2">This schedule needs to be configured first.</p>
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    contentEl.innerHTML = `
+                        <div class="text-center py-8">
+                            <p class="text-rose-600 dark:text-rose-400">Failed to load preview</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-500 mt-2">Please try again later.</p>
+                        </div>
+                    `;
+                }
+            }
+
+            function renderWeeklyPreview(data) {
+                const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                
+                let html = '<div class="tcc-preview-week-grid">';
+                
+                days.forEach((day, index) => {
+                    const dayNum = index + 1;
+                    const dayEntries = (data.entries || []).filter(e => e.dayOfWeek === dayNum);
+                    
+                    html += `
+                        <div class="tcc-preview-day">
+                            <div class="tcc-preview-day-header">${day}</div>
+                            <div class="tcc-preview-day-content">
+                    `;
+                    
+                    if (dayEntries.length > 0) {
+                        dayEntries.forEach(entry => {
+                            const exerciseName = entry.customExercise?.name || entry.exercise?.name || 'Exercise';
+                            html += `<div class="tcc-preview-workout">${exerciseName}</div>`;
+                        });
+                    } else {
+                        html += `<div class="tcc-preview-rest">Rest day</div>`;
+                    }
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                return html;
+            }
+
+            // Duplicate Schedule Function
+            async function duplicateSchedule(button) {
+                const scheduleId = button.getAttribute('data-schedule-id');
+                
+                if (!confirm('Duplicate this schedule? A copy will be created with "(Copy)" appended to the name.')) {
+                    return;
+                }
+                
+                button.disabled = true;
+                button.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>';
+                
+                try {
+                    const response = await fetch(`/api/schedules/${scheduleId}/duplicate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    
+                    if (response.ok) {
+                        // Reload page to show the new schedule
+                        window.location.reload();
+                    } else {
+                        alert('Failed to duplicate schedule. Please try again.');
+                        button.disabled = false;
+                        button.innerHTML = `
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            Duplicate
+                        `;
+                    }
+                } catch (e) {
+                    alert('An error occurred. Please try again.');
+                    button.disabled = false;
+                    button.innerHTML = `
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        Duplicate
+                    `;
+                }
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Escape key closes modals
+                if (e.key === 'Escape') {
+                    hideCreateModal();
+                    hidePreviewModal();
+                }
+                
+                // Ctrl/Cmd + K opens search
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.getElementById('schedule-search')?.focus();
                 }
             });
         </script>
