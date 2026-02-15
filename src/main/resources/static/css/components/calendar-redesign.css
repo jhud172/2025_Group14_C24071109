@@ -1185,6 +1185,128 @@
   }
 }
 
+/* ===== WEEK VIEW SPECIFIC STYLES ===== */
+/* Week strip - the horizontal day selector */
+.calendar-week-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(226, 232, 240);
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .calendar-week-strip {
+  border-color: rgb(51, 65, 85);
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.calendar-week-strip-label {
+  padding: 0 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(148, 163, 184);
+}
+
+.calendar-week-day-item {
+  flex: 1;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.calendar-week-day-item:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.calendar-week-day-item.active {
+  background: rgba(59, 130, 246, 0.15);
+  color: rgb(29, 78, 216);
+  font-weight: 600;
+}
+
+.dark .calendar-week-day-item.active {
+  color: rgb(96, 165, 250);
+}
+
+/* Week view day cards are taller than month view */
+.calendar-week-view .calendar-day-card {
+  min-height: 18rem; /* h-72 equivalent */
+}
+
+@media (min-width: 640px) {
+  .calendar-week-view .calendar-day-card {
+    min-height: 20rem; /* h-80 equivalent */
+  }
+}
+
+/* Week view specific responsive adjustments */
+@media (max-width: 640px) {
+  /* Smaller week cards on mobile */
+  .calendar-week-view .calendar-day-card {
+    min-height: 14rem;
+  }
+  
+  /* Week strip adjustments */
+  .calendar-week-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .calendar-week-day-item {
+    flex: 0 0 auto;
+    min-width: 3.5rem;
+    padding: 0.375rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Ensure week grid doesn't get too cramped */
+  .calendar-week-view .calendar-month-grid {
+    gap: 0.5rem;
+  }
+  
+  /* Reduce singular list height for week view on mobile */
+  .calendar-week-view .calendar-singular-list {
+    max-height: 10rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens - make week view more compact */
+  .calendar-week-view .calendar-day-card {
+    min-height: 12rem;
+  }
+  
+  .calendar-week-view .calendar-month-grid {
+    gap: 0.375rem;
+  }
+  
+  .calendar-week-view .calendar-day-number {
+    font-size: 1rem;
+  }
+  
+  /* Week strip ultra-compact */
+  .calendar-week-day-item {
+    min-width: 3rem;
+    padding: 0.25rem;
+    font-size: 0.6875rem;
+  }
+  
+  /* Stack week title on very small screens */
+  .calendar-week-title {
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+}
+
 /* ===== PRINT STYLES ===== */
 @media print {
   .calendar-day-card {
@@ -1195,7 +1317,8 @@
   .calendar-heat-icons,
   .calendar-nav-controls,
   .calendar-view-toggle,
-  .calendar-mode-indicator {
+  .calendar-mode-indicator,
+  .calendar-week-strip {
     display: none;
   }
 }

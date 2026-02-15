@@ -2850,6 +2850,117 @@ html:not(.dark) .week-day-card:has(.workout-badge.badge-success:is(.dark *)) {
     transition: none;
   }
 }
+/* ===== WEEK VIEW SPECIFIC STYLES ===== */
+/* Week strip - the horizontal day selector */
+.calendar-week-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(226, 232, 240);
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.dark .calendar-week-strip {
+  border-color: rgb(51, 65, 85);
+  background: rgba(15, 23, 42, 0.4);
+}
+.calendar-week-strip-label {
+  padding: 0 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(148, 163, 184);
+}
+.calendar-week-day-item {
+  flex: 1;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.calendar-week-day-item:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+.calendar-week-day-item.active {
+  background: rgba(59, 130, 246, 0.15);
+  color: rgb(29, 78, 216);
+  font-weight: 600;
+}
+.dark .calendar-week-day-item.active {
+  color: rgb(96, 165, 250);
+}
+/* Week view day cards are taller than month view */
+.calendar-week-view .calendar-day-card {
+  min-height: 18rem; /* h-72 equivalent */
+}
+@media (min-width: 640px) {
+  .calendar-week-view .calendar-day-card {
+    min-height: 20rem; /* h-80 equivalent */
+  }
+}
+/* Week view specific responsive adjustments */
+@media (max-width: 640px) {
+  /* Smaller week cards on mobile */
+  .calendar-week-view .calendar-day-card {
+    min-height: 14rem;
+  }
+  
+  /* Week strip adjustments */
+  .calendar-week-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .calendar-week-day-item {
+    flex: 0 0 auto;
+    min-width: 3.5rem;
+    padding: 0.375rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Ensure week grid doesn't get too cramped */
+  .calendar-week-view .calendar-month-grid {
+    gap: 0.5rem;
+  }
+  
+  /* Reduce singular list height for week view on mobile */
+  .calendar-week-view .calendar-singular-list {
+    max-height: 10rem;
+  }
+}
+@media (max-width: 480px) {
+  /* Extra small screens - make week view more compact */
+  .calendar-week-view .calendar-day-card {
+    min-height: 12rem;
+  }
+  
+  .calendar-week-view .calendar-month-grid {
+    gap: 0.375rem;
+  }
+  
+  .calendar-week-view .calendar-day-number {
+    font-size: 1rem;
+  }
+  
+  /* Week strip ultra-compact */
+  .calendar-week-day-item {
+    min-width: 3rem;
+    padding: 0.25rem;
+    font-size: 0.6875rem;
+  }
+  
+  /* Stack week title on very small screens */
+  .calendar-week-title {
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+}
 /* ===== PRINT STYLES ===== */
 @media print {
   .calendar-day-card {
@@ -2861,7 +2972,8 @@ html:not(.dark) .week-day-card:has(.workout-badge.badge-success:is(.dark *)) {
   .calendar-heat-icons,
   .calendar-nav-controls,
   .calendar-view-toggle,
-  .calendar-mode-indicator {
+  .calendar-mode-indicator,
+  .calendar-week-strip {
     display: none;
   }
 }
@@ -9704,9 +9816,6 @@ html.dark .profile-badge-unverified {
 .z-30 {
   z-index: 30;
 }
-.z-40 {
-  z-index: 40;
-}
 .z-50 {
   z-index: 50;
 }
@@ -10007,9 +10116,6 @@ html.dark .profile-badge-unverified {
 .h-\[90\%\] {
   height: 90%;
 }
-.h-\[calc\(100\%-73px\)\] {
-  height: calc(100% - 73px);
-}
 .h-auto {
   height: auto;
 }
@@ -10154,9 +10260,6 @@ html.dark .profile-badge-unverified {
 .w-\[22\.5rem\] {
   width: 22.5rem;
 }
-.w-\[22rem\] {
-  width: 22rem;
-}
 .w-\[28rem\] {
   width: 28rem;
 }
@@ -10242,9 +10345,6 @@ html.dark .profile-badge-unverified {
 }
 .max-w-\[80\%\] {
   max-width: 80%;
-}
-.max-w-\[85vw\] {
-  max-width: 85vw;
 }
 .max-w-\[calc\(100vw-2rem\)\] {
   max-width: calc(100vw - 2rem);
@@ -11151,9 +11251,6 @@ html.dark .profile-badge-unverified {
 .bg-slate-50\/60 {
   background-color: rgb(248 250 252 / 0.6);
 }
-.bg-slate-50\/70 {
-  background-color: rgb(248 250 252 / 0.7);
-}
 .bg-slate-500\/10 {
   background-color: rgb(100 116 139 / 0.1);
 }
@@ -11163,9 +11260,6 @@ html.dark .profile-badge-unverified {
 }
 .bg-slate-900\/60 {
   background-color: rgb(15 23 42 / 0.6);
-}
-.bg-slate-900\/70 {
-  background-color: rgb(15 23 42 / 0.7);
 }
 .bg-slate-900\/95 {
   background-color: rgb(15 23 42 / 0.95);
@@ -11290,11 +11384,6 @@ html.dark .profile-badge-unverified {
   --tw-gradient-to: rgb(16 185 129 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
-.from-emerald-600 {
-  --tw-gradient-from: #059669 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(5 150 105 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
 .from-indigo-500 {
   --tw-gradient-from: #6366f1 var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(99 102 241 / 0) var(--tw-gradient-to-position);
@@ -11410,10 +11499,6 @@ html.dark .profile-badge-unverified {
 }
 .bg-\[size\:32px_32px\] {
   background-size: 32px 32px;
-}
-.bg-clip-text {
-  -webkit-background-clip: text;
-          background-clip: text;
 }
 .object-cover {
   -o-object-fit: cover;
@@ -11711,9 +11796,6 @@ html.dark .profile-badge-unverified {
 }
 .leading-snug {
   line-height: 1.375;
-}
-.leading-tight {
-  line-height: 1.25;
 }
 .tracking-\[0\.2em\] {
   letter-spacing: 0.2em;
@@ -12015,9 +12097,6 @@ html.dark .profile-badge-unverified {
 .text-slate-900\/70 {
   color: rgb(15 23 42 / 0.7);
 }
-.text-transparent {
-  color: transparent;
-}
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
@@ -12198,9 +12277,6 @@ html.dark .profile-badge-unverified {
 .ring-blue-400\/50 {
   --tw-ring-color: rgb(96 165 250 / 0.5);
 }
-.ring-blue-500\/80 {
-  --tw-ring-color: rgb(59 130 246 / 0.8);
-}
 .ring-emerald-200 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(167 243 208 / var(--tw-ring-opacity, 1));
@@ -12210,9 +12286,6 @@ html.dark .profile-badge-unverified {
 }
 .ring-emerald-500\/30 {
   --tw-ring-color: rgb(16 185 129 / 0.3);
-}
-.ring-emerald-500\/70 {
-  --tw-ring-color: rgb(16 185 129 / 0.7);
 }
 .ring-emerald-600\/20 {
   --tw-ring-color: rgb(5 150 105 / 0.2);
@@ -12832,9 +12905,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
   --tw-bg-opacity: 1;
   background-color: rgb(219 234 254 / var(--tw-bg-opacity, 1));
 }
-.hover\:bg-blue-100\/70:hover {
-  background-color: rgb(219 234 254 / 0.7);
-}
 .hover\:bg-blue-700:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(29 78 216 / var(--tw-bg-opacity, 1));
@@ -12926,9 +12996,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 }
 .hover\:bg-white\/5:hover {
   background-color: rgb(255 255 255 / 0.05);
-}
-.hover\:bg-white\/90:hover {
-  background-color: rgb(255 255 255 / 0.9);
 }
 .hover\:bg-yellow-700:hover {
   --tw-bg-opacity: 1;
@@ -13562,11 +13629,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
   --tw-gradient-to: rgb(30 58 138 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
-.dark\:from-emerald-400:is(.dark *) {
-  --tw-gradient-from: #34d399 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(52 211 153 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
 .dark\:from-emerald-500\/5:is(.dark *) {
   --tw-gradient-from: rgb(16 185 129 / 0.05) var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(16 185 129 / 0) var(--tw-gradient-to-position);
@@ -13608,9 +13670,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:via-slate-950\/80:is(.dark *) {
   --tw-gradient-to: rgb(2 6 23 / 0)  var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), rgb(2 6 23 / 0.8) var(--tw-gradient-via-position), var(--tw-gradient-to);
-}
-.dark\:to-emerald-300:is(.dark *) {
-  --tw-gradient-to: #6ee7b7 var(--tw-gradient-to-position);
 }
 .dark\:to-indigo-900\/20:is(.dark *) {
   --tw-gradient-to: rgb(49 46 129 / 0.2) var(--tw-gradient-to-position);
