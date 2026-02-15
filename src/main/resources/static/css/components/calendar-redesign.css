@@ -1133,12 +1133,33 @@
     width: 100%;
     max-width: 100%;
   }
+  
+  /* View toggle remains visible on mobile - user can switch between month/week */
+  .calendar-view-toggle {
+    display: flex;
+  }
+  
+  /* Hide mode indicator on small screens to save space */
+  .calendar-mode-indicator {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
-  /* Hide view toggle on mobile - moved to navbar */
-  .calendar-view-toggle.desktop-only {
-    display: none;
+  /* View toggle stays visible on mobile */
+  .calendar-view-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .calendar-view-btn {
+    flex: 1;
+  }
+  
+  /* Stack controls vertically on mobile */
+  .calendar-top-controls {
+    flex-direction: column;
+    gap: 0.75rem;
   }
 }
 

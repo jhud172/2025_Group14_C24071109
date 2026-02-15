@@ -27,25 +27,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
     // ===== MODE INFO MODAL =====
-    const modeInfoBtn = document.getElementById("modeInfoBtn");
+    const modeInfoBtn = document.querySelector("[data-mode-info-toggle]");
     const modeInfoModal = document.getElementById("modeInfoModal");
-    const closeModeModalBtn = document.getElementById("closeModeModal");
+    const closeModeModalBtn = modeInfoModal?.querySelector("[data-mode-modal-close]");
     
     function openModeInfoModal() {
         if (!modeInfoModal) return;
         modeInfoModal.classList.add("open");
+        modeInfoModal.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
     }
     
     function closeModeInfoModal() {
         if (!modeInfoModal) return;
         modeInfoModal.classList.remove("open");
+        modeInfoModal.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
     }
     
     modeInfoBtn?.addEventListener("click", openModeInfoModal);
     closeModeModalBtn?.addEventListener("click", closeModeInfoModal);
-    modeInfoModal?.querySelector(".calendar-mode-modal")?.addEventListener("click", (e) => {
+    
+    // Click outside to close
+    modeInfoModal?.addEventListener("click", (e) => {
         if (e.target === modeInfoModal) {
             closeModeInfoModal();
         }

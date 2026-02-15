@@ -92,7 +92,7 @@
                     <div class="flex-shrink-0" style="width:33.333333%;" data-month-pane-slot="current">
                         <div th:fragment="monthPane" th:attr="data-year=${year},data-month=${month}" data-month-pane class="min-w-full w-full">
                             <div class="calendar-month-container">
-                                <div class="calendar-day-headers">
+                                <div class="calendar-day-headers grid grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm">
                                     <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
                                 </div>
                                 <div class="calendar-month-grid grid grid-cols-7">
@@ -147,14 +147,14 @@
                                                 <svg class="calendar-empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                 </svg>
-                                                <span class="text-xs text-slate-500 dark:text-slate-400">Free day</span>
+                                                <span class="calendar-empty-state-text">Free day</span>
                                             </div>
                                             <!-- Detailed mode (COMBINED_LIST) -->
                                             <div th:if="${!grouped}" class="calendar-singular-list">
                                                 <div th:each="task,iter : ${tasks}"
                                                      th:if="${iter.index < 4}"
                                                      class="calendar-item"
-                                                     th:classappend="${task.completed} ? ' calendar-item--complete' : ''"
+                                                     th:classappend="${task.completed} ? ' completed' : ''"
                                                      th:attr="data-type='task',
                                                               data-id=${task.id},
                                                               data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
@@ -169,13 +169,13 @@
                                                     </div>
                                                     <div th:if="${task.completed}" class="calendar-item-check">✓</div>
                                                 </div>
-                                                <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="calendar-item-more" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
+                                                <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="calendar-more-link" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
                                                 <div th:if="${tTotal > 0 and sTotal > 0}" class="my-1 border-t border-white/10"></div>
                                                 <div th:each="occ,iter : ${sched}"
                                                      th:if="${iter.index < 3}"
                                                      th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
-                                                     class="calendar-item calendar-item--workout"
-                                                     th:classappend="${occ.completed} ? ' calendar-item--complete' : ''"
+                                                     class="calendar-item"
+                                                     th:classappend="${occ.completed} ? ' completed' : ''"
                                                      th:attr="data-id=${occ.id},
                                                               data-type='workout',
                                                               data-title=${occTitle},
@@ -189,18 +189,19 @@
                                                     </div>
                                                     <div th:if="${occ.completed}" class="calendar-item-check">✓</div>
                                                 </div>
-                                                <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="calendar-item-more" th:text="${'+' + (sTotal - 3) + ' more schedules'}"></a>
+                                                <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="calendar-more-link" th:text="${'+' + (sTotal - 3) + ' more schedules'}"></a>
                                             </div>
                                             <!-- Grouped mode (SEPARATED_BY_CATEGORY) -->
                                             <div th:if="${grouped}" class="space-y-3">
                                                 <div class="calendar-grouped-section">
                                                     <div class="calendar-grouped-header">
-                                                        <span>Tasks</span><span th:text="${tTotal}"></span>
+                                                        <span class="calendar-grouped-label">Tasks</span>
+                                                        <span class="calendar-grouped-count" th:text="${tTotal}"></span>
                                                     </div>
                                                     <div class="calendar-grouped-items">
                                                         <div th:each="task,iter : ${tasks}" th:if="${iter.index < 2}"
                                                              class="calendar-grouped-item"
-                                                             th:classappend="${task.completed} ? ' line-through text-emerald-600' : ''"
+                                                             th:classappend="${task.completed} ? ' completed' : ''"
                                                              th:attr="data-type='task',data-id=${task.id},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-completed=${task.completed}">
                                                             <span class="truncate" th:text="${task.title}"></span>
                                                         </div>
@@ -208,12 +209,14 @@
                                                 </div>
                                                 <div class="calendar-grouped-section">
                                                     <div class="calendar-grouped-header">
-                                                        <span>Schedules</span><span th:text="${sTotal}"></span>
+                                                        <span class="calendar-grouped-label">Schedules</span>
+                                                        <span class="calendar-grouped-count" th:text="${sTotal}"></span>
                                                     </div>
                                                     <div class="calendar-grouped-items">
                                                         <div th:each="occ,iter : ${sched}" th:if="${iter.index < 2}"
                                                              th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
                                                              class="calendar-grouped-item"
+                                                             th:classappend="${occ.completed} ? ' completed' : ''"
                                                              th:attr="data-type='occurrence',data-id=${occ.id},data-title=${occTitle},data-notes=${occ.scheduleName},data-time='—',data-completed=${occ.completed},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
                                                             <span class="truncate" th:text="${occTitle}"></span>
                                                         </div>
@@ -270,29 +273,35 @@
     </div>
 
     <div id="modeInfoModal" class="calendar-mode-modal" aria-hidden="true">
-        <div class="calendar-mode-modal-overlay" data-mode-modal-overlay></div>
-        <div class="calendar-mode-modal-content" data-mode-modal-panel>
-            <div class="flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-800">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Display Modes</h2>
-                <button type="button" class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800" data-mode-modal-close>
+        <div class="calendar-mode-modal-content">
+            <div class="calendar-mode-modal-header">
+                <h2 class="calendar-mode-modal-title">Display Modes</h2>
+            </div>
+            <div class="calendar-mode-modal-body">
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">Detailed Mode</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                            Shows all tasks and schedules in a single, combined list with full details including time, completion status, and notes. 
+                            Perfect for viewing all your activities at a glance with maximum information density.
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">Grouped Mode</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                            Organizes tasks and schedules into separate categories for cleaner visual separation. 
+                            Ideal for quickly distinguishing between different types of activities and maintaining a focused view.
+                        </p>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                        You can change your display preference anytime using the toggle above or in your <a href="/preferences" class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 underline">user preferences</a>.
+                    </p>
+                </div>
+            </div>
+            <div class="calendar-mode-modal-footer">
+                <button type="button" class="calendar-mode-modal-btn calendar-mode-modal-btn-secondary" data-mode-modal-close>
                     Close
                 </button>
-            </div>
-            <div class="mt-4 space-y-4">
-                <div>
-                    <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Detailed Mode</h3>
-                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                        Shows all tasks and schedules in a single, combined list with full details including time, completion status, and notes. 
-                        Perfect for viewing all your activities at a glance with maximum information density.
-                    </p>
-                </div>
-                <div>
-                    <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Grouped Mode</h3>
-                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                        Organizes tasks and schedules into separate categories for cleaner visual separation. 
-                        Ideal for quickly distinguishing between different types of activities and maintaining a focused view.
-                    </p>
-                </div>
             </div>
         </div>
     </div>
