@@ -71,6 +71,9 @@ public class ScheduleController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ScheduleTemplateService scheduleTemplateService;
+
     @GetMapping("")
     public String listSchedules(@SessionAttribute("user") User user, Model model) {
         List<Schedule> all = scheduleService.findByUser(user);
@@ -309,6 +312,7 @@ public class ScheduleController {
 
         model.addAttribute("days", new String[]{"Mon","Tue","Wed","Thu","Fri","Sat","Sun"});
         model.addAttribute("schedule", new Schedule());
+        model.addAttribute("templates", scheduleTemplateService.getAllTemplates());
 
         return "schedule/builder";
     }
@@ -318,6 +322,10 @@ public class ScheduleController {
     public String saveBuilder(
             @RequestParam String payload,
             @RequestParam String name,
+            @RequestParam(required = false, defaultValue = "WEEKLY") String scheduleType,
+            @RequestParam(required = false, defaultValue = "WEEKLY_REPEAT") String rotationMode,
+            @RequestParam(required = false, defaultValue = "7") Integer customDayCount,
+            @RequestParam(required = false) String templateId,
             @SessionAttribute("user") User user
     ) throws Exception {
 
@@ -327,6 +335,27 @@ public class ScheduleController {
         Schedule schedule = new Schedule();
         schedule.setName(name);
         schedule.setUser(user);
+        
+        // Set schedule type and rotation mode with error handling
+        try {
+            schedule.setScheduleType(ScheduleType.valueOf(scheduleType));
+        } catch (IllegalArgumentException e) {
+            // Log warning and default to WEEKLY for invalid schedule type
+            System.err.println("Warning: Invalid schedule type '" + scheduleType + "', defaulting to WEEKLY");
+            schedule.setScheduleType(ScheduleType.WEEKLY);
+        }
+        
+        try {
+            schedule.setRotationMode(RotationMode.valueOf(rotationMode));
+        } catch (IllegalArgumentException e) {
+            // Log warning and default to WEEKLY_REPEAT for invalid rotation mode
+            System.err.println("Warning: Invalid rotation mode '" + rotationMode + "', defaulting to WEEKLY_REPEAT");
+            schedule.setRotationMode(RotationMode.WEEKLY_REPEAT);
+        }
+        
+        schedule.setCustomDayCount(customDayCount != null ? customDayCount : 7);
+        schedule.setTemplateId(templateId);
+        
         scheduleService.save(schedule);
 
         for (Map.Entry<String, List<Long>> entry : weekMap.entrySet()) {
