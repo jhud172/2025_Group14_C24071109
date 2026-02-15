@@ -1,0 +1,428 @@
+/* Training Control Centre Component Styles */
+/* Premium emerald accent with clean white/grey structure */
+
+/* ========================================
+   Control Centre Container
+   ======================================== */
+.tcc-container {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6;
+}
+
+/* ========================================
+   Insights Bar
+   ======================================== */
+.tcc-insights-bar {
+    @apply bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-500/5 dark:to-slate-900/50;
+    @apply border border-emerald-200 dark:border-emerald-800 rounded-2xl p-6 shadow-sm mb-8;
+}
+
+.tcc-insights-grid {
+    @apply grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5;
+}
+
+.tcc-insight-item {
+    @apply text-center;
+}
+
+.tcc-insight-value {
+    @apply text-2xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400;
+}
+
+.tcc-insight-label {
+    @apply text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 mt-1;
+}
+
+/* ========================================
+   Active Schedule Status Panel
+   ======================================== */
+.tcc-active-panel {
+    @apply bg-white dark:bg-slate-900/50 border-2 border-emerald-500 dark:border-emerald-600;
+    @apply rounded-2xl p-6 shadow-lg mb-8 relative overflow-hidden;
+}
+
+.tcc-active-panel::before {
+    content: '';
+    @apply absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-emerald-500 to-emerald-600;
+}
+
+.tcc-active-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4;
+}
+
+.tcc-active-title {
+    @apply text-xl font-bold text-slate-900 dark:text-slate-100;
+}
+
+.tcc-active-badge {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full;
+    @apply bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300;
+    @apply text-sm font-semibold;
+}
+
+.tcc-active-badge::before {
+    content: '';
+    @apply w-2 h-2 rounded-full bg-emerald-500 animate-pulse;
+}
+
+.tcc-active-meta {
+    @apply grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 pb-4 border-b border-slate-200 dark:border-slate-800;
+}
+
+.tcc-active-meta-item {
+    @apply flex flex-col;
+}
+
+.tcc-active-meta-label {
+    @apply text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400;
+}
+
+.tcc-active-meta-value {
+    @apply text-base font-semibold text-slate-900 dark:text-slate-100 mt-1;
+}
+
+.tcc-active-actions {
+    @apply flex flex-wrap gap-2;
+}
+
+/* Empty state for active panel */
+.tcc-active-empty {
+    @apply bg-white dark:bg-slate-900/50 border-2 border-dashed border-slate-300 dark:border-slate-700;
+    @apply rounded-2xl p-8 text-center mb-8;
+}
+
+.tcc-active-empty-icon {
+    @apply w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-700;
+}
+
+.tcc-active-empty-title {
+    @apply text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2;
+}
+
+.tcc-active-empty-text {
+    @apply text-sm text-slate-600 dark:text-slate-400 mb-6;
+}
+
+/* ========================================
+   Status Tabs
+   ======================================== */
+.tcc-tabs {
+    @apply flex flex-wrap gap-2 mb-6;
+}
+
+.tcc-tab {
+    @apply px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200;
+    @apply border border-slate-200 dark:border-slate-800;
+    @apply text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900/50;
+    @apply hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/5;
+    @apply cursor-pointer;
+}
+
+.tcc-tab.active {
+    @apply border-emerald-500 bg-emerald-500 text-white;
+    @apply hover:bg-emerald-600 hover:border-emerald-600;
+}
+
+.tcc-tab-count {
+    @apply ml-2 px-2 py-0.5 rounded-full text-xs font-bold;
+    @apply bg-white/20;
+}
+
+.tcc-tab:not(.active) .tcc-tab-count {
+    @apply bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300;
+}
+
+/* ========================================
+   Schedule Cards
+   ======================================== */
+.tcc-card-grid {
+    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.tcc-card {
+    @apply bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800;
+    @apply rounded-2xl p-5 shadow-sm transition-all duration-200;
+    @apply hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700;
+}
+
+.tcc-card-header {
+    @apply flex items-start justify-between gap-3 mb-3;
+}
+
+.tcc-card-title {
+    @apply text-base font-bold text-slate-900 dark:text-slate-100;
+}
+
+.tcc-card-status-badge {
+    @apply px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0;
+}
+
+.tcc-card-status-badge.status-active {
+    @apply bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300;
+}
+
+.tcc-card-status-badge.status-draft {
+    @apply bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300;
+}
+
+.tcc-card-status-badge.status-archived {
+    @apply bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300;
+}
+
+.tcc-card-description {
+    @apply text-sm text-slate-600 dark:text-slate-400 mb-4;
+}
+
+.tcc-card-meta {
+    @apply grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-slate-200 dark:border-slate-800;
+}
+
+.tcc-card-meta-item {
+    @apply flex items-center gap-2;
+}
+
+.tcc-card-meta-icon {
+    @apply w-4 h-4 text-emerald-500;
+}
+
+.tcc-card-meta-text {
+    @apply text-xs text-slate-600 dark:text-slate-400;
+}
+
+.tcc-card-tags {
+    @apply flex flex-wrap gap-2 mb-4;
+}
+
+.tcc-card-tag {
+    @apply px-2 py-1 rounded-md text-xs font-medium;
+    @apply bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300;
+}
+
+.tcc-card-footer {
+    @apply flex flex-wrap gap-2;
+}
+
+.tcc-card-action {
+    @apply inline-flex items-center justify-center px-3 py-2 rounded-xl;
+    @apply text-sm font-semibold transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
+}
+
+.tcc-card-action-primary {
+    @apply tcc-card-action;
+    @apply bg-emerald-500 text-white hover:bg-emerald-600;
+    @apply focus:ring-emerald-500;
+}
+
+.tcc-card-action-secondary {
+    @apply tcc-card-action;
+    @apply border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/50;
+    @apply text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800;
+    @apply focus:ring-slate-500;
+}
+
+.tcc-card-action-danger {
+    @apply tcc-card-action;
+    @apply border border-rose-500 text-rose-600 dark:text-rose-400;
+    @apply hover:bg-rose-50 dark:hover:bg-rose-500/10;
+    @apply focus:ring-rose-500;
+}
+
+/* ========================================
+   Template Cards
+   ======================================== */
+.tcc-template-card {
+    @apply tcc-card;
+    @apply border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/30 dark:bg-indigo-950/20;
+}
+
+.tcc-template-badge {
+    @apply px-2.5 py-1 rounded-lg text-xs font-semibold;
+    @apply bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300;
+}
+
+/* ========================================
+   Search & Filter Bar
+   ======================================== */
+.tcc-search-bar {
+    @apply flex flex-col sm:flex-row gap-3 mb-6;
+}
+
+.tcc-search-input {
+    @apply flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700;
+    @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100;
+    @apply placeholder:text-slate-400 dark:placeholder:text-slate-500;
+    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500;
+    @apply transition-all duration-200;
+}
+
+.tcc-filter-group {
+    @apply flex flex-wrap gap-2;
+}
+
+.tcc-filter-chip {
+    @apply px-3 py-2 rounded-xl text-sm font-medium border cursor-pointer;
+    @apply transition-all duration-200;
+    @apply border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300;
+    @apply hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10;
+}
+
+.tcc-filter-chip.active {
+    @apply border-emerald-500 bg-emerald-500 text-white;
+}
+
+/* ========================================
+   Preview Modal
+   ======================================== */
+.tcc-preview-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50;
+    @apply flex items-center justify-center p-4;
+}
+
+.tcc-preview-modal {
+    @apply bg-white dark:bg-slate-900 rounded-2xl shadow-2xl;
+    @apply w-full max-w-4xl max-h-[90vh] overflow-hidden;
+    @apply border border-slate-200 dark:border-slate-800;
+}
+
+.tcc-preview-header {
+    @apply flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800;
+}
+
+.tcc-preview-title {
+    @apply text-xl font-bold text-slate-900 dark:text-slate-100;
+}
+
+.tcc-preview-close {
+    @apply p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200;
+    @apply hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200;
+}
+
+.tcc-preview-body {
+    @apply p-6 overflow-y-auto max-h-[calc(90vh-10rem)];
+}
+
+.tcc-preview-week-grid {
+    @apply grid grid-cols-1 sm:grid-cols-7 gap-3;
+}
+
+.tcc-preview-day {
+    @apply bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3;
+}
+
+.tcc-preview-day-header {
+    @apply text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2;
+}
+
+.tcc-preview-day-content {
+    @apply space-y-2;
+}
+
+.tcc-preview-workout {
+    @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700;
+    @apply rounded-lg p-2 text-xs text-slate-700 dark:text-slate-300;
+}
+
+.tcc-preview-rest {
+    @apply text-xs text-slate-500 dark:text-slate-400 italic;
+}
+
+/* ========================================
+   Action Buttons
+   ======================================== */
+.tcc-btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl;
+    @apply font-semibold text-sm text-white;
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600;
+    @apply hover:from-emerald-600 hover:to-emerald-700;
+    @apply shadow-sm hover:shadow-md transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
+}
+
+.tcc-btn-secondary {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl;
+    @apply font-semibold text-sm border border-slate-300 dark:border-slate-700;
+    @apply text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900/50;
+    @apply hover:bg-slate-50 dark:hover:bg-slate-800;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
+}
+
+.tcc-btn-danger {
+    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl;
+    @apply font-semibold text-sm border border-rose-500;
+    @apply text-rose-600 dark:text-rose-400 bg-white dark:bg-slate-900/50;
+    @apply hover:bg-rose-50 dark:hover:bg-rose-500/10;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
+}
+
+/* ========================================
+   Toggle Switches
+   ======================================== */
+.tcc-toggle-label {
+    @apply flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800;
+    @apply bg-white/80 dark:bg-slate-950/40 px-3 py-2;
+    @apply text-sm font-semibold text-slate-700 dark:text-slate-200;
+    @apply shadow-sm cursor-pointer;
+}
+
+.tcc-toggle-switch {
+    @apply relative inline-flex h-5 w-9 items-center rounded-full;
+    @apply bg-slate-200 dark:bg-slate-700 transition;
+}
+
+.tcc-toggle-switch.checked {
+    @apply bg-emerald-500;
+}
+
+.tcc-toggle-dot {
+    @apply inline-block h-4 w-4 translate-x-0.5 rounded-full bg-white transition;
+}
+
+.tcc-toggle-dot.checked {
+    @apply translate-x-4;
+}
+
+/* ========================================
+   Responsive Adjustments
+   ======================================== */
+@media (max-width: 640px) {
+    .tcc-insights-grid {
+        @apply grid-cols-2;
+    }
+    
+    .tcc-card-grid {
+        @apply grid-cols-1;
+    }
+    
+    .tcc-active-meta {
+        @apply grid-cols-1;
+    }
+    
+    .tcc-preview-week-grid {
+        @apply grid-cols-1;
+    }
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+.tcc-hidden {
+    @apply hidden;
+}
+
+.tcc-fade-enter {
+    @apply opacity-0;
+}
+
+.tcc-fade-enter-active {
+    @apply opacity-100 transition-opacity duration-200;
+}
+
+.tcc-fade-exit {
+    @apply opacity-100;
+}
+
+.tcc-fade-exit-active {
+    @apply opacity-0 transition-opacity duration-200;
+}
