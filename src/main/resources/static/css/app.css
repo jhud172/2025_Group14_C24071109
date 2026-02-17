@@ -1406,6 +1406,13 @@ html:not(.dark) .week-day-card:has(.workout-badge.badge-success:is(.dark *)) {
     flex-direction: column;
     gap: 1rem;
   }
+
+    .auth-fields-block.workout-wizard-step:not(:last-child)::after {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
     
     .workout-wizard-step:not(:last-child)::after {
     display: none;
@@ -1516,6 +1523,12 @@ html:not(.dark) .week-day-card:has(.workout-badge.badge-success:is(.dark *)) {
    MODE PANELS
    Each mode has its own panel
    ============================================ */
+.auth-fields-block.studio-mode-panel {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
 .studio-mode-panel {
   display: none;
 }
@@ -2832,6 +2845,12 @@ html:not(.dark) .week-day-card:has(.workout-badge.badge-success:is(.dark *)) {
    CUSTOM EXERCISE CREATION PANEL
    Slide-in panel for custom exercises
    ============================================ */
+.auth-fields-block.custom-exercise-overlay {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
 .custom-exercise-overlay {
   position: fixed;
   inset: 0px;
@@ -4099,6 +4118,12 @@ html:not(.dark) .week-day-card:has(.schedule-day-rest-action:is(.dark *)) {
   color: rgb(248 113 113 / var(--tw-text-opacity, 1));
 }
 /* Workout Preview Tooltip */
+.auth-fields-block.workout-preview-tooltip {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
 .workout-preview-tooltip {
   position: absolute;
   top: -0.5rem;
@@ -4766,6 +4791,13 @@ html:not(.dark) .week-day-card:has(.advanced-control-btn:hover:is(.dark *)) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+
+    .auth-fields-block.workout-preview-tooltip {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
     
     .workout-preview-tooltip {
     display: none;
@@ -7772,6 +7804,12 @@ html:not(.dark) .week-day-card:has(.tcc-insight-value:is(.dark *)) {
 /* ========================================
    Utility Classes
    ======================================== */
+.auth-fields-block.tcc-hidden {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
 .tcc-hidden {
   display: none;
 }
@@ -12937,8 +12975,17 @@ html:not(.dark) .week-day-card:has(.chat-icon-btn-premium:hover:is(.dark *)) {
 @media (max-width: 640px) {
     .chat-fab-premium {
       /* Hide FAB button on mobile - accessible via navbar instead */
-      display: none;
     }
+
+    .auth-fields-block.chat-fab-premium {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
+    .chat-fab-premium {
+    display: none;
+  }
     
     .chat-panel-premium {
       /* Expand nearly full width */
@@ -13657,8 +13704,17 @@ html:not(.dark) .week-day-card:has(.quick-actions-icon-btn-premium:hover:is(.dar
 @media (max-width: 640px) {
     .quick-actions-fab-premium {
       /* Hide FAB button on mobile - accessible via navbar instead */
-      display: none;
     }
+
+    .auth-fields-block.quick-actions-fab-premium {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
+    .quick-actions-fab-premium {
+    display: none;
+  }
     
     .quick-actions-panel-premium {
       /* Expand nearly full width */
@@ -14499,8 +14555,6 @@ html.dark .btn--secondary:hover {
   align-items: center;
   padding-left: 1rem;
   padding-right: 1rem;
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
 }
 @media (min-width: 640px) {
   .auth-container {
@@ -14515,6 +14569,8 @@ html.dark .btn--secondary:hover {
   }
 }
 .auth-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
         background: 
             radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
             radial-gradient(circle at 80% 80%, rgba(52, 211, 153, 0.03) 0%, transparent 50%);
@@ -14636,10 +14692,8 @@ html.dark .btn--secondary:hover {
   padding-top: 0.625rem;
   padding-bottom: 0.625rem;
   text-align: center;
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
         transform-origin: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .role-slider__option.active {
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
@@ -15303,6 +15357,22 @@ html.dark .code-input-separator {
   --tw-text-opacity: 1;
   color: rgb(52 211 153 / var(--tw-text-opacity, 1));
 }
+/* Smooth transitions for form field blocks */
+.auth-fields-block {
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, max-height 0.4s ease-in-out;
+        overflow: hidden;
+    }
+.auth-fields-block.hidden {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
+.auth-fields-block:not(.hidden) {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 1000px;
+    }
 /* Enhanced Dashboard Styles - Clean, Personal, and Engaging */
 .dashboard-enhanced {
         animation: fadeIn 0.6s ease-out;
@@ -19041,6 +19111,39 @@ html:not(.dark) .week-day-card:has(.dark\:text-emerald-400:is(.dark *)) {
 html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark *)) {
         background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
         border-color: rgba(16, 185, 129, 0.3);
+    }
+@media (min-width: 640px) {
+
+    .sm\:hidden.auth-fields-block {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
+}
+@media (min-width: 1024px) {
+
+    .lg\:hidden.auth-fields-block {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
+}
+@media (min-width: 1125px) {
+
+    .nav\:hidden.auth-fields-block {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
+    }
+}
+.\[\&\:\:-webkit-details-marker\]\:hidden.auth-fields-block::-webkit-details-marker {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+        pointer-events: none;
     }
 .placeholder\:text-slate-400::-moz-placeholder {
   --tw-text-opacity: 1;
