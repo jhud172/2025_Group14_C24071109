@@ -16,6 +16,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelProgress;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscription;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
@@ -250,6 +251,22 @@ public class ProfileController {
                 shareWeightTrend != null
         );
         redirectAttributes.addFlashAttribute("settingsUpdated", true);
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/settings/calendar-display")
+    public String updateCalendarDisplay(@RequestParam(value = "layout", required = false) String layout,
+                                        RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        if (layout != null) {
+            try {
+                CalendarTaskLayoutPreference layoutPref = CalendarTaskLayoutPreference.valueOf(layout);
+                userSettingsService.updateCalendarPreferences(user, null, layoutPref);
+                redirectAttributes.addFlashAttribute("settingsUpdated", true);
+            } catch (IllegalArgumentException e) {
+                redirectAttributes.addFlashAttribute("settingsError", "Invalid calendar layout preference.");
+            }
+        }
         return "redirect:/profile";
     }
 

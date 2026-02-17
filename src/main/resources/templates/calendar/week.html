@@ -18,20 +18,9 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <button type="button" id="scheduleDrawerButton" class="btn btn--secondary btn--md">Schedules</button>
-                    <div class="calendar-mode-indicator">
+                    <div class="calendar-mode-indicator hidden sm:flex">
                         Week View — <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
                     </div>
-                    <form method="post" action="/calendar/preferences" class="flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <input type="hidden" id="week-redirect" name="redirect" th:value="${'/calendar?view=week&week=' + week + '&weekYear=' + weekYear}" />
-                        <span class="text-slate-500">Display</span>
-                        <button name="layout" value="COMBINED_LIST" type="submit"
-                                class="rounded-full px-2 py-1"
-                                th:classappend="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).COMBINED_LIST} ? ' bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ' hover:bg-slate-100 dark:hover:bg-slate-800'">Detailed</button>
-                        <button name="layout" value="SEPARATED_BY_CATEGORY" type="submit"
-                                class="rounded-full px-2 py-1"
-                                th:classappend="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY} ? ' bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ' hover:bg-slate-100 dark:hover:bg-slate-800'">Grouped</button>
-                    </form>
                     <button type="button" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200" data-mode-info-toggle aria-label="View mode information">
                         <span class="sr-only">Mode information</span>
                         <span class="flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-[11px] font-bold dark:border-slate-700">i</span>
@@ -109,7 +98,13 @@
                         <div th:fragment="weekPane" th:attr="data-week=${week},data-week-year=${weekYear}" data-week-pane class="min-w-full w-full">
                             <div class="calendar-month-container">
                                 <div class="calendar-day-headers grid grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm">
-                                    <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                                    <div th:classappend="${today.dayOfWeek.value == 1} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Mon</div>
+                                    <div th:classappend="${today.dayOfWeek.value == 2} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Tue</div>
+                                    <div th:classappend="${today.dayOfWeek.value == 3} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Wed</div>
+                                    <div th:classappend="${today.dayOfWeek.value == 4} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Thu</div>
+                                    <div th:classappend="${today.dayOfWeek.value == 5} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Fri</div>
+                                    <div th:classappend="${today.dayOfWeek.value == 6} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Sat</div>
+                                    <div th:classappend="${today.dayOfWeek.value == 7} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Sun</div>
                                 </div>
                                 <div class="calendar-month-grid grid grid-cols-7">
                                 <div th:each="i : ${#numbers.sequence(0,6)}" 
@@ -157,8 +152,8 @@
                                             <span class="text-slate-600 dark:text-slate-300">•</span>
                                             <span th:text="${day.dayOfWeek}"></span>
                                         </a>
-                                        <span th:if="${day.isEqual(today)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600">Today</span>
-                                        <span th:if="${isPremium and day.isEqual(tomorrow)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">Tomorrow</span>
+                                        <span th:if="${day.isEqual(today)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
+                                        <span th:if="${isPremium and day.isEqual(tomorrow)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
                                     </div>
                                     <div class="calendar-day-content" th:with="grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
                                         <!-- Empty state when no tasks or schedules -->
@@ -208,7 +203,7 @@
                                                 </div>
                                                 <div th:if="${occ.completed}" class="calendar-item-check">✓</div>
                                             </div>
-                                            <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}" class="calendar-more-link" th:text="${'+' + (sTotal - 3) + ' more schedules'}"></a>
+                                            <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}" class="calendar-more-link" th:text="${'+' + (sTotal - 3) + ' more workouts'}"></a>
                                         </div>
                                         <!-- Grouped mode (SEPARATED_BY_CATEGORY) -->
                                         <div th:if="${grouped}" class="space-y-3">
@@ -228,7 +223,7 @@
                                             </div>
                                             <div class="calendar-grouped-section">
                                                 <div class="calendar-grouped-header">
-                                                    <span class="calendar-grouped-label">Schedules</span>
+                                                    <span class="calendar-grouped-label">Workouts</span>
                                                     <span class="calendar-grouped-count" th:text="${sTotal}"></span>
                                                 </div>
                                                 <div class="calendar-grouped-items">
@@ -299,22 +294,28 @@
             <div class="calendar-mode-modal-body">
                 <div class="space-y-4">
                     <div>
-                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">Detailed Mode</h3>
-                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Shows all tasks and schedules in a single, combined list with full details including time, completion status, and notes. 
-                            Perfect for viewing all your activities at a glance with maximum information density.
+                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">Display Modes</h3>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                            Your calendar can display tasks and workouts in two different formats:
                         </p>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">Grouped Mode</h3>
+                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">• Detailed Mode</h3>
                         <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Organizes tasks and schedules into separate categories for cleaner visual separation. 
-                            Ideal for quickly distinguishing between different types of activities and maintaining a focused view.
+                            Shows all tasks and workouts in a single, combined list with full details including time, completion status, and notes.
                         </p>
                     </div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">
-                        You can change your display preference anytime using the toggle above or in your <a href="/preferences" class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 underline">user preferences</a>.
-                    </p>
+                    <div>
+                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">• Grouped Mode</h3>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                            Organizes tasks and workouts into separate categories for cleaner visual separation and focused viewing.
+                        </p>
+                    </div>
+                    <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
+                        <p class="text-sm text-slate-700 dark:text-slate-300">
+                            <strong>Change your display preference:</strong> Visit your <a href="/profile" class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 underline">profile settings</a> and look for the "Calendar display" section.
+                        </p>
+                    </div>
                 </div>
             </div>
             <div class="calendar-mode-modal-footer">

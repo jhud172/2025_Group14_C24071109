@@ -278,6 +278,33 @@
                     <button type="submit" class="mt-4 profile-btn-small">Save sharing</button>
                 </form>
 
+                <form th:action="@{/profile/settings/calendar-display}" method="post" class="profile-settings-card">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Calendar display</h3>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Control how tasks and schedules appear on the calendar.</p>
+                    <div class="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-200">
+                        <label class="flex items-start gap-3">
+                            <input type="radio" name="layout" value="COMBINED_LIST" 
+                                   th:checked="${userSettings != null && userSettings.calendarTaskLayout.name() == 'COMBINED_LIST'}" 
+                                   class="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500" />
+                            <div>
+                                <div class="font-semibold">Detailed</div>
+                                <div class="text-xs text-slate-500">Shows all tasks and workouts in a single combined list with full details.</div>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-3">
+                            <input type="radio" name="layout" value="SEPARATED_BY_CATEGORY" 
+                                   th:checked="${userSettings != null && userSettings.calendarTaskLayout.name() == 'SEPARATED_BY_CATEGORY'}" 
+                                   class="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500" />
+                            <div>
+                                <div class="font-semibold">Grouped</div>
+                                <div class="text-xs text-slate-500">Organizes tasks and workouts into separate categories for cleaner separation.</div>
+                            </div>
+                        </label>
+                    </div>
+                    <button type="submit" class="mt-4 profile-btn-small">Save display</button>
+                </form>
+
                 <div class="profile-settings-card">
                     <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Exercise logs</h3>
                     <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Review progress, trends, and history.</p>

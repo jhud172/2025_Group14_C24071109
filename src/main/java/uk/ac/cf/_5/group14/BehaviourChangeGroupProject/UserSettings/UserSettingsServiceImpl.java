@@ -113,6 +113,21 @@ public class UserSettingsServiceImpl implements UserSettingsService {
 
     @Override
     @Transactional
+    public UserSettings updateCalendarViewPreference(User user, CalendarViewPreference calendarViewPreference) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+
+        if (calendarViewPreference != null) {
+            settings.setCalendarViewPreference(calendarViewPreference);
+        }
+
+        return userSettingsRepository.save(settings);
+    }
+
+    @Override
+    @Transactional
     public UserSettings updateAccessibility(User user,
                                             boolean colorBlindMode,
                                             boolean disabilityHearing,

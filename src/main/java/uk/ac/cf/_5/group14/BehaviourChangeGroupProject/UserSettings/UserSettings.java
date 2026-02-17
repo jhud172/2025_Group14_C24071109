@@ -72,6 +72,10 @@ public class UserSettings {
     @Column(name = "calendar_workout_ordering", nullable = false, length = 30)
     private CalendarWorkoutOrderingPreference calendarWorkoutOrdering = CalendarWorkoutOrderingPreference.SCHEDULE_ORDER;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "calendar_view_preference", nullable = false, length = 10)
+    private CalendarViewPreference calendarViewPreference = CalendarViewPreference.MONTH;
+
     @Column(name = "default_sets", nullable = false)
     private int defaultSets = 3;
 

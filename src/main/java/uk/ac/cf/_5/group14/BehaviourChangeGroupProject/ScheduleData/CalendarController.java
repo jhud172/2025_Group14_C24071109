@@ -40,7 +40,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.Reflection
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskOrderingPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarViewPreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarWorkoutOrderingPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
@@ -110,20 +112,50 @@ public class CalendarController {
 
     @GetMapping("")
     public String calendarView(
-            @RequestParam(required = false, defaultValue = "month") String view,
+            @RequestParam(required = false) String view,
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer week,
             @RequestParam(required = false) Integer weekYear,
             @RequestParam(required = false) String fragment,
             @SessionAttribute("user") User user,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
         LocalDate today = LocalDate.now();
         LocalDate tomorrow = today.plusDays(1);
         boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
-        CalendarTaskLayoutPreference layoutPreference = userSettingsService.getOrCreate(user).getCalendarTaskLayout();
-        if ("week".equals(view)) {
+        UserSettings userSettings = userSettingsService.getOrCreate(user);
+        CalendarTaskLayoutPreference layoutPreference = userSettings.getCalendarTaskLayout();
+        
+        // Determine view based on: explicit parameter, stored preference, or device-based default
+        String targetView = view;
+        if (targetView == null) {
+            // Check if user has a stored preference
+            CalendarViewPreference storedView = userSettings.getCalendarViewPreference();
+            if (storedView != null) {
+                targetView = storedView.name().toLowerCase();
+            } else {
+                // Default based on device: mobile/tablet -> week, desktop -> month
+                String userAgent = request.getHeader("User-Agent");
+                boolean isMobile = userAgent != null && 
+                    (userAgent.toLowerCase().contains("mobile") || 
+                     userAgent.toLowerCase().contains("iphone") || 
+                     userAgent.toLowerCase().contains("ipad") ||
+                     userAgent.toLowerCase().contains("android"));
+                targetView = isMobile ? "week" : "month";
+            }
+        }
+        
+        // Save the view preference when explicitly switched (not on initial load)
+        if (view != null && !view.isEmpty()) {
+            CalendarViewPreference newPref = "week".equals(view) ? CalendarViewPreference.WEEK : CalendarViewPreference.MONTH;
+            if (userSettings.getCalendarViewPreference() != newPref) {
+                userSettingsService.updateCalendarViewPreference(user, newPref);
+            }
+        }
+        
+        if ("week".equals(targetView)) {
             int currentWeekYear = (weekYear != null)
                     ? weekYear
                     : today.get(java.time.temporal.WeekFields.ISO.weekBasedYear());
@@ -228,9 +260,10 @@ public class CalendarController {
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year,
             @SessionAttribute("user") User user,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
-        return calendarView("month", month, year, null, null, "monthPane", user, model);
+        return calendarView("month", month, year, null, null, "monthPane", user, model, request);
     }
 
     @GetMapping("/week-fragment")
@@ -238,9 +271,10 @@ public class CalendarController {
             @RequestParam(required = false) Integer week,
             @RequestParam(required = false) Integer weekYear,
             @SessionAttribute("user") User user,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
-        return calendarView("week", null, null, week, weekYear, "weekPane", user, model);
+        return calendarView("week", null, null, week, weekYear, "weekPane", user, model, request);
     }
 
     @PostMapping("/preferences")
