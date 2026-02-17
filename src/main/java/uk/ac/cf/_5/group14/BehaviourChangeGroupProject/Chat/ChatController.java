@@ -77,16 +77,22 @@ public class ChatController {
 
     @GetMapping
     public String chatPage(Model model, Principal principal) {
-        boolean isPremium = false;
-        int used = 0;
-        int remaining = FREE_DAILY_LIMIT;
-        if (principal != null) {
-            User user = requireUser(principal);
-            isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
-            DailyUsageService.UsageStatus status = dailyUsageService.peek(user.getId(), FREE_DAILY_LIMIT, isPremium);
-            used = status.used();
-            remaining = status.remaining();
+        if (principal == null) {
+            return "redirect:/login";
         }
+        
+        User user = requireUser(principal);
+        boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
+        
+        // Block non-premium users from accessing /chat
+        if (!isPremium) {
+            return "redirect:/access-denied?reason=premium_required";
+        }
+        
+        DailyUsageService.UsageStatus status = dailyUsageService.peek(user.getId(), FREE_DAILY_LIMIT, isPremium);
+        int used = status.used();
+        int remaining = status.remaining();
+        
         model.addAttribute("isPremium", isPremium);
         model.addAttribute("dailyLimit", FREE_DAILY_LIMIT);
         model.addAttribute("dailyUsed", used);
