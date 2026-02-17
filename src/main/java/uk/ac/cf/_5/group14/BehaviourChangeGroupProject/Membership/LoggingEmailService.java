@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(prefix = "app.email", name = "provider", havingValue = "log", matchIfMissing = true)
 public class LoggingEmailService implements EmailService {
 
     private static final DateTimeFormatter DATE_FORMATTER =

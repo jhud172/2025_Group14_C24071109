@@ -19,6 +19,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 @Service
 @Primary
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "app.email", name = "provider", havingValue = "smtp")
 @ConditionalOnProperty(prefix = "spring.mail", name = "host")
 public class SmtpEmailService implements EmailService {
 
@@ -29,6 +30,9 @@ public class SmtpEmailService implements EmailService {
 
     @Value("${app.email.from:${spring.mail.username:no-reply@healthyhabits.local}}")
     private String fromAddress;
+
+    @Value("${app.email.fail-on-error:true}")
+    private boolean failOnError;
 
     @Override
     public void sendPriceChangeNotification(
@@ -100,6 +104,9 @@ public class SmtpEmailService implements EmailService {
             mailSender.send(message);
         } catch (Exception e) {
             log.error("Failed to send email to {}", to, e);
+            if (failOnError) {
+                throw new IllegalStateException("SMTP email delivery failed for " + to, e);
+            }
         }
     }
 }
