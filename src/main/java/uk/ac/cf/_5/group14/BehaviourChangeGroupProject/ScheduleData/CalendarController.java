@@ -40,7 +40,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.Reflection
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskOrderingPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarViewPreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarWorkoutOrderingPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
@@ -258,9 +260,10 @@ public class CalendarController {
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year,
             @SessionAttribute("user") User user,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
-        return calendarView("month", month, year, null, null, "monthPane", user, model);
+        return calendarView("month", month, year, null, null, "monthPane", user, model, request);
     }
 
     @GetMapping("/week-fragment")
@@ -268,9 +271,10 @@ public class CalendarController {
             @RequestParam(required = false) Integer week,
             @RequestParam(required = false) Integer weekYear,
             @SessionAttribute("user") User user,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
-        return calendarView("week", null, null, week, weekYear, "weekPane", user, model);
+        return calendarView("week", null, null, week, weekYear, "weekPane", user, model, request);
     }
 
     @PostMapping("/preferences")
