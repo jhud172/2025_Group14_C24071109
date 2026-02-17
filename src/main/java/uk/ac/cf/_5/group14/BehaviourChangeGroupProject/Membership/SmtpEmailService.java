@@ -19,7 +19,6 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 @Service
 @Primary
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "app.email", name = "provider", havingValue = "smtp")
 @ConditionalOnProperty(prefix = "spring.mail", name = "host")
 public class SmtpEmailService implements EmailService {
 
@@ -30,6 +29,12 @@ public class SmtpEmailService implements EmailService {
 
     @Value("${app.email.from:${spring.mail.username:no-reply@healthyhabits.local}}")
     private String fromAddress;
+
+    @Value("${spring.mail.username:}")
+    private String smtpUsername;
+
+    @Value("${spring.mail.password:}")
+    private String smtpPassword;
 
     @Value("${app.email.fail-on-error:true}")
     private boolean failOnError;
@@ -93,6 +98,12 @@ public class SmtpEmailService implements EmailService {
 
     private void sendEmail(String to, String subject, String body) {
         try {
+            if (smtpUsername == null || smtpUsername.isBlank() || smtpPassword == null || smtpPassword.isBlank()) {
+                throw new IllegalStateException(
+                    "SMTP credentials are missing. Set SPRING_MAIL_USERNAME and SPRING_MAIL_PASSWORD."
+                );
+            }
+
             String from = (fromAddress == null || fromAddress.isBlank())
                 ? "no-reply@healthyhabits.local"
                 : fromAddress;

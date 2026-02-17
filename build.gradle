@@ -63,6 +63,30 @@ tasks.named('test') {
 	exclude '**/UserPreferenceFullContainerMockTests.*'
 }
 
+tasks.named('bootRun') {
+	doFirst {
+		def envFile = file('.env')
+		if (!envFile.exists()) {
+			return
+		}
+
+		envFile.eachLine { line ->
+			def trimmed = line?.trim()
+			if (!trimmed || trimmed.startsWith('#') || !trimmed.contains('=')) {
+				return
+			}
+
+			def separator = trimmed.indexOf('=')
+			def key = trimmed.substring(0, separator).trim()
+			def value = trimmed.substring(separator + 1).trim()
+
+			if (key.startsWith('SPRING_MAIL_') || key.startsWith('APP_EMAIL_') || key == 'APP_BASE_URL') {
+				environment key, value
+			}
+		}
+	}
+}
+
 tasks.register('bcrypt', JavaExec) {
 	group = 'help'
 	description = 'Prints a BCrypt hash for -Ppw (defaults to Demo123!)'

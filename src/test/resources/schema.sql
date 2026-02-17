@@ -322,6 +322,7 @@ CREATE TABLE IF NOT EXISTS user_settings
     calendar_task_ordering VARCHAR(30) NOT NULL DEFAULT 'CHRONOLOGICAL',
     calendar_task_layout   VARCHAR(30) NOT NULL DEFAULT 'COMBINED_LIST',
     calendar_workout_ordering VARCHAR(30) NOT NULL DEFAULT 'SCHEDULE_ORDER',
+    calendar_view_preference VARCHAR(10) NOT NULL DEFAULT 'MONTH',
     default_sets INT NOT NULL DEFAULT 3,
     default_rep_min INT NOT NULL DEFAULT 8,
     default_rep_max INT NOT NULL DEFAULT 12,
