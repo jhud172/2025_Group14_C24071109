@@ -60,7 +60,7 @@
                 <input type="hidden" name="loginType" id="loginType" value="client" />
 
                 <!-- Client/Trainer Login Fields -->
-                <div id="emailFields">
+                <div id="emailFields" class="auth-fields-block">
                     <div>
                         <label for="username" class="auth-field__label" th:text="#{auth.login.username}">Email or username</label>
                         <input
@@ -128,7 +128,7 @@
                 </div>
 
                 <!-- Gym Login Fields (hidden by default) -->
-                <div id="gymFields" class="hidden space-y-4">
+                <div id="gymFields" class="auth-fields-block hidden space-y-4">
                     <div>
                         <label for="gymCode" class="auth-field__label">Gym Code</label>
                         <input
@@ -215,7 +215,9 @@
                 // Show/hide appropriate fields and update required attributes
                 if (role === 'gym') {
                     emailFields.classList.add('hidden');
-                    gymFields.classList.remove('hidden');
+                    setTimeout(() => {
+                        gymFields.classList.remove('hidden');
+                    }, 50);
                     trainerCodeField.classList.add('hidden');
                     
                     // Update form field names and requirements
@@ -229,8 +231,10 @@
                     gymCodeInput.name = 'username';
                     gymPasswordInput.name = 'password';
                 } else {
-                    emailFields.classList.remove('hidden');
                     gymFields.classList.add('hidden');
+                    setTimeout(() => {
+                        emailFields.classList.remove('hidden');
+                    }, 50);
                     
                     // Update form field names and requirements
                     usernameInput.setAttribute('required', 'required');
