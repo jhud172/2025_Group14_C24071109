@@ -82,13 +82,13 @@
                         <div th:fragment="monthPane" th:attr="data-year=${year},data-month=${month}" data-month-pane class="min-w-full w-full">
                             <div class="calendar-month-container">
                                 <div class="calendar-day-headers grid grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm">
-                                    <div th:classappend="${today.dayOfWeek.value == 1} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Mon</div>
-                                    <div th:classappend="${today.dayOfWeek.value == 2} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Tue</div>
-                                    <div th:classappend="${today.dayOfWeek.value == 3} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Wed</div>
-                                    <div th:classappend="${today.dayOfWeek.value == 4} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Thu</div>
-                                    <div th:classappend="${today.dayOfWeek.value == 5} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Fri</div>
-                                    <div th:classappend="${today.dayOfWeek.value == 6} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Sat</div>
-                                    <div th:classappend="${today.dayOfWeek.value == 7} ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' : ''">Sun</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 1} ? ' calendar-weekday-pill--today' : ''">Mon</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 2} ? ' calendar-weekday-pill--today' : ''">Tue</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 3} ? ' calendar-weekday-pill--today' : ''">Wed</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 4} ? ' calendar-weekday-pill--today' : ''">Thu</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 5} ? ' calendar-weekday-pill--today' : ''">Fri</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 6} ? ' calendar-weekday-pill--today' : ''">Sat</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 7} ? ' calendar-weekday-pill--today' : ''">Sun</div>
                                 </div>
                                 <div class="calendar-month-grid grid grid-cols-7">
                                     <div th:each="i : ${#numbers.sequence(1, offset - 1)}"></div>
@@ -102,7 +102,7 @@
                                                   schedComplete=${sched != null ? #lists.size(#lists.select(sched, 's', s.completed)) : 0},
                                                   allComplete=${(tTotal + sTotal) > 0 && (tasksComplete + schedComplete) == (tTotal + sTotal)},
                                                   hasIncomplete=${(tTotal + sTotal) > 0 && (tasksComplete + schedComplete) < (tTotal + sTotal)},
-                                                  statusValue=${dateObj.isEqual(today) ? 'today' : (isPremium and dateObj.isEqual(tomorrow) ? 'tomorrow' : (dateObj.isBefore(today) ? (hasIncomplete ? 'past-incomplete' : ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-complete')) : 'future'))}"
+                                                  statusValue=${dateObj.isEqual(today) ? 'today' : (dateObj.isEqual(tomorrow) ? 'tomorrow' : (dateObj.isBefore(today) ? (hasIncomplete ? 'past-incomplete' : ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-complete')) : 'future'))}"
                                          class="calendar-day-card heat-none"
                                          data-load="0"
                                          th:attr="data-day-link=@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}},
@@ -111,37 +111,15 @@
                                                   data-is-past=${dateObj.isBefore(today)}">
                                         <div class="calendar-status-bar"></div>
                                         <div class="calendar-heat-overlay"></div>
-                                        <div class="calendar-heat-icons">
-                                            <span class="calendar-icon calendar-icon-workout hidden" aria-label="Workout completed" title="Workout completed">
-                                                <span class="calendar-icon-dot"></span>
-                                            </span>
-                                            <span class="calendar-icon calendar-icon-nutrition hidden" aria-label="Nutrition logged" title="Nutrition logged">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M5 3v7"></path>
-                                                    <path d="M9 3v7"></path>
-                                                    <path d="M5 10h4"></path>
-                                                    <path d="M14 3c0 4 0 7 4 7v11"></path>
-                                                </svg>
-                                            </span>
-                                            <span class="calendar-icon calendar-icon-pr hidden" aria-label="PR hit" title="PR hit">
-                                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                                    <path d="M12 2l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 16.9 6.19 19.87 7.3 13.4 2.6 8.82l6.5-.94L12 2z"/>
-                                                </svg>
-                                                <span class="calendar-icon-count hidden" data-pr-count></span>
-                                            </span>
-                                        </div>
                                         <div class="calendar-day-header">
                                             <a th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
                                                class="calendar-day-number" th:text="${day}"></a>
                                             <span th:if="${dateObj.isEqual(today)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
-                                            <span th:if="${isPremium and dateObj.isEqual(tomorrow)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
+                                                          <span th:if="${dateObj.isEqual(tomorrow)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
                                         </div>
                                         <div class="calendar-day-content" th:with="grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
                                             <!-- Empty state when no tasks or schedules -->
                                             <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
-                                                <svg class="calendar-empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                                </svg>
                                                 <span class="calendar-empty-state-text">Free day</span>
                                             </div>
                                             <!-- Detailed mode (COMBINED_LIST) -->

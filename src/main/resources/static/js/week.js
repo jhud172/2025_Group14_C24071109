@@ -125,6 +125,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function attachDayCardNavigation(root) {
+        if (!root) return;
+
+        root.querySelectorAll('.calendar-day-card[data-day-link]').forEach((card) => {
+            if (card.dataset.dayCardNavBound === 'true') return;
+            card.dataset.dayCardNavBound = 'true';
+            card.classList.add('cursor-pointer');
+
+            card.addEventListener('click', (event) => {
+                if (event.defaultPrevented) return;
+                if (event.target.closest('a, button, input, textarea, select, label, form')) return;
+
+                const href = card.getAttribute('data-day-link');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    }
+
     preview.addEventListener("mouseenter", () => clearTimeout(closeTimer));
     preview.addEventListener("mouseleave", () => {
         closeTimer = setTimeout(() => hidePreview(), 250);
@@ -145,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const hasSlider = slider && track && prevLink && nextLink && currentSlot && prevSlot && nextSlot;
     if (!hasSlider) {
         attachPreviewHandlers(document);
+        attachDayCardNavigation(document);
         return;
     }
 
@@ -361,6 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!paneEl) return false;
         slot.replaceChildren(paneEl);
         attachPreviewHandlers(slot);
+        attachDayCardNavigation(slot);
         return true;
     }
 
@@ -515,6 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const key = keyFor(currentWeekYear, currentWeek);
         cache.set(key, initialPane.outerHTML);
         attachPreviewHandlers(currentSlot);
+        attachDayCardNavigation(currentSlot);
     }
 
     if (track) {

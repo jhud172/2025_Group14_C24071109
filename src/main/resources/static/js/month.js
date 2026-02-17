@@ -126,6 +126,26 @@
         });
     }
 
+    function attachDayCardNavigation(root) {
+        if (!root) return;
+
+        root.querySelectorAll('.calendar-day-card[data-day-link]').forEach((card) => {
+            if (card.dataset.dayCardNavBound === 'true') return;
+            card.dataset.dayCardNavBound = 'true';
+            card.classList.add('cursor-pointer');
+
+            card.addEventListener('click', (event) => {
+                if (event.defaultPrevented) return;
+                if (event.target.closest('a, button, input, textarea, select, label, form')) return;
+
+                const href = card.getAttribute('data-day-link');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    }
+
     if (preview) {
         preview.addEventListener('mouseenter', () => clearTimeout(closeTimer));
         preview.addEventListener('mouseleave', () => {
@@ -146,6 +166,7 @@
     if (!hasSlider) {
         // No slider wrapper (or missing controls) - keep legacy navigation.
         attachPreviewHandlers(document);
+        attachDayCardNavigation(document);
         return;
     }
 
@@ -328,6 +349,7 @@
         }
         slot.replaceChildren(paneEl.cloneNode(true));
         attachPreviewHandlers(slot);
+        attachDayCardNavigation(slot);
         return true;
     }
 
@@ -503,6 +525,7 @@
         // Serialize initial pane to HTML for cache consistency
         cache.set(key, initialPane.outerHTML);
         attachPreviewHandlers(currentSlot);
+        attachDayCardNavigation(currentSlot);
     }
     if (track) {
         track.style.willChange = 'transform';
