@@ -136,7 +136,7 @@
 
             card.addEventListener('click', (event) => {
                 if (event.defaultPrevented) return;
-                if (event.target.closest('a, button, input, textarea, select, label, form')) return;
+                if (event.target.closest('button, input, textarea, select, form')) return;
 
                 const href = card.getAttribute('data-day-link');
                 if (href) {

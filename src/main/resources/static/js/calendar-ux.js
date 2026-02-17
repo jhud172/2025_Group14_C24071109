@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const card = event.target.closest(".calendar-day-card");
         if (!card) return;
         // Don't trigger if clicking on interactive elements
-        if (event.target.closest("a, button, input, textarea, select, .calendar-item, .calendar-grouped-item")) {
+        if (event.target.closest("button, input, textarea, select, form")) {
             return;
         }
         const href = card.getAttribute("data-day-link");

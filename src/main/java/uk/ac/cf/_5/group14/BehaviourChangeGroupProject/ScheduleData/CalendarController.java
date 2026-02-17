@@ -202,6 +202,7 @@ public class CalendarController {
             model.addAttribute("weekEnd", weekEnd);
             model.addAttribute("weekDays", weekDays);
             model.addAttribute("tasksByDate", tasks);
+            model.addAttribute("tasksByDateIso", toIsoDateKeyedTaskMap(tasks));
             model.addAttribute("occurrences", occ);
             model.addAttribute("today", today);
             model.addAttribute("tomorrow", tomorrow);
@@ -244,7 +245,9 @@ public class CalendarController {
         model.addAttribute("prevYear", prev.getYear());
         model.addAttribute("nextMonth", next.getMonthValue());
         model.addAttribute("nextYear", next.getYear());
-        model.addAttribute("tasksByDate", taskService.getTasksGroupedByDate(user));
+        Map<LocalDate, List<CalendarTask>> tasksByDate = taskService.getTasksGroupedByDate(user);
+        model.addAttribute("tasksByDate", tasksByDate);
+        model.addAttribute("tasksByDateIso", toIsoDateKeyedTaskMap(tasksByDate));
         model.addAttribute("occurrences", scheduleOccurrenceService.getOccurrencesForUserInMonth(user, year, month));
         model.addAttribute("schedules", scheduleService.findByUser(user));
         model.addAttribute("view", "month");
@@ -873,6 +876,23 @@ public class CalendarController {
 
         taskWarningService.addOnTaskCompleteWarning(task, triggerTask);
         return "redirect:/calendar/task/" + id;
+    }
+
+    private Map<String, List<CalendarTask>> toIsoDateKeyedTaskMap(Map<LocalDate, List<CalendarTask>> source) {
+        Map<String, List<CalendarTask>> byIsoDate = new HashMap<>();
+        if (source == null || source.isEmpty()) {
+            return byIsoDate;
+        }
+
+        for (Map.Entry<LocalDate, List<CalendarTask>> entry : source.entrySet()) {
+            LocalDate date = entry.getKey();
+            if (date == null) {
+                continue;
+            }
+            byIsoDate.put(date.toString(), entry.getValue());
+        }
+
+        return byIsoDate;
     }
 
 }

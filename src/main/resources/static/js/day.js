@@ -11,8 +11,30 @@ function toggleEdit(id) {
     if (!openBtn || !modal || !closeBtn) return;
 
     const backdrop = modal.querySelector('[data-modal-backdrop]');
+    const titleInput = modal.querySelector('input[name="title"]');
+    const notesInput = modal.querySelector('textarea[name="notes"]');
+    const exerciseInput = modal.querySelector('input[name="exercise"]');
+    const modalForms = Array.from(modal.querySelectorAll('form'));
+
+    function resetModalSubmitState() {
+        modalForms.forEach((form) => {
+            if (form.dataset.submitting) {
+                delete form.dataset.submitting;
+            }
+
+            const submitButtons = Array.from(form.querySelectorAll('button[type="submit"], button:not([type])'));
+            submitButtons.forEach((button) => {
+                if (button.dataset.originalLabel) {
+                    button.textContent = button.dataset.originalLabel;
+                    delete button.dataset.originalLabel;
+                }
+                button.disabled = false;
+            });
+        });
+    }
 
     function open() {
+        resetModalSubmitState();
         modal.classList.remove('hidden');
         modal.setAttribute('aria-hidden', 'false');
 
@@ -21,6 +43,7 @@ function toggleEdit(id) {
     }
 
     function close() {
+        resetModalSubmitState();
         modal.classList.add('hidden');
         modal.setAttribute('aria-hidden', 'true');
         openBtn.focus();
@@ -39,10 +62,6 @@ function toggleEdit(id) {
         }
     });
 
-    const titleInput = modal.querySelector('input[name="title"]');
-    const notesInput = modal.querySelector('textarea[name="notes"]');
-    const exerciseInput = modal.querySelector('input[name="exercise"]');
-
     modal.addEventListener('click', (e) => {
         const btn = e.target && e.target.closest ? e.target.closest('[data-template]') : null;
         if (!btn) return;
@@ -56,6 +75,30 @@ function toggleEdit(id) {
         if (exerciseInput) exerciseInput.checked = ex;
 
         if (titleInput) titleInput.focus();
+    });
+
+    modalForms.forEach((form) => {
+        form.addEventListener('submit', (e) => {
+            if (form.dataset.submitting === 'true') {
+                e.preventDefault();
+                return;
+            }
+
+            form.dataset.submitting = 'true';
+
+            const submitButtons = Array.from(form.querySelectorAll('button[type="submit"], button:not([type])'));
+            submitButtons.forEach((button) => {
+                if (!button.dataset.originalLabel) {
+                    button.dataset.originalLabel = button.textContent;
+                }
+
+                if (button.textContent.trim().length > 0) {
+                    button.textContent = 'Submitting...';
+                }
+
+                button.disabled = true;
+            });
+        });
     });
 })();
 
@@ -269,16 +312,18 @@ function toggleEdit(id) {
         const allTaskItems = Array.from(tasksRoot.querySelectorAll('[data-task-item]'));
         if (!allTaskItems.length) return;
 
+        // Sort items based on ordering preference
         sortByOrdering(allTaskItems, ordering);
 
         const combinedScrollClass = 'mt-4 max-h-[32rem] overflow-x-hidden overflow-y-auto rounded-xl border border-slate-200 bg-white scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:scrollbar-thumb-slate-700';
         const separatedScrollClass = 'mt-3 max-h-[24rem] overflow-x-hidden overflow-y-auto rounded-xl border border-slate-200 bg-white scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:scrollbar-thumb-slate-700';
         const headingClass = 'mt-6 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400';
 
-        // Clear current layout nodes (we rebuild only the layout portion, not the empty-state banner)
+        // Clear and rebuild task list
         tasksRoot.innerHTML = '';
 
         if (layout === 'SEPARATED_BY_CATEGORY') {
+            // Create headers and containers for separated layout
             const otherHeading = document.createElement('h3');
             otherHeading.className = headingClass;
             otherHeading.textContent = 'Other tasks';
@@ -295,23 +340,29 @@ function toggleEdit(id) {
             exerciseScroll.className = separatedScrollClass;
             exerciseScroll.setAttribute('data-task-list', 'exercise');
 
+            // Distribute tasks into exercise vs other
             allTaskItems.forEach((item) => {
                 const isExercise = (item.dataset.taskExercise || '').toLowerCase() === 'true';
                 (isExercise ? exerciseScroll : otherScroll).appendChild(item);
             });
 
-            tasksRoot.appendChild(otherHeading);
-            tasksRoot.appendChild(otherScroll);
-            tasksRoot.appendChild(exerciseHeading);
-            tasksRoot.appendChild(exerciseScroll);
-            return;
+            // Only show headers if they have content
+            if (otherScroll.children.length > 0) {
+                tasksRoot.appendChild(otherHeading);
+                tasksRoot.appendChild(otherScroll);
+            }
+            if (exerciseScroll.children.length > 0) {
+                tasksRoot.appendChild(exerciseHeading);
+                tasksRoot.appendChild(exerciseScroll);
+            }
+        } else {
+            // Combined list layout
+            const combinedScroll = document.createElement('div');
+            combinedScroll.className = combinedScrollClass;
+            combinedScroll.setAttribute('data-task-list', 'combined');
+            allTaskItems.forEach((item) => combinedScroll.appendChild(item));
+            tasksRoot.appendChild(combinedScroll);
         }
-
-        const combinedScroll = document.createElement('div');
-        combinedScroll.className = combinedScrollClass;
-        combinedScroll.setAttribute('data-task-list', 'combined');
-        allTaskItems.forEach((item) => combinedScroll.appendChild(item));
-        tasksRoot.appendChild(combinedScroll);
     }
 
     function applyWorkoutPreferences(form) {
@@ -333,6 +384,7 @@ function toggleEdit(id) {
                 return 0;
             });
         } else {
+            // Restore schedule order
             items.sort((a, b) => {
                 const ai = parseInt(a.dataset.originalIndex || '0', 10);
                 const bi = parseInt(b.dataset.originalIndex || '0', 10);
@@ -340,6 +392,7 @@ function toggleEdit(id) {
             });
         }
 
+        // Reorder items in DOM
         items.forEach((el) => workoutsRoot.appendChild(el));
     }
 
@@ -365,5 +418,17 @@ function toggleEdit(id) {
                     // fail silently; non-js fallback still works on normal submits
                 });
         });
+    });
+
+    // Initialize display on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const tasksConfig = document.querySelector('form[action*="/task-preferences"]');
+        if (tasksConfig) {
+            applyTaskPreferences(tasksConfig);
+        }
+        const workoutConfig = document.querySelector('form[action*="/workout-preferences"]');
+        if (workoutConfig) {
+            applyWorkoutPreferences(workoutConfig);
+        }
     });
 })();
