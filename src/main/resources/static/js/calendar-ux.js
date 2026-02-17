@@ -1,28 +1,30 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // ===== SCHEDULE SHELF (Left-side sliding panel) =====
+    // ===== SCHEDULE DRAWER (Left-side sliding panel) =====
     const scheduleButton = document.getElementById("scheduleDrawerButton");
-    const scheduleShelf = document.getElementById("scheduleShelf");
+    const scheduleDrawer = document.getElementById("scheduleDrawer");
     
-    function openScheduleShelf() {
-        if (!scheduleShelf) return;
-        scheduleShelf.classList.add("open");
+    function openScheduleDrawer() {
+        if (!scheduleDrawer) return;
+        scheduleDrawer.classList.add("open");
+        scheduleDrawer.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden"; // Prevent scrolling when open
     }
     
-    function closeScheduleShelf() {
-        if (!scheduleShelf) return;
-        scheduleShelf.classList.remove("open");
+    function closeScheduleDrawer() {
+        if (!scheduleDrawer) return;
+        scheduleDrawer.classList.remove("open");
+        scheduleDrawer.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
     }
     
-    scheduleButton?.addEventListener("click", openScheduleShelf);
-    scheduleShelf?.querySelector(".calendar-schedule-overlay")?.addEventListener("click", closeScheduleShelf);
-    scheduleShelf?.querySelector(".calendar-schedule-close")?.addEventListener("click", closeScheduleShelf);
+    scheduleButton?.addEventListener("click", openScheduleDrawer);
+    scheduleDrawer?.querySelector("[data-drawer-overlay]")?.addEventListener("click", closeScheduleDrawer);
+    scheduleDrawer?.querySelector("[data-drawer-close]")?.addEventListener("click", closeScheduleDrawer);
     
     // Close on Escape key
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && scheduleShelf?.classList.contains("open")) {
-            closeScheduleShelf();
+        if (e.key === "Escape" && scheduleDrawer?.classList.contains("open")) {
+            closeScheduleDrawer();
         }
     });
     

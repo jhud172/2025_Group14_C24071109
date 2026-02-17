@@ -17,6 +17,11 @@ public interface UserSettingsService {
             CalendarWorkoutOrderingPreference calendarWorkoutOrdering
         );
 
+    UserSettings updateCalendarViewPreference(
+            User user,
+            CalendarViewPreference calendarViewPreference
+        );
+
     UserSettings updateAccessibility(
             User user,
             boolean colorBlindMode,
