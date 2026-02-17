@@ -52,7 +52,7 @@
                                     <div th:each="day : ${#numbers.sequence(1, lengthOfMonth)}"
                                          th:with="dateObj=${T(java.time.LocalDate).of(year,month,day)},
                                                 dateKey=${#temporals.format(dateObj,'yyyy-MM-dd')},
-                                                tasks=${tasksByDateIso != null ? tasksByDateIso[dateKey] : tasksByDate[dateObj]},
+                                                tasks=${tasksByDateIso != null && tasksByDateIso[dateKey] != null ? tasksByDateIso[dateKey] : tasksByDate[dateObj]},
                                                   tTotal=${tasks!=null?#lists.size(tasks):0},
                                                   sched=${occurrences[dateObj]},
                                                   sTotal=${sched!=null?#lists.size(sched):0},

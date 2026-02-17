@@ -110,7 +110,7 @@
                                 <div th:each="i : ${#numbers.sequence(0,6)}" 
                                      th:with="day=${weekDays[i]},
                                              dateKey=${#temporals.format(day,'yyyy-MM-dd')},
-                                             tasks=${tasksByDateIso != null ? tasksByDateIso[dateKey] : tasksByDate[day]},
+                                             tasks=${tasksByDateIso != null && tasksByDateIso[dateKey] != null ? tasksByDateIso[dateKey] : tasksByDate[day]},
                                               tTotal=${tasks!=null?tasks.size():0},
                                               sched=${occurrences[day]},
                                               sTotal=${sched!=null?sched.size():0},
