@@ -7,9 +7,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +78,9 @@ public class CalendarController {
 
     @Autowired
     private ScheduleService scheduleService;
+
+    @Autowired
+    private ScheduleAppliedRepository scheduleAppliedRepository;
 
     @Autowired
     private ScheduleOccurrenceService scheduleOccurrenceService;
@@ -174,7 +179,7 @@ public class CalendarController {
             for (int i = 0; i < 7; i++) {
                 weekDays.add(weekStart.plusDays(i));
             }
-            Map<LocalDate, List<CalendarTask>> tasks = taskService.getTasksByRange(user, weekStart, weekEnd);
+            Map<LocalDate, List<CalendarTask>> tasks = getTasksByDateRange(user, weekStart, weekEnd);
             Map<LocalDate, List<ScheduleOccurrence>> occ = scheduleOccurrenceService.getOccurrencesByRange(user, weekStart, weekEnd);
 
             int prevWeek = targetWeek - 1;
@@ -209,7 +214,9 @@ public class CalendarController {
             model.addAttribute("isPremium", isPremium);
             model.addAttribute("calendarLayout", layoutPreference);
             model.addAttribute("view", "week");
-            model.addAttribute("schedules", scheduleService.findByUser(user));
+            List<Schedule> schedules = scheduleService.findByUser(user);
+            model.addAttribute("schedules", schedules);
+            populateScheduleDrawerState(user, schedules, model);
             if ("weekPane".equals(fragment)) {
                 return "calendar/week :: weekPane";
             }
@@ -245,17 +252,60 @@ public class CalendarController {
         model.addAttribute("prevYear", prev.getYear());
         model.addAttribute("nextMonth", next.getMonthValue());
         model.addAttribute("nextYear", next.getYear());
-        Map<LocalDate, List<CalendarTask>> tasksByDate = taskService.getTasksGroupedByDate(user);
+        Map<LocalDate, List<CalendarTask>> tasksByDate = getTasksByDateRange(
+            user,
+            current.withDayOfMonth(1),
+            current.withDayOfMonth(current.lengthOfMonth())
+        );
         model.addAttribute("tasksByDate", tasksByDate);
         model.addAttribute("tasksByDateIso", toIsoDateKeyedTaskMap(tasksByDate));
         model.addAttribute("occurrences", scheduleOccurrenceService.getOccurrencesForUserInMonth(user, year, month));
-        model.addAttribute("schedules", scheduleService.findByUser(user));
+        List<Schedule> schedules = scheduleService.findByUser(user);
+        model.addAttribute("schedules", schedules);
+        populateScheduleDrawerState(user, schedules, model);
         model.addAttribute("view", "month");
 
         if ("monthPane".equals(fragment)) {
             return "calendar/month :: monthPane";
         }
         return "calendar/month";
+    }
+
+    private void populateScheduleDrawerState(User user, List<Schedule> schedules, Model model) {
+        Map<Long, LocalDate> latestAppliedByScheduleId = new HashMap<>();
+        Set<Long> activeScheduleIds = new HashSet<>();
+        Map<Long, Integer> applyCountByScheduleId = new HashMap<>();
+
+        for (Schedule schedule : schedules) {
+            if (schedule == null || schedule.getId() == null) {
+                continue;
+            }
+            List<ScheduleApplied> appliedList = scheduleAppliedRepository.findByUserAndSchedule(user, schedule);
+            if (appliedList == null || appliedList.isEmpty()) {
+                continue;
+            }
+
+            applyCountByScheduleId.put(schedule.getId(), appliedList.size());
+
+            LocalDate latestDate = appliedList.stream()
+                    .map(ScheduleApplied::getDateApplied)
+                    .filter(Objects::nonNull)
+                    .max(LocalDate::compareTo)
+                    .orElse(null);
+
+            if (latestDate != null) {
+                latestAppliedByScheduleId.put(schedule.getId(), latestDate);
+            }
+
+            boolean hasShownOnCalendar = appliedList.stream().anyMatch(ScheduleApplied::isShownOnCalendar);
+            if (hasShownOnCalendar) {
+                activeScheduleIds.add(schedule.getId());
+            }
+        }
+
+        model.addAttribute("scheduleLatestAppliedById", latestAppliedByScheduleId);
+        model.addAttribute("scheduleActiveIds", activeScheduleIds);
+        model.addAttribute("scheduleApplyCountById", applyCountByScheduleId);
     }
 
     @GetMapping("/month-fragment")
@@ -893,6 +943,24 @@ public class CalendarController {
         }
 
         return byIsoDate;
+    }
+
+    private Map<LocalDate, List<CalendarTask>> getTasksByDateRange(User user, LocalDate start, LocalDate end) {
+        Map<LocalDate, List<CalendarTask>> tasksByDate = new HashMap<>();
+        if (user == null || start == null || end == null || end.isBefore(start)) {
+            return tasksByDate;
+        }
+
+        LocalDate cursor = start;
+        while (!cursor.isAfter(end)) {
+            List<CalendarTask> dayTasks = taskService.getTasks(user, cursor);
+            if (dayTasks != null && !dayTasks.isEmpty()) {
+                tasksByDate.put(cursor, dayTasks);
+            }
+            cursor = cursor.plusDays(1);
+        }
+
+        return tasksByDate;
     }
 
 }

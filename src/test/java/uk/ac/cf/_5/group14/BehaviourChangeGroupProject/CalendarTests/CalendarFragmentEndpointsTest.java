@@ -1,7 +1,9 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
@@ -96,7 +99,16 @@ class CalendarFragmentEndpointsTest {
 
         given(userSettingsService.getOrCreate(eq(sessionUser))).willReturn(settings);
         given(platformSubscriptionService.isPremium(eq(sessionUser.getId()), any(Clock.class))).willReturn(false);
-        given(taskService.getTasksGroupedByDate(eq(sessionUser))).willReturn(Collections.emptyMap());
+        CalendarTask monthTask = new CalendarTask();
+        monthTask.setId(101L);
+        monthTask.setTitle("Monthly visible task");
+        given(taskService.getTasks(any(User.class), any(LocalDate.class))).willAnswer(invocation -> {
+            LocalDate date = invocation.getArgument(1);
+            if (LocalDate.of(2026, 1, 15).equals(date)) {
+                return List.of(monthTask);
+            }
+            return Collections.emptyList();
+        });
         given(scheduleOccurrenceService.getOccurrencesForUserInMonth(eq(sessionUser), eq(2026), eq(1))).willReturn(Collections.emptyMap());
         given(scheduleService.findByUser(eq(sessionUser))).willReturn(Collections.emptyList());
 
@@ -105,7 +117,8 @@ class CalendarFragmentEndpointsTest {
                         .param("year", "2026")
                         .sessionAttr("user", sessionUser))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-month-pane")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-month-pane")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Monthly visible task")));
     }
 
     @Test
@@ -119,7 +132,16 @@ class CalendarFragmentEndpointsTest {
 
         given(userSettingsService.getOrCreate(eq(sessionUser))).willReturn(settings);
         given(platformSubscriptionService.isPremium(eq(sessionUser.getId()), any(Clock.class))).willReturn(false);
-        given(taskService.getTasksByRange(eq(sessionUser), any(), any())).willReturn(Collections.emptyMap());
+        CalendarTask weekTask = new CalendarTask();
+        weekTask.setId(102L);
+        weekTask.setTitle("Weekly visible task");
+        given(taskService.getTasks(any(User.class), any(LocalDate.class))).willAnswer(invocation -> {
+            LocalDate date = invocation.getArgument(1);
+            if (LocalDate.of(2026, 1, 12).equals(date)) {
+                return List.of(weekTask);
+            }
+            return Collections.emptyList();
+        });
         given(scheduleOccurrenceService.getOccurrencesByRange(eq(sessionUser), any(), any())).willReturn(Collections.emptyMap());
         given(scheduleService.findByUser(eq(sessionUser))).willReturn(Collections.emptyList());
 
@@ -128,7 +150,8 @@ class CalendarFragmentEndpointsTest {
                         .param("weekYear", "2026")
                         .sessionAttr("user", sessionUser))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-week-pane")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-week-pane")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Weekly visible task")));
     }
 
     @TestConfiguration
