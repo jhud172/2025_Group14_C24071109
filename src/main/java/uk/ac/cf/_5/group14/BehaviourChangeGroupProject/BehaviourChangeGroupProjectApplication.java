@@ -45,8 +45,11 @@ public class BehaviourChangeGroupProjectApplication {
 		}
 
 		if (rawDatabaseUrl.startsWith("jdbc:")) {
-			System.setProperty("spring.datasource.url", rawDatabaseUrl);
-			System.setProperty("app.datasource.url-origin", "DATABASE_URL (jdbc)");
+			String normalizedJdbcUrl = normalizeJdbcPostgresUrl(rawDatabaseUrl);
+			System.setProperty("spring.datasource.url", normalizedJdbcUrl);
+			System.setProperty("app.datasource.url-origin", normalizedJdbcUrl.equals(rawDatabaseUrl)
+					? "DATABASE_URL (jdbc)"
+					: "DATABASE_URL (jdbc normalized)");
 			return;
 		}
 
@@ -80,6 +83,40 @@ public class BehaviourChangeGroupProjectApplication {
 
 	private static boolean hasText(String value) {
 		return value != null && !value.isBlank();
+	}
+
+	private static String normalizeJdbcPostgresUrl(String jdbcUrl) {
+		String prefix = "jdbc:postgresql://";
+		if (!jdbcUrl.startsWith(prefix)) {
+			return jdbcUrl;
+		}
+
+		String remainder = jdbcUrl.substring(prefix.length());
+		if (!remainder.contains("@")) {
+			return jdbcUrl;
+		}
+
+		URI uri = URI.create("postgresql://" + remainder);
+		String normalizedJdbcUrl = "jdbc:postgresql://" + uri.getHost()
+				+ (uri.getPort() > 0 ? ":" + uri.getPort() : "")
+				+ uri.getPath()
+				+ (hasText(uri.getQuery()) ? "?" + uri.getQuery() : "");
+
+		String userInfo = uri.getUserInfo();
+		if (hasText(userInfo) && !hasText(System.getProperty("spring.datasource.username"))
+				&& !hasText(System.getenv("SPRING_DATASOURCE_USERNAME"))) {
+			String[] userInfoParts = userInfo.split(":", 2);
+			if (userInfoParts.length > 0 && hasText(userInfoParts[0])) {
+				System.setProperty("spring.datasource.username", userInfoParts[0]);
+			}
+			if (userInfoParts.length == 2 && hasText(userInfoParts[1])
+					&& !hasText(System.getProperty("spring.datasource.password"))
+					&& !hasText(System.getenv("SPRING_DATASOURCE_PASSWORD"))) {
+				System.setProperty("spring.datasource.password", userInfoParts[1]);
+			}
+		}
+
+		return normalizedJdbcUrl;
 	}
 
 	private static String detectDatasourceSource() {
