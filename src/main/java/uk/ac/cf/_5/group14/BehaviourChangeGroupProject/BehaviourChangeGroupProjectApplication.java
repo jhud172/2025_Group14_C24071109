@@ -39,6 +39,7 @@ public class BehaviourChangeGroupProjectApplication {
 		if (hasText(explicitDatasourceUrl)) {
 			String normalizedExplicitUrl = normalizeJdbcPostgresUrl(explicitDatasourceUrl);
 			System.setProperty("spring.datasource.url", normalizedExplicitUrl);
+			applyDriverClassForUrl(normalizedExplicitUrl);
 			System.setProperty("app.datasource.url-origin", normalizedExplicitUrl.equals(explicitDatasourceUrl)
 					? "spring.datasource.url"
 					: "spring.datasource.url (jdbc normalized)");
@@ -53,6 +54,7 @@ public class BehaviourChangeGroupProjectApplication {
 		if (rawDatabaseUrl.startsWith("jdbc:")) {
 			String normalizedJdbcUrl = normalizeJdbcPostgresUrl(rawDatabaseUrl);
 			System.setProperty("spring.datasource.url", normalizedJdbcUrl);
+			applyDriverClassForUrl(normalizedJdbcUrl);
 			System.setProperty("app.datasource.url-origin", normalizedJdbcUrl.equals(rawDatabaseUrl)
 					? "DATABASE_URL (jdbc)"
 					: "DATABASE_URL (jdbc normalized)");
@@ -70,6 +72,7 @@ public class BehaviourChangeGroupProjectApplication {
 				+ (hasText(uri.getQuery()) ? "?" + uri.getQuery() : "");
 
 		System.setProperty("spring.datasource.url", jdbcUrl);
+		applyDriverClassForUrl(jdbcUrl);
 		System.setProperty("app.datasource.url-origin", "DATABASE_URL (normalized postgres:// -> jdbc:postgresql://)");
 
 		String userInfo = uri.getUserInfo();
@@ -92,6 +95,10 @@ public class BehaviourChangeGroupProjectApplication {
 	}
 
 	private static String normalizeJdbcPostgresUrl(String jdbcUrl) {
+		if (jdbcUrl.startsWith("jdbc:jdbc:postgresql://")) {
+			jdbcUrl = jdbcUrl.replaceFirst("^jdbc:jdbc:postgresql://", "jdbc:postgresql://");
+		}
+
 		String prefix = "jdbc:postgresql://";
 		if (!jdbcUrl.startsWith(prefix)) {
 			return jdbcUrl;
@@ -123,6 +130,21 @@ public class BehaviourChangeGroupProjectApplication {
 		}
 
 		return normalizedJdbcUrl;
+	}
+
+	private static void applyDriverClassForUrl(String jdbcUrl) {
+		if (!hasText(jdbcUrl)) {
+			return;
+		}
+
+		if (jdbcUrl.startsWith("jdbc:postgresql://")) {
+			System.setProperty("spring.datasource.driver-class-name", "org.postgresql.Driver");
+			return;
+		}
+
+		if (jdbcUrl.startsWith("jdbc:h2:")) {
+			System.setProperty("spring.datasource.driver-class-name", "org.h2.Driver");
+		}
 	}
 
 	private static String detectDatasourceSource() {
