@@ -123,7 +123,7 @@ SET subscription_status = false
 WHERE username = 'demo2';
 
 INSERT INTO platform_subscriptions (user_id, plan, status, current_period_end, cancel_at_period_end)
-SELECT u.id, 'MONTHLY', 'ACTIVE', DATEADD('DAY', 30, CURRENT_TIMESTAMP), FALSE
+SELECT u.id, 'MONTHLY', 'ACTIVE', CURRENT_TIMESTAMP + INTERVAL '30 days', FALSE
 FROM users u
 WHERE u.username = 'demo'
   AND NOT EXISTS (
@@ -133,12 +133,12 @@ WHERE u.username = 'demo'
 UPDATE platform_subscriptions ps
 SET plan = 'MONTHLY',
     status = 'ACTIVE',
-  current_period_end = DATEADD('DAY', 30, CURRENT_TIMESTAMP),
+  current_period_end = CURRENT_TIMESTAMP + INTERVAL '30 days',
     cancel_at_period_end = FALSE
 WHERE ps.user_id = (SELECT id FROM users WHERE username = 'demo');
 
 INSERT INTO platform_subscriptions (user_id, plan, status, current_period_end, cancel_at_period_end)
-SELECT u.id, 'MONTHLY', 'CANCELLED', DATEADD('DAY', -1, CURRENT_TIMESTAMP), TRUE
+SELECT u.id, 'MONTHLY', 'CANCELLED', CURRENT_TIMESTAMP - INTERVAL '1 day', TRUE
 FROM users u
 WHERE u.username = 'demo2'
   AND NOT EXISTS (
@@ -148,6 +148,6 @@ WHERE u.username = 'demo2'
 UPDATE platform_subscriptions ps
 SET plan = 'MONTHLY',
     status = 'CANCELLED',
-  current_period_end = DATEADD('DAY', -1, CURRENT_TIMESTAMP),
+  current_period_end = CURRENT_TIMESTAMP - INTERVAL '1 day',
     cancel_at_period_end = TRUE
 WHERE ps.user_id = (SELECT id FROM users WHERE username = 'demo2');

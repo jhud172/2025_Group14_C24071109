@@ -375,7 +375,7 @@ WHERE u.username = 'demo'
   );
 
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
-SELECT u.id, e.id, s.id, CAST(DATEADD('DAY', 2, CURRENT_DATE) AS DATE), s.name, FALSE
+SELECT u.id, e.id, s.id, CAST((CURRENT_DATE + INTERVAL '2 days') AS DATE), s.name, FALSE
 FROM users u
 JOIN schedules s ON s.user_id = u.id AND s.name = 'Demo Live Week Plan'
 JOIN exercises e ON e.name = 'Push-up'
@@ -383,12 +383,12 @@ WHERE u.username = 'demo'
   AND NOT EXISTS (
     SELECT 1 FROM schedule_occurrences so
     WHERE so.user_id = u.id
-      AND so.date = CAST(DATEADD('DAY', 2, CURRENT_DATE) AS DATE)
+      AND so.date = CAST((CURRENT_DATE + INTERVAL '2 days') AS DATE)
       AND so.schedule_name = s.name
   );
 
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
-SELECT u.id, e.id, s.id, CAST(DATEADD('DAY', 4, CURRENT_DATE) AS DATE), s.name, FALSE
+SELECT u.id, e.id, s.id, CAST((CURRENT_DATE + INTERVAL '4 days') AS DATE), s.name, FALSE
 FROM users u
 JOIN schedules s ON s.user_id = u.id AND s.name = 'Demo Live Week Plan'
 JOIN exercises e ON e.name = 'Run'
@@ -396,7 +396,7 @@ WHERE u.username = 'demo'
   AND NOT EXISTS (
     SELECT 1 FROM schedule_occurrences so
     WHERE so.user_id = u.id
-      AND so.date = CAST(DATEADD('DAY', 4, CURRENT_DATE) AS DATE)
+      AND so.date = CAST((CURRENT_DATE + INTERVAL '4 days') AS DATE)
       AND so.schedule_name = s.name
   );
 
@@ -412,24 +412,24 @@ WHERE u.username = 'demo'
   );
 
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, exercise_name, requires_log)
-SELECT u.id, CAST(DATEADD('DAY', 1, CURRENT_DATE) AS DATE), 'Prep tomorrow session', TIME '18:00:00', 'Review plan and prep kit for tomorrow.', FALSE, FALSE, NULL, FALSE
+SELECT u.id, CAST((CURRENT_DATE + INTERVAL '1 day') AS DATE), 'Prep tomorrow session', TIME '18:00:00', 'Review plan and prep kit for tomorrow.', FALSE, FALSE, NULL, FALSE
 FROM users u
 WHERE u.username = 'demo'
   AND NOT EXISTS (
     SELECT 1 FROM calendar_tasks ct
     WHERE ct.user_id = u.id
-      AND ct.date = CAST(DATEADD('DAY', 1, CURRENT_DATE) AS DATE)
+      AND ct.date = CAST((CURRENT_DATE + INTERVAL '1 day') AS DATE)
       AND ct.title = 'Prep tomorrow session'
   );
 
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, exercise_name, requires_log)
-SELECT u.id, CAST(DATEADD('DAY', 3, CURRENT_DATE) AS DATE), 'Band Pull-Apart activation', TIME '17:45:00', 'Complete 3 sets and log form quality.', TRUE, FALSE, 'Band Pull-Apart', TRUE
+SELECT u.id, CAST((CURRENT_DATE + INTERVAL '3 days') AS DATE), 'Band Pull-Apart activation', TIME '17:45:00', 'Complete 3 sets and log form quality.', TRUE, FALSE, 'Band Pull-Apart', TRUE
 FROM users u
 WHERE u.username = 'demo'
   AND NOT EXISTS (
     SELECT 1 FROM calendar_tasks ct
     WHERE ct.user_id = u.id
-      AND ct.date = CAST(DATEADD('DAY', 3, CURRENT_DATE) AS DATE)
+      AND ct.date = CAST((CURRENT_DATE + INTERVAL '3 days') AS DATE)
       AND ct.title = 'Band Pull-Apart activation'
   );
 
