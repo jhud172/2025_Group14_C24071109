@@ -1,6 +1,15 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -10,11 +19,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayMode.DayModeService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarController;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleService;
@@ -23,24 +41,6 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.Worko
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayMode.DayModeService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
-
-import java.time.Clock;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CalendarController.class)
 @ActiveProfiles("test")
@@ -105,7 +105,9 @@ public class CalendarDayCompletionAutoUpdateTest {
         completedTask.setTitle("Test task");
         completedTask.setCompleted(true);
 
-        given(taskService.getTasks(eq(sessionUser), eq(date))).willReturn(List.of(task), List.of(completedTask));
+        given(taskService.getTasks(eq(sessionUser), eq(date)))
+            .willReturn(List.of(task))
+            .willReturn(List.of(completedTask));
         given(scheduleOccurrenceService.getOccurrencesForUserOnDate(eq(sessionUser), eq(date))).willReturn(Collections.emptyList());
         given(workoutScheduleService.findByUserAndDayOfWeek(eq(sessionUser), any(Integer.class))).willReturn(Collections.emptyList());
         given(taskTemplateService.listRecents(eq(sessionUser), eq(6))).willReturn(Collections.emptyList());

@@ -63,7 +63,7 @@
                                 <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
                             </div>
                             <div class="mt-3 grid w-full grid-cols-7 gap-3">
-                                <div th:each="i : ${#numbers.sequence(0,6)}" th:with="day=${weekDays[i]}"
+                                <div th:each="i : ${#numbers.sequence(0,6)}" th:with="day=${weekDays[i]}, dateKey=${#temporals.format(day,'yyyy-MM-dd')}"
                                      class="calendar-day-card relative h-72 overflow-hidden rounded-2xl ring-1 ring-white/10 bg-white/70 p-3 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.5)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_22px_48px_-32px_rgba(15,23,42,0.6)] dark:bg-white/5 sm:h-80 sm:p-4"
                                       th:attr="data-day-link=@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}"
                                     th:classappend="${(day.isBefore(today) ? ' opacity-60' : '') +
@@ -80,7 +80,7 @@
                                         <span th:if="${day.isEqual(today)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600">Today</span>
                                         <span th:if="${isPremium and day.isEqual(tomorrow)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">Tomorrow</span>
                                     </div>
-                                    <div th:with="tasks=${tasksByDate[T(java.time.LocalDate).parse(day.toString())]}, tTotal=${tasks!=null?tasks.size():0}, sched=${occurrences[day]}, sTotal=${sched!=null?sched.size():0}, grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
+                                    <div th:with="localTasks=${tasksByDate != null ? tasksByDate[day] : null}, tasks=${localTasks != null ? localTasks : (tasksByDateIso != null ? tasksByDateIso[dateKey] : null)}, tTotal=${tasks!=null?tasks.size():0}, sched=${occurrences[day]}, sTotal=${sched!=null?sched.size():0}, grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
                                         <div th:if="${!grouped}" class="space-y-2 overflow-y-auto pr-1" style="max-height:260px;">
                                             <div th:each="task, iter : ${tasks}"
                                                  th:if="${iter.index < 4}"

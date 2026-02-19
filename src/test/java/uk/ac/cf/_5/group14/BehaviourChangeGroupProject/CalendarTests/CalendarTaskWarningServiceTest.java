@@ -1,17 +1,5 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarning;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningRepository;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningTriggerType;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,8 +7,29 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarning;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningTriggerType;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 @ExtendWith(MockitoExtension.class)
 public class CalendarTaskWarningServiceTest {
@@ -134,9 +143,13 @@ public class CalendarTaskWarningServiceTest {
         assertFalse(task.isLate());
         assertEquals(scheduled, warning.getTriggeredAt());
 
-        ArgumentCaptor<List<CalendarTaskWarning>> captor = ArgumentCaptor.forClass(List.class);
-        verify(warningRepository, times(1)).saveAll(captor.capture());
-        assertEquals(1, captor.getValue().size());
+        verify(warningRepository, times(1)).saveAll(argThat(warnings -> {
+            int count = 0;
+            for (CalendarTaskWarning ignored : warnings) {
+                count++;
+            }
+            return count == 1;
+        }));
     }
 
     @Test

@@ -136,7 +136,7 @@
 
             card.addEventListener('click', (event) => {
                 if (event.defaultPrevented) return;
-                if (event.target.closest('a, button, input, textarea, select, label, form')) return;
+                if (event.target.closest('button, input, textarea, select, form')) return;
 
                 const href = card.getAttribute('data-day-link');
                 if (href) {
@@ -356,6 +356,254 @@
     const monthNameEl = document.getElementById('month-name');
     const monthYearEl = document.getElementById('month-year');
     const monthRedirectInput = document.getElementById('month-redirect');
+    const jumpTodayBtn = document.getElementById('month-jump-today');
+    const jumpDateInput = document.getElementById('month-jump-date');
+    const jumpDateBtn = document.getElementById('month-jump-date-go');
+    const jumpNextWorkoutBtn = document.getElementById('month-jump-next-workout');
+    const jumpTaskInput = document.getElementById('month-jump-task');
+    const jumpTaskBtn = document.getElementById('month-jump-task-go');
+    const jumpStatusEl = document.getElementById('month-jump-status');
+    const jumpControls = [jumpTodayBtn, jumpDateInput, jumpDateBtn, jumpNextWorkoutBtn, jumpTaskInput, jumpTaskBtn].filter(Boolean);
+    let jumpActionInProgress = false;
+
+    function setJumpStatus(message, type = 'error') {
+        if (!jumpStatusEl) return;
+        jumpStatusEl.textContent = message || '';
+        jumpStatusEl.classList.toggle('is-visible', !!message);
+        jumpStatusEl.classList.toggle('is-error', !!message && type === 'error');
+        jumpStatusEl.classList.toggle('is-success', !!message && type === 'success');
+    }
+
+    function setJumpControlsDisabled(disabled) {
+        jumpControls.forEach((control) => {
+            control.disabled = disabled;
+        });
+    }
+
+    async function runJumpAction(action) {
+        if (jumpActionInProgress) return;
+        jumpActionInProgress = true;
+        setJumpControlsDisabled(true);
+        try {
+            await action();
+        } catch (error) {
+            console.error(error);
+            setJumpStatus('Jump failed. Please try again.', 'error');
+        } finally {
+            setJumpControlsDisabled(false);
+            jumpActionInProgress = false;
+        }
+    }
+
+    function toLocalIsoDate(date) {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function parseIsoDateInput(value) {
+        if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+        const [year, month, day] = value.split('-').map((part) => parseInt(part, 10));
+        if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+        return new Date(year, month - 1, day);
+    }
+
+    function getCurrentPane() {
+        return currentSlot.querySelector('[data-month-pane]');
+    }
+
+    function clearJumpHighlights() {
+        document.querySelectorAll('.calendar-day-card--jump-target').forEach((card) => {
+            card.classList.remove('calendar-day-card--jump-target');
+        });
+    }
+
+    function scrollJumpTargetIntoView(card) {
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        const topInset = 110;
+        const bottomInset = 24;
+        const outsideViewport = rect.top < topInset || rect.bottom > (window.innerHeight - bottomInset);
+        if (!outsideViewport) return;
+        card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    }
+
+    function highlightJumpCard(card) {
+        if (!card) return false;
+        clearJumpHighlights();
+        card.classList.add('calendar-day-card--jump-target');
+        scrollJumpTargetIntoView(card);
+        setTimeout(() => {
+            card.classList.remove('calendar-day-card--jump-target');
+        }, 1800);
+        return true;
+    }
+
+    function findDateCardInCurrentPane(dateIso) {
+        const pane = getCurrentPane();
+        if (!pane) return null;
+        return pane.querySelector(`.calendar-day-card[data-date="${dateIso}"]`);
+    }
+
+    function monthDifference(fromYear, fromMonth, toYear, toMonth) {
+        return ((toYear - fromYear) * 12) + (toMonth - fromMonth);
+    }
+
+    async function jumpToMonth(targetYear, targetMonth) {
+        let safety = 0;
+        while ((currentYear !== targetYear || currentMonth !== targetMonth) && safety < 120) {
+            const diff = monthDifference(currentYear, currentMonth, targetYear, targetMonth);
+            await go(diff > 0 ? 1 : -1);
+            safety += 1;
+        }
+        return currentYear === targetYear && currentMonth === targetMonth;
+    }
+
+    function getCurrentMonthState() {
+        return { year: currentYear, month: currentMonth };
+    }
+
+    async function restoreMonthState(state) {
+        if (!state) return;
+        if (currentYear === state.year && currentMonth === state.month) return;
+        await jumpToMonth(state.year, state.month);
+    }
+
+    function sortedCardsInPane(pane) {
+        return Array.from(pane.querySelectorAll('.calendar-day-card[data-date]')).sort((a, b) => {
+            return (a.dataset.date || '').localeCompare(b.dataset.date || '');
+        });
+    }
+
+    function findNextWorkoutCard(pane, fromDateIso) {
+        const cards = sortedCardsInPane(pane);
+        return cards.find((card) => {
+            const date = card.dataset.date || '';
+            if (date < fromDateIso) return false;
+            return !!card.querySelector('.calendar-item[data-type="workout"]');
+        }) || null;
+    }
+
+    function findTaskCardByQuery(pane, query, fromDateIso) {
+        const cards = sortedCardsInPane(pane);
+        return cards.find((card) => {
+            const date = card.dataset.date || '';
+            if (date < fromDateIso) return false;
+            return Array.from(card.querySelectorAll('.calendar-item[data-type="task"]')).some((item) => {
+                const title = (item.dataset.title || '').toLowerCase();
+                return title.includes(query);
+            });
+        }) || null;
+    }
+
+    async function jumpToDate(dateIso) {
+        const parsed = parseIsoDateInput(dateIso);
+        if (!parsed) {
+            setJumpStatus('Please enter a valid date.', 'error');
+            return;
+        }
+        const targetYear = parsed.getFullYear();
+        const targetMonth = parsed.getMonth() + 1;
+        const reached = await jumpToMonth(targetYear, targetMonth);
+        if (!reached) {
+            setJumpStatus('Could not navigate to that date.', 'error');
+            return;
+        }
+        const targetCard = findDateCardInCurrentPane(dateIso);
+        if (!highlightJumpCard(targetCard)) {
+            setJumpStatus('No day card found for that date.', 'error');
+            return;
+        }
+        setJumpStatus('Jumped to selected date.', 'success');
+    }
+
+    async function jumpToNextWorkout() {
+        const fromDateIso = toLocalIsoDate(new Date());
+        const initialState = getCurrentMonthState();
+        let safety = 0;
+        while (safety < 18) {
+            const pane = getCurrentPane();
+            if (pane) {
+                const targetCard = findNextWorkoutCard(pane, fromDateIso);
+                if (targetCard) {
+                    highlightJumpCard(targetCard);
+                    setJumpStatus('Jumped to next workout.', 'success');
+                    return;
+                }
+            }
+            await go(1);
+            safety += 1;
+        }
+        await restoreMonthState(initialState);
+        setJumpStatus('No upcoming workout found.', 'error');
+    }
+
+    async function jumpToTask() {
+        const query = (jumpTaskInput?.value || '').trim().toLowerCase();
+        if (!query) {
+            setJumpStatus('Please enter a task name to search.', 'error');
+            return;
+        }
+        const fromDateIso = toLocalIsoDate(new Date());
+        const initialState = getCurrentMonthState();
+        let safety = 0;
+        while (safety < 18) {
+            const pane = getCurrentPane();
+            if (pane) {
+                const targetCard = findTaskCardByQuery(pane, query, fromDateIso);
+                if (targetCard) {
+                    highlightJumpCard(targetCard);
+                    setJumpStatus('Jumped to matching task.', 'success');
+                    return;
+                }
+            }
+            await go(1);
+            safety += 1;
+        }
+        await restoreMonthState(initialState);
+        setJumpStatus('No matching task found.', 'error');
+    }
+
+    jumpTodayBtn?.addEventListener('click', () => {
+        runJumpAction(() => jumpToDate(toLocalIsoDate(new Date())));
+    });
+
+    jumpDateBtn?.addEventListener('click', () => {
+        runJumpAction(() => jumpToDate(jumpDateInput?.value || ''));
+    });
+
+    jumpDateInput?.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        runJumpAction(() => jumpToDate(jumpDateInput.value || ''));
+    });
+
+    jumpNextWorkoutBtn?.addEventListener('click', () => {
+        runJumpAction(() => jumpToNextWorkout());
+    });
+
+    jumpTaskBtn?.addEventListener('click', () => {
+        runJumpAction(() => jumpToTask());
+    });
+
+    jumpTaskInput?.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        runJumpAction(() => jumpToTask());
+    });
+
+    jumpDateInput?.addEventListener('input', () => {
+        if (jumpStatusEl?.classList.contains('is-error')) {
+            setJumpStatus('', 'error');
+        }
+    });
+
+    jumpTaskInput?.addEventListener('input', () => {
+        if (jumpStatusEl?.classList.contains('is-error')) {
+            setJumpStatus('', 'error');
+        }
+    });
 
     function updateMonthHeader() {
         if (monthNameEl) {

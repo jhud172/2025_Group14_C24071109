@@ -17,18 +17,30 @@
                     <a href="/calendar?view=week" class="calendar-view-btn active">Week view</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <button type="button" id="scheduleDrawerButton" class="btn btn--secondary btn--md">Schedules</button>
                     <div class="calendar-mode-indicator hidden sm:flex">
                         Week View — <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
                     </div>
-                    <button type="button" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200" data-mode-info-toggle aria-label="View mode information">
-                        <span class="sr-only">Mode information</span>
-                        <span class="flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-[11px] font-bold dark:border-slate-700">i</span>
-                    </button>
+                    <div class="calendar-info-link" aria-label="Calendar layout information">
+                        <button type="button" class="calendar-info-link__button" aria-label="Calendar layout settings help">
+                            <span class="calendar-info-link__icon">i</span>
+                        </button>
+                        <span class="calendar-info-link__tip" role="tooltip">
+                            Controls how cards display: Detailed combines items, Grouped separates categories.
+                            <a href="/profile" class="calendar-info-link__tip-link">Open calendar settings</a>
+                        </span>
+                    </div>
+                    <button type="button" id="scheduleDrawerButton" class="calendar-action-btn calendar-action-btn--primary">Schedules</button>
                     <div class="relative" data-heatmap-legend-wrapper>
                         <button type="button" class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200" data-heatmap-legend-toggle aria-expanded="false" aria-label="Toggle workout heatmap legend">
                             <span class="sr-only">Heatmap legend</span>
-                            <span class="flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-[11px] font-bold dark:border-slate-700">i</span>
+                            <span class="flex h-5 w-5 items-center justify-center" aria-hidden="true">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19h16"></path>
+                                    <path d="M6 16v-5"></path>
+                                    <path d="M12 16V8"></path>
+                                    <path d="M18 16v-3"></path>
+                                </svg>
+                            </span>
                         </button>
                         <div class="calendar-legend-card absolute right-0 top-full z-30 mt-2 hidden w-64 rounded-2xl border border-white/10 bg-white/95 p-4 text-xs text-slate-700 shadow-xl backdrop-blur dark:bg-slate-900/95 dark:text-slate-200" data-heatmap-legend>
                             <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Workout heatmap</p>
@@ -66,6 +78,24 @@
                 </div>
             </div>
 
+            <div class="calendar-jump-controls" aria-label="Week jump controls">
+                <div class="calendar-jump-toolbar">
+                    <button type="button" id="week-jump-today" class="calendar-action-btn calendar-jump-btn">Jump to today</button>
+                    <div class="calendar-jump-field calendar-jump-field--date">
+                        <label class="sr-only" for="week-jump-date">Jump to date</label>
+                        <input id="week-jump-date" type="date" class="calendar-jump-input" />
+                        <button type="button" id="week-jump-date-go" class="calendar-action-btn calendar-jump-btn">Jump to date</button>
+                    </div>
+                    <button type="button" id="week-jump-next-workout" class="calendar-action-btn calendar-jump-btn">Jump to next workout</button>
+                    <div class="calendar-jump-field calendar-jump-field--task">
+                        <label class="sr-only" for="week-jump-task">Jump to task</label>
+                        <input id="week-jump-task" type="text" class="calendar-jump-input" placeholder="Task name" />
+                        <button type="button" id="week-jump-task-go" class="calendar-action-btn calendar-action-btn--accent calendar-jump-btn">Jump to task</button>
+                    </div>
+                </div>
+                <p id="week-jump-status" class="calendar-jump-status" aria-live="polite"></p>
+            </div>
+
             <div class="calendar-nav-controls">
                 <a id="week-prev" th:href="@{/calendar(view='week', week=${prevWeek}, weekYear=${prevWeekYear})}"
                         class="calendar-nav-btn">← Prev</a>
@@ -78,17 +108,6 @@
 
                 <a id="week-next" th:href="@{/calendar(view='week', week=${nextWeek}, weekYear=${nextWeekYear})}"
                         class="calendar-nav-btn">Next →</a>
-            </div>
-
-            <div class="calendar-week-strip mt-3">
-                <span class="calendar-week-strip-label">Week</span>
-                <div id="week-strip" class="flex flex-1 gap-2">
-                    <div th:each="day : ${weekDays}" class="calendar-week-day-item"
-                         th:classappend="${day.isEqual(today)} ? ' active' : ''">
-                        <div th:text="${day.dayOfWeek}"></div>
-                        <div class="text-[10px] text-slate-500 dark:text-slate-400" th:text="${day.dayOfMonth}"></div>
-                    </div>
-                </div>
             </div>
 
             <div id="week-slider" th:attr="data-week=${week},data-week-year=${weekYear}" class="mt-3 overflow-hidden" tabindex="0" role="region" aria-label="Calendar week navigation">
@@ -109,16 +128,13 @@
                                 <div class="calendar-month-grid grid grid-cols-7">
                                 <div th:each="i : ${#numbers.sequence(0,6)}" 
                                      th:with="day=${weekDays[i]},
-                                              tasks=${tasksByDate[T(java.time.LocalDate).parse(day.toString())]},
+                                         dateKey=${#temporals.format(day,'yyyy-MM-dd')},
+                                         tasks=${tasksByDate != null ? tasksByDate[day] : null},
                                               tTotal=${tasks!=null?tasks.size():0},
                                               sched=${occurrences[day]},
                                               sTotal=${sched!=null?sched.size():0},
-                                              tasksComplete=${tasks != null ? #lists.size(#lists.select(tasks, 't', t.completed)) : 0},
-                                              schedComplete=${sched != null ? #lists.size(#lists.select(sched, 's', s.completed)) : 0},
-                                              allComplete=${(tTotal + sTotal) > 0 && (tasksComplete + schedComplete) == (tTotal + sTotal)},
-                                              hasIncomplete=${(tTotal + sTotal) > 0 && (tasksComplete + schedComplete) < (tTotal + sTotal)},
-                                              statusValue=${day.isEqual(today) ? 'today' : (day.isEqual(tomorrow) ? 'tomorrow' : (day.isBefore(today) ? (hasIncomplete ? 'past-incomplete' : ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-complete')) : 'future'))}"
-                                     class="calendar-day-card heat-none relative h-72 overflow-hidden rounded-2xl ring-1 ring-white/10 bg-white/70 p-3 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.5)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_22px_48px_-32px_rgba(15,23,42,0.6)] dark:bg-white/5 sm:h-80 sm:p-4"
+                                             statusValue=${day.isEqual(today) ? 'today' : (day.isEqual(tomorrow) ? 'tomorrow' : (day.isBefore(today) ? ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-incomplete') : 'future'))}"
+                                     class="calendar-day-card calendar-week-card heat-none"
                                      data-load="0"
                                      th:attr="data-day-link=@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}},
                                               data-date=${#temporals.format(day,'yyyy-MM-dd')},
@@ -126,15 +142,14 @@
                                               data-is-past=${day.isBefore(today)}">
                                     <div class="calendar-status-bar"></div>
                                     <div class="calendar-heat-overlay"></div>
-                                    <div class="calendar-day-header">
+                                    <div class="calendar-day-header calendar-week-card-header">
                                         <a th:if="${day != null}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}"
-                                           class="calendar-day-number">
-                                            <span th:text="${day.dayOfMonth}"></span>
-                                            <span class="text-slate-600 dark:text-slate-300">•</span>
-                                            <span th:text="${day.dayOfWeek}"></span>
+                                           class="calendar-day-number calendar-week-day-number">
+                                            <span class="calendar-week-day-name" th:text="${day.dayOfWeek.getDisplayName(T(java.time.format.TextStyle).SHORT, T(java.util.Locale).UK)}"></span>
+                                            <span class="calendar-week-day-date" th:text="${day.dayOfMonth + (day.dayOfMonth == 1 || day.dayOfMonth == 21 || day.dayOfMonth == 31 ? 'st' : (day.dayOfMonth == 2 || day.dayOfMonth == 22 ? 'nd' : (day.dayOfMonth == 3 || day.dayOfMonth == 23 ? 'rd' : 'th')))}"></span>
                                         </a>
-                                        <span th:if="${day.isEqual(today)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
-                                        <span th:if="${day.isEqual(tomorrow)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
+                                        <span th:if="${day.isEqual(today)}" class="calendar-week-day-badge rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
+                                        <span th:if="${day.isEqual(tomorrow)}" class="calendar-week-day-badge rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
                                     </div>
                                     <div class="calendar-day-content" th:with="grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
                                         <!-- Empty state when no tasks or schedules -->
@@ -143,8 +158,8 @@
                                         </div>
                                         <!-- Detailed mode (COMBINED_LIST) -->
                                         <div th:if="${!grouped}" class="calendar-singular-list">
-                                            <div th:each="task,iter : ${tasks}"
-                                                 th:if="${iter.index < 4}"
+                                                <div th:each="task,iter : ${tasks}"
+                                                    th:if="${iter.index < 4 && task != null}"
                                                  class="calendar-item"
                                                  th:classappend="${task.completed} ? ' completed' : ''"
                                                  th:attr="data-type='task',
@@ -163,8 +178,8 @@
                                             </div>
                                             <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}" class="calendar-more-link" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
                                             <div th:if="${tTotal > 0 and sTotal > 0}" class="my-1 border-t border-white/10"></div>
-                                            <div th:each="occ,iter : ${sched}"
-                                                 th:if="${iter.index < 3}"
+                                                <div th:each="occ,iter : ${sched}"
+                                                    th:if="${iter.index < 3 && occ != null}"
                                                  th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
                                                  class="calendar-item"
                                                  th:classappend="${occ.completed} ? ' completed' : ''"
@@ -191,7 +206,7 @@
                                                     <span class="calendar-grouped-count" th:text="${tTotal}"></span>
                                                 </div>
                                                 <div class="calendar-grouped-items">
-                                                    <div th:each="task,iter : ${tasks}" th:if="${iter.index < 2}"
+                                                      <div th:each="task,iter : ${tasks}" th:if="${iter.index < 2 && task != null}"
                                                          class="calendar-grouped-item"
                                                          th:classappend="${task.completed} ? ' completed' : ''"
                                                          th:attr="data-type='task',data-id=${task.id},data-date=${#temporals.format(day,'yyyy-MM-dd')},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-completed=${task.completed}">
@@ -205,7 +220,7 @@
                                                     <span class="calendar-grouped-count" th:text="${sTotal}"></span>
                                                 </div>
                                                 <div class="calendar-grouped-items">
-                                                    <div th:each="occ,iter : ${sched}" th:if="${iter.index < 2}"
+                                                      <div th:each="occ,iter : ${sched}" th:if="${iter.index < 2 && occ != null}"
                                                          th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
                                                          class="calendar-grouped-item"
                                                          th:classappend="${occ.completed} ? ' completed' : ''"
@@ -233,29 +248,194 @@
         <div class="calendar-schedule-overlay" data-drawer-overlay></div>
         <div class="calendar-schedule-panel" data-drawer-panel>
             <div class="calendar-schedule-header">
-                <h2>Schedules</h2>
-                <button type="button" class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800" data-drawer-close>
-                    Close
-                </button>
+                <div class="calendar-schedule-context">
+                    <p class="calendar-schedule-eyebrow">Deployment engine</p>
+                    <h2 class="calendar-schedule-title">Schedules</h2>
+                    <div class="calendar-schedule-context-grid">
+                        <div class="calendar-schedule-context-item">
+                            <span class="calendar-schedule-context-label">View</span>
+                            <span id="schedule-context-view" class="calendar-schedule-context-value">Week</span>
+                        </div>
+                        <div class="calendar-schedule-context-item">
+                            <span class="calendar-schedule-context-label">Visible range</span>
+                            <span id="schedule-context-range" class="calendar-schedule-context-value">—</span>
+                        </div>
+                        <div class="calendar-schedule-context-item">
+                            <span class="calendar-schedule-context-label">Selected day</span>
+                            <span id="schedule-context-selected-day" class="calendar-schedule-context-value">None</span>
+                        </div>
+                        <div class="calendar-schedule-context-item">
+                            <span class="calendar-schedule-context-label">Entries in range</span>
+                            <span id="schedule-context-existing" class="calendar-schedule-context-value">Checking…</span>
+                        </div>
+                    </div>
+                    <div class="calendar-schedule-scope" role="group" aria-label="Apply scope selection">
+                        <button type="button" class="calendar-schedule-scope-btn is-active" data-schedule-scope="visible">Visible range</button>
+                        <button type="button" class="calendar-schedule-scope-btn" data-schedule-scope="day">Selected day</button>
+                        <button type="button" class="calendar-schedule-scope-btn" data-schedule-scope="custom">Custom range</button>
+                    </div>
+                    <div class="calendar-schedule-custom-range" data-scope-custom hidden>
+                        <label class="sr-only" for="schedule-scope-start">Scope start date</label>
+                        <input id="schedule-scope-start" type="date" class="calendar-jump-input" />
+                        <label class="sr-only" for="schedule-scope-end">Scope end date</label>
+                        <input id="schedule-scope-end" type="date" class="calendar-jump-input" />
+                    </div>
+                </div>
+                <button type="button" class="calendar-schedule-close" data-drawer-close>Close</button>
             </div>
             <div class="calendar-schedule-body">
                 <label class="sr-only" for="schedule-search">Search schedules</label>
                 <input id="schedule-search" 
                        type="text" 
                        placeholder="Search schedules..." 
-                       class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" />
-                <ul id="schedule-list" class="mt-4 space-y-2">
-                    <li th:each="schedule, iter : ${schedules}" th:if="${iter.index < 8}">
-                        <div class="group rounded-xl border border-slate-200 bg-slate-50/50 p-4 shadow-sm transition hover:border-emerald-500 hover:bg-emerald-50/50 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
-                            <p class="font-semibold text-slate-900 dark:text-slate-100" th:text="${schedule.name}"></p>
-                            <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}" 
-                               class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">
-                                Apply to calendar
-                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                </svg>
-                            </a>
+                       class="calendar-schedule-search" />
+
+                <section class="calendar-deploy-controls" aria-label="Schedule deployment controls">
+                    <div class="calendar-deploy-preview-row">
+                        <label class="calendar-deploy-switch">
+                            <input type="checkbox" id="schedule-preview-toggle" checked />
+                            <span>Live preview mode</span>
+                        </label>
+                        <button type="button" class="calendar-schedule-action" id="schedule-preview-clear">Clear preview</button>
+                    </div>
+
+                    <div class="calendar-deploy-grid">
+                        <div>
+                            <label class="calendar-deploy-label" for="schedule-apply-scope">Apply scope</label>
+                            <select id="schedule-apply-scope" class="calendar-schedule-search">
+                                <option value="week">Apply to this week only</option>
+                                <option value="forward">Apply from selected date forward</option>
+                                <option value="weeks">Apply for X weeks</option>
+                            </select>
                         </div>
+                        <div>
+                            <label class="calendar-deploy-label" for="schedule-apply-weeks">Weeks</label>
+                            <input id="schedule-apply-weeks" type="number" min="1" max="52" value="4" class="calendar-schedule-search" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="calendar-deploy-label">Conflict handling</span>
+                        <div class="calendar-deploy-strategy" role="group" aria-label="Conflict handling strategy">
+                            <button type="button" class="calendar-deploy-strategy-btn is-active" data-deploy-strategy="merge">Merge (safe default)</button>
+                            <button type="button" class="calendar-deploy-strategy-btn" data-deploy-strategy="replace">Replace existing</button>
+                            <button type="button" class="calendar-deploy-strategy-btn" data-deploy-strategy="skip">Skip conflicted days</button>
+                        </div>
+                    </div>
+
+                    <div class="calendar-deploy-summary" id="schedule-impact-summary" aria-live="polite">
+                        Select a schedule card to preview impact.
+                    </div>
+
+                    <div class="calendar-deploy-actions">
+                        <button type="button" class="calendar-schedule-action" id="schedule-impact-review" disabled>Review impact</button>
+                        <button type="button" class="calendar-schedule-action calendar-schedule-action--primary" id="schedule-impact-apply" disabled>Confirm deploy</button>
+                    </div>
+
+                    <details class="calendar-sim-panel">
+                        <summary class="calendar-filter-summary">Simulation mode (optional)</summary>
+                        <div class="calendar-sim-grid">
+                            <label class="calendar-deploy-switch"><input type="checkbox" id="schedule-sim-enable" /> <span>Enable multi-week simulation</span></label>
+                            <div>
+                                <label class="calendar-deploy-label" for="schedule-sim-weeks">Simulate weeks</label>
+                                <input id="schedule-sim-weeks" type="number" min="1" max="12" value="6" class="calendar-schedule-search" />
+                            </div>
+                            <button type="button" class="calendar-schedule-action" id="schedule-sim-run" disabled>Run simulation</button>
+                        </div>
+                    </details>
+                </section>
+
+                <details class="calendar-filter-panel">
+                    <summary class="calendar-filter-summary">Filters & sorting</summary>
+                    <div class="calendar-filter-grid">
+                        <div>
+                            <label class="calendar-deploy-label" for="schedule-filter-type">Type</label>
+                            <select id="schedule-filter-type" class="calendar-schedule-search">
+                                <option value="all">All types</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="custom">Custom</option>
+                                <option value="rotational">Rotational</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="calendar-deploy-label" for="schedule-filter-status">Status</label>
+                            <select id="schedule-filter-status" class="calendar-schedule-search">
+                                <option value="all">All statuses</option>
+                                <option value="active">Active</option>
+                                <option value="draft">Draft</option>
+                                <option value="archived">Archived</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="calendar-deploy-label" for="schedule-filter-frequency">Frequency</label>
+                            <select id="schedule-filter-frequency" class="calendar-schedule-search">
+                                <option value="all">Any frequency</option>
+                                <option value="low">1-2 / week</option>
+                                <option value="mid">3-4 / week</option>
+                                <option value="high">5+ / week</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="calendar-deploy-label" for="schedule-sort">Sort</label>
+                            <select id="schedule-sort" class="calendar-schedule-search">
+                                <option value="recentlyApplied">Recently applied</option>
+                                <option value="mostUsed">Most used</option>
+                                <option value="recentlyCreated">Recently created</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="calendar-filter-toggles" role="group" aria-label="Quick filters">
+                        <label class="calendar-deploy-switch"><input type="checkbox" id="schedule-filter-favourites" /> <span>Favourites</span></label>
+                        <label class="calendar-deploy-switch"><input type="checkbox" id="schedule-filter-recent" /> <span>Recently used</span></label>
+                    </div>
+                </details>
+
+                <section class="calendar-quick-access" aria-label="Quick access schedules">
+                    <h3 class="calendar-quick-access-title">Pinned</h3>
+                    <div id="schedule-pinned-list" class="calendar-quick-chip-list"></div>
+                    <h3 class="calendar-quick-access-title">Recently used</h3>
+                    <div id="schedule-recent-list" class="calendar-quick-chip-list"></div>
+                </section>
+
+                <ul id="schedule-list" class="mt-4 space-y-2">
+                    <li th:if="${#lists.isEmpty(schedules)}" class="calendar-schedule-empty">No schedules found yet. Create one to start deploying.</li>
+                    <li th:each="schedule : ${schedules}"
+                        th:with="active=${scheduleActiveIds != null and scheduleActiveIds.contains(schedule.id)},
+                                 hasEntries=${schedule.entries != null and !#lists.isEmpty(schedule.entries)},
+                                 status=${active ? 'Active' : (hasEntries ? 'Archived' : 'Draft')},
+                                 latestApplied=${scheduleLatestAppliedById != null ? scheduleLatestAppliedById[schedule.id] : null},
+                                 applyCount=${scheduleApplyCountById != null ? scheduleApplyCountById[schedule.id] : 0}"
+                        th:attr="data-schedule-id=${schedule.id},data-schedule-name=${schedule.name},data-schedule-type=${#strings.toLowerCase(schedule.scheduleType.name())},data-schedule-status=${#strings.toLowerCase(status)},data-schedule-rotation=${#strings.toLowerCase(schedule.rotationMode.name())},data-schedule-latest-applied=${latestApplied != null ? #temporals.format(latestApplied, 'yyyy-MM-dd') : ''},data-schedule-apply-count=${applyCount != null ? applyCount : 0}">
+                        <article class="calendar-schedule-card" th:attr="data-schedule-id=${schedule.id}">
+                            <header class="calendar-schedule-card-header">
+                                <div>
+                                    <h3 class="calendar-schedule-card-title" th:text="${schedule.name}">Schedule</h3>
+                                    <p class="calendar-schedule-card-subtitle" th:text="${schedule.description != null and !schedule.description.isBlank() ? schedule.description : 'Ready for calendar deployment'}"></p>
+                                </div>
+                                <div class="calendar-schedule-card-tools">
+                                    <button type="button" class="calendar-schedule-pin" data-pin-toggle th:attr="data-schedule-id=${schedule.id}" aria-label="Toggle pin">📌</button>
+                                    <button type="button" class="calendar-schedule-favourite" data-favourite-toggle th:attr="data-schedule-id=${schedule.id}" aria-label="Toggle favourite">☆</button>
+                                </div>
+                            </header>
+                            <button type="button" class="calendar-drag-handle" draggable="true" data-schedule-drag th:attr="data-schedule-id=${schedule.id}">Drag onto calendar</button>
+                            <div class="calendar-schedule-metrics">
+                                <div class="calendar-schedule-metric"><span>Type</span><strong th:text="${#strings.capitalize(#strings.toLowerCase(schedule.scheduleType.name()).replace('_', ' '))}">Weekly</strong></div>
+                                <div class="calendar-schedule-metric"><span>Frequency</span><strong data-meta-field="sessionsPerWeek">—</strong></div>
+                                <div class="calendar-schedule-metric"><span>Active days</span><strong data-meta-field="activeDayLabels">—</strong></div>
+                                <div class="calendar-schedule-metric"><span>Rest days</span><strong data-meta-field="restDays">—</strong></div>
+                            </div>
+                            <div class="calendar-schedule-card-footer">
+                                <span class="calendar-schedule-status" th:classappend="${status == 'Active' ? ' is-active' : (status == 'Draft' ? ' is-draft' : ' is-archived')}" th:text="${status}">Draft</span>
+                                <span class="calendar-schedule-last-applied" th:text="${latestApplied != null ? 'Last applied ' + #temporals.format(latestApplied, 'dd MMM yyyy') : 'Last applied —'}">Last applied —</span>
+                            </div>
+                            <div class="calendar-schedule-health" data-health-indicators></div>
+                            <div class="calendar-schedule-card-actions">
+                                <a th:href="@{'/schedules/' + ${schedule.id} + '/entries'}" class="calendar-schedule-action">Edit</a>
+                                <button type="button" class="calendar-schedule-action" data-duplicate-schedule th:attr="data-schedule-id=${schedule.id}">Duplicate</button>
+                                <a th:href="@{'/schedules/' + ${schedule.id} + '/deactivate'}" class="calendar-schedule-action">Archive</a>
+                                <button type="button" class="calendar-schedule-action calendar-schedule-action--primary" data-open-deploy th:attr="data-schedule-id=${schedule.id}">Deploy</button>
+                            </div>
+                        </article>
                     </li>
                 </ul>
                 <a href="/schedules" class="btn btn--primary btn--md mt-4 w-full">View all schedules</a>
@@ -264,45 +444,6 @@
         </div>
     </div>
 
-    <div id="modeInfoModal" class="calendar-mode-modal" aria-hidden="true">
-        <div class="calendar-mode-modal-content">
-            <div class="calendar-mode-modal-header">
-                <h2 class="calendar-mode-modal-title">Display Modes</h2>
-            </div>
-            <div class="calendar-mode-modal-body">
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">Display Modes</h3>
-                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                            Your calendar can display tasks and workouts in two different formats:
-                        </p>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">• Detailed Mode</h3>
-                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Shows all tasks and workouts in a single, combined list with full details including time, completion status, and notes.
-                        </p>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-slate-900 dark:text-slate-100">• Grouped Mode</h3>
-                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            Organizes tasks and workouts into separate categories for cleaner visual separation and focused viewing.
-                        </p>
-                    </div>
-                    <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
-                        <p class="text-sm text-slate-700 dark:text-slate-300">
-                            <strong>Change your display preference:</strong> Visit your <a href="/profile" class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 underline">profile settings</a> and look for the "Calendar display" section.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="calendar-mode-modal-footer">
-                <button type="button" class="calendar-mode-modal-btn calendar-mode-modal-btn-secondary" data-mode-modal-close>
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <div th:fragment="pageScripts">
