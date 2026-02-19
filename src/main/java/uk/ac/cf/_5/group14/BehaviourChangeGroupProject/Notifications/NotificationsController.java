@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import org.springframework.http.MediaType;
@@ -92,7 +93,7 @@ public class NotificationsController {
                                      Principal principal,
                                      Authentication authentication) {
         requireUser(principal);
-        boolean isDev = environment.acceptsProfiles("dev");
+        boolean isDev = environment.acceptsProfiles(Profiles.of("dev"));
         boolean isAdmin = SecurityUtils.hasRole(authentication, "PLATFORM_ADMIN")
                 || SecurityUtils.hasRole(authentication, "SUPER_ADMIN");
         if (!isDev && !isAdmin) {
