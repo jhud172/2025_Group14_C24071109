@@ -35,6 +35,18 @@ public class BehaviourChangeGroupProjectApplication {
 	}
 
 	private static void applyRenderDatabaseUrlFallback() {
+		String rawDatabaseUrl = System.getenv("DATABASE_URL");
+		if (hasText(rawDatabaseUrl)) {
+			String normalizedDatabaseUrl = normalizeJdbcPostgresUrl(rawDatabaseUrl);
+			System.setProperty("DATABASE_URL", normalizedDatabaseUrl);
+			System.setProperty("spring.datasource.url", normalizedDatabaseUrl);
+			applyDriverClassForUrl(normalizedDatabaseUrl);
+			System.setProperty("app.datasource.url-origin", normalizedDatabaseUrl.equals(rawDatabaseUrl)
+					? "DATABASE_URL"
+					: "DATABASE_URL (normalized)");
+			return;
+		}
+
 		String explicitDatasourceUrl = System.getProperty("spring.datasource.url");
 		if (hasText(explicitDatasourceUrl)) {
 			String normalizedExplicitUrl = normalizeJdbcPostgresUrl(explicitDatasourceUrl);
@@ -46,50 +58,6 @@ public class BehaviourChangeGroupProjectApplication {
 			return;
 		}
 
-		String rawDatabaseUrl = System.getenv("DATABASE_URL");
-		if (!hasText(rawDatabaseUrl)) {
-			return;
-		}
-
-		if (rawDatabaseUrl.startsWith("jdbc:")) {
-			String normalizedJdbcUrl = normalizeJdbcPostgresUrl(rawDatabaseUrl);
-			System.setProperty("DATABASE_URL", normalizedJdbcUrl);
-			System.setProperty("spring.datasource.url", normalizedJdbcUrl);
-			applyDriverClassForUrl(normalizedJdbcUrl);
-			System.setProperty("app.datasource.url-origin", normalizedJdbcUrl.equals(rawDatabaseUrl)
-					? "DATABASE_URL (jdbc)"
-					: "DATABASE_URL (jdbc normalized)");
-			return;
-		}
-
-		if (!(rawDatabaseUrl.startsWith("postgres://") || rawDatabaseUrl.startsWith("postgresql://"))) {
-			return;
-		}
-
-		URI uri = URI.create(rawDatabaseUrl);
-		String jdbcUrl = "jdbc:postgresql://" + uri.getHost()
-				+ (uri.getPort() > 0 ? ":" + uri.getPort() : "")
-				+ uri.getPath()
-				+ (hasText(uri.getQuery()) ? "?" + uri.getQuery() : "");
-
-		System.setProperty("spring.datasource.url", jdbcUrl);
-		System.setProperty("DATABASE_URL", jdbcUrl);
-		applyDriverClassForUrl(jdbcUrl);
-		System.setProperty("app.datasource.url-origin", "DATABASE_URL (normalized postgres:// -> jdbc:postgresql://)");
-
-		String userInfo = uri.getUserInfo();
-		if (hasText(userInfo) && !hasText(System.getProperty("spring.datasource.username"))
-				&& !hasText(System.getenv("DATABASE_USER"))) {
-			String[] userInfoParts = userInfo.split(":", 2);
-			if (userInfoParts.length > 0 && hasText(userInfoParts[0])) {
-				System.setProperty("spring.datasource.username", userInfoParts[0]);
-			}
-			if (userInfoParts.length == 2 && hasText(userInfoParts[1])
-					&& !hasText(System.getProperty("spring.datasource.password"))
-					&& !hasText(System.getenv("DATABASE_PASSWORD"))) {
-				System.setProperty("spring.datasource.password", userInfoParts[1]);
-			}
-		}
 	}
 
 	private static boolean hasText(String value) {
@@ -97,6 +65,30 @@ public class BehaviourChangeGroupProjectApplication {
 	}
 
 	private static String normalizeJdbcPostgresUrl(String jdbcUrl) {
+		if (jdbcUrl.startsWith("postgres://") || jdbcUrl.startsWith("postgresql://")) {
+			URI uri = URI.create(jdbcUrl);
+			String normalizedJdbcUrl = "jdbc:postgresql://" + uri.getHost()
+					+ (uri.getPort() > 0 ? ":" + uri.getPort() : "")
+					+ uri.getPath()
+					+ (hasText(uri.getQuery()) ? "?" + uri.getQuery() : "");
+
+			String userInfo = uri.getUserInfo();
+			if (hasText(userInfo) && !hasText(System.getProperty("spring.datasource.username"))
+					&& !hasText(System.getenv("DATABASE_USER"))) {
+				String[] userInfoParts = userInfo.split(":", 2);
+				if (userInfoParts.length > 0 && hasText(userInfoParts[0])) {
+					System.setProperty("spring.datasource.username", userInfoParts[0]);
+				}
+				if (userInfoParts.length == 2 && hasText(userInfoParts[1])
+						&& !hasText(System.getProperty("spring.datasource.password"))
+						&& !hasText(System.getenv("DATABASE_PASSWORD"))) {
+					System.setProperty("spring.datasource.password", userInfoParts[1]);
+				}
+			}
+
+			return normalizedJdbcUrl;
+		}
+
 		if (jdbcUrl.startsWith("jdbc:jdbc:postgresql://")) {
 			jdbcUrl = jdbcUrl.replaceFirst("^jdbc:jdbc:postgresql://", "jdbc:postgresql://");
 		}
