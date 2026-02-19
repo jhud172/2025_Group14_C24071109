@@ -2,6 +2,7 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.FeedbackData;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class AdaptiveFeedbackKey implements Serializable {
 
@@ -30,5 +31,21 @@ public class AdaptiveFeedbackKey implements Serializable {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof AdaptiveFeedbackKey other)) {
+            return false;
+        }
+        return Objects.equals(userId, other.userId) && Objects.equals(date, other.date);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, date);
     }
 }
