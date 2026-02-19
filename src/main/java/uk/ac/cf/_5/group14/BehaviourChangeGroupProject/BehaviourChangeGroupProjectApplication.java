@@ -35,7 +35,13 @@ public class BehaviourChangeGroupProjectApplication {
 	}
 
 	private static void applyRenderDatabaseUrlFallback() {
-		if (hasText(System.getProperty("spring.datasource.url")) || hasText(System.getenv("SPRING_DATASOURCE_URL"))) {
+		String explicitDatasourceUrl = System.getProperty("spring.datasource.url");
+		if (hasText(explicitDatasourceUrl)) {
+			String normalizedExplicitUrl = normalizeJdbcPostgresUrl(explicitDatasourceUrl);
+			System.setProperty("spring.datasource.url", normalizedExplicitUrl);
+			System.setProperty("app.datasource.url-origin", normalizedExplicitUrl.equals(explicitDatasourceUrl)
+					? "spring.datasource.url"
+					: "spring.datasource.url (jdbc normalized)");
 			return;
 		}
 
@@ -68,14 +74,14 @@ public class BehaviourChangeGroupProjectApplication {
 
 		String userInfo = uri.getUserInfo();
 		if (hasText(userInfo) && !hasText(System.getProperty("spring.datasource.username"))
-				&& !hasText(System.getenv("SPRING_DATASOURCE_USERNAME"))) {
+				&& !hasText(System.getenv("DATABASE_USER"))) {
 			String[] userInfoParts = userInfo.split(":", 2);
 			if (userInfoParts.length > 0 && hasText(userInfoParts[0])) {
 				System.setProperty("spring.datasource.username", userInfoParts[0]);
 			}
 			if (userInfoParts.length == 2 && hasText(userInfoParts[1])
 					&& !hasText(System.getProperty("spring.datasource.password"))
-					&& !hasText(System.getenv("SPRING_DATASOURCE_PASSWORD"))) {
+					&& !hasText(System.getenv("DATABASE_PASSWORD"))) {
 				System.setProperty("spring.datasource.password", userInfoParts[1]);
 			}
 		}
@@ -104,14 +110,14 @@ public class BehaviourChangeGroupProjectApplication {
 
 		String userInfo = uri.getUserInfo();
 		if (hasText(userInfo) && !hasText(System.getProperty("spring.datasource.username"))
-				&& !hasText(System.getenv("SPRING_DATASOURCE_USERNAME"))) {
+				&& !hasText(System.getenv("DATABASE_USER"))) {
 			String[] userInfoParts = userInfo.split(":", 2);
 			if (userInfoParts.length > 0 && hasText(userInfoParts[0])) {
 				System.setProperty("spring.datasource.username", userInfoParts[0]);
 			}
 			if (userInfoParts.length == 2 && hasText(userInfoParts[1])
 					&& !hasText(System.getProperty("spring.datasource.password"))
-					&& !hasText(System.getenv("SPRING_DATASOURCE_PASSWORD"))) {
+					&& !hasText(System.getenv("DATABASE_PASSWORD"))) {
 				System.setProperty("spring.datasource.password", userInfoParts[1]);
 			}
 		}
@@ -127,12 +133,6 @@ public class BehaviourChangeGroupProjectApplication {
 
 		if (hasText(System.getProperty("spring.datasource.url"))) {
 			return "spring.datasource.url system property";
-		}
-		if (hasText(System.getenv("SPRING_DATASOURCE_URL"))) {
-			return "SPRING_DATASOURCE_URL env";
-		}
-		if (hasText(System.getenv("JDBC_DATABASE_URL"))) {
-			return "JDBC_DATABASE_URL env";
 		}
 		if (hasText(System.getenv("DATABASE_URL"))) {
 			return "DATABASE_URL env";
