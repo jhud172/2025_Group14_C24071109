@@ -53,6 +53,7 @@ public class BehaviourChangeGroupProjectApplication {
 
 		if (rawDatabaseUrl.startsWith("jdbc:")) {
 			String normalizedJdbcUrl = normalizeJdbcPostgresUrl(rawDatabaseUrl);
+			System.setProperty("DATABASE_URL", normalizedJdbcUrl);
 			System.setProperty("spring.datasource.url", normalizedJdbcUrl);
 			applyDriverClassForUrl(normalizedJdbcUrl);
 			System.setProperty("app.datasource.url-origin", normalizedJdbcUrl.equals(rawDatabaseUrl)
@@ -72,6 +73,7 @@ public class BehaviourChangeGroupProjectApplication {
 				+ (hasText(uri.getQuery()) ? "?" + uri.getQuery() : "");
 
 		System.setProperty("spring.datasource.url", jdbcUrl);
+		System.setProperty("DATABASE_URL", jdbcUrl);
 		applyDriverClassForUrl(jdbcUrl);
 		System.setProperty("app.datasource.url-origin", "DATABASE_URL (normalized postgres:// -> jdbc:postgresql://)");
 
