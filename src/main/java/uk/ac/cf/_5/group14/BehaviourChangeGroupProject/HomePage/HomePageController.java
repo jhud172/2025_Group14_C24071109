@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreferenceService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLogService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.FeedbackData.AdaptiveFeedbackService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessagingService;
@@ -39,6 +41,9 @@ public class HomePageController {
     private final AuthHelper authHelper;
     private final UserPreferenceService userPreferenceService;
     private final AdaptiveFeedbackService adaptiveFeedbackService;
+    
+    @Autowired
+    private DevModeProperties devModeProperties;
 
     private static final DateTimeFormatter PRETTY_DATE = DateTimeFormatter.ofPattern("d MMM", Locale.UK);
     private static final DateTimeFormatter TASK_TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.UK);
@@ -68,10 +73,14 @@ public class HomePageController {
         User user = authHelper.getAuthenticatedUser();
 
         if (user == null) {
-            return new ModelAndView("home/public");
+            ModelAndView mav = new ModelAndView("home/public");
+            mav.addObject("isDevMode", devModeProperties.isDevMode());
+            return mav;
         }
-
-        return new ModelAndView("redirect:/dashboard");
+        
+        ModelAndView mav = new ModelAndView("redirect:/dashboard");
+        mav.addObject("isDevMode", devModeProperties.isDevMode());
+        return mav;
     }
 
     @GetMapping("/about")

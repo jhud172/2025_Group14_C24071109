@@ -1,0 +1,80 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Development Mode', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+
+    <th:block th:fragment="pageStyles">
+        <!-- auth.css is now included in app.css via tailwind.css -->
+    </th:block>
+
+    <div th:fragment="content" class="auth-container animate-fade-in">
+        <div class="auth-card">
+            <div class="auth-accent-bar" style="background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+
+            <div class="mb-8 mt-8 text-center">
+                <h1 class="auth-heading">Development Mode</h1>
+                <p class="auth-subheading">Application is running in development/demo mode</p>
+            </div>
+
+            <!-- Dev Mode Banner -->
+            <div class="auth-alert auth-alert--error" role="alert" style="background: #fef2f2; border-left: 4px solid #dc2626;">
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="font-size: 20px; line-height: 1.4;">⚠️</div>
+                    <div>
+                        <strong>Login is disabled in development mode</strong>
+                        <p style="margin-top: 8px; font-size: 14px; color: #666;">
+                            This application is currently running in development/demo mode and authentication has been disabled for testing purposes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div style="margin-top: 24px; padding: 16px; background: #f3f4f6; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                <h2 style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #1f2937;">To enable login:</h2>
+                <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: #374151; line-height: 1.6;">
+                    <li>Set the environment variable: <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-family: monospace;">DEV_MODE=false</code></li>
+                    <li>Restart the application</li>
+                    <li>Login will be enabled and functional</li>
+                </ol>
+            </div>
+
+            <!-- Dev Mode Info -->
+            <div style="margin-top: 24px; padding: 16px; background: #eff6ff; border-radius: 8px;">
+                <h2 style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #0c4a6e;">Development Mode Features:</h2>
+                <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c4a6e; line-height: 1.6;">
+                    <li>✓ All protected pages and features are accessible</li>
+                    <li>✓ No authentication required</li>
+                    <li>✓ Perfect for testing and demonstrations</li>
+                    <li>✓ Demo mode indicator visible across the application</li>
+                </ul>
+            </div>
+
+            <!-- Return to Home -->
+            <div style="margin-top: 24px; text-center;">
+                <a href="/dev-mode" style="display: inline-block; padding: 10px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; transition: background 0.2s; margin-right: 12px;">
+                    Browse Dev Hub
+                </a>
+                <a href="/" style="display: inline-block; padding: 10px 24px; background: #e5e7eb; color: #111827; text-decoration: none; border-radius: 6px; font-weight: 500; transition: background 0.2s;">
+                    Return to Home
+                </a>
+            </div>
+
+            <!-- App Status -->
+            <div style="margin-top: 24px; padding: 12px; background: #f0fdf4; border-radius: 6px; text-align: center; border-left: 4px solid #16a34a;">
+                <p style="margin: 0; font-size: 13px; color: #15803d;">
+                    <strong>Current Environment:</strong> Development/Demo Mode
+                </p>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: #15803d;">
+                    Application Status: Running with login disabled
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <th:block th:fragment="pageScripts">
+        <script>
+            // No scripts needed for dev mode page
+        </script>
+    </th:block>
+
+</th:block>

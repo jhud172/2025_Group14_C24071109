@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.GymProfile.GymProfile;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.GymProfile.GymProfileService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerProfile.TrainerProfile;
@@ -27,6 +28,9 @@ public class UserController {
 
     @Autowired
     private GymProfileService gymProfileService;
+    
+    @Autowired
+    private DevModeProperties devModeProperties;
 
     // signup choice
     @GetMapping("/signup")
@@ -186,10 +190,18 @@ public class UserController {
 
     // login page
     @GetMapping("/login")
-    public String showLoginForm(@RequestParam(value = "expired", required = false) String expired) {
+    public String showLoginForm(@RequestParam(value = "expired", required = false) String expired,
+                                Model model) {
         if (expired != null) {
             return "redirect:/?expired=1";
         }
+        
+        // Check if dev mode is enabled
+        if (devModeProperties.isDevMode()) {
+            model.addAttribute("isDevMode", true);
+            return "User/login-demo";
+        }
+        
         return "User/login";
     }
 

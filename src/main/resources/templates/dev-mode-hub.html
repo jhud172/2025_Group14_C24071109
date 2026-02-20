@@ -1,0 +1,231 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Development Mode Hub', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+
+    <th:block th:fragment="pageStyles">
+        <style>
+            .dev-hub-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 40px 20px;
+            }
+            
+            .dev-mode-banner {
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                color: white;
+                padding: 30px;
+                border-radius: 12px;
+                margin-bottom: 40px;
+                box-shadow: 0 10px 25px rgba(217, 119, 6, 0.2);
+            }
+            
+            .dev-mode-banner h1 {
+                margin: 0 0 10px 0;
+                font-size: 28px;
+                font-weight: 700;
+            }
+            
+            .dev-mode-banner p {
+                margin: 0;
+                font-size: 14px;
+                opacity: 0.95;
+            }
+            
+            .dev-mode-banner code {
+                background: rgba(0, 0, 0, 0.2);
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-family: monospace;
+            }
+            
+            .navigation-section {
+                margin-bottom: 50px;
+            }
+            
+            .section-title {
+                font-size: 20px;
+                font-weight: 700;
+                color: #111827;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #10b981;
+            }
+            
+            .page-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 20px;
+            }
+            
+            .page-card {
+                background: white;
+                border: 2px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 24px;
+                text-decoration: none;
+                color: inherit;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            
+            .page-card:hover {
+                border-color: #10b981;
+                box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
+                transform: translateY(-4px);
+            }
+            
+            .page-card-icon {
+                font-size: 32px;
+                margin-bottom: 12px;
+                display: inline-block;
+            }
+            
+            .page-card-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #111827;
+                margin-bottom: 8px;
+            }
+            
+            .page-card-description {
+                font-size: 14px;
+                color: #6b7280;
+                line-height: 1.5;
+            }
+            
+            .page-card-badge {
+                display: inline-block;
+                background: #dbeafe;
+                color: #1e40af;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 600;
+                margin-top: 12px;
+            }
+            
+            .feature-status {
+                background: #f0fdf4;
+                border-left: 4px solid #10b981;
+                padding: 16px;
+                border-radius: 8px;
+                margin-top: 30px;
+                font-size: 14px;
+                color: #15803d;
+            }
+            
+            .feature-status strong {
+                display: block;
+                margin-bottom: 8px;
+            }
+            
+            .info-box {
+                background: #eff6ff;
+                border-left: 4px solid #3b82f6;
+                padding: 16px;
+                border-radius: 8px;
+                margin-bottom: 30px;
+                font-size: 14px;
+                color: #0c4a6e;
+            }
+        </style>
+    </th:block>
+
+    <div th:fragment="content" class="dev-hub-container">
+        
+        <!-- Dev Mode Banner -->
+        <div class="dev-mode-banner">
+            <h1>🚀 Development Mode Hub</h1>
+            <p>You're in demo mode. Browse the application interface to see how it works. To enable full functionality, set <code>DEV_MODE=false</code> and restart.</p>
+        </div>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <strong>ℹ️ About Demo Mode:</strong>
+            <p>In development mode, you can explore the user interface and see how pages are structured. However, you won't have access to real data since you're not logged in. This is perfect for testing the layout, navigation, and overall UX without requiring authentication.</p>
+        </div>
+        
+        <!-- Public Pages -->
+        <div class="navigation-section">
+            <h2 class="section-title">📄 Public Pages</h2>
+            <div class="page-grid">
+                <a href="/" class="page-card">
+                    <div class="page-card-icon">🏠</div>
+                    <div class="page-card-title">Home</div>
+                    <div class="page-card-description">Landing page with overview and key features</div>
+                    <div class="page-card-badge">Accessible</div>
+                </a>
+                
+                <a href="/about" class="page-card">
+                    <div class="page-card-icon">ℹ️</div>
+                    <div class="page-card-title">About</div>
+                    <div class="page-card-description">Learn more about the platform and our mission</div>
+                    <div class="page-card-badge">Accessible</div>
+                </a>
+                
+                <a href="/pricing" class="page-card">
+                    <div class="page-card-icon">💰</div>
+                    <div class="page-card-title">Pricing</div>
+                    <div class="page-card-description">View pricing plans and subscription options</div>
+                    <div class="page-card-badge">Accessible</div>
+                </a>
+                
+                <a href="/explore" class="page-card">
+                    <div class="page-card-icon">🔍</div>
+                    <div class="page-card-title">Explore Trainers</div>
+                    <div class="page-card-description">Browse available trainers and their profiles</div>
+                    <div class="page-card-badge">Accessible</div>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Protected Pages (View Only) -->
+        <div class="navigation-section">
+            <h2 class="section-title">🔐 Protected Pages (Demo Only)</h2>
+            <div class="page-grid">
+                <a href="/client/dashboard" class="page-card">
+                    <div class="page-card-icon">📊</div>
+                    <div class="page-card-title">Dashboard</div>
+                    <div class="page-card-description">Main user dashboard (requires login)</div>
+                    <div class="page-card-badge">Login Required</div>
+                </a>
+                
+                <a href="/client/calendar" class="page-card">
+                    <div class="page-card-icon">📅</div>
+                    <div class="page-card-title">Calendar</div>
+                    <div class="page-card-description">View and manage schedule and tasks (requires login)</div>
+                    <div class="page-card-badge">Login Required</div>
+                </a>
+                
+                <a href="/trainers" class="page-card">
+                    <div class="page-card-icon">👨‍🏫</div>
+                    <div class="page-card-title">My Trainers</div>
+                    <div class="page-card-description">View your connected trainers (requires login)</div>
+                    <div class="page-card-badge">Login Required</div>
+                </a>
+                
+                <a href="/client/messages" class="page-card">
+                    <div class="page-card-icon">💬</div>
+                    <div class="page-card-title">Messages</div>
+                    <div class="page-card-description">Chat with trainers and coaches (requires login)</div>
+                    <div class="page-card-badge">Login Required</div>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Feature Status -->
+        <div class="feature-status">
+            <strong>✓ Development Mode Active</strong>
+            You are viewing the application in demonstration mode. Protected pages will redirect to login since you have not authenticated. This allows you to explore the UI without needing a user account.
+        </div>
+        
+    </div>
+
+    <th:block th:fragment="pageScripts">
+        <script>
+            // Log that user is in dev mode
+            console.log('Development Mode Hub Loaded');
+            console.log('Note: Protected pages will require login to view actual data');
+        </script>
+    </th:block>
+
+</th:block>

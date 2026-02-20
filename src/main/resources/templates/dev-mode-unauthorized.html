@@ -1,0 +1,129 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Dev Mode - Login Required', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+
+    <th:block th:fragment="pageStyles">
+        <style>
+            .unauthorized-container {
+                min-height: 60vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 40px 20px;
+            }
+            
+            .unauthorized-card {
+                background: white;
+                border-radius: 12px;
+                padding: 40px;
+                max-width: 600px;
+                text-align: center;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+            
+            .unauthorized-icon {
+                font-size: 64px;
+                margin-bottom: 20px;
+            }
+            
+            .unauthorized-card h1 {
+                font-size: 28px;
+                color: #111827;
+                margin-bottom: 12px;
+            }
+            
+            .unauthorized-card p {
+                color: #6b7280;
+                font-size: 16px;
+                line-height: 1.6;
+                margin-bottom: 24px;
+            }
+            
+            .button-group {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .btn-primary, .btn-secondary {
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.3s ease;
+                border: none;
+                cursor: pointer;
+                font-size: 14px;
+            }
+            
+            .btn-primary {
+                background: #10b981;
+                color: white;
+            }
+            
+            .btn-primary:hover {
+                background: #059669;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            }
+            
+            .btn-secondary {
+                background: #e5e7eb;
+                color: #111827;
+            }
+            
+            .btn-secondary:hover {
+                background: #d1d5db;
+                transform: translateY(-2px);
+            }
+            
+            .info-section {
+                background: #f0fdf4;
+                border-left: 4px solid #10b981;
+                padding: 20px;
+                border-radius: 8px;
+                margin-top: 30px;
+                text-align: left;
+            }
+            
+            .info-section h3 {
+                color: #15803d;
+                margin-top: 0;
+                margin-bottom: 10px;
+            }
+            
+            .info-section p {
+                color: #166534;
+                margin: 0;
+            }
+        </style>
+    </th:block>
+
+    <div th:fragment="content" class="unauthorized-container">
+        <div class="unauthorized-card">
+            <div class="unauthorized-icon">🔐</div>
+            
+            <h1>This Page Requires Login</h1>
+            
+            <p>You're viewing a protected page in development mode. To see the actual content and data for this page, you'll need to log in with a user account.</p>
+            
+            <div class="button-group">
+                <a href="/dev-mode" class="btn-primary">⬅️ Back to Dev Hub</a>
+                <a href="/login" class="btn-secondary">🔓 Try Demo Login</a>
+            </div>
+            
+            <div class="info-section">
+                <h3>💡 About Development Mode</h3>
+                <p>In development mode, you can explore the public pages of the application freely. Protected pages (dashboard, calendar, messages, etc.) still require authentication to display real user data. Try clicking on public pages like Home, Pricing, or Explore Trainers to see them in action!</p>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:fragment="pageScripts">
+        <script>
+            console.log('Unauthorized in dev mode');
+        </script>
+    </th:block>
+
+</th:block>
