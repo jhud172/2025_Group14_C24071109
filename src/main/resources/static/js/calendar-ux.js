@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const csrfHeader = csrfHeaderMeta?.content || 'X-CSRF-TOKEN';
 
     const cardById = new Map();
-    const scheduleCards = Array.from(scheduleDrawer?.querySelectorAll('.calendar-schedule-card[data-schedule-id], .calendar-schedule-card-compact[data-schedule-id]') || []);
+    const scheduleCards = Array.from(scheduleDrawer?.querySelectorAll('.calendar-schedule-card[data-schedule-id], .calendar-schedule-card-compact[data-schedule-id], .sched-card[data-schedule-id]') || []);
     scheduleCards.forEach((card) => {
         const id = card.getAttribute('data-schedule-id');
         if (id) cardById.set(id, card);
@@ -709,7 +709,12 @@ document.addEventListener("DOMContentLoaded", () => {
         scheduleDrawer?.querySelectorAll('[data-favourite-toggle]').forEach((button) => {
             const id = button.getAttribute('data-schedule-id');
             const isFavourite = id ? favourites.has(id) : false;
-            button.textContent = isFavourite ? '★' : '☆';
+            const iconEl = button.querySelector('[data-fav-icon]');
+            if (iconEl) {
+                iconEl.textContent = isFavourite ? '★' : '☆';
+            } else {
+                button.textContent = isFavourite ? '★' : '☆';
+            }
             button.classList.toggle('is-favourite', isFavourite);
             button.setAttribute('aria-pressed', String(isFavourite));
         });

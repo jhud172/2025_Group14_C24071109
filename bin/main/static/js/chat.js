@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("chatInput");
     const body = document.getElementById("chatBody");
     const sendBtn = document.getElementById("chatSend");
-    const dot = document.querySelector(".chat-fab-dot");
+    const dot = document.getElementById("chatNotificationDot");
     const notificationsToggle = document.getElementById("chatNotificationsToggle");
     const notificationsView = document.getElementById("chatNotificationsView");
     const chatView = document.getElementById("chatChatView");
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
         fab.setAttribute("aria-expanded", "true");
-        dot?.classList.remove("on");
+        dot?.classList.remove("active");
         if (!input.disabled) {
             setTimeout(() => input.focus(), 50);
         }
@@ -64,14 +64,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function addMsg(text, who) {
         const wrap = document.createElement("div");
-        wrap.className = `chat-msg ${who === "me" ? "chat-msg-me justify-end" : "chat-msg-ai justify-start"} flex`;
+        wrap.className = `chat-message-wrapper ${who === "me" ? "user" : "assistant"}`;
 
         const bubble = document.createElement("div");
-        bubble.className = `bubble max-w-[82%] whitespace-pre-wrap rounded-2xl border px-3 py-2 text-sm shadow-sm ${
-            who === "me"
-                ? "border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900"
-                : "border-slate-200 bg-slate-50 text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
-        }`;
+        bubble.className = "chat-message-bubble";
         bubble.textContent = text;
 
         wrap.appendChild(bubble);
@@ -81,12 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function addTyping() {
         const wrap = document.createElement("div");
-        wrap.className = "chat-msg chat-msg-ai flex justify-start";
+        wrap.className = "chat-typing-indicator";
         wrap.id = "typingRow";
 
         const bubble = document.createElement("div");
-        bubble.className = "bubble max-w-[82%] whitespace-pre-wrap rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm italic text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400";
-        bubble.textContent = "Typing…";
+        bubble.className = "chat-typing-bubble";
+        bubble.textContent = "✨ Coach is thinking…";
 
         wrap.appendChild(bubble);
         body.appendChild(wrap);
@@ -179,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!res.ok) {
                 addMsg(data?.reply || "Something went wrong talking to the AI. Try again.", "ai");
-                dot?.classList.add("on");
+                dot?.classList.add("active");
                 return;
             }
 
@@ -190,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) {
             removeTyping();
             addMsg("AI request failed (network/server).", "ai");
-            dot?.classList.add("on");
+            dot?.classList.add("active");
         } finally {
             sendBtn.disabled = false;
         }
@@ -216,13 +212,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function setNavUnreadBadges(count) {
+        const badges = document.querySelectorAll(".nav-notification-badge");
+        if (!badges.length) return;
+        badges.forEach((badge) => {
+            if (count > 0) {
+                badge.textContent = count > 99 ? "99+" : `${count}`;
+                badge.classList.remove("hidden");
+                badge.classList.add("inline-flex");
+            } else {
+                badge.textContent = "";
+                badge.classList.add("hidden");
+                badge.classList.remove("inline-flex");
+            }
+        });
+    }
+
     async function refreshUnreadCount() {
         if (!isAuthenticated) return;
         try {
             const res = await fetch("/api/notifications/unread-count");
             if (!res.ok) return;
             const data = await res.json();
-            setUnreadBadge(Number(data?.count || 0));
+            const count = Number(data?.count || 0);
+            setUnreadBadge(count);
+            setNavUnreadBadges(count);
         } catch {
             // ignore
         }
@@ -276,9 +290,26 @@ document.addEventListener("DOMContentLoaded", () => {
         const time = document.createElement("div");
         time.className = "mt-2 text-[10px] text-slate-400";
         // Simple relative time approximation or date parse could go here
-        
+
         row.appendChild(header);
         row.appendChild(message);
+
+        if (notification.ctaUrl) {
+            const cta = document.createElement("a");
+            cta.href = notification.ctaUrl;
+            cta.className = "mt-2 inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200";
+            cta.textContent = "Open";
+            cta.addEventListener("click", async (e) => {
+                e.stopPropagation();
+                if (isUnread) {
+                    const headers = {};
+                    if (csrfToken) headers[csrfHeader] = csrfToken;
+                    await fetch(`/api/notifications/${notification.id}/read`, { method: "POST", headers });
+                    await refreshUnreadCount();
+                }
+            });
+            row.appendChild(cta);
+        }
         
         // Mark as read on click if unread
         if (isUnread) {
@@ -452,6 +483,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 chatView.classList.add("hidden");
                 notificationsView.classList.remove("hidden");
                 notificationsToggle.textContent = "Back";
+                await loadNotifications();
+            }
+        });
+    }
+
+    // Mobile notifications toggle button
+    const notificationsToggleMobile = document.getElementById("chatNotificationsToggleMobile");
+    if (notificationsToggleMobile && notificationsView && chatView) {
+        notificationsToggleMobile.addEventListener("click", async () => {
+            const showingNotifications = !notificationsView.classList.contains("hidden");
+            if (showingNotifications) {
+                notificationsView.classList.add("hidden");
+                chatView.classList.remove("hidden");
+            } else {
+                chatView.classList.add("hidden");
+                notificationsView.classList.remove("hidden");
                 await loadNotifications();
             }
         });

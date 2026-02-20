@@ -1,118 +1,1025 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Home', null, ~{::content}, null)}">
+          xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+          th:replace="~{base :: layout('Home', ~{::styles}, ~{::content}, ~{::scripts})}">
 
-    <div th:fragment="content">
-        <div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            <div th:if="${param.loggedout}" class="mb-4 rounded-xl ring-1 ring-white/10 bg-slate-900/40 px-4 py-3 text-sm text-slate-200">
-                You’ve been logged out.
+    <th:block th:fragment="styles">
+        <style>
+            html { scroll-behavior: smooth; }
+            :root {
+                --emerald-accent: #10b981;
+                --emerald-light: #34d399;
+                --emerald-glow: rgba(16, 185, 129, 0.15);
+                --white-base: #ffffff;
+                --gray-subtle: #f9fafb;
+                --gray-border: #e5e7eb;
+                --text-primary: #111827;
+                --text-secondary: #6b7280;
+            }
+
+            /* ENTRY OVERLAY ANIMATIONS */
+            #opening-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 9999;
+                background-color: #ffffff;
+                display: grid;
+                place-items: center;
+                opacity: 1;
+                visibility: visible;
+                transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+            }
+            #opening-overlay.finished {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+            }
+            .bloom-effect {
+                position: absolute;
+                width: 300px;
+                height: 300px;
+                background: radial-gradient(circle, var(--emerald-glow) 0%, rgba(255,255,255,0) 70%);
+                filter: blur(40px);
+                opacity: 0;
+                animation: bloomPulse 1.4s ease-out forwards;
+            }
+            .logo-reveal-group {
+                opacity: 0;
+                transform: scale(0.95);
+                animation: premiumReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+            .brand-line {
+                opacity: 0;
+                transform: translateY(10px);
+                animation: textSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+            }
+
+            @keyframes bloomPulse {
+                0% { opacity: 0; transform: scale(0.8); }
+                50% { opacity: 1; transform: scale(1.1); }
+                100% { opacity: 0; transform: scale(1.3); }
+            }
+            @keyframes premiumReveal {
+                0% { opacity: 0; transform: scale(0.95); }
+                100% { opacity: 1; transform: scale(1); }
+            }
+            @keyframes textSlideUp {
+                0% { opacity: 0; transform: translateY(10px); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+
+            /* REDUCED MOTION */
+            @media (prefers-reduced-motion: reduce) {
+                #opening-overlay { display: none !important; }
+                .reveal-up, .hover-lift { transition: none !important; animation: none !important; }
+            }
+
+            /* PREMIUM GRADIENTS */
+            .text-gradient {
+                background: linear-gradient(135deg, var(--emerald-accent) 0%, var(--emerald-light) 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            /* MODERN ANIMATIONS */
+            .reveal-up {
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .reveal-up.in-view {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            
+            /* PREMIUM CARD SYSTEM */
+            .premium-card {
+                background: white;
+                border: 1px solid var(--gray-border);
+                border-radius: 24px;
+                padding: 2rem;
+                transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            }
+            .premium-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+                border-color: var(--emerald-accent);
+            }
+
+            /* BUTTON STYLES */
+            .btn-primary {
+                background: linear-gradient(135deg, var(--emerald-accent) 0%, var(--emerald-light) 100%);
+                color: white;
+                font-weight: 600;
+                padding: 1rem 2.5rem;
+                border-radius: 16px;
+                border: none;
+                font-size: 1.0625rem;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 0 4px 12px -2px var(--emerald-glow), 0 0 0 0 var(--emerald-glow);
+                animation: gentleGlow 4s ease-in-out infinite;
+            }
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 24px -4px var(--emerald-glow), 0 0 24px var(--emerald-glow);
+            }
+            .btn-secondary {
+                background: white;
+                color: var(--text-primary);
+                font-weight: 600;
+                padding: 1rem 2.5rem;
+                border-radius: 16px;
+                border: 1.5px solid var(--gray-border);
+                font-size: 1.0625rem;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .btn-secondary:hover {
+                border-color: var(--emerald-accent);
+                background: var(--gray-subtle);
+            }
+
+            @keyframes gentleGlow {
+                0%, 100% { box-shadow: 0 4px 12px -2px var(--emerald-glow), 0 0 0 0 var(--emerald-glow); }
+                50% { box-shadow: 0 4px 12px -2px var(--emerald-glow), 0 0 20px var(--emerald-glow); }
+            }
+
+            /* SECTION SPACING */
+            .section-spacer {
+                padding-top: 7rem;
+                padding-bottom: 7rem;
+            }
+            @media (max-width: 1024px) {
+                .section-spacer {
+                    padding-top: 5rem;
+                    padding-bottom: 5rem;
+                }
+            }
+
+            /* HOVER LIFT */
+            .hover-lift {
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .hover-lift:hover {
+                transform: translateY(-3px);
+            }
+
+            /* LINK UNDERLINE ANIMATION */
+            .link-animated {
+                position: relative;
+                transition: color 0.3s ease;
+            }
+            .link-animated::after {
+                content: '';
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: var(--emerald-accent);
+                transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .link-animated:hover::after {
+                width: 100%;
+            }
+
+            /* STEP CONNECTOR */
+            .step-connector {
+                position: absolute;
+                top: 3rem;
+                left: 50%;
+                right: -50%;
+                height: 2px;
+                background: linear-gradient(90deg, var(--emerald-accent) 0%, var(--gray-border) 100%);
+                opacity: 0.3;
+            }
+            @media (max-width: 768px) {
+                .step-connector { display: none; }
+            }
+
+            /* GLASS NAVBAR EFFECT */
+            .navbar-glass {
+                backdrop-filter: blur(10px);
+                background: rgba(249, 250, 251, 0.85);
+                border-bottom: 1px solid rgba(229, 231, 235, 0.6);
+            }
+        </style>
+    </th:block>
+
+    <div th:fragment="content" class="bg-white text-slate-900 font-sans antialiased overflow-x-hidden">
+
+        <!-- PREMIUM INTRO OVERLAY (Logged out only) -->
+        <div id="opening-overlay" sec:authorize="!isAuthenticated()">
+            <div class="relative flex flex-col items-center justify-center">
+                <!-- Ambient Bloom -->
+                <div class="bloom-effect"></div>
+                
+                <!-- Content Group -->
+                <div class="logo-reveal-group relative z-10 flex flex-col items-center gap-6">
+                     <!-- Logo -->
+                     <img th:src="@{/img/logo.png}" alt="Logo" class="h-20 w-auto drop-shadow-2xl filter brightness-110" />
+                     
+                     <!-- Brand Line -->
+                     <h1 class="brand-line text-xs font-bold tracking-[0.3em] text-slate-400 uppercase">One To One</h1>
+                </div>
             </div>
-            <div th:if="${param.expired}" class="mb-4 rounded-xl ring-1 ring-white/10 bg-slate-900/40 px-4 py-3 text-sm text-slate-200">
-                Your session has expired. Please sign in again.
-            </div>
-
-            <section class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-8 lg:p-12 shadow-sm">
-                <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">Premium coaching, protected payments</p>
-                        <h1 class="mt-3 text-4xl font-semibold text-slate-100 sm:text-5xl">
-                            Build real momentum with verified trainers and a structured plan.
-                        </h1>
-                        <p class="mt-4 text-lg text-slate-300">
-                            ONE TO ONE keeps training, scheduling, and payments in one secure place. Track progress, stay accountable, and level up week after week.
-                        </p>
-                        <div class="mt-6 flex flex-wrap items-center gap-3">
-                            <a th:href="@{/signup}"
-                               class="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60">
-                                Start free
-                            </a>
-                            <a th:href="@{/explore}"
-                               class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-5 py-2 text-sm font-semibold text-slate-200 hover:bg-white/10">
-                                Explore trainers
-                            </a>
-                        </div>
-                    </div>
-                    <div class="rounded-2xl bg-gradient-to-br from-emerald-400/20 via-slate-900/40 to-slate-900/80 ring-1 ring-white/10 p-6">
-                        <div class="space-y-4 text-sm text-slate-200">
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                <p class="text-xs uppercase tracking-wide text-emerald-200">Today</p>
-                                <p class="mt-2 text-lg font-semibold">Plan, train, and check-in with your coach.</p>
-                            </div>
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                <p class="text-xs uppercase tracking-wide text-emerald-200">Momentum</p>
-                                <p class="mt-2">Weekly scheduling, progress logs, and accountability in one flow.</p>
-                            </div>
-                            <div class="rounded-2xl bg-white/5 p-4">
-                                <p class="text-xs uppercase tracking-wide text-emerald-200">Secure</p>
-                                <p class="mt-2">Payments stay in-platform to protect both clients and trainers.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="mt-10 grid gap-6 lg:grid-cols-3">
-                <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/10 transition">
-                    <h2 class="text-lg font-semibold text-slate-100">Clients</h2>
-                    <p class="mt-2 text-sm text-slate-300">Stay consistent with clear plans, weekly schedules, and a verified coach who keeps you accountable.</p>
-                </div>
-                <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/10 transition">
-                    <h2 class="text-lg font-semibold text-slate-100">Trainers</h2>
-                    <p class="mt-2 text-sm text-slate-300">Manage programming, messaging, and clients in one premium workspace built for results.</p>
-                </div>
-                <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/10 transition">
-                    <h2 class="text-lg font-semibold text-slate-100">Gyms</h2>
-                    <p class="mt-2 text-sm text-slate-300">Approve verified coaches, oversee activity, and keep payments streamlined and compliant.</p>
-                </div>
-            </section>
-
-            <section class="mt-12 rounded-3xl bg-white/5 ring-1 ring-white/10 p-8 lg:p-10">
-                <h2 class="text-2xl font-semibold text-slate-100">How it works</h2>
-                <div class="mt-6 grid gap-6 lg:grid-cols-3">
-                    <div class="rounded-2xl bg-white/5 p-5">
-                        <p class="text-xs uppercase tracking-wide text-emerald-200">Step 1</p>
-                        <h3 class="mt-2 text-lg font-semibold text-slate-100">Discover verified trainers</h3>
-                        <p class="mt-2 text-sm text-slate-300">Browse coaching styles, ratings, and locations tailored to your goals.</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/5 p-5">
-                        <p class="text-xs uppercase tracking-wide text-emerald-200">Step 2</p>
-                        <h3 class="mt-2 text-lg font-semibold text-slate-100">Build the plan</h3>
-                        <p class="mt-2 text-sm text-slate-300">Align on training cadence, workouts, and check-ins with built-in accountability.</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/5 p-5">
-                        <p class="text-xs uppercase tracking-wide text-emerald-200">Step 3</p>
-                        <h3 class="mt-2 text-lg font-semibold text-slate-100">Track results</h3>
-                        <p class="mt-2 text-sm text-slate-300">Log sessions, review progress, and keep payments protected in-platform.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="mt-12 grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-                <div class="rounded-3xl bg-white/5 ring-1 ring-white/10 p-8">
-                    <h2 class="text-2xl font-semibold text-slate-100">Trusted by verified coaches</h2>
-                    <p class="mt-3 text-sm text-slate-300">Every trainer is verified, with payments and messaging secured to protect clients and trainers alike.</p>
-                    <div class="mt-6 flex flex-wrap gap-3">
-                        <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">Verified trainers</span>
-                        <span class="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">Data privacy first</span>
-                        <span class="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200">In-platform payments</span>
-                    </div>
-                </div>
-                <div class="rounded-3xl bg-gradient-to-br from-slate-900/60 via-slate-900/40 to-emerald-500/10 ring-1 ring-white/10 p-8">
-                    <h3 class="text-xl font-semibold text-slate-100">Ready to start?</h3>
-                    <p class="mt-3 text-sm text-slate-300">A premium training experience without scattered tools.</p>
-                    <a th:href="@{/signup}" class="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-500 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-400">Create your account</a>
-                </div>
-            </section>
-
-            <section class="mt-12 rounded-3xl bg-white/5 ring-1 ring-white/10 p-8 lg:p-10">
-                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        <h2 class="text-2xl font-semibold text-slate-100">Premium pricing, simple entry</h2>
-                        <p class="mt-2 text-sm text-slate-300">Start with a trainer match, then unlock advanced scheduling and insights.</p>
-                    </div>
-                    <a th:href="@{/pricing}" class="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-500 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-400">View pricing</a>
-                </div>
-            </section>
         </div>
+
+        <!-- 1. HERO SECTION -->
+        <section class="relative pt-28 pb-20 lg:pt-36 lg:pb-28 bg-white overflow-hidden section-spacer">
+
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                <div class="grid lg:grid-cols-[1.05fr_0.95fr] items-center gap-16">
+                    <!-- Left Column: Content -->
+                    <div class="text-center lg:text-left">
+                        <div class="reveal-up flex flex-col items-center lg:items-start gap-6">
+                            <img th:src="@{/img/logo.png}" alt="One To One" class="h-16 w-auto" />
+                            <h1 class="text-5xl lg:text-7xl font-bold text-slate-900 tracking-tight leading-[1.1]">
+                                Premium Training,<br>
+                                <span class="text-emerald-500">Verified Results.</span>
+                            </h1>
+                            <p class="text-lg text-slate-600 max-w-2xl leading-relaxed">
+                                Connect with expert personal trainers who deliver structured programs designed for real progress.
+                            </p>
+                        </div>
+
+                        <div class="reveal-up mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                            <a th:href="@{/signup}" class="btn-primary h-14 px-8 flex items-center justify-center">
+                                Start as a Client
+                            </a>
+                            <a th:href="@{/trainers}" class="btn-secondary h-14 px-8 flex items-center justify-center">
+                                Explore Trainers
+                            </a>
+                        </div>
+
+                        <div class="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-600 font-semibold tracking-wide uppercase">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                Verified Experts
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                Protected Payments
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Real-Time Updates
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex items-center justify-center lg:justify-start gap-4 text-sm text-slate-500">
+                            <a href="#roles" class="hover:text-emerald-500 transition-colors">I'm a Trainer</a>
+                            <span class="text-slate-300">•</span>
+                            <a href="#roles" class="hover:text-emerald-500 transition-colors">For Gyms</a>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Visuals -->
+                    <div class="relative reveal-up">
+                        <div class="premium-card hover-lift relative z-10 p-2">
+                            <div class="aspect-[16/10] w-full bg-white rounded-2xl overflow-hidden flex flex-col md:flex-row shadow-lg">
+                                <!-- Sidebar -->
+                                <div class="hidden md:flex w-14 border-r border-slate-200 flex-col items-center py-5 gap-6 bg-slate-50">
+                                    <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                        <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-lg text-slate-400 hover:text-emerald-500 flex items-center justify-center transition">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-lg text-slate-400 hover:text-emerald-500 flex items-center justify-center transition">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+                                    </div>
+                                    <div class="mt-auto w-8 h-8 rounded-full bg-white border border-emerald-200"></div>
+                                </div>
+
+                                <!-- Main Content -->
+                                <div class="flex-1 flex flex-col bg-white">
+                                    <div class="h-12 border-b border-slate-200 flex items-center justify-between px-6">
+                                        <div class="w-24 h-2 bg-slate-300 rounded-full"></div>
+                                        <div class="flex gap-2">
+                                            <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                                            <div class="w-2 h-2 rounded-full bg-emerald-300"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-6 space-y-6">
+                                        <div class="flex justify-between items-end">
+                                            <div>
+                                                <div class="h-2 w-16 bg-emerald-100 rounded mb-2"></div>
+                                                <div class="h-6 w-32 bg-slate-200 rounded"></div>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="h-8 w-8 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-lg shadow-lg flex items-center justify-center text-white font-bold text-xs">98</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="h-32 w-full bg-slate-50 rounded-lg border border-slate-200 relative overflow-hidden flex items-end justify-between px-4 pb-0 pt-8 gap-2">
+                                            <div class="absolute top-0 left-0 right-0 h-px bg-slate-200"></div>
+                                            <div class="absolute top-1/2 left-0 right-0 h-px border-t border-dashed border-slate-200"></div>
+
+                                            <div class="w-full bg-emerald-200 h-[30%] rounded-t-sm"></div>
+                                            <div class="w-full bg-emerald-300 h-[50%] rounded-t-sm"></div>
+                                            <div class="w-full bg-emerald-300 h-[40%] rounded-t-sm"></div>
+                                            <div class="w-full bg-emerald-400 h-[75%] rounded-t-sm"></div>
+                                            <div class="w-full bg-emerald-400 h-[60%] rounded-t-sm"></div>
+                                            <div class="w-full bg-emerald-500 h-[90%] rounded-t-sm"></div>
+                                        </div>
+
+                                        <div class="space-y-3">
+                                            <div class="h-12 w-full bg-slate-50 border border-slate-200 rounded-lg flex items-center px-4 gap-3">
+                                                <div class="w-4 h-4 rounded border border-slate-400"></div>
+                                                <div class="w-40 h-2 bg-slate-300 rounded"></div>
+                                            </div>
+                                            <div class="h-12 w-full bg-emerald-50 border border-emerald-200 rounded-lg flex items-center px-4 gap-3">
+                                                <div class="w-4 h-4 rounded border border-emerald-500 bg-emerald-50 text-emerald-500 flex items-center justify-center">
+                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                                </div>
+                                                <div class="w-32 h-2 bg-slate-300 rounded opacity-70"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="premium-card absolute -bottom-6 -left-6 z-20 p-4 shadow-lg">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                    <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs text-slate-500 uppercase tracking-wider font-bold">Current Streak</h4>
+                                    <p class="font-bold text-lg text-emerald-500">24 Days</p>
+                                </div>
+                            </div>
+                            <div class="w-32 h-1 bg-slate-200 rounded-full overflow-hidden">
+                                <div class="h-full w-2/3 bg-emerald-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 2. FRICTION VS FLOW (Outcomes) -->
+        <section class="section-spacer bg-gray-50 relative z-30">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                <div class="grid lg:grid-cols-2 gap-16 items-center">
+                    
+                    <!-- Left: The Old Way (Friction) -->
+                    <div class="reveal-up space-y-8 opacity-70 hover:opacity-100 transition duration-500">
+                        <div class="space-y-2">
+                             <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500">The Old Way</h3>
+                             <h2 class="text-3xl font-bold text-slate-900">Fighting Friction.</h2>
+                        </div>
+                        <ul class="space-y-6">
+                            <li class="flex items-start gap-4">
+                                <span class="mt-1 h-5 w-5 flex items-center justify-center text-red-400">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </span>
+                                <div>
+                                    <p class="font-medium text-slate-900">Scattered spreadsheets & DMs</p>
+                                    <p class="text-sm text-slate-600">Progress gets lost in the noise.</p>
+                                </div>
+                            </li>
+                             <li class="flex items-start gap-4">
+                                <span class="mt-1 h-5 w-5 flex items-center justify-center text-red-400">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </span>
+                                <div>
+                                    <p class="font-medium text-slate-900">Inconsistent accountability</p>
+                                    <p class="text-sm text-slate-600">Missed check-ins kill momentum.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Right: The One To One Way (Flow) -->
+                    <div class="reveal-up premium-card hover-lift p-8 lg:p-12 relative overflow-hidden">
+                        <div class="space-y-8 relative z-10">
+                            <div class="space-y-2">
+                                <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-500">One To One</h3>
+                                <h2 class="text-3xl font-bold text-gradient">Engineered Flow.</h2>
+                            </div>
+                            
+                            <ul class="space-y-6">
+                                <li class="flex items-start gap-4">
+                                    <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                        <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900">Visualised Progress</h4>
+                                        <p class="text-sm text-slate-600 mt-1">See your strength and consistency climb with elite-grade analytics.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-4">
+                                    <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                        <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900">Verified Safety</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Every trainer is manually vetted for certifications and insurance.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-4">
+                                    <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                                        <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900">Zero Latency</h4>
+                                        <p class="text-sm text-slate-600 mt-1">Real-time chat, instant plan updates, and seamless payments.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 3. TRUST & STANDARDS -->
+        <section class="py-20 bg-white section-spacer relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                <div class="text-center mb-12">
+                    <h2 class="text-sm font-bold text-emerald-500 uppercase tracking-[0.2em] mb-2">The Standard</h2>
+                    <h3 class="text-2xl lg:text-3xl font-bold text-slate-900">Trust is our currency.</h3>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+                    
+                    <!-- 1. Verified Trainers -->
+                    <div class="premium-card hover-lift reveal-up group p-6 transition-all duration-300">
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 group-hover:bg-emerald-500 transition-colors">
+                                <svg class="w-5 h-5 text-emerald-500 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            </div>
+                            <h4 class="text-slate-900 font-bold text-sm uppercase tracking-wide">Verified Experts</h4>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-snug">Every "Pro" coach undergoes manual ID and certification review.</p>
+                    </div>
+
+                    <!-- 2. Protected Payments -->
+                    <div class="premium-card hover-lift reveal-up group p-6 transition-all duration-300">
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 group-hover:bg-emerald-500 transition-colors">
+                                <svg class="w-5 h-5 text-emerald-500 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            </div>
+                            <h4 class="text-slate-900 font-bold text-sm uppercase tracking-wide">Escrow Protection</h4>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-snug">Funds are held securely until your session is successfully completed.</p>
+                    </div>
+                    
+                    <!-- 3. Privacy First -->
+                    <div class="premium-card hover-lift reveal-up group p-6 transition-all duration-300">
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 group-hover:bg-emerald-500 transition-colors">
+                                <svg class="w-5 h-5 text-emerald-500 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839-1.132c.645-1.015 1.09-2.132 1.335-3.307.198-.94.255-1.939.119-2.912M17.159 8.24a4 4 0 00-2.023-1.63M12.924 6.208a8.03 8.03 0 00-1.848-.15m-4.524 1.09A4.996 4.996 0 004 11c0 3.517 1.009 6.799 2.753 9.571m3.44 2.04l-.054.09"/></svg>
+                            </div>
+                            <h4 class="text-slate-900 font-bold text-sm uppercase tracking-wide">GDPR Compliant</h4>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-snug">Your health data is encrypted. We never sell your information.</p>
+                    </div>
+
+                    <!-- 4. Accountability -->
+                    <div class="premium-card hover-lift reveal-up group p-6 transition-all duration-300">
+                        <div class="flex items-center gap-4 mb-3">
+                            <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 group-hover:bg-emerald-500 transition-colors">
+                                <svg class="w-5 h-5 text-emerald-500 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            </div>
+                            <h4 class="text-slate-900 font-bold text-sm uppercase tracking-wide">Built-in Accountability</h4>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-snug">Automated streak tracking and check-ins keep you consistent.</p>
+                    </div>
+
+                </div>
+                </div>
+        </section>
+
+
+        <!-- 4. HOW IT WORKS (Cinematic 3-Step) -->
+           <section class="py-24 bg-gray-50 section-spacer relative z-20">
+               <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                  <div class="text-center mb-20">
+                     <h2 class="text-sm font-bold text-emerald-500 uppercase tracking-[0.2em] mb-3">Workflow</h2>
+                     <h3 class="text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">Systematic Progression.</h3>
+                  </div>
+                  
+                  <div class="grid md:grid-cols-3 gap-8 relative">
+                      <!-- Connecting Line (Desktop) -->
+                      <div class="absolute top-12 left-0 right-0 h-px bg-slate-200 hidden md:block z-0 pointer-events-none"></div>
+
+                      <!-- Step 1 -->
+                      <div class="reveal-up premium-card hover-lift group relative z-10 p-8 transition-all duration-300">
+                         <div class="flex items-start justify-between mb-8">
+                              <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 group-hover:bg-emerald-500 transition-colors duration-300">
+                                 <svg class="w-5 h-5 text-emerald-500 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                              </div>
+                              <span class="font-mono text-xs text-slate-400 group-hover:text-emerald-500 transition-colors">01</span>
+                         </div>
+                         <h4 class="text-lg font-bold text-slate-900 mb-3 group-hover:text-emerald-500 transition-colors">Match with Verified Trainer</h4>
+                         <p class="text-slate-600 text-sm leading-relaxed">Filter by specialization, bio-mechanics, or goals. Every "Pro" trainer is manually vetted for credentials.</p>
+                      </div>
+
+                      <!-- Step 2 -->
+                      <div class="reveal-up premium-card hover-lift group relative z-10 p-8 transition-all duration-300 transition-delay-100">
+                         <div class="flex items-start justify-between mb-8">
+                              <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 group-hover:bg-emerald-500 transition-colors duration-300">
+                                 <svg class="w-5 h-5 text-emerald-500 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                              </div>
+                              <span class="font-mono text-xs text-slate-400 group-hover:text-emerald-500 transition-colors">02</span>
+                         </div>
+                         <h4 class="text-lg font-bold text-slate-900 mb-3 group-hover:text-emerald-500 transition-colors">Build Plan & Schedule</h4>
+                         <p class="text-slate-600 text-sm leading-relaxed">Receive a custom protocol directly to your dashboard. Adjust volume and frequency in real-time.</p>
+                      </div>
+
+                      <!-- Step 3 -->
+                      <div class="reveal-up premium-card hover-lift group relative z-10 p-8 transition-all duration-300 transition-delay-200">
+                         <div class="flex items-start justify-between mb-8">
+                              <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 group-hover:bg-emerald-500 transition-colors duration-300">
+                                 <svg class="w-5 h-5 text-emerald-500 group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                              </div>
+                              <span class="font-mono text-xs text-slate-400 group-hover:text-emerald-500 transition-colors">03</span>
+                         </div>
+                         <h4 class="text-lg font-bold text-slate-900 mb-3 group-hover:text-emerald-500 transition-colors">Train, Log, Progress</h4>
+                         <p class="text-slate-600 text-sm leading-relaxed">Execute the work. Payments are held in escrow until your trainer delivers the service.</p>
+                      </div>
+
+                  </div>
+                  </div>
+         </section>
+
+
+        <!-- 4.1 CYCLE OF PROGRESS (5-Step Loop) -->
+           <section class="py-24 bg-white section-spacer">
+                  <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                 <div class="text-center mb-16">
+                     <h2 class="text-sm font-bold text-emerald-500 uppercase tracking-widest mb-3">The Engine</h2>
+                     <h3 class="text-3xl font-bold text-slate-900">The Cycle of Progress.</h3>
+                 </div>
+
+                 <!-- Desktop: 5-Col Stepper -->
+                 <div class="hidden lg:grid grid-cols-5 gap-4 relative">
+                     <!-- Connecting Line -->
+                     <div class="absolute top-8 left-0 w-full h-0.5 bg-gray-200 z-0"></div>
+                     <div class="absolute top-8 left-0 w-1/5 h-0.5 bg-gradient-to-r from-emerald-500/0 via-emerald-500 to-emerald-500/0 z-0 blur-sm animate-pulse"></div>
+
+                     <!-- Steps -->
+                     <div class="group relative z-10 flex flex-col items-center text-center reveal-up">
+                         <div class="w-16 h-16 rounded-full bg-white border-2 border-emerald-400/30 group-hover:border-emerald-400 group-hover:shadow-lg transition-all duration-300 flex items-center justify-center mb-6 text-emerald-400/60 group-hover:text-emerald-400">
+                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                         </div>
+                         <h4 class="text-slate-900 font-bold mb-2 group-hover:text-emerald-400 transition-colors">1. Assess</h4>
+                         <p class="text-xs text-slate-600 max-w-[140px]">Goals defined.<br>Baselines set.</p>
+                     </div>
+
+                     <div class="group relative z-10 flex flex-col items-center text-center reveal-up transition-delay-100">
+                         <div class="w-16 h-16 rounded-full bg-white border-2 border-emerald-400/30 group-hover:border-emerald-400 group-hover:shadow-lg transition-all duration-300 flex items-center justify-center mb-6 text-emerald-400/60 group-hover:text-emerald-400">
+                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                         </div>
+                         <h4 class="text-slate-900 font-bold mb-2 group-hover:text-emerald-400 transition-colors">2. Program</h4>
+                         <p class="text-xs text-slate-600 max-w-[140px]">Protocol built.<br>Schedule locked.</p>
+                     </div>
+
+                     <div class="group relative z-10 flex flex-col items-center text-center reveal-up transition-delay-200">
+                         <div class="w-16 h-16 rounded-full bg-white border-2 border-emerald-500 shadow-lg bg-gradient-to-b from-emerald-500/10 to-transparent flex items-center justify-center mb-6 text-emerald-500">
+                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                         </div>
+                         <h4 class="text-emerald-500 font-bold mb-2">3. Execute</h4>
+                         <p class="text-xs text-slate-600 max-w-[140px]">Workouts logged.<br>Feedback loop active.</p>
+                     </div>
+
+                     <div class="group relative z-10 flex flex-col items-center text-center reveal-up transition-delay-300">
+                         <div class="w-16 h-16 rounded-full bg-white border-2 border-emerald-400/30 group-hover:border-emerald-400 group-hover:shadow-lg transition-all duration-300 flex items-center justify-center mb-6 text-emerald-400/60 group-hover:text-emerald-400">
+                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                         </div>
+                         <h4 class="text-slate-900 font-bold mb-2 group-hover:text-emerald-400 transition-colors">4. Analyze</h4>
+                         <p class="text-xs text-slate-600 max-w-[140px]">Metrics reviewed.<br>Progress visualized.</p>
+                     </div>
+
+                     <div class="group relative z-10 flex flex-col items-center text-center reveal-up transition-delay-400">
+                         <div class="w-16 h-16 rounded-full bg-white border-2 border-emerald-400/30 group-hover:border-emerald-400 group-hover:shadow-lg transition-all duration-300 flex items-center justify-center mb-6 text-emerald-400/60 group-hover:text-emerald-400">
+                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                         </div>
+                         <h4 class="text-slate-900 font-bold mb-2 group-hover:text-emerald-400 transition-colors">5. Evolve</h4>
+                         <p class="text-xs text-slate-600 max-w-[140px]">Standards raised.<br>Repeat.</p>
+                     </div>
+                 </div>
+
+                 <!-- Mobile: Vertical Card Timeline -->
+                 <div class="lg:hidden premium-card hover-lift p-6 relative overflow-hidden reveal-up">
+                    <div class="absolute left-8 top-8 bottom-8 w-0.5 bg-gray-200"></div>
+                    
+                    <div class="space-y-8 relative z-10">
+                        <!-- 1 -->
+                        <div class="flex gap-6 items-start">
+                            <div class="w-5 h-5 mt-1 rounded-full bg-white border-2 border-emerald-400/40 z-10 shrink-0"></div>
+                            <div>
+                                <h4 class="text-emerald-500 font-bold text-lg">Assess</h4>
+                                <p class="text-sm text-slate-600 mt-1">Movement screening and goal setting.</p>
+                            </div>
+                        </div>
+                        <!-- 2 -->
+                        <div class="flex gap-6 items-start">
+                             <div class="w-5 h-5 mt-1 rounded-full bg-white border-2 border-emerald-400/40 z-10 shrink-0"></div>
+                             <div>
+                                 <h4 class="text-emerald-500 font-bold text-lg">Program</h4>
+                                 <p class="text-sm text-slate-600 mt-1">Trainer builds your micro-cycle.</p>
+                             </div>
+                         </div>
+                        <!-- 3 (Active) -->
+                        <div class="flex gap-6 items-start">
+                             <div class="w-5 h-5 mt-1 rounded-full bg-emerald-500 border-2 border-emerald-500 shadow-lg z-10 shrink-0 relative">
+                                 <span class="absolute inset-0 rounded-full animate-ping bg-emerald-500 opacity-50"></span>
+                             </div>
+                             <div>
+                                 <h4 class="text-emerald-500 font-bold text-lg">Execute</h4>
+                                 <p class="text-sm text-emerald-500/80 mt-1">Train hard. Log instantly.</p>
+                             </div>
+                         </div>
+                        <!-- 4 -->
+                        <div class="flex gap-6 items-start">
+                             <div class="w-5 h-5 mt-1 rounded-full bg-white border-2 border-emerald-400/40 z-10 shrink-0"></div>
+                             <div>
+                                 <h4 class="text-emerald-500 font-bold text-lg">Analyze</h4>
+                                 <p class="text-sm text-slate-600 mt-1">Big data feedback loop.</p>
+                             </div>
+                         </div>
+                        <!-- 5 -->
+                        <div class="flex gap-6 items-start">
+                             <div class="w-5 h-5 mt-1 rounded-full bg-white border-2 border-emerald-400/40 z-10 shrink-0"></div>
+                             <div>
+                                 <h4 class="text-emerald-500 font-bold text-lg">Evolve</h4>
+                                 <p class="text-sm text-slate-600 mt-1">Next block. Higher weight.</p>
+                             </div>
+                         </div>
+                    </div>
+                 </div>
+                 </div>
+             </div>
+        </section>
+
+
+        <!-- 5. DEPLOYMENT VECTORS (Roles) -->
+        <section id="roles" class="py-24 bg-gray-50 relative overflow-hidden section-spacer">
+                <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                <div class="text-center mb-16 space-y-4">
+                    <h2 class="text-4xl font-bold text-slate-900 tracking-tight">Deploy for your Role.</h2>
+                    <p class="text-slate-600 max-w-2xl mx-auto">Optimized interfaces for every stakeholder in the ecosystem.</p>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-8 items-start">
+                    
+                    <!-- 1. Client (DOMINANT/FEATURED) -->
+                    <div class="reveal-up premium-card hover-lift group relative p-8 lg:-translate-y-4 transition-all duration-300 z-10 overflow-hidden border-2 border-emerald-200">
+                        
+                        <div class="relative z-10 h-full flex flex-col">
+                            <h3 class="text-emerald-500 font-bold tracking-widest text-xs uppercase mb-2">For Athletes</h3>
+                            <h4 class="text-3xl lg:text-4xl font-bold text-slate-900 mb-6">Peak Performance.</h4>
+                            <p class="text-slate-600 mb-8 leading-relaxed">Everything you need to execute your training and track your evolution in one ecosystem.</p>
+                            
+                            <ul class="space-y-4 mb-10 flex-grow">
+                                <li class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span class="text-slate-700 text-sm font-medium">Custom protocol & schedule</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+                                    <span class="text-slate-700 text-sm font-medium">Real-time analytics</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                    <span class="text-slate-700 text-sm font-medium">Direct coach messaging</span>
+                                </li>
+                            </ul>
+
+                            <a th:href="@{/signup}" class="btn btn--primary h-14 flex items-center justify-center">
+                                Start as a client
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 2. Trainer -->
+                    <div class="reveal-up premium-card hover-lift group relative p-8 transition-all duration-300 h-full flex flex-col">
+                        <h3 class="text-emerald-500 font-bold tracking-widest text-xs uppercase mb-2">For Coaches</h3>
+                        <h4 class="text-2xl font-bold text-slate-900 mb-6">Scale Your Business.</h4>
+                        
+                        <ul class="space-y-4 mb-8 flex-grow">
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
+                                <span class="text-slate-600 text-sm">Rapid program builder</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
+                                <span class="text-slate-600 text-sm">Automated billing & subscriptions</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
+                                <span class="text-slate-600 text-sm">Client video feedback tools</span>
+                            </li>
+                        </ul>
+
+                        <a th:href="@{/signup?role=trainer}" class="mt-auto inline-flex items-center font-bold text-slate-900 hover:text-emerald-500 transition-colors group-hover:gap-2">
+                            Become verified trainer <svg class="w-4 h-4 ml-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    </div>
+
+                    <!-- 3. Gym Owner -->
+                    <div class="reveal-up premium-card hover-lift group relative p-8 transition-all duration-300 h-full flex flex-col">
+                        <h3 class="text-emerald-500 font-bold tracking-widest text-xs uppercase mb-2">For Facilities</h3>
+                        <h4 class="text-2xl font-bold text-slate-900 mb-6">Operational Excellence.</h4>
+                        
+                        <ul class="space-y-4 mb-8 flex-grow">
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
+                                <span class="text-slate-600 text-sm">Centralized staff management</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
+                                <span class="text-slate-600 text-sm">Revenue aggregation</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
+                                <span class="text-slate-600 text-sm">High-level retention metrics</span>
+                            </li>
+                        </ul>
+
+                         <a th:href="@{/signup?role=gym}" class="mt-auto inline-flex items-center font-bold text-slate-900 hover:text-emerald-500 transition-colors group-hover:gap-2">
+                            Partner with One to One <svg class="w-4 h-4 ml-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+                </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 6. PRODUCT GALLERY -->
+        <section class="py-24 bg-white section-spacer overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                <div class="text-center mb-16">
+                    <h2 class="text-sm font-bold text-emerald-500 uppercase tracking-[0.2em] mb-3">Interface</h2>
+                    <h3 class="text-3xl font-bold text-slate-900">Precision Engineered.</h3>
+                </div>
+
+                <!-- Gallery Grid -->
+                <div class="grid md:grid-cols-3 gap-8">
+                    
+                    <!-- Item 1: Progress Streaks -->
+                    <div class="reveal-up group">
+                        <div class="premium-card hover-lift relative overflow-hidden transition-all duration-300">
+                            <!-- App Header -->
+                            <div class="h-8 bg-slate-50 border-b border-slate-200 flex items-center px-4 gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-300"></div>
+                            </div>
+                            <!-- Mock UI Body -->
+                            <div class="p-6 aspect-[4/3] bg-white relative">
+                                <!-- Mock Graph -->
+                                <div class="absolute bottom-6 left-6 right-6 h-32 flex items-end gap-2">
+                                    <div class="w-1/5 bg-emerald-200 rounded-t-sm h-[40%]"></div>
+                                    <div class="w-1/5 bg-emerald-300 rounded-t-sm h-[60%]"></div>
+                                    <div class="w-1/5 bg-emerald-300 rounded-t-sm h-[50%]"></div>
+                                    <div class="w-1/5 bg-emerald-400 rounded-t-sm h-[85%]"></div>
+                                    <div class="w-1/5 bg-emerald-500 rounded-t-sm h-[100%] relative group-hover:scale-y-110 origin-bottom transition-transform duration-500">
+                                        <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white border border-emerald-500 text-emerald-500 text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">PR</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="mt-6 text-lg font-bold text-slate-900">Progress Streaks</h4>
+                        <p class="text-sm text-slate-600 mt-1">Visualize your consistency.</p>
+                    </div>
+
+                    <!-- Item 2: Session Scheduling -->
+                    <div class="reveal-up group transition-delay-100">
+                         <div class="premium-card hover-lift relative overflow-hidden transition-all duration-300">
+                            <!-- App Header -->
+                            <div class="h-8 bg-slate-50 border-b border-slate-200 flex items-center px-4 gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-300"></div>
+                            </div>
+                            <!-- Mock UI Body -->
+                            <div class="p-6 aspect-[4/3] bg-white relative flex flex-col gap-3">
+                                <div class="h-8 w-2/3 bg-slate-100 rounded border border-slate-200 shadow-sm"></div>
+                                <div class="flex gap-2">
+                                    <div class="h-16 w-16 bg-slate-50 rounded border border-slate-200 shadow-sm flex flex-col items-center justify-center">
+                                        <span class="text-[8px] text-slate-500 uppercase">Mon</span>
+                                        <span class="text-lg font-bold text-slate-400">12</span>
+                                    </div>
+                                    <div class="h-16 w-16 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded border border-emerald-400 shadow-lg flex flex-col items-center justify-center text-white ring-2 ring-emerald-200">
+                                        <span class="text-[8px] text-white/80 uppercase">Tue</span>
+                                        <span class="text-lg font-bold">13</span>
+                                    </div>
+                                    <div class="h-16 w-16 bg-slate-50 rounded border border-slate-200 shadow-sm flex flex-col items-center justify-center">
+                                        <span class="text-[8px] text-slate-500 uppercase">Wed</span>
+                                        <span class="text-lg font-bold text-slate-400">14</span>
+                                    </div>
+                                </div>
+                                <div class="mt-auto h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                                     <div class="h-full w-3/4 bg-emerald-500"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="mt-6 text-lg font-bold text-slate-900">Smart Scheduling</h4>
+                        <p class="text-sm text-slate-600 mt-1">Never miss a session.</p>
+                    </div>
+
+                    <!-- Item 3: Coach Feedback -->
+                    <div class="reveal-up group transition-delay-200">
+                         <div class="premium-card hover-lift relative overflow-hidden transition-all duration-300">
+                            <!-- App Header -->
+                            <div class="h-8 bg-slate-50 border-b border-slate-200 flex items-center px-4 gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-300"></div>
+                            </div>
+                            <!-- Mock UI Body -->
+                            <div class="p-6 aspect-[4/3] bg-white relative flex flex-col gap-3 justify-end">
+                                <div class="self-start max-w-[80%] bg-slate-50 border border-slate-200 p-3 rounded-2xl rounded-tl-none text-xs text-slate-700 shadow-sm">
+                                    Great depth on that squat! 🚀
+                                </div>
+                                <div class="self-end max-w-[80%] bg-gradient-to-br from-emerald-400 to-emerald-500 text-white p-3 rounded-2xl rounded-tr-none text-xs shadow-lg font-semibold">
+                                    Thanks coach, felt heavy today.
+                                </div>
+                                <div class="self-start flex items-center gap-2 mt-1">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                    <span class="text-[10px] text-slate-500 font-bold uppercase">Coach is typing...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="mt-6 text-lg font-bold text-slate-900">Direct Feedback</h4>
+                        <p class="text-sm text-slate-600 mt-1">Real-time adjustments.</p>
+                    </div>
+
+                </div>
+                </div>
+        </section>
+
+
+        <!-- 7. FAQ -->
+        <section class="py-24 bg-gray-50 section-spacer">
+            <div class="max-w-3xl mx-auto px-6 lg:px-8 relative z-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-12 text-center">Clarity.</h2>
+                
+                <div class="space-y-4">
+                    <!-- Item 1: Verification -->
+                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
+                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
+                            How are trainers verified?
+                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
+                            Quality is our firewall. Every "Pro" trainer undergoes a manual review of their certifications (CIMSPA, REPs, or equivalent) and liability insurance. We reject over 40% of applicants to ensure you only work with legitimate experts.
+                        </p>
+                    </details>
+                    
+                    <!-- Item 2: Payments -->
+                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
+                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
+                            How do payments work?
+                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
+                            Securely. Payments are processed via Stripe and held in escrow. Your trainer is paid only after they deliver your promised coaching block or session. This "Deployment Protection" ensures you get exactly what you pay for.
+                        </p>
+                    </details>
+
+                    <!-- Item 3: Switching -->
+                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
+                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
+                            Can I switch trainers?
+                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
+                            Yes. You are never locked into a long-term contract unless you specifically agree to one. You can switch coaches at the end of any billing cycle (usually monthly) without penalty.
+                        </p>
+                    </details>
+
+                    <!-- Item 4: GDPR -->
+                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
+                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
+                            What data is stored / GDPR?
+                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
+                            We operate on a privacy-first architecture. Your health data, progress photos, and chat logs are encrypted at rest. We are fully UK-GDPR compliant and will never sell your personal performance metrics to advertisers.
+                        </p>
+                    </details>
+
+                    <!-- Item 5: Subscription -->
+                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
+                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
+                            Do I need a subscription?
+                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
+                            The platform itself is free for clients. You can create an account, browse verified trainers, and read articles at no cost. You only pay the specific rate set by a coach when you hire them.
+                        </p>
+                    </details>
+
+                    <!-- Item 6: UK First -->
+                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
+                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
+                            Is this UK-first?
+                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
+                            Yes. One To One is built in the UK, for the UK fitness ecosystem. All transactions are in GBP, and our verification standards are aligned with British governing bodies like CIMSPA.
+                        </p>
+                    </details>
+                </div>
+                </div>
+        </section>
+
+
+        <!-- 8. FINAL CTA -->
+        <section class="py-32 bg-gray-50 section-spacer relative overflow-hidden">
+            <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center relative z-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-bold tracking-widest uppercase mb-8">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Ready to Begin
+                </div>
+                
+                <h2 class="text-5xl lg:text-7xl font-bold text-slate-900 tracking-tighter mb-6 leading-[1.1]">
+                    Your Ceiling is<br>
+                    <span class="text-emerald-500">Just a Suggestion.</span>
+                </h2>
+                
+                <p class="text-lg text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+                    Join the high-performance ecosystem where structure guarantees results. Whether you're training or coaching, this is where you evolve.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                    <!-- Client Action -->
+                    <a th:href="@{/signup}" class="btn-primary w-full sm:w-auto h-14 px-8 flex items-center justify-center">
+                        Start as a Client
+                    </a>
+                    
+                    <!-- Trainer Action -->
+                    <a th:href="@{/signup?role=trainer}" class="btn-secondary w-full sm:w-auto h-14 px-8 flex items-center justify-center group">
+                         Become a Trainer
+                    </a>
+                </div>
+
+                <div class="mt-8">
+                     <a th:href="@{/signup?role=gym}" class="text-sm text-slate-500 hover:text-emerald-500 transition-colors border-b border-transparent hover:border-emerald-500 pb-0.5">
+                        Operational tools for Gym Owners <span aria-hidden="true">&rarr;</span>
+                    </a>
+                </div>
+                </div>
+        </section>
+
     </div>
+
+    <th:block th:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const overlay = document.getElementById('opening-overlay');
+                
+                // INTRO SEQUENCE
+                if (overlay) {
+                    // Total cinematic duration: 1400ms
+                    setTimeout(() => {
+                        overlay.classList.add('finished');
+                        
+                        // Garbage Collection: Remove from DOM after fade-out completes
+                        setTimeout(() => {
+                            if(overlay.parentNode) {
+                                overlay.parentNode.removeChild(overlay);
+                            }
+                        }, 800); // Matches CSS transition time
+                    }, 1400); 
+                }
+
+                // SCROLL REVEAL
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('in-view');
+                            // Optional: unobserve after revealing
+                            // observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.reveal-up').forEach((el) => observer.observe(el));
+            });
+        </script>
+    </th:block>
 
 </th:block>

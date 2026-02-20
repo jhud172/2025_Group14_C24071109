@@ -2,82 +2,193 @@
           th:replace="~{base :: layout('Dashboard', null, ~{::content}, null)}">
 
     <div th:fragment="content">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight">Trainer dashboard</h1>
-                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Plan today and stay on top of sessions.</p>
+        <div class="dashboard-enhanced max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <!-- Personal Header -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 class="text-4xl font-bold text-white mb-2">
+                            <span class="text-slate-400">Welcome back,</span>
+                            <span class="text-emerald-400" th:text="${#authentication.name}">Trainer</span>
+                        </h1>
+                        <p class="text-slate-400">Empower your clients today 💪</p>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-400/40 bg-emerald-400/10">
+                        <span class="h-3 w-3 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-sm font-semibold text-emerald-400">Training</span>
+                    </div>
+                </div>
+                <div class="h-1 w-24 bg-gradient-to-r from-emerald-400 to-transparent rounded-full"></div>
             </div>
 
-            <div class="mt-6 grid gap-4 lg:grid-cols-3">
-                <div class="rounded-2xl bg-white dark:bg-slate-900/60 ring-1 ring-slate-200 dark:ring-white/10 shadow-sm p-5">
-                    <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Today overview</h2>
-                    <div class="mt-4 grid gap-3 text-sm">
-                        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                            <span>Tasks due</span>
-                            <span class="font-semibold text-slate-900 dark:text-white" th:text="${summary.tasksDueToday}">0</span>
+            <!-- Today's Focus -->
+            <div class="mb-8 card-neon card--emerald">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-3 rounded-xl bg-emerald-400/10 border border-emerald-400/30">
+                        <svg class="h-7 w-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-emerald-400">Today's Schedule</h2>
+                        <p class="text-sm text-slate-400" th:text="${#temporals.format(summary.today, 'EEEE, MMMM d')}">Tuesday, February 13</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="stat-pulse-card">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-slate-400">Your Tasks</span>
+                            <svg class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
                         </div>
-                        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                            <span>Workouts due</span>
-                            <span class="font-semibold text-slate-900 dark:text-white" th:text="${summary.workoutsDueToday}">0</span>
+                        <div class="flex items-end justify-between">
+                            <span class="text-4xl font-bold text-emerald-400" th:text="${summary.tasksDueToday}">0</span>
+                            <a th:href="@{/calendar/day/{date}(date=${#temporals.format(summary.today, 'yyyy-MM-dd')})}"
+                               class="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
+                                View →
+                            </a>
                         </div>
                     </div>
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <a th:href="@{/calendar/day/{date}(date=${#temporals.format(summary.today, 'yyyy-MM-dd')})}"
-                           class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800">
-                            Quick complete
-                        </a>
-                        <a th:href="@{/calendar/day/{date}(date=${#temporals.format(summary.today, 'yyyy-MM-dd')})}"
-                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5">
-                            Add task
-                        </a>
+                    
+                    <div class="stat-pulse-card">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-slate-400">Sessions Planned</span>
+                            <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                            </svg>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <span class="text-4xl font-bold text-blue-400" th:text="${summary.workoutsDueToday}">0</span>
+                            <a th:href="@{/calendar/day/{date}(date=${#temporals.format(summary.today, 'yyyy-MM-dd')})}"
+                               class="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors">
+                                Start →
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <div class="rounded-2xl bg-white dark:bg-slate-900/60 ring-1 ring-slate-200 dark:ring-white/10 shadow-sm p-5">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Mini week view</h2>
-                        <a th:href="@{/calendar}" class="text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300">Open calendar</a>
-                    </div>
-                    <div class="mt-4 grid grid-cols-7 gap-2">
-                        <div th:each="day : ${summary.week}"
-                             class="flex flex-col items-center rounded-xl px-2 py-3 text-xs"
-                             th:classappend="${day.today} ? ' bg-slate-900 text-white' : ' bg-slate-50 text-slate-700 dark:bg-white/5 dark:text-slate-200'">
-                            <span class="font-semibold" th:text="${day.label}">Mon</span>
-                            <span class="text-sm font-bold" th:text="${day.dayNumber}">12</span>
-                            <span class="mt-1 text-[10px] opacity-80" th:text="${day.tasksCount + day.workoutsCount}">0</span>
-                        </div>
-                    </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <a th:href="@{/calendar/day/{date}(date=${#temporals.format(summary.today, 'yyyy-MM-dd')})}"
+                       class="btn btn--primary btn--sm text-center">
+                        View Today
+                    </a>
+                    <a th:href="@{/trainer/active-clients}"
+                       class="btn btn--secondary btn--sm text-center">
+                        View Clients
+                    </a>
                 </div>
+            </div>
 
-                <div class="rounded-2xl bg-white dark:bg-slate-900/60 ring-1 ring-slate-200 dark:ring-white/10 shadow-sm p-5">
-                    <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Quick buttons</h2>
-                    <div class="mt-4 grid gap-2 text-sm">
-                        <a th:href="@{/calendar/day/{date}(date=${#temporals.format(summary.today, 'yyyy-MM-dd')})}"
-                           class="inline-flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5">
-                            Add Task
-                            <span class="text-xs text-slate-400">Today</span>
-                        </a>
-                        <a th:href="@{/workout}"
-                           class="inline-flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5">
-                            Add Workout
-                            <span class="text-xs text-slate-400">Program</span>
-                        </a>
-                        <a th:href="@{/calendar}"
-                           class="inline-flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5">
-                            Open Calendar
-                            <span class="text-xs text-slate-400">Week</span>
-                        </a>
-                        <a th:href="@{/vault}"
-                           class="inline-flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5">
-                            Open Vault
-                            <span class="text-xs text-slate-400">Notes</span>
-                        </a>
-                        <a th:href="@{/inbox}"
-                           class="inline-flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5">
-                            Message
-                            <span class="text-xs text-slate-400">Inbox</span>
-                        </a>
-                    </div>
+            <!-- 7-Day Forward View -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-slate-200">Your Week Ahead</h2>
+                    <a th:href="@{/calendar}" class="text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors">
+                        Full Calendar →
+                    </a>
+                </div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+                    <a th:each="day : ${summary.week}" 
+                       th:href="@{/calendar/day/{date}(date=${#temporals.format(day.date, 'yyyy-MM-dd')})}"
+                       class="week-day-card group">
+                        <div class="flex flex-col h-full">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold uppercase tracking-wider" 
+                                      th:text="${day.label}"
+                                      th:classappend="${day.today} ? 'text-emerald-400' : 'text-slate-400'">
+                                    Mon
+                                </span>
+                                <div th:if="${day.today}" class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="text-3xl font-bold mb-1"
+                                     th:text="${day.dayNumber}"
+                                     th:classappend="${day.today} ? 'text-emerald-400' : 'text-white'">
+                                    13
+                                </div>
+                                <div th:if="${day.today}" class="text-xs font-semibold text-emerald-400">TODAY</div>
+                            </div>
+                            
+                            <div class="mt-auto space-y-2">
+                                <div th:if="${day.tasksCount > 0}" class="flex items-center gap-2 text-xs">
+                                    <div class="h-1.5 w-1.5 rounded-full bg-emerald-400"></div>
+                                    <span class="text-slate-400" th:text="${day.tasksCount} + ' task' + (${day.tasksCount} > 1 ? 's' : '')">2 tasks</span>
+                                </div>
+                                <div th:if="${day.workoutsCount > 0}" class="flex items-center gap-2 text-xs">
+                                    <div class="h-1.5 w-1.5 rounded-full bg-blue-400"></div>
+                                    <span class="text-slate-400" th:text="${day.workoutsCount} + ' session' + (${day.workoutsCount} > 1 ? 's' : '')">1 session</span>
+                                </div>
+                                <div th:if="${day.tasksCount == 0 && day.workoutsCount == 0}" class="text-xs text-slate-600">
+                                    Free day
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Actions Grid - Trainer Specific -->
+            <div>
+                <h2 class="text-2xl font-bold text-slate-200 mb-4">Quick Actions</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <a th:href="@{/trainer/active-clients}"
+                       class="quick-action-card group">
+                        <div class="p-3 rounded-xl bg-emerald-400/10 border border-emerald-400/30 mb-3 group-hover:bg-emerald-400/20 transition-all">
+                            <svg class="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <div class="text-sm font-semibold text-slate-200 mb-1">My Clients</div>
+                        <div class="text-xs text-slate-500">Manage clients</div>
+                    </a>
+                    
+                    <a th:href="@{/trainer/programmes/list}"
+                       class="quick-action-card group">
+                        <div class="p-3 rounded-xl bg-blue-400/10 border border-blue-400/30 mb-3 group-hover:bg-blue-400/20 transition-all">
+                            <svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        </div>
+                        <div class="text-sm font-semibold text-slate-200 mb-1">Programmes</div>
+                        <div class="text-xs text-slate-500">Create & edit</div>
+                    </a>
+                    
+                    <a th:href="@{/trainer/exercises/list}"
+                       class="quick-action-card group">
+                        <div class="p-3 rounded-xl bg-slate-400/10 border border-slate-400/30 mb-3 group-hover:bg-slate-400/20 transition-all">
+                            <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                            </svg>
+                        </div>
+                        <div class="text-sm font-semibold text-slate-200 mb-1">Exercises</div>
+                        <div class="text-xs text-slate-500">Exercise library</div>
+                    </a>
+                    
+                    <a th:href="@{/trainer/templates/index}"
+                       class="quick-action-card group">
+                        <div class="p-3 rounded-xl bg-slate-400/10 border border-slate-400/30 mb-3 group-hover:bg-slate-400/20 transition-all">
+                            <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                            </svg>
+                        </div>
+                        <div class="text-sm font-semibold text-slate-200 mb-1">Templates</div>
+                        <div class="text-xs text-slate-500">Quick assign</div>
+                    </a>
+                    
+                    <a th:href="@{/inbox}"
+                       class="quick-action-card group">
+                        <div class="p-3 rounded-xl bg-slate-400/10 border border-slate-400/30 mb-3 group-hover:bg-slate-400/20 transition-all">
+                            <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="text-sm font-semibold text-slate-200 mb-1">Messages</div>
+                        <div class="text-xs text-slate-500">Client chats</div>
+                    </a>
                 </div>
             </div>
         </div>

@@ -1,27 +1,35 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Login', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Login', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-md px-4 py-10 sm:px-6 lg:px-8">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
-            <div class="mb-6">
-                <h1 class="text-2xl font-semibold tracking-tight text-slate-900" th:text="#{auth.login.title}">Welcome back</h1>
-                <p class="mt-1 text-sm text-slate-600" th:text="#{auth.login.subtitle}">Log in to continue.</p>
+    <th:block th:fragment="pageStyles">
+        <!-- auth.css is now included in app.css via tailwind.css -->
+    </th:block>
+
+    <div th:fragment="content" class="auth-container animate-fade-in">
+        <div class="auth-card">
+            <div class="auth-accent-bar"></div>
+
+            <div class="mb-8 mt-8 text-center">
+                <h1 class="auth-heading" th:text="#{auth.login.title}">Welcome back</h1>
+                <p class="auth-subheading" th:text="#{auth.login.subtitle}">Log in to continue.</p>
             </div>
 
+            <!-- Role Slider -->
             <div class="mb-6">
-                <div class="inline-flex w-full rounded-full bg-slate-100 p-1 text-sm font-medium text-slate-600">
-                    <span class="flex-1 rounded-full bg-white px-3 py-2 text-center text-slate-900 shadow-sm" th:text="#{auth.role.client}">Client</span>
-                    <span class="flex-1 px-3 py-2 text-center" th:text="#{auth.role.trainer}">Trainer</span>
-                    <span class="flex-1 px-3 py-2 text-center" th:text="#{auth.role.gym}">Gym</span>
+                <div class="role-slider" id="roleSlider">
+                    <span class="role-slider__option active" data-role="client" th:text="#{auth.role.client}">Client</span>
+                    <span class="role-slider__option" data-role="trainer" th:text="#{auth.role.trainer}">Trainer</span>
+                    <span class="role-slider__option" data-role="gym" th:text="#{auth.role.gym}">Gym</span>
                 </div>
-                <p class="mt-2 text-xs text-slate-500" th:text="#{auth.login.sameLogin}">All accounts use the same login.</p>
+                <p class="mt-3 text-xs text-gray-500 text-center" id="roleHint" th:text="#{auth.login.clientHint}">Login with your email and password.</p>
             </div>
 
-            <div th:if="${success}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="auth-alert auth-alert--success" role="alert">
                 <span th:text="${success}"></span>
             </div>
 
-            <div th:if="${param.error}" class="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
+            <div th:if="${param.error}" class="auth-alert auth-alert--error" role="alert">
                 <span th:switch="${param.error[0]}">
                     <span th:case="'disabled'" th:text="#{auth.error.disabled}">Account disabled. Contact support.</span>
                     <span th:case="'locked'" th:text="#{auth.error.locked}">Too many attempts. Try again later.</span>
@@ -30,63 +38,280 @@
                 </span>
             </div>
 
-            <div th:if="${param.logout}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <div th:if="${param.logout}" class="auth-alert auth-alert--success" role="alert">
                 <span th:text="#{auth.logout}">You've been signed out.</span>
             </div>
 
-            <div th:if="${param.expired}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <div th:if="${param.expired}" class="auth-alert auth-alert--success" role="alert">
                 <span th:text="#{auth.logout}">You've been signed out.</span>
             </div>
 
-            <div th:if="${param.registered}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <div th:if="${param.registered}" class="auth-alert auth-alert--success" role="alert">
                 <span th:text="#{auth.registered}">Registration successful! Please login.</span>
             </div>
 
-            <div th:if="${param.reset}" class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="alert">
+            <div th:if="${param.reset}" class="auth-alert auth-alert--success" role="alert">
                 <span th:text="#{auth.reset.success}">Password updated. Please log in with your new password.</span>
             </div>
 
-            <form th:action="@{/login}" method="post" class="space-y-4">
+            <form th:action="@{/login}" method="post" class="space-y-4" id="loginForm">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <input type="hidden" name="next" th:if="${param.next}" th:value="${param.next}" />
+                <input type="hidden" name="loginType" id="loginType" value="client" />
 
-                <div>
-                    <label for="username" class="block text-sm font-medium text-slate-800" th:text="#{auth.login.username}">Email or username</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        required
-                        autocomplete="username"
-                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
-                </div>
-
-                <div>
-                    <div class="flex items-center justify-between">
-                        <label for="password" class="block text-sm font-medium text-slate-800" th:text="#{auth.login.password}">Password</label>
-                        <a th:href="@{/forgot-password}" class="text-xs font-semibold text-slate-600 hover:text-slate-800" th:text="#{auth.login.forgot}">Forgot password?</a>
+                <!-- Client/Trainer Login Fields -->
+                <div id="emailFields" class="auth-fields-block">
+                    <div>
+                        <label for="username" class="auth-field__label" th:text="#{auth.login.username}">Email or username</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            required
+                            autocomplete="username"
+                            class="auth-field__input" />
                     </div>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
+
+                    <!-- Trainer Code Field (hidden by default) -->
+                    <div id="trainerCodeField" class="hidden mt-4">
+                        <label for="trainerCode" class="auth-field__label">Trainer Code</label>
+                        <div class="code-input-group">
+                            <input
+                                type="text"
+                                id="trainerCode1"
+                                maxlength="4"
+                                placeholder="****"
+                                class="code-input-part"
+                                autocomplete="off" />
+                            <span class="code-input-separator">-</span>
+                            <input
+                                type="text"
+                                id="trainerCode2"
+                                maxlength="4"
+                                placeholder="****"
+                                class="code-input-part"
+                                autocomplete="off" />
+                            <span class="code-input-separator">-</span>
+                            <input
+                                type="text"
+                                id="trainerCode3"
+                                maxlength="4"
+                                placeholder="****"
+                                class="code-input-part"
+                                autocomplete="off" />
+                        </div>
+                        <input type="hidden" name="trainerCode" id="trainerCodeFull" />
+                        <p class="mt-2 text-xs text-gray-500 text-center">Enter your 12-digit trainer authorization code</p>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="password" class="auth-field__label !mb-0" th:text="#{auth.login.password}">Password</label>
+                            <a th:href="@{/forgot-password}" class="text-xs font-semibold auth-link" th:text="#{auth.login.forgot}">Forgot password?</a>
+                        </div>
+                        <div class="auth-field__input-wrapper">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                required
+                                autocomplete="current-password"
+                                class="auth-field__input auth-field__input--with-icon" />
+                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                                <svg class="h-5 w-5" id="eyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <button
-                    type="submit"
-                    class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                <!-- Gym Login Fields (hidden by default) -->
+                <div id="gymFields" class="auth-fields-block hidden space-y-4">
+                    <div>
+                        <label for="gymCode" class="auth-field__label">Gym Code</label>
+                        <input
+                            type="text"
+                            id="gymCode"
+                            name="gymUsername"
+                            placeholder="Enter your gym code"
+                            class="auth-field__input auth-field__code-input"
+                            autocomplete="off" />
+                        <p class="mt-1 text-xs text-gray-500">Your unique gym identification code</p>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="gymPassword" class="auth-field__label !mb-0">Password</label>
+                            <a th:href="@{/forgot-password}" class="text-xs font-semibold auth-link" th:text="#{auth.login.forgot}">Forgot password?</a>
+                        </div>
+                        <div class="auth-field__input-wrapper">
+                            <input
+                                type="password"
+                                id="gymPassword"
+                                name="gymPass"
+                                autocomplete="current-password"
+                                class="auth-field__input auth-field__input--with-icon" />
+                            <button type="button" class="password-toggle" id="toggleGymPassword" aria-label="Toggle password visibility">
+                                <svg class="h-5 w-5" id="gymEyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn auth-btn--primary">
                     <span th:text="#{auth.login.submit}">Log in</span>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                 </button>
 
-                <p class="text-center text-sm text-slate-600">
+                <p class="text-center text-sm text-gray-600">
                     <span th:text="#{auth.login.noAccount}">Don't have an account?</span>
-                    <a th:href="@{/signup}" class="font-semibold text-slate-900 underline underline-offset-4 hover:text-slate-700" th:text="#{auth.login.signup}">Sign up</a>
+                    <a th:href="@{/signup}" class="auth-link" th:text="#{auth.login.signup}">Sign up</a>
                 </p>
             </form>
         </div>
     </div>
+
+    <th:block th:fragment="pageScripts">
+    <script th:inline="javascript">
+        // Role slider functionality
+        const roleOptions = document.querySelectorAll('.role-slider__option');
+        const loginTypeInput = document.getElementById('loginType');
+        const emailFields = document.getElementById('emailFields');
+        const gymFields = document.getElementById('gymFields');
+        const trainerCodeField = document.getElementById('trainerCodeField');
+        const roleHint = document.getElementById('roleHint');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const gymCodeInput = document.getElementById('gymCode');
+        const gymPasswordInput = document.getElementById('gymPassword');
+
+        const hints = {
+            client: 'Login with your email and password.',
+            trainer: 'Login with email, password, and trainer code.',
+            gym: 'Login with your gym code and password.'
+        };
+
+        roleOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const role = option.dataset.role;
+                
+                // Update active state
+                roleOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                
+                // Update hidden input
+                loginTypeInput.value = role;
+                
+                // Update hint
+                roleHint.textContent = hints[role] || hints.client;
+                
+                // Show/hide appropriate fields and update required attributes
+                if (role === 'gym') {
+                    emailFields.classList.add('hidden');
+                    setTimeout(() => {
+                        gymFields.classList.remove('hidden');
+                    }, 50);
+                    trainerCodeField.classList.add('hidden');
+                    
+                    // Update form field names and requirements
+                    usernameInput.removeAttribute('required');
+                    passwordInput.removeAttribute('required');
+                    passwordInput.name = '';
+                    usernameInput.name = '';
+                    
+                    gymCodeInput.setAttribute('required', 'required');
+                    gymPasswordInput.setAttribute('required', 'required');
+                    gymCodeInput.name = 'username';
+                    gymPasswordInput.name = 'password';
+                } else {
+                    gymFields.classList.add('hidden');
+                    setTimeout(() => {
+                        emailFields.classList.remove('hidden');
+                    }, 50);
+                    
+                    // Update form field names and requirements
+                    usernameInput.setAttribute('required', 'required');
+                    passwordInput.setAttribute('required', 'required');
+                    usernameInput.name = 'username';
+                    passwordInput.name = 'password';
+                    
+                    gymCodeInput.removeAttribute('required');
+                    gymPasswordInput.removeAttribute('required');
+                    gymCodeInput.name = '';
+                    gymPasswordInput.name = '';
+                    
+                    if (role === 'trainer') {
+                        trainerCodeField.classList.remove('hidden');
+                    } else {
+                        trainerCodeField.classList.add('hidden');
+                    }
+                }
+            });
+        });
+
+        // Password visibility toggle for client/trainer
+        const togglePassword = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />';
+            } else {
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+            }
+        });
+
+        // Password visibility toggle for gym
+        const toggleGymPassword = document.getElementById('toggleGymPassword');
+        const gymEyeIcon = document.getElementById('gymEyeIcon');
+        
+        toggleGymPassword.addEventListener('click', () => {
+            const type = gymPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            gymPasswordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                gymEyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />';
+            } else {
+                gymEyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+            }
+        });
+
+        // Trainer code auto-advance
+        const trainerCode1 = document.getElementById('trainerCode1');
+        const trainerCode2 = document.getElementById('trainerCode2');
+        const trainerCode3 = document.getElementById('trainerCode3');
+        const trainerCodeFull = document.getElementById('trainerCodeFull');
+
+        function updateTrainerCode() {
+            const code = trainerCode1.value + trainerCode2.value + trainerCode3.value;
+            trainerCodeFull.value = code;
+        }
+
+        [trainerCode1, trainerCode2, trainerCode3].forEach((input, index, inputs) => {
+            input.addEventListener('input', (e) => {
+                updateTrainerCode();
+                if (e.target.value.length === 4 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+    </script>
+    </th:block>
 
 </th:block>

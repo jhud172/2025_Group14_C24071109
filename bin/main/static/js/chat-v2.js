@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const commandMenu = document.getElementById("chatCommandMenu");
     const settingsToggle = document.getElementById("chatSettingsToggle");
     const settingsDrawer = document.getElementById("chatSettingsDrawer");
+    const instructionsToggle = document.getElementById("chatInstructionsToggle");
+    const instructionsDrawer = document.getElementById("chatInstructionsDrawer");
     const titleInput = document.getElementById("chatTitleInput");
     const colorInput = document.getElementById("chatColorInput");
     const iconInput = document.getElementById("chatIconInput");
@@ -16,9 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const archivedInput = document.getElementById("chatArchivedInput");
     const instructionsInput = document.getElementById("chatInstructionsInput");
     const instructionsReset = document.getElementById("chatInstructionsReset");
+    const instructionsClear = document.getElementById("chatInstructionsResetBtn");
+    const instructionsSave = document.getElementById("chatInstructionsSave");
+    const instructionsBadge = document.getElementById("chatInstructionsBadge");
     const settingsSave = document.getElementById("chatSettingsSave");
     const folderMove = document.getElementById("chatFolderMove");
     const quickAddTask = document.getElementById("quickAddTask");
+    const presetButtons = Array.from(document.querySelectorAll(".chat-preset"));
 
     const csrfToken = document.getElementById("chat_csrf")?.value || null;
     const csrfHeader = document.getElementById("chat_csrf_header")?.value || "X-CSRF-TOKEN";
@@ -69,16 +75,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 text.appendChild(label);
                 text.appendChild(value);
 
-                const action = document.createElement("button");
-                action.type = "button";
-                action.className = "rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white";
-                action.textContent = item.status === "done" ? "Done" : "Add";
-                action.dataset.actionType = item.status === "done" ? "TASK_COMPLETE" : "TASK_CREATE";
-                action.dataset.itemId = item.id || "";
-                action.addEventListener("click", () => handleBlockAction(action));
-
-                row.appendChild(text);
-                row.appendChild(action);
+                const actionSpec = resolveActionSpec(block, item);
+                if (actionSpec) {
+                    const action = document.createElement("button");
+                    action.type = "button";
+                    action.className = "rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white";
+                    action.textContent = actionSpec.label;
+                    action.dataset.actionType = actionSpec.type;
+                    action.dataset.actionPayload = JSON.stringify(actionSpec.payload || {});
+                    action.disabled = actionSpec.disabled;
+                    if (actionSpec.disabled) {
+                        action.classList.add("opacity-60", "cursor-not-allowed");
+                    }
+                    action.addEventListener("click", () => handleBlockAction(action));
+                    row.appendChild(text);
+                    row.appendChild(action);
+                } else {
+                    row.appendChild(text);
+                }
                 list.appendChild(row);
             });
 
@@ -90,11 +104,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function handleBlockAction(button) {
         const type = button.dataset.actionType;
-        const payload = {};
-        if (type === "TASK_COMPLETE") payload.taskId = button.dataset.itemId;
+        const payload = button.dataset.actionPayload ? JSON.parse(button.dataset.actionPayload) : {};
         const result = await runAction(type, payload);
+        if (result) {
+            renderActionResults([result]);
+        }
         if (result?.status === "OK") {
             button.textContent = "Done";
+            button.disabled = true;
+            button.classList.add("opacity-60", "cursor-not-allowed");
         }
     }
 
@@ -137,6 +155,66 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data?.blocks) {
             renderBlocks(data.blocks);
         }
+        if (data?.actions) {
+            renderActionResults(data.actions);
+        }
+    }
+
+    function resolveActionSpec(block, item) {
+        if (!block || !item) return null;
+        const blockType = (block.type || "").toLowerCase();
+        const status = (item.status || "").toLowerCase();
+
+        if (blockType === "tasks") {
+            if (status === "done") {
+                return { type: "TASK_COMPLETE", label: "Done", payload: { taskId: item.id }, disabled: true };
+            }
+            if (item.id) {
+                return { type: "TASK_COMPLETE", label: "Complete", payload: { taskId: item.id } };
+            }
+            return { type: "TASK_CREATE", label: "Add", payload: { title: item.label || "New task" } };
+        }
+
+        if (blockType === "notes") {
+            return { type: "NOTE_CREATE", label: "Add", payload: { title: item.label || "New note", content: item.value || "" } };
+        }
+
+        if (blockType === "schedule") {
+            if (!item.id) return null;
+            return { type: "SCHEDULE_APPLY", label: "Apply", payload: { scheduleId: item.id } };
+        }
+
+        return null;
+    }
+
+    function renderActionResults(actions) {
+        if (!Array.isArray(actions) || !messagesEl || actions.length === 0) return;
+        const card = document.createElement("div");
+        card.className = "rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700";
+        const title = document.createElement("div");
+        title.className = "text-[11px] font-semibold uppercase tracking-widest text-slate-400";
+        title.textContent = "Action results";
+        card.appendChild(title);
+
+        actions.forEach(action => {
+            const row = document.createElement("div");
+            row.className = "mt-2 flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2";
+            const label = document.createElement("div");
+            label.className = "text-xs font-semibold text-slate-700";
+            label.textContent = action.type || "Action";
+            const status = document.createElement("div");
+            const ok = (action.status || "").toUpperCase() === "OK";
+            status.className = ok
+                ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"
+                : "rounded-full bg-rose-500/10 px-2 py-0.5 text-[11px] font-semibold text-rose-700";
+            status.textContent = action.message || (ok ? "Done" : "Failed");
+            row.appendChild(label);
+            row.appendChild(status);
+            card.appendChild(row);
+        });
+
+        messagesEl.appendChild(card);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
     function updateCommandMenu() {
@@ -179,9 +257,51 @@ document.addEventListener("DOMContentLoaded", () => {
         settingsDrawer?.classList.toggle("hidden");
     });
 
+    instructionsToggle?.addEventListener("click", () => {
+        instructionsDrawer?.classList.toggle("hidden");
+    });
+
     instructionsReset?.addEventListener("click", () => {
         if (instructionsInput) instructionsInput.value = "";
     });
+
+    instructionsClear?.addEventListener("click", () => {
+        if (instructionsInput) instructionsInput.value = "";
+    });
+
+    presetButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            if (!instructionsInput) return;
+            const preset = button.dataset.preset;
+            const textMap = {
+                fatloss: "Focus on sustainable fat loss. Keep guidance simple, emphasize protein, daily movement, and recovery.",
+                strength: "Prioritize strength progressions. Use progressive overload, compound lifts, and form cues.",
+                rehab: "Use rehab-friendly guidance. Prioritize pain-free range, controlled tempo, and gradual progression.",
+                motivation: "Be motivating and upbeat. Encourage consistency, celebrate wins, and suggest small next steps."
+            };
+            const insert = textMap[preset] || "";
+            if (!insert) return;
+            const current = instructionsInput.value || "";
+            instructionsInput.value = current ? current + "\n" + insert : insert;
+            instructionsInput.focus();
+        });
+    });
+
+    async function saveInstructions() {
+        if (!threadId) return;
+        const headers = { "Content-Type": "application/x-www-form-urlencoded" };
+        if (csrfToken) headers[csrfHeader] = csrfToken;
+        const body = new URLSearchParams({
+            customInstructions: instructionsInput?.value || ""
+        });
+        await fetch(`/chatv2/${threadId}/settings`, { method: "POST", headers, body });
+        const hasValue = instructionsInput?.value?.trim().length > 0;
+        if (instructionsBadge) {
+            instructionsBadge.classList.toggle("hidden", !hasValue);
+        }
+    }
+
+    instructionsSave?.addEventListener("click", saveInstructions);
 
     settingsSave?.addEventListener("click", async () => {
         if (!threadId) return;
@@ -196,6 +316,10 @@ document.addEventListener("DOMContentLoaded", () => {
             customInstructions: instructionsInput?.value || ""
         });
         await fetch(`/chatv2/${threadId}/settings`, { method: "POST", headers, body });
+        const hasValue = instructionsInput?.value?.trim().length > 0;
+        if (instructionsBadge) {
+            instructionsBadge.classList.toggle("hidden", !hasValue);
+        }
     });
 
     folderMove?.addEventListener("change", async () => {

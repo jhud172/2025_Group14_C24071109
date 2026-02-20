@@ -125,6 +125,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function attachDayCardNavigation(root) {
+        if (!root) return;
+
+        root.querySelectorAll('.calendar-day-card[data-day-link]').forEach((card) => {
+            if (card.dataset.dayCardNavBound === 'true') return;
+            card.dataset.dayCardNavBound = 'true';
+            card.classList.add('cursor-pointer');
+
+            card.addEventListener('click', (event) => {
+                if (event.defaultPrevented) return;
+                if (event.target.closest('button, input, textarea, select, form')) return;
+
+                const href = card.getAttribute('data-day-link');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    }
+
     preview.addEventListener("mouseenter", () => clearTimeout(closeTimer));
     preview.addEventListener("mouseleave", () => {
         closeTimer = setTimeout(() => hidePreview(), 250);
@@ -136,8 +156,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const nextLink = document.getElementById("week-next");
     const weekStartEl = document.getElementById("week-start");
     const weekEndEl = document.getElementById("week-end");
-    const weekStrip = document.getElementById("week-strip");
     const weekRedirectInput = document.getElementById("week-redirect");
+    const jumpTodayBtn = document.getElementById("week-jump-today");
+    const jumpDateInput = document.getElementById("week-jump-date");
+    const jumpDateBtn = document.getElementById("week-jump-date-go");
+    const jumpNextWorkoutBtn = document.getElementById("week-jump-next-workout");
+    const jumpTaskInput = document.getElementById("week-jump-task");
+    const jumpTaskBtn = document.getElementById("week-jump-task-go");
+    const jumpStatusEl = document.getElementById("week-jump-status");
+    const jumpControls = [jumpTodayBtn, jumpDateInput, jumpDateBtn, jumpNextWorkoutBtn, jumpTaskInput, jumpTaskBtn].filter(Boolean);
+    let jumpActionInProgress = false;
     const currentSlot = track?.querySelector('[data-week-pane-slot="current"]');
     const prevSlot = track?.querySelector('[data-week-pane-slot="prev"]');
     const nextSlot = track?.querySelector('[data-week-pane-slot="next"]');
@@ -145,10 +173,336 @@ document.addEventListener("DOMContentLoaded", () => {
     const hasSlider = slider && track && prevLink && nextLink && currentSlot && prevSlot && nextSlot;
     if (!hasSlider) {
         attachPreviewHandlers(document);
+        attachDayCardNavigation(document);
         return;
     }
 
     const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function setJumpStatus(message, type = 'error') {
+        if (!jumpStatusEl) return;
+        jumpStatusEl.textContent = message || '';
+        jumpStatusEl.classList.toggle('is-visible', !!message);
+        jumpStatusEl.classList.toggle('is-error', !!message && type === 'error');
+        jumpStatusEl.classList.toggle('is-success', !!message && type === 'success');
+    }
+
+    function setJumpControlsDisabled(disabled) {
+        jumpControls.forEach((control) => {
+            control.disabled = disabled;
+        });
+    }
+
+    async function runJumpAction(action) {
+        if (jumpActionInProgress) return;
+        jumpActionInProgress = true;
+        setJumpControlsDisabled(true);
+        try {
+            await action();
+        } catch (error) {
+            console.error(error);
+            setJumpStatus('Jump failed. Please try again.', 'error');
+        } finally {
+            setJumpControlsDisabled(false);
+            jumpActionInProgress = false;
+        }
+    }
+
+    function toLocalIsoDate(date) {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const dd = String(date.getDate()).padStart(2, "0");
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function parseIsoDateInput(value) {
+        if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+        const [year, month, day] = value.split("-").map((part) => parseInt(part, 10));
+        if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+        return new Date(year, month - 1, day);
+    }
+
+    function getCurrentPane() {
+        return currentSlot.querySelector('[data-week-pane]');
+    }
+
+    function clearJumpHighlights() {
+        document.querySelectorAll('.calendar-day-card--jump-target').forEach((card) => {
+            card.classList.remove('calendar-day-card--jump-target');
+        });
+    }
+
+    function scrollJumpTargetIntoView(card) {
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        const topInset = 110;
+        const bottomInset = 24;
+        const outsideViewport = rect.top < topInset || rect.bottom > (window.innerHeight - bottomInset);
+        if (!outsideViewport) return;
+        card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    }
+
+    function highlightJumpCard(card) {
+        if (!card) return false;
+        clearJumpHighlights();
+        card.classList.add('calendar-day-card--jump-target');
+        scrollJumpTargetIntoView(card);
+        setTimeout(() => {
+            card.classList.remove('calendar-day-card--jump-target');
+        }, 1800);
+        return true;
+    }
+
+    function sortedCardsInPane(pane) {
+        return Array.from(pane.querySelectorAll('.calendar-day-card[data-date]')).sort((a, b) => {
+            return (a.dataset.date || '').localeCompare(b.dataset.date || '');
+        });
+    }
+
+    function findDateCardInCurrentPane(dateIso) {
+        const pane = getCurrentPane();
+        if (!pane) return null;
+        return pane.querySelector(`.calendar-day-card[data-date="${dateIso}"]`);
+    }
+
+    function weekDifference(fromWeekYear, fromWeek, toWeekYear, toWeek) {
+        const fromStart = getIsoWeekStart(fromWeekYear, fromWeek);
+        const toStart = getIsoWeekStart(toWeekYear, toWeek);
+        return Math.round((toStart.getTime() - fromStart.getTime()) / (7 * 24 * 60 * 60 * 1000));
+    }
+
+    async function jumpToWeek(targetWeekYear, targetWeek) {
+        let safety = 0;
+        while ((currentWeekYear !== targetWeekYear || currentWeek !== targetWeek) && safety < 260) {
+            const diff = weekDifference(currentWeekYear, currentWeek, targetWeekYear, targetWeek);
+            await go(diff > 0 ? 1 : -1);
+            safety += 1;
+        }
+        return currentWeekYear === targetWeekYear && currentWeek === targetWeek;
+    }
+
+    function getCurrentWeekState() {
+        return { weekYear: currentWeekYear, week: currentWeek };
+    }
+
+    async function restoreWeekState(state) {
+        if (!state) return;
+        if (currentWeekYear === state.weekYear && currentWeek === state.week) return;
+        await jumpToWeek(state.weekYear, state.week);
+    }
+
+    function findNextWorkoutCard(pane, fromDateIso) {
+        const cards = sortedCardsInPane(pane);
+        return cards.find((card) => {
+            const date = card.dataset.date || '';
+            if (date < fromDateIso) return false;
+            return !!card.querySelector('.calendar-item[data-type="workout"]');
+        }) || null;
+    }
+
+    function findTaskCardByQuery(pane, query, fromDateIso) {
+        const cards = sortedCardsInPane(pane);
+        return cards.find((card) => {
+            const date = card.dataset.date || '';
+            if (date < fromDateIso) return false;
+            return Array.from(card.querySelectorAll('.calendar-item[data-type="task"]')).some((item) => {
+                const title = (item.dataset.title || '').toLowerCase();
+                return title.includes(query);
+            });
+        }) || null;
+    }
+
+    async function jumpToDate(dateIso) {
+        const parsed = parseIsoDateInput(dateIso);
+        if (!parsed) {
+            setJumpStatus('Please enter a valid date.', 'error');
+            return;
+        }
+        const target = getIsoWeekFromDate(parsed);
+        const reached = await jumpToWeek(target.weekYear, target.week);
+        if (!reached) {
+            setJumpStatus('Could not navigate to that date.', 'error');
+            return;
+        }
+        const targetCard = findDateCardInCurrentPane(dateIso);
+        if (!highlightJumpCard(targetCard)) {
+            setJumpStatus('No day card found for that date.', 'error');
+            return;
+        }
+        setJumpStatus('Jumped to selected date.', 'success');
+    }
+
+    async function jumpToNextWorkout() {
+        const fromDateIso = toLocalIsoDate(new Date());
+        const initialState = getCurrentWeekState();
+        let safety = 0;
+        while (safety < 52) {
+            const pane = getCurrentPane();
+            if (pane) {
+                const targetCard = findNextWorkoutCard(pane, fromDateIso);
+                if (targetCard) {
+                    highlightJumpCard(targetCard);
+                    setJumpStatus('Jumped to next workout.', 'success');
+                    return;
+                }
+            }
+            await go(1);
+            safety += 1;
+        }
+        await restoreWeekState(initialState);
+        setJumpStatus('No upcoming workout found.', 'error');
+    }
+
+    async function jumpToTask() {
+        const query = (jumpTaskInput?.value || '').trim().toLowerCase();
+        if (!query) {
+            setJumpStatus('Please enter a task name to search.', 'error');
+            return;
+        }
+        const fromDateIso = toLocalIsoDate(new Date());
+        const initialState = getCurrentWeekState();
+        let safety = 0;
+        while (safety < 52) {
+            const pane = getCurrentPane();
+            if (pane) {
+                const targetCard = findTaskCardByQuery(pane, query, fromDateIso);
+                if (targetCard) {
+                    highlightJumpCard(targetCard);
+                    setJumpStatus('Jumped to matching task.', 'success');
+                    return;
+                }
+            }
+            await go(1);
+            safety += 1;
+        }
+        await restoreWeekState(initialState);
+        setJumpStatus('No matching task found.', 'error');
+    }
+
+    jumpTodayBtn?.addEventListener('click', () => {
+        runJumpAction(() => jumpToDate(toLocalIsoDate(new Date())));
+    });
+
+    jumpDateBtn?.addEventListener('click', () => {
+        runJumpAction(() => jumpToDate(jumpDateInput?.value || ''));
+    });
+
+    jumpDateInput?.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        runJumpAction(() => jumpToDate(jumpDateInput.value || ''));
+    });
+
+    jumpNextWorkoutBtn?.addEventListener('click', () => {
+        runJumpAction(() => jumpToNextWorkout());
+    });
+
+    jumpTaskBtn?.addEventListener('click', () => {
+        runJumpAction(() => jumpToTask());
+    });
+
+    jumpTaskInput?.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        runJumpAction(() => jumpToTask());
+    });
+
+    jumpDateInput?.addEventListener('input', () => {
+        if (jumpStatusEl?.classList.contains('is-error')) {
+            setJumpStatus('', 'error');
+        }
+    });
+
+    jumpTaskInput?.addEventListener('input', () => {
+        if (jumpStatusEl?.classList.contains('is-error')) {
+            setJumpStatus('', 'error');
+        }
+    });
+
+    const heatmapCache = new Map();
+
+    function heatClassFor(loadScore) {
+        if (loadScore <= 0) return "heat-none";
+        if (loadScore <= 3) return "heat-low";
+        if (loadScore <= 7) return "heat-med";
+        return "heat-high";
+    }
+
+    function applySummaryToPane(pane, summaries) {
+        if (!pane) return;
+        const summaryMap = new Map(summaries.map((item) => [item.date, item]));
+
+        pane.querySelectorAll(".calendar-day-card[data-date]").forEach((card) => {
+            const date = card.getAttribute("data-date");
+            const summary = summaryMap.get(date);
+            const loadScore = summary ? summary.loadScore : 0;
+            card.setAttribute("data-load", String(loadScore));
+            card.classList.remove("heat-none", "heat-low", "heat-med", "heat-high");
+            card.classList.add(heatClassFor(loadScore));
+
+            const workoutIcon = card.querySelector(".calendar-icon-workout");
+            const nutritionIcon = card.querySelector(".calendar-icon-nutrition");
+            const prIcon = card.querySelector(".calendar-icon-pr");
+            const prCount = card.querySelector("[data-pr-count]");
+
+            if (workoutIcon) workoutIcon.classList.toggle("hidden", !(summary && summary.hasWorkout));
+            if (nutritionIcon) nutritionIcon.classList.toggle("hidden", !(summary && summary.hasNutrition));
+
+            if (prIcon) {
+                const count = summary ? summary.prHitCount : 0;
+                prIcon.classList.toggle("hidden", count <= 0);
+                if (prCount) {
+                    prCount.textContent = count > 1 ? String(count) : "";
+                    prCount.classList.toggle("hidden", count <= 1);
+                }
+            }
+        });
+    }
+
+    async function fetchHeatmapSummary(start, end) {
+        const cacheKey = `${start}|${end}`;
+        if (heatmapCache.has(cacheKey)) return heatmapCache.get(cacheKey);
+
+        const url = new URL("/api/calendar/summary", window.location.origin);
+        url.searchParams.set("start", start);
+        url.searchParams.set("end", end);
+        const res = await fetch(url, { credentials: "same-origin" });
+        if (!res.ok) throw new Error(`Failed to load calendar summary: ${res.status}`);
+        const data = await res.json();
+        heatmapCache.set(cacheKey, data);
+        return data;
+    }
+
+    async function updateHeatmapForPane(pane) {
+        if (!pane) return;
+        const week = parseInt(pane.getAttribute("data-week") || "", 10);
+        const weekYear = parseInt(pane.getAttribute("data-week-year") || "", 10);
+        if (!Number.isFinite(week) || !Number.isFinite(weekYear)) return;
+
+        const startDate = getIsoWeekStart(weekYear, week);
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        const start = formatIsoDate(startDate);
+        const end = formatIsoDate(endDate);
+
+        try {
+            const summary = await fetchHeatmapSummary(start, end);
+            applySummaryToPane(pane, summary);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function refreshHeatmaps() {
+        const panes = [
+            prevSlot.querySelector("[data-week-pane]"),
+            currentSlot.querySelector("[data-week-pane]"),
+            nextSlot.querySelector("[data-week-pane]")
+        ].filter(Boolean);
+        panes.forEach((pane) => {
+            updateHeatmapForPane(pane);
+        });
+    }
 
     function keyFor(weekYear, week) {
         return `${weekYear}-W${String(week).padStart(2, "0")}`;
@@ -178,26 +532,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (weekRedirectInput) {
             weekRedirectInput.value = `/calendar?view=week&week=${currentWeek}&weekYear=${currentWeekYear}`;
         }
-
-        if (weekStrip) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            weekStrip.innerHTML = "";
-            for (let i = 0; i < 7; i++) {
-                const day = new Date(start);
-                day.setDate(start.getDate() + i);
-                const isToday = day.getTime() === today.getTime();
-                const dayLabel = day.toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase();
-                const dayNumber = day.getDate();
-                const cell = document.createElement("div");
-                cell.className = `flex-1 rounded-xl px-2 py-1 text-center${isToday ? " bg-blue-500/15 text-blue-600" : ""}`;
-                cell.innerHTML = `
-                    <div>${dayLabel}</div>
-                    <div class="text-[10px] text-slate-500">${dayNumber}</div>
-                `;
-                weekStrip.appendChild(cell);
-            }
-        }
     }
 
     function getIsoWeekFromDate(date) {
@@ -217,11 +551,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function weekPaneUrl(weekYear, week) {
-        const url = new URL("/calendar", window.location.origin);
-        url.searchParams.set("view", "week");
+        const url = new URL("/calendar/week-fragment", window.location.origin);
         url.searchParams.set("week", String(week));
         url.searchParams.set("weekYear", String(weekYear));
-        url.searchParams.set("fragment", "weekPane");
         return url.toString();
     }
 
@@ -278,6 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!paneEl) return false;
         slot.replaceChildren(paneEl);
         attachPreviewHandlers(slot);
+        attachDayCardNavigation(slot);
         return true;
     }
 
@@ -308,6 +641,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateWeekHeaderAndStrip();
         slider.dataset.week = String(currentWeek);
         slider.dataset.weekYear = String(currentWeekYear);
+        refreshHeatmaps();
     }
 
     function animateTo(offsetPercent) {
@@ -402,6 +736,16 @@ document.addEventListener("DOMContentLoaded", () => {
         pointerStartX = null;
     });
 
+    slider.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            go(-1);
+        } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            go(1);
+        }
+    });
+
     window.addEventListener("popstate", async () => {
         const params = new URLSearchParams(window.location.search);
         const view = params.get("view") || "week";
@@ -421,6 +765,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const key = keyFor(currentWeekYear, currentWeek);
         cache.set(key, initialPane.outerHTML);
         attachPreviewHandlers(currentSlot);
+        attachDayCardNavigation(currentSlot);
     }
 
     if (track) {

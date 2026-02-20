@@ -52,7 +52,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                        Change History (<span th:text="${#lists.size(priceChanges)}">0</span>)
+                        Change History (<span th:text="${priceChangesPage != null ? priceChangesPage.totalElements : #lists.size(priceChanges)}">0</span>)
                     </h2>
                 </div>
 
@@ -132,6 +132,10 @@
                                     <span th:text="${changedByUsers[change.changedByUserId].firstName + ' ' + changedByUsers[change.changedByUserId].lastName}">Admin Name</span>
                                     <span class="text-slate-500">(<span th:text="${changedByUsers[change.changedByUserId].email}">admin@gym.com</span>)</span>
                                 </div>
+                                <div class="col-span-2" th:if="${changedByUsers} == null or ${changedByUsers[change.changedByUserId]} == null">
+                                    <span class="font-semibold">Changed By:</span>
+                                    <span class="text-slate-500">Unknown</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -142,7 +146,7 @@
             <div th:if="${!#lists.isEmpty(priceChanges)}" class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3 border-t border-white/10 pt-6">
                 <div class="rounded-lg bg-white/5 dark:bg-slate-800/40 p-4 text-center">
                     <dt class="text-sm font-medium text-slate-600 dark:text-slate-400">Total Changes</dt>
-                    <dd class="mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-100" th:text="${#lists.size(priceChanges)}">5</dd>
+                    <dd class="mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-100" th:text="${priceChangesPage != null ? priceChangesPage.totalElements : #lists.size(priceChanges)}">5</dd>
                 </div>
                 <div class="rounded-lg bg-white/5 dark:bg-slate-800/40 p-4 text-center">
                     <dt class="text-sm font-medium text-slate-600 dark:text-slate-400">Price Increases</dt>
@@ -151,6 +155,34 @@
                 <div class="rounded-lg bg-white/5 dark:bg-slate-800/40 p-4 text-center">
                     <dt class="text-sm font-medium text-slate-600 dark:text-slate-400">Price Decreases</dt>
                     <dd class="mt-1 text-2xl font-semibold text-green-600 dark:text-green-400" th:text="${decreaseCount}">2</dd>
+                </div>
+            </div>
+
+            <div th:if="${priceChangesPage != null and priceChangesPage.totalPages > 1}" class="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm">
+                <div class="text-slate-600 dark:text-slate-300">
+                    <span>Showing</span>
+                    <span th:text="${priceChangesPage.number * priceChangesPage.size + 1}">1</span>
+                    <span>-</span>
+                    <span th:text="${priceChangesPage.number * priceChangesPage.size + priceChangesPage.numberOfElements}">10</span>
+                    <span>of</span>
+                    <span th:text="${priceChangesPage.totalElements}">0</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a th:if="${priceChangesPage.hasPrevious()}"
+                       th:href="@{/gym/admin/memberships/{id}/price-history(id=${product.id}, page=${priceChangesPage.number - 1}, size=${pageSize})}"
+                       class="rounded-lg border border-white/20 px-3 py-1.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/70">
+                        Prev
+                    </a>
+                    <span th:if="${!priceChangesPage.hasPrevious()}" class="rounded-lg border border-white/10 px-3 py-1.5 text-slate-400">Prev</span>
+                    <span class="text-slate-600 dark:text-slate-300">
+                        Page <span th:text="${priceChangesPage.number + 1}">1</span> of <span th:text="${priceChangesPage.totalPages}">1</span>
+                    </span>
+                    <a th:if="${priceChangesPage.hasNext()}"
+                       th:href="@{/gym/admin/memberships/{id}/price-history(id=${product.id}, page=${priceChangesPage.number + 1}, size=${pageSize})}"
+                       class="rounded-lg border border-white/20 px-3 py-1.5 text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/70">
+                        Next
+                    </a>
+                    <span th:if="${!priceChangesPage.hasNext()}" class="rounded-lg border border-white/10 px-3 py-1.5 text-slate-400">Next</span>
                 </div>
             </div>
         </div>
