@@ -356,8 +356,10 @@ public class CalendarController {
             Model model
     ) {
         LocalDate date = LocalDate.parse(dateStr, DATE_FORMAT);
+        LocalDate today = LocalDate.now();
 
-        model.addAttribute("isToday", date.equals(LocalDate.now()));
+        model.addAttribute("isToday", date.equals(today));
+        model.addAttribute("todayDate", today.format(DATE_FORMAT));
 
         model.addAttribute("date", date);
         model.addAttribute("prevDate", date.minusDays(1).format(DATE_FORMAT));
