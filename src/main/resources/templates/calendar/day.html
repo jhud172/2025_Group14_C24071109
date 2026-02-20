@@ -4,31 +4,41 @@
 
 <div th:fragment="content">
     <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-        <!-- Day Navigation -->
-        <div class="mb-4 flex items-center justify-between gap-3">
-            <a th:href="@{'/calendar/day/' + ${prevDate}}" 
-               class="btn btn--secondary btn--md flex items-center gap-2"
-               aria-label="Previous day">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-                <span class="hidden sm:inline">Previous</span>
-            </a>
-            
-            <a href="/calendar?view=month" 
-               class="btn btn--ghost btn--sm"
-               aria-label="Back to calendar">
-                Calendar
-            </a>
-            
-            <a th:href="@{'/calendar/day/' + ${nextDate}}" 
-               class="btn btn--secondary btn--md flex items-center gap-2"
-               aria-label="Next day">
-                <span class="hidden sm:inline">Next</span>
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </a>
+        <!-- Day Navigation Header -->
+        <div class="mb-4 flex flex-col gap-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="calendar-view-toggle">
+                    <a href="/calendar?view=month" class="calendar-view-btn">Month view</a>
+                    <a href="/calendar?view=week" class="calendar-view-btn">Week view</a>
+                    <span class="calendar-view-btn active" aria-current="page">Day view</span>
+                </div>
+                <a th:href="@{'/calendar/day/' + ${todayDate}}"
+                   class="calendar-action-btn"
+                   aria-label="Go to today">
+                    Today
+                </a>
+            </div>
+
+            <div class="calendar-nav-controls">
+                <a th:href="@{'/calendar/day/' + ${prevDate}}"
+                   class="calendar-nav-btn"
+                   aria-label="Previous day">
+                    ← Prev
+                </a>
+
+                <div class="calendar-month-title">
+                    <span class="calendar-month-name"
+                          th:text="${#temporals.format(date, 'EEEE')}"></span>
+                    <span class="calendar-month-year"
+                          th:text="${#temporals.format(date, 'd MMMM yyyy')}"></span>
+                </div>
+
+                <a th:href="@{'/calendar/day/' + ${nextDate}}"
+                   class="calendar-nav-btn"
+                   aria-label="Next day">
+                    Next →
+                </a>
+            </div>
         </div>
 
         <div data-testid="day-status-bar"
