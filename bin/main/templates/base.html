@@ -11,8 +11,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${pageTitle} ?: 'Healthy Habits'">Healthy Habits</title>
+    <link rel="shortcut icon" th:href="@{/favicon.ico}">
+    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/img/tab_logo.png}">
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/img/tab_logo.png}">
+    <link rel="apple-touch-icon" th:href="@{/img/tab_logo.png}">
 
-    <!-- Core styles (compiled Tailwind + shared components) -->
+    <!-- Core styles (compiled Tailwind + all component styles) -->
     <link rel="stylesheet" th:href="@{/css/app.css}">
 
     <!-- Page-specific styles -->
@@ -21,7 +25,7 @@
     </th:block>
 </head>
 
-<body class="min-h-screen text-slate-900 bg-slate-50 dark:bg-slate-950 dark:text-slate-100"
+<body class="min-h-screen bg-cyber-900 text-slate-100 antialiased"
     th:classappend="${((userSettings != null and userSettings.easyMode) ? ' text-lg leading-relaxed' : ' text-base') + (userSettings != null and userSettings.colorBlindMode ? ' color-blind' : '') + (timeOfDayMoodClass != null ? ' ' + timeOfDayMoodClass : '')}"
     th:attr="data-time-theme=${timeTheme},
              data-chat-history=${disableChatHistory == true ? 'off' : 'on'},
@@ -30,7 +34,8 @@
              data-color-blind=${userSettings != null && userSettings.colorBlindMode ? 'on' : 'off'},
              data-disability-hearing=${userSettings != null && userSettings.disabilityHearing ? 'on' : 'off'},
              data-disability-mobility=${userSettings != null && userSettings.disabilityMobility ? 'on' : 'off'},
-             data-disability-vision=${userSettings != null && userSettings.disabilityVision ? 'on' : 'off'}">
+             data-disability-vision=${userSettings != null && userSettings.disabilityVision ? 'on' : 'off'},
+             data-day-mode=${dayMode != null ? dayMode : 'REST_DAY'}">
 
 <!-- NAVBAR -->
 <th:block
@@ -38,7 +43,7 @@
     th:insert="~{fragments/navbar :: navbar}"></th:block>
 
 <!-- MAIN CONTENT -->
-<main class="min-h-[calc(100vh-4rem)] pt-16">
+<main class="min-h-[calc(100vh-5rem)] pt-16">
     <th:block th:replace="${content}"></th:block>
 </main>
 
@@ -49,8 +54,13 @@
 <div th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false'}"
     th:replace="~{fragments/chat/chat-widget :: chatWidget}"></div>
 
+<!-- QUICK ACTIONS (global) -->
+<div th:replace="~{fragments/quick-actions :: quickActionsShelf}"></div>
+
 <!-- Core scripts -->
 <script th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false'}" src="/js/chat.js" defer></script>
+<script src="/js/quick-actions.js" defer></script>
+<script src="/js/navbar-premium.js" defer></script>
 
 <!-- Page-specific scripts -->
 <th:block th:if="${pageScripts != null}">

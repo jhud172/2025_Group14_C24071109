@@ -1,96 +1,151 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Client Sign Up', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Client Sign Up', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
-            <div class="mb-6">
-                <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Create your client account</h1>
-                <p class="mt-1 text-sm text-slate-600">Personalize your profile and start booking trainers.</p>
+    <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
+        <div class="auth-card">
+            <div class="auth-accent-bar"></div>
+
+            <div class="mb-8 mt-8 text-center">
+                <h1 class="auth-heading">Create your client account</h1>
+                <p class="auth-subheading">Personalize your profile and start booking trainers.</p>
             </div>
 
             <form th:action="@{/signup/client}" th:object="${signupForm}" method="post" class="space-y-5">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                <div th:if="${#fields.hasAnyErrors()}" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
+                <div th:if="${#fields.hasAnyErrors()}" class="auth-alert auth-alert--error" role="alert">
                     Please correct the highlighted fields below.
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-slate-800">Email Address *</label>
+                    <label for="email" class="auth-field__label">Email Address *</label>
                     <input
                         type="email"
                         id="email"
                         th:field="*{email}"
                         required
                         autocomplete="email"
-                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                        th:classappend="${#fields.hasErrors('email')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                    <div th:if="${#fields.hasErrors('email')}" class="mt-1 text-sm text-rose-700">
+                        class="auth-field__input" />
+                    <div th:if="${#fields.hasErrors('email')}" class="mt-1 text-sm text-red-600">
                         <span th:errors="*{email}"></span>
                     </div>
                 </div>
 
                 <div>
-                    <label for="username" class="block text-sm font-medium text-slate-800">Username *</label>
+                    <label for="username" class="auth-field__label">Username *</label>
                     <input
                         type="text"
                         id="username"
                         th:field="*{username}"
                         required
                         autocomplete="username"
-                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                        th:classappend="${#fields.hasErrors('username')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                    <p class="mt-1 text-sm text-slate-600">3–20 characters. Letters, numbers, underscore only.</p>
-                    <div th:if="${#fields.hasErrors('username')}" class="mt-1 text-sm text-rose-700">
+                        class="auth-field__input" />
+                    <p class="mt-1 text-xs text-gray-500">3–20 characters. Letters, numbers, underscore only.</p>
+                    <div th:if="${#fields.hasErrors('username')}" class="mt-1 text-sm text-red-600">
                         <span th:errors="*{username}"></span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label for="password" class="block text-sm font-medium text-slate-800">Password *</label>
-                        <input
-                            type="password"
-                            id="password"
-                            th:field="*{password}"
-                            required
-                            autocomplete="new-password"
-                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                            th:classappend="${#fields.hasErrors('password')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                        <p class="mt-1 text-sm text-slate-600">Min 8, with upper, lower, number, and special character.</p>
-                        <div th:if="${#fields.hasErrors('password')}" class="mt-1 text-sm text-rose-700">
+                        <label for="password" class="auth-field__label">Password *</label>
+                        <div class="auth-field__input-wrapper">
+                            <input
+                                type="password"
+                                id="password"
+                                th:field="*{password}"
+                                required
+                                autocomplete="new-password"
+                                class="auth-field__input auth-field__input--with-icon" />
+                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                                <svg class="h-5 w-5" id="eyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Min 8, with upper, lower, number, and special character.</p>
+                        <div th:if="${#fields.hasErrors('password')}" class="mt-1 text-sm text-red-600">
                             <span th:errors="*{password}"></span>
                         </div>
                     </div>
 
                     <div>
-                        <label for="confirmPassword" class="block text-sm font-medium text-slate-800">Confirm Password *</label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            th:field="*{confirmPassword}"
-                            required
-                            autocomplete="new-password"
-                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
-                            th:classappend="${#fields.hasErrors('confirmPassword')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
-                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="mt-1 text-sm text-rose-700">
+                        <label for="confirmPassword" class="auth-field__label">Confirm Password *</label>
+                        <div class="auth-field__input-wrapper">
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                th:field="*{confirmPassword}"
+                                required
+                                autocomplete="new-password"
+                                class="auth-field__input auth-field__input--with-icon" />
+                            <button type="button" class="password-toggle" id="toggleConfirmPassword" aria-label="Toggle password visibility">
+                                <svg class="h-5 w-5" id="confirmEyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="mt-1 text-sm text-red-600">
                             <span th:errors="*{confirmPassword}"></span>
                         </div>
                     </div>
                 </div>
 
-                <button
-                    type="submit"
-                    class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
-                    Sign up as client
+                <button type="submit" class="auth-btn auth-btn--primary">
+                    <span>Sign up as client</span>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                 </button>
 
-                <p class="text-center text-sm text-slate-600">
+                <p class="text-center text-sm text-gray-600">
                     Already have an account?
-                    <a th:href="@{/login}" class="font-semibold text-slate-900 underline underline-offset-4 hover:text-slate-700">Log in</a>
+                    <a th:href="@{/login}" class="auth-link">Log in</a>
                 </p>
             </form>
         </div>
     </div>
+
+    <th:block th:fragment="pageStyles">
+        <!-- auth.css is now included in app.css via tailwind.css -->
+    </th:block>
+
+    <th:block th:fragment="pageScripts">
+    <script>
+        // Password visibility toggle
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />';
+            } else {
+                eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+            }
+        });
+
+        // Confirm password visibility toggle
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const confirmEyeIcon = document.getElementById('confirmEyeIcon');
+        
+        toggleConfirmPassword.addEventListener('click', () => {
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                confirmEyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />';
+            } else {
+                confirmEyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+            }
+        });
+    </script>
+    </th:block>
 
 </th:block>

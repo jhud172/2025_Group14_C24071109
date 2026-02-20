@@ -19,7 +19,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="calendar-mode-indicator hidden sm:flex">
-                        Month View — <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
+                        Month View — <span th:text="${calendarLayout != null and calendarLayout.name() == 'SEPARATED_BY_CATEGORY' ? 'Grouped' : 'Detailed'}"></span>
                     </div>
                     <div class="calendar-info-link" aria-label="Calendar layout information">
                         <button type="button" class="calendar-info-link__button" aria-label="Calendar layout settings help">
@@ -78,14 +78,14 @@
                                 </div>
                                 <div class="calendar-month-grid grid grid-cols-7">
                                     <div th:each="i : ${#numbers.sequence(1, offset - 1)}"></div>
-                                     <div th:each="day : ${#numbers.sequence(1, lengthOfMonth)}"
-                                         th:with="dateObj=${T(java.time.LocalDate).of(year,month,day)},
-                                               dateKey=${#temporals.format(dateObj,'yyyy-MM-dd')},
-                                               tasks=${tasksByDate != null ? tasksByDate[dateObj] : null},
-                                                  tTotal=${tasks!=null?#lists.size(tasks):0},
-                                                  sched=${occurrences[dateObj]},
-                                                  sTotal=${sched!=null?#lists.size(sched):0},
-                                                                  statusValue=${dateObj.isEqual(today) ? 'today' : (dateObj.isEqual(tomorrow) ? 'tomorrow' : (dateObj.isBefore(today) ? ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-incomplete') : 'future'))}"
+                                    <div th:each="day : ${#numbers.sequence(1, lengthOfMonth)}"
+                                         th:with="dateObj=${T(java.time.LocalDate).of(year, month, day)},
+                                                  dateKey=${#temporals.format(dateObj, 'yyyy-MM-dd')},
+                                                  tasks=${tasksByDateIso != null ? tasksByDateIso.get(dateKey) : null},
+                                                  tTotal=${tasks != null ? #lists.size(tasks) : 0},
+                                                  sched=${occurrencesByDateIso != null ? occurrencesByDateIso.get(dateKey) : null},
+                                                  sTotal=${sched != null ? #lists.size(sched) : 0},
+                                                  statusValue=${dateObj.isEqual(today) ? 'today' : (dateObj.isEqual(tomorrow) ? 'tomorrow' : (dateObj.isBefore(today) ? ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-incomplete') : 'future'))}"
                                          class="calendar-day-card heat-none"
                                          data-load="0"
                                          th:attr="data-day-link=@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}},
@@ -96,86 +96,129 @@
                                         <div class="calendar-heat-overlay"></div>
                                         <div class="calendar-day-header">
                                             <a th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
-                                               class="calendar-day-number" th:text="${day}"></a>
-                                            <span th:if="${dateObj.isEqual(today)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
-                                                          <span th:if="${dateObj.isEqual(tomorrow)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
+                                               class="calendar-day-number"
+                                               th:text="${day}"></a>
+                                            <span th:if="${dateObj.isEqual(today)}"
+                                                  class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
+                                            <span th:if="${dateObj.isEqual(tomorrow)}"
+                                                  class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
                                         </div>
-                                        <div class="calendar-day-content" th:with="grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
-                                            <!-- Empty state when no tasks or schedules -->
-                                            <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
+                                        <div class="calendar-day-content" th:with="grouped=${calendarLayout != null and calendarLayout.name() == 'SEPARATED_BY_CATEGORY'}">
+                                            <!-- Empty state: Show only when both tasks AND schedules are empty -->
+                                            <div th:if="${tTotal == 0 and sTotal == 0}"
+                                                 class="calendar-empty-state">
                                                 <span class="calendar-empty-state-text">Free day</span>
                                             </div>
-                                            <!-- Detailed mode (COMBINED_LIST) -->
-                                            <div th:if="${!grouped}" class="calendar-singular-list">
-                                                   <div th:each="task,iter : ${tasks}"
-                                                       th:if="${iter.index < 4 && task != null}"
-                                                     class="calendar-item"
-                                                     th:classappend="${task.completed} ? ' completed' : ''"
-                                                     th:attr="data-type='task',
-                                                              data-id=${task.id},
-                                                              data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
-                                                              data-title=${task.title},
-                                                              data-time=${task.time},
-                                                              data-notes=${task.notes},
-                                                              data-completed=${task.completed},
-                                                              data-priority=${task.priority != null ? task.priority.toString().toLowerCase() : 'medium'}">
-                                                    <div class="calendar-item-content">
-                                                        <div class="calendar-item-title" th:text="${task.title}"></div>
-                                                        <div class="calendar-item-meta" th:text="${task.time != null ? task.time : '—'}"></div>
+                                            <!-- Detailed mode: Tasks and workouts combined -->
+                                            <div th:if="${!grouped}"
+                                                 class="calendar-singular-list">
+                                                <!-- Task items loop: max 4 shown -->
+                                                <th:block th:if="${tasks != null and #lists.size(tasks) > 0}">
+                                                  <div th:each="task, taskIter : ${tasks}"
+                                                       th:if="${taskIter.index < 4}"
+                                                       class="calendar-item"
+                                                         th:classappend="${task.completed} ? ' completed' : ''"
+                                                         th:attr="data-type='task',
+                                                                  data-id=${task.id},
+                                                                  data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
+                                                                  data-title=${task.title},
+                                                                  data-time=${task.time},
+                                                                  data-notes=${task.notes},
+                                                                  data-completed=${task.completed}">
+                                                        <div class="calendar-item-content">
+                                                            <div class="calendar-item-title" th:text="${task.title}"></div>
+                                                            <div class="calendar-item-meta" th:text="${task.time != null ? task.time : '—'}"></div>
+                                                        </div>
+                                                        <div th:if="${task.completed}" class="calendar-item-check">✓</div>
                                                     </div>
-                                                    <div th:if="${task.completed}" class="calendar-item-check">✓</div>
-                                                </div>
-                                                <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="calendar-more-link" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
-                                                <div th:if="${tTotal > 0 and sTotal > 0}" class="my-1 border-t border-white/10"></div>
-                                                   <div th:each="occ,iter : ${sched}"
-                                                       th:if="${iter.index < 3 && occ != null}"
-                                                     th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
-                                                     class="calendar-item"
-                                                     th:classappend="${occ.completed} ? ' completed' : ''"
-                                                     th:attr="data-id=${occ.id},
-                                                              data-type='workout',
-                                                              data-title=${occTitle},
-                                                              data-notes=${occ.scheduleName},
-                                                              data-time='—',
-                                                              data-completed=${occ.completed},
-                                                              data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
-                                                    <div class="calendar-item-content">
-                                                        <div class="calendar-item-title" th:text="${occTitle}"></div>
-                                                        <div class="calendar-item-meta" th:text="'From: ' + ${occ.scheduleName}"></div>
+                                                </th:block>
+                                                <!-- "More tasks" link -->
+                                                <a th:if="${tTotal > 4}"
+                                                   th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
+                                                   class="calendar-more-link"
+                                                   th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
+                                                <!-- Divider between tasks and workouts -->
+                                                <div th:if="${tTotal > 0 and sTotal > 0}"
+                                                     class="my-1 border-t border-white/10"></div>
+                                                <!-- Workout items loop: max 3 shown -->
+                                                <th:block th:if="${sched != null and #lists.size(sched) > 0}">
+                                                  <div th:each="occ, occIter : ${sched}"
+                                                       th:if="${occIter.index < 3}"
+                                                       th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
+                                                       class="calendar-item"
+                                                       th:classappend="${occ.completed} ? ' completed' : ''"
+                                                       th:attr="data-type='workout',
+                                                                data-id=${occ.id},
+                                                                data-title=${occTitle},
+                                                                  data-notes=${occ.scheduleName},
+                                                                  data-time='—',
+                                                                  data-completed=${occ.completed},
+                                                                  data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
+                                                        <div class="calendar-item-content">
+                                                            <div class="calendar-item-title" th:text="${occTitle}"></div>
+                                                            <div class="calendar-item-meta" th:text="'From: ' + ${occ.scheduleName}"></div>
+                                                        </div>
+                                                        <div th:if="${occ.completed}" class="calendar-item-check">✓</div>
                                                     </div>
-                                                    <div th:if="${occ.completed}" class="calendar-item-check">✓</div>
-                                                </div>
-                                                <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="calendar-more-link" th:text="${'+' + (sTotal - 3) + ' more workouts'}"></a>
+                                                </th:block>
+                                                <!-- "More workouts" link -->
+                                                <a th:if="${sTotal > 3}"
+                                                   th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
+                                                   class="calendar-more-link"
+                                                   th:text="${'+' + (sTotal - 3) + ' more workouts'}"></a>
                                             </div>
-                                            <!-- Grouped mode (SEPARATED_BY_CATEGORY) -->
-                                            <div th:if="${grouped}" class="space-y-3">
+                                            <!-- Grouped mode: Tasks and workouts in separate sections -->
+                                            <div th:if="${grouped}"
+                                                 class="space-y-3">
+                                                <!-- Tasks section -->
                                                 <div class="calendar-grouped-section">
                                                     <div class="calendar-grouped-header">
                                                         <span class="calendar-grouped-label">Tasks</span>
                                                         <span class="calendar-grouped-count" th:text="${tTotal}"></span>
                                                     </div>
                                                     <div class="calendar-grouped-items">
-                                                         <div th:each="task,iter : ${tasks}" th:if="${iter.index < 2 && task != null}"
-                                                             class="calendar-grouped-item"
-                                                             th:classappend="${task.completed} ? ' completed' : ''"
-                                                             th:attr="data-type='task',data-id=${task.id},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-completed=${task.completed}">
-                                                            <span class="truncate" th:text="${task.title}"></span>
-                                                        </div>
+                                                        <!-- Task items: max 2 shown -->
+                                                        <th:block th:if="${tasks != null}">
+                                                          <div th:each="task, grpTaskIter : ${tasks}"
+                                                               th:if="${grpTaskIter.index < 2}"
+                                                               class="calendar-grouped-item"
+                                                                     th:classappend="${task.completed} ? ' completed' : ''"
+                                                                     th:attr="data-type='task',
+                                                                          data-id=${task.id},
+                                                                          data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
+                                                                          data-title=${task.title},
+                                                                          data-time=${task.time},
+                                                                          data-notes=${task.notes},
+                                                                          data-completed=${task.completed}">
+                                                                <span class="truncate" th:text="${task.title}"></span>
+                                                            </div>
+                                                        </th:block>
                                                     </div>
                                                 </div>
+                                                <!-- Workouts section -->
                                                 <div class="calendar-grouped-section">
                                                     <div class="calendar-grouped-header">
                                                         <span class="calendar-grouped-label">Workouts</span>
                                                         <span class="calendar-grouped-count" th:text="${sTotal}"></span>
                                                     </div>
                                                     <div class="calendar-grouped-items">
-                                                         <div th:each="occ,iter : ${sched}" th:if="${iter.index < 2 && occ != null}"
-                                                             th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
-                                                             class="calendar-grouped-item"
-                                                             th:classappend="${occ.completed} ? ' completed' : ''"
-                                                             th:attr="data-type='occurrence',data-id=${occ.id},data-title=${occTitle},data-notes=${occ.scheduleName},data-time='—',data-completed=${occ.completed},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
-                                                            <span class="truncate" th:text="${occTitle}"></span>
-                                                        </div>
+                                                        <!-- Workout items: max 2 shown -->
+                                                        <th:block th:if="${sched != null}">
+                                                          <div th:each="occ, grpOccIter : ${sched}"
+                                                               th:if="${grpOccIter.index < 2}"
+                                                               th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
+                                                               class="calendar-grouped-item"
+                                                                     th:classappend="${occ.completed} ? ' completed' : ''"
+                                                                     th:attr="data-type='workout',
+                                                                          data-id=${occ.id},
+                                                                          data-title=${occTitle},
+                                                                          data-notes=${occ.scheduleName},
+                                                                          data-time='—',
+                                                                          data-completed=${occ.completed},
+                                                                          data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
+                                                                <span class="truncate" th:text="${occTitle}"></span>
+                                                            </div>
+                                                        </th:block>
                                                     </div>
                                                 </div>
                                             </div>

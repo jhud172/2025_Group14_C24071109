@@ -1,11 +1,17 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Home', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('Home', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+
+    <th:block th:fragment="pageStyles">
+        <th:block th:replace="~{home/public :: styles}"></th:block>
+    </th:block>
+
     <div th:fragment="content">
         <div th:replace="~{fragments/AccountHomePage :: contentAuthenticated}"></div>
-        <div th:replace="~{fragments/AccountHomePage :: contentPublic}"></div>
+        <div th:replace="~{home/public :: content}"></div>
     </div>
 
     <th:block th:fragment="pageScripts">
         <th:block th:replace="~{fragments/AccountHomePage :: pageScripts}"></th:block>
+        <th:block th:replace="~{home/public :: scripts}"></th:block>
     </th:block>
 </th:block>

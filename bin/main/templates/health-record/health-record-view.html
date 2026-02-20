@@ -1,66 +1,97 @@
 <th:block th:replace="~{base :: layout('Health Record Details', null, ~{::content}, null)}">
 
-    <div th:fragment="content">
-        <div class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
-            <div class="flex flex-col gap-2">
-                <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Health record details</h1>
-                <p class="text-sm text-slate-700 dark:text-slate-200">Review a specific record.</p>
+    <div th:fragment="content" class="detail-container">
+        <!-- Header with key metadata at top -->
+        <div class="detail-header">
+            <div class="detail-header-content">
+                <div class="detail-header-meta">
+                    <p class="detail-label">Health Record</p>
+                    <h1 class="detail-title">Health record details</h1>
+                    <p class="detail-subtitle">Review a specific record.</p>
+                </div>
+                <!-- Primary actions - sticky on larger screens -->
+                <div class="detail-actions-sticky">
+                    <a href="/health-record/list" class="detail-btn-secondary">Back to list</a>
+                </div>
             </div>
+        </div>
 
-            <section class="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
-                <div class="text-sm text-slate-700 dark:text-slate-200">
-                    <span class="font-semibold text-slate-900 dark:text-slate-100">Date recorded:</span>
-                    <span th:text="${record.baselineDate}"></span>
-                </div>
-
-                <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <div class="space-y-6">
-                        <div class="rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/30">
-                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Cardiovascular</h3>
-                            <div class="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
-                                <p>
-                                    <span class="font-semibold text-slate-900 dark:text-slate-100">Blood pressure:</span>
-                                    <span th:text="${record.systolicBloodPressure}"></span> / <span th:text="${record.diastolicBloodPressure}"></span> mmHg
-                                </p>
-                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Cholesterol:</span> <span th:text="${record.cholesterol}"></span> mmol/L</p>
-                            </div>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/30">
-                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Body measurements</h3>
-                            <div class="mt-3 space-y-2 text-sm text-slate-700 dark:text-slate-200">
-                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Weight:</span> <span th:text="${record.weightKg}"></span> kg</p>
-                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Height:</span> <span th:text="${record.heightCm}"></span> cm</p>
-                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Waist:</span> <span th:text="${record.waistCm}"></span> cm</p>
-                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">BMI:</span> <span th:text="${record.bmi}"></span></p>
-                                <p><span class="font-semibold text-slate-900 dark:text-slate-100">Waist/height ratio:</span> <span th:text="${record.waistHeightRatio}"></span></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/30">
-                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Activity</h3>
-                            <p class="mt-3 text-sm text-slate-700 dark:text-slate-200">
-                                <span class="font-semibold text-slate-900 dark:text-slate-100">Activity level:</span>
-                                <span th:text="${record.activityLevel}"></span>
-                            </p>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/30">
-                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Physical conditions</h3>
-                            <ul class="mt-3 list-disc list-inside text-sm text-slate-700 dark:text-slate-200">
-                                <li th:each="pc : ${record.physicalConditions}" th:text="${pc.name}"></li>
-                            </ul>
-                            <p th:if="${#lists.isEmpty(record.physicalConditions)}" class="mt-3 text-sm text-slate-700 dark:text-slate-200">None recorded</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
-                    <a href="/health-record/list" class="text-sm font-semibold text-blue-700 hover:underline dark:text-blue-300">Back to list</a>
+        <!-- Structured content sections -->
+        <div class="detail-sections">
+            <section class="detail-section">
+                <div class="detail-section-content">
+                    <p class="detail-metadata-label">Date recorded</p>
+                    <p class="detail-metadata-value" th:text="${record.baselineDate}"></p>
                 </div>
             </section>
+
+            <div class="detail-grid-2">
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Cardiovascular</h2>
+                    <div class="detail-section-content">
+                        <div class="detail-metadata">
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Blood pressure</p>
+                                <p class="detail-metadata-value">
+                                    <span th:text="${record.systolicBloodPressure}"></span> / <span th:text="${record.diastolicBloodPressure}"></span> mmHg
+                                </p>
+                            </div>
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Cholesterol</p>
+                                <p class="detail-metadata-value"><span th:text="${record.cholesterol}"></span> mmol/L</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Body measurements</h2>
+                    <div class="detail-section-content">
+                        <div class="detail-metadata">
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Weight</p>
+                                <p class="detail-metadata-value"><span th:text="${record.weightKg}"></span> kg</p>
+                            </div>
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Height</p>
+                                <p class="detail-metadata-value"><span th:text="${record.heightCm}"></span> cm</p>
+                            </div>
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Waist</p>
+                                <p class="detail-metadata-value"><span th:text="${record.waistCm}"></span> cm</p>
+                            </div>
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">BMI</p>
+                                <p class="detail-metadata-value" th:text="${record.bmi}"></p>
+                            </div>
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Waist/height ratio</p>
+                                <p class="detail-metadata-value" th:text="${record.waistHeightRatio}"></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Activity</h2>
+                    <div class="detail-section-content">
+                        <div class="detail-metadata-item">
+                            <p class="detail-metadata-label">Activity level</p>
+                            <p class="detail-metadata-value" th:text="${record.activityLevel}"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Physical conditions</h2>
+                    <div class="detail-section-content">
+                        <div th:if="${#lists.isEmpty(record.physicalConditions)}" class="detail-empty">None recorded</div>
+                        <ul th:if="${!#lists.isEmpty(record.physicalConditions)}" class="list-disc list-inside space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                            <li th:each="pc : ${record.physicalConditions}" th:text="${pc.name}"></li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
         </div>
     </div>
 </th:block>

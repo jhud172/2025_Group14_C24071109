@@ -10,8 +10,10 @@ DROP TABLE IF EXISTS trainer_profiles CASCADE;
 DROP TABLE IF EXISTS gym_profiles CASCADE;
 
 DROP TABLE IF EXISTS off_platform_payment_attempts CASCADE;
+DROP TABLE IF EXISTS message_read_states CASCADE;
 DROP TABLE IF EXISTS message_thread_messages CASCADE;
 DROP TABLE IF EXISTS message_threads CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
 
 DROP TABLE IF EXISTS message CASCADE;
 DROP TABLE IF EXISTS conversation_participant CASCADE;
@@ -20,6 +22,8 @@ DROP TABLE IF EXISTS dashboard_layout CASCADE;
 DROP TABLE IF EXISTS user_settings CASCADE;
 DROP TABLE IF EXISTS data_export_requests CASCADE;
 DROP TABLE IF EXISTS user_health_conditions CASCADE;
+DROP TABLE IF EXISTS assigned_workouts CASCADE;
+DROP TABLE IF EXISTS assigned_schedules CASCADE;
 
 DROP TABLE IF EXISTS selected_preferences CASCADE;
 DROP TABLE IF EXISTS user_preference_conditions CASCADE;
@@ -35,7 +39,17 @@ DROP TABLE IF EXISTS trainer_library_workout_items CASCADE;
 DROP TABLE IF EXISTS trainer_library_workout_templates CASCADE;
 DROP TABLE IF EXISTS trainer_library_exercise_notes CASCADE;
 DROP TABLE IF EXISTS trainer_library_exercises CASCADE;
+DROP TABLE IF EXISTS coaching_phase_changes CASCADE;
+DROP TABLE IF EXISTS weekly_check_ins CASCADE;
+DROP TABLE IF EXISTS trainer_checkin_questions CASCADE;
+DROP TABLE IF EXISTS trainer_schedule_template_entries CASCADE;
+DROP TABLE IF EXISTS trainer_schedule_templates CASCADE;
+DROP TABLE IF EXISTS weekly_summaries CASCADE;
+DROP TABLE IF EXISTS user_streaks CASCADE;
 DROP TABLE IF EXISTS trainer_client_links CASCADE;
+DROP TABLE IF EXISTS goal_check_ins CASCADE;
+DROP TABLE IF EXISTS goal_links CASCADE;
+DROP TABLE IF EXISTS goals CASCADE;
 DROP TABLE IF EXISTS platform_subscriptions CASCADE;
 DROP TABLE IF EXISTS gym_subscriptions CASCADE;
 DROP TABLE IF EXISTS password_reset_tokens CASCADE;
@@ -55,6 +69,7 @@ DROP TABLE IF EXISTS schedules CASCADE;
 DROP TABLE IF EXISTS exercise_log CASCADE;
 DROP TABLE IF EXISTS calendar_tasks CASCADE;
 DROP TABLE IF EXISTS day_health CASCADE;
+DROP TABLE IF EXISTS daily_nutrition_logs CASCADE;
 DROP TABLE IF EXISTS daily_focus CASCADE;
 DROP TABLE IF EXISTS adaptive_feedback CASCADE;
 DROP TABLE IF EXISTS daily_completion CASCADE;
@@ -63,6 +78,12 @@ DROP TABLE IF EXISTS coach_messages CASCADE;
 DROP TABLE IF EXISTS coach_conversations CASCADE;
 DROP TABLE IF EXISTS daily_usage CASCADE;
 DROP TABLE IF EXISTS chat_messages CASCADE;
+DROP TABLE IF EXISTS ai_form_feedback CASCADE;
+DROP TABLE IF EXISTS workout_set_videos CASCADE;
+DROP TABLE IF EXISTS workout_set_logs CASCADE;
+DROP TABLE IF EXISTS workout_player_sessions CASCADE;
+DROP TABLE IF EXISTS workout_template_exercises CASCADE;
+DROP TABLE IF EXISTS workout_templates CASCADE;
 DROP TABLE IF EXISTS set_logs CASCADE;
 DROP TABLE IF EXISTS exercise_sessions CASCADE;
 DROP TABLE IF EXISTS vault_notes CASCADE;
@@ -110,6 +131,50 @@ CREATE TABLE IF NOT EXISTS users
     CONSTRAINT uq_users_username UNIQUE (username),
     CONSTRAINT uq_users_public_id UNIQUE (public_id)
 );
+
+-- =========================
+-- NOTIFICATIONS
+-- =========================
+CREATE TABLE IF NOT EXISTS notifications
+(
+    id           BIGSERIAL PRIMARY KEY,
+    user_id      BIGINT      NOT NULL,
+    type         VARCHAR(20) NOT NULL,
+    title        VARCHAR(255),
+    message      TEXT        NOT NULL,
+    cta_url      VARCHAR(500),
+    created_at   TIMESTAMP   NOT NULL,
+    read_at      TIMESTAMP   NULL,
+    dismissed_at TIMESTAMP   NULL,
+
+    CONSTRAINT fk_notifications_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS quick_action_definitions
+(
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    name VARCHAR(120) NOT NULL,
+    action_key VARCHAR(60),
+    prompt VARCHAR(2000),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_quick_action_user
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_quick_action_user
+    ON quick_action_definitions (user_id, sort_order);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created
+    ON notifications (user_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_status
+    ON notifications (user_id, read_at, dismissed_at);
 
 -- =========================
 -- PLATFORM SUBSCRIPTIONS
@@ -235,9 +300,30 @@ CREATE TABLE IF NOT EXISTS user_settings
     disability_hearing BOOLEAN NOT NULL DEFAULT FALSE,
     disability_mobility BOOLEAN NOT NULL DEFAULT FALSE,
     disability_vision BOOLEAN NOT NULL DEFAULT FALSE,
+    share_recovery_signals BOOLEAN NOT NULL DEFAULT FALSE,
+    share_nutrition_signals BOOLEAN NOT NULL DEFAULT FALSE,
+    share_sleep_signals BOOLEAN NOT NULL DEFAULT FALSE,
+    share_fatigue_signals BOOLEAN NOT NULL DEFAULT FALSE,
+    share_weight_trend BOOLEAN NOT NULL DEFAULT FALSE,
     calendar_task_ordering VARCHAR(30) NOT NULL DEFAULT 'CHRONOLOGICAL',
     calendar_task_layout   VARCHAR(30) NOT NULL DEFAULT 'COMBINED_LIST',
     calendar_workout_ordering VARCHAR(30) NOT NULL DEFAULT 'SCHEDULE_ORDER',
+    calendar_view_preference VARCHAR(10) NOT NULL DEFAULT 'MONTH',
+    default_sets INT NOT NULL DEFAULT 3,
+    default_rep_min INT NOT NULL DEFAULT 8,
+    default_rep_max INT NOT NULL DEFAULT 12,
+    preferred_equipment_bodyweight BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_dumbbell BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_barbell BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_machine BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_bands BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_kettlebell BOOLEAN NOT NULL DEFAULT FALSE,
+    macro_target_calories INT NULL,
+    macro_target_protein INT NULL,
+    macro_target_carbs INT NULL,
+    macro_target_fat INT NULL,
+    quiet_hours_start TIME NULL,
+    quiet_hours_end   TIME NULL,
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_settings_user
@@ -488,6 +574,10 @@ CREATE TABLE IF NOT EXISTS trainer_client_links
     created_at      TIMESTAMP   NOT NULL,
     updated_at      TIMESTAMP   NOT NULL,
     ended_at        TIMESTAMP   NULL,
+    coaching_phase  VARCHAR(30) NULL,
+    coaching_phase_label VARCHAR(120) NULL,
+    coaching_phase_started_at TIMESTAMP NULL,
+    coaching_phase_updated_at TIMESTAMP NULL,
 
     CONSTRAINT fk_tcl_client
         FOREIGN KEY (client_id) REFERENCES users (id),
@@ -504,6 +594,241 @@ CREATE INDEX IF NOT EXISTS idx_tcl_trainer_id
 
 CREATE INDEX IF NOT EXISTS idx_tcl_status
     ON trainer_client_links (status);
+
+-- =========================
+-- COACHING PHASE AUDIT
+-- =========================
+CREATE TABLE IF NOT EXISTS coaching_phase_changes
+(
+    id         BIGSERIAL PRIMARY KEY,
+    link_id    BIGINT      NOT NULL,
+    trainer_id BIGINT      NOT NULL,
+    old_phase  VARCHAR(30) NULL,
+    new_phase  VARCHAR(30) NOT NULL,
+    old_label  VARCHAR(120) NULL,
+    new_label  VARCHAR(120) NULL,
+    changed_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    notes      VARCHAR(800) NULL,
+
+    CONSTRAINT fk_coaching_phase_link
+        FOREIGN KEY (link_id) REFERENCES trainer_client_links (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_coaching_phase_trainer
+        FOREIGN KEY (trainer_id) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+-- =========================
+-- TRAINER SCHEDULE TEMPLATES
+-- =========================
+-- =========================
+-- GOALS
+-- =========================
+CREATE TABLE IF NOT EXISTS goals
+(
+    id BIGSERIAL PRIMARY KEY,
+    owner_user_id BIGINT NOT NULL,
+    created_by_user_id BIGINT NOT NULL,
+    trainer_user_id BIGINT NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    goal_type VARCHAR(30) NOT NULL,
+    target_metric_name VARCHAR(120),
+    target_metric_value DOUBLE PRECISION,
+    target_metric_unit VARCHAR(30),
+    start_date DATE,
+    target_date DATE,
+    status VARCHAR(20) NOT NULL,
+    priority INTEGER,
+    archived BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_goal_owner FOREIGN KEY (owner_user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_goal_creator FOREIGN KEY (created_by_user_id) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT fk_goal_trainer FOREIGN KEY (trainer_user_id) REFERENCES users (id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_goals_owner
+    ON goals (owner_user_id);
+
+CREATE TABLE IF NOT EXISTS goal_links
+(
+    id BIGSERIAL PRIMARY KEY,
+    goal_id BIGINT NOT NULL,
+    link_type VARCHAR(30) NOT NULL,
+    source VARCHAR(30) NOT NULL,
+    calendar_task_id BIGINT,
+    schedule_occurrence_id BIGINT,
+    workout_session_id BIGINT,
+    workout_template_id BIGINT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_goal_links_goal FOREIGN KEY (goal_id) REFERENCES goals (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_goal_links_goal
+    ON goal_links (goal_id);
+
+CREATE INDEX IF NOT EXISTS idx_goal_links_task
+    ON goal_links (calendar_task_id);
+
+CREATE INDEX IF NOT EXISTS idx_goal_links_occurrence
+    ON goal_links (schedule_occurrence_id);
+
+CREATE INDEX IF NOT EXISTS idx_goal_links_workout_session
+    ON goal_links (workout_session_id);
+
+CREATE TABLE IF NOT EXISTS goal_check_ins
+(
+    id BIGSERIAL PRIMARY KEY,
+    goal_id BIGINT NOT NULL,
+    created_by_user_id BIGINT NOT NULL,
+    created_by_role VARCHAR(30) NOT NULL,
+    week_start_date DATE NOT NULL,
+    reflection TEXT,
+    confidence_rating INTEGER,
+    trainer_comment TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_goal_checkin_goal FOREIGN KEY (goal_id) REFERENCES goals (id) ON DELETE CASCADE,
+    CONSTRAINT fk_goal_checkin_user FOREIGN KEY (created_by_user_id) REFERENCES users (id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_goal_checkins_goal
+    ON goal_check_ins (goal_id);
+
+-- =========================
+-- ACCOUNTABILITY STREAKS + SUMMARIES
+-- =========================
+CREATE TABLE IF NOT EXISTS user_streaks
+(
+    user_id            BIGINT      NOT NULL,
+    streak_type        VARCHAR(20) NOT NULL,
+    current_count      INT         NOT NULL DEFAULT 0,
+    longest_count      INT         NOT NULL DEFAULT 0,
+    last_completed_date DATE       NULL,
+    updated_at         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_user_streaks PRIMARY KEY (user_id, streak_type),
+    CONSTRAINT fk_user_streaks_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS weekly_summaries
+(
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         BIGINT      NOT NULL,
+    week_start      DATE        NOT NULL,
+    summary_json    TEXT        NULL,
+    goals_json      TEXT        NULL,
+    missed_items_json TEXT      NULL,
+    streaks_json    TEXT        NULL,
+    created_at      TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_weekly_summaries_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+    CONSTRAINT uq_weekly_summaries_user_week
+        UNIQUE (user_id, week_start)
+);
+
+-- =========================
+-- WORKOUT BUILDER + PLAYER
+-- =========================
+CREATE TABLE IF NOT EXISTS workout_templates
+(
+    id            BIGSERIAL PRIMARY KEY,
+    owner_user_id BIGINT       NOT NULL,
+    owner_role    VARCHAR(30)  NOT NULL,
+    name          VARCHAR(200) NOT NULL,
+    description   VARCHAR(600) NULL,
+    created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_workout_templates_owner
+        FOREIGN KEY (owner_user_id) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_templates_owner_updated
+    ON workout_templates (owner_user_id, updated_at);
+
+-- =========================
+-- TRAINER ASSIGNMENTS
+-- =========================
+CREATE TABLE IF NOT EXISTS assigned_workouts
+(
+    id                  BIGSERIAL PRIMARY KEY,
+    trainer_id          BIGINT       NOT NULL,
+    client_id           BIGINT       NOT NULL,
+    workout_template_id BIGINT       NOT NULL,
+    trainer_notes       VARCHAR(800) NULL,
+    client_notes        VARCHAR(1200) NULL,
+    client_feedback     VARCHAR(1200) NULL,
+    completed           BOOLEAN      NOT NULL DEFAULT FALSE,
+    assigned_at         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at        TIMESTAMP    NULL,
+    updated_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_assigned_workouts_trainer
+        FOREIGN KEY (trainer_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_assigned_workouts_client
+        FOREIGN KEY (client_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_assigned_workouts_template
+        FOREIGN KEY (workout_template_id) REFERENCES workout_templates (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_assigned_workouts_client
+    ON assigned_workouts (client_id, assigned_at);
+
+CREATE TABLE IF NOT EXISTS schedules
+(
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     BIGINT       NOT NULL,
+    name        VARCHAR(200) NOT NULL,
+    description VARCHAR(500),
+    schedule_type VARCHAR(20) NOT NULL DEFAULT 'WEEKLY',
+    rotation_mode VARCHAR(30) NOT NULL DEFAULT 'WEEKLY_REPEAT',
+    custom_day_count INT NOT NULL DEFAULT 7,
+    template_id VARCHAR(100),
+
+    CONSTRAINT fk_schedules_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS assigned_schedules
+(
+    id           BIGSERIAL PRIMARY KEY,
+    trainer_id   BIGINT       NOT NULL,
+    client_id    BIGINT       NOT NULL,
+    schedule_id  BIGINT       NOT NULL,
+    trainer_notes VARCHAR(800) NULL,
+    active       BOOLEAN      NOT NULL DEFAULT TRUE,
+    assigned_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_assigned_schedules_trainer
+        FOREIGN KEY (trainer_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_assigned_schedules_client
+        FOREIGN KEY (client_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_assigned_schedules_schedule
+        FOREIGN KEY (schedule_id) REFERENCES schedules (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_assigned_schedules_client
+    ON assigned_schedules (client_id, assigned_at);
 
 -- =========================
 -- TRAINER <-> CLIENT MESSAGING (relationship scoped)
@@ -546,6 +871,9 @@ CREATE TABLE IF NOT EXISTS message_thread_messages
     sender_user_id BIGINT      NOT NULL,
     type           VARCHAR(20) NOT NULL,
     body_text      TEXT        NOT NULL,
+    attachment_name VARCHAR(200) NULL,
+    attachment_url  VARCHAR(500) NULL,
+    attachment_type VARCHAR(100) NULL,
     created_at     TIMESTAMP   NOT NULL,
 
     CONSTRAINT fk_mtm_thread
@@ -555,6 +883,30 @@ CREATE TABLE IF NOT EXISTS message_thread_messages
     CONSTRAINT fk_mtm_sender
         FOREIGN KEY (sender_user_id) REFERENCES users (id)
             ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS message_read_states
+(
+    id         BIGSERIAL PRIMARY KEY,
+    message_id BIGINT    NOT NULL,
+    thread_id  BIGINT    NOT NULL,
+    user_id    BIGINT    NOT NULL,
+    read_at    TIMESTAMP NOT NULL,
+
+    CONSTRAINT fk_mrs_message
+        FOREIGN KEY (message_id) REFERENCES message_thread_messages (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_mrs_thread
+        FOREIGN KEY (thread_id) REFERENCES message_threads (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_mrs_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT uq_message_read_state
+        UNIQUE (message_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS off_platform_payment_attempts
@@ -577,6 +929,9 @@ CREATE TABLE IF NOT EXISTS off_platform_payment_attempts
 
 CREATE INDEX IF NOT EXISTS idx_mtm_thread_created
     ON message_thread_messages (thread_id, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_mrs_thread_user
+    ON message_read_states (thread_id, user_id, read_at);
 
 -- =========================
 -- TRAINER PROFILES
@@ -1006,6 +1361,115 @@ CREATE TABLE IF NOT EXISTS custom_exercises
 );
 
 -- =========================
+-- TRAINER SCHEDULE TEMPLATES
+-- =========================
+CREATE TABLE IF NOT EXISTS trainer_schedule_templates
+(
+    id          BIGSERIAL PRIMARY KEY,
+    trainer_id  BIGINT      NOT NULL,
+    name        VARCHAR(200) NOT NULL,
+    description VARCHAR(800) NULL,
+    tags        VARCHAR(500) NULL,
+    version     INT         NOT NULL DEFAULT 1,
+    archived    BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_trainer_schedule_templates_trainer
+        FOREIGN KEY (trainer_id) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS trainer_schedule_template_entries
+(
+    id                 BIGSERIAL PRIMARY KEY,
+    template_id        BIGINT      NOT NULL,
+    day_of_week        INT         NOT NULL,
+    time_window_start  TIME        NULL,
+    time_window_end    TIME        NULL,
+    type               VARCHAR(20) NOT NULL,
+    title              VARCHAR(200) NOT NULL,
+    defaults_json      TEXT        NULL,
+    intensity_label    VARCHAR(80) NULL,
+    intensity_level    INT         NULL,
+    exercise_id        BIGINT      NULL,
+    custom_exercise_id BIGINT      NULL,
+    order_index        INT         NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_trainer_schedule_entries_template
+        FOREIGN KEY (template_id) REFERENCES trainer_schedule_templates (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_trainer_schedule_entries_exercise
+        FOREIGN KEY (exercise_id) REFERENCES exercises (id)
+            ON DELETE SET NULL,
+
+    CONSTRAINT fk_trainer_schedule_entries_custom_exercise
+        FOREIGN KEY (custom_exercise_id) REFERENCES custom_exercises (id)
+            ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_trainer_schedule_entries_template
+    ON trainer_schedule_template_entries (template_id);
+
+-- =========================
+-- CHECK-IN QUESTIONS + WEEKLY CHECK-INS
+-- =========================
+CREATE TABLE IF NOT EXISTS trainer_checkin_questions
+(
+    id         BIGSERIAL PRIMARY KEY,
+    template_id BIGINT     NOT NULL,
+    prompt     VARCHAR(300) NOT NULL,
+    order_index INT        NOT NULL DEFAULT 0,
+    required   BOOLEAN     NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT fk_trainer_checkin_template
+        FOREIGN KEY (template_id) REFERENCES trainer_schedule_templates (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS weekly_check_ins
+(
+    id             BIGSERIAL PRIMARY KEY,
+    trainer_id     BIGINT      NOT NULL,
+    client_id      BIGINT      NOT NULL,
+    template_id    BIGINT      NULL,
+    week_start_date DATE       NOT NULL,
+    status         VARCHAR(20) NOT NULL DEFAULT 'SUBMITTED',
+    responses_json TEXT        NULL,
+    client_notes   TEXT        NULL,
+    trainer_response TEXT      NULL,
+    next_week_focus VARCHAR(600) NULL,
+    goal_id        BIGINT      NULL,
+    submitted_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    responded_at   TIMESTAMP   NULL,
+    created_at     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_weekly_checkin_trainer
+        FOREIGN KEY (trainer_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_weekly_checkin_client
+        FOREIGN KEY (client_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_weekly_checkin_template
+        FOREIGN KEY (template_id) REFERENCES trainer_schedule_templates (id)
+            ON DELETE SET NULL,
+
+    CONSTRAINT fk_weekly_checkin_goal
+        FOREIGN KEY (goal_id) REFERENCES goals (id)
+            ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_weekly_checkins_trainer
+    ON weekly_check_ins (trainer_id, submitted_at);
+
+CREATE INDEX IF NOT EXISTS idx_weekly_checkins_client
+    ON weekly_check_ins (client_id, submitted_at);
+
+-- =========================
 -- FAVOURITES
 -- =========================
 CREATE TABLE IF NOT EXISTS favourites
@@ -1137,18 +1601,6 @@ CREATE TABLE IF NOT EXISTS physical_condition_tag
 -- =========================
 -- SCHEDULES
 -- =========================
-CREATE TABLE IF NOT EXISTS schedules
-(
-    id          BIGSERIAL PRIMARY KEY,
-    user_id     BIGINT       NOT NULL,
-    name        VARCHAR(200) NOT NULL,
-    description VARCHAR(500),
-
-    CONSTRAINT fk_schedules_user
-        FOREIGN KEY (user_id) REFERENCES users (id)
-            ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS schedule_entries
 (
     id                 BIGSERIAL PRIMARY KEY,
@@ -1183,6 +1635,10 @@ CREATE TABLE IF NOT EXISTS schedule_occurrences
     schedule_name      VARCHAR(200) NOT NULL,
     exercise_log_id    BIGINT       NULL,
     completed          BOOLEAN      DEFAULT FALSE,
+    missed             BOOLEAN      NOT NULL DEFAULT FALSE,
+    missed_at          TIMESTAMP    NULL,
+    trainer_template_id BIGINT      NULL,
+    trainer_template_entry_id BIGINT NULL,
 
     CONSTRAINT fk_schedule_user
         FOREIGN KEY (user_id) REFERENCES users (id)
@@ -1218,10 +1674,14 @@ CREATE TABLE IF NOT EXISTS calendar_tasks
     notes           TEXT         NULL,
     is_exercise     BOOLEAN      NOT NULL DEFAULT FALSE,
     completed       BOOLEAN      NOT NULL DEFAULT FALSE,
+    missed          BOOLEAN      NOT NULL DEFAULT FALSE,
+    missed_at       TIMESTAMP    NULL,
     grace_period_minutes INT     NULL,
     exercise_log_id BIGINT       NULL,
     exercise_name   VARCHAR(200) NULL,
     requires_log    BOOLEAN      NOT NULL DEFAULT FALSE,
+    trainer_template_id BIGINT   NULL,
+    trainer_template_entry_id BIGINT NULL,
 
     CONSTRAINT fk_calendar_tasks_user
         FOREIGN KEY (user_id) REFERENCES users (id)
@@ -1365,6 +1825,37 @@ CREATE TABLE IF NOT EXISTS day_health
 );
 
 -- =========================
+-- DAILY NUTRITION LOGS
+-- =========================
+CREATE TABLE IF NOT EXISTS daily_nutrition_logs
+(
+    id            BIGSERIAL PRIMARY KEY,
+    user_id       BIGINT      NOT NULL,
+    log_date      DATE        NOT NULL,
+    calories      INTEGER     NOT NULL,
+    protein_grams INTEGER     NOT NULL,
+    carbs_grams   INTEGER     NOT NULL,
+    fat_grams     INTEGER     NOT NULL,
+    fibre_grams   INTEGER     NULL,
+    water_ml      INTEGER     NULL,
+    notes         VARCHAR(1000) NULL,
+    updated_at    TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_daily_nutrition_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT uq_daily_nutrition_user_date
+        UNIQUE (user_id, log_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_nutrition_user
+    ON daily_nutrition_logs (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_daily_nutrition_user_date
+    ON daily_nutrition_logs (user_id, log_date);
+
+-- =========================
 -- WORKOUTS
 -- =========================
 CREATE TABLE IF NOT EXISTS workouts
@@ -1404,6 +1895,114 @@ CREATE TABLE IF NOT EXISTS workouts_custom_exercises
 
     CONSTRAINT fk_workouts_custom_exercises_custom
         FOREIGN KEY (custom_exercise_id) REFERENCES custom_exercises (id)
+);
+
+CREATE TABLE IF NOT EXISTS workout_template_exercises
+(
+    id                 BIGSERIAL PRIMARY KEY,
+    template_id        BIGINT       NOT NULL,
+    exercise_id        BIGINT       NULL,
+    custom_exercise_id BIGINT       NULL,
+    exercise_name      VARCHAR(200) NOT NULL,
+    sets               INT          NOT NULL DEFAULT 3,
+    reps               INT          NOT NULL DEFAULT 10,
+    rest_seconds       INT          NOT NULL DEFAULT 60,
+    notes              VARCHAR(500) NULL,
+    order_index        INT          NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_wte_template
+        FOREIGN KEY (template_id) REFERENCES workout_templates (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_wte_exercise
+        FOREIGN KEY (exercise_id) REFERENCES exercises (id)
+            ON DELETE SET NULL,
+
+    CONSTRAINT fk_wte_custom_exercise
+        FOREIGN KEY (custom_exercise_id) REFERENCES custom_exercises (id)
+            ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_wte_template_order
+    ON workout_template_exercises (template_id, order_index);
+
+CREATE TABLE IF NOT EXISTS workout_player_sessions
+(
+    id            BIGSERIAL PRIMARY KEY,
+    user_id       BIGINT       NOT NULL,
+    template_id   BIGINT       NOT NULL,
+    name_snapshot VARCHAR(200) NULL,
+    completed     BOOLEAN      NOT NULL DEFAULT FALSE,
+    total_volume  DOUBLE PRECISION NULL,
+    started_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at  TIMESTAMP    NULL,
+
+    CONSTRAINT fk_workout_player_sessions_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_workout_player_sessions_template
+        FOREIGN KEY (template_id) REFERENCES workout_templates (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_player_sessions_user_started
+    ON workout_player_sessions (user_id, started_at);
+
+CREATE TABLE IF NOT EXISTS workout_set_logs
+(
+    id             BIGSERIAL PRIMARY KEY,
+    session_id     BIGINT       NOT NULL,
+    exercise_name  VARCHAR(200) NOT NULL,
+    exercise_order INT          NOT NULL DEFAULT 0,
+    set_number     INT          NOT NULL DEFAULT 1,
+    target_reps    INT          NULL,
+    rest_seconds   INT          NULL,
+    weight         DOUBLE PRECISION NULL,
+    reps           INT          NULL,
+    notes          VARCHAR(500) NULL,
+    completed      BOOLEAN      NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_workout_set_logs_session
+        FOREIGN KEY (session_id) REFERENCES workout_player_sessions (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_set_logs_session
+    ON workout_set_logs (session_id);
+
+CREATE TABLE IF NOT EXISTS workout_set_videos
+(
+    id          BIGSERIAL PRIMARY KEY,
+    set_log_id  BIGINT       NOT NULL,
+    status      VARCHAR(20)  NOT NULL,
+    path        VARCHAR(500) NOT NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_workout_set_videos_set
+        FOREIGN KEY (set_log_id) REFERENCES workout_set_logs (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_set_videos_set
+    ON workout_set_videos (set_log_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS ai_form_feedback
+(
+    id         BIGSERIAL PRIMARY KEY,
+    video_id   BIGINT       NOT NULL,
+    rep_count  INT          NULL,
+    tempo      VARCHAR(40)  NULL,
+    flags_json TEXT         NULL,
+    confidence DOUBLE PRECISION NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_ai_form_feedback_video
+        FOREIGN KEY (video_id) REFERENCES workout_set_videos (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT uq_ai_form_feedback_video
+        UNIQUE (video_id)
 );
 
 -- =========================
@@ -1463,6 +2062,8 @@ CREATE TABLE IF NOT EXISTS vault_notes
     content                   TEXT         NOT NULL,
     linked_date               DATE         NULL,
     linked_workout_session_id BIGINT       NULL,
+    trainer_template_id        BIGINT       NULL,
+    trainer_template_entry_id  BIGINT       NULL,
     created_at                TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

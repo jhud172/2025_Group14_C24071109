@@ -16,11 +16,14 @@
                                          th:text="${icons[thread.iconKey]}">💬</div>
                                     <div>
                                         <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100" th:text="${thread.title}">Chat</h1>
-                                        <span th:if="${hasCustomInstructions}" class="mt-1 inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Active instructions</span>
+                                        <span id="chatInstructionsBadge" th:classappend="${!hasCustomInstructions} ? ' hidden' : ''" class="mt-1 inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Active instructions</span>
                                     </div>
                                 </div>
                             </div>
-                            <button id="chatSettingsToggle" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50">⚙ Settings</button>
+                            <div class="flex items-center gap-2">
+                                <button id="chatInstructionsToggle" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Instructions</button>
+                                <button id="chatSettingsToggle" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50">⚙ Settings</button>
+                            </div>
                         </header>
 
                         <div class="flex min-h-[60vh] flex-col">
@@ -64,11 +67,33 @@
                                     <label class="flex items-center gap-2"><input id="chatPinnedInput" type="checkbox" th:checked="${thread.pinned}" />Pinned</label>
                                     <label class="flex items-center gap-2"><input id="chatArchivedInput" type="checkbox" th:checked="${thread.archived}" />Archived</label>
                                 </div>
-                                <textarea id="chatInstructionsInput" rows="3" class="rounded-xl border border-slate-200 px-3 py-2 text-sm" th:text="${thread.customInstructions}"></textarea>
                             </div>
                             <div class="mt-3 flex items-center gap-2">
                                 <button id="chatInstructionsReset" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold">Reset to default</button>
                                 <button id="chatSettingsSave" class="rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white">Save settings</button>
+                            </div>
+                        </div>
+
+                        <div id="chatInstructionsDrawer" class="hidden border-t border-slate-200/70 bg-white px-6 py-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-900">Coach modes</div>
+                                    <p class="mt-1 text-xs text-slate-500">Add guidance that shapes how Coach Bot responds in this thread.</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <button type="button" class="chat-preset rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700" data-preset="fatloss">Fat loss</button>
+                                <button type="button" class="chat-preset rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700" data-preset="strength">Strength</button>
+                                <button type="button" class="chat-preset rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700" data-preset="rehab">Rehab</button>
+                                <button type="button" class="chat-preset rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700" data-preset="motivation">Motivation</button>
+                            </div>
+
+                            <textarea id="chatInstructionsInput" rows="5" class="mt-3 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm" th:text="${thread.customInstructions}" placeholder="Example: Keep responses short. Focus on recovery, pain-free movement, and safe progressions."></textarea>
+
+                            <div class="mt-3 flex flex-wrap items-center gap-2">
+                                <button id="chatInstructionsResetBtn" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold">Clear</button>
+                                <button id="chatInstructionsSave" class="rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white">Save instructions</button>
                             </div>
                         </div>
                     </section>

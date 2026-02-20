@@ -1,43 +1,55 @@
 <th:block th:replace="~{base :: layout('Exercise Log', null, ~{::content}, null)}">
 
-    <div th:fragment="content">
-        <div class="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
+    <div th:fragment="content" class="detail-container">
+        <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
 
-            <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Exercise Log Details</h1>
-                        <p class="mt-1 text-sm text-slate-600">A full view of the selected log entry.</p>
-                    </div>
-                    <a href="/exercise-log/list" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
-                        Back to list
-                    </a>
+        <!-- Header with key metadata at top -->
+        <div class="detail-header">
+            <div class="detail-header-content">
+                <div class="detail-header-meta">
+                    <p class="detail-label">Exercise Log</p>
+                    <h1 class="detail-title">Exercise Log Details</h1>
+                    <p class="detail-subtitle">A full view of the selected log entry.</p>
                 </div>
-
-                <dl class="mt-6 divide-y divide-slate-100">
-                    <div class="flex items-center justify-between gap-4 py-3">
-                        <dt class="text-sm font-medium text-slate-700">Date</dt>
-                        <dd class="text-sm text-slate-900" th:text="${log.date}"></dd>
-                    </div>
-                    <div class="flex items-center justify-between gap-4 py-3">
-                        <dt class="text-sm font-medium text-slate-700">Mood before</dt>
-                        <dd class="text-sm text-slate-900" th:text="${log.moodBefore}"></dd>
-                    </div>
-                    <div class="flex items-center justify-between gap-4 py-3">
-                        <dt class="text-sm font-medium text-slate-700">Mood after</dt>
-                        <dd class="text-sm text-slate-900" th:text="${log.moodAfter}"></dd>
-                    </div>
-                    <div class="flex items-center justify-between gap-4 py-3">
-                        <dt class="text-sm font-medium text-slate-700">Confidence after</dt>
-                        <dd class="text-sm text-slate-900" th:text="${log.confidence}"></dd>
-                    </div>
-                    <div class="py-3">
-                        <dt class="text-sm font-medium text-slate-700">Comments</dt>
-                        <dd class="mt-1 whitespace-pre-wrap text-sm text-slate-900" th:text="${log.comments}"></dd>
-                    </div>
-                </dl>
+                <!-- Primary actions - sticky on larger screens -->
+                <div class="detail-actions-sticky">
+                    <a href="/exercise-log/list" class="detail-btn-secondary">Back to list</a>
+                </div>
             </div>
+        </div>
+
+        <!-- Structured content sections -->
+        <div class="detail-sections">
+            <section class="detail-section">
+                <h2 class="detail-section-title">Log details</h2>
+                <div class="detail-section-content">
+                    <div class="detail-metadata">
+                        <div class="detail-metadata-item">
+                            <p class="detail-metadata-label">Date</p>
+                            <p class="detail-metadata-value" th:text="${log.date}"></p>
+                        </div>
+                        <div class="detail-metadata-item">
+                            <p class="detail-metadata-label">Mood before</p>
+                            <p class="detail-metadata-value" th:text="${log.moodBefore}"></p>
+                        </div>
+                        <div class="detail-metadata-item">
+                            <p class="detail-metadata-label">Mood after</p>
+                            <p class="detail-metadata-value" th:text="${log.moodAfter}"></p>
+                        </div>
+                        <div class="detail-metadata-item">
+                            <p class="detail-metadata-label">Confidence after</p>
+                            <p class="detail-metadata-value" th:text="${log.confidence}"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="detail-section" th:if="${log.comments != null && !log.comments.isEmpty()}">
+                <h2 class="detail-section-title">Comments</h2>
+                <div class="detail-section-content">
+                    <p class="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300" th:text="${log.comments}"></p>
+                </div>
+            </section>
         </div>
     </div>
 </th:block>

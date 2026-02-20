@@ -1,5 +1,5 @@
 -- Demo calendar seed for user 'demo'
--- Range: 2026-01-09 .. 2026-01-23 (inclusive)
+-- Range: CURRENT_DATE - 7 .. CURRENT_DATE + 7 (inclusive)
 -- Guarantees: each day has at least one item (either a calendar task or a schedule occurrence)
 -- Also seeds exercises, workouts, and some workout_sessions.
 
@@ -204,204 +204,204 @@ WHERE NOT EXISTS (
 -- -------------------------
 -- SCHEDULE OCCURRENCES (odd days) - ensure every odd day has schedule data
 -- -------------------------
--- 2026-01-09
+-- CURRENT_DATE - 7
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
   (SELECT id FROM exercises WHERE name = 'Walk'),
   (SELECT id FROM schedules WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Daily Movement'),
-  DATE '2026-01-09',
+  CURRENT_DATE - INTERVAL '7' DAY,
   'Demo Daily Movement',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM schedule_occurrences
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-09'
+    AND date = CURRENT_DATE - INTERVAL '7' DAY
     AND schedule_name = 'Demo Daily Movement'
 );
 
--- 2026-01-11
+-- CURRENT_DATE - 5
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
   (SELECT id FROM exercises WHERE name = 'Plank'),
   (SELECT id FROM schedules WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Daily Movement'),
-  DATE '2026-01-11',
+  CURRENT_DATE - INTERVAL '5' DAY,
   'Demo Daily Movement',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM schedule_occurrences
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-11'
+    AND date = CURRENT_DATE - INTERVAL '5' DAY
     AND schedule_name = 'Demo Daily Movement'
 );
 
--- 2026-01-13
+-- CURRENT_DATE - 3
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
   (SELECT id FROM exercises WHERE name = 'Walk'),
   (SELECT id FROM schedules WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Daily Movement'),
-  DATE '2026-01-13',
+  CURRENT_DATE - INTERVAL '3' DAY,
   'Demo Daily Movement',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM schedule_occurrences
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-13'
+    AND date = CURRENT_DATE - INTERVAL '3' DAY
     AND schedule_name = 'Demo Daily Movement'
 );
 
--- 2026-01-15
+-- CURRENT_DATE - 1
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
   (SELECT id FROM exercises WHERE name = 'Run'),
   (SELECT id FROM schedules WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Daily Movement'),
-  DATE '2026-01-15',
+  CURRENT_DATE - INTERVAL '1' DAY,
   'Demo Daily Movement',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM schedule_occurrences
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-15'
+    AND date = CURRENT_DATE - INTERVAL '1' DAY
     AND schedule_name = 'Demo Daily Movement'
 );
 
--- 2026-01-17
+-- CURRENT_DATE + 1
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
   (SELECT id FROM exercises WHERE name = 'Walk'),
   (SELECT id FROM schedules WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Daily Movement'),
-  DATE '2026-01-17',
+  CURRENT_DATE + INTERVAL '1' DAY,
   'Demo Daily Movement',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM schedule_occurrences
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-17'
+    AND date = CURRENT_DATE + INTERVAL '1' DAY
     AND schedule_name = 'Demo Daily Movement'
 );
 
--- 2026-01-19
+-- CURRENT_DATE + 3
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
   (SELECT id FROM exercises WHERE name = 'Plank'),
   (SELECT id FROM schedules WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Daily Movement'),
-  DATE '2026-01-19',
+  CURRENT_DATE + INTERVAL '3' DAY,
   'Demo Daily Movement',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM schedule_occurrences
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-19'
+    AND date = CURRENT_DATE + INTERVAL '3' DAY
     AND schedule_name = 'Demo Daily Movement'
 );
 
--- 2026-01-21
+-- CURRENT_DATE + 5
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
   (SELECT id FROM exercises WHERE name = 'Walk'),
   (SELECT id FROM schedules WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Daily Movement'),
-  DATE '2026-01-21',
+  CURRENT_DATE + INTERVAL '5' DAY,
   'Demo Daily Movement',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM schedule_occurrences
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-21'
+    AND date = CURRENT_DATE + INTERVAL '5' DAY
     AND schedule_name = 'Demo Daily Movement'
 );
 
--- 2026-01-23
+-- CURRENT_DATE + 7
 INSERT INTO schedule_occurrences (user_id, exercise_id, schedule_id, date, schedule_name, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
   (SELECT id FROM exercises WHERE name = 'Run'),
   (SELECT id FROM schedules WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Daily Movement'),
-  DATE '2026-01-23',
+  CURRENT_DATE + INTERVAL '7' DAY,
   'Demo Daily Movement',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM schedule_occurrences
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-23'
+    AND date = CURRENT_DATE + INTERVAL '7' DAY
     AND schedule_name = 'Demo Daily Movement'
 );
 
 -- -------------------------
 -- TASKS (even days) - ensure every even day has task data
 -- -------------------------
--- 2026-01-10
+-- CURRENT_DATE - 6
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, requires_log)
-SELECT (SELECT id FROM users WHERE username = 'demo'), DATE '2026-01-10', 'Plan the day (10 min)', TIME '09:00:00', 'Pick your top 1–2 priorities.', FALSE, FALSE, FALSE
+SELECT (SELECT id FROM users WHERE username = 'demo'), CURRENT_DATE - INTERVAL '6' DAY, 'Plan the day (10 min)', TIME '09:00:00', 'Pick your top 1–2 priorities.', FALSE, FALSE, FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM calendar_tasks
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-10'
+    AND date = CURRENT_DATE - INTERVAL '6' DAY
     AND title = 'Plan the day (10 min)'
 );
 
--- 2026-01-12
+-- CURRENT_DATE - 4
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, requires_log)
-SELECT (SELECT id FROM users WHERE username = 'demo'), DATE '2026-01-12', 'Hydrate (2L target)', TIME '10:00:00', 'Keep a bottle nearby.', FALSE, FALSE, FALSE
+SELECT (SELECT id FROM users WHERE username = 'demo'), CURRENT_DATE - INTERVAL '4' DAY, 'Hydrate (2L target)', TIME '10:00:00', 'Keep a bottle nearby.', FALSE, FALSE, FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM calendar_tasks
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-12'
+    AND date = CURRENT_DATE - INTERVAL '4' DAY
     AND title = 'Hydrate (2L target)'
 );
 
--- 2026-01-14
+-- CURRENT_DATE - 2
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, requires_log)
-SELECT (SELECT id FROM users WHERE username = 'demo'), DATE '2026-01-14', 'Tidy workspace', TIME '11:30:00', 'Small reset = big focus.', FALSE, FALSE, FALSE
+SELECT (SELECT id FROM users WHERE username = 'demo'), CURRENT_DATE - INTERVAL '2' DAY, 'Tidy workspace', TIME '11:30:00', 'Small reset = big focus.', FALSE, FALSE, FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM calendar_tasks
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-14'
+    AND date = CURRENT_DATE - INTERVAL '2' DAY
     AND title = 'Tidy workspace'
 );
 
--- 2026-01-16
+-- CURRENT_DATE
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, requires_log)
-SELECT (SELECT id FROM users WHERE username = 'demo'), DATE '2026-01-16', 'Review week progress', TIME '17:00:00', 'Quick reflection: what worked?', FALSE, FALSE, FALSE
+SELECT (SELECT id FROM users WHERE username = 'demo'), CURRENT_DATE, 'Review week progress', TIME '17:00:00', 'Quick reflection: what worked?', FALSE, FALSE, FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM calendar_tasks
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-16'
+    AND date = CURRENT_DATE
     AND title = 'Review week progress'
 );
 
--- 2026-01-18
+-- CURRENT_DATE + 2
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, requires_log)
-SELECT (SELECT id FROM users WHERE username = 'demo'), DATE '2026-01-18', 'Meal prep basics', TIME '13:00:00', 'Prep something easy for tomorrow.', FALSE, FALSE, FALSE
+SELECT (SELECT id FROM users WHERE username = 'demo'), CURRENT_DATE + INTERVAL '2' DAY, 'Meal prep basics', TIME '13:00:00', 'Prep something easy for tomorrow.', FALSE, FALSE, FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM calendar_tasks
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-18'
+    AND date = CURRENT_DATE + INTERVAL '2' DAY
     AND title = 'Meal prep basics'
 );
 
--- 2026-01-20
+-- CURRENT_DATE + 4
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, requires_log)
-SELECT (SELECT id FROM users WHERE username = 'demo'), DATE '2026-01-20', 'Inbox zero (15 min)', TIME '09:30:00', 'Batch messages, then stop.', FALSE, FALSE, FALSE
+SELECT (SELECT id FROM users WHERE username = 'demo'), CURRENT_DATE + INTERVAL '4' DAY, 'Inbox zero (15 min)', TIME '09:30:00', 'Batch messages, then stop.', FALSE, FALSE, FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM calendar_tasks
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-20'
+    AND date = CURRENT_DATE + INTERVAL '4' DAY
     AND title = 'Inbox zero (15 min)'
 );
 
--- 2026-01-22
+-- CURRENT_DATE + 6
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, requires_log)
-SELECT (SELECT id FROM users WHERE username = 'demo'), DATE '2026-01-22', 'Early night', TIME '21:30:00', 'Protect recovery for tomorrow.', FALSE, FALSE, FALSE
+SELECT (SELECT id FROM users WHERE username = 'demo'), CURRENT_DATE + INTERVAL '6' DAY, 'Early night', TIME '21:30:00', 'Protect recovery for tomorrow.', FALSE, FALSE, FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM calendar_tasks
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-22'
+    AND date = CURRENT_DATE + INTERVAL '6' DAY
     AND title = 'Early night'
 );
 
@@ -411,41 +411,41 @@ WHERE NOT EXISTS (
 INSERT INTO workout_sessions (user_id, date, workout_id, name_snapshot, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
-  DATE '2026-01-12',
+  CURRENT_DATE - INTERVAL '4' DAY,
   (SELECT id FROM workouts WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Full Body'),
   'Demo Full Body',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM workout_sessions
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-12'
+    AND date = CURRENT_DATE - INTERVAL '4' DAY
     AND workout_id = (SELECT id FROM workouts WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Full Body')
 );
 
 INSERT INTO workout_sessions (user_id, date, workout_id, name_snapshot, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
-  DATE '2026-01-16',
+  CURRENT_DATE,
   (SELECT id FROM workouts WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Cardio Blast'),
   'Demo Cardio Blast',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM workout_sessions
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-16'
+    AND date = CURRENT_DATE
     AND workout_id = (SELECT id FROM workouts WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Cardio Blast')
 );
 
 INSERT INTO workout_sessions (user_id, date, workout_id, name_snapshot, completed)
 SELECT
   (SELECT id FROM users WHERE username = 'demo'),
-  DATE '2026-01-21',
+  CURRENT_DATE + INTERVAL '5' DAY,
   (SELECT id FROM workouts WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Full Body'),
   'Demo Full Body',
   FALSE
 WHERE NOT EXISTS (
   SELECT 1 FROM workout_sessions
   WHERE user_id = (SELECT id FROM users WHERE username = 'demo')
-    AND date = DATE '2026-01-21'
+    AND date = CURRENT_DATE + INTERVAL '5' DAY
     AND workout_id = (SELECT id FROM workouts WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND name = 'Demo Full Body')
 );

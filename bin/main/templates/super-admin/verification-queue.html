@@ -1,6 +1,6 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout(${pageTitle} ?: 'Super Admin · Trainer Verification Queue', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(${pageTitle} ?: 'Super Admin · Trainer Verification Queue', null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
@@ -152,7 +152,11 @@
 
                                 <!-- Actions -->
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                    <div th:if="${request.status.name()} == 'PENDING' or ${request.status.name()} == 'NEEDS_INFO'">
+                                    <a th:href="@{/super-admin/verification/{id}(id=${request.id})}"
+                                       class="inline-flex items-center px-3 py-1.5 rounded-lg border border-white/20 bg-white/5 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors">
+                                        View Details
+                                    </a>
+                                    <div th:if="${request.status.name()} == 'PENDING' or ${request.status.name()} == 'NEEDS_INFO'" class="inline-flex items-center gap-2">
                                         <button type="button" 
                                                 onclick="approveRequest(this)"
                                                 th:attr="data-request-id=${request.id}"
@@ -305,6 +309,9 @@
         </div>
 
         <!-- JavaScript for Modals -->
+    </div>
+
+    <th:block th:fragment="pageScripts">
         <script th:inline="javascript">
             function selectRequest(row) {
                 const name = row.getAttribute('data-trainer-name') || 'Unknown';
@@ -385,6 +392,6 @@
                 }
             });
         </script>
-    </div>
+    </th:block>
 
 </th:block>

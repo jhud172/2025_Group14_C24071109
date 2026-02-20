@@ -69,6 +69,10 @@ tasks.named('compileTestJava') {
 
 tasks.named('bootRun') {
 	doFirst {
+		if (!System.getenv('SPRING_PROFILES_ACTIVE') && !System.getProperty('spring.profiles.active')) {
+			environment 'SPRING_PROFILES_ACTIVE', 'local'
+		}
+
 		def envFile = file('.env')
 		if (!envFile.exists()) {
 			return

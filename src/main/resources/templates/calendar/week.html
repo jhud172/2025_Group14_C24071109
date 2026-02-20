@@ -125,17 +125,18 @@
                                     <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 6} ? ' calendar-weekday-pill--today' : ''">Sat</div>
                                     <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 7} ? ' calendar-weekday-pill--today' : ''">Sun</div>
                                 </div>
-                                <div class="calendar-month-grid grid grid-cols-7">
+                                <div class="calendar-month-grid grid grid-cols-7 gap-3">
                                 <div th:each="i : ${#numbers.sequence(0,6)}" 
                                      th:with="day=${weekDays[i]},
                                          dateKey=${#temporals.format(day,'yyyy-MM-dd')},
-                                         tasks=${tasksByDate != null ? tasksByDate[day] : null},
+                                         tasks=${tasksByDateIso != null ? tasksByDateIso.get(dateKey) : null},
                                               tTotal=${tasks!=null?tasks.size():0},
-                                              sched=${occurrences[day]},
+                                              sched=${occurrencesByDateIso != null ? occurrencesByDateIso.get(dateKey) : null},
                                               sTotal=${sched!=null?sched.size():0},
                                              statusValue=${day.isEqual(today) ? 'today' : (day.isEqual(tomorrow) ? 'tomorrow' : (day.isBefore(today) ? ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-incomplete') : 'future'))}"
                                      class="calendar-day-card calendar-week-card heat-none"
                                      data-load="0"
+                                     style="min-width: 0;"
                                      th:attr="data-day-link=@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}},
                                               data-date=${#temporals.format(day,'yyyy-MM-dd')},
                                               data-status=${statusValue},

@@ -5,141 +5,220 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <meta name="_csrf_param" th:content="${_csrf.parameterName}">
+    <link rel="stylesheet" href="/css/calendar-heatmap.css">
+    <link rel="stylesheet" href="/css/components/calendar-deployment-overrides.css">
 </div>
 
 <div th:fragment="content">
-    <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+    <div class="calendar-month-view mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex flex-col gap-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <div class="flex flex-wrap gap-3">
-                    <a href="/calendar?view=month" class="btn btn--primary btn--md">Month view</a>
-                    <a href="/calendar?view=week" class="btn btn--secondary btn--md">Week view</a>
+                <div class="calendar-view-toggle">
+                    <a href="/calendar?view=month" class="calendar-view-btn active">Month view</a>
+                    <a href="/calendar?view=week" class="calendar-view-btn">Week view</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <button type="button" id="scheduleDrawerButton" class="btn btn--secondary btn--md">Schedules</button>
-                    <form method="post" action="/calendar/preferences" class="flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <input type="hidden" id="month-redirect" name="redirect" th:value="${'/calendar?view=month&month=' + month + '&year=' + year}" />
-                        <span class="text-slate-500">Display</span>
-                        <button name="layout" value="COMBINED_LIST" type="submit"
-                                class="rounded-full px-2 py-1"
-                                th:classappend="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).COMBINED_LIST} ? ' bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ' hover:bg-slate-100 dark:hover:bg-slate-800'">Detailed</button>
-                        <button name="layout" value="SEPARATED_BY_CATEGORY" type="submit"
-                                class="rounded-full px-2 py-1"
-                                th:classappend="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY} ? ' bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : ' hover:bg-slate-100 dark:hover:bg-slate-800'">Grouped</button>
-                    </form>
+                    <div class="calendar-mode-indicator hidden sm:flex">
+                        Month View — <span th:text="${calendarLayout != null and calendarLayout.name() == 'SEPARATED_BY_CATEGORY' ? 'Grouped' : 'Detailed'}"></span>
+                    </div>
+                    <div class="calendar-info-link" aria-label="Calendar layout information">
+                        <button type="button" class="calendar-info-link__button" aria-label="Calendar layout settings help">
+                            <span class="calendar-info-link__icon">i</span>
+                        </button>
+                        <span class="calendar-info-link__tip" role="tooltip">
+                            Controls how cards display: Detailed combines items, Grouped separates categories.
+                            <a href="/profile" class="calendar-info-link__tip-link">Open calendar settings</a>
+                        </span>
+                    </div>
+                    <button type="button" id="scheduleDrawerButton" class="calendar-action-btn calendar-action-btn--primary">Schedules</button>
                 </div>
             </div>
 
-            <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <a id="month-prev" th:href="@{'/calendar?view=month&month=' + ${prevMonth} + '&year=' + ${prevYear}}" class="btn btn--secondary btn--md">← Prev</a>
-                <div class="text-center">
-                    <h1 class="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 sm:text-2xl">
-                        <span id="month-name" th:text="${T(java.time.Month).of(month).getDisplayName(T(java.time.format.TextStyle).FULL, T(java.util.Locale).UK)}"></span>
-                        <span id="month-year" class="text-slate-600 dark:text-slate-300" th:text="${year}"></span>
-                    </h1>
+            <div class="calendar-jump-controls" aria-label="Month jump controls">
+                <div class="calendar-jump-toolbar">
+                    <button type="button" id="month-jump-today" class="calendar-action-btn calendar-jump-btn">Jump to today</button>
+                    <div class="calendar-jump-field calendar-jump-field--date">
+                        <label class="sr-only" for="month-jump-date">Jump to date</label>
+                        <input id="month-jump-date" type="date" class="calendar-jump-input" />
+                        <button type="button" id="month-jump-date-go" class="calendar-action-btn calendar-jump-btn">Jump to date</button>
+                    </div>
+                    <button type="button" id="month-jump-next-workout" class="calendar-action-btn calendar-jump-btn">Jump to next workout</button>
+                    <div class="calendar-jump-field calendar-jump-field--task">
+                        <label class="sr-only" for="month-jump-task">Jump to task</label>
+                        <input id="month-jump-task" type="text" class="calendar-jump-input" placeholder="Task name" />
+                        <button type="button" id="month-jump-task-go" class="calendar-action-btn calendar-action-btn--accent calendar-jump-btn">Jump to task</button>
+                    </div>
                 </div>
-                <a id="month-next" th:href="@{'/calendar?view=month&month=' + ${nextMonth} + '&year=' + ${nextYear}}" class="btn btn--secondary btn--md">Next →</a>
+                <p id="month-jump-status" class="calendar-jump-status" aria-live="polite"></p>
             </div>
 
-            <div id="month-slider" th:attr="data-year=${year},data-month=${month}" class="mt-6 overflow-hidden">
+            <div class="calendar-nav-controls">
+                <a id="month-prev" th:href="@{'/calendar?view=month&month=' + ${prevMonth} + '&year=' + ${prevYear}}" class="calendar-nav-btn">← Prev</a>
+                <div class="calendar-month-title">
+                    <span id="month-name" class="calendar-month-name" th:text="${T(java.time.Month).of(month).getDisplayName(T(java.time.format.TextStyle).FULL, T(java.util.Locale).UK)}"></span>
+                    <span id="month-year" class="calendar-month-year" th:text="${year}"></span>
+                </div>
+                <a id="month-next" th:href="@{'/calendar?view=month&month=' + ${nextMonth} + '&year=' + ${nextYear}}" class="calendar-nav-btn">Next →</a>
+            </div>
+
+            <div id="month-slider" th:attr="data-year=${year},data-month=${month}" class="mt-6 overflow-hidden" tabindex="0" role="region" aria-label="Calendar month navigation">
                 <div id="month-slider-track" class="flex" style="width:300%; transform: translateX(-33.333333%);">
                     <div class="flex-shrink-0" style="width:33.333333%;" data-month-pane-slot="prev"></div>
                     <div class="flex-shrink-0" style="width:33.333333%;" data-month-pane-slot="current">
                         <div th:fragment="monthPane" th:attr="data-year=${year},data-month=${month}" data-month-pane class="min-w-full w-full">
-                            <div class="grid w-full grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm">
-                                <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
-                            </div>
-                            <div class="mt-3 grid w-full grid-cols-7 gap-3">
-                                <div th:each="i : ${#numbers.sequence(1, offset - 1)}"></div>
-                                  <div th:each="day : ${#numbers.sequence(1, lengthOfMonth)}"
-                                      th:with="dateObj=${T(java.time.LocalDate).of(year,month,day)},
-                                             dateKey=${#temporals.format(dateObj,'yyyy-MM-dd')}"
-                                     class="calendar-day-card relative h-44 overflow-hidden rounded-2xl ring-1 ring-white/10 bg-white/70 p-3 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.5)] backdrop-blur transition hover:-translate-y-0.5 hover:shadow-[0_22px_48px_-32px_rgba(15,23,42,0.6)] dark:bg-white/5 sm:h-48 sm:p-4"
-                                      th:attr="data-day-link=@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
-                                      th:classappend="${(dateObj.isBefore(today) ? ' opacity-60' : '') +
-                                      (dateObj.isEqual(today) ? ' ring-2 ring-blue-500/80' : '') +
-                                      (isPremium and dateObj.isEqual(today) ? ' bg-blue-500/10' : '') +
-                                      (isPremium and dateObj.isEqual(tomorrow) ? ' ring-2 ring-emerald-500/70 bg-emerald-500/10' : '')}">
-                                    <div class="mb-2 flex items-center justify-between">
-                                        <a th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
-                                           class="block text-sm font-semibold text-slate-900 hover:underline dark:text-slate-100 sm:text-base" th:text="${day}"></a>
-                                        <span th:if="${dateObj.isEqual(today)}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600">Today</span>
-                                        <span th:if="${isPremium and dateObj.isEqual(tomorrow)}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">Tomorrow</span>
-                                    </div>
-                                    <div th:with="localTasks=${tasksByDate != null ? tasksByDate[dateObj] : null}, tasks=${localTasks != null ? localTasks : (tasksByDateIso != null ? tasksByDateIso[dateKey] : null)}, tTotal=${tasks!=null?#lists.size(tasks):0}, sched=${occurrences[dateObj]}, sTotal=${sched!=null?#lists.size(sched):0}, grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
-                                        <div th:if="${!grouped}" class="space-y-2 overflow-y-auto pr-1" style="max-height:140px; position:relative;">
-                                            <div th:each="task,iter : ${tasks}"
-                                                 th:if="${iter.index < 4}"
-                                                 class="calendar-item flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-white/80 p-2 text-xs shadow-sm transition hover:bg-white/90 dark:bg-white/5"
-                                                 th:classappend="${task.completed} ? ' border-emerald-400/40 bg-emerald-500/10' : ''"
-                                                 th:attr="
-                                                    data-type='task',
-                                                    data-id=${task.id},
-                                                    data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
-                                                    data-title=${task.title},
-                                                    data-time=${task.time},
-                                                    data-notes=${task.notes},
-                                                    data-completed=${task.completed}
-                                                ">
-                                                <div class="flex min-w-0 flex-col leading-tight">
-                                                    <span class="truncate font-semibold text-slate-900 dark:text-slate-100" th:classappend="${task.completed} ? ' line-through' : ''" th:text="${task.title}"></span>
-                                                    <span class="truncate text-slate-600 dark:text-slate-300" th:classappend="${task.completed} ? ' line-through' : ''" th:text="${task.time != null ? task.time : '—'}"></span>
-                                                </div>
-                                                <div th:if="${task.completed}" class="flex-shrink-0 text-base font-bold text-emerald-600">✓</div>
-                                            </div>
-                                            <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="block rounded-xl border border-white/10 bg-white/70 p-1 text-center text-xs font-semibold text-slate-700 shadow-sm hover:underline dark:bg-white/5 dark:text-slate-200" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
-                                            <div th:if="${tTotal > 0 and sTotal > 0}" class="my-1 border-t border-white/10"></div>
-                                            <div th:each="occ,iter : ${sched}"
-                                                 th:if="${iter.index < 3}"
-                                                 th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
-                                                 class="calendar-item flex items-center justify-between gap-2 rounded-2xl border border-white/10 bg-slate-50/70 p-2 text-xs shadow-sm transition hover:bg-blue-100/70 dark:bg-white/5 dark:hover:bg-blue-500/10"
-                                                 th:classappend="${occ.completed} ? ' border-emerald-400/40 bg-emerald-500/10' : ''"
-                                                 th:attr="
-                                                    data-id=${occ.id},
-                                                    data-type='occurrence',
-                                                    data-title=${occTitle},
-                                                    data-notes=${occ.scheduleName},
-                                                    data-time='—',
-                                                    data-completed=${occ.completed},
-                                                    data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}
-                                                 ">
-                                                <div class="flex min-w-0 flex-col leading-tight">
-                                                    <span class="truncate font-semibold text-slate-900 dark:text-slate-100"
-                                                          th:classappend="${occ.completed} ? ' line-through' : ''"
-                                                          th:text="${occTitle}"></span>
-                                                    <span class="truncate text-slate-700 dark:text-slate-300"
-                                                          th:classappend="${occ.completed} ? ' line-through' : ''"
-                                                          th:text="'From: ' + ${occ.scheduleName}"></span>
-                                                </div>
-                                                <div th:if="${occ.completed}" class="flex-shrink-0 text-base font-bold text-emerald-600">✓</div>
-                                            </div>
-                                            <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}" class="block rounded-xl border border-white/10 bg-white/60 p-1 text-center text-xs font-semibold text-slate-700 shadow-sm hover:underline dark:bg-white/5 dark:text-slate-200" th:text="${'+' + (sTotal - 3) + ' more schedules'}"></a>
+                            <div class="calendar-month-container">
+                                <div class="calendar-day-headers grid grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm">
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 1} ? ' calendar-weekday-pill--today' : ''">Mon</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 2} ? ' calendar-weekday-pill--today' : ''">Tue</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 3} ? ' calendar-weekday-pill--today' : ''">Wed</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 4} ? ' calendar-weekday-pill--today' : ''">Thu</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 5} ? ' calendar-weekday-pill--today' : ''">Fri</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 6} ? ' calendar-weekday-pill--today' : ''">Sat</div>
+                                    <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 7} ? ' calendar-weekday-pill--today' : ''">Sun</div>
+                                </div>
+                                <div class="calendar-month-grid grid grid-cols-7">
+                                    <div th:each="i : ${#numbers.sequence(1, offset - 1)}"></div>
+                                    <div th:each="day : ${#numbers.sequence(1, lengthOfMonth)}"
+                                         th:with="dateObj=${T(java.time.LocalDate).of(year, month, day)},
+                                                  dateKey=${#temporals.format(dateObj, 'yyyy-MM-dd')},
+                                                  tasks=${tasksByDateIso != null ? tasksByDateIso.get(dateKey) : null},
+                                                  tTotal=${tasks != null ? #lists.size(tasks) : 0},
+                                                  sched=${occurrencesByDateIso != null ? occurrencesByDateIso.get(dateKey) : null},
+                                                  sTotal=${sched != null ? #lists.size(sched) : 0},
+                                                  statusValue=${dateObj.isEqual(today) ? 'today' : (dateObj.isEqual(tomorrow) ? 'tomorrow' : (dateObj.isBefore(today) ? ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-incomplete') : 'future'))}"
+                                         class="calendar-day-card heat-none"
+                                         data-load="0"
+                                         th:attr="data-day-link=@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}},
+                                                  data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
+                                                  data-status=${statusValue},
+                                                  data-is-past=${dateObj.isBefore(today)}">
+                                        <div class="calendar-status-bar"></div>
+                                        <div class="calendar-heat-overlay"></div>
+                                        <div class="calendar-day-header">
+                                            <a th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
+                                               class="calendar-day-number"
+                                               th:text="${day}"></a>
+                                            <span th:if="${dateObj.isEqual(today)}"
+                                                  class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
+                                            <span th:if="${dateObj.isEqual(tomorrow)}"
+                                                  class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
                                         </div>
-                                        <div th:if="${grouped}" class="space-y-3 text-xs">
-                                            <div>
-                                                <div class="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                                                    <span>Tasks</span><span th:text="${tTotal}"></span>
-                                                </div>
-                                                <div class="mt-1 space-y-1">
-                                                    <div th:each="task,iter : ${tasks}" th:if="${iter.index < 2}"
-                                                         class="calendar-item rounded-xl border border-white/10 bg-white/70 px-2 py-1 text-slate-700 dark:bg-white/5 dark:text-slate-200"
-                                                         th:classappend="${task.completed} ? ' line-through text-emerald-600' : ''"
-                                                         th:attr="data-type='task',data-id=${task.id},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-completed=${task.completed}">
-                                                        <span class="truncate" th:text="${task.title}"></span>
+                                        <div class="calendar-day-content" th:with="grouped=${calendarLayout != null and calendarLayout.name() == 'SEPARATED_BY_CATEGORY'}">
+                                            <!-- Empty state: Show only when both tasks AND schedules are empty -->
+                                            <div th:if="${tTotal == 0 and sTotal == 0}"
+                                                 class="calendar-empty-state">
+                                                <span class="calendar-empty-state-text">Free day</span>
+                                            </div>
+                                            <!-- Detailed mode: Tasks and workouts combined -->
+                                            <div th:if="${!grouped}"
+                                                 class="calendar-singular-list">
+                                                <!-- Task items loop: max 4 shown -->
+                                                <th:block th:if="${tasks != null and #lists.size(tasks) > 0}">
+                                                  <div th:each="task, taskIter : ${tasks}"
+                                                       th:if="${taskIter.index < 4}"
+                                                       class="calendar-item"
+                                                         th:classappend="${task.completed} ? ' completed' : ''"
+                                                         th:attr="data-type='task',
+                                                                  data-id=${task.id},
+                                                                  data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
+                                                                  data-title=${task.title},
+                                                                  data-time=${task.time},
+                                                                  data-notes=${task.notes},
+                                                                  data-completed=${task.completed}">
+                                                        <div class="calendar-item-content">
+                                                            <div class="calendar-item-title" th:text="${task.title}"></div>
+                                                            <div class="calendar-item-meta" th:text="${task.time != null ? task.time : '—'}"></div>
+                                                        </div>
+                                                        <div th:if="${task.completed}" class="calendar-item-check">✓</div>
+                                                    </div>
+                                                </th:block>
+                                                <!-- "More tasks" link -->
+                                                <a th:if="${tTotal > 4}"
+                                                   th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
+                                                   class="calendar-more-link"
+                                                   th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
+                                                <!-- Divider between tasks and workouts -->
+                                                <div th:if="${tTotal > 0 and sTotal > 0}"
+                                                     class="my-1 border-t border-white/10"></div>
+                                                <!-- Workout items loop: max 3 shown -->
+                                                <th:block th:if="${sched != null and #lists.size(sched) > 0}">
+                                                  <div th:each="occ, occIter : ${sched}"
+                                                       th:if="${occIter.index < 3}"
+                                                       th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
+                                                       class="calendar-item"
+                                                       th:classappend="${occ.completed} ? ' completed' : ''"
+                                                       th:attr="data-type='workout',
+                                                                data-id=${occ.id},
+                                                                data-title=${occTitle},
+                                                                  data-notes=${occ.scheduleName},
+                                                                  data-time='—',
+                                                                  data-completed=${occ.completed},
+                                                                  data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
+                                                        <div class="calendar-item-content">
+                                                            <div class="calendar-item-title" th:text="${occTitle}"></div>
+                                                            <div class="calendar-item-meta" th:text="'From: ' + ${occ.scheduleName}"></div>
+                                                        </div>
+                                                        <div th:if="${occ.completed}" class="calendar-item-check">✓</div>
+                                                    </div>
+                                                </th:block>
+                                                <!-- "More workouts" link -->
+                                                <a th:if="${sTotal > 3}"
+                                                   th:href="@{'/calendar/day/' + ${year} + '-' + ${'%02d'.formatted(month)} + '-' + ${'%02d'.formatted(day)}}"
+                                                   class="calendar-more-link"
+                                                   th:text="${'+' + (sTotal - 3) + ' more workouts'}"></a>
+                                            </div>
+                                            <!-- Grouped mode: Tasks and workouts in separate sections -->
+                                            <div th:if="${grouped}"
+                                                 class="space-y-3">
+                                                <!-- Tasks section -->
+                                                <div class="calendar-grouped-section">
+                                                    <div class="calendar-grouped-header">
+                                                        <span class="calendar-grouped-label">Tasks</span>
+                                                        <span class="calendar-grouped-count" th:text="${tTotal}"></span>
+                                                    </div>
+                                                    <div class="calendar-grouped-items">
+                                                        <!-- Task items: max 2 shown -->
+                                                        <th:block th:if="${tasks != null}">
+                                                          <div th:each="task, grpTaskIter : ${tasks}"
+                                                               th:if="${grpTaskIter.index < 2}"
+                                                               class="calendar-grouped-item"
+                                                                     th:classappend="${task.completed} ? ' completed' : ''"
+                                                                     th:attr="data-type='task',
+                                                                          data-id=${task.id},
+                                                                          data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)},
+                                                                          data-title=${task.title},
+                                                                          data-time=${task.time},
+                                                                          data-notes=${task.notes},
+                                                                          data-completed=${task.completed}">
+                                                                <span class="truncate" th:text="${task.title}"></span>
+                                                            </div>
+                                                        </th:block>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div>
-                                                <div class="flex items-center justify-between text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                                                    <span>Schedules</span><span th:text="${sTotal}"></span>
-                                                </div>
-                                                <div class="mt-1 space-y-1">
-                                                    <div th:each="occ,iter : ${sched}" th:if="${iter.index < 2}"
-                                                         th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
-                                                         class="calendar-item rounded-xl border border-white/10 bg-slate-50/70 px-2 py-1 text-slate-700 dark:bg-white/5 dark:text-slate-200"
-                                                         th:attr="data-type='occurrence',data-id=${occ.id},data-title=${occTitle},data-notes=${occ.scheduleName},data-time='—',data-completed=${occ.completed},data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
-                                                        <span class="truncate" th:text="${occTitle}"></span>
+                                                <!-- Workouts section -->
+                                                <div class="calendar-grouped-section">
+                                                    <div class="calendar-grouped-header">
+                                                        <span class="calendar-grouped-label">Workouts</span>
+                                                        <span class="calendar-grouped-count" th:text="${sTotal}"></span>
+                                                    </div>
+                                                    <div class="calendar-grouped-items">
+                                                        <!-- Workout items: max 2 shown -->
+                                                        <th:block th:if="${sched != null}">
+                                                          <div th:each="occ, grpOccIter : ${sched}"
+                                                               th:if="${grpOccIter.index < 2}"
+                                                               th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
+                                                               class="calendar-grouped-item"
+                                                                     th:classappend="${occ.completed} ? ' completed' : ''"
+                                                                     th:attr="data-type='workout',
+                                                                          data-id=${occ.id},
+                                                                          data-title=${occTitle},
+                                                                          data-notes=${occ.scheduleName},
+                                                                          data-time='—',
+                                                                          data-completed=${occ.completed},
+                                                                          data-date=${year + '-' + '%02d'.formatted(month) + '-' + '%02d'.formatted(day)}">
+                                                                <span class="truncate" th:text="${occTitle}"></span>
+                                                            </div>
+                                                        </th:block>
                                                     </div>
                                                 </div>
                                             </div>
@@ -157,26 +236,228 @@
         </div>
     </div>
 
-    <div id="scheduleDrawer" class="fixed inset-0 z-40 hidden">
-        <div class="absolute inset-0 bg-slate-900/70" data-drawer-overlay></div>
-        <div class="absolute left-0 top-0 h-full w-[20rem] max-w-[80vw] overflow-hidden border-r border-white/10 bg-slate-950/95 backdrop-blur">
-            <div class="flex items-center justify-between px-4 py-4">
-                <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-200">Schedules</h2>
-                <button type="button" class="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-200" data-drawer-close>Close</button>
-            </div>
-            <div class="h-[calc(100%-64px)] overflow-y-auto px-4 pb-6">
-                <label class="sr-only" for="schedule-search">Search schedules</label>
-                <input id="schedule-search" type="text" placeholder="Search schedules..." class="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-400" />
-                <ul id="schedule-list" class="mt-4 space-y-3">
-                    <li th:each="schedule, iter : ${schedules}" th:if="${iter.index < 8}">
-                        <div class="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-100 shadow-sm transition hover:bg-white/10">
-                            <p class="font-semibold" th:text="${schedule.name}"></p>
-                            <a th:href="@{'/schedules/' + ${schedule.id} + '/apply'}" class="mt-1 inline-block text-xs font-semibold text-slate-300 hover:underline">Apply to calendar</a>
+    <div id="scheduleDrawer" class="calendar-schedule-shelf" aria-hidden="true">
+        <div class="calendar-schedule-overlay" data-drawer-overlay></div>
+        <div class="calendar-schedule-panel" data-drawer-panel>
+            <!-- New Header Structure -->
+            <header class="calendar-deployment-header">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Deployment Engine</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Manage and deploy training schedules</p>
+                    </div>
+                    <button type="button" class="calendar-schedule-close" data-drawer-close aria-label="Close drawer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="calendar-schedule-body">
+                <!-- Deployment Context Section -->
+                <section class="calendar-deployment-section">
+                    <h3 class="calendar-deployment-section-title">Target Context</h3>
+                    <div class="calendar-deployment-context-card">
+                        <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                            <div>
+                                <span class="block text-slate-500">View</span>
+                                <span id="schedule-context-view" class="font-medium text-slate-900 dark:text-slate-200">Month</span>
+                            </div>
+                            <div>
+                                <span class="block text-slate-500">Selected</span>
+                                <span id="schedule-context-selected-day" class="font-medium text-slate-900 dark:text-slate-200">None</span>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="block text-slate-500">Visible Range</span>
+                                <span id="schedule-context-range" class="font-medium text-slate-900 dark:text-slate-200">—</span>
+                            </div>
+                            <div class="col-span-2 flex items-center gap-2">
+                                <span class="block text-slate-500">Status:</span>
+                                <span id="schedule-context-existing" class="font-medium text-emerald-500">Checking…</span>
+                            </div>
                         </div>
+
+                        <div class="calendar-schedule-scope" role="group" aria-label="Apply scope selection">
+                            <button type="button" class="calendar-schedule-scope-btn is-active" data-schedule-scope="visible">Visible Range</button>
+                            <button type="button" class="calendar-schedule-scope-btn" data-schedule-scope="day">Selected Day</button>
+                            <button type="button" class="calendar-schedule-scope-btn" data-schedule-scope="custom">Custom</button>
+                        </div>
+                        
+                        <div class="calendar-schedule-custom-range mt-2" data-scope-custom hidden>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase text-slate-500" for="schedule-scope-start">Start</label>
+                                    <input id="schedule-scope-start" type="date" class="calendar-deployment-input" />
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase text-slate-500" for="schedule-scope-end">End</label>
+                                    <input id="schedule-scope-end" type="date" class="calendar-deployment-input" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Configuration Section -->
+                <section class="calendar-deployment-section">
+                    <h3 class="calendar-deployment-section-title">Configuration</h3>
+                    
+                    <div class="space-y-3">
+                        <!-- Preview Toggle -->
+                        <div class="flex items-center justify-between rounded-lg bg-slate-50 dark:bg-slate-800 p-2">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="schedule-preview-toggle" checked class="accent-emerald-500 h-4 w-4" />
+                                <label for="schedule-preview-toggle" class="text-sm font-medium text-slate-700 dark:text-slate-300">Live Preview</label>
+                            </div>
+                            <button type="button" class="text-xs text-slate-500 hover:text-red-500" id="schedule-preview-clear">Reset</button>
+                        </div>
+
+                        <!-- Apply Mode & Duration -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-2">
+                                <label class="calendar-deployment-label" for="schedule-apply-scope">Apply Method</label>
+                                <select id="schedule-apply-scope" class="calendar-deployment-select">
+                                    <option value="week">This week only</option>
+                                    <option value="forward">From selected date</option>
+                                    <option value="weeks">Specific duration</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="calendar-deployment-label" for="schedule-apply-weeks">Weeks</label>
+                                <input id="schedule-apply-weeks" type="number" min="1" max="52" value="4" class="calendar-deployment-input" />
+                            </div>
+                        </div>
+
+                        <!-- Conflict Strategy -->
+                        <div>
+                            <label class="calendar-deployment-label">Conflict Strategy</label>
+                            <div class="calendar-deploy-strategy-pills" role="group" aria-label="Conflict handling strategy">
+                                <button type="button" class="strategy-pill is-active" data-deploy-strategy="merge" title="Merge with existing items">Merge</button>
+                                <button type="button" class="strategy-pill" data-deploy-strategy="replace" title="Overwrite exiting items">Replace</button>
+                                <button type="button" class="strategy-pill" data-deploy-strategy="skip" title="Skip busy days">Skip</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="border-t border-slate-200 dark:border-slate-700/50 my-4"></div>
+
+                <!-- Simulation & Actions -->
+                 <details class="calendar-sim-panel mb-4">
+                    <summary class="calendar-filter-summary text-xs">Advanced: Simulation Mode</summary>
+                    <div class="calendar-sim-grid mt-2 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="schedule-sim-enable" class="accent-indigo-500" /> 
+                            <span>Enable Simulation</span>
+                        </label>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-500" for="schedule-sim-weeks">Sim Weeks</label>
+                                <input id="schedule-sim-weeks" type="number" min="1" max="12" value="6" class="calendar-deployment-input" />
+                            </div>
+                            <div class="flex items-end">
+                                 <button type="button" class="w-full rounded bg-indigo-600 px-2 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50" id="schedule-sim-run" disabled>Run Sim</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                
+                <div class="calendar-deploy-summary p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-lg text-xs mb-3" id="schedule-impact-summary" aria-live="polite">
+                    Select a schedule below to preview impact.
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button type="button" class="btn btn--secondary btn--sm w-full justification-center" id="schedule-impact-review" disabled>Review</button>
+                    <button type="button" class="btn btn--primary btn--sm w-full justification-center" id="schedule-impact-apply" disabled>Deploy</button>
+                </div>
+
+                <!-- List Section -->
+                <div class="calendar-schedule-list-header flex items-center justify-between mb-2">
+                    <h3 class="calendar-deployment-section-title mb-0">Library</h3>
+                    <div class="flex gap-2">
+                        <button class="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white" title="Filter" id="toggle-library-filters">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                     <input id="schedule-search" type="text" placeholder="Search saved schedules..." class="calendar-deployment-input w-full" />
+                </div>
+                
+                 <details class="calendar-filter-panel mb-3" id="library-filters-panel">
+                    <summary class="hidden"></summary> <!-- Controlled by JS/CSS ideally, but keeping generic for now -->
+                    <div class="grid grid-cols-2 gap-2 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <select id="schedule-filter-type" class="calendar-deployment-select text-xs">
+                             <option value="all">All types</option>
+                             <option value="weekly">Weekly</option>
+                             <option value="rotational">Rotational</option>
+                        </select>
+                         <select id="schedule-filter-status" class="calendar-deployment-select text-xs">
+                             <option value="all">All Status</option>
+                             <option value="active">Active</option>
+                             <option value="draft">Draft</option>
+                        </select>
+                         <select id="schedule-sort" class="calendar-deployment-select text-xs col-span-2">
+                            <option value="recentlyApplied">Sort: Recently applied</option>
+                            <option value="mostUsed">Sort: Most used</option>
+                        </select>
+                    </div>
+                 </details>
+
+                <section class="calendar-quick-access mb-4" aria-label="Quick access schedules">
+                     <!-- Quick chips container -->
+                    <div id="schedule-pinned-list" class="flex flex-wrap gap-2 mb-2 empty:hidden"></div>
+                    <div id="schedule-recent-list" class="flex flex-wrap gap-2 empty:hidden"></div>
+                </section>
+
+                <ul id="schedule-list" class="space-y-3 pb-8">
+                     <!-- Template items will be injected here via JS -->
+                    <li th:if="${#lists.isEmpty(schedules)}" class="text-center text-sm text-slate-500 py-8">
+                        No schedules found. <a href="/schedules/builder" class="text-indigo-500 hover:underline">Create one?</a>
+                    </li>
+                     <!-- Loop standard item -->
+                    <li th:each="schedule : ${schedules}"
+                        th:with="active=${scheduleActiveIds != null and scheduleActiveIds.contains(schedule.id)},
+                                 hasEntries=${schedule.entries != null and !#lists.isEmpty(schedule.entries)},
+                                 status=${active ? 'Active' : (hasEntries ? 'Archived' : 'Draft')},
+                                 latestApplied=${scheduleLatestAppliedById != null ? scheduleLatestAppliedById[schedule.id] : null}"
+                        th:attr="data-schedule-id=${schedule.id},data-schedule-name=${schedule.name},data-schedule-type=${#strings.toLowerCase(schedule.scheduleType.name())},data-schedule-status=${#strings.toLowerCase(status)},data-schedule-rotation=${#strings.toLowerCase(schedule.rotationMode.name())},data-schedule-latest-applied=${latestApplied != null ? #temporals.format(latestApplied, 'yyyy-MM-dd') : ''}"
+                        class="group">
+                        
+                        <article class="calendar-schedule-card-compact bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm hover:border-indigo-400 dark:hover:border-indigo-500 transition-all cursor-pointer" th:attr="data-schedule-id=${schedule.id}">
+                            <div class="p-3">
+                                <header class="flex justify-between items-start mb-2 opacity-100"> <!-- Force opacity -->
+                                     <div>
+                                        <h4 class="font-medium text-sm text-slate-900 dark:text-gray-100" th:text="${schedule.name}">Schedule Name</h4>
+                                        <span class="inline-flex items-center rounded bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300 mt-1" th:text="${#strings.capitalize(#strings.toLowerCase(schedule.scheduleType.name()).replace('_', ' '))}">Weekly</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                         <button type="button" class="text-slate-400 hover:text-amber-400" data-favourite-toggle th:attr="data-schedule-id=${schedule.id}">☆</button>
+                                         <button type="button" class="text-slate-400 hover:text-indigo-400" data-pin-toggle th:attr="data-schedule-id=${schedule.id}">📌</button>
+                                    </div>
+                                </header>
+                                
+                                <div class="flex items-center justify-between text-xs text-slate-500 mt-2">
+                                     <span th:text="${latestApplied != null ? 'Used ' + #temporals.format(latestApplied, 'dd MMM') : 'Never used'}">Used Jan 12</span>
+                                     <span class="calendar-schedule-status-dot" th:classappend="${status == 'Active' ? 'bg-emerald-500' : (status == 'Draft' ? 'bg-slate-400' : 'bg-amber-500')}" th:title="${status}"></span>
+                                </div>
+                            </div>
+                            <!-- Action Footer, reveals on hover or selection -->
+                             <div class="calendar-schedule-card-actions bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 grid grid-cols-2 divide-x divide-slate-200 dark:divide-slate-700" style="display:none;"> <!-- Hidden by default, toggled by JS or CSS -->
+                                <button type="button" class="py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-duplicate-schedule th:attr="data-schedule-id=${schedule.id}">Duplicate</button>
+                                <a th:href="@{'/schedules/' + ${schedule.id} + '/entries'}" class="py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-center block">Edit</a>
+                            </div>
+                              <!-- Hidden drag handle for drag ops -->
+                            <div class="calendar-drag-handle hidden" draggable="true" data-schedule-drag th:attr="data-schedule-id=${schedule.id}"></div>
+                        </article>
                     </li>
                 </ul>
-                <a href="/schedules" class="btn btn--primary btn--md mt-4 w-full">View all schedules</a>
-                <a href="/schedules/builder" class="btn btn--ghost btn--sm mt-3 w-full">+ Create new schedule</a>
+                
+                <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700/50">
+                    <a href="/schedules/builder" class="flex items-center justify-center gap-2 w-full rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 p-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:border-indigo-500 hover:text-indigo-500 transition-colors">
+                        <span>+ Create New Schedule</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
