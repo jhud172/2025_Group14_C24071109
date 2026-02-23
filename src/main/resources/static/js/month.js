@@ -553,8 +553,8 @@
     }
 
     function getCurrentPane() {
-        if (isExpanded && carousel) {
-            return getCenterPane() || monthPane;
+        if (isExpanded) {
+            return currentSlot || monthPane;
         }
         return monthPane;
     }
@@ -718,15 +718,18 @@
     const carousel = document.getElementById('month-carousel');
     const track = document.getElementById('month-carousel-track');
     const expandToggle = document.getElementById('month-expand-toggle');
+    const monthPrevBtn = document.getElementById('month-prev');
+    const monthNextBtn = document.getElementById('month-next');
     const paneCache = new Map();
     const pendingLoads = new Set();
-    const edgeThresholdPx = 160;
     let isExpanded = false;
-    let carouselObserver = null;
-    let scrollRaf = null;
-    let hasUserInteracted = false;
-    let ignoreNextScroll = false;
-    let observerEnabled = false;
+    let isAnimating = false;
+    let prevSlot = null;
+    let currentSlot = null;
+    let nextSlot = null;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let scrollSettleTimer = null;
+    let onExpandedScroll = null;
 
     function paneKey(year, month) {
         return `${year}-${String(month).padStart(2, '0')}`;
@@ -779,17 +782,16 @@
                 bestPane = pane;
             }
         });
-
         return bestPane;
     }
 
     function updateCenterState(force = false) {
-        if (isExpanded && !hasUserInteracted && !force) return;
-        const centerPane = getCenterPane();
-        if (!centerPane) return;
-        markCenterPane(centerPane);
-        const year = parseInt(centerPane.getAttribute('data-pane-year') || '', 10);
-        const month = parseInt(centerPane.getAttribute('data-pane-month') || '', 10);
+        if (!force) return;
+        const pane = getCurrentPane();
+        if (!pane) return;
+        markCenterPane(pane);
+        const year = parseInt(pane.getAttribute('data-pane-year') || '', 10);
+        const month = parseInt(pane.getAttribute('data-pane-month') || '', 10);
         if (Number.isFinite(year) && Number.isFinite(month)) {
             currentYear = year;
             currentMonth = month;
@@ -867,157 +869,186 @@
         return pane;
     }
 
-    async function appendMonthPane(year, month, enterClass) {
-        if (!track) return;
-        const key = paneKey(year, month);
-        if (findPaneByKey(key)) return;
-        if (pendingLoads.has(key)) return;
-        pendingLoads.add(key);
+    async function setSlot(slot, year, month) {
+        const pane = await fetchMonthPane(year, month);
+        pane.classList.add('month-pane');
+        if (slot) {
+            slot.replaceWith(pane);
+        } else if (track) {
+            track.appendChild(pane);
+        }
+        attachDayCardNavigation(pane);
+        updateHeatmapForPane(pane);
+        return pane;
+    }
 
-        const loading = createLoadingPane(year, month);
-        if (enterClass) loading.classList.add(enterClass);
-        track.appendChild(loading);
+    function updateNavHrefs() {
+        if (!monthPrevBtn || !monthNextBtn) return;
+        const prev = addMonths(currentYear, currentMonth, -1);
+        const next = addMonths(currentYear, currentMonth, 1);
+        monthPrevBtn.href = `/calendar?view=month&month=${prev.month}&year=${prev.year}`;
+        monthNextBtn.href = `/calendar?view=month&month=${next.month}&year=${next.year}`;
+    }
 
-        try {
-            const pane = await fetchMonthPane(year, month);
-            pane.classList.add('month-pane');
-            if (enterClass) pane.classList.add(enterClass);
-            loading.replaceWith(pane);
-            attachDayCardNavigation(pane);
-            updateHeatmapForPane(pane);
-            requestAnimationFrame(() => {
-                pane.classList.remove('month-pane--enter-left', 'month-pane--enter-right');
-            });
-        } catch (error) {
-            const errorPane = createErrorPane(year, month, error.message);
-            errorPane.querySelector('[data-retry]')?.addEventListener('click', () => {
-                paneCache.delete(key);
-                errorPane.remove();
-                appendMonthPane(year, month, enterClass);
-            });
-            loading.replaceWith(errorPane);
-        } finally {
-            pendingLoads.delete(key);
-            prunePanes();
-            reconnectObserver();
+    async function renderAdjacentPanes() {
+        const prev = addMonths(currentYear, currentMonth, -1);
+        const next = addMonths(currentYear, currentMonth, 1);
+        prevSlot = await setSlot(prevSlot, prev.year, prev.month);
+        currentSlot = await setSlot(currentSlot, currentYear, currentMonth);
+        nextSlot = await setSlot(nextSlot, next.year, next.month);
+        monthPane = currentSlot;
+        markCenterPane(currentSlot);
+        setMonthHeader(currentYear, currentMonth);
+        updateNavHrefs();
+        if (track) {
+            track.dataset.year = String(currentYear);
+            track.dataset.month = String(currentMonth);
         }
     }
 
-    async function prependMonthPane(year, month, enterClass) {
-        if (!track || !carousel) return;
-        const key = paneKey(year, month);
-        if (findPaneByKey(key)) return;
-        if (pendingLoads.has(key)) return;
-        pendingLoads.add(key);
+    function getPaneWidth() {
+        if (!carousel) return 0;
+        return carousel.clientWidth || monthPane?.getBoundingClientRect().width || 0;
+    }
 
-        const gap = getTrackGap();
-        const loading = createLoadingPane(year, month);
-        if (enterClass) loading.classList.add(enterClass);
-        track.insertBefore(loading, track.firstChild);
-
-        const loadingWidth = loading.getBoundingClientRect().width;
-        carousel.scrollLeft += loadingWidth + gap;
-
-        try {
-            const pane = await fetchMonthPane(year, month);
-            pane.classList.add('month-pane');
-            if (enterClass) pane.classList.add(enterClass);
-            const paneWidth = pane.getBoundingClientRect().width || loadingWidth;
-            loading.replaceWith(pane);
-            const widthDelta = paneWidth - loadingWidth;
-            if (Math.abs(widthDelta) > 0.5) {
-                carousel.scrollLeft += widthDelta;
+    function scrollToOffset(offset) {
+        return new Promise((resolve) => {
+            if (!carousel) {
+                resolve();
+                return;
             }
-            attachDayCardNavigation(pane);
-            updateHeatmapForPane(pane);
-            requestAnimationFrame(() => {
-                pane.classList.remove('month-pane--enter-left', 'month-pane--enter-right');
-            });
-        } catch (error) {
-            const errorPane = createErrorPane(year, month, error.message);
-            errorPane.querySelector('[data-retry]')?.addEventListener('click', () => {
-                paneCache.delete(key);
-                errorPane.remove();
-                prependMonthPane(year, month, enterClass);
-            });
-            loading.replaceWith(errorPane);
-        } finally {
-            pendingLoads.delete(key);
-            prunePanes();
-            reconnectObserver();
-        }
-    }
-
-    function prunePanes() {
-        if (!carousel || !track) return;
-        const panes = getMonthPanes();
-        if (panes.length <= 7) return;
-
-        const centerPane = getCenterPane();
-        if (!centerPane) return;
-        const centerIndex = panes.indexOf(centerPane);
-        const keepStart = Math.max(0, centerIndex - 3);
-        const keepEnd = Math.min(panes.length - 1, centerIndex + 3);
-        const gap = getTrackGap();
-
-        let scrollAdjustment = 0;
-        panes.forEach((pane, idx) => {
-            if (idx < keepStart || idx > keepEnd) {
-                if (idx < keepStart) {
-                    scrollAdjustment += pane.getBoundingClientRect().width + gap;
+            if (prefersReducedMotion) {
+                carousel.scrollLeft = offset;
+                resolve();
+                return;
+            }
+            let done = false;
+            const onScroll = () => {
+                if (!carousel) return;
+                if (Math.abs(carousel.scrollLeft - offset) < 2) {
+                    carousel.removeEventListener('scroll', onScroll);
+                    done = true;
+                    resolve();
                 }
-                pane.remove();
-            }
+            };
+            carousel.addEventListener('scroll', onScroll, { passive: true });
+            carousel.scrollTo({ left: offset, behavior: 'smooth' });
+            setTimeout(() => {
+                if (!done) {
+                    carousel.removeEventListener('scroll', onScroll);
+                    resolve();
+                }
+            }, 500);
         });
+    }
 
-        if (scrollAdjustment > 0) {
-            carousel.scrollLeft -= scrollAdjustment;
+    function snapToCenter() {
+        if (!carousel) return;
+        const paneWidth = getPaneWidth();
+        if (!paneWidth) return;
+        carousel.scrollLeft = paneWidth;
+    }
+
+    async function go(delta) {
+        if (!isExpanded || isAnimating) return;
+        isAnimating = true;
+        monthPrevBtn?.setAttribute('aria-disabled', 'true');
+        monthNextBtn?.setAttribute('aria-disabled', 'true');
+        monthPrevBtn?.classList.add('pointer-events-none', 'opacity-60');
+        monthNextBtn?.classList.add('pointer-events-none', 'opacity-60');
+
+        const target = addMonths(currentYear, currentMonth, delta);
+        await fetchMonthPane(target.year, target.month);
+        await renderAdjacentPanes();
+
+        const paneWidth = getPaneWidth();
+        const targetLeft = delta > 0 ? paneWidth * 2 : 0;
+        await scrollToOffset(targetLeft);
+
+        currentYear = target.year;
+        currentMonth = target.month;
+        await renderAdjacentPanes();
+        snapToCenter();
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('view', 'month');
+        url.searchParams.set('month', String(currentMonth));
+        url.searchParams.set('year', String(currentYear));
+        window.history.pushState({ month: currentMonth, year: currentYear }, '', url.toString());
+
+        monthPrevBtn?.removeAttribute('aria-disabled');
+        monthNextBtn?.removeAttribute('aria-disabled');
+        monthPrevBtn?.classList.remove('pointer-events-none', 'opacity-60');
+        monthNextBtn?.classList.remove('pointer-events-none', 'opacity-60');
+        isAnimating = false;
+    }
+
+
+    async function setSlot(slot, year, month) {
+        const pane = await fetchMonthPane(year, month);
+        pane.classList.add('month-pane');
+        if (slot) {
+            slot.replaceWith(pane);
+        } else if (track) {
+            track.appendChild(pane);
+        }
+        attachDayCardNavigation(pane);
+        updateHeatmapForPane(pane);
+        return pane;
+    }
+
+    function updateNavHrefs() {
+        if (!monthPrevBtn || !monthNextBtn) return;
+        const prev = addMonths(currentYear, currentMonth, -1);
+        const next = addMonths(currentYear, currentMonth, 1);
+        monthPrevBtn.href = `/calendar?view=month&month=${prev.month}&year=${prev.year}`;
+        monthNextBtn.href = `/calendar?view=month&month=${next.month}&year=${next.year}`;
+    }
+
+    async function renderAdjacentPanes() {
+        const prev = addMonths(currentYear, currentMonth, -1);
+        const next = addMonths(currentYear, currentMonth, 1);
+        prevSlot = await setSlot(prevSlot, prev.year, prev.month);
+        currentSlot = await setSlot(currentSlot, currentYear, currentMonth);
+        nextSlot = await setSlot(nextSlot, next.year, next.month);
+        monthPane = currentSlot;
+        markCenterPane(currentSlot);
+        setMonthHeader(currentYear, currentMonth);
+        updateNavHrefs();
+        if (track) {
+            track.dataset.year = String(currentYear);
+            track.dataset.month = String(currentMonth);
         }
     }
 
-    function reconnectObserver() {
-        if (!carousel || !track || !carouselObserver) return;
-        const panes = getMonthPanes();
-        panes.forEach((pane) => carouselObserver.unobserve(pane));
-        if (panes.length === 0) return;
-        carouselObserver.observe(panes[0]);
-        if (panes.length > 1) {
-            carouselObserver.observe(panes[panes.length - 1]);
-        }
+
+    function startSwipe(event) {
+        if (!isExpanded) return;
+        if (event.target.closest('a, button, input, textarea, select, label')) return;
+        pointerStartX = event.clientX;
+        pointerActive = true;
+        carousel?.setPointerCapture?.(event.pointerId);
     }
 
-    function setupObserver() {
-        if (!carousel || !track) return;
-        if (carouselObserver) carouselObserver.disconnect();
-        carouselObserver = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-            if (!entry.isIntersecting || !isExpanded || !observerEnabled) return;
-                const pane = entry.target;
-                const year = parseInt(pane.getAttribute('data-pane-year') || '', 10);
-                const month = parseInt(pane.getAttribute('data-pane-month') || '', 10);
-                if (!Number.isFinite(year) || !Number.isFinite(month)) return;
-                const panes = getMonthPanes();
-                const isFirst = pane === panes[0];
-                const isLast = pane === panes[panes.length - 1];
-                if (isLast) {
-                    const next = addMonths(year, month, 1);
-                    appendMonthPane(next.year, next.month, 'month-pane--enter-right');
-                }
-                if (isFirst) {
-                    const prev = addMonths(year, month, -1);
-                    prependMonthPane(prev.year, prev.month, 'month-pane--enter-left');
-                }
-            });
-        }, { root: carousel, threshold: 0.5 });
-        reconnectObserver();
+    function endSwipe(event) {
+        if (!pointerActive || pointerStartX == null) return;
+        const delta = event.clientX - pointerStartX;
+        pointerActive = false;
+        pointerStartX = null;
+        if (Math.abs(delta) > swipeThresholdPx) {
+            go(delta < 0 ? 1 : -1);
+        }
+        try {
+            carousel?.releasePointerCapture?.(event.pointerId);
+        } catch (error) {
+            console.warn(error);
+        }
     }
 
     function expandCarousel() {
         if (!carousel || !track || !monthPane) return;
         if (isExpanded) return;
         isExpanded = true;
-        hasUserInteracted = false;
-        observerEnabled = false;
         carousel.classList.add('is-expanded');
         carousel.classList.add('is-opening');
         if (expandToggle) {
@@ -1025,21 +1056,21 @@
             expandToggle.setAttribute('aria-pressed', 'true');
             expandToggle.textContent = 'Collapse';
         }
-
         monthPane.classList.add('month-pane--enter-center');
-        const next = addMonths(currentYear, currentMonth, 1);
-        appendMonthPane(next.year, next.month, 'month-pane--enter-right');
 
-        requestAnimationFrame(() => {
-            markCenterPane(monthPane);
-            setMonthHeader(currentYear, currentMonth);
-            updateCenterState(true);
-            setupObserver();
+        prevSlot = document.createElement('div');
+        prevSlot.className = 'calendar-month-container month-pane';
+        currentSlot = monthPane;
+        nextSlot = document.createElement('div');
+        nextSlot.className = 'calendar-month-container month-pane';
+        track.replaceChildren(prevSlot, currentSlot, nextSlot);
+        track.style.willChange = 'auto';
+        track.style.transform = '';
 
-            requestAnimationFrame(() => {
-                monthPane.classList.remove('month-pane--enter-center');
-                carousel.classList.remove('is-opening');
-            });
+        renderAdjacentPanes().then(() => {
+            snapToCenter();
+            monthPane.classList.remove('month-pane--enter-center');
+            carousel.classList.remove('is-opening');
         });
     }
 
@@ -1047,26 +1078,22 @@
         if (!carousel || !track) return;
         if (!isExpanded) return;
         isExpanded = false;
-        hasUserInteracted = false;
-        observerEnabled = false;
         carousel.classList.remove('is-expanded');
         if (expandToggle) {
             expandToggle.classList.remove('active');
             expandToggle.setAttribute('aria-pressed', 'false');
             expandToggle.textContent = 'Expand';
         }
-
-        if (carouselObserver) {
-            carouselObserver.disconnect();
-            carouselObserver = null;
-        }
-
-        const centerPane = getCenterPane();
+        const centerPane = getCurrentPane();
         if (!centerPane) return;
         track.replaceChildren(centerPane);
-        carousel.scrollLeft = 0;
+        track.style.transition = '';
+        track.style.transform = '';
+        prevSlot = null;
+        nextSlot = null;
+        currentSlot = centerPane;
         monthPane = centerPane;
-        updateCenterState();
+        updateCenterState(true);
     }
 
     function toggleCarousel() {
@@ -1077,53 +1104,37 @@
         }
     }
 
-    function onCarouselScroll() {
-        if (!isExpanded) return;
-        if (ignoreNextScroll) {
-            ignoreNextScroll = false;
-            return;
-        }
-        if (!hasUserInteracted) {
-            hasUserInteracted = true;
-            observerEnabled = true;
-        }
-        if (carousel && carousel.scrollLeft <= edgeThresholdPx) {
-            const panes = getMonthPanes();
-            const firstPane = panes[0];
-            if (firstPane) {
-                const year = parseInt(firstPane.getAttribute('data-pane-year') || '', 10);
-                const month = parseInt(firstPane.getAttribute('data-pane-month') || '', 10);
-                if (Number.isFinite(year) && Number.isFinite(month)) {
-                    const prev = addMonths(year, month, -1);
-                    prependMonthPane(prev.year, prev.month, 'month-pane--enter-left');
-                }
-            }
-        }
-        if (carousel && carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - edgeThresholdPx) {
-            const panes = getMonthPanes();
-            const lastPane = panes[panes.length - 1];
-            if (lastPane) {
-                const year = parseInt(lastPane.getAttribute('data-pane-year') || '', 10);
-                const month = parseInt(lastPane.getAttribute('data-pane-month') || '', 10);
-                if (Number.isFinite(year) && Number.isFinite(month)) {
-                    const next = addMonths(year, month, 1);
-                    appendMonthPane(next.year, next.month, 'month-pane--enter-right');
-                }
-            }
-        }
-        if (scrollRaf) return;
-        scrollRaf = requestAnimationFrame(() => {
-            scrollRaf = null;
-            updateCenterState();
-        });
-    }
-
     if (carousel && track && monthPane) {
-        updateCenterState();
-        carousel.addEventListener('scroll', onCarouselScroll);
+        updateCenterState(true);
+        onExpandedScroll = () => {
+            if (!isExpanded || isAnimating || !carousel) return;
+            if (scrollSettleTimer) {
+                clearTimeout(scrollSettleTimer);
+            }
+            scrollSettleTimer = setTimeout(() => {
+                const paneWidth = getPaneWidth();
+                if (!paneWidth) return;
+                if (carousel.scrollLeft < paneWidth * 0.5) {
+                    go(-1);
+                } else if (carousel.scrollLeft > paneWidth * 1.5) {
+                    go(1);
+                }
+            }, 120);
+        };
+        carousel.addEventListener('scroll', onExpandedScroll, { passive: true });
     }
 
     expandToggle?.addEventListener('click', toggleCarousel);
+    monthPrevBtn?.addEventListener('click', (event) => {
+        if (!isExpanded) return;
+        event.preventDefault();
+        go(-1);
+    });
+    monthNextBtn?.addEventListener('click', (event) => {
+        if (!isExpanded) return;
+        event.preventDefault();
+        go(1);
+    });
 
     attachPreviewHandlers(document);
     attachDayCardNavigation(document);
