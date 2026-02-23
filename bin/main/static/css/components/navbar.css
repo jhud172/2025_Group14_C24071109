@@ -172,6 +172,64 @@
         color: rgb(203, 213, 225);
     }
 
+    /* Admin badge (red/crimson shield for PLATFORM_ADMIN / SUPER_ADMIN) */
+    .nav-admin-badge-group {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .nav-admin-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.6rem;
+        height: 1.6rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(220, 38, 38, 0.65);
+        background: radial-gradient(circle at 35% 30%, rgba(254, 202, 202, 0.95) 0%, rgba(239, 68, 68, 0.92) 62%, rgba(185, 28, 28, 0.95) 100%);
+        color: rgb(127, 29, 29);
+        box-shadow: 0 0 0 2px rgba(254, 226, 226, 0.6), 0 2px 6px -2px rgba(185, 28, 28, 0.35);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .nav-admin-badge__icon {
+        width: 0.85rem;
+        height: 0.85rem;
+    }
+
+    .nav-admin-tooltip {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: -0.2rem;
+        z-index: 30;
+        white-space: nowrap;
+        border-radius: 0.6rem;
+        border: 1px solid rgb(226, 232, 240);
+        background: white;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: rgb(71, 85, 105);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(0.15rem);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        box-shadow: 0 12px 20px -14px rgba(15, 23, 42, 0.55);
+    }
+
+    .nav-admin-badge-group:hover .nav-admin-tooltip {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    html.dark .nav-admin-tooltip {
+        border-color: rgb(51, 65, 85);
+        background: rgb(15, 23, 42);
+        color: rgb(203, 213, 225);
+    }
+
     /* Nav auth container - bordered frame for username, premium, role badge, and logout */
     .nav-auth-container {
         display: flex;
