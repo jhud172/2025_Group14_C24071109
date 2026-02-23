@@ -38,6 +38,18 @@ public class VaultNote {
     @Column(name = "trainer_template_entry_id")
     private Long trainerTemplateEntryId;
 
+    @Column(name = "pinned", nullable = false)
+    private boolean pinned = false;
+
+    @Column(name = "tags", nullable = false, length = 255)
+    private String tags = "";
+
+    @Column(name = "mood", length = 20)
+    private String mood;
+
+    @Column(name = "ai_summary", columnDefinition = "TEXT")
+    private String aiSummary;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -63,11 +75,17 @@ public class VaultNote {
         if (updatedAt == null) {
             updatedAt = now;
         }
+        if (tags == null) {
+            tags = "";
+        }
     }
 
     @PreUpdate
     void preUpdate() {
         updatedAt = Instant.now();
+        if (tags == null) {
+            tags = "";
+        }
     }
 
     public Long getId() {
@@ -136,6 +154,38 @@ public class VaultNote {
 
     public void setTrainerTemplateEntryId(Long trainerTemplateEntryId) {
         this.trainerTemplateEntryId = trainerTemplateEntryId;
+    }
+
+    public boolean isPinned() {
+        return pinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
+    }
+
+    public String getTags() {
+        return tags == null ? "" : tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags == null ? "" : tags;
+    }
+
+    public String getMood() {
+        return mood;
+    }
+
+    public void setMood(String mood) {
+        this.mood = mood;
+    }
+
+    public String getAiSummary() {
+        return aiSummary;
+    }
+
+    public void setAiSummary(String aiSummary) {
+        this.aiSummary = aiSummary;
     }
 
     public Instant getCreatedAt() {

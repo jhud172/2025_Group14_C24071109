@@ -38,6 +38,18 @@ public class VaultAiService {
         return response != null ? response.reply() : "AI is unavailable right now. Try again later.";
     }
 
+    public String generateInsight(VaultNote note) {
+        List<ChatService.Message> messages = new ArrayList<>();
+        messages.add(new ChatService.Message("system",
+                "You are an intelligent fitness assistant. Analyse the following training note and provide a concise insight. " +
+                "Identify key themes, suggest improvements, and highlight any potential concerns (e.g. injury risk, nutrition gaps). " +
+                "Keep your response under 80 words. Be direct and actionable."));
+        messages.add(new ChatService.Message("user", buildNotesPayload(List.of(note))));
+
+        ChatResponse response = chatService.chat(messages);
+        return response != null ? response.reply() : "AI is unavailable right now. Try again later.";
+    }
+
     private String buildNotesPayload(List<VaultNote> notes) {
         if (notes == null || notes.isEmpty()) {
             return "No notes selected.";
@@ -50,6 +62,9 @@ public class VaultAiService {
             sb.append(note.getTitle() == null ? "(untitled)" : note.getTitle());
             if (note.getLinkedDate() != null) {
                 sb.append(" (date: ").append(note.getLinkedDate()).append(")");
+            }
+            if (note.getMood() != null && !note.getMood().isBlank()) {
+                sb.append(" (mood: ").append(note.getMood()).append(")");
             }
             sb.append("\n");
             String content = note.getContent() == null ? "" : note.getContent().trim();

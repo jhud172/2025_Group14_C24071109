@@ -2064,6 +2064,10 @@ CREATE TABLE IF NOT EXISTS vault_notes
     linked_workout_session_id BIGINT       NULL,
     trainer_template_id        BIGINT       NULL,
     trainer_template_entry_id  BIGINT       NULL,
+    pinned                    BOOLEAN      NOT NULL DEFAULT FALSE,
+    tags                      VARCHAR(255) NOT NULL DEFAULT '',
+    mood                      VARCHAR(20)  NULL,
+    ai_summary                TEXT         NULL,
     created_at                TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

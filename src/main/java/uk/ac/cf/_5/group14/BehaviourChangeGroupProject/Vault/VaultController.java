@@ -20,6 +20,8 @@ import java.util.*;
 @RequestMapping("/vault")
 public class VaultController {
 
+    private static final String[] MOOD_OPTIONS = {"GREAT", "GOOD", "NEUTRAL", "LOW", "POOR"};
+
     private final AuthHelper authHelper;
     private final UserService userService;
     private final VaultNoteService vaultNoteService;
@@ -56,19 +58,44 @@ public class VaultController {
     }
 
     @GetMapping
-    public String index(@RequestParam(required = false) String type, Model model) {
+    public String index(@RequestParam(required = false) String type,
+                        @RequestParam(required = false) String search,
+                        @RequestParam(required = false) String from,
+                        @RequestParam(required = false) String to,
+                        @RequestParam(required = false, defaultValue = "false") boolean pinned,
+                        @RequestParam(required = false) String sort,
+                        Model model) {
         User user = currentUserOrThrow();
 
         VaultNoteType selectedType = parseType(type);
-        List<VaultNote> notes = vaultNoteService.listForUser(user.getId(), selectedType);
+        LocalDate fromDate = parseDate(from);
+        LocalDate toDate = parseDate(to);
+
+        List<VaultNote> notes;
+        boolean hasFilters = (search != null && !search.isBlank())
+                || fromDate != null || toDate != null || pinned
+                || selectedType != null;
+
+        if (hasFilters) {
+            notes = vaultNoteService.search(user.getId(), search, selectedType, pinned, fromDate, toDate);
+        } else {
+            notes = vaultNoteService.listForUser(user.getId(), null);
+        }
 
         Map<Long, WorkoutSession> sessionsById = loadSessionsById(notes);
+        Map<String, Object> metrics = vaultNoteService.getMetrics(user.getId());
 
         model.addAttribute("pageTitle", "Training Vault");
         model.addAttribute("noteTypes", VaultNoteType.values());
         model.addAttribute("selectedType", selectedType);
         model.addAttribute("notes", notes);
         model.addAttribute("sessionsById", sessionsById);
+        model.addAttribute("searchQuery", search);
+        model.addAttribute("fromDate", from);
+        model.addAttribute("toDate", to);
+        model.addAttribute("pinnedOnly", pinned);
+        model.addAttribute("metrics", metrics);
+        model.addAttribute("moods", MOOD_OPTIONS);
         return "vault/index";
     }
 
@@ -82,6 +109,7 @@ public class VaultController {
         model.addAttribute("pageTitle", "New Vault Note");
         model.addAttribute("note", note);
         model.addAttribute("noteTypes", VaultNoteType.values());
+        model.addAttribute("moods", MOOD_OPTIONS);
         model.addAttribute("recentSessions", workoutSessionRepository.findTop20ByUserOrderByDateDesc(user));
         return "vault/note-form";
     }
@@ -91,10 +119,13 @@ public class VaultController {
                              @RequestParam String title,
                              @RequestParam String content,
                              @RequestParam(required = false) LocalDate linkedDate,
-                             @RequestParam(required = false) Long linkedWorkoutSessionId) {
+                             @RequestParam(required = false) Long linkedWorkoutSessionId,
+                             @RequestParam(required = false, defaultValue = "") String tags,
+                             @RequestParam(required = false) String mood) {
         User user = currentUserOrThrow();
 
-        VaultNote created = vaultNoteService.create(user.getId(), noteType, title, content, linkedDate, linkedWorkoutSessionId);
+        VaultNote created = vaultNoteService.create(user.getId(), noteType, title, content,
+                linkedDate, linkedWorkoutSessionId, tags, mood);
         return "redirect:/vault/" + created.getId();
     }
 
@@ -112,7 +143,6 @@ public class VaultController {
         if (note.getLinkedWorkoutSessionId() != null) {
             linkedSession = workoutSessionRepository.findById(note.getLinkedWorkoutSessionId()).orElse(null);
             if (linkedSession != null && linkedSession.getUser() != null && !Objects.equals(linkedSession.getUser().getId(), user.getId())) {
-                // Defensive: do not leak details from other users' sessions
                 linkedSession = null;
             }
         }
@@ -135,6 +165,7 @@ public class VaultController {
         model.addAttribute("pageTitle", "Edit Vault Note");
         model.addAttribute("note", noteOpt.get());
         model.addAttribute("noteTypes", VaultNoteType.values());
+        model.addAttribute("moods", MOOD_OPTIONS);
         model.addAttribute("recentSessions", workoutSessionRepository.findTop20ByUserOrderByDateDesc(user));
         return "vault/note-form";
     }
@@ -145,10 +176,13 @@ public class VaultController {
                          @RequestParam String title,
                          @RequestParam String content,
                          @RequestParam(required = false) LocalDate linkedDate,
-                         @RequestParam(required = false) Long linkedWorkoutSessionId) {
+                         @RequestParam(required = false) Long linkedWorkoutSessionId,
+                         @RequestParam(required = false, defaultValue = "") String tags,
+                         @RequestParam(required = false) String mood) {
         User user = currentUserOrThrow();
 
-        Optional<VaultNote> updated = vaultNoteService.update(id, user.getId(), noteType, title, content, linkedDate, linkedWorkoutSessionId);
+        Optional<VaultNote> updated = vaultNoteService.update(id, user.getId(), noteType, title, content,
+                linkedDate, linkedWorkoutSessionId, tags, mood);
         if (updated.isEmpty()) {
             return "redirect:/access-denied";
         }
@@ -164,6 +198,18 @@ public class VaultController {
             return "redirect:/access-denied";
         }
         return "redirect:/vault";
+    }
+
+    @PostMapping("/{id}/pin")
+    public String togglePin(@PathVariable Long id,
+                            @RequestParam(required = false) String returnTo) {
+        User user = currentUserOrThrow();
+
+        Optional<VaultNote> result = vaultNoteService.togglePin(id, user.getId());
+        if (result.isEmpty()) {
+            return "redirect:/access-denied";
+        }
+        return "redirect:" + safeReturnTo(returnTo, "/vault");
     }
 
     @PostMapping("/ai/summarise-week")
@@ -204,11 +250,39 @@ public class VaultController {
         return "redirect:" + safeReturnTo(returnTo, "/vault");
     }
 
+    @PostMapping("/ai/insight/{id}")
+    public String generateInsight(@PathVariable Long id,
+                                  @RequestParam(required = false) String returnTo,
+                                  RedirectAttributes redirectAttributes) {
+        User user = currentUserOrThrow();
+
+        Optional<VaultNote> noteOpt = vaultNoteService.getForUser(id, user.getId());
+        if (noteOpt.isEmpty()) {
+            return "redirect:/access-denied";
+        }
+
+        String insight = vaultAiService.generateInsight(noteOpt.get());
+        vaultNoteService.saveAiSummary(id, user.getId(), insight);
+        redirectAttributes.addFlashAttribute("aiResultTitle", "AI Insight");
+        redirectAttributes.addFlashAttribute("aiResult", insight);
+
+        return "redirect:" + safeReturnTo(returnTo, "/vault/" + id);
+    }
+
     private VaultNoteType parseType(String type) {
         if (type == null || type.isBlank()) return null;
         try {
             return VaultNoteType.valueOf(type);
         } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private LocalDate parseDate(String date) {
+        if (date == null || date.isBlank()) return null;
+        try {
+            return LocalDate.parse(date);
+        } catch (Exception ex) {
             return null;
         }
     }
