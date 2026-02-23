@@ -2,53 +2,109 @@
  * vault.js – Training Vault client-side enhancements
  *
  * Handles: live search debounce, filter application,
- * pin toggle feedback, delete confirm, view toggles.
+ * confirm delete (with modal when available), flash fade-out,
+ * sidebar collapse toggle.
  */
 (function () {
     "use strict";
 
     document.addEventListener("DOMContentLoaded", function () {
-        // ── Live Search ─────────────────────────────────────────────
-        const searchInput = document.getElementById("vaultSearch");
+
+        // ── Confirm modal setup ────────────────────────────────────────
+        var confirmOverlay  = document.getElementById("confirmOverlay");
+        var confirmTitle    = document.getElementById("confirmTitle");
+        var confirmMessage  = document.getElementById("confirmMessage");
+        var confirmOk       = document.getElementById("confirmOk");
+        var confirmCancel   = document.getElementById("confirmCancel");
+        var pendingForm     = null;
+
+        function showConfirm(title, message, form) {
+            if (!confirmOverlay) {
+                // Fallback when no modal is available
+                if (confirm(message || "Are you sure?")) {
+                    form._confirmed = true;
+                    form.submit();
+                }
+                return;
+            }
+            if (confirmTitle)   confirmTitle.textContent   = title   || "Confirm";
+            if (confirmMessage) confirmMessage.textContent = message || "Are you sure?";
+            pendingForm = form;
+            confirmOverlay.classList.add("show");
+        }
+
+        if (confirmOk) {
+            confirmOk.addEventListener("click", function () {
+                confirmOverlay.classList.remove("show");
+                if (pendingForm) {
+                    pendingForm._confirmed = true;
+                    pendingForm.submit();
+                    pendingForm = null;
+                }
+            });
+        }
+
+        if (confirmCancel) {
+            confirmCancel.addEventListener("click", function () {
+                confirmOverlay.classList.remove("show");
+                pendingForm = null;
+            });
+        }
+
+        if (confirmOverlay) {
+            confirmOverlay.addEventListener("click", function (e) {
+                if (e.target === confirmOverlay) {
+                    confirmOverlay.classList.remove("show");
+                    pendingForm = null;
+                }
+            });
+        }
+
+        // ── Wire delete-confirm forms ──────────────────────────────────
+        document.querySelectorAll("[data-vault-confirm-delete]").forEach(function (form) {
+            form.addEventListener("submit", function (e) {
+                if (form._confirmed) return; // already confirmed
+                e.preventDefault();
+                var title   = form.getAttribute("data-confirm-title")   || "Delete note?";
+                var message = form.getAttribute("data-confirm-message") || "This cannot be undone.";
+                showConfirm(title, message, form);
+            });
+        });
+
+        // Wire data-confirm forms (used in note-view.html)
+        document.querySelectorAll("[data-confirm]").forEach(function (form) {
+            form.addEventListener("submit", function (e) {
+                if (form._confirmed) return;
+                e.preventDefault();
+                var title   = form.getAttribute("data-confirm-title")   || "Confirm";
+                var message = form.getAttribute("data-confirm-message") || "Are you sure?";
+                showConfirm(title, message, form);
+            });
+        });
+
+        // ── Live Search ─────────────────────────────────────────────────
+        var searchInput = document.getElementById("vaultSearch");
         if (searchInput) {
-            let searchTimer = null;
+            var searchTimer = null;
             searchInput.addEventListener("input", function () {
                 clearTimeout(searchTimer);
                 searchTimer = setTimeout(function () {
-                    submitVaultFilters();
+                    var searchForm = document.getElementById("vaultSearchForm");
+                    if (searchForm) searchForm.submit();
                 }, 350);
             });
         }
 
-        // ── Filter form auto-submit on change ────────────────────────
-        const filterForm = document.getElementById("vaultFilterForm");
+        // ── Filter form auto-submit on change ────────────────────────────
+        var filterForm = document.getElementById("vaultFilterForm");
         if (filterForm) {
             filterForm.querySelectorAll("select, input[type=checkbox]").forEach(function (el) {
-                el.addEventListener("change", function () {
-                    submitVaultFilters();
-                });
+                el.addEventListener("change", function () { filterForm.submit(); });
             });
             filterForm.querySelectorAll("input[type=date]").forEach(function (el) {
-                el.addEventListener("change", function () {
-                    submitVaultFilters();
-                });
+                el.addEventListener("change", function () { filterForm.submit(); });
             });
         }
-
-        function submitVaultFilters() {
-            if (filterForm) {
-                filterForm.submit();
-            }
-        }
-
-        // ── Confirm-delete for vault cards ────────────────────────────
-        document.querySelectorAll("[data-vault-confirm-delete]").forEach(function (form) {
-            form.addEventListener("submit", function (e) {
-                if (!confirm("Delete this note? This cannot be undone.")) {
-                    e.preventDefault();
-                }
-            });
-        });
 
         // ── Card hover actions – prevent link navigation on action btns ─
         document.querySelectorAll(".vault-card-actions form, .vault-card-actions a").forEach(function (el) {
@@ -57,32 +113,15 @@
             });
         });
 
-        // ── Filter chip removal ───────────────────────────────────────
-        document.querySelectorAll("[data-remove-filter]").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                const param = btn.getAttribute("data-remove-filter");
-                if (!filterForm) return;
-                const input = filterForm.querySelector("[name=" + param + "]");
-                if (input) {
-                    if (input.type === "checkbox") {
-                        input.checked = false;
-                    } else {
-                        input.value = "";
-                    }
-                }
-                submitVaultFilters();
-            });
-        });
-
         // ── Sidebar collapsible sections ──────────────────────────────
         document.querySelectorAll("[data-vault-collapse]").forEach(function (toggle) {
-            const targetId = toggle.getAttribute("data-vault-collapse");
-            const target = document.getElementById(targetId);
+            var targetId = toggle.getAttribute("data-vault-collapse");
+            var target   = document.getElementById(targetId);
             if (!target) return;
             toggle.addEventListener("click", function () {
-                const isOpen = !target.classList.contains("hidden");
+                var isOpen = !target.classList.contains("hidden");
                 target.classList.toggle("hidden", isOpen);
-                const icon = toggle.querySelector("[data-collapse-icon]");
+                var icon = toggle.querySelector("[data-collapse-icon]");
                 if (icon) {
                     icon.style.transform = isOpen ? "rotate(-90deg)" : "";
                 }
@@ -90,15 +129,16 @@
         });
 
         // ── Flash fade-out ─────────────────────────────────────────────
-        const flashEls = document.querySelectorAll("[data-vault-flash]");
+        var flashEls = document.querySelectorAll("[data-vault-flash]");
         if (flashEls.length) {
             setTimeout(function () {
                 flashEls.forEach(function (el) {
                     el.style.transition = "opacity 0.5s ease";
-                    el.style.opacity = "0";
+                    el.style.opacity    = "0";
                     setTimeout(function () { el.remove(); }, 600);
                 });
-            }, 5000);
+            }, 6000);
         }
+
     });
 }());

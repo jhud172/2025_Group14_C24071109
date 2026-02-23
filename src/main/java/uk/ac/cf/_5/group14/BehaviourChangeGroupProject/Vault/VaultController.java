@@ -20,6 +20,8 @@ import java.util.*;
 @RequestMapping("/vault")
 public class VaultController {
 
+    private static final String[] MOOD_OPTIONS = {"GREAT", "GOOD", "NEUTRAL", "LOW", "POOR"};
+
     private final AuthHelper authHelper;
     private final UserService userService;
     private final VaultNoteService vaultNoteService;
@@ -93,7 +95,7 @@ public class VaultController {
         model.addAttribute("toDate", to);
         model.addAttribute("pinnedOnly", pinned);
         model.addAttribute("metrics", metrics);
-        model.addAttribute("moods", new String[]{"GREAT", "GOOD", "NEUTRAL", "LOW", "POOR"});
+        model.addAttribute("moods", MOOD_OPTIONS);
         return "vault/index";
     }
 
@@ -107,7 +109,7 @@ public class VaultController {
         model.addAttribute("pageTitle", "New Vault Note");
         model.addAttribute("note", note);
         model.addAttribute("noteTypes", VaultNoteType.values());
-        model.addAttribute("moods", new String[]{"GREAT", "GOOD", "NEUTRAL", "LOW", "POOR"});
+        model.addAttribute("moods", MOOD_OPTIONS);
         model.addAttribute("recentSessions", workoutSessionRepository.findTop20ByUserOrderByDateDesc(user));
         return "vault/note-form";
     }
@@ -163,7 +165,7 @@ public class VaultController {
         model.addAttribute("pageTitle", "Edit Vault Note");
         model.addAttribute("note", noteOpt.get());
         model.addAttribute("noteTypes", VaultNoteType.values());
-        model.addAttribute("moods", new String[]{"GREAT", "GOOD", "NEUTRAL", "LOW", "POOR"});
+        model.addAttribute("moods", MOOD_OPTIONS);
         model.addAttribute("recentSessions", workoutSessionRepository.findTop20ByUserOrderByDateDesc(user));
         return "vault/note-form";
     }
