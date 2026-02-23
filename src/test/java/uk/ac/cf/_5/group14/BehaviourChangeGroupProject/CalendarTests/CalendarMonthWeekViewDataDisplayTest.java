@@ -538,41 +538,6 @@ class CalendarMonthWeekViewDataDisplayTest {
                 .andExpect(model().attribute("year", 2026));
     }
 
-        /**
-         * Guard: Ensure expand mode and carousel hooks never render in the month view.
-         */
-        @Test
-        void monthViewDoesNotRenderExpandOrCarouselMarkup() throws Exception {
-        User testUser = new User();
-        testUser.setId(310L);
-        testUser.setUsername("guarduser");
-
-        UserSettings settings = new UserSettings();
-        settings.setCalendarTaskOrdering(CalendarTaskOrderingPreference.CHRONOLOGICAL);
-        settings.setCalendarTaskLayout(CalendarTaskLayoutPreference.COMBINED_LIST);
-
-        given(userSettingsService.getOrCreate(eq(testUser))).willReturn(settings);
-        given(platformSubscriptionService.isPremium(eq(testUser.getId()), any(Clock.class))).willReturn(false);
-        given(scheduleService.findByUser(eq(testUser))).willReturn(Collections.emptyList());
-        given(taskService.getTasksByRange(any(), any(), any())).willReturn(Collections.emptyMap());
-        given(scheduleOccurrenceService.getOccurrencesForUserInMonth(any(), anyInt(), anyInt()))
-            .willReturn(Collections.emptyMap());
-
-        MvcResult result = mvc.perform(get("/calendar")
-                .param("view", "month")
-                .param("month", "2")
-                .param("year", "2026")
-                .sessionAttr("user", testUser))
-            .andExpect(status().isOk())
-            .andReturn();
-
-        String htmlContent = result.getResponse().getContentAsString();
-        assertFalse(htmlContent.contains("id=\"month-expand-toggle\""));
-        assertFalse(htmlContent.contains("calendar-expand-toggle"));
-        assertFalse(htmlContent.contains("month-card"));
-        assertFalse(htmlContent.contains("month-fragment"));
-        }
-
     // Helper methods to create test data
 
     /**

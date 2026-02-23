@@ -75,7 +75,8 @@ function initCalendarUx() {
     const scheduleMetadataCache = new Map();
 
     function getCurrentPane() {
-        return document.querySelector('[data-month-pane]')
+        return document.querySelector('[data-pane-center="true"]')
+            || document.querySelector('[data-month-pane]')
             || document.querySelector('[data-week-pane-slot="current"] [data-week-pane]')
             || document;
     }

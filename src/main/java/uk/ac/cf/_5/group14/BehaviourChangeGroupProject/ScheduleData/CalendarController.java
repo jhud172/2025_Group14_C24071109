@@ -343,6 +343,17 @@ public class CalendarController {
         model.addAttribute("scheduleApplyCountById", applyCountByScheduleId);
     }
 
+    @GetMapping("/month-fragment")
+    public String monthFragment(
+            @RequestParam(value = "month", required = false) Integer month,
+            @RequestParam(value = "year", required = false) Integer year,
+            @SessionAttribute("user") User user,
+            Model model,
+            HttpServletRequest request
+    ) {
+        return calendarView("month", month, year, null, null, "monthPane", user, model, request);
+    }
+
     @GetMapping("/week-fragment")
     public String weekFragment(
             @RequestParam(value = "week", required = false) Integer week,

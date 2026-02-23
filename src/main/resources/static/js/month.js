@@ -402,11 +402,11 @@
         positionPreviewAtItem(activeItem);
     });
 
-    const monthPane = document.querySelector('[data-month-pane]');
-    const paneYear = parseInt(monthPane?.getAttribute('data-year') || '', 10);
-    const paneMonth = parseInt(monthPane?.getAttribute('data-month') || '', 10);
-    const currentYear = Number.isFinite(paneYear) ? paneYear : new Date().getFullYear();
-    const currentMonth = Number.isFinite(paneMonth) ? paneMonth : new Date().getMonth() + 1;
+    let monthPane = document.querySelector('[data-month-pane]');
+    const paneYear = parseInt(monthPane?.getAttribute('data-pane-year') || '', 10);
+    const paneMonth = parseInt(monthPane?.getAttribute('data-pane-month') || '', 10);
+    let currentYear = Number.isFinite(paneYear) ? paneYear : new Date().getFullYear();
+    let currentMonth = Number.isFinite(paneMonth) ? paneMonth : new Date().getMonth() + 1;
     const heatmapCache = new Map();
 
     const monthNameEl = document.getElementById('month-name');
@@ -494,8 +494,8 @@
 
     async function updateHeatmapForPane(pane) {
         if (!pane) return;
-        const year = parseInt(pane.getAttribute('data-year') || '', 10);
-        const month = parseInt(pane.getAttribute('data-month') || '', 10);
+        const year = parseInt(pane.getAttribute('data-pane-year') || '', 10);
+        const month = parseInt(pane.getAttribute('data-pane-month') || '', 10);
         if (!Number.isFinite(year) || !Number.isFinite(month)) return;
 
         const lastDay = new Date(year, month, 0).getDate();
@@ -553,6 +553,9 @@
     }
 
     function getCurrentPane() {
+        if (isExpanded && carousel) {
+            return getCenterPane() || monthPane;
+        }
         return monthPane;
     }
 
@@ -711,6 +714,416 @@
             setJumpStatus('', 'error');
         }
     });
+
+    const carousel = document.getElementById('month-carousel');
+    const track = document.getElementById('month-carousel-track');
+    const expandToggle = document.getElementById('month-expand-toggle');
+    const paneCache = new Map();
+    const pendingLoads = new Set();
+    const edgeThresholdPx = 160;
+    let isExpanded = false;
+    let carouselObserver = null;
+    let scrollRaf = null;
+    let hasUserInteracted = false;
+    let ignoreNextScroll = false;
+    let observerEnabled = false;
+
+    function paneKey(year, month) {
+        return `${year}-${String(month).padStart(2, '0')}`;
+    }
+
+    function addMonths(year, month, delta) {
+        const base = new Date(year, month - 1, 1);
+        base.setMonth(base.getMonth() + delta);
+        return { year: base.getFullYear(), month: base.getMonth() + 1 };
+    }
+
+    function getTrackGap() {
+        if (!track) return 0;
+        const styles = getComputedStyle(track);
+        const gap = parseFloat(styles.columnGap || styles.gap || '0');
+        return Number.isFinite(gap) ? gap : 0;
+    }
+
+    function getMonthPanes() {
+        return Array.from(track?.querySelectorAll('.month-pane') || []);
+    }
+
+    function findPaneByKey(key) {
+        return getMonthPanes().find((pane) => pane.getAttribute('data-pane-key') === key) || null;
+    }
+
+    function markCenterPane(pane) {
+        getMonthPanes().forEach((item) => {
+            item.removeAttribute('data-pane-center');
+        });
+        if (pane) pane.setAttribute('data-pane-center', 'true');
+    }
+
+    function getCenterPane() {
+        if (!carousel) return monthPane;
+        const panes = getMonthPanes();
+        if (!panes.length) return monthPane;
+
+        const rect = carousel.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        let bestPane = panes[0];
+        let bestDistance = Number.POSITIVE_INFINITY;
+
+        panes.forEach((pane) => {
+            const paneRect = pane.getBoundingClientRect();
+            const paneCenter = paneRect.left + paneRect.width / 2;
+            const distance = Math.abs(paneCenter - centerX);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestPane = pane;
+            }
+        });
+
+        return bestPane;
+    }
+
+    function updateCenterState(force = false) {
+        if (isExpanded && !hasUserInteracted && !force) return;
+        const centerPane = getCenterPane();
+        if (!centerPane) return;
+        markCenterPane(centerPane);
+        const year = parseInt(centerPane.getAttribute('data-pane-year') || '', 10);
+        const month = parseInt(centerPane.getAttribute('data-pane-month') || '', 10);
+        if (Number.isFinite(year) && Number.isFinite(month)) {
+            currentYear = year;
+            currentMonth = month;
+            setMonthHeader(year, month);
+        }
+    }
+
+    function createLoadingPane(year, month) {
+        const pane = document.createElement('div');
+        pane.className = 'calendar-month-container month-pane month-pane--loading';
+        pane.setAttribute('data-month-pane', 'true');
+        pane.setAttribute('data-pane-year', String(year));
+        pane.setAttribute('data-pane-month', String(month));
+        pane.setAttribute('data-pane-key', paneKey(year, month));
+        pane.innerHTML = `
+            <div class="animate-pulse w-full">
+                <div class="h-6 w-32 bg-slate-200 dark:bg-slate-700 rounded mb-4"></div>
+                <div class="grid grid-cols-7 gap-2">
+                    ${Array.from({ length: 35 }).map(() => '<div class="h-20 bg-slate-100 dark:bg-slate-800 rounded"></div>').join('')}
+                </div>
+            </div>
+        `;
+        return pane;
+    }
+
+    function createErrorPane(year, month, message) {
+        const pane = document.createElement('div');
+        pane.className = 'calendar-month-container month-pane month-pane--error';
+        pane.setAttribute('data-month-pane', 'true');
+        pane.setAttribute('data-pane-year', String(year));
+        pane.setAttribute('data-pane-month', String(month));
+        pane.setAttribute('data-pane-key', paneKey(year, month));
+        pane.innerHTML = `
+            <div class="text-center px-4">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">Failed to load ${year}-${String(month).padStart(2, '0')}</p>
+                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">${message || 'Please try again.'}</p>
+                <button type="button" class="mt-4" data-retry>Retry</button>
+            </div>
+        `;
+        return pane;
+    }
+
+    function validatePane(pane) {
+        if (!pane || !pane.hasAttribute('data-month-pane')) return false;
+        const hasYear = pane.hasAttribute('data-pane-year');
+        const hasMonth = pane.hasAttribute('data-pane-month');
+        const hasKey = pane.hasAttribute('data-pane-key');
+        if (!hasYear || !hasMonth || !hasKey) return false;
+        const dayCards = pane.querySelectorAll('.calendar-day-card[data-date]');
+        return dayCards.length > 0;
+    }
+
+    async function fetchMonthPane(year, month) {
+        const key = paneKey(year, month);
+        if (paneCache.has(key)) {
+            const cachedHtml = paneCache.get(key);
+            const doc = new DOMParser().parseFromString(cachedHtml, 'text/html');
+            const pane = doc.querySelector('[data-month-pane]');
+            if (!validatePane(pane)) throw new Error('Invalid cached month pane');
+            pane.classList.add('calendar-month-container', 'month-pane');
+            return pane;
+        }
+
+        const url = new URL('/calendar/month-fragment', window.location.origin);
+        url.searchParams.set('year', String(year));
+        url.searchParams.set('month', String(month));
+        const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+        if (!res.ok) throw new Error(`Failed to load month pane: ${res.status}`);
+        const html = await res.text();
+        paneCache.set(key, html);
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const pane = doc.querySelector('[data-month-pane]');
+        if (!validatePane(pane)) throw new Error('Invalid month pane response');
+        pane.classList.add('calendar-month-container', 'month-pane');
+        return pane;
+    }
+
+    async function appendMonthPane(year, month, enterClass) {
+        if (!track) return;
+        const key = paneKey(year, month);
+        if (findPaneByKey(key)) return;
+        if (pendingLoads.has(key)) return;
+        pendingLoads.add(key);
+
+        const loading = createLoadingPane(year, month);
+        if (enterClass) loading.classList.add(enterClass);
+        track.appendChild(loading);
+
+        try {
+            const pane = await fetchMonthPane(year, month);
+            pane.classList.add('month-pane');
+            if (enterClass) pane.classList.add(enterClass);
+            loading.replaceWith(pane);
+            attachDayCardNavigation(pane);
+            updateHeatmapForPane(pane);
+            requestAnimationFrame(() => {
+                pane.classList.remove('month-pane--enter-left', 'month-pane--enter-right');
+            });
+        } catch (error) {
+            const errorPane = createErrorPane(year, month, error.message);
+            errorPane.querySelector('[data-retry]')?.addEventListener('click', () => {
+                paneCache.delete(key);
+                errorPane.remove();
+                appendMonthPane(year, month, enterClass);
+            });
+            loading.replaceWith(errorPane);
+        } finally {
+            pendingLoads.delete(key);
+            prunePanes();
+            reconnectObserver();
+        }
+    }
+
+    async function prependMonthPane(year, month, enterClass) {
+        if (!track || !carousel) return;
+        const key = paneKey(year, month);
+        if (findPaneByKey(key)) return;
+        if (pendingLoads.has(key)) return;
+        pendingLoads.add(key);
+
+        const gap = getTrackGap();
+        const loading = createLoadingPane(year, month);
+        if (enterClass) loading.classList.add(enterClass);
+        track.insertBefore(loading, track.firstChild);
+
+        const loadingWidth = loading.getBoundingClientRect().width;
+        carousel.scrollLeft += loadingWidth + gap;
+
+        try {
+            const pane = await fetchMonthPane(year, month);
+            pane.classList.add('month-pane');
+            if (enterClass) pane.classList.add(enterClass);
+            const paneWidth = pane.getBoundingClientRect().width || loadingWidth;
+            loading.replaceWith(pane);
+            const widthDelta = paneWidth - loadingWidth;
+            if (Math.abs(widthDelta) > 0.5) {
+                carousel.scrollLeft += widthDelta;
+            }
+            attachDayCardNavigation(pane);
+            updateHeatmapForPane(pane);
+            requestAnimationFrame(() => {
+                pane.classList.remove('month-pane--enter-left', 'month-pane--enter-right');
+            });
+        } catch (error) {
+            const errorPane = createErrorPane(year, month, error.message);
+            errorPane.querySelector('[data-retry]')?.addEventListener('click', () => {
+                paneCache.delete(key);
+                errorPane.remove();
+                prependMonthPane(year, month, enterClass);
+            });
+            loading.replaceWith(errorPane);
+        } finally {
+            pendingLoads.delete(key);
+            prunePanes();
+            reconnectObserver();
+        }
+    }
+
+    function prunePanes() {
+        if (!carousel || !track) return;
+        const panes = getMonthPanes();
+        if (panes.length <= 7) return;
+
+        const centerPane = getCenterPane();
+        if (!centerPane) return;
+        const centerIndex = panes.indexOf(centerPane);
+        const keepStart = Math.max(0, centerIndex - 3);
+        const keepEnd = Math.min(panes.length - 1, centerIndex + 3);
+        const gap = getTrackGap();
+
+        let scrollAdjustment = 0;
+        panes.forEach((pane, idx) => {
+            if (idx < keepStart || idx > keepEnd) {
+                if (idx < keepStart) {
+                    scrollAdjustment += pane.getBoundingClientRect().width + gap;
+                }
+                pane.remove();
+            }
+        });
+
+        if (scrollAdjustment > 0) {
+            carousel.scrollLeft -= scrollAdjustment;
+        }
+    }
+
+    function reconnectObserver() {
+        if (!carousel || !track || !carouselObserver) return;
+        const panes = getMonthPanes();
+        panes.forEach((pane) => carouselObserver.unobserve(pane));
+        if (panes.length === 0) return;
+        carouselObserver.observe(panes[0]);
+        if (panes.length > 1) {
+            carouselObserver.observe(panes[panes.length - 1]);
+        }
+    }
+
+    function setupObserver() {
+        if (!carousel || !track) return;
+        if (carouselObserver) carouselObserver.disconnect();
+        carouselObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+            if (!entry.isIntersecting || !isExpanded || !observerEnabled) return;
+                const pane = entry.target;
+                const year = parseInt(pane.getAttribute('data-pane-year') || '', 10);
+                const month = parseInt(pane.getAttribute('data-pane-month') || '', 10);
+                if (!Number.isFinite(year) || !Number.isFinite(month)) return;
+                const panes = getMonthPanes();
+                const isFirst = pane === panes[0];
+                const isLast = pane === panes[panes.length - 1];
+                if (isLast) {
+                    const next = addMonths(year, month, 1);
+                    appendMonthPane(next.year, next.month, 'month-pane--enter-right');
+                }
+                if (isFirst) {
+                    const prev = addMonths(year, month, -1);
+                    prependMonthPane(prev.year, prev.month, 'month-pane--enter-left');
+                }
+            });
+        }, { root: carousel, threshold: 0.5 });
+        reconnectObserver();
+    }
+
+    function expandCarousel() {
+        if (!carousel || !track || !monthPane) return;
+        if (isExpanded) return;
+        isExpanded = true;
+        hasUserInteracted = false;
+        observerEnabled = false;
+        carousel.classList.add('is-expanded');
+        carousel.classList.add('is-opening');
+        if (expandToggle) {
+            expandToggle.classList.add('active');
+            expandToggle.setAttribute('aria-pressed', 'true');
+            expandToggle.textContent = 'Collapse';
+        }
+
+        monthPane.classList.add('month-pane--enter-center');
+        const next = addMonths(currentYear, currentMonth, 1);
+        appendMonthPane(next.year, next.month, 'month-pane--enter-right');
+
+        requestAnimationFrame(() => {
+            markCenterPane(monthPane);
+            setMonthHeader(currentYear, currentMonth);
+            updateCenterState(true);
+            setupObserver();
+
+            requestAnimationFrame(() => {
+                monthPane.classList.remove('month-pane--enter-center');
+                carousel.classList.remove('is-opening');
+            });
+        });
+    }
+
+    function collapseCarousel() {
+        if (!carousel || !track) return;
+        if (!isExpanded) return;
+        isExpanded = false;
+        hasUserInteracted = false;
+        observerEnabled = false;
+        carousel.classList.remove('is-expanded');
+        if (expandToggle) {
+            expandToggle.classList.remove('active');
+            expandToggle.setAttribute('aria-pressed', 'false');
+            expandToggle.textContent = 'Expand';
+        }
+
+        if (carouselObserver) {
+            carouselObserver.disconnect();
+            carouselObserver = null;
+        }
+
+        const centerPane = getCenterPane();
+        if (!centerPane) return;
+        track.replaceChildren(centerPane);
+        carousel.scrollLeft = 0;
+        monthPane = centerPane;
+        updateCenterState();
+    }
+
+    function toggleCarousel() {
+        if (isExpanded) {
+            collapseCarousel();
+        } else {
+            expandCarousel();
+        }
+    }
+
+    function onCarouselScroll() {
+        if (!isExpanded) return;
+        if (ignoreNextScroll) {
+            ignoreNextScroll = false;
+            return;
+        }
+        if (!hasUserInteracted) {
+            hasUserInteracted = true;
+            observerEnabled = true;
+        }
+        if (carousel && carousel.scrollLeft <= edgeThresholdPx) {
+            const panes = getMonthPanes();
+            const firstPane = panes[0];
+            if (firstPane) {
+                const year = parseInt(firstPane.getAttribute('data-pane-year') || '', 10);
+                const month = parseInt(firstPane.getAttribute('data-pane-month') || '', 10);
+                if (Number.isFinite(year) && Number.isFinite(month)) {
+                    const prev = addMonths(year, month, -1);
+                    prependMonthPane(prev.year, prev.month, 'month-pane--enter-left');
+                }
+            }
+        }
+        if (carousel && carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - edgeThresholdPx) {
+            const panes = getMonthPanes();
+            const lastPane = panes[panes.length - 1];
+            if (lastPane) {
+                const year = parseInt(lastPane.getAttribute('data-pane-year') || '', 10);
+                const month = parseInt(lastPane.getAttribute('data-pane-month') || '', 10);
+                if (Number.isFinite(year) && Number.isFinite(month)) {
+                    const next = addMonths(year, month, 1);
+                    appendMonthPane(next.year, next.month, 'month-pane--enter-right');
+                }
+            }
+        }
+        if (scrollRaf) return;
+        scrollRaf = requestAnimationFrame(() => {
+            scrollRaf = null;
+            updateCenterState();
+        });
+    }
+
+    if (carousel && track && monthPane) {
+        updateCenterState();
+        carousel.addEventListener('scroll', onCarouselScroll);
+    }
+
+    expandToggle?.addEventListener('click', toggleCarousel);
 
     attachPreviewHandlers(document);
     attachDayCardNavigation(document);

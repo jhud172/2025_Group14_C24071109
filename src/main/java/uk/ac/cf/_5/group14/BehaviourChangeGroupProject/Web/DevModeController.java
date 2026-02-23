@@ -30,7 +30,7 @@ public class DevModeController {
         }
         
         model.addAttribute("isDevMode", true);
-        return "dev-mode-hub";
+        return "dev-mode/hub";
     }
     
     /**
@@ -45,6 +45,6 @@ public class DevModeController {
         }
         
         model.addAttribute("isDevMode", true);
-        return "dev-mode-unauthorized";
+        return "dev-mode/unauthorized";
     }
 }

@@ -135,7 +135,7 @@ Removed redundant CSS links from templates that use base layout:
 
 ### Files Created
 
-#### `CSS_ORGANIZATION.md`
+#### `CSS-Organization.md`
 Comprehensive documentation covering:
 - File structure and organization
 - Build process
@@ -256,14 +256,14 @@ Run `npm run build:css` after:
 - **Don't** add direct `<link>` tags for component CSS in templates
 - **Don't** create CSS files outside `/components/` unless page-specific
 - **Do** rebuild CSS after any changes to component files
-- **Do** check `CSS_ORGANIZATION.md` for guidelines
+- **Do** check `CSS-Organization.md` for guidelines
 
 ### Breaking Changes
 None. All existing functionality is preserved. The reorganization only affects file structure and loading patterns, not the actual CSS content or styling.
 
 ## References
 
-- Full documentation: `CSS_ORGANIZATION.md`
+- Full documentation: `CSS-Organization.md`
 - Build configuration: `package.json`, `postcss.config.js`, `tailwind.config.js`
 - Base template: `src/main/resources/templates/base.html`
 - Source CSS: `src/main/resources/static/css/tailwind.css`

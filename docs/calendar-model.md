@@ -57,18 +57,18 @@ public class CalendarDayModel {
 #### 2. CalendarDayModelBuilder Service
 **Location**: `src/main/java/.../CalendarData/CalendarDayModelBuilder.java`
 
-A service responsible for building lists of `CalendarDayModel` objects:
+A service responsible for building lists of `CalendarDayModel` objects and month grid cells:
 
 ```java
 @Service
 public class CalendarDayModelBuilder {
     
-    public List<CalendarDayModel> buildMonthDays(
+    public List<CalendarCellModel> buildMonthCells(
         int year, int month, LocalDate today,
         Map<LocalDate, List<CalendarTask>> tasksByDate,
         Map<LocalDate, List<ScheduleOccurrence>> occurrencesByDate
     ) {
-        // Builds 28-31 CalendarDayModel objects for the month
+        // Builds CalendarCellModel entries including placeholders + CalendarDayModel
     }
     
     public List<CalendarDayModel> buildWeekDays(
@@ -83,9 +83,10 @@ public class CalendarDayModelBuilder {
 
 **Responsibilities**:
 - Pre-compute all day data for a month or week
+- Build month grid cells with placeholders for alignment (month view)
 - Lookup tasks and occurrences from input maps (with type-safe `LocalDate` keys)
 - Create defensive copies of task/occurrence lists
-- Package data into `CalendarDayModel` objects
+- Package data into `CalendarDayModel` objects and `CalendarCellModel` containers
 
 #### 3. Controller Integration
 **Location**: `src/main/java/.../ScheduleData/CalendarController.java`
@@ -104,16 +105,16 @@ model.addAttribute("occurrencesByDateIso", toIsoDateKeyedMap(occurrences));
 ```java
 Map<LocalDate, List<CalendarTask>> tasksByDate = ...;
 Map<LocalDate, List<ScheduleOccurrence>> occurrences = ...;
-List<CalendarDayModel> calendarDays = calendarDayModelBuilder.buildMonthDays(
+List<CalendarCellModel> calendarCells = calendarDayModelBuilder.buildMonthCells(
     year, month, today, tasksByDate, occurrences
 );
-model.addAttribute("calendarDays", calendarDays);
+model.addAttribute("calendarCells", calendarCells);
 ```
 
 #### 4. Template Refactoring
 **Location**: `src/main/resources/templates/calendar/month.html` and `week.html`
 
-Templates now iterate over `calendarDays` list instead of performing map lookups:
+Templates now iterate over `calendarCells` (month) or `calendarDays` (week) instead of performing map lookups:
 
 **Before** (map-based approach):
 ```html
@@ -126,14 +127,17 @@ Templates now iterate over `calendarDays` list instead of performing map lookups
 </div>
 ```
 
-**After** (list-based approach):
+**After** (cell-based approach for month view):
 ```html
-<div th:each="dayModel : ${calendarDays}"
-     th:with="tasks=${dayModel.tasks}">
-    <div th:each="task : ${tasks}">
-        <!-- Direct access, no key matching issues -->
+<th:block th:each="cell : ${calendarCells}">
+    <div th:if="${cell.placeholder}" class="calendar-day-card calendar-day-card--placeholder"></div>
+    <div th:if="${!cell.placeholder}"
+             th:with="dayModel=${cell.dayModel}, tasks=${dayModel.tasks}">
+        <div th:each="task : ${tasks}">
+                <!-- Direct access, no key matching issues -->
+        </div>
     </div>
-</div>
+</th:block>
 ```
 
 ---

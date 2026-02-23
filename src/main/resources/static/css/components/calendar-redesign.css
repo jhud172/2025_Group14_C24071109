@@ -29,6 +29,145 @@
   -webkit-user-drag: none;
 }
 
+.calendar-expand-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgb(226, 232, 240);
+  background: rgba(248, 250, 252, 0.85);
+}
+
+.dark .calendar-expand-toggle {
+  border-color: rgb(51, 65, 85);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.calendar-expand-toggle__btn {
+  padding: 0.55rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: white;
+  color: rgb(30, 41, 59);
+  transition: all 0.2s ease;
+}
+
+.calendar-expand-toggle__btn:hover {
+  border-color: rgb(16, 185, 129);
+  background: rgb(240, 253, 250);
+  color: rgb(5, 150, 105);
+}
+
+.calendar-expand-toggle__btn.active,
+.calendar-expand-toggle__btn[aria-pressed="true"] {
+  border-color: rgb(16, 185, 129);
+  background: rgb(236, 253, 245);
+  color: rgb(5, 150, 105);
+  box-shadow: 0 2px 8px -2px rgba(16, 185, 129, 0.35);
+}
+
+.dark .calendar-expand-toggle__btn {
+  background: rgb(15, 23, 42);
+  color: rgb(226, 232, 240);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.dark .calendar-expand-toggle__btn:hover {
+  background: rgba(6, 78, 59, 0.2);
+  color: rgb(110, 231, 183);
+}
+
+.month-carousel {
+  --month-carousel-gap: 1.5rem;
+  overflow: hidden;
+  border-radius: 1.25rem;
+}
+
+.month-carousel.is-expanded {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 2px solid rgba(16, 185, 129, 0.35);
+  padding: 0.5rem;
+  scroll-behavior: smooth;
+}
+
+.dark .month-carousel.is-expanded {
+  border-color: rgba(16, 185, 129, 0.45);
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.month-carousel__track {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--month-carousel-gap);
+  align-items: stretch;
+  transition: transform 0.4s ease;
+}
+
+.month-pane {
+  flex: 0 0 100%;
+  min-width: 0;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.month-carousel.is-expanded .month-pane {
+  flex: 0 0 100%;
+}
+
+.month-pane--enter-left {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+.month-pane--enter-right {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+.month-pane--enter-center {
+  opacity: 0.85;
+  transform: scale(0.985);
+}
+
+.month-carousel.is-opening .month-pane--enter-center,
+.month-carousel.is-opening .month-pane--enter-left,
+.month-carousel.is-opening .month-pane--enter-right {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.month-pane--loading,
+.month-pane--error {
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  border-radius: 1.25rem;
+  min-height: 20rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.dark .month-pane--loading,
+.dark .month-pane--error {
+  border-color: rgba(71, 85, 105, 0.6);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.month-pane--error button {
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid rgba(37, 99, 235, 0.4);
+  background: rgb(37, 99, 235);
+  color: #fff;
+}
+
+.month-pane--error button:hover {
+  background: rgb(29, 78, 216);
+}
+
 /* Day headers row */
 .calendar-day-headers {
   margin-bottom: 1rem;
@@ -1863,8 +2002,6 @@ body.calendar-schedule-open .calendar-week-view {
   background: rgb(240, 253, 250);
 }
 
-}
-
 .calendar-schedule-list {
   margin-top: 1.25rem;
   display: flex;
@@ -2284,11 +2421,8 @@ body.calendar-schedule-open .calendar-week-view {
   color: rgb(226, 232, 240);
 }
 
-.dark .calendar-quick-chip-empty,
-  margin-top: 0.75rem;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.42rem;
+.dark .calendar-quick-chip-empty {
+  color: rgb(148, 163, 184);
 }
 
 .calendar-schedule-action {
