@@ -24,14 +24,28 @@
                 </button>
                 <div id="premium-tooltip" class="nav-premium-tooltip" role="status">You have premium features</div>
             </div>
+
+            <!-- Admin Shield Icon (PLATFORM_ADMIN / SUPER_ADMIN) -->
+            <div sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')" class="nav-admin-badge-group" aria-label="Administrator">
+                <div class="nav-admin-badge" title="Administrator">
+                    <svg class="nav-admin-badge__icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="nav-admin-tooltip" role="status">Administrator access</div>
+            </div>
             
-            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-500/30">
-                <span sec:authorize="hasRole('SUPER_ADMIN')">Super Admin</span>
-                <span sec:authorize="hasRole('PLATFORM_ADMIN') and !hasRole('SUPER_ADMIN')">Platform Admin</span>
+            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-500/30"
+                  sec:authorize="!hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')">
                 <span sec:authorize="hasRole('GYM_ADMIN') and !hasAnyRole('SUPER_ADMIN','PLATFORM_ADMIN')">Gym Admin</span>
                 <span sec:authorize="hasRole('TRAINER') and !hasAnyRole('SUPER_ADMIN','PLATFORM_ADMIN','GYM_ADMIN')">Trainer</span>
                 <span sec:authorize="hasRole('CLIENT') and !hasAnyRole('SUPER_ADMIN','PLATFORM_ADMIN','GYM_ADMIN','TRAINER')">Client</span>
                 <span sec:authorize="!hasAnyRole('SUPER_ADMIN','PLATFORM_ADMIN','GYM_ADMIN','TRAINER','CLIENT')">User</span>
+            </span>
+            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-bold bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20 dark:bg-red-900/30 dark:text-red-300 dark:ring-red-500/30"
+                  sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')">
+                <span sec:authorize="hasRole('SUPER_ADMIN')">Super Admin</span>
+                <span sec:authorize="hasRole('PLATFORM_ADMIN') and !hasRole('SUPER_ADMIN')">Platform Admin</span>
             </span>
         </div>
         
