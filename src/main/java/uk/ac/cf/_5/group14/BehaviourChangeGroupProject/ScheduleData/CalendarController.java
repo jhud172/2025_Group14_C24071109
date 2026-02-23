@@ -54,6 +54,8 @@ public class CalendarController {
 
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CalendarController.class);
 
     @Autowired
     private CalendarTaskService taskService;
@@ -115,23 +117,28 @@ public class CalendarController {
     @Autowired
     private GoalLinkService goalLinkService;
 
+    @Autowired
+    private uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarDayModelBuilder calendarDayModelBuilder;
+
     @GetMapping("")
     public String calendarView(
-            @RequestParam(required = false) String view,
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer week,
-            @RequestParam(required = false) Integer weekYear,
-            @RequestParam(required = false) String fragment,
+            @RequestParam(value = "view", required = false) String view,
+            @RequestParam(value = "month", required = false) Integer month,
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "week", required = false) Integer week,
+            @RequestParam(value = "weekYear", required = false) Integer weekYear,
+            @RequestParam(value = "fragment", required = false) String fragment,
             @SessionAttribute("user") User user,
             Model model,
             HttpServletRequest request
     ) {
         LocalDate today = LocalDate.now();
         LocalDate tomorrow = today.plusDays(1);
+        System.out.println("DEBUG: CalendarController - User: " + (user != null ? user.getUsername() : "NULL") + ", UserId: " + (user != null ? user.getId() : "NULL"));
         boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
         UserSettings userSettings = userSettingsService.getOrCreate(user);
         CalendarTaskLayoutPreference layoutPreference = userSettings.getCalendarTaskLayout();
+        logger.debug("calendarView: layoutPreference = {}", layoutPreference);
         
         // Determine view based on: explicit parameter, stored preference, or device-based default
         String targetView = view;
@@ -206,10 +213,20 @@ public class CalendarController {
             model.addAttribute("weekStart", weekStart);
             model.addAttribute("weekEnd", weekEnd);
             model.addAttribute("weekDays", weekDays);
+            
+            // Build unified calendar day models for week view
+            List<uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarDayModel> calendarDays = 
+                calendarDayModelBuilder.buildWeekDays(weekStart, today, tasks, occ);
+            model.addAttribute("calendarDays", calendarDays);
+            
+            // Keep old attributes for backward compatibility
             model.addAttribute("tasksByDate", tasks);
-            model.addAttribute("tasksByDateIso", toIsoDateKeyedTaskMap(tasks));
+            model.addAttribute("tasksByDateIso", toIsoDateKeyedTaskMap(tasks, weekStart, weekEnd));
             model.addAttribute("occurrences", occ);
-            model.addAttribute("occurrencesByDateIso", toIsoDateKeyedOccurrenceMap(occ));
+            model.addAttribute("occurrencesByDateIso", toIsoDateKeyedOccurrenceMap(occ, weekStart, weekEnd));
+            logger.debug("Week view - tasksByDate size: {}, occurrences size: {}", 
+                tasks != null ? tasks.size() : 0,
+                occ != null ? occ.size() : 0);
             model.addAttribute("today", today);
             model.addAttribute("tomorrow", tomorrow);
             model.addAttribute("isPremium", isPremium);
@@ -244,7 +261,6 @@ public class CalendarController {
         model.addAttribute("month", month);
         model.addAttribute("year", year);
         model.addAttribute("lengthOfMonth", current.lengthOfMonth());
-        model.addAttribute("offset", current.getDayOfWeek().getValue());
         model.addAttribute("today", today);
         model.addAttribute("tomorrow", tomorrow);
         model.addAttribute("isPremium", isPremium);
@@ -253,18 +269,32 @@ public class CalendarController {
         model.addAttribute("prevYear", prev.getYear());
         model.addAttribute("nextMonth", next.getMonthValue());
         model.addAttribute("nextYear", next.getYear());
+        
+        // Fetch tasks and occurrences
         Map<LocalDate, List<CalendarTask>> tasksByDate = getTasksByDateRange(
             user,
             current.withDayOfMonth(1),
             current.withDayOfMonth(current.lengthOfMonth())
         );
-        model.addAttribute("tasksByDate", tasksByDate);
-        Map<String, List<CalendarTask>> isoTaskMap = toIsoDateKeyedTaskMap(tasksByDate);
-        model.addAttribute("tasksByDateIso", isoTaskMap);
         Map<LocalDate, List<ScheduleOccurrence>> occurrences = scheduleOccurrenceService.getOccurrencesForUserInMonth(user, year, month);
+        
+        // Build unified calendar cells with placeholders for proper grid alignment
+        List<uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarCellModel> calendarCells = 
+            calendarDayModelBuilder.buildMonthCells(year, month, today, tasksByDate, occurrences);
+        
+        model.addAttribute("calendarCells", calendarCells);
+        logger.debug("Month view - calendarCells size: {}, total tasks: {}, total occurrences: {}", 
+            calendarCells.size(),
+            calendarCells.stream().filter(c -> !c.isPlaceholder()).mapToInt(c -> c.getDayModel().getTaskCount()).sum(),
+            calendarCells.stream().filter(c -> !c.isPlaceholder()).mapToInt(c -> c.getDayModel().getOccurrenceCount()).sum());
+        
+        // Keep old attributes for backward compatibility during transition
+        model.addAttribute("tasksByDate", tasksByDate);
         model.addAttribute("occurrences", occurrences);
-        Map<String, List<ScheduleOccurrence>> isoOccMap = toIsoDateKeyedOccurrenceMap(occurrences);
-        model.addAttribute("occurrencesByDateIso", isoOccMap);
+        LocalDate monthStart = current.withDayOfMonth(1);
+        LocalDate monthEnd = current.withDayOfMonth(current.lengthOfMonth());
+        model.addAttribute("tasksByDateIso", toIsoDateKeyedTaskMap(tasksByDate, monthStart, monthEnd));
+        model.addAttribute("occurrencesByDateIso", toIsoDateKeyedOccurrenceMap(occurrences, monthStart, monthEnd));
         List<Schedule> schedules = scheduleService.findByUser(user);
         model.addAttribute("schedules", schedules);
         populateScheduleDrawerState(user, schedules, model);
@@ -313,21 +343,10 @@ public class CalendarController {
         model.addAttribute("scheduleApplyCountById", applyCountByScheduleId);
     }
 
-    @GetMapping("/month-fragment")
-    public String monthFragment(
-            @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year,
-            @SessionAttribute("user") User user,
-            Model model,
-            HttpServletRequest request
-    ) {
-        return calendarView("month", month, year, null, null, "monthPane", user, model, request);
-    }
-
     @GetMapping("/week-fragment")
     public String weekFragment(
-            @RequestParam(required = false) Integer week,
-            @RequestParam(required = false) Integer weekYear,
+            @RequestParam(value = "week", required = false) Integer week,
+            @RequestParam(value = "weekYear", required = false) Integer weekYear,
             @SessionAttribute("user") User user,
             Model model,
             HttpServletRequest request
@@ -935,45 +954,66 @@ public class CalendarController {
         return "redirect:/calendar/task/" + id;
     }
 
-    private Map<String, List<CalendarTask>> toIsoDateKeyedTaskMap(Map<LocalDate, List<CalendarTask>> source) {
+    private Map<String, List<CalendarTask>> toIsoDateKeyedTaskMap(Map<LocalDate, List<CalendarTask>> source, LocalDate rangeStart, LocalDate rangeEnd) {
         Map<String, List<CalendarTask>> byIsoDate = new HashMap<>();
-        if (source == null || source.isEmpty()) {
-            return byIsoDate;
+        
+        // First, populate all dates in the range with empty lists
+        LocalDate current = rangeStart;
+        while (!current.isAfter(rangeEnd)) {
+            byIsoDate.put(current.toString(), new ArrayList<>());
+            current = current.plusDays(1);
         }
-
-        for (Map.Entry<LocalDate, List<CalendarTask>> entry : source.entrySet()) {
-            LocalDate date = entry.getKey();
-            if (date == null) {
-                continue;
+        logger.debug("toIsoDateKeyedTaskMap: initialized {} dates in range", byIsoDate.size());
+        
+        // Then, override with actual task data where it exists
+        if (source != null && !source.isEmpty()) {
+            for (Map.Entry<LocalDate, List<CalendarTask>> entry : source.entrySet()) {
+                LocalDate date = entry.getKey();
+                if (date == null) {
+                    continue;
+                }
+                List<CalendarTask> tasks = entry.getValue();
+                // Materialize the lazy-loaded collection by creating a new ArrayList
+                // This forces Hibernate to load the collection while the session is active
+                List<CalendarTask> materializedTasks = tasks != null ? new ArrayList<>(tasks) : new ArrayList<>();
+                byIsoDate.put(date.toString(), materializedTasks);
+                logger.debug("  ISO key {}: {} tasks", date.toString(), materializedTasks.size());
             }
-            List<CalendarTask> tasks = entry.getValue();
-            // Materialize the lazy-loaded collection by creating a new ArrayList
-            // This forces Hibernate to load the collection while the session is active
-            List<CalendarTask> materializedTasks = tasks != null ? new ArrayList<>(tasks) : new ArrayList<>();
-            byIsoDate.put(date.toString(), materializedTasks);
+        } else {
+            logger.debug("toIsoDateKeyedTaskMap: source is null or empty");
         }
 
+        logger.debug("toIsoDateKeyedTaskMap: final result size = {}", byIsoDate.size());
         return byIsoDate;
     }
 
     private Map<String, List<ScheduleOccurrence>> toIsoDateKeyedOccurrenceMap(
-            Map<LocalDate, List<ScheduleOccurrence>> source
+            Map<LocalDate, List<ScheduleOccurrence>> source,
+            LocalDate rangeStart,
+            LocalDate rangeEnd
     ) {
         Map<String, List<ScheduleOccurrence>> byIsoDate = new HashMap<>();
-        if (source == null || source.isEmpty()) {
-            return byIsoDate;
+        
+        // First, populate all dates in the range with empty lists
+        LocalDate current = rangeStart;
+        while (!current.isAfter(rangeEnd)) {
+            byIsoDate.put(current.toString(), new ArrayList<>());
+            current = current.plusDays(1);
         }
-
-        for (Map.Entry<LocalDate, List<ScheduleOccurrence>> entry : source.entrySet()) {
-            LocalDate date = entry.getKey();
-            if (date == null) {
-                continue;
+        
+        // Then, override with actual occurrence data where it exists
+        if (source != null && !source.isEmpty()) {
+            for (Map.Entry<LocalDate, List<ScheduleOccurrence>> entry : source.entrySet()) {
+                LocalDate date = entry.getKey();
+                if (date == null) {
+                    continue;
+                }
+                List<ScheduleOccurrence> occurrences = entry.getValue();
+                // Materialize the lazy-loaded collection by creating a new ArrayList
+                // This forces Hibernate to load the collection while the session is active
+                List<ScheduleOccurrence> materializedOccurrences = occurrences != null ? new ArrayList<>(occurrences) : new ArrayList<>();
+                byIsoDate.put(date.toString(), materializedOccurrences);
             }
-            List<ScheduleOccurrence> occurrences = entry.getValue();
-            // Materialize the lazy-loaded collection by creating a new ArrayList
-            // This forces Hibernate to load the collection while the session is active
-            List<ScheduleOccurrence> materializedOccurrences = occurrences != null ? new ArrayList<>(occurrences) : new ArrayList<>();
-            byIsoDate.put(date.toString(), materializedOccurrences);
         }
 
         return byIsoDate;
@@ -981,10 +1021,13 @@ public class CalendarController {
 
     private Map<LocalDate, List<CalendarTask>> getTasksByDateRange(User user, LocalDate start, LocalDate end) {
         if (user == null || start == null || end == null || end.isBefore(start)) {
+            System.out.println("DEBUG: getTasksByDateRange - returning empty due to null check");
             return new HashMap<>();
         }
 
-        return taskService.getTasksByRange(user, start, end);
+        Map<LocalDate, List<CalendarTask>> result = taskService.getTasksByRange(user, start, end);
+        System.out.println("DEBUG: getTasksByDateRange - user: " + user.getId() + ", start: " + start + ", end: " + end + ", resultSize: " + result.size() + ", totalTasks: " + result.values().stream().mapToInt(List::size).sum());
+        return result;
     }
 
 }

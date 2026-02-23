@@ -1,30 +1,40 @@
-document.addEventListener("DOMContentLoaded", () => {
+function initCalendarUx() {
+    if (window.__calendarUxInit) return;
+    window.__calendarUxInit = true;
     const scheduleButton = document.getElementById("scheduleDrawerButton");
     const scheduleDrawer = document.getElementById("scheduleDrawer");
     const scheduleSearch = document.getElementById("schedule-search");
     const scheduleList = document.getElementById("schedule-list");
 
-    const contextView = document.getElementById('schedule-context-view');
-    const contextRange = document.getElementById('schedule-context-range');
-    const contextSelectedDay = document.getElementById('schedule-context-selected-day');
-    const contextExisting = document.getElementById('schedule-context-existing');
-
-    const scopeButtons = Array.from(scheduleDrawer?.querySelectorAll('[data-schedule-scope]') || []);
-    const customScopeRow = scheduleDrawer?.querySelector('[data-scope-custom]') || null;
-    const customStartInput = document.getElementById('schedule-scope-start');
-    const customEndInput = document.getElementById('schedule-scope-end');
+    const contextSummary = document.getElementById('schedule-context-summary');
+    const contextMeta = document.getElementById('schedule-context-meta');
+    const deployStartInput = document.getElementById('schedule-deploy-start');
+    const repeatSelect = document.getElementById('schedule-deploy-repeat');
+    const repeatCustomRow = document.getElementById('schedule-repeat-custom');
+    const repeatIntervalInput = document.getElementById('schedule-repeat-interval');
+    const repeatUnitSelect = document.getElementById('schedule-repeat-unit');
+    const repeatEndInput = document.getElementById('schedule-repeat-end');
+    const repeatEndRow = document.getElementById('schedule-repeat-end-row');
 
     const previewToggle = document.getElementById('schedule-preview-toggle');
     const previewClearButton = document.getElementById('schedule-preview-clear');
-    const applyScopeSelect = document.getElementById('schedule-apply-scope');
-    const applyWeeksInput = document.getElementById('schedule-apply-weeks');
     const strategyButtons = Array.from(scheduleDrawer?.querySelectorAll('[data-deploy-strategy]') || []);
     const impactSummary = document.getElementById('schedule-impact-summary');
     const impactReviewButton = document.getElementById('schedule-impact-review');
     const impactApplyButton = document.getElementById('schedule-impact-apply');
+    const previewDeployButton = document.getElementById('schedule-preview-deploy');
     const simEnableToggle = document.getElementById('schedule-sim-enable');
     const simWeeksInput = document.getElementById('schedule-sim-weeks');
     const simRunButton = document.getElementById('schedule-sim-run');
+    const simToggleButton = document.getElementById('schedule-sim-toggle');
+    const simPanel = document.getElementById('schedule-sim-panel');
+    const deployPanel = scheduleDrawer?.querySelector('[data-deploy-panel]') || null;
+    const deployFooter = scheduleDrawer?.querySelector('[data-deploy-footer]') || null;
+    const deployCancelButton = document.getElementById('schedule-deploy-cancel');
+    const previewConfirmBar = document.getElementById('schedule-preview-confirm');
+    const previewConfirmName = document.getElementById('schedule-preview-confirm-name');
+    const previewConfirmApply = document.getElementById('schedule-preview-confirm-apply');
+    const previewConfirmCancel = document.getElementById('schedule-preview-confirm-cancel');
 
     const filterType = document.getElementById('schedule-filter-type');
     const filterStatus = document.getElementById('schedule-filter-status');
@@ -49,7 +59,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     let selectedDay = null;
-    let contextScope = 'visible';
+    let pendingPreviewPayload = null;
+    let pendingPreviewScheduleId = null;
     let selectedScheduleId = null;
     let selectedStrategy = 'merge';
     let previewEnabled = true;
@@ -64,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const scheduleMetadataCache = new Map();
 
     function getCurrentPane() {
-        return document.querySelector('[data-month-pane-slot="current"] [data-month-pane]')
+        return document.querySelector('[data-month-pane]')
             || document.querySelector('[data-week-pane-slot="current"] [data-week-pane]')
             || document;
     }
@@ -167,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         lis.forEach((li) => {
             const scheduleId = li.getAttribute('data-schedule-id') || '';
-            const card = li.querySelector('.calendar-schedule-card, .calendar-schedule-card-compact');
+            const card = li.querySelector('.calendar-schedule-card, .calendar-schedule-card-compact, .sched-card');
             const status = (li.getAttribute('data-schedule-status') || '').toLowerCase();
             const type = typeLabelToFilterValue(li.getAttribute('data-schedule-type'));
             const frequencyBucket = card?.getAttribute('data-frequency-bucket') || 'all';
@@ -315,17 +326,19 @@ document.addEventListener("DOMContentLoaded", () => {
             event.stopPropagation();
 
             selectedDay = dayCard.getAttribute('data-date');
-            const choice = window.prompt('Drop scope: type week, forward, or weeks', 'forward');
-            const scopeChoice = (choice || 'forward').trim().toLowerCase();
-
-            if (applyScopeSelect) {
-                applyScopeSelect.value = ['week', 'forward', 'weeks'].includes(scopeChoice) ? scopeChoice : 'forward';
+            if (deployStartInput && selectedDay) {
+                deployStartInput.value = selectedDay;
             }
+            if (repeatSelect) {
+                repeatSelect.value = 'weekly';
+            }
+            updateRepeatVisibility();
 
             activateSchedule(draggedScheduleId, true)
                 .then(() => requestImpact())
                 .then(() => {
-                    const confirmApply = window.confirm(`Deploy schedule from ${formatDateLabel(selectedDay)} using ${applyScopeSelect?.value || 'forward'} scope?`);
+                    const config = computeRepeatConfig();
+                    const confirmApply = window.confirm(`Deploy schedule starting ${formatDateLabel(config.startDate)} (${config.repeat})?`);
                     if (confirmApply) {
                         return applyDeployment();
                     }
@@ -358,8 +371,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const enabled = !!selectedScheduleId;
         if (impactReviewButton) impactReviewButton.disabled = !enabled;
-        if (impactApplyButton) impactApplyButton.disabled = true;
+        if (impactApplyButton) {
+            impactApplyButton.disabled = !enabled || impactApplyButton.dataset.hasImpact !== 'true';
+            impactApplyButton.textContent = enabled ? `Deploy "${getSelectedScheduleName()}"` : 'Deploy schedule';
+        }
+        if (previewDeployButton) {
+            previewDeployButton.disabled = !enabled;
+        }
+        if (deployPanel) {
+            deployPanel.classList.toggle('is-hidden', !enabled);
+        }
+        if (deployFooter) {
+            deployFooter.classList.toggle('is-hidden', !enabled);
+        }
+        if (enabled) {
+            updateContextHeader();
+        }
         if (simRunButton) simRunButton.disabled = !enabled || !simEnableToggle?.checked;
+    }
+
+    function getSelectedScheduleName() {
+        if (!selectedScheduleId) return 'schedule';
+        const li = getListItemForSchedule(selectedScheduleId);
+        return li?.getAttribute('data-schedule-name') || 'schedule';
+    }
+
+    function isPremiumUser() {
+        return scheduleDrawer?.dataset.isPremium === 'true';
+    }
+
+    function showPreviewConfirm() {
+        if (!previewConfirmBar) return;
+        if (previewConfirmName) previewConfirmName.textContent = getSelectedScheduleName();
+        previewConfirmBar.classList.remove('hidden');
+    }
+
+    function hidePreviewConfirm() {
+        if (!previewConfirmBar) return;
+        previewConfirmBar.classList.add('hidden');
+    }
+
+    function markScheduleDeployed(scheduleId) {
+        const card = cardById.get(scheduleId || '') || null;
+        if (!card) return;
+        let badge = card.querySelector('[data-deploy-status]');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.setAttribute('data-deploy-status', 'true');
+            badge.className = 'sched-deploy-status';
+            badge.textContent = 'Deployed just now';
+            const header = card.querySelector('.sched-card-header');
+            header?.appendChild(badge);
+            return;
+        }
+        badge.textContent = 'Deployed just now';
+        badge.classList.remove('hidden');
     }
 
     function renderHealthIndicators(card, metadata) {
@@ -470,9 +536,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    async function activateSchedule(scheduleId, withPreview = true) {
+    async function activateSchedule(scheduleId, withPreview = true, withImpact = false) {
         if (!scheduleId) return;
         selectedScheduleId = scheduleId;
+        if (impactApplyButton) impactApplyButton.dataset.hasImpact = 'false';
         trackRecent(scheduleId);
         updateScheduleSelectionUi();
         renderQuickAccessChips();
@@ -484,29 +551,107 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error(error);
         }
+
+        if (withImpact) {
+            requestImpact().catch((error) => {
+                console.error(error);
+                if (impactSummary) {
+                    impactSummary.textContent = 'Unable to calculate impact. Please try again.';
+                }
+            });
+        }
     }
 
-    function readApplyScope() {
-        return applyScopeSelect?.value || 'forward';
+    function toLocalIsoDate(date) {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
     }
 
-    function readWeeks() {
-        const raw = Number(applyWeeksInput?.value || 4);
-        if (!Number.isFinite(raw)) return 4;
-        return Math.max(1, Math.min(52, Math.trunc(raw)));
+    function weeksBetween(startIso, endIso) {
+        const start = parseDate(startIso);
+        const end = parseDate(endIso);
+        if (!start || !end) return 4;
+        const diffDays = Math.max(1, Math.round((end - start) / 86400000) + 1);
+        return Math.ceil(diffDays / 7);
+    }
+
+    function intervalToWeeks(interval, unit) {
+        const safeInterval = Math.max(1, Math.trunc(interval || 1));
+        if (unit === 'day') return Math.ceil(safeInterval / 7);
+        if (unit === 'month') return safeInterval * 4;
+        if (unit === 'year') return safeInterval * 52;
+        return safeInterval;
+    }
+
+    function computeRepeatConfig() {
+        const bounds = getVisibleDateBounds();
+        const startDate = deployStartInput?.value || selectedDay || bounds?.start || toLocalIsoDate(new Date());
+        const repeat = repeatSelect?.value || 'forever';
+        const endDateInput = repeatEndInput?.value || '';
+        let weeks = 4;
+        let scope = 'weeks';
+
+        if (repeat === 'forever') {
+            scope = 'forward';
+            weeks = 52;
+        } else if (endDateInput) {
+            weeks = weeksBetween(startDate, endDateInput);
+        } else if (repeat === 'yearly') {
+            weeks = 52;
+        } else if (repeat === 'monthly') {
+            weeks = 4;
+        } else if (repeat === 'weekly') {
+            weeks = 1;
+        } else if (repeat === 'daily') {
+            weeks = 1;
+        } else {
+            weeks = intervalToWeeks(Number(repeatIntervalInput?.value || 1), repeatUnitSelect?.value || 'week');
+        }
+
+        weeks = Math.max(1, Math.min(52, Math.trunc(weeks)));
+
+        let computedEnd = endDateInput;
+        if (!computedEnd && repeat !== 'forever') {
+            const start = parseDate(startDate);
+            if (start) {
+                const end = new Date(start);
+                end.setDate(end.getDate() + (weeks * 7) - 1);
+                computedEnd = toLocalIsoDate(end);
+            }
+        }
+
+        return {
+            startDate,
+            repeat,
+            endDate: computedEnd,
+            scope,
+            weeks
+        };
     }
 
     function buildDeploymentPayload() {
-        const bounds = getVisibleDateBounds();
-        const scope = readApplyScope();
-        const startDate = selectedDay || customStartInput?.value || bounds?.start;
+        const config = computeRepeatConfig();
+        const repeat = repeatSelect?.value || 'forever';
+
+        // Build the recurrence config object
+        const recurrenceConfig = {
+            repeat: repeat,
+            interval: repeat === 'custom' ? Number(repeatIntervalInput?.value || 1) : null,
+            unit: repeat === 'custom' ? (repeatUnitSelect?.value || 'weeks') : null,
+            endDate: config.endDate || null
+        };
 
         return {
-            scope,
-            selectedDate: selectedDay,
-            startDate,
-            weeks: readWeeks(),
-            strategy: selectedStrategy
+            // New recurrence-based payload
+            recurrence: recurrenceConfig,
+            startDate: config.startDate,
+            selectedDate: config.startDate,
+            strategy: selectedStrategy,
+            // Keep old fields for backward compatibility
+            scope: config.scope,
+            weeks: config.weeks
         };
     }
 
@@ -545,8 +690,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!selectedDay || selectedDay < bounds.start || selectedDay > bounds.end) {
             selectedDay = bounds.start;
         }
-        if (customStartInput) {
-            customStartInput.value = selectedDay;
+        if (deployStartInput && !deployStartInput.value) {
+            deployStartInput.value = selectedDay;
         }
     }
 
@@ -554,15 +699,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!impactSummary || !impact || !impact.summary) return;
         const summary = impact.summary;
         const conflictDates = Array.isArray(impact.conflictDates) ? impact.conflictDates : [];
-        const conflictLine = conflictDates.length
-            ? `<br/>Conflicts on: ${conflictDates.slice(0, 6).map(formatDateLabel).join(', ')}${conflictDates.length > 6 ? '…' : ''}`
-            : '<br/>No conflicts detected.';
+        const added = Number(summary.added ?? 0);
+        const replaced = Number(summary.replaced ?? 0);
+        const skipped = Number(summary.skipped ?? 0);
+        const conflicts = Number(summary.existingConflicts ?? conflictDates.length ?? 0);
 
         impactSummary.innerHTML = `
-            Window: ${formatDateLabel(impact.windowStart)} → ${formatDateLabel(impact.windowEnd)}
-            <br/>Added: ${summary.added ?? 0} • Replaced: ${summary.replaced ?? 0} • Skipped: ${summary.skipped ?? 0}
-            <br/>Existing overlaps: ${summary.existingConflicts ?? 0}
-            ${conflictLine}
+            This will add ${added} entries, replace ${replaced}, and skip ${skipped}.
+            <br/>${conflicts > 0 ? `${conflicts} day${conflicts === 1 ? '' : 's'} have conflicts.` : 'No conflicts detected.'}
         `;
 
         clearConflictHighlights();
@@ -576,12 +720,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (impactApplyButton) {
             impactApplyButton.disabled = false;
             impactApplyButton.dataset.hasImpact = 'true';
+            impactApplyButton.textContent = `Deploy "${getSelectedScheduleName()}"`;
         }
+
+        setScopeBadge(getCurrentPane().querySelectorAll('.calendar-item').length, conflicts, replaced);
     }
 
-    async function requestImpact() {
-        if (!selectedScheduleId) return;
-        const payload = buildDeploymentPayload();
+    async function requestImpact(payloadOverride = null) {
+        if (!selectedScheduleId) return null;
+        const payload = payloadOverride || buildDeploymentPayload();
 
         const res = await fetch(`/api/schedules/${selectedScheduleId}/deployment/impact`, {
             method: 'POST',
@@ -596,16 +743,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!res.ok) throw new Error('Impact request failed');
         const impact = await res.json();
         renderImpact(impact);
+        return impact;
     }
 
-    async function applyDeployment() {
-        if (!selectedScheduleId) return;
+    async function applyDeployment(options = {}) {
+        if (!selectedScheduleId) return null;
+        const payload = options.payload || buildDeploymentPayload();
         if (selectedStrategy === 'replace') {
             const proceed = window.confirm('Replace will remove existing entries in the selected window. Continue?');
             if (!proceed) return;
         }
-
-        const payload = buildDeploymentPayload();
 
         const res = await fetch(`/api/schedules/${selectedScheduleId}/deployment/apply`, {
             method: 'POST',
@@ -629,6 +776,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         clearPreview();
         clearConflictHighlights();
+
+        if (options.onSuccess) {
+            options.onSuccess(data);
+        }
+
+        if (options.suppressReload) {
+            return data;
+        }
 
         if (data.undoToken) {
             const token = data.undoToken;
@@ -656,40 +811,55 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             window.location.reload();
         }
+        return data;
+    }
+
+    function setScopeBadge(entryCount, conflictCount = 0, replacedCount = 0) {
+        if (!contextMeta) return;
+        contextMeta.classList.remove('is-ok', 'is-warn', 'is-danger');
+        if (conflictCount > 3 || replacedCount > 0) {
+            contextMeta.classList.add('is-danger');
+        } else if (conflictCount > 0) {
+            contextMeta.classList.add('is-warn');
+        } else {
+            contextMeta.classList.add('is-ok');
+        }
+        contextMeta.textContent = entryCount > 0 ? `${entryCount} entries scheduled` : 'No entries yet';
     }
 
     function updateContextHeader() {
-        const isWeek = document.querySelector('.calendar-view-btn.active[href*="view=week"]') != null;
-        if (contextView) contextView.textContent = isWeek ? 'Week' : 'Month';
-
-        const bounds = getVisibleDateBounds();
-        if (contextRange) {
-            contextRange.textContent = bounds ? `${formatDateLabel(bounds.start)} → ${formatDateLabel(bounds.end)}` : '—';
-        }
-        if (contextSelectedDay) {
-            contextSelectedDay.textContent = selectedDay ? formatDateLabel(selectedDay) : 'None';
-        }
-
         const pane = getCurrentPane();
         const entryCount = pane.querySelectorAll('.calendar-item').length;
-        if (contextExisting) {
-            contextExisting.textContent = entryCount > 0 ? `${entryCount} entries already scheduled` : 'No entries yet';
-        }
+        const config = computeRepeatConfig();
+        const repeatLabels = {
+            forever: 'Forever',
+            daily: 'Daily',
+            weekly: 'Weekly',
+            monthly: 'Monthly',
+            yearly: 'Yearly',
+            custom: 'Custom'
+        };
+        const repeatLabel = repeatLabels[config.repeat] || 'Custom';
+        const endText = config.repeat === 'forever' || !config.endDate
+            ? ''
+            : ` • Ends ${formatDateLabel(config.endDate)}`;
 
-        if (bounds && customStartInput && customEndInput && !customStartInput.value && !customEndInput.value) {
-            customStartInput.value = bounds.start;
-            customEndInput.value = bounds.end;
+        if (contextSummary) {
+            contextSummary.textContent = `Starts ${formatDateLabel(config.startDate)} • ${repeatLabel}${endText}`;
         }
+        setScopeBadge(entryCount);
     }
 
-    function setContextScope(nextScope) {
-        contextScope = nextScope;
-        scopeButtons.forEach((button) => {
-            button.classList.toggle('is-active', button.getAttribute('data-schedule-scope') === nextScope);
-        });
-        if (customScopeRow) {
-            customScopeRow.hidden = nextScope !== 'custom';
+    function updateRepeatVisibility() {
+        if (repeatCustomRow) {
+            repeatCustomRow.hidden = repeatSelect?.value !== 'custom';
         }
+        if (repeatEndRow) {
+            repeatEndRow.hidden = repeatSelect?.value === 'forever';
+        }
+        invalidateImpact();
+        updateContextHeader();
+        refreshImpactIfReady();
     }
 
     function loadFavourites() {
@@ -748,7 +918,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const activeDayLabels = card.querySelector('[data-meta-field="activeDayLabels"]');
             const restDays = card.querySelector('[data-meta-field="restDays"]');
 
-            if (sessionsPerWeek) sessionsPerWeek.textContent = `${metadata.sessionsPerWeek ?? 0}/week`;
+            if (sessionsPerWeek) sessionsPerWeek.textContent = `${metadata.sessionsPerWeek ?? 0}x per week`;
             if (card) {
                 const perWeek = Number(metadata.sessionsPerWeek ?? 0);
                 let bucket = 'low';
@@ -758,7 +928,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             if (activeDayLabels) {
                 const labels = Array.isArray(metadata.activeDayLabels) ? metadata.activeDayLabels : [];
-                activeDayLabels.textContent = labels.length ? labels.join(', ') : '—';
+                activeDayLabels.textContent = labels.length ? labels.join('/') : 'Any day';
             }
             if (restDays) restDays.textContent = String(metadata.restDays ?? '—');
             renderHealthIndicators(card, metadata);
@@ -774,7 +944,9 @@ document.addEventListener("DOMContentLoaded", () => {
         scheduleDrawer.setAttribute("aria-hidden", "false");
         document.body.classList.add("calendar-schedule-open");
         document.body.style.overflow = "hidden";
+        ensureSelectedDayInVisibleRange();
         updateContextHeader();
+        updateRepeatVisibility();
         applyFavouriteUi();
         applyPinnedUi();
         renderQuickAccessChips();
@@ -784,14 +956,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function closeScheduleDrawer() {
+    function closeScheduleDrawer(options = {}) {
         if (!scheduleDrawer) return;
         scheduleDrawer.classList.remove("open");
         scheduleDrawer.setAttribute("aria-hidden", "true");
         document.body.classList.remove("calendar-schedule-open");
         document.body.style.overflow = "";
-        clearPreview();
-        clearConflictHighlights();
+        if (!options.keepPreview) {
+            clearPreview();
+            clearConflictHighlights();
+        }
         if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
             lastFocusedElement.focus();
         } else if (scheduleButton) {
@@ -799,7 +973,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    scheduleButton?.addEventListener("click", openScheduleDrawer);
+    scheduleButton?.addEventListener("click", () => {
+        if (scheduleDrawer?.classList.contains("open")) {
+            closeScheduleDrawer();
+            return;
+        }
+        openScheduleDrawer();
+    });
     scheduleDrawer?.querySelector("[data-drawer-overlay]")?.addEventListener("click", closeScheduleDrawer);
     scheduleDrawer?.querySelector("[data-drawer-close]")?.addEventListener("click", closeScheduleDrawer);
 
@@ -861,13 +1041,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const deployButton = event.target.closest('[data-open-deploy]');
-        if (deployButton) {
-            event.preventDefault();
-            const scheduleId = deployButton.getAttribute('data-schedule-id');
-            activateSchedule(scheduleId, true).catch((error) => console.error(error));
-            return;
-        }
     });
 
     scheduleCards.forEach((card) => {
@@ -885,7 +1058,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         card.addEventListener('click', () => {
-            activateSchedule(scheduleId, previewEnabled).catch((error) => console.error(error));
+            activateSchedule(scheduleId, previewEnabled, true).catch((error) => console.error(error));
         });
     });
 
@@ -898,24 +1071,33 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         event.stopPropagation();
         selectedDay = card.getAttribute('data-date');
-        if (customStartInput && selectedDay) {
-            customStartInput.value = selectedDay;
+        if (deployStartInput && selectedDay) {
+            deployStartInput.value = selectedDay;
         }
-        setContextScope('day');
         updateContextHeader();
     }, true);
 
-    scopeButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-            const scope = button.getAttribute('data-schedule-scope');
-            if (!scope) return;
-            setContextScope(scope);
-            updateContextHeader();
-        });
+    deployStartInput?.addEventListener('change', () => {
+        invalidateImpact();
+        updateContextHeader();
+        refreshImpactIfReady();
     });
-
-    customStartInput?.addEventListener('change', updateContextHeader);
-    customEndInput?.addEventListener('change', updateContextHeader);
+    repeatSelect?.addEventListener('change', updateRepeatVisibility);
+    repeatEndInput?.addEventListener('change', () => {
+        invalidateImpact();
+        updateContextHeader();
+        refreshImpactIfReady();
+    });
+    repeatIntervalInput?.addEventListener('input', () => {
+        invalidateImpact();
+        updateContextHeader();
+        refreshImpactIfReady();
+    });
+    repeatUnitSelect?.addEventListener('change', () => {
+        invalidateImpact();
+        updateContextHeader();
+        refreshImpactIfReady();
+    });
 
     previewToggle?.addEventListener('change', () => {
         previewEnabled = !!previewToggle.checked;
@@ -930,12 +1112,104 @@ document.addEventListener("DOMContentLoaded", () => {
 
     previewClearButton?.addEventListener('click', () => {
         selectedScheduleId = null;
+        pendingPreviewPayload = null;
+        pendingPreviewScheduleId = null;
+        if (impactApplyButton) impactApplyButton.dataset.hasImpact = 'false';
         updateScheduleSelectionUi();
         clearPreview();
         if (impactSummary) {
-            impactSummary.textContent = 'Select a schedule card to preview impact.';
+            impactSummary.textContent = 'Pick a schedule, choose where it goes, then deploy.';
         }
         clearConflictHighlights();
+        setScopeBadge(getCurrentPane().querySelectorAll('.calendar-item').length);
+    });
+
+    previewDeployButton?.addEventListener('click', () => {
+        if (!selectedScheduleId || !isPremiumUser()) return;
+        if (!document.querySelector('.calendar-month-view')) {
+            if (impactSummary) {
+                impactSummary.textContent = 'Preview deploy is available in month view.';
+            }
+            return;
+        }
+
+        pendingPreviewPayload = buildDeploymentPayload();
+        pendingPreviewScheduleId = selectedScheduleId;
+
+        closeScheduleDrawer({ keepPreview: true });
+
+        requestImpact(pendingPreviewPayload).then((impact) => {
+            if (impact) {
+                renderProjectedLayout(selectedScheduleId, impact);
+            }
+            showPreviewConfirm();
+        }).catch((error) => {
+            console.error(error);
+            if (impactSummary) {
+                impactSummary.textContent = 'Preview deploy failed. Please try again.';
+            }
+        });
+    });
+
+    previewConfirmCancel?.addEventListener('click', () => {
+        pendingPreviewPayload = null;
+        pendingPreviewScheduleId = null;
+        hidePreviewConfirm();
+        clearPreview();
+        clearConflictHighlights();
+        openScheduleDrawer();
+    });
+
+    previewConfirmApply?.addEventListener('click', () => {
+        if (!pendingPreviewPayload || !pendingPreviewScheduleId) return;
+        selectedScheduleId = pendingPreviewScheduleId;
+        applyDeployment({
+            payload: pendingPreviewPayload,
+            suppressReload: true,
+            onSuccess: (data) => {
+                const created = Number(data.created || 0);
+                const replaced = Number(data.replaced || 0);
+                const skipped = Number(data.skipped || 0);
+                const undoToken = data.undoToken;
+                const undoSeconds = Number(data.undoExpiresInSeconds || 30);
+                
+                if (undoToken) {
+                    showApplyToast(
+                        `Schedule deployed. ${created} added, ${replaced} replaced, ${skipped} skipped.`,
+                        () => {
+                            fetch(`/api/schedules/${pendingPreviewScheduleId}/deployment/undo`, {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    ...(csrfToken ? { [csrfHeader]: csrfToken } : {})
+                                },
+                                body: JSON.stringify({ undoToken: undoToken })
+                            }).then((undoRes) => {
+                                if (!undoRes.ok) throw new Error('Undo failed');
+                                window.location.reload();
+                            }).catch((error) => {
+                                console.error(error);
+                            });
+                        },
+                        undoSeconds
+                    );
+                } else {
+                    showApplyToast(`Schedule deployed. ${created} added, ${replaced} replaced, ${skipped} skipped.`, null, 5);
+                }
+            }
+        }).then(() => {
+            hidePreviewConfirm();
+            clearPreview();
+            clearConflictHighlights();
+            collapseMonthView();
+            openScheduleDrawer();
+        }).catch((error) => {
+            console.error(error);
+            if (impactSummary) {
+                impactSummary.textContent = 'Deployment failed. Please review and retry.';
+            }
+        });
     });
 
     strategyButtons.forEach((button) => {
@@ -945,17 +1219,39 @@ document.addEventListener("DOMContentLoaded", () => {
             strategyButtons.forEach((candidate) => {
                 candidate.classList.toggle('is-active', candidate === button);
             });
-            if (impactApplyButton) impactApplyButton.disabled = true;
+            if (impactApplyButton) {
+                impactApplyButton.disabled = true;
+                impactApplyButton.dataset.hasImpact = 'false';
+            }
+            const help = document.getElementById('schedule-strategy-help');
+            if (help) {
+                if (strategy === 'replace') {
+                    help.textContent = 'Overwrites existing items in the selected window.';
+                } else if (strategy === 'skip') {
+                    help.textContent = 'Skips days that already have scheduled items.';
+                } else {
+                    help.textContent = 'Adds new entries without removing what is already scheduled.';
+                }
+            }
         });
     });
 
-    applyScopeSelect?.addEventListener('change', () => {
-        if (impactApplyButton) impactApplyButton.disabled = true;
-    });
+    function invalidateImpact() {
+        if (impactApplyButton) {
+            impactApplyButton.disabled = true;
+            impactApplyButton.dataset.hasImpact = 'false';
+        }
+    }
 
-    applyWeeksInput?.addEventListener('input', () => {
-        if (impactApplyButton) impactApplyButton.disabled = true;
-    });
+    function refreshImpactIfReady() {
+        if (!selectedScheduleId) return;
+        requestImpact().catch((error) => {
+            console.error(error);
+            if (impactSummary) {
+                impactSummary.textContent = 'Unable to calculate impact. Please try again.';
+            }
+        });
+    }
 
     simEnableToggle?.addEventListener('change', () => {
         if (simRunButton) simRunButton.disabled = !selectedScheduleId || !simEnableToggle.checked;
@@ -965,6 +1261,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 activateSchedule(selectedScheduleId, true).catch((error) => console.error(error));
             }
         }
+    });
+
+    simToggleButton?.addEventListener('click', () => {
+        if (!simPanel) return;
+        const nextOpen = !simPanel.classList.contains('is-open');
+        simPanel.classList.toggle('is-open', nextOpen);
+        simPanel.hidden = !nextOpen;
+        simToggleButton.setAttribute('aria-expanded', String(nextOpen));
     });
 
     simRunButton?.addEventListener('click', () => {
@@ -1033,6 +1337,20 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    deployCancelButton?.addEventListener('click', () => {
+        selectedScheduleId = null;
+        pendingPreviewPayload = null;
+        pendingPreviewScheduleId = null;
+        if (impactApplyButton) impactApplyButton.dataset.hasImpact = 'false';
+        updateScheduleSelectionUi();
+        clearPreview();
+        clearConflictHighlights();
+        if (impactSummary) {
+            impactSummary.textContent = 'Pick a schedule, choose where it goes, then deploy.';
+        }
+        setScopeBadge(getCurrentPane().querySelectorAll('.calendar-item').length);
+    });
+
     [document.getElementById('month-prev'), document.getElementById('month-next'), document.getElementById('week-prev'), document.getElementById('week-next')]
         .filter(Boolean)
         .forEach((nav) => {
@@ -1071,11 +1389,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    setContextScope('visible');
-    if (applyScopeSelect) applyScopeSelect.value = 'forward';
+    scheduleDrawer?.querySelectorAll('[data-premium-only]').forEach((el) => {
+        el.classList.toggle('hidden', !isPremiumUser());
+    });
+    updateRepeatVisibility();
     updateScheduleSelectionUi();
     bindDragToApply();
     applyPinnedUi();
     renderQuickAccessChips();
     hydrateScheduleMetadata().catch((error) => console.error(error));
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCalendarUx);
+} else {
+    initCalendarUx();
+}

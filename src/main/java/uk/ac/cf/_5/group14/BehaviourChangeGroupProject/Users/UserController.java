@@ -191,6 +191,7 @@ public class UserController {
     // login page
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "expired", required = false) String expired,
+                                @RequestParam(value = "devLogin", required = false) Boolean devLogin,
                                 Model model) {
         if (expired != null) {
             return "redirect:/?expired=1";
@@ -198,6 +199,10 @@ public class UserController {
         
         // Check if dev mode is enabled
         if (devModeProperties.isDevMode()) {
+            if (Boolean.TRUE.equals(devLogin)) {
+                model.addAttribute("isDevMode", true);
+                return "User/login";
+            }
             model.addAttribute("isDevMode", true);
             return "User/login-demo";
         }

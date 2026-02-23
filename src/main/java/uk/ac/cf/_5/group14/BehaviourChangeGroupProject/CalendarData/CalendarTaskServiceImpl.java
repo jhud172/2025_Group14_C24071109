@@ -124,6 +124,7 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
         Map<LocalDate, List<CalendarTask>> map = new HashMap<>();
 
         List<CalendarTask> tasks = repo.findByUserAndDateBetween(user, start, end);
+        System.out.println("DEBUG: CalendarTaskServiceImpl.getTasksByRange - user: " + user.getId() + ", start: " + start + ", end: " + end + ", foundTasks: " + tasks.size());
 
         warningService.applyWarningStates(tasks, Instant.now());
 
@@ -131,6 +132,7 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
             map.computeIfAbsent(task.getDate(), d -> new ArrayList<>()).add(task);
         }
 
+        System.out.println("DEBUG: CalendarTaskServiceImpl.getTasksByRange - final map size: " + map.size());
         return map;
     }
 }

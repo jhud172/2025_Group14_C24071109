@@ -6,7 +6,6 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <meta name="_csrf_param" th:content="${_csrf.parameterName}">
     <link rel="stylesheet" href="/css/calendar-heatmap.css">
-    <link rel="stylesheet" href="/css/components/calendar-deployment-overrides.css">
 </div>
 
 <div th:fragment="content">
@@ -126,32 +125,28 @@
                                     <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 6} ? ' calendar-weekday-pill--today' : ''">Sat</div>
                                     <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 7} ? ' calendar-weekday-pill--today' : ''">Sun</div>
                                 </div>
-                                <div class="calendar-month-grid grid grid-cols-7 gap-3">
-                                <div th:each="i : ${#numbers.sequence(0,6)}" 
-                                     th:with="day=${weekDays[i]},
-                                         dateKey=${#temporals.format(day,'yyyy-MM-dd')},
-                                         tasks=${tasksByDateIso != null ? tasksByDateIso.get(dateKey) : null},
-                                              tTotal=${tasks!=null?tasks.size():0},
-                                              sched=${occurrencesByDateIso != null ? occurrencesByDateIso.get(dateKey) : null},
-                                              sTotal=${sched!=null?sched.size():0},
-                                             statusValue=${day.isEqual(today) ? 'today' : (day.isEqual(tomorrow) ? 'tomorrow' : (day.isBefore(today) ? ((tTotal + sTotal) == 0 ? 'past-zero' : 'past-incomplete') : 'future'))}"
+                                <div class="calendar-month-grid grid grid-cols-7">
+                                     <div th:each="dayModel : ${calendarDays}"
+                                         th:with="tasks=${dayModel.tasks},
+                                                  tTotal=${dayModel.taskCount},
+                                                  sched=${dayModel.occurrences},
+                                                  sTotal=${dayModel.occurrenceCount}"
                                      class="calendar-day-card calendar-week-card heat-none"
                                      data-load="0"
-                                     style="min-width: 0;"
-                                     th:attr="data-day-link=@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}},
-                                              data-date=${#temporals.format(day,'yyyy-MM-dd')},
-                                              data-status=${statusValue},
-                                              data-is-past=${day.isBefore(today)}">
+                                     th:attr="data-day-link=@{'/calendar/day/' + ${dayModel.isoDate}},
+                                              data-date=${dayModel.isoDate},
+                                              data-status=${dayModel.statusValue},
+                                              data-is-past=${dayModel.past}">
                                     <div class="calendar-status-bar"></div>
                                     <div class="calendar-heat-overlay"></div>
                                     <div class="calendar-day-header calendar-week-card-header">
-                                        <a th:if="${day != null}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}"
+                                        <a th:href="@{'/calendar/day/' + ${dayModel.isoDate}}"
                                            class="calendar-day-number calendar-week-day-number">
-                                            <span class="calendar-week-day-name" th:text="${day.dayOfWeek.getDisplayName(T(java.time.format.TextStyle).SHORT, T(java.util.Locale).UK)}"></span>
-                                            <span class="calendar-week-day-date" th:text="${day.dayOfMonth + (day.dayOfMonth == 1 || day.dayOfMonth == 21 || day.dayOfMonth == 31 ? 'st' : (day.dayOfMonth == 2 || day.dayOfMonth == 22 ? 'nd' : (day.dayOfMonth == 3 || day.dayOfMonth == 23 ? 'rd' : 'th')))}"></span>
+                                            <span class="calendar-week-day-name" th:text="${dayModel.localDate.dayOfWeek.getDisplayName(T(java.time.format.TextStyle).SHORT, T(java.util.Locale).UK)}"></span>
+                                            <span class="calendar-week-day-date" th:text="${dayModel.dayOfMonth + (dayModel.dayOfMonth == 1 || dayModel.dayOfMonth == 21 || dayModel.dayOfMonth == 31 ? 'st' : (dayModel.dayOfMonth == 2 || dayModel.dayOfMonth == 22 ? 'nd' : (dayModel.dayOfMonth == 3 || dayModel.dayOfMonth == 23 ? 'rd' : 'th')))}"></span>
                                         </a>
-                                        <span th:if="${day.isEqual(today)}" class="calendar-week-day-badge rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
-                                        <span th:if="${day.isEqual(tomorrow)}" class="calendar-week-day-badge rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
+                                        <span th:if="${dayModel.today}" class="calendar-week-day-badge rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
+                                        <span th:if="${dayModel.tomorrow}" class="calendar-week-day-badge rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
                                     </div>
                                     <div class="calendar-day-content" th:with="grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
                                         <!-- Empty state when no tasks or schedules -->
@@ -166,19 +161,18 @@
                                                  th:classappend="${task.completed} ? ' completed' : ''"
                                                  th:attr="data-type='task',
                                                           data-id=${task.id},
-                                                          data-date=${#temporals.format(day,'yyyy-MM-dd')},
+                                                          data-date=${dayModel.isoDate},
                                                           data-title=${task.title},
                                                           data-time=${task.time},
                                                           data-notes=${task.notes},
-                                                          data-completed=${task.completed},
-                                                          data-priority=${task.priority != null ? task.priority.toString().toLowerCase() : 'medium'}">
+                                                          data-completed=${task.completed}">
                                                 <div class="calendar-item-content">
                                                     <div class="calendar-item-title" th:text="${task.title}"></div>
                                                     <div class="calendar-item-meta" th:text="${task.time != null ? task.time : '—'}"></div>
                                                 </div>
                                                 <div th:if="${task.completed}" class="calendar-item-check">✓</div>
                                             </div>
-                                            <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}" class="calendar-more-link" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
+                                            <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${dayModel.isoDate}}" class="calendar-more-link" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
                                             <div th:if="${tTotal > 0 and sTotal > 0}" class="my-1 border-t border-white/10"></div>
                                                 <div th:each="occ,iter : ${sched}"
                                                     th:if="${iter.index < 3 && occ != null}"
@@ -186,19 +180,19 @@
                                                  class="calendar-item"
                                                  th:classappend="${occ.completed} ? ' completed' : ''"
                                                  th:attr="data-id=${occ.id},
-                                                          data-type='workout',
+                                                          data-type='occurrence',
                                                           data-title=${occTitle},
                                                           data-notes=${occ.scheduleName},
                                                           data-time='—',
                                                           data-completed=${occ.completed},
-                                                          data-date=${#temporals.format(day,'yyyy-MM-dd')}">
+                                                          data-date=${dayModel.isoDate}">
                                                 <div class="calendar-item-content">
                                                     <div class="calendar-item-title" th:text="${occTitle}"></div>
                                                     <div class="calendar-item-meta" th:text="'From: ' + ${occ.scheduleName}"></div>
                                                 </div>
                                                 <div th:if="${occ.completed}" class="calendar-item-check">✓</div>
                                             </div>
-                                            <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${#temporals.format(day,'yyyy-MM-dd')}}" class="calendar-more-link" th:text="${'+' + (sTotal - 3) + ' more workouts'}"></a>
+                                            <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${dayModel.isoDate}}" class="calendar-more-link" th:text="${'+' + (sTotal - 3) + ' more workouts'}"></a>
                                         </div>
                                         <!-- Grouped mode (SEPARATED_BY_CATEGORY) -->
                                         <div th:if="${grouped}" class="space-y-3">
@@ -211,7 +205,7 @@
                                                       <div th:each="task,iter : ${tasks}" th:if="${iter.index < 2 && task != null}"
                                                          class="calendar-grouped-item"
                                                          th:classappend="${task.completed} ? ' completed' : ''"
-                                                         th:attr="data-type='task',data-id=${task.id},data-date=${#temporals.format(day,'yyyy-MM-dd')},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-completed=${task.completed}">
+                                                         th:attr="data-type='task',data-id=${task.id},data-date=${dayModel.isoDate},data-title=${task.title},data-time=${task.time},data-notes=${task.notes},data-completed=${task.completed}">
                                                         <span class="truncate" th:text="${task.title}"></span>
                                                     </div>
                                                 </div>
@@ -226,7 +220,7 @@
                                                          th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
                                                          class="calendar-grouped-item"
                                                          th:classappend="${occ.completed} ? ' completed' : ''"
-                                                         th:attr="data-type='occurrence',data-id=${occ.id},data-title=${occTitle},data-notes=${occ.scheduleName},data-time='—',data-completed=${occ.completed},data-date=${#temporals.format(day,'yyyy-MM-dd')}">
+                                                         th:attr="data-type='occurrence',data-id=${occ.id},data-title=${occTitle},data-notes=${occ.scheduleName},data-time='—',data-completed=${occ.completed},data-date=${dayModel.isoDate}">
                                                         <span class="truncate" th:text="${occTitle}"></span>
                                                     </div>
                                                 </div>
@@ -246,281 +240,8 @@
         </div>
     </div>
 
-    <div id="scheduleDrawer" class="calendar-schedule-shelf" aria-hidden="true">
-        <div class="calendar-schedule-overlay" data-drawer-overlay></div>
-        <div class="calendar-schedule-panel" data-drawer-panel>
-            <header class="calendar-deployment-header">
-                <div class="sched-header-inner">
-                    <div class="sched-header-icon" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    </div>
-                    <div class="sched-header-text">
-                        <h2 class="sched-header-title">Schedules</h2>
-                        <p class="sched-header-subtitle">Deploy training plans to your calendar</p>
-                    </div>
-                    <button type="button" class="calendar-schedule-close" data-drawer-close aria-label="Close drawer">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                </div>
-            </header>
-            <div class="calendar-schedule-body">
-                <!-- Context section -->
-                <section class="calendar-deployment-section">
-                    <h3 class="calendar-deployment-section-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        Target Context
-                    </h3>
-                    <div class="calendar-deployment-context-card">
-                        <div class="sched-context-grid">
-                            <div class="sched-context-item">
-                                <span class="sched-context-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                    View
-                                </span>
-                                <span id="schedule-context-view" class="sched-context-value">Week</span>
-                            </div>
-                            <div class="sched-context-item">
-                                <span class="sched-context-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                    Selected day
-                                </span>
-                                <span id="schedule-context-selected-day" class="sched-context-value">None</span>
-                            </div>
-                            <div class="sched-context-item sched-context-item--wide">
-                                <span class="sched-context-label">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                                    Visible range
-                                </span>
-                                <span id="schedule-context-range" class="sched-context-value">—</span>
-                            </div>
-                            <div class="sched-context-item sched-context-item--wide">
-                                <span class="sched-context-label">Entries in range</span>
-                                <span id="schedule-context-existing" class="sched-context-value sched-context-value--highlight">Checking…</span>
-                            </div>
-                        </div>
-                        <div class="calendar-schedule-scope" role="group" aria-label="Apply scope selection">
-                            <button type="button" class="calendar-schedule-scope-btn is-active" data-schedule-scope="visible">Visible range</button>
-                            <button type="button" class="calendar-schedule-scope-btn" data-schedule-scope="day">Selected day</button>
-                            <button type="button" class="calendar-schedule-scope-btn" data-schedule-scope="custom">Custom range</button>
-                        </div>
-                        <div class="calendar-schedule-custom-range mt-2" data-scope-custom hidden>
-                            <label class="sr-only" for="schedule-scope-start">Scope start date</label>
-                            <input id="schedule-scope-start" type="date" class="calendar-jump-input" />
-                            <label class="sr-only" for="schedule-scope-end">Scope end date</label>
-                            <input id="schedule-scope-end" type="date" class="calendar-jump-input" />
-                        </div>
-                    </div>
-                </section>
-                <label class="sr-only" for="schedule-search">Search schedules</label>
-                <input id="schedule-search" 
-                       type="text" 
-                       placeholder="Search schedules..." 
-                       class="calendar-schedule-search" />
-
-                <section class="calendar-deploy-controls" aria-label="Schedule deployment controls">
-                    <div class="calendar-deploy-preview-row">
-                        <label class="calendar-deploy-switch">
-                            <input type="checkbox" id="schedule-preview-toggle" checked />
-                            <span>Live preview mode</span>
-                        </label>
-                        <button type="button" class="calendar-schedule-action" id="schedule-preview-clear">Clear preview</button>
-                    </div>
-
-                    <div class="calendar-deploy-grid">
-                        <div>
-                            <label class="calendar-deploy-label" for="schedule-apply-scope">Apply scope</label>
-                            <select id="schedule-apply-scope" class="calendar-schedule-search">
-                                <option value="week">Apply to this week only</option>
-                                <option value="forward">Apply from selected date forward</option>
-                                <option value="weeks">Apply for X weeks</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="calendar-deploy-label" for="schedule-apply-weeks">Weeks</label>
-                            <input id="schedule-apply-weeks" type="number" min="1" max="52" value="4" class="calendar-schedule-search" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <span class="calendar-deploy-label">Conflict handling</span>
-                        <div class="calendar-deploy-strategy" role="group" aria-label="Conflict handling strategy">
-                            <button type="button" class="calendar-deploy-strategy-btn is-active" data-deploy-strategy="merge">Merge (safe default)</button>
-                            <button type="button" class="calendar-deploy-strategy-btn" data-deploy-strategy="replace">Replace existing</button>
-                            <button type="button" class="calendar-deploy-strategy-btn" data-deploy-strategy="skip">Skip conflicted days</button>
-                        </div>
-                    </div>
-
-                    <div class="calendar-deploy-summary" id="schedule-impact-summary" aria-live="polite">
-                        Select a schedule card to preview impact.
-                    </div>
-
-                    <div class="calendar-deploy-actions">
-                        <button type="button" class="calendar-schedule-action" id="schedule-impact-review" disabled>Review impact</button>
-                        <button type="button" class="calendar-schedule-action calendar-schedule-action--primary" id="schedule-impact-apply" disabled>Confirm deploy</button>
-                    </div>
-
-                    <details class="calendar-sim-panel">
-                        <summary class="calendar-filter-summary">Simulation mode (optional)</summary>
-                        <div class="calendar-sim-grid">
-                            <label class="calendar-deploy-switch"><input type="checkbox" id="schedule-sim-enable" /> <span>Enable multi-week simulation</span></label>
-                            <div>
-                                <label class="calendar-deploy-label" for="schedule-sim-weeks">Simulate weeks</label>
-                                <input id="schedule-sim-weeks" type="number" min="1" max="12" value="6" class="calendar-schedule-search" />
-                            </div>
-                            <button type="button" class="calendar-schedule-action" id="schedule-sim-run" disabled>Run simulation</button>
-                        </div>
-                    </details>
-                </section>
-
-                <details class="calendar-filter-panel">
-                    <summary class="calendar-filter-summary">Filters & sorting</summary>
-                    <div class="calendar-filter-grid">
-                        <div>
-                            <label class="calendar-deploy-label" for="schedule-filter-type">Type</label>
-                            <select id="schedule-filter-type" class="calendar-schedule-search">
-                                <option value="all">All types</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="custom">Custom</option>
-                                <option value="rotational">Rotational</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="calendar-deploy-label" for="schedule-filter-status">Status</label>
-                            <select id="schedule-filter-status" class="calendar-schedule-search">
-                                <option value="all">All statuses</option>
-                                <option value="active">Active</option>
-                                <option value="draft">Draft</option>
-                                <option value="archived">Archived</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="calendar-deploy-label" for="schedule-filter-frequency">Frequency</label>
-                            <select id="schedule-filter-frequency" class="calendar-schedule-search">
-                                <option value="all">Any frequency</option>
-                                <option value="low">1-2 / week</option>
-                                <option value="mid">3-4 / week</option>
-                                <option value="high">5+ / week</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="calendar-deploy-label" for="schedule-sort">Sort</label>
-                            <select id="schedule-sort" class="calendar-schedule-search">
-                                <option value="recentlyApplied">Recently applied</option>
-                                <option value="mostUsed">Most used</option>
-                                <option value="recentlyCreated">Recently created</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="calendar-filter-toggles" role="group" aria-label="Quick filters">
-                        <label class="calendar-deploy-switch"><input type="checkbox" id="schedule-filter-favourites" /> <span>Favourites</span></label>
-                        <label class="calendar-deploy-switch"><input type="checkbox" id="schedule-filter-recent" /> <span>Recently used</span></label>
-                    </div>
-                </details>
-
-                <section class="calendar-quick-access" aria-label="Quick access schedules">
-                    <h3 class="calendar-quick-access-title">Pinned</h3>
-                    <div id="schedule-pinned-list" class="calendar-quick-chip-list"></div>
-                    <h3 class="calendar-quick-access-title">Recently used</h3>
-                    <div id="schedule-recent-list" class="calendar-quick-chip-list"></div>
-                </section>
-
-                <ul id="schedule-list" class="mt-4 space-y-3 pb-8">
-                    <li th:if="${#lists.isEmpty(schedules)}" class="calendar-schedule-empty">No schedules found yet. Create one to start deploying.</li>
-                    <li th:each="schedule : ${schedules}"
-                        th:with="active=${scheduleActiveIds != null and scheduleActiveIds.contains(schedule.id)},
-                                 hasEntries=${schedule.entries != null and !#lists.isEmpty(schedule.entries)},
-                                 status=${active ? 'Active' : (hasEntries ? 'Archived' : 'Draft')},
-                                 latestApplied=${scheduleLatestAppliedById != null ? scheduleLatestAppliedById[schedule.id] : null},
-                                 applyCount=${scheduleApplyCountById != null ? scheduleApplyCountById[schedule.id] : 0}"
-                        th:attr="data-schedule-id=${schedule.id},data-schedule-name=${schedule.name},data-schedule-type=${#strings.toLowerCase(schedule.scheduleType.name())},data-schedule-status=${#strings.toLowerCase(status)},data-schedule-rotation=${#strings.toLowerCase(schedule.rotationMode.name())},data-schedule-latest-applied=${latestApplied != null ? #temporals.format(latestApplied, 'yyyy-MM-dd') : ''},data-schedule-apply-count=${applyCount != null ? applyCount : 0}">
-
-                        <article class="sched-card" th:attr="data-schedule-id=${schedule.id}">
-                            <!-- Status accent bar -->
-                            <div class="sched-card-accent"
-                                 th:classappend="${status == 'Active' ? ' sched-card-accent--active' : (status == 'Draft' ? ' sched-card-accent--draft' : ' sched-card-accent--archived')}"></div>
-
-                            <div class="sched-card-body">
-                                <!-- Header: name + tools -->
-                                <div class="sched-card-header">
-                                    <div class="sched-card-title-group">
-                                        <h4 class="sched-card-name" th:text="${schedule.name}">Schedule</h4>
-                                        <p class="sched-card-description" th:text="${schedule.description != null and !schedule.description.isBlank() ? schedule.description : 'No description provided'}">No description provided</p>
-                                    </div>
-                                    <div class="sched-card-tools">
-                                        <button type="button" class="sched-icon-btn" data-pin-toggle th:attr="data-schedule-id=${schedule.id}" aria-label="Toggle pin">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-                                        </button>
-                                        <button type="button" class="sched-icon-btn" data-favourite-toggle th:attr="data-schedule-id=${schedule.id}" aria-label="Toggle favourite">
-                                            <span data-fav-icon aria-hidden="true">☆</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Metrics row -->
-                                <div class="sched-card-metrics">
-                                    <div class="sched-card-metric">
-                                        <svg class="sched-metric-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><line x1="13" y1="6" x2="21" y2="6"></line><line x1="13" y1="12" x2="21" y2="12"></line><line x1="13" y1="18" x2="21" y2="18"></line></svg>
-                                        <span th:text="${#strings.capitalize(#strings.toLowerCase(schedule.scheduleType.name()).replace('_', ' '))}">Weekly</span>
-                                    </div>
-                                    <div class="sched-card-metric">
-                                        <svg class="sched-metric-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                                        <span data-meta-field="sessionsPerWeek">—/wk</span>
-                                    </div>
-                                    <div class="sched-card-metric">
-                                        <svg class="sched-metric-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                        <span data-meta-field="activeDayLabels">Active days loading…</span>
-                                    </div>
-                                    <div class="sched-card-metric">
-                                        <svg class="sched-metric-icon" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg>
-                                        <span data-meta-field="restDays">— rest</span>
-                                    </div>
-                                </div>
-
-                                <!-- Footer: status + last applied + apply count -->
-                                <div class="sched-card-footer">
-                                    <span class="sched-status-badge"
-                                          th:classappend="${status == 'Active' ? ' sched-status-badge--active' : (status == 'Draft' ? ' sched-status-badge--draft' : ' sched-status-badge--archived')}"
-                                          th:text="${status}">Active</span>
-                                    <span class="sched-card-last-used" th:text="${latestApplied != null ? 'Last used ' + #temporals.format(latestApplied, 'dd MMM yyyy') : 'Never deployed'}">Never deployed</span>
-                                </div>
-                            </div>
-
-                            <!-- Drag handle -->
-                            <div class="sched-drag-row">
-                                <button type="button" class="calendar-drag-handle sched-drag-btn" draggable="true" data-schedule-drag th:attr="data-schedule-id=${schedule.id}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
-                                    Drag to calendar
-                                </button>
-                            </div>
-
-                            <!-- Action bar -->
-                            <div class="sched-card-actions">
-                                <a th:href="@{'/schedules/' + ${schedule.id} + '/entries'}" class="sched-action-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                    Edit
-                                </a>
-                                <button type="button" class="sched-action-btn" data-duplicate-schedule th:attr="data-schedule-id=${schedule.id}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                    Duplicate
-                                </button>
-                                <a th:href="@{'/schedules/' + ${schedule.id} + '/deactivate'}" class="sched-action-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 20 20"></path><path d="M8.35 2.69A10 10 0 0 1 21.3 15.65M19.08 19.08A10 10 0 1 1 4.92 4.92"></path></svg>
-                                    Archive
-                                </a>
-                                <button type="button" class="sched-action-btn sched-action-btn--deploy" data-open-deploy th:attr="data-schedule-id=${schedule.id}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 12 5 19 12"></polyline><line x1="12" y1="19" x2="12" y2="5"></line></svg>
-                                    Deploy
-                                </button>
-                            </div>
-                            <div class="calendar-schedule-health" data-health-indicators></div>
-                        </article>
-                    </li>
-                </ul>
-                <a href="/schedules" class="btn btn--primary btn--md mt-4 w-full">View all schedules</a>
-                <a href="/schedules/builder" class="btn btn--ghost btn--sm mt-3 w-full">+ Create new schedule</a>
-            </div>
-        </div>
-    </div>
+    <!-- Schedule Drawer Fragment -->
+    <div th:replace="~{calendar/fragments/schedule-drawer-week :: scheduleDrawer}"></div>
 
 </div>
 

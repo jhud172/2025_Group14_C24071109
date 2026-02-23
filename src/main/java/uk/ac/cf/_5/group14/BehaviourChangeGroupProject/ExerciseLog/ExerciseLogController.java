@@ -1,22 +1,28 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
+
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrence;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Controller
 @RequestMapping("/exercise-log")
@@ -44,9 +50,15 @@ public class ExerciseLogController {
     @Autowired
     private AuthHelper authHelper;
 
+    @Autowired
+    private DevModeProperties devModeProperties;
+
     // Show form
     @GetMapping
     public String showForm(Model model) {
+        if (devModeProperties.isDevMode()) {
+            return "redirect:/dev-mode/unauthorized";
+        }
         User user = authHelper.getAuthenticatedUser();
         ExerciseLogForm emptyExerciseLogForm = new ExerciseLogForm();
         emptyExerciseLogForm.setDate(LocalDate.now());
@@ -58,6 +70,9 @@ public class ExerciseLogController {
     // Save form
     @PostMapping
     public String save(@ModelAttribute("exerciseLog") ExerciseLogForm form) {
+        if (devModeProperties.isDevMode()) {
+            return "redirect:/dev-mode/unauthorized";
+        }
         User user = authHelper.getAuthenticatedUser();
         service.saveLog(form, user);
         // Award points for logging exercise
@@ -68,6 +83,9 @@ public class ExerciseLogController {
     // List
     @GetMapping("/list")
     public String listLogsForUser(@SessionAttribute("user") User user, Model model) {
+        if (devModeProperties.isDevMode()) {
+            return "redirect:/dev-mode/unauthorized";
+        }
         model.addAttribute("logs", service.getLogsForUser(user));
         return "exercise-log/exercise-log-list";
     }
@@ -75,12 +93,18 @@ public class ExerciseLogController {
     // View single
     @GetMapping("/view/{id}")
     public String viewSingle(@PathVariable Long id, Model model) {
+        if (devModeProperties.isDevMode()) {
+            return "redirect:/dev-mode/unauthorized";
+        }
         model.addAttribute("log", service.getLogById(id));
         return "exercise-log/exercise-log-view";
     }
 
     @GetMapping("/add-occurrence")
     public String addForOccurrence(@RequestParam Long occId, Model model) {
+        if (devModeProperties.isDevMode()) {
+            return "redirect:/dev-mode/unauthorized";
+        }
         ExerciseLogForm form = new ExerciseLogForm();
         ScheduleOccurrence occ = occurrenceRepo.findById(occId).orElse(null);
         if (occ != null) {
@@ -97,6 +121,9 @@ public class ExerciseLogController {
 
     @GetMapping("/add-calendar")
     public String addCalendarExercise(@RequestParam Long taskId, Model model) {
+        if (devModeProperties.isDevMode()) {
+            return "redirect:/dev-mode/unauthorized";
+        }
         ExerciseLogForm form = new ExerciseLogForm();
         form.setCalendarTaskId(taskId);
         model.addAttribute("exerciseLog", form);
@@ -105,6 +132,9 @@ public class ExerciseLogController {
 
     @GetMapping("/export/pdf")
     public ResponseEntity<byte[]> exportPdf(@SessionAttribute("user") User user) {
+        if (devModeProperties.isDevMode()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         List<ExerciseLog> logs = service.getLogsByUser(user);
         byte[] pdf = pdfService.generateLogsPdf(logs);
         return ResponseEntity.ok()

@@ -64,16 +64,16 @@
 
 /* --- Section Titles --- */
 .calendar-deployment-section-title {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #64748b; /* Slate 500 */
+    text-transform: none;
+    letter-spacing: 0.01em;
+    color: #0f766e;
     margin-bottom: 0.75rem;
 }
 
 :root.dark .calendar-deployment-section-title {
-    color: #94a3b8; /* Slate 400 */
+    color: #5eead4;
 }
 
 /* --- Inputs & Selects --- */
@@ -261,7 +261,7 @@
     width: 2.25rem;
     height: 2.25rem;
     border-radius: 0.5rem;
-    background: linear-gradient(135deg, #6366f1, #818cf8);
+    background: linear-gradient(135deg, #10b981, #34d399);
     color: #ffffff;
     flex-shrink: 0;
 }
@@ -288,6 +288,10 @@
     margin-top: 0.125rem;
 }
 
+:root.dark .sched-context-label {
+    color: #5eead4;
+}
+
 :root.dark .sched-header-subtitle {
     color: #94a3b8;
 }
@@ -302,12 +306,14 @@
 
 .sched-context-item {
     background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 0.375rem;
     padding: 0.5rem 0.625rem;
 }
 
 :root.dark .sched-context-item {
     background-color: #0f172a;
+    border-color: #1e293b;
 }
 
 .sched-context-item--wide {
@@ -322,7 +328,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #94a3b8;
+    color: #0f766e;
     margin-bottom: 0.2rem;
 }
 
@@ -357,33 +363,31 @@
 }
 
 .sched-card:hover {
-    border-color: #6366f1;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+    border-color: #10b981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
     transform: translateY(-1px);
 }
 
 :root.dark .sched-card:hover {
-    border-color: #818cf8;
-    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.12);
+    border-color: #34d399;
+    box-shadow: 0 4px 12px rgba(52, 211, 153, 0.12);
 }
 
 .sched-card.selected,
 .sched-card.is-selected {
-    border-color: #6366f1;
-    background: #eef2ff;
+    border-color: #10b981;
+    background: #ecfdf5;
 }
 
 :root.dark .sched-card.selected,
 :root.dark .sched-card.is-selected {
-    background: #1e1b4b;
-    border-color: #4f46e5;
+    background: #064e3b;
+    border-color: #10b981;
 }
 
 /* Top accent bar */
 .sched-card-accent {
-    height: 3px;
-    border-radius: 0.625rem 0.625rem 0 0;
-    background: #cbd5e1;
+    display: none;
 }
 
 .sched-card-accent--active {
@@ -464,12 +468,12 @@
 
 .sched-icon-btn:hover {
     background-color: #f1f5f9;
-    color: #6366f1;
+    color: #10b981;
 }
 
 :root.dark .sched-icon-btn:hover {
     background-color: #334155;
-    color: #818cf8;
+    color: #34d399;
 }
 
 .sched-icon-btn.is-favourite {
@@ -477,7 +481,7 @@
 }
 
 .sched-icon-btn.is-pinned {
-    color: #6366f1;
+    color: #10b981;
 }
 
 /* Metrics row */
@@ -492,7 +496,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    background: #f1f5f9;
+    background: #ecfdf5;
     border-radius: 0.25rem;
     padding: 0.2rem 0.5rem;
     font-size: 0.7rem;
@@ -501,17 +505,368 @@
 }
 
 :root.dark .sched-card-metric {
-    background: #0f172a;
+    background: #064e3b;
     color: #94a3b8;
 }
 
 .sched-metric-icon {
-    color: #6366f1;
+    color: #10b981;
     flex-shrink: 0;
 }
 
 :root.dark .sched-metric-icon {
-    color: #818cf8;
+    color: #34d399;
+}
+
+/* --- Compact Schedule Drawer Flow --- */
+.calendar-schedule-listing {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.calendar-deploy-panel {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+:root.dark .calendar-deploy-panel {
+    border-top-color: #1e293b;
+}
+
+.calendar-deploy-panel.is-hidden {
+    display: none;
+}
+
+.calendar-scope-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+:root.dark .calendar-scope-summary {
+    border-color: #1e293b;
+    background: #0f172a;
+}
+
+.calendar-scope-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: #0f766e;
+    margin-bottom: 0.15rem;
+    font-weight: 700;
+}
+
+.calendar-scope-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.calendar-scope-meta {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.calendar-scope-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #ecfdf5;
+    color: #0f766e;
+}
+
+.calendar-scope-badge.is-warn {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.calendar-scope-badge.is-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.calendar-scope-badge.is-ok {
+    background: #ecfdf5;
+    color: #0f766e;
+}
+
+:root.dark .calendar-scope-badge {
+    background: #064e3b;
+    color: #d1fae5;
+}
+
+:root.dark .calendar-scope-badge.is-warn {
+    background: #7c2d12;
+    color: #fed7aa;
+}
+
+:root.dark .calendar-scope-badge.is-danger {
+    background: #7f1d1d;
+    color: #fecaca;
+}
+
+:root.dark .calendar-scope-value {
+    color: #e2e8f0;
+}
+
+:root.dark .calendar-scope-meta {
+    color: #94a3b8;
+}
+
+.calendar-scope-toggle {
+    border: none;
+    background: transparent;
+    color: #10b981;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.calendar-scope-panel {
+    margin-top: 0.75rem;
+}
+
+.calendar-deploy-summary {
+    line-height: 1.5;
+}
+
+.calendar-strategy-help {
+    margin-top: 0.4rem;
+    font-size: 0.72rem;
+    color: #64748b;
+}
+
+:root.dark .calendar-strategy-help {
+    color: #94a3b8;
+}
+
+.calendar-deploy-link {
+    border: none;
+    background: transparent;
+    color: #10b981;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0;
+    text-align: left;
+    cursor: pointer;
+}
+
+.calendar-deploy-footer {
+    position: sticky;
+    bottom: 0;
+    background: #ffffff;
+    padding: 0.75rem 0;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.calendar-deploy-footer.is-hidden {
+    display: none;
+}
+
+:root.dark .calendar-deploy-footer {
+    background: #0f172a;
+    border-top-color: #1e293b;
+}
+
+.calendar-deploy-footer-actions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.calendar-deploy-preview {
+    flex: 1;
+    border-radius: 0.6rem;
+    padding: 0.65rem;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.08);
+    color: #0f766e;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+:root.dark .calendar-deploy-preview {
+    border-color: rgba(45, 212, 191, 0.35);
+    background: rgba(6, 95, 70, 0.35);
+    color: #5eead4;
+}
+
+.calendar-repeat-row {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 0.5rem;
+}
+
+.calendar-repeat-custom,
+.calendar-repeat-end {
+    margin-top: 0.4rem;
+}
+
+.calendar-deploy-secondary {
+    flex: 1;
+    border-radius: 0.6rem;
+    padding: 0.65rem;
+    border: 1px solid #cbd5f5;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.calendar-deploy-primary {
+    flex: 1.2;
+    border-radius: 0.6rem;
+    padding: 0.65rem;
+    border: none;
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.calendar-deploy-primary:disabled,
+.calendar-deploy-secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* --- Compact Schedule Cards --- */
+.sched-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sched-card-header .sched-status-badge {
+    margin-left: auto;
+}
+
+.sched-deploy-status {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    color: #0f766e;
+    background: rgba(16, 185, 129, 0.12);
+}
+
+:root.dark .sched-deploy-status {
+    border-color: rgba(45, 212, 191, 0.45);
+    color: #5eead4;
+    background: rgba(6, 95, 70, 0.35);
+}
+
+.sched-icon-btn--favourite {
+    font-size: 0.95rem;
+}
+
+.sched-card-menu {
+    position: relative;
+}
+
+.sched-card-menu summary {
+    list-style: none;
+}
+
+.sched-card-menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.sched-menu-trigger {
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.sched-menu-popover {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.35rem);
+    min-width: 9.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.6rem;
+    padding: 0.4rem;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    z-index: 5;
+}
+
+:root.dark .sched-menu-popover {
+    background: #0f172a;
+    border-color: #1e293b;
+}
+
+.sched-card-menu:not([open]) .sched-menu-popover {
+    display: none;
+}
+
+.sched-menu-item {
+    border: none;
+    background: transparent;
+    text-align: left;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
+    color: #0f172a;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.sched-menu-item:hover {
+    background: #ecfdf5;
+    color: #0f766e;
+}
+
+:root.dark .sched-menu-item {
+    color: #e2e8f0;
+}
+
+:root.dark .sched-menu-item:hover {
+    background: #064e3b;
+    color: #5eead4;
+}
+
+.sched-card-meta {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+:root.dark .sched-card-meta {
+    color: #94a3b8;
+}
+
+.sched-card-meta-dot {
+    color: #94a3b8;
 }
 
 /* Footer row */

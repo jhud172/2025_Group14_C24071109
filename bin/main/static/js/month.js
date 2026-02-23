@@ -1,45 +1,55 @@
 (function initMonthView() {
     const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
     const csrfParamMeta = document.querySelector('meta[name="_csrf_param"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
 
     const csrfToken = csrfTokenMeta ? csrfTokenMeta.content : null;
     const csrfParam = csrfParamMeta ? csrfParamMeta.content : null;
+    const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : 'X-CSRF-TOKEN';
 
     let hoverTimer = null;
     let closeTimer = null;
 
     const preview = document.getElementById('preview-card');
-    let lockPosition = false;
+    const logModal = document.getElementById('calendar-log-modal');
+    const logForm = document.getElementById('calendar-log-form');
+    const logStatus = document.getElementById('calendar-log-status');
+    const logTitle = document.getElementById('calendar-log-title');
+    const logTaskFields = logModal?.querySelector('[data-log-task-fields]') || null;
+    const logWorkoutFields = logModal?.querySelector('[data-log-workout-fields]') || null;
+    const logWorkoutLink = document.getElementById('calendar-log-workout-link');
+    const logActions = logModal?.querySelector('.calendar-log-actions') || null;
+    let activeItem = null;
 
-    let mouseX = 0;
-    let mouseY = 0;
+    function positionPreviewAtItem(item) {
+        if (!preview || !item) return;
+        const offset = 16;
+        const itemRect = item.getBoundingClientRect();
+        const previewRect = preview.getBoundingClientRect();
 
-    function positionPreview(x, y) {
-        const offset = 18;
-        if (!preview) return;
-        const rect = preview.getBoundingClientRect();
+        let left = itemRect.right + offset;
+        let top = itemRect.top;
 
-        let left = x + offset;
-        let top = y + offset;
-
-        if (left + rect.width > window.innerWidth) {
-            left = x - rect.width - offset;
+        if (left + previewRect.width > window.innerWidth - offset) {
+            left = itemRect.left - previewRect.width - offset;
         }
-        if (top + rect.height > window.innerHeight) {
-            top = y - rect.height - offset;
-        }
+        left = Math.max(offset, left);
+
+        const maxTop = window.innerHeight - previewRect.height - offset;
+        top = Math.min(Math.max(itemRect.top, offset), Math.max(offset, maxTop));
 
         preview.style.left = left + 'px';
         preview.style.top = top + 'px';
     }
 
-    function showPreview() {
+    function showPreview(item) {
         if (!preview) return;
         preview.classList.remove('hidden');
         preview.classList.remove('opacity-0');
-        requestAnimationFrame(() => preview.classList.add('opacity-100'));
-        lockPosition = true;
-        positionPreview(mouseX, mouseY);
+        requestAnimationFrame(() => {
+            positionPreviewAtItem(item);
+            preview.classList.add('opacity-100');
+        });
     }
 
     function hidePreview() {
@@ -49,81 +59,227 @@
 
         setTimeout(() => {
             preview.classList.add('hidden');
-            lockPosition = false;
+            activeItem = null;
         }, 180);
     }
 
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        if (!lockPosition) {
-            positionPreview(mouseX, mouseY);
+    function getCompletedMessage(item) {
+        const messages = [
+            'Completed. Nice work keeping the streak alive.',
+            'Done and dusted. Keep the momentum going.',
+            'Completed. Small wins add up fast.',
+            'Checked off. You are on track today.'
+        ];
+        const seed = `${item.dataset.id || ''}${item.dataset.date || ''}`;
+        let hash = 0;
+        for (let i = 0; i < seed.length; i += 1) {
+            hash = (hash * 31 + seed.charCodeAt(i)) % messages.length;
         }
-    });
+        return messages[hash] || messages[0];
+    }
 
-    function attachPreviewHandlers(root) {
-        if (!preview || !csrfToken || !csrfParam || !root) return;
+    function buildPreviewHtml(item) {
+        const type = item.dataset.type;
+        const completed = item.dataset.completed;
+        const title = item.dataset.title || 'Untitled';
+        const time = item.dataset.time || '—';
+        const notes = item.dataset.notes || 'No description';
+        const isCompleted = completed === 'true';
 
-        root.querySelectorAll('.calendar-item').forEach((item) => {
-            item.addEventListener('mouseenter', () => {
-                clearTimeout(closeTimer);
+        let html = `
+            <p class="mb-1 text-lg font-semibold text-slate-900 dark:text-slate-100">${title}</p>
+            <p class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">${type === 'occurrence' ? 'Schedule' : 'Task'}</p>
+            <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">Time: ${time}</p>
+            <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">${notes}</p>
+        `;
 
-                hoverTimer = setTimeout(() => {
-                    const type = item.dataset.type;
-                    const id = item.dataset.id;
-                    const completed = item.dataset.completed;
+        if (isCompleted) {
+            html += `
+                <div class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
+                    ✓ Completed
+                </div>
+                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">${getCompletedMessage(item)}</p>
+            `;
+        }
 
-                    let html = `
-                        <p class="mb-1 text-lg font-semibold text-slate-100">${item.dataset.title}</p>
-                        <p class="text-xs uppercase tracking-widest text-slate-400">${type === 'occurrence' ? 'Schedule' : 'Task'}</p>
-                        <p class="mt-2 text-sm text-slate-300">Time: ${item.dataset.time ?? '—'}</p>
-                        <p class="mb-4 text-sm text-slate-400">${item.dataset.notes || 'No description'}</p>
-                    `;
+        if (type === 'task') {
+            if (!isCompleted) {
+                html += `
+                    <div class="calendar-preview-actions">
+                        <button type="button" class="calendar-preview-action" data-preview-action="complete">Mark completed</button>
+                        <button type="button" class="calendar-preview-action calendar-preview-action--ghost" data-preview-action="log">Log completion</button>
+                    </div>
+                `;
+            }
+        } else if (type === 'occurrence') {
+            const actionLabel = isCompleted ? 'Review workout log' : 'Complete workout';
+            const actionType = isCompleted ? 'workout-review' : 'workout-log';
+            html += `
+                <div class="calendar-preview-actions">
+                    <button type="button" class="calendar-preview-action" data-preview-action="${actionType}">${actionLabel}</button>
+                </div>
+            `;
+        }
 
-                    if (completed === 'true') {
-                        html += `
-                            <div class="mt-3 flex items-center gap-2 font-semibold text-emerald-300">
-                                <span class="text-xl">✓</span> Completed
-                            </div>
-                        `;
-                    } else if (type === 'exercise') {
-                        html += `
-                            <a href="/exercise-log/add-calendar?taskId=${id}"
-                                class="mt-3 block rounded-lg bg-white px-3 py-2 text-center text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                Complete Exercise Log
-                            </a>
-                        `;
-                    } else if (type === 'occurrence') {
-                        html += `
-                            <a href="/exercise-log/add-occurrence?occId=${id}"
-                                class="mt-3 block rounded-lg bg-white px-3 py-2 text-center text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                Complete Scheduled Exercise
-                            </a>
-                        `;
-                    } else if (type === 'task') {
-                        html += `
-                            <form method="post" action="/calendar/day/${item.dataset.date}/toggle-complete">
-                                <input type="hidden" name="taskId" value="${id}">
-                                <input type="hidden" name="${csrfParam}" value="${csrfToken}">
-                                <button class="mt-3 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                    Mark Completed
-                                </button>
-                            </form>
-                        `;
-                    }
+        return html;
+    }
 
-                    preview.innerHTML = html;
-                    showPreview();
-                }, 600);
-            });
+    let previewDelegated = false;
+    function bindPreviewDelegation() {
+        if (previewDelegated || !preview || !csrfToken || !csrfParam) return;
+        previewDelegated = true;
 
-            item.addEventListener('mouseleave', () => {
-                clearTimeout(hoverTimer);
-                closeTimer = setTimeout(() => {
-                    if (!preview.matches(':hover')) hidePreview();
-                }, 200);
-            });
+        document.addEventListener('mouseover', (event) => {
+            const item = event.target.closest('.calendar-item');
+            if (!item) return;
+            if (activeItem === item) return;
+            clearTimeout(closeTimer);
+            activeItem = item;
+            hoverTimer = setTimeout(() => {
+                preview.innerHTML = buildPreviewHtml(item);
+                showPreview(item);
+            }, 600);
         });
+
+        document.addEventListener('mouseout', (event) => {
+            const item = event.target.closest('.calendar-item');
+            if (!item) return;
+            const related = event.relatedTarget;
+            if (related && (related.closest?.('.calendar-item') === item || related.closest?.('#preview-card'))) return;
+            clearTimeout(hoverTimer);
+            closeTimer = setTimeout(() => {
+                if (!preview.matches(':hover')) hidePreview();
+            }, 200);
+        });
+    }
+
+    function attachPreviewHandlers() {
+        bindPreviewDelegation();
+    }
+
+    function setLogStatus(message, isError = false) {
+        if (!logStatus) return;
+        logStatus.textContent = message || '';
+        logStatus.classList.toggle('is-error', isError);
+        logStatus.classList.toggle('is-visible', !!message);
+    }
+
+    function openLogModal(item, mode) {
+        if (!logModal || !logForm) return;
+        const isWorkout = mode === 'workout';
+        if (logTaskFields) logTaskFields.classList.toggle('hidden', isWorkout);
+        if (logWorkoutFields) logWorkoutFields.classList.toggle('hidden', !isWorkout);
+        if (logActions) logActions.classList.toggle('hidden', isWorkout);
+        logForm.dataset.mode = isWorkout ? 'workout' : 'task';
+
+        const title = item.dataset.title || 'Task';
+        if (logTitle) logTitle.textContent = isWorkout ? 'Complete workout' : `Log ${title}`;
+
+        logForm.taskId.value = item.dataset.id || '';
+        logForm.date.value = item.dataset.date || '';
+        logForm.title.value = item.dataset.title || '';
+        logForm.time.value = item.dataset.time || '';
+        logForm.notes.value = item.dataset.notes || '';
+        logForm.exercise.value = item.dataset.exercise || 'false';
+        logForm.completed.value = item.dataset.completed || 'false';
+
+        if (logWorkoutLink) {
+            const occId = item.dataset.id;
+            logWorkoutLink.href = occId ? `/exercise-log/add-occurrence?occId=${occId}` : '#';
+        }
+
+        setLogStatus('');
+        logModal.classList.remove('hidden');
+        logModal.setAttribute('aria-hidden', 'false');
+        const focusTarget = isWorkout ? logWorkoutLink : logForm.querySelector('textarea, select, input');
+        if (focusTarget) focusTarget.focus();
+    }
+
+    function closeLogModal() {
+        if (!logModal) return;
+        logModal.classList.add('hidden');
+        logModal.setAttribute('aria-hidden', 'true');
+        setLogStatus('');
+    }
+
+    function buildLogEntry(formData) {
+        const summary = formData.get('summary') || '';
+        const effort = formData.get('effort') || '';
+        const mood = formData.get('mood') || '';
+        const extra = formData.get('logNotes') || '';
+        const stamped = new Date().toLocaleString();
+        const parts = [`Completion log (${stamped})`];
+        if (summary) parts.push(`Summary: ${summary}`);
+        if (effort) parts.push(`Effort: ${effort}/5`);
+        if (mood) parts.push(`Mood: ${mood}`);
+        if (extra) parts.push(`Notes: ${extra}`);
+        return parts.join('\n');
+    }
+
+    async function postForm(action, body) {
+        const headers = {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+        if (csrfToken) headers[csrfHeader] = csrfToken;
+        return fetch(action, {
+            method: 'POST',
+            headers,
+            body: body.toString()
+        });
+    }
+
+    function updateTaskCompletionUi(taskId, completed) {
+        const items = document.querySelectorAll(
+            `.calendar-item[data-type="task"][data-id="${taskId}"], .calendar-grouped-item[data-type="task"][data-id="${taskId}"]`
+        );
+        items.forEach((el) => {
+            el.classList.toggle('completed', completed);
+            el.dataset.completed = String(completed);
+            if (el.classList.contains('calendar-item')) {
+                let check = el.querySelector('.calendar-item-check');
+                if (completed && !check) {
+                    check = document.createElement('div');
+                    check.className = 'calendar-item-check';
+                    check.textContent = '✓';
+                    el.appendChild(check);
+                }
+                if (!completed && check) {
+                    check.remove();
+                }
+            }
+        });
+    }
+
+    async function toggleTaskCompletion(item) {
+        const taskId = item.dataset.id;
+        const date = item.dataset.date;
+        if (!taskId || !date) return;
+        const nextCompleted = item.dataset.completed !== 'true';
+        item.dataset.completed = String(nextCompleted);
+        updateTaskCompletionUi(taskId, nextCompleted);
+        if (preview && activeItem && activeItem.dataset.id === taskId) {
+            preview.innerHTML = buildPreviewHtml(activeItem);
+        }
+
+        const body = new URLSearchParams();
+        body.append('taskId', taskId);
+        if (csrfParam && csrfToken) body.append(csrfParam, csrfToken);
+
+        try {
+            const res = await postForm(`/calendar/day/${date}/toggle-complete`, body);
+            if (!res.ok) {
+                throw new Error(`Toggle failed: ${res.status}`);
+            }
+        } catch (error) {
+            console.error(error);
+            const revert = !nextCompleted;
+            item.dataset.completed = String(revert);
+            updateTaskCompletionUi(taskId, revert);
+            if (preview && activeItem && activeItem.dataset.id === taskId) {
+                preview.innerHTML = buildPreviewHtml(activeItem);
+            }
+        }
     }
 
     function attachDayCardNavigation(root) {
@@ -153,26 +309,130 @@
         });
     }
 
-    // --- Sliding month navigation ---
-    const slider = document.getElementById('month-slider');
-    const track = document.getElementById('month-slider-track');
-    const prevLink = document.getElementById('month-prev');
-    const nextLink = document.getElementById('month-next');
-    const currentSlot = track?.querySelector('[data-month-pane-slot="current"]');
-    const prevSlot = track?.querySelector('[data-month-pane-slot="prev"]');
-    const nextSlot = track?.querySelector('[data-month-pane-slot="next"]');
-
-    const hasSlider = slider && track && prevLink && nextLink && currentSlot && prevSlot && nextSlot;
-    if (!hasSlider) {
-        // No slider wrapper (or missing controls) - keep legacy navigation.
-        attachPreviewHandlers(document);
-        attachDayCardNavigation(document);
-        return;
+    function handlePreviewAction(actionEl, event) {
+        if (!actionEl || !activeItem) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const action = actionEl.getAttribute('data-preview-action');
+        if (action === 'complete') {
+            toggleTaskCompletion(activeItem).catch((error) => console.error(error));
+        }
+        if (action === 'log') {
+            openLogModal(activeItem, 'task');
+        }
+        if (action === 'workout-log') {
+            openLogModal(activeItem, 'workout');
+        }
+        if (action === 'workout-review') {
+            window.location.href = '/exercise-log/list';
+        }
     }
 
-    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    preview?.addEventListener('click', (event) => {
+        const actionEl = event.target.closest('[data-preview-action]');
+        if (!actionEl) return;
+        handlePreviewAction(actionEl, event);
+    });
 
+    document.addEventListener('click', (event) => {
+        const actionEl = event.target.closest('[data-preview-action]');
+        if (!actionEl) return;
+        handlePreviewAction(actionEl, event);
+    }, true);
+
+    if (logModal) {
+        const backdrop = logModal.querySelector('[data-log-backdrop]');
+        const closeBtn = logModal.querySelector('[data-log-close]');
+        const cancelBtn = logModal.querySelector('[data-log-cancel]');
+        if (backdrop) backdrop.addEventListener('click', closeLogModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeLogModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeLogModal);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !logModal.classList.contains('hidden')) {
+                closeLogModal();
+            }
+        });
+    }
+
+    if (logForm) {
+        logForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!activeItem) return;
+            if (logForm.dataset.mode === 'workout') return;
+
+            const formData = new FormData(logForm);
+            const taskId = formData.get('taskId');
+            const date = formData.get('date');
+            if (!taskId || !date) return;
+
+            const logEntry = buildLogEntry(formData);
+            const existingNotes = (formData.get('notes') || '').toString().trim();
+            const combinedNotes = existingNotes ? `${existingNotes}\n\n${logEntry}` : logEntry;
+            const title = formData.get('title') || '';
+            const time = formData.get('time') || '';
+            const exercise = formData.get('exercise') === 'true' ? 'true' : 'false';
+
+            try {
+                setLogStatus('Saving log...');
+                const editBody = new URLSearchParams();
+                editBody.append('title', String(title));
+                editBody.append('time', String(time));
+                editBody.append('notes', combinedNotes);
+                editBody.append('exercise', exercise);
+                if (csrfParam && csrfToken) editBody.append(csrfParam, csrfToken);
+                await postForm(`/calendar/task/${taskId}/edit-inline`, editBody);
+
+                if (activeItem.dataset.completed !== 'true') {
+                    await toggleTaskCompletion(activeItem);
+                }
+
+                activeItem.dataset.notes = combinedNotes;
+                if (preview) preview.innerHTML = buildPreviewHtml(activeItem);
+                setLogStatus('Log saved.');
+                setTimeout(closeLogModal, 600);
+            } catch (error) {
+                console.error(error);
+                setLogStatus('Unable to save log. Please try again.', true);
+            }
+        });
+    }
+
+    window.addEventListener('resize', () => {
+        if (!preview || preview.classList.contains('hidden') || !activeItem) return;
+        positionPreviewAtItem(activeItem);
+    });
+
+    const monthPane = document.querySelector('[data-month-pane]');
+    const paneYear = parseInt(monthPane?.getAttribute('data-year') || '', 10);
+    const paneMonth = parseInt(monthPane?.getAttribute('data-month') || '', 10);
+    const currentYear = Number.isFinite(paneYear) ? paneYear : new Date().getFullYear();
+    const currentMonth = Number.isFinite(paneMonth) ? paneMonth : new Date().getMonth() + 1;
     const heatmapCache = new Map();
+
+    const monthNameEl = document.getElementById('month-name');
+    const monthYearEl = document.getElementById('month-year');
+    const monthRedirectInput = document.getElementById('month-redirect');
+    const jumpTodayBtn = document.getElementById('month-jump-today');
+    const jumpDateInput = document.getElementById('month-jump-date');
+    const jumpDateBtn = document.getElementById('month-jump-date-go');
+    const jumpNextWorkoutBtn = document.getElementById('month-jump-next-workout');
+    const jumpTaskInput = document.getElementById('month-jump-task');
+    const jumpTaskBtn = document.getElementById('month-jump-task-go');
+    const jumpStatusEl = document.getElementById('month-jump-status');
+    const jumpControls = [jumpTodayBtn, jumpDateInput, jumpDateBtn, jumpNextWorkoutBtn, jumpTaskInput, jumpTaskBtn].filter(Boolean);
+    let jumpActionInProgress = false;
+
+    function setMonthHeader(year, month) {
+        if (monthNameEl) {
+            monthNameEl.textContent = new Date(year, month - 1, 1).toLocaleString('en-GB', { month: 'long' });
+        }
+        if (monthYearEl) {
+            monthYearEl.textContent = String(year);
+        }
+        if (monthRedirectInput) {
+            monthRedirectInput.value = `/calendar?view=month&month=${month}&year=${year}`;
+        }
+    }
 
     function formatDate(year, month, day) {
         const mm = String(month).padStart(2, '0');
@@ -249,123 +509,6 @@
         }
     }
 
-    function refreshHeatmaps() {
-        const panes = [
-            prevSlot.querySelector('[data-month-pane]'),
-            currentSlot.querySelector('[data-month-pane]'),
-            nextSlot.querySelector('[data-month-pane]')
-        ].filter(Boolean);
-        panes.forEach((pane) => {
-            updateHeatmapForPane(pane);
-        });
-    }
-
-    function ymKey(year, month) {
-        return `${year}-${String(month).padStart(2, '0')}`;
-    }
-
-    function addMonths(year, month, delta) {
-        const base = new Date(year, month - 1, 1);
-        base.setMonth(base.getMonth() + delta);
-        return { year: base.getFullYear(), month: base.getMonth() + 1 };
-    }
-
-    function parseMonthYearFromHref(href) {
-        try {
-            const url = new URL(href, window.location.origin);
-            const month = parseInt(url.searchParams.get('month') || '', 10);
-            const year = parseInt(url.searchParams.get('year') || '', 10);
-            if (!Number.isFinite(month) || !Number.isFinite(year)) return null;
-            return { month, year, url };
-        } catch {
-            return null;
-        }
-    }
-
-    function monthPaneUrl(year, month) {
-        const url = new URL('/calendar/month-fragment', window.location.origin);
-        url.searchParams.set('month', String(month));
-        url.searchParams.set('year', String(year));
-        return url.toString();
-    }
-
-    function parsePaneHtml(html) {
-        const template = document.createElement('template');
-        template.innerHTML = html.trim();
-        return template.content.firstElementChild;
-    }
-        function extractMonthPane(html) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            return doc.querySelector('[data-month-pane]');
-        }
-
-    const cache = new Map();
-    let currentYear = parseInt(slider.dataset.year || '', 10);
-    let currentMonth = parseInt(slider.dataset.month || '', 10);
-    if (!Number.isFinite(currentYear) || !Number.isFinite(currentMonth)) {
-        currentYear = new Date().getFullYear();
-        currentMonth = new Date().getMonth() + 1;
-    }
-
-    let isAnimating = false;
-
-    async function fetchPane(year, month) {
-        const url = monthPaneUrl(year, month);
-        const res = await fetch(url, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            credentials: 'same-origin'
-        });
-        if (!res.ok) throw new Error(`Failed to load month pane: ${res.status}`);
-        return await res.text();
-    }
-
-    async function ensureCached(year, month) {
-        const key = ymKey(year, month);
-        if (cache.has(key)) return;
-        const html = await fetchPane(year, month);
-        cache.set(key, html);
-    }
-
-    function evictOutsideWindow(centerYear, centerMonth) {
-        const keep = new Set();
-        for (let d = -2; d <= 2; d++) {
-            const t = addMonths(centerYear, centerMonth, d);
-            keep.add(ymKey(t.year, t.month));
-        }
-        for (const key of Array.from(cache.keys())) {
-            if (!keep.has(key)) cache.delete(key);
-        }
-    }
-
-    function setSlotFromCache(slot, year, month) {
-        const key = ymKey(year, month);
-        const html = cache.get(key);
-        if (!html) return false;
-        const paneEl = extractMonthPane(html);
-        if (!paneEl) {
-            console.error('Month pane missing in fragment response for', key);
-            return false;
-        }
-        slot.replaceChildren(paneEl.cloneNode(true));
-        attachPreviewHandlers(slot);
-        attachDayCardNavigation(slot);
-        return true;
-    }
-
-    const monthNameEl = document.getElementById('month-name');
-    const monthYearEl = document.getElementById('month-year');
-    const monthRedirectInput = document.getElementById('month-redirect');
-    const jumpTodayBtn = document.getElementById('month-jump-today');
-    const jumpDateInput = document.getElementById('month-jump-date');
-    const jumpDateBtn = document.getElementById('month-jump-date-go');
-    const jumpNextWorkoutBtn = document.getElementById('month-jump-next-workout');
-    const jumpTaskInput = document.getElementById('month-jump-task');
-    const jumpTaskBtn = document.getElementById('month-jump-task-go');
-    const jumpStatusEl = document.getElementById('month-jump-status');
-    const jumpControls = [jumpTodayBtn, jumpDateInput, jumpDateBtn, jumpNextWorkoutBtn, jumpTaskInput, jumpTaskBtn].filter(Boolean);
-    let jumpActionInProgress = false;
-
     function setJumpStatus(message, type = 'error') {
         if (!jumpStatusEl) return;
         jumpStatusEl.textContent = message || '';
@@ -410,7 +553,7 @@
     }
 
     function getCurrentPane() {
-        return currentSlot.querySelector('[data-month-pane]');
+        return monthPane;
     }
 
     function clearJumpHighlights() {
@@ -446,30 +589,6 @@
         return pane.querySelector(`.calendar-day-card[data-date="${dateIso}"]`);
     }
 
-    function monthDifference(fromYear, fromMonth, toYear, toMonth) {
-        return ((toYear - fromYear) * 12) + (toMonth - fromMonth);
-    }
-
-    async function jumpToMonth(targetYear, targetMonth) {
-        let safety = 0;
-        while ((currentYear !== targetYear || currentMonth !== targetMonth) && safety < 120) {
-            const diff = monthDifference(currentYear, currentMonth, targetYear, targetMonth);
-            await go(diff > 0 ? 1 : -1);
-            safety += 1;
-        }
-        return currentYear === targetYear && currentMonth === targetMonth;
-    }
-
-    function getCurrentMonthState() {
-        return { year: currentYear, month: currentMonth };
-    }
-
-    async function restoreMonthState(state) {
-        if (!state) return;
-        if (currentYear === state.year && currentMonth === state.month) return;
-        await jumpToMonth(state.year, state.month);
-    }
-
     function sortedCardsInPane(pane) {
         return Array.from(pane.querySelectorAll('.calendar-day-card[data-date]')).sort((a, b) => {
             return (a.dataset.date || '').localeCompare(b.dataset.date || '');
@@ -481,7 +600,7 @@
         return cards.find((card) => {
             const date = card.dataset.date || '';
             if (date < fromDateIso) return false;
-            return !!card.querySelector('.calendar-item[data-type="workout"]');
+            return !!card.querySelector('.calendar-item[data-type="occurrence"]');
         }) || null;
     }
 
@@ -505,9 +624,13 @@
         }
         const targetYear = parsed.getFullYear();
         const targetMonth = parsed.getMonth() + 1;
-        const reached = await jumpToMonth(targetYear, targetMonth);
-        if (!reached) {
-            setJumpStatus('Could not navigate to that date.', 'error');
+        if (targetYear !== currentYear || targetMonth !== currentMonth) {
+            const url = new URL('/calendar', window.location.origin);
+            url.searchParams.set('view', 'month');
+            url.searchParams.set('month', String(targetMonth));
+            url.searchParams.set('year', String(targetYear));
+            url.searchParams.set('jumpDate', dateIso);
+            window.location.href = url.toString();
             return;
         }
         const targetCard = findDateCardInCurrentPane(dateIso);
@@ -519,24 +642,16 @@
     }
 
     async function jumpToNextWorkout() {
+        const pane = getCurrentPane();
+        if (!pane) return;
         const fromDateIso = toLocalIsoDate(new Date());
-        const initialState = getCurrentMonthState();
-        let safety = 0;
-        while (safety < 18) {
-            const pane = getCurrentPane();
-            if (pane) {
-                const targetCard = findNextWorkoutCard(pane, fromDateIso);
-                if (targetCard) {
-                    highlightJumpCard(targetCard);
-                    setJumpStatus('Jumped to next workout.', 'success');
-                    return;
-                }
-            }
-            await go(1);
-            safety += 1;
+        const targetCard = findNextWorkoutCard(pane, fromDateIso);
+        if (!targetCard) {
+            setJumpStatus('No upcoming workout found in this month.', 'error');
+            return;
         }
-        await restoreMonthState(initialState);
-        setJumpStatus('No upcoming workout found.', 'error');
+        highlightJumpCard(targetCard);
+        setJumpStatus('Jumped to next workout.', 'success');
     }
 
     async function jumpToTask() {
@@ -545,24 +660,16 @@
             setJumpStatus('Please enter a task name to search.', 'error');
             return;
         }
+        const pane = getCurrentPane();
+        if (!pane) return;
         const fromDateIso = toLocalIsoDate(new Date());
-        const initialState = getCurrentMonthState();
-        let safety = 0;
-        while (safety < 18) {
-            const pane = getCurrentPane();
-            if (pane) {
-                const targetCard = findTaskCardByQuery(pane, query, fromDateIso);
-                if (targetCard) {
-                    highlightJumpCard(targetCard);
-                    setJumpStatus('Jumped to matching task.', 'success');
-                    return;
-                }
-            }
-            await go(1);
-            safety += 1;
+        const targetCard = findTaskCardByQuery(pane, query, fromDateIso);
+        if (!targetCard) {
+            setJumpStatus('No matching task found in this month.', 'error');
+            return;
         }
-        await restoreMonthState(initialState);
-        setJumpStatus('No matching task found.', 'error');
+        highlightJumpCard(targetCard);
+        setJumpStatus('Jumped to matching task.', 'success');
     }
 
     jumpTodayBtn?.addEventListener('click', () => {
@@ -605,182 +712,14 @@
         }
     });
 
-    function updateMonthHeader() {
-        if (monthNameEl) {
-            monthNameEl.textContent = new Date(currentYear, currentMonth - 1, 1).toLocaleString('en-GB', { month: 'long' });
-        }
-        if (monthYearEl) {
-            monthYearEl.textContent = String(currentYear);
-        }
-        if (monthRedirectInput) {
-            monthRedirectInput.value = `/calendar?view=month&month=${currentMonth}&year=${currentYear}`;
-        }
+    attachPreviewHandlers(document);
+    attachDayCardNavigation(document);
+    setMonthHeader(currentYear, currentMonth);
+    updateHeatmapForPane(monthPane);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const jumpDateFromUrl = urlParams.get('jumpDate');
+    if (jumpDateFromUrl) {
+        runJumpAction(() => jumpToDate(jumpDateFromUrl));
     }
-
-    function updateNavHrefs() {
-        const prev = addMonths(currentYear, currentMonth, -1);
-        const next = addMonths(currentYear, currentMonth, 1);
-        prevLink.href = `/calendar?view=month&month=${prev.month}&year=${prev.year}`;
-        nextLink.href = `/calendar?view=month&month=${next.month}&year=${next.year}`;
-    }
-
-    async function warmCache(centerYear, centerMonth) {
-        const targets = [];
-        for (let d = -2; d <= 2; d++) {
-            const t = addMonths(centerYear, centerMonth, d);
-            targets.push(ensureCached(t.year, t.month));
-        }
-        await Promise.allSettled(targets);
-        evictOutsideWindow(centerYear, centerMonth);
-    }
-
-    async function renderAdjacentPanes() {
-        const prev = addMonths(currentYear, currentMonth, -1);
-        const next = addMonths(currentYear, currentMonth, 1);
-        setSlotFromCache(prevSlot, prev.year, prev.month);
-        setSlotFromCache(currentSlot, currentYear, currentMonth);
-        setSlotFromCache(nextSlot, next.year, next.month);
-        updateNavHrefs();
-        updateMonthHeader();
-        slider.dataset.year = String(currentYear);
-        slider.dataset.month = String(currentMonth);
-        refreshHeatmaps();
-    }
-
-    function animateTo(offsetPercent) {
-        return new Promise((resolve) => {
-            if (prefersReducedMotion) {
-                track.style.transition = '';
-                track.style.transform = `translateX(${offsetPercent}%)`;
-                resolve();
-                return;
-            }
-
-            track.style.transition = 'transform 360ms cubic-bezier(0.22, 0.61, 0.36, 1)';
-            const onEnd = (e) => {
-                if (e.propertyName !== 'transform') return;
-                track.removeEventListener('transitionend', onEnd);
-                resolve();
-            };
-            track.addEventListener('transitionend', onEnd);
-            requestAnimationFrame(() => {
-                track.style.transform = `translateX(${offsetPercent}%)`;
-            });
-        });
-    }
-
-    function snapToCenter() {
-        track.style.transition = '';
-        track.style.transform = 'translateX(-33.333333%)';
-    }
-
-    async function go(delta) {
-        if (isAnimating) return;
-        isAnimating = true;
-        prevLink.setAttribute('aria-disabled', 'true');
-        nextLink.setAttribute('aria-disabled', 'true');
-        prevLink.classList.add('pointer-events-none', 'opacity-60');
-        nextLink.classList.add('pointer-events-none', 'opacity-60');
-
-        const target = addMonths(currentYear, currentMonth, delta);
-        await ensureCached(target.year, target.month);
-
-        // Ensure visible neighbor is present
-        await renderAdjacentPanes();
-
-        // Slide: current is at -33.333%; next is -66.666%; prev is 0%
-        await animateTo(delta > 0 ? -66.666666 : 0);
-
-        currentYear = target.year;
-        currentMonth = target.month;
-        await warmCache(currentYear, currentMonth);
-        await renderAdjacentPanes();
-        snapToCenter();
-
-        const url = new URL(window.location.href);
-        url.searchParams.set('view', 'month');
-        url.searchParams.set('month', String(currentMonth));
-        url.searchParams.set('year', String(currentYear));
-        window.history.pushState({ month: currentMonth, year: currentYear }, '', url.toString());
-
-        prevLink.removeAttribute('aria-disabled');
-        nextLink.removeAttribute('aria-disabled');
-        prevLink.classList.remove('pointer-events-none', 'opacity-60');
-        nextLink.classList.remove('pointer-events-none', 'opacity-60');
-        isAnimating = false;
-    }
-
-    prevLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        go(-1);
-    });
-
-    nextLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        go(1);
-    });
-
-    let pointerStartX = null;
-    let pointerActive = false;
-    slider.addEventListener('pointerdown', (e) => {
-        if (e.target.closest('a, button, input, textarea, select')) return;
-        pointerStartX = e.clientX;
-        pointerActive = true;
-        slider.setPointerCapture?.(e.pointerId);
-    });
-    slider.addEventListener('pointerup', (e) => {
-        if (!pointerActive || pointerStartX == null) return;
-        const delta = e.clientX - pointerStartX;
-        pointerActive = false;
-        pointerStartX = null;
-        if (Math.abs(delta) > 60) {
-            go(delta < 0 ? 1 : -1);
-        }
-    });
-    slider.addEventListener('pointercancel', () => {
-        pointerActive = false;
-        pointerStartX = null;
-    });
-
-    slider.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') {
-            e.preventDefault();
-            go(-1);
-        } else if (e.key === 'ArrowRight') {
-            e.preventDefault();
-            go(1);
-        }
-    });
-
-    window.addEventListener('popstate', async () => {
-        const params = new URLSearchParams(window.location.search);
-        const view = params.get('view') || 'month';
-        if (view !== 'month') return;
-        const month = parseInt(params.get('month') || '', 10);
-        const year = parseInt(params.get('year') || '', 10);
-        if (!Number.isFinite(month) || !Number.isFinite(year)) return;
-        currentMonth = month;
-        currentYear = year;
-        await warmCache(currentYear, currentMonth);
-        await renderAdjacentPanes();
-        snapToCenter();
-    });
-
-    // Initial: cache current pane from DOM, then warm ±2 and render.
-    const initialPane = currentSlot.querySelector('[data-month-pane]');
-    if (initialPane) {
-        const key = ymKey(currentYear, currentMonth);
-        // Serialize initial pane to HTML for cache consistency
-        cache.set(key, initialPane.outerHTML);
-        attachPreviewHandlers(currentSlot);
-        attachDayCardNavigation(currentSlot);
-    }
-    if (track) {
-        track.style.willChange = 'transform';
-    }
-    updateMonthHeader();
-    warmCache(currentYear, currentMonth).then(() => {
-        renderAdjacentPanes();
-        snapToCenter();
-    });
 })();

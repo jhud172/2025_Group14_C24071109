@@ -487,9 +487,10 @@
         </header>
 
         <div class="p-4">
-            <div th:if="${#lists.isEmpty(workoutSessions)}" class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300">No scheduled workouts today.</div>
+            <div th:if="${#lists.isEmpty(workoutSessions) && #lists.isEmpty(occurrences)}" class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300">No scheduled workouts today.</div>
 
-            <div th:if="${!#lists.isEmpty(workoutSessions)}" class="max-h-[32rem] overflow-x-hidden overflow-y-auto rounded-xl border border-slate-200 bg-white scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:scrollbar-thumb-slate-700" id="workouts-list-root" data-testid="workouts-list-root">
+            <div th:if="${!#lists.isEmpty(workoutSessions) || !#lists.isEmpty(occurrences)}" class="max-h-[32rem] overflow-x-hidden overflow-y-auto rounded-xl border border-slate-200 bg-white scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:scrollbar-thumb-slate-700" id="workouts-list-root" data-testid="workouts-list-root">
+                <!-- Workout Sessions -->
                 <div th:each="ws : ${workoutSessions}" data-fade-in class="border-b border-slate-200 p-4 last:border-b-0 dark:border-slate-800 border-l-4 border-l-emerald-400 dark:border-l-emerald-500" data-workout-item th:attr="data-workout-name=${ws.nameSnapshot != null ? ws.nameSnapshot : (ws.workout != null ? ws.workout.name : '')}">
                     <div class="flex items-start justify-between gap-4">
                         <div class="min-w-0">
@@ -498,6 +499,39 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <a th:href="@{'/workout-session/' + ${ws.id} + '/completion?day=' + ${date}}" class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">Complete Workout</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Schedule Occurrences -->
+                <div th:each="occ : ${occurrences}" 
+                     th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown Exercise')}"
+                     data-fade-in 
+                     class="border-b border-slate-200 p-4 last:border-b-0 dark:border-slate-800 border-l-4"
+                     th:classappend="${occ.completed} ? ' border-l-slate-400 dark:border-l-slate-600' : ' border-l-blue-400 dark:border-l-blue-500'"
+                     data-occurrence-item 
+                     th:attr="data-occurrence-id=${occ.id},
+                              data-occurrence-title=${occTitle},
+                              data-completed=${occ.completed}">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <p class="font-semibold text-slate-900 dark:text-slate-100" th:text="${occTitle}"></p>
+                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                                <span th:text="'From: ' + ${occ.scheduleName}"></span>
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <form th:action="@{'/schedule-occurrence/' + ${occ.id} + '/toggle'}" method="post" style="display: inline;">
+                                <input type="hidden" th:if="${_csrf != null}"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}"/>
+                                <input type="hidden" name="returnUrl" th:value="@{'/calendar/day/' + ${date}}"/>
+                                <button type="submit" 
+                                        class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2"
+                                        th:classappend="${occ.completed} ? ' bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 focus-visible:ring-slate-500' : ' bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500'"
+                                        th:text="${occ.completed} ? 'Completed ✓' : 'Mark Complete'">
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

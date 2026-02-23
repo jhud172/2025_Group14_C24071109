@@ -1,50 +1,79 @@
 document.addEventListener("DOMContentLoaded", () => {
     const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
     const csrfParamMeta = document.querySelector('meta[name="_csrf_param"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
 
     const csrfToken = csrfTokenMeta ? csrfTokenMeta.content : null;
     const csrfParam = csrfParamMeta ? csrfParamMeta.content : null;
+    const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : 'X-CSRF-TOKEN';
 
     const preview = document.getElementById("preview-card");
     if (!preview) return;
 
     let hoverTimer = null;
     let closeTimer = null;
-    let lockPosition = false;
-    let mouseX = 0;
-    let mouseY = 0;
+    const logModal = document.getElementById('calendar-log-modal');
+    let activeItem = null;
 
-    document.addEventListener("mousemove", (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        if (!lockPosition) {
-            positionPreview(mouseX, mouseY);
-        }
-    });
+    function positionPreviewAtItem(item) {
+        if (!preview || !item) return;
+        const offset = 16;
+        const itemRect = item.getBoundingClientRect();
+        const previewRect = preview.getBoundingClientRect();
 
-    function positionPreview(x, y) {
-        const offset = 18;
-        const rect = preview.getBoundingClientRect();
-        let left = x + offset;
-        let top = y + offset;
-        if (left + rect.width > window.innerWidth) {
-            left = x - rect.width - offset;
+        let left = itemRect.right + offset;
+        let top = itemRect.top;
+
+        if (left + previewRect.width > window.innerWidth - offset) {
+            left = itemRect.left - previewRect.width - offset;
         }
-        if (top + rect.height > window.innerHeight) {
-            top = y - rect.height - offset;
-        }
+        left = Math.max(offset, left);
+
+        const maxTop = window.innerHeight - previewRect.height - offset;
+        top = Math.min(Math.max(itemRect.top, offset), Math.max(offset, maxTop));
+
         preview.style.left = left + "px";
         preview.style.top = top + "px";
     }
 
-    function showPreview() {
+    function handlePreviewAction(actionEl, event) {
+        if (!actionEl || !activeItem) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const action = actionEl.getAttribute('data-preview-action');
+        if (action === 'complete') {
+            toggleTaskCompletion(activeItem).catch((error) => console.error(error));
+        }
+        if (action === 'log') {
+            openLogModal(activeItem, 'task');
+        }
+        if (action === 'workout-log') {
+            openLogModal(activeItem, 'workout');
+        }
+        if (action === 'workout-review') {
+            window.location.href = '/exercise-log/list';
+        }
+    }
+
+    preview?.addEventListener('click', (event) => {
+        const actionEl = event.target.closest('[data-preview-action]');
+        if (!actionEl) return;
+        handlePreviewAction(actionEl, event);
+    });
+
+    document.addEventListener('click', (event) => {
+        const actionEl = event.target.closest('[data-preview-action]');
+        if (!actionEl) return;
+        handlePreviewAction(actionEl, event);
+    }, true);
+
+    function showPreview(item) {
         preview.classList.remove("hidden");
         preview.classList.remove("opacity-0");
         requestAnimationFrame(() => {
+            positionPreviewAtItem(item);
             preview.classList.add("opacity-100");
         });
-        lockPosition = true;
-        positionPreview(mouseX, mouseY);
     }
 
     function hidePreview() {
@@ -53,76 +82,104 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setTimeout(() => {
             preview.classList.add("hidden");
-            lockPosition = false;
+            activeItem = null;
         }, 180);
     }
 
-    function renderPreview(item) {
+    function getCompletedMessage(item) {
+        const messages = [
+            'Completed. Nice work keeping the streak alive.',
+            'Done and dusted. Keep the momentum going.',
+            'Completed. Small wins add up fast.',
+            'Checked off. You are on track today.'
+        ];
+        const seed = `${item.dataset.id || ''}${item.dataset.date || ''}`;
+        let hash = 0;
+        for (let i = 0; i < seed.length; i += 1) {
+            hash = (hash * 31 + seed.charCodeAt(i)) % messages.length;
+        }
+        return messages[hash] || messages[0];
+    }
+
+    function buildPreviewHtml(item) {
         const title = item.dataset.title || "Unknown";
         const time = item.dataset.time || "—";
         const notes = item.dataset.notes || "No notes";
         const completed = item.dataset.completed === "true";
         const type = item.dataset.type;
-        const id = item.dataset.id;
         let html = `
-            <p class="mb-1 text-lg font-semibold text-slate-100">${title}</p>
-            <p class="text-xs uppercase tracking-widest text-slate-400">${type === "occurrence" ? "Schedule" : "Task"}</p>
-            <p class="mt-2 text-sm text-slate-300">Time: ${time}</p>
-            <p class="mb-4 text-sm text-slate-400">${notes}</p>
+            <p class="mb-1 text-lg font-semibold text-slate-900 dark:text-slate-100">${title}</p>
+            <p class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">${type === "occurrence" || type === "workout" ? "Schedule" : "Task"}</p>
+            <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">Time: ${time}</p>
+            <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">${notes}</p>
         `;
 
         if (completed) {
             html += `
-                    <div class="mt-3 flex items-center gap-2 font-semibold text-emerald-300">
-                        <span class="text-xl">✓</span> Completed
+                <div class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
+                    ✓ Completed
+                </div>
+                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">${getCompletedMessage(item)}</p>
+            `;
+        }
+
+        if (type === "task") {
+            if (!completed) {
+                html += `
+                    <div class="calendar-preview-actions">
+                        <button type="button" class="calendar-preview-action" data-preview-action="complete">Mark completed</button>
+                        <button type="button" class="calendar-preview-action calendar-preview-action--ghost" data-preview-action="log">Log completion</button>
                     </div>
                 `;
-        } else if (type === "exercise") {
+            }
+        } else if (type === "workout" || type === "occurrence") {
+            const actionLabel = completed ? 'Review workout log' : 'Complete workout';
+            const actionType = completed ? 'workout-review' : 'workout-log';
             html += `
-                    <a href="/exercise-log/add-calendar?taskId=${id}"
-                        class="mt-3 block rounded-lg bg-white px-3 py-2 text-center text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-white/40">
-                        Complete Exercise Log
-                    </a>
-                `;
-        } else if (type === "occurrence") {
-            html += `
-                    <a href="/exercise-log/add-occurrence?occId=${id}"
-                        class="mt-3 block rounded-lg bg-white px-3 py-2 text-center text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-white/40">
-                        Complete Scheduled Exercise
-                    </a>
-                `;
-        } else if (type === "task") {
-            html += `
-                    <form method="post" action="/calendar/day/${item.dataset.date}/toggle-complete">
-                        <input type="hidden" name="taskId" value="${id}">
-                        <input type="hidden" name="${csrfParam}" value="${csrfToken}">
-                        <button class="mt-3 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-white/40">
-                            Mark Completed
-                        </button>
-                    </form>
-                `;
+                <div class="calendar-preview-actions">
+                    <button type="button" class="calendar-preview-action" data-preview-action="${actionType}">${actionLabel}</button>
+                </div>
+            `;
         }
-        preview.innerHTML = html;
-        positionPreview(mouseX, mouseY);
+
+        return html;
     }
 
-    function attachPreviewHandlers(root) {
-        if (!root) return;
-        root.querySelectorAll(".calendar-item").forEach((item) => {
-            item.addEventListener("mouseenter", () => {
-                clearTimeout(closeTimer);
-                hoverTimer = setTimeout(() => {
-                    renderPreview(item);
-                    showPreview();
-                }, 500);
-            });
-            item.addEventListener("mouseleave", () => {
-                clearTimeout(hoverTimer);
-                closeTimer = setTimeout(() => {
-                    if (!preview.matches(":hover")) hidePreview();
-                }, 200);
-            });
+    function renderPreview(item) {
+        preview.innerHTML = buildPreviewHtml(item);
+    }
+
+    let previewDelegated = false;
+    function bindPreviewDelegation() {
+        if (previewDelegated) return;
+        previewDelegated = true;
+
+        document.addEventListener('mouseover', (event) => {
+            const item = event.target.closest('.calendar-item');
+            if (!item) return;
+            if (activeItem === item) return;
+            clearTimeout(closeTimer);
+            activeItem = item;
+            hoverTimer = setTimeout(() => {
+                renderPreview(item);
+                showPreview(item);
+            }, 500);
         });
+
+        document.addEventListener('mouseout', (event) => {
+            const item = event.target.closest('.calendar-item');
+            if (!item) return;
+            const related = event.relatedTarget;
+            if (related && (related.closest?.('.calendar-item') === item || related.closest?.('#preview-card'))) return;
+            clearTimeout(hoverTimer);
+            closeTimer = setTimeout(() => {
+                if (!preview.matches(':hover')) hidePreview();
+            }, 200);
+        });
+    }
+
+    function attachPreviewHandlers() {
+        bindPreviewDelegation();
     }
 
     function attachDayCardNavigation(root) {
@@ -148,6 +205,213 @@ document.addEventListener("DOMContentLoaded", () => {
     preview.addEventListener("mouseenter", () => clearTimeout(closeTimer));
     preview.addEventListener("mouseleave", () => {
         closeTimer = setTimeout(() => hidePreview(), 250);
+    });
+
+    preview.addEventListener('click', (event) => {
+        const actionEl = event.target.closest('[data-preview-action]');
+        if (!actionEl || !activeItem) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const action = actionEl.getAttribute('data-preview-action');
+        if (action === 'complete') {
+            toggleTaskCompletion(activeItem).catch((error) => console.error(error));
+        }
+        if (action === 'log') {
+            openLogModal(activeItem, 'task');
+        }
+        if (action === 'workout-log') {
+            openLogModal(activeItem, 'workout');
+        }
+        if (action === 'workout-review') {
+            window.location.href = '/exercise-log/list';
+        }
+    });
+
+    function setLogStatus(message, isError = false) {
+        if (!logStatus) return;
+        logStatus.textContent = message || '';
+        logStatus.classList.toggle('is-error', isError);
+        logStatus.classList.toggle('is-visible', !!message);
+    }
+
+    function openLogModal(item, mode) {
+        if (!logModal || !logForm) return;
+        const isWorkout = mode === 'workout';
+        if (logTaskFields) logTaskFields.classList.toggle('hidden', isWorkout);
+        if (logWorkoutFields) logWorkoutFields.classList.toggle('hidden', !isWorkout);
+        if (logActions) logActions.classList.toggle('hidden', isWorkout);
+        logForm.dataset.mode = isWorkout ? 'workout' : 'task';
+
+        const title = item.dataset.title || 'Task';
+        if (logTitle) logTitle.textContent = isWorkout ? 'Complete workout' : `Log ${title}`;
+
+        logForm.taskId.value = item.dataset.id || '';
+        logForm.date.value = item.dataset.date || '';
+        logForm.title.value = item.dataset.title || '';
+        logForm.time.value = item.dataset.time || '';
+        logForm.notes.value = item.dataset.notes || '';
+        logForm.exercise.value = item.dataset.exercise || 'false';
+        logForm.completed.value = item.dataset.completed || 'false';
+
+        if (logWorkoutLink) {
+            const occId = item.dataset.id;
+            logWorkoutLink.href = occId ? `/exercise-log/add-occurrence?occId=${occId}` : '#';
+        }
+
+        setLogStatus('');
+        logModal.classList.remove('hidden');
+        logModal.setAttribute('aria-hidden', 'false');
+        const focusTarget = isWorkout ? logWorkoutLink : logForm.querySelector('textarea, select, input');
+        if (focusTarget) focusTarget.focus();
+    }
+
+    function closeLogModal() {
+        if (!logModal) return;
+        logModal.classList.add('hidden');
+        logModal.setAttribute('aria-hidden', 'true');
+        setLogStatus('');
+    }
+
+    function buildLogEntry(formData) {
+        const summary = formData.get('summary') || '';
+        const effort = formData.get('effort') || '';
+        const mood = formData.get('mood') || '';
+        const extra = formData.get('logNotes') || '';
+        const stamped = new Date().toLocaleString();
+        const parts = [`Completion log (${stamped})`];
+        if (summary) parts.push(`Summary: ${summary}`);
+        if (effort) parts.push(`Effort: ${effort}/5`);
+        if (mood) parts.push(`Mood: ${mood}`);
+        if (extra) parts.push(`Notes: ${extra}`);
+        return parts.join('\n');
+    }
+
+    async function postForm(action, body) {
+        const headers = {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+        if (csrfToken) headers[csrfHeader] = csrfToken;
+        return fetch(action, {
+            method: 'POST',
+            headers,
+            body: body.toString()
+        });
+    }
+
+    function updateTaskCompletionUi(taskId, completed) {
+        const items = document.querySelectorAll(
+            `.calendar-item[data-type="task"][data-id="${taskId}"], .calendar-grouped-item[data-type="task"][data-id="${taskId}"]`
+        );
+        items.forEach((el) => {
+            el.classList.toggle('completed', completed);
+            el.dataset.completed = String(completed);
+            if (el.classList.contains('calendar-item')) {
+                let check = el.querySelector('.calendar-item-check');
+                if (completed && !check) {
+                    check = document.createElement('div');
+                    check.className = 'calendar-item-check';
+                    check.textContent = '✓';
+                    el.appendChild(check);
+                }
+                if (!completed && check) {
+                    check.remove();
+                }
+            }
+        });
+    }
+
+    async function toggleTaskCompletion(item) {
+        const taskId = item.dataset.id;
+        const date = item.dataset.date;
+        if (!taskId || !date) return;
+        const nextCompleted = item.dataset.completed !== 'true';
+        item.dataset.completed = String(nextCompleted);
+        updateTaskCompletionUi(taskId, nextCompleted);
+        if (preview && activeItem && activeItem.dataset.id === taskId) {
+            preview.innerHTML = buildPreviewHtml(activeItem);
+        }
+
+        const body = new URLSearchParams();
+        body.append('taskId', taskId);
+        if (csrfParam && csrfToken) body.append(csrfParam, csrfToken);
+
+        try {
+            const res = await postForm(`/calendar/day/${date}/toggle-complete`, body);
+            if (!res.ok) {
+                throw new Error(`Toggle failed: ${res.status}`);
+            }
+        } catch (error) {
+            console.error(error);
+            const revert = !nextCompleted;
+            item.dataset.completed = String(revert);
+            updateTaskCompletionUi(taskId, revert);
+            if (preview && activeItem && activeItem.dataset.id === taskId) {
+                preview.innerHTML = buildPreviewHtml(activeItem);
+            }
+        }
+    }
+
+    if (logModal) {
+        const backdrop = logModal.querySelector('[data-log-backdrop]');
+        const closeBtn = logModal.querySelector('[data-log-close]');
+        const cancelBtn = logModal.querySelector('[data-log-cancel]');
+        if (backdrop) backdrop.addEventListener('click', closeLogModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeLogModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeLogModal);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !logModal.classList.contains('hidden')) {
+                closeLogModal();
+            }
+        });
+    }
+
+    if (logForm) {
+        logForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!activeItem) return;
+            if (logForm.dataset.mode === 'workout') return;
+
+            const formData = new FormData(logForm);
+            const taskId = formData.get('taskId');
+            const date = formData.get('date');
+            if (!taskId || !date) return;
+
+            const logEntry = buildLogEntry(formData);
+            const existingNotes = (formData.get('notes') || '').toString().trim();
+            const combinedNotes = existingNotes ? `${existingNotes}\n\n${logEntry}` : logEntry;
+            const title = formData.get('title') || '';
+            const time = formData.get('time') || '';
+            const exercise = formData.get('exercise') === 'true' ? 'true' : 'false';
+
+            try {
+                setLogStatus('Saving log...');
+                const editBody = new URLSearchParams();
+                editBody.append('title', String(title));
+                editBody.append('time', String(time));
+                editBody.append('notes', combinedNotes);
+                editBody.append('exercise', exercise);
+                if (csrfParam && csrfToken) editBody.append(csrfParam, csrfToken);
+                await postForm(`/calendar/task/${taskId}/edit-inline`, editBody);
+
+                if (activeItem.dataset.completed !== 'true') {
+                    await toggleTaskCompletion(activeItem);
+                }
+
+                activeItem.dataset.notes = combinedNotes;
+                if (preview) preview.innerHTML = buildPreviewHtml(activeItem);
+                setLogStatus('Log saved.');
+                setTimeout(closeLogModal, 600);
+            } catch (error) {
+                console.error(error);
+                setLogStatus('Unable to save log. Please try again.', true);
+            }
+        });
+    }
+
+    window.addEventListener('resize', () => {
+        if (preview.classList.contains('hidden') || !activeItem) return;
+        positionPreviewAtItem(activeItem);
     });
 
     const slider = document.getElementById("week-slider");

@@ -63,8 +63,13 @@ tasks.named('test') {
 	exclude '**/UserPreferenceFullContainerMockTests.*'
 }
 
-tasks.named('compileTestJava') {
-	options.compilerArgs += ['-Xlint:unchecked']
+compileJava {
+	options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+	options.compilerArgs << '-Xlint:unchecked'
+	options.compilerArgs << '-parameters'
 }
 
 tasks.named('bootRun') {
