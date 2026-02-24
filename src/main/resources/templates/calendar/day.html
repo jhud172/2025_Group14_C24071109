@@ -188,11 +188,12 @@
                         <circle class="ring-track" cx="60" cy="60" r="50"
                                 fill="none" stroke-width="10" stroke-linecap="round"/>
                         <circle class="ring-progress"
-                                th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' ring-green' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' ring-orange' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' ring-red' : ' ring-default')"
+                                th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' ring-green' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' ring-orange' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' ring-red' : ' ring-default'))"
                                 cx="60" cy="60" r="50"
                                 fill="none" stroke-width="10"
                                 stroke-linecap="round"
-                                th:attr="stroke-dasharray=${'314.159 314.159'}, stroke-dashoffset=${314.159 * (1 - pct / 100.0)}"/>
+                                stroke-dasharray="314.159 314.159"
+                                th:attr="stroke-dashoffset=${314.159 * (1 - pct / 100.0)}"/>
                     </svg>
                     <div class="ring-center" aria-hidden="true">
                         <p class="ring-pct"
