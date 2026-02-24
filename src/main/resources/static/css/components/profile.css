@@ -1,128 +1,7 @@
 @layer components {
-    /* Profile Page - App-style redesign */
-
-    /* Page Layout: sidebar + main content */
-    .profile-page-layout {
-        @apply mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8;
-        display: grid;
-        gap: 1.5rem;
-        grid-template-columns: 1fr;
-        align-items: start;
-    }
-
-    @media (min-width: 1024px) {
-        .profile-page-layout {
-            grid-template-columns: 280px 1fr;
-        }
-    }
-
-    /* Sidebar profile card */
-    .profile-sidebar-card {
-        @apply rounded-3xl border border-slate-200/70 p-6 shadow-sm;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-        position: sticky;
-        top: 5rem;
-    }
-
-    html.dark .profile-sidebar-card {
-        @apply border-slate-800;
-        background: linear-gradient(135deg, rgba(2, 6, 23, 0.6) 0%, rgba(15, 23, 42, 0.4) 100%);
-    }
-
-    /* Main content area */
-    .profile-main-content {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        min-width: 0;
-    }
-
-    /* Settings Drawer */
-    .profile-settings-drawer {
-        position: fixed;
-        inset: 0;
-        z-index: 60;
-        pointer-events: none;
-    }
-
-    .profile-settings-drawer.is-open {
-        pointer-events: auto;
-    }
-
-    .profile-settings-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        backdrop-filter: blur(2px);
-        -webkit-backdrop-filter: blur(2px);
-    }
-
-    .profile-settings-drawer.is-open .profile-settings-overlay {
-        opacity: 1;
-    }
-
-    .profile-settings-panel {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: min(480px, 100vw);
-        background: white;
-        transform: translateX(100%);
-        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
-    }
-
-    html.dark .profile-settings-panel {
-        background: rgb(2, 6, 23);
-        border-left: 1px solid rgba(51, 65, 85, 0.5);
-    }
-
-    .profile-settings-drawer.is-open .profile-settings-panel {
-        transform: translateX(0);
-    }
-
-    .profile-settings-panel-header {
-        @apply flex items-center justify-between border-b border-slate-200/70 px-6 py-4;
-        flex-shrink: 0;
-    }
-
-    html.dark .profile-settings-panel-header {
-        @apply border-slate-800;
-    }
-
-    .profile-settings-panel-body {
-        @apply flex-1 overflow-y-auto px-6 py-5 space-y-6;
-    }
-
-    .profile-settings-panel-section {
-        @apply rounded-2xl border border-slate-200/70 p-5;
-        background: rgba(248, 250, 252, 0.6);
-    }
-
-    html.dark .profile-settings-panel-section {
-        @apply border-slate-800 bg-slate-900/30;
-    }
-
-    .profile-settings-panel-section-title {
-        @apply text-sm font-semibold text-slate-900 dark:text-white;
-    }
-
-    .profile-settings-panel-section-subtitle {
-        @apply mt-1 text-xs text-slate-500 dark:text-slate-400;
-    }
-
-    /* Profile Container (legacy, kept for compatibility) */
+    /* Profile Page - Control Center Design */
+    
+    /* Profile Container */
     .profile-container {
         @apply mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-8;
     }
@@ -263,7 +142,7 @@
     
     /* Avatar with hover overlay */
     .profile-avatar {
-        @apply relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm cursor-pointer transition-all duration-300;
+        @apply relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm cursor-pointer transition-all duration-300;
     }
     
     .profile-avatar:hover {
