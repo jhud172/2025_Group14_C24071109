@@ -3,95 +3,145 @@
           th:replace="~{base :: layout(${pageTitle}, null, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="content">
-    <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-        <!-- Day Navigation Header -->
-        <div class="mb-4 flex flex-col gap-4">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div class="calendar-view-toggle">
-                    <a href="/calendar?view=month" class="calendar-view-btn">Month view</a>
-                    <a href="/calendar?view=week" class="calendar-view-btn">Week view</a>
-                    <span class="calendar-view-btn active" aria-current="page">Day view</span>
-                </div>
-                <a th:href="@{'/calendar/day/' + ${todayDate}}"
-                   class="calendar-action-btn"
-                   aria-label="Go to today">
-                    Today
-                </a>
-            </div>
+<a href="#day-main-content"
+   class="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-[100] focus-visible:rounded-xl focus-visible:bg-white focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-slate-900 focus-visible:shadow-lg focus-visible:ring-2 focus-visible:ring-emerald-500 dark:focus-visible:bg-slate-950 dark:focus-visible:text-slate-100">
+    Skip to day content
+</a>
 
-            <div class="calendar-nav-controls">
-                <a th:href="@{'/calendar/day/' + ${prevDate}}"
-                   class="calendar-nav-btn"
-                   aria-label="Previous day">
-                    ← Prev
-                </a>
+<div id="day-main-content"
+     class="day-view-wrapper mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4"
+     th:attr="data-date=${date}, data-today=${todayDate}, data-prev-date=${prevDate}, data-next-date=${nextDate}">
 
-                <div class="calendar-month-title">
-                    <span class="calendar-month-name"
-                          th:text="${#temporals.format(date, 'EEEE')}"></span>
-                    <span class="calendar-month-year"
-                          th:text="${#temporals.format(date, 'd MMMM yyyy')}"></span>
-                </div>
-
-                <a th:href="@{'/calendar/day/' + ${nextDate}}"
-                   class="calendar-nav-btn"
-                   aria-label="Next day">
-                    Next →
-                </a>
-            </div>
+    <!-- ========== TOP NAVIGATION ROW ========== -->
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="calendar-view-toggle">
+            <a href="/calendar?view=month" class="calendar-view-btn">Month</a>
+            <a href="/calendar?view=week" class="calendar-view-btn">Week</a>
+            <span class="calendar-view-btn active" aria-current="page">Day</span>
         </div>
-
-        <div data-testid="day-status-bar"
-             class="day-status-bar mb-4 h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800"
-             th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' bg-green-500 dark:bg-green-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' bg-yellow-200 dark:bg-yellow-900/40' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-slate-950 dark:bg-slate-950' : ' bg-slate-200 dark:bg-slate-800'))">
-            <span class="sr-only">Day status bar</span>
+        <div class="flex items-center gap-2">
+            <a th:href="@{'/calendar/day/' + ${todayDate}}"
+               class="calendar-action-btn"
+               aria-label="Go to today">
+                Today
+            </a>
+            <button type="button"
+                    id="day-shortcuts-btn"
+                    aria-label="Show keyboard shortcuts"
+                    class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-100">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </button>
         </div>
+    </div>
 
-        <header data-testid="day-hub-header"
-                th:attr="data-time-theme=${timeTheme}"
-                class="day-hub-header relative mb-4 overflow-hidden rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950 dark:ring-1 dark:ring-white/20">
-            <!-- Animated gradient top border (time-theme dependent) is handled by CSS -->
+    <!-- ========== WEEK CONTEXT STRIP ========== -->
+    <div class="day-week-strip mb-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-800 dark:bg-slate-950"
+         aria-label="Week navigation"
+         th:with="weekStart=${date.minusDays(date.dayOfWeek.value - 1)}">
+        <div class="flex min-w-max items-center gap-1.5">
+            <a th:href="@{'/calendar/day/' + ${#temporals.format(weekStart, 'yyyy-MM-dd')}}"
+               class="day-week-btn"
+               th:classappend="${date.equals(weekStart)} ? ' active' : ''"
+               th:attr="aria-current=${date.equals(weekStart) ? 'page' : null}">
+                <span class="day-week-btn__name" th:text="${#temporals.format(weekStart, 'EEE')}">Mon</span>
+                <span class="day-week-btn__num" th:text="${weekStart.dayOfMonth}">1</span>
+            </a>
+            <th:block th:each="i : ${#numbers.sequence(1, 6)}"
+                      th:with="d=${weekStart.plusDays(i)}">
+                <a th:href="@{'/calendar/day/' + ${#temporals.format(d, 'yyyy-MM-dd')}}"
+                   class="day-week-btn"
+                   th:classappend="${date.equals(d)} ? ' active' : ''"
+                   th:attr="aria-current=${date.equals(d) ? 'page' : null}">
+                    <span class="day-week-btn__name" th:text="${#temporals.format(d, 'EEE')}">Tue</span>
+                    <span class="day-week-btn__num" th:text="${d.dayOfMonth}">2</span>
+                </a>
+            </th:block>
+        </div>
+    </div>
 
-            <div class="flex flex-col gap-4">
+    <!-- ========== DAY NAVIGATION ========== -->
+    <div class="calendar-nav-controls mb-4">
+        <a th:href="@{'/calendar/day/' + ${prevDate}}"
+           class="calendar-nav-btn"
+           aria-label="Previous day">
+            &#8592; Prev
+        </a>
+        <div class="calendar-month-title">
+            <span class="calendar-month-name"
+                  th:text="${#temporals.format(date, 'EEEE')}"></span>
+            <span class="calendar-month-year"
+                  th:text="${#temporals.format(date, 'd MMMM yyyy')}"></span>
+        </div>
+        <a th:href="@{'/calendar/day/' + ${nextDate}}"
+           class="calendar-nav-btn"
+           aria-label="Next day">
+            Next &#8594;
+        </a>
+    </div>
+
+    <!-- ========== STATUS BAR ========== -->
+    <div data-testid="day-status-bar"
+         class="day-status-bar mb-4 h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800"
+         th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' bg-green-500 dark:bg-green-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' bg-yellow-300 dark:bg-yellow-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-red-500 dark:bg-red-500' : ' bg-slate-200 dark:bg-slate-800'))">
+        <span class="sr-only">Day status bar</span>
+    </div>
+
+    <!-- ========== HERO CARD ========== -->
+    <header data-testid="day-hub-header"
+            th:attr="data-time-theme=${timeTheme}"
+            class="day-hub-header relative mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950 dark:ring-1 dark:ring-white/10">
+
+        <div class="day-hero-grid">
+            <!-- Left: Date + Focus cards -->
+            <div class="day-hero-left">
+                <div id="time-greeting-slot" class="mb-3"></div>
                 <p class="sr-only">Day view: <span th:text="${date}"></span></p>
 
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-center">
-                    <section class="day-focus-card cursor-not-allowed rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950" data-testid="timed-focus" title="Timed Focus is automatic and can’t be changed">
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Timed Focus</h2>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Automatic • Locked</p>
+                <div th:with="day=${date.dayOfMonth}, mod100=${day % 100}, mod10=${day % 10}, suffix=${(mod100 == 11 || mod100 == 12 || mod100 == 13) ? 'th' : ((mod10 == 1) ? 'st' : ((mod10 == 2) ? 'nd' : ((mod10 == 3) ? 'rd' : 'th')))}">
+                    <h1 class="text-2xl font-bold tracking-tight sm:text-3xl"
+                        th:classappend="${isToday} ? ' text-emerald-700 dark:text-emerald-400' : ' text-slate-900 dark:text-slate-100'">
+                        <span th:text="${#temporals.format(date, 'EEEE')}"></span>
+                        <span class="block text-base font-semibold text-slate-500 dark:text-slate-400 sm:inline sm:text-lg"
+                              th:text="${' — ' + day + suffix + ' ' + #temporals.format(date, 'MMMM yyyy')}"></span>
+                    </h1>
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                        <span th:if="${isToday}"
+                              data-testid="today-badge"
+                              class="today-badge inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-300">
+                            Today
+                        </span>
+                        <span class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
+                              data-testid="day-completion-summary"
+                              th:text="${dayCompletionSummary != null ? dayCompletionSummary : '0/0 completed (0%)'}">
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Focus cards row -->
+                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <!-- Timed Focus -->
+                    <section class="day-focus-card cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60"
+                             data-testid="timed-focus"
+                             title="Timed Focus is automatic and can't be changed">
+                        <div class="flex items-center justify-between gap-2">
+                            <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Timed Focus</h2>
+                            <span class="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">Auto &#183; Locked</span>
                         </div>
-                        <p class="mt-1 text-sm text-slate-700 dark:text-slate-200" data-testid="timed-focus-value"
+                        <p class="mt-1.5 text-sm font-semibold text-slate-800 dark:text-slate-200"
+                           data-testid="timed-focus-value"
                            th:text="${timedFocus != null ? timedFocus.label : '—'}"></p>
                     </section>
 
-                    <div class="text-center"
-                         th:with="day=${date.dayOfMonth}, mod100=${day % 100}, mod10=${day % 10}, suffix=${(mod100 == 11 || mod100 == 12 || mod100 == 13) ? 'th' : ((mod10 == 1) ? 'st' : ((mod10 == 2) ? 'nd' : ((mod10 == 3) ? 'rd' : 'th')))}">
-                        <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl"
-                            th:classappend="${isToday} ? ' text-emerald-600 dark:text-emerald-400' : ' text-slate-900 dark:text-slate-100'">
-                            <span th:text="${#temporals.format(date, 'EEEE') + ' - ' + day + suffix + ' - ' + #temporals.format(date, 'MMMM')}"></span>
-                        </h1>
-
-                        <span th:if="${isToday}"
-                              data-testid="today-badge"
-                              class="today-badge mt-2 inline-flex w-fit items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                            Today
-                        </span>
-                    </div>
-
-                    <section class="day-focus-card rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950" data-testid="daily-focus">
+                    <!-- Daily Focus -->
+                    <section class="day-focus-card rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950"
+                             data-testid="daily-focus">
                         <div class="flex flex-col gap-2" data-testid="daily-focus-card">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Daily Focus</h2>
-                                <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                                    Auto-saves
-                                </span>
+                            <div class="flex items-center justify-between gap-2">
+                                <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Daily Focus</h2>
+                                <span class="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">Auto-saves</span>
                             </div>
-
-                            <p class="text-sm text-slate-600 dark:text-slate-300" data-testid="daily-focus-description">
-                                Choose one priority to guide today’s suggestions.
-                            </p>
-
                             <form th:action="@{'/calendar/day/' + ${date} + '/daily-focus'}" method="post" class="flex w-full items-center gap-2" data-ajax-form>
                                 <input type="hidden" th:if="${_csrf != null}"
                                        th:name="${_csrf.parameterName}"
@@ -121,183 +171,218 @@
                             <a th:if="${hasAnyPreferences != null && !hasAnyPreferences}"
                                href="/select-preferences#preferences"
                                class="mt-1 inline-flex w-fit items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                                choose prefferences
+                                choose preferences
                             </a>
                         </div>
                     </section>
                 </div>
+            </div>
 
-                <section class="day-stat-card rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950"
-                         th:with="pct=${dayCompletionPercentage != null ? dayCompletionPercentage : 0}"
-                         aria-label="Day completion">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Completion</h2>
-                        <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold"
-                              th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-900/50 dark:bg-orange-950/30 dark:text-orange-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' border-red-200 bg-red-50 text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200' : ' border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'))">
-                            <span class="sr-only">Day status</span>
-                            <span th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? 'Complete' : (dayCompletionStatus.name() == 'ORANGE' ? 'Watchlist' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Not started'))) : 'Not started'}"></span>
-                        </span>
-                    </div>
-
-                    <div class="mt-3 flex flex-wrap items-center justify-between gap-3"
-                         th:with="filledDotClass=${(dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN') ? ' bg-green-500 dark:bg-green-400' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE') ? ' bg-yellow-400 dark:bg-yellow-300' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'RED') ? ' bg-slate-950 dark:bg-slate-100' : ' bg-slate-400 dark:bg-slate-500'))}">
-                         <div class="completion-dots-container flex items-center gap-1" aria-hidden="true">
-                            <span th:each="i : ${#numbers.sequence(1, 10)}"
-                                  class="completion-dot h-2.5 w-2.5 rounded-full"
-                                  th:classappend="${pct >= (i * 10)} ? (' filled' + ${filledDotClass}) : ' bg-slate-200 dark:bg-slate-800'"></span>
-                        </div>
-
-                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                            <span th:text="${pct}"></span><span>%</span>
+            <!-- Right: Progress Ring + Quick Stats -->
+            <div class="day-hero-right">
+                <!-- Circular Progress Ring -->
+                <div class="day-progress-ring-wrap"
+                     th:with="pct=${dayCompletionPercentage != null ? dayCompletionPercentage : 0}"
+                     th:attr="aria-label=${'Day is ' + (dayCompletionPercentage != null ? dayCompletionPercentage : 0) + '% complete'}">
+                    <svg class="day-progress-ring" viewBox="0 0 120 120" role="img" aria-hidden="true">
+                        <circle class="ring-track" cx="60" cy="60" r="50"
+                                fill="none" stroke-width="10" stroke-linecap="round"/>
+                        <circle class="ring-progress"
+                                th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' ring-green' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' ring-orange' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' ring-red' : ' ring-default'))"
+                                cx="60" cy="60" r="50"
+                                fill="none" stroke-width="10"
+                                stroke-linecap="round"
+                                stroke-dasharray="314.159 314.159"
+                                th:attr="stroke-dashoffset=${314.159 * (1 - pct / 100.0)}"/>
+                    </svg>
+                    <div class="ring-center" aria-hidden="true">
+                        <p class="ring-pct"
+                           th:text="${pct + '%'}">0%</p>
+                        <p class="ring-label"
+                           th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? 'Complete' : (dayCompletionStatus.name() == 'ORANGE' ? 'Watchlist' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Started'))) : 'Not started'}">
                         </p>
                     </div>
-                </section>
+                </div>
 
-                <section data-testid="day-overview"
-                         class="day-overview-section rounded-xl border border-amber-200 bg-amber-50/50 p-4 ring-2 ring-amber-400/70 dark:border-amber-900/40 dark:bg-amber-950/15 dark:ring-amber-300/50"
-                         th:with="isComplete=${dayCompletionStatus == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionStatus).GREEN}">
-                    <div class="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                            <h2 class="text-sm font-semibold text-amber-900 dark:text-amber-100">Day overview</h2>
-                            <p class="mt-0.5 text-sm text-amber-900/80 dark:text-amber-100/80"
-                               th:text="${isComplete} ? 'Unlocked — reflect and ask AI about the day.' : 'Locked — complete the day to unlock AI.'"></p>
-                        </div>
+                <!-- Quick stat pills -->
+                <div class="day-quick-stats mt-4" role="list" aria-label="Day statistics">
+                    <div class="day-stat-pill" role="listitem">
+                        <p class="stat-pill-val"
+                           th:text="${dayCompletionCompletedCount != null ? dayCompletionCompletedCount : 0}">0</p>
+                        <p class="stat-pill-key">Done</p>
+                    </div>
+                    <div class="day-stat-pill" role="listitem">
+                        <p class="stat-pill-val"
+                           th:text="${dayCompletionTotalCount != null ? dayCompletionTotalCount : 0}">0</p>
+                        <p class="stat-pill-key">Total</p>
+                    </div>
+                    <div class="day-stat-pill" role="listitem">
+                        <p class="stat-pill-val"
+                           th:text="${dayCompletionRemainingTasks != null ? dayCompletionRemainingTasks : 0}">0</p>
+                        <p class="stat-pill-key">Tasks left</p>
+                    </div>
+                    <div class="day-stat-pill" role="listitem">
+                        <p class="stat-pill-val"
+                           th:text="${dayCompletionRemainingWorkouts != null ? dayCompletionRemainingWorkouts : 0}">0</p>
+                        <p class="stat-pill-key">Workouts left</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-                        <span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold"
-                              th:classappend="${isComplete} ? ' border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200' : ' border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="2">
-                                <path th:if="${!isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M8 11V8a4 4 0 018 0v3" />
-                                <path th:if="${!isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M7 11h10v10H7V11z" />
-                                <path th:if="${isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M7 11h10v10H7V11z" />
-                                <path th:if="${isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M9 11V8a3 3 0 016 0" />
+    <!-- Streak Bar -->
+    <th:block th:replace="~{fragments/daily-streak-bar :: dailyStreakBar}"></th:block>
+
+    <!-- ========== SECTION TABS ========== -->
+    <div class="day-tabs-container mt-5">
+        <nav class="day-tab-nav overflow-x-auto" role="tablist" aria-label="Day view sections">
+            <button role="tab" aria-selected="true" aria-controls="tab-panel-tasks"
+                    id="tab-btn-tasks" class="day-tab-btn is-active" data-tab-target="tasks" tabindex="0">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <span>Tasks</span>
+                <span class="day-tab-badge" th:text="${tasks != null ? tasks.size() : 0}">0</span>
+            </button>
+            <button role="tab" aria-selected="false" aria-controls="tab-panel-workouts"
+                    id="tab-btn-workouts" class="day-tab-btn" data-tab-target="workouts" tabindex="-1">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span>Workouts</span>
+                <span class="day-tab-badge"
+                      th:text="${(workoutSessions != null ? workoutSessions.size() : 0) + (occurrences != null ? occurrences.size() : 0)}">0</span>
+            </button>
+            <button role="tab" aria-selected="false" aria-controls="tab-panel-timeline"
+                    id="tab-btn-timeline" class="day-tab-btn" data-tab-target="timeline" tabindex="-1">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Timeline</span>
+            </button>
+            <button role="tab" aria-selected="false" aria-controls="tab-panel-overview"
+                    id="tab-btn-overview" class="day-tab-btn" data-tab-target="overview" tabindex="-1">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <span>Overview</span>
+            </button>
+        </nav>
+
+        <!-- ===== TASKS TAB PANEL ===== -->
+        <div id="tab-panel-tasks" role="tabpanel" aria-labelledby="tab-btn-tasks" class="day-tab-panel">
+            <section class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" data-testid="tasks-panel">
+                <header class="flex flex-col gap-3 border-b border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Tasks</h2>
+                        <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Your actions for the day.</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <details id="tasks-config-details" class="relative" data-click-off-details>
+                            <summary id="tasks-configure"
+                                     class="inline-flex cursor-pointer list-none items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900 [&::-webkit-details-marker]:hidden">
+                                Configure
+                            </summary>
+
+                            <div class="absolute right-0 z-20 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-4 shadow-lg dark:border-slate-800 dark:bg-slate-950 sm:w-80">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Task preferences</p>
+
+                                <form th:action="@{'/calendar/day/' + ${date} + '/task-preferences'}" method="post" class="mt-3 grid grid-cols-1 gap-3" data-ajax-form>
+                                    <input type="hidden" th:if="${_csrf != null}"
+                                           th:name="${_csrf.parameterName}"
+                                           th:value="${_csrf.token}"/>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="task-ordering">Order</label>
+                                        <select id="task-ordering"
+                                                name="ordering"
+                                                data-testid="task-ordering-select"
+                                                onchange="this.form.submit()"
+                                                class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                                            <option value="CHRONOLOGICAL"
+                                                    th:selected="${userSettings == null || userSettings.calendarTaskOrdering.name() == 'CHRONOLOGICAL'}">Chronological</option>
+                                            <option value="ALPHABETICAL"
+                                                    th:selected="${userSettings != null && userSettings.calendarTaskOrdering.name() == 'ALPHABETICAL'}">Alphabetical</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="task-layout">Layout</label>
+                                        <select id="task-layout"
+                                                name="layout"
+                                                data-testid="task-layout-select"
+                                                onchange="this.form.submit()"
+                                                class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                                            <option value="COMBINED_LIST"
+                                                    th:selected="${userSettings == null || userSettings.calendarTaskLayout.name() == 'COMBINED_LIST'}">Combined</option>
+                                            <option value="SEPARATED_BY_CATEGORY"
+                                                    th:selected="${userSettings != null && userSettings.calendarTaskLayout.name() == 'SEPARATED_BY_CATEGORY'}">Separated</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                        </details>
+                        <button type="button"
+                                id="open-add-task"
+                                data-testid="open-add-task"
+                                class="inline-flex items-center gap-1.5 justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            <span th:text="${isComplete} ? 'Unlocked' : 'Locked'"></span>
-                        </span>
+                            Add Task
+                        </button>
                     </div>
+                </header>
 
-                    <form th:action="@{'/calendar/day/' + ${date} + '/reflection'}"
-                          method="post"
-                          class="mt-3 space-y-3">
-                        <input type="hidden" th:if="${_csrf != null}"
-                               th:name="${_csrf.parameterName}"
-                               th:value="${_csrf.token}"/>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-amber-900 dark:text-amber-100" for="reflection-text"
-                                   th:text="${isComplete} ? 'How was today?' : 'Day overview (locked)'"></label>
-                            <textarea id="reflection-text"
-                                      name="reflection"
-                                      rows="3"
-                                      th:disabled="${!isComplete}"
-                                      th:attr="required=${isComplete}"
-                                      placeholder="Write a quick overview of the day..."
-                                      class="mt-1 w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-amber-900/40 dark:bg-slate-950 dark:text-slate-100 dark:disabled:bg-slate-900 dark:disabled:text-slate-500"></textarea>
+                <!-- Task filter/search bar -->
+                <div class="border-b border-slate-100 px-4 py-2.5 dark:border-slate-800/60">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="relative min-w-[160px] flex-1">
+                            <svg class="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <label class="sr-only" for="task-filter-input">Filter tasks by name</label>
+                            <input id="task-filter-input"
+                                   type="text"
+                                   placeholder="Filter tasks…"
+                                   aria-label="Filter tasks by name"
+                                   class="w-full rounded-lg border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"/>
                         </div>
-
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button th:if="${isComplete}"
-                                    class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-                                Ask AI about the day
-                            </button>
-
-                            <a th:if="${isComplete}"
-                               th:href="@{/chat}"
-                               class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">
-                                Open Chat
-                            </a>
-                        </div>
-                    </form>
-
-                    <div class="mt-4 space-y-3"
-                         th:if="${isComplete && reflectionPerformanceSummary != null && !#strings.isEmpty(reflectionPerformanceSummary)}">
-                        <div>
-                            <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Performance summary</p>
-                            <p class="mt-1 text-sm text-amber-900/90 dark:text-amber-100/90" th:text="${reflectionPerformanceSummary}"></p>
-                        </div>
-                        <div th:if="${reflectionImprovementSuggestions != null && !#strings.isEmpty(reflectionImprovementSuggestions)}">
-                            <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Improvement suggestions</p>
-                            <p class="mt-1 whitespace-pre-line text-sm text-amber-900/90 dark:text-amber-100/90" th:text="${reflectionImprovementSuggestions}"></p>
+                        <div class="flex items-center gap-1" role="group" aria-label="Filter tasks by status">
+                            <button type="button" class="task-filter-chip is-active" data-filter="all" aria-pressed="true">All</button>
+                            <button type="button" class="task-filter-chip" data-filter="todo" aria-pressed="false">To do</button>
+                            <button type="button" class="task-filter-chip" data-filter="done" aria-pressed="false">Done</button>
+                            <button type="button" class="task-filter-chip" data-filter="late" aria-pressed="false">Late</button>
                         </div>
                     </div>
-                </section>
-            </div>
-        </header>
+                </div>
 
-        <th:block th:replace="~{fragments/daily-streak-bar :: dailyStreakBar}"></th:block>
-
-        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2" data-testid="day-command-centre-zones">
-
-    <!-- TASKS -->
-    <section class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" data-testid="tasks-panel">
-        <header class="flex flex-col gap-3 border-b border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Tasks</h2>
-                <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Your actions for the day.</p>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2">
-                <details id="tasks-config-details" class="relative" data-click-off-details>
-                    <summary id="tasks-configure"
-                             class="inline-flex cursor-pointer list-none items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900 [&::-webkit-details-marker]:hidden">
-                        Configure
-                    </summary>
-
-                    <div class="absolute right-0 z-20 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-4 shadow-lg dark:border-slate-800 dark:bg-slate-950 sm:w-80">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Task preferences</p>
-
-                        <form th:action="@{'/calendar/day/' + ${date} + '/task-preferences'}" method="post" class="mt-3 grid grid-cols-1 gap-3" data-ajax-form>
-                            <input type="hidden" th:if="${_csrf != null}"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}"/>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="task-ordering">Order</label>
-                                <select id="task-ordering"
-                                        name="ordering"
-                                        data-testid="task-ordering-select"
-                                        onchange="this.form.submit()"
-                                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                                    <option value="CHRONOLOGICAL"
-                                            th:selected="${userSettings == null || userSettings.calendarTaskOrdering.name() == 'CHRONOLOGICAL'}">Chronological</option>
-                                    <option value="ALPHABETICAL"
-                                            th:selected="${userSettings != null && userSettings.calendarTaskOrdering.name() == 'ALPHABETICAL'}">Alphabetical</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="task-layout">Layout</label>
-                                <select id="task-layout"
-                                        name="layout"
-                                        data-testid="task-layout-select"
-                                        onchange="this.form.submit()"
-                                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                                    <option value="COMBINED_LIST"
-                                            th:selected="${userSettings == null || userSettings.calendarTaskLayout.name() == 'COMBINED_LIST'}">Combined</option>
-                                    <option value="SEPARATED_BY_CATEGORY"
-                                            th:selected="${userSettings != null && userSettings.calendarTaskLayout.name() == 'SEPARATED_BY_CATEGORY'}">Separated</option>
-                                </select>
-                            </div>
-                        </form>
+                <div class="p-4">
+                    <div th:if="${#lists.isEmpty(tasks)}" class="day-empty-state">
+                        <svg class="mx-auto h-10 w-10 text-slate-300 dark:text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <p class="mt-3 text-sm font-medium text-slate-700 dark:text-slate-300">No tasks for this day</p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Add a task to get started.</p>
+                        <button type="button"
+                                data-open-add-task-alias
+                                class="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add your first task
+                        </button>
                     </div>
-                </details>
-                <button type="button"
-                        id="open-add-task"
-                        data-testid="open-add-task"
-                        class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-                    Add Task
-                </button>
-            </div>
-        </header>
-
-        <div class="p-4">
-            <div th:if="${#lists.isEmpty(tasks)}" class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300">No tasks for this day.</div>
 
         <div id="tasks-list-root" data-testid="tasks-list-root">
             <div th:each="task : ${tasks}"
                  class="border-b border-slate-200 p-4 last:border-b-0 dark:border-slate-800"
                  data-fade-in
                  data-task-item
-                 th:attr="data-task-id=${task.id}, data-task-title=${task.title}, data-task-time=${task.time != null ? #temporals.format(task.time, 'HH:mm') : ''}, data-task-exercise=${task.exercise}"
+                 th:attr="data-task-id=${task.id}, data-task-title=${task.title}, data-task-time=${task.time != null ? #temporals.format(task.time, 'HH:mm') : ''}, data-task-exercise=${task.exercise}, data-task-status=${task.completed ? 'done' : (task.late ? 'late' : 'todo')}"
                  th:classappend="(${task.exercise} ? ' border-l-4 border-l-purple-400 dark:border-l-purple-500' : '') + (${task.completed} ? ' bg-green-50 dark:bg-green-950/20' : '') + (${task.inGrace} ? ' ring-2 ring-orange-400/60' : '') + (${task.late} ? ' bg-red-50 dark:bg-red-950/20' : '')">
                 <div class="flex items-start justify-between gap-4" data-testid="task-list-item" th:attr="data-task-id=${task.id}">
                     <div class="min-w-0">
@@ -438,15 +523,17 @@
             </div>
         </div>
 
-        <!-- Historical note: Separated layout is now handled by JS applyTaskPreferences() function -->
+                <!-- Historical note: Separated layout is now handled by JS applyTaskPreferences() function -->
 
+                </div>
+
+                </div>
+            </section>
         </div>
 
-        </div>
-    </section>
-
-    <!-- SCHEDULED WORKOUTS -->
-    <section class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" data-testid="workouts-panel">
+        <!-- ===== WORKOUTS TAB PANEL ===== -->
+        <div id="tab-panel-workouts" role="tabpanel" aria-labelledby="tab-btn-workouts" class="day-tab-panel hidden">
+            <section class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" data-testid="workouts-panel">
         <header class="flex flex-col gap-3 border-b border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-start sm:justify-between">
             <div>
                 <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Scheduled Workouts</h2>
@@ -542,10 +629,134 @@
             </div>
         </div>
     </section>
-
         </div>
 
-        <section class="day-health-section mt-6 rounded-xl border border-orange-200 bg-orange-50 px-5 py-4 dark:border-orange-900/50 dark:bg-orange-950/20"
+        <!-- ===== TIMELINE TAB PANEL ===== -->
+        <div id="tab-panel-timeline" role="tabpanel" aria-labelledby="tab-btn-timeline" class="day-tab-panel hidden">
+            <div class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+                <div class="border-b border-slate-200 p-4 dark:border-slate-800">
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Day Timeline</h2>
+                    <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Your tasks and workouts visualised across the day. Tasks with a set time appear in their time slots.</p>
+                </div>
+                <div id="day-timeline"
+                     class="day-timeline p-4"
+                     aria-label="Daily timeline"
+                     th:attr="data-is-today=${isToday}">
+                    <!-- Populated by day-enhancements.js buildTimeline() -->
+                    <noscript>
+                        <p class="py-4 text-sm text-slate-500 dark:text-slate-400">Enable JavaScript to see the timeline view.</p>
+                    </noscript>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== OVERVIEW TAB PANEL ===== -->
+        <div id="tab-panel-overview" role="tabpanel" aria-labelledby="tab-btn-overview" class="day-tab-panel hidden">
+            <div class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+
+                    <!-- Completion progress card -->
+                    <section class="p-5"
+                             th:with="pct=${dayCompletionPercentage != null ? dayCompletionPercentage : 0}"
+                             aria-label="Day completion">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Completion</h2>
+                            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold"
+                                  th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-900/50 dark:bg-orange-950/30 dark:text-orange-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' border-red-200 bg-red-50 text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200' : ' border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'))">
+                                <span class="sr-only">Day status</span>
+                                <span th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? 'Complete' : (dayCompletionStatus.name() == 'ORANGE' ? 'Watchlist' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Not started'))) : 'Not started'}"></span>
+                            </span>
+                        </div>
+                        <!-- Animated progress bar -->
+                        <div class="mt-4 h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" role="progressbar"
+                             th:attr="aria-valuenow=${pct}, aria-valuemin=0, aria-valuemax=100">
+                            <div class="h-full rounded-full transition-all duration-700"
+                                 th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' bg-green-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' bg-yellow-400' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-red-500' : ' bg-blue-400'))"
+                                 th:style="'width: ' + ${pct} + '%'">
+                            </div>
+                        </div>
+                        <div class="mt-3 flex flex-wrap items-center justify-between gap-3"
+                             th:with="filledDotClass=${(dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN') ? ' bg-green-500 dark:bg-green-400' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE') ? ' bg-yellow-400 dark:bg-yellow-300' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'RED') ? ' bg-slate-950 dark:bg-slate-100' : ' bg-slate-400 dark:bg-slate-500'))}">
+                             <div class="completion-dots-container flex items-center gap-1" aria-hidden="true">
+                                <span th:each="i : ${#numbers.sequence(1, 10)}"
+                                      class="completion-dot h-2.5 w-2.5 rounded-full"
+                                      th:classappend="${pct >= (i * 10)} ? (' filled' + ${filledDotClass}) : ' bg-slate-200 dark:bg-slate-800'"></span>
+                            </div>
+                            <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                <span th:text="${pct}"></span><span>%</span>
+                            </p>
+                        </div>
+                    </section>
+
+                    <section data-testid="day-overview"
+                         class="day-overview-section rounded-xl border border-amber-200 bg-amber-50/50 p-4 ring-2 ring-amber-400/70 dark:border-amber-900/40 dark:bg-amber-950/15 dark:ring-amber-300/50"
+                         th:with="isComplete=${dayCompletionStatus == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionStatus).GREEN}">
+                    <div class="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                            <h2 class="text-sm font-semibold text-amber-900 dark:text-amber-100">Day overview</h2>
+                            <p class="mt-0.5 text-sm text-amber-900/80 dark:text-amber-100/80"
+                               th:text="${isComplete} ? 'Unlocked — reflect and ask AI about the day.' : 'Locked — complete the day to unlock AI.'"></p>
+                        </div>
+
+                        <span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold"
+                              th:classappend="${isComplete} ? ' border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200' : ' border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="2">
+                                <path th:if="${!isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M8 11V8a4 4 0 018 0v3" />
+                                <path th:if="${!isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M7 11h10v10H7V11z" />
+                                <path th:if="${isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M7 11h10v10H7V11z" />
+                                <path th:if="${isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M9 11V8a3 3 0 016 0" />
+                            </svg>
+                            <span th:text="${isComplete} ? 'Unlocked' : 'Locked'"></span>
+                        </span>
+                    </div>
+
+                    <form th:action="@{'/calendar/day/' + ${date} + '/reflection'}"
+                          method="post"
+                          class="mt-3 space-y-3">
+                        <input type="hidden" th:if="${_csrf != null}"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}"/>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-amber-900 dark:text-amber-100" for="reflection-text"
+                                   th:text="${isComplete} ? 'How was today?' : 'Day overview (locked)'"></label>
+                            <textarea id="reflection-text"
+                                      name="reflection"
+                                      rows="3"
+                                      th:disabled="${!isComplete}"
+                                      th:attr="required=${isComplete}"
+                                      placeholder="Write a quick overview of the day..."
+                                      class="mt-1 w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-amber-900/40 dark:bg-slate-950 dark:text-slate-100 dark:disabled:bg-slate-900 dark:disabled:text-slate-500"></textarea>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button th:if="${isComplete}"
+                                    class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                                Ask AI about the day
+                            </button>
+
+                            <a th:if="${isComplete}"
+                               th:href="@{/chat}"
+                               class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">
+                                Open Chat
+                            </a>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 space-y-3"
+                         th:if="${isComplete && reflectionPerformanceSummary != null && !#strings.isEmpty(reflectionPerformanceSummary)}">
+                        <div>
+                            <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Performance summary</p>
+                            <p class="mt-1 text-sm text-amber-900/90 dark:text-amber-100/90" th:text="${reflectionPerformanceSummary}"></p>
+                        </div>
+                        <div th:if="${reflectionImprovementSuggestions != null && !#strings.isEmpty(reflectionImprovementSuggestions)}">
+                            <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Improvement suggestions</p>
+                            <p class="mt-1 whitespace-pre-line text-sm text-amber-900/90 dark:text-amber-100/90" th:text="${reflectionImprovementSuggestions}"></p>
+                        </div>
+                    </div>
+                    </section>
+
+                    <section class="day-health-section p-5"
                  data-testid="day-health">
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h2 class="text-lg font-semibold text-orange-900 dark:text-orange-100">Day Health</h2>
@@ -582,9 +793,14 @@
                     Watch out: <span class="font-normal text-orange-900/90 dark:text-orange-100/90" th:text="${dayHealthWatchOut}"></span>
                 </p>
             </th:block>
-        </section>
+                    </section>
 
-    <!-- ADD TASK MODAL -->
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /day-tabs-container -->
+
     <div id="add-task-modal" class="fixed inset-0 z-[60] hidden" aria-hidden="true" data-testid="add-task-modal">
         <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" data-modal-backdrop></div>
         <div class="relative flex min-h-full items-end justify-center p-4 sm:items-center">
@@ -704,7 +920,9 @@
 
         </div>
     </div>
-</div>
+
+</div><!-- /day-main-content -->
+</div><!-- /th:fragment="content" -->
 
 <div th:fragment="pageScripts">
     <div id="task-drawer" data-testid="task-drawer" class="fixed inset-0 z-50 hidden" aria-hidden="true">
@@ -725,5 +943,6 @@
     <script src="/js/day-navigation.js"></script>
     <script src="/js/day-enhancements.js"></script>
 </div>
+
 
 </th:block>
