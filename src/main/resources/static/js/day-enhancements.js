@@ -341,7 +341,7 @@
 
         // Keyboard shortcut: 1-4 to switch tabs
         document.addEventListener('keydown', (e) => {
-            if (e.target.matches('input, textarea, select')) return;
+            if (e.target.matches('input, textarea, select, [contenteditable]')) return;
             const num = parseInt(e.key);
             if (num >= 1 && num <= tabs.length && !e.ctrlKey && !e.metaKey) {
                 activateTab(tabs[num - 1]);
@@ -373,15 +373,16 @@
             const tasks = document.querySelectorAll('[data-task-item]');
             tasks.forEach(task => {
                 const title = (task.getAttribute('data-task-title') || '').toLowerCase();
+                const status = task.getAttribute('data-task-status') || 'todo';
                 const matchesQuery = !query || title.includes(query);
 
                 let matchesStatus = true;
                 if (activeStatus === 'todo') {
-                    matchesStatus = !task.classList.contains('completed') && !task.classList.contains('bg-red-50');
+                    matchesStatus = status === 'todo';
                 } else if (activeStatus === 'done') {
-                    matchesStatus = task.classList.contains('completed') || task.classList.contains('bg-green-50');
+                    matchesStatus = status === 'done';
                 } else if (activeStatus === 'late') {
-                    matchesStatus = task.classList.contains('bg-red-50');
+                    matchesStatus = status === 'late';
                 }
                 task.style.display = (matchesQuery && matchesStatus) ? '' : 'none';
             });
@@ -416,7 +417,7 @@
             id: el.getAttribute('data-task-id') || '',
             title: el.getAttribute('data-task-title') || 'Task',
             time: el.getAttribute('data-task-time') || '',
-            completed: el.classList.contains('completed') || el.classList.contains('bg-green-50'),
+            completed: el.getAttribute('data-task-status') === 'done',
             type: 'task'
         })).filter(t => t.time);
 
@@ -498,7 +499,11 @@
         if (isToday) {
             const nowRow = container.querySelector('.timeline-now-indicator');
             if (nowRow) {
-                setTimeout(() => nowRow.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+                const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                setTimeout(() => nowRow.scrollIntoView({
+                    behavior: reducedMotion ? 'auto' : 'smooth',
+                    block: 'center'
+                }), 300);
             }
         }
     }
