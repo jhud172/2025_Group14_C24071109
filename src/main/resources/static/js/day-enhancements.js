@@ -235,6 +235,15 @@
                         <span class="text-slate-700 dark:text-slate-200">Show Help</span>
                         <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">?</kbd>
                     </div>
+                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900">
+                        <span class="text-slate-700 dark:text-slate-200">Switch tabs (Tasks/Workouts/Timeline/Overview)</span>
+                        <div class="flex gap-1">
+                            <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">1</kbd>
+                            <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">2</kbd>
+                            <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">3</kbd>
+                            <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">4</kbd>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -282,6 +291,226 @@
         header.appendChild(helpBtn);
     }
     
+    // ==================== Section Tabs ====================
+    function initTabs() {
+        const tabNav = document.querySelector('[role="tablist"][aria-label="Day view sections"]');
+        if (!tabNav) return;
+
+        const tabs = Array.from(tabNav.querySelectorAll('[role="tab"]'));
+        const panels = tabs.map(t => document.getElementById('tab-panel-' + t.dataset.tabTarget));
+
+        function activateTab(tab) {
+            tabs.forEach((t, i) => {
+                const isActive = t === tab;
+                t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                t.setAttribute('tabindex', isActive ? '0' : '-1');
+                t.classList.toggle('is-active', isActive);
+                if (panels[i]) {
+                    panels[i].classList.toggle('hidden', !isActive);
+                }
+            });
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => activateTab(tab));
+
+            // Arrow key navigation
+            tab.addEventListener('keydown', (e) => {
+                let idx = tabs.indexOf(tab);
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    idx = (idx + 1) % tabs.length;
+                    tabs[idx].focus();
+                    activateTab(tabs[idx]);
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    idx = (idx - 1 + tabs.length) % tabs.length;
+                    tabs[idx].focus();
+                    activateTab(tabs[idx]);
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    tabs[0].focus();
+                    activateTab(tabs[0]);
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    tabs[tabs.length - 1].focus();
+                    activateTab(tabs[tabs.length - 1]);
+                }
+            });
+        });
+
+        // Keyboard shortcut: 1-4 to switch tabs
+        document.addEventListener('keydown', (e) => {
+            if (e.target.matches('input, textarea, select')) return;
+            const num = parseInt(e.key);
+            if (num >= 1 && num <= tabs.length && !e.ctrlKey && !e.metaKey) {
+                activateTab(tabs[num - 1]);
+                tabs[num - 1].focus();
+            }
+        });
+
+        // Shortcuts button
+        const shortcutsBtn = document.getElementById('day-shortcuts-btn');
+        if (shortcutsBtn) shortcutsBtn.addEventListener('click', showKeyboardHelp);
+
+        // Empty-state alias buttons
+        document.querySelectorAll('[data-open-add-task-alias]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const addBtn = document.getElementById('open-add-task');
+                if (addBtn) addBtn.click();
+            });
+        });
+    }
+
+    // ==================== Task Filter ====================
+    function initTaskFilter() {
+        const filterInput = document.getElementById('task-filter-input');
+        const filterChips = document.querySelectorAll('.task-filter-chip');
+        let activeStatus = 'all';
+
+        function applyFilter() {
+            const query = filterInput ? filterInput.value.trim().toLowerCase() : '';
+            const tasks = document.querySelectorAll('[data-task-item]');
+            tasks.forEach(task => {
+                const title = (task.getAttribute('data-task-title') || '').toLowerCase();
+                const matchesQuery = !query || title.includes(query);
+
+                let matchesStatus = true;
+                if (activeStatus === 'todo') {
+                    matchesStatus = !task.classList.contains('completed') && !task.classList.contains('bg-red-50');
+                } else if (activeStatus === 'done') {
+                    matchesStatus = task.classList.contains('completed') || task.classList.contains('bg-green-50');
+                } else if (activeStatus === 'late') {
+                    matchesStatus = task.classList.contains('bg-red-50');
+                }
+                task.style.display = (matchesQuery && matchesStatus) ? '' : 'none';
+            });
+        }
+
+        if (filterInput) {
+            filterInput.addEventListener('input', applyFilter);
+        }
+
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                activeStatus = chip.dataset.filter || 'all';
+                filterChips.forEach(c => {
+                    c.classList.toggle('is-active', c === chip);
+                    c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+                });
+                applyFilter();
+            });
+        });
+    }
+
+    // ==================== Timeline View ====================
+    function buildTimeline() {
+        const container = document.getElementById('day-timeline');
+        if (!container) return;
+
+        const isToday = container.getAttribute('data-is-today') === 'true';
+        const now = new Date();
+
+        // Collect tasks with times
+        const taskItems = Array.from(document.querySelectorAll('[data-task-item]')).map(el => ({
+            id: el.getAttribute('data-task-id') || '',
+            title: el.getAttribute('data-task-title') || 'Task',
+            time: el.getAttribute('data-task-time') || '',
+            completed: el.classList.contains('completed') || el.classList.contains('bg-green-50'),
+            type: 'task'
+        })).filter(t => t.time);
+
+        // Collect workout items
+        const workoutItems = Array.from(document.querySelectorAll('[data-workout-item]')).map(el => ({
+            title: el.getAttribute('data-workout-name') || 'Workout',
+            time: '',
+            type: 'workout'
+        }));
+
+        const occurrenceItems = Array.from(document.querySelectorAll('[data-occurrence-item]')).map(el => ({
+            title: el.getAttribute('data-occurrence-title') || 'Workout',
+            time: '',
+            type: 'workout',
+            completed: el.getAttribute('data-completed') === 'true'
+        }));
+
+        // Build hour grid 6-23
+        let html = '<div class="timeline-grid" role="list" aria-label="Day timeline">';
+
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+
+        for (let h = 6; h <= 23; h++) {
+            const isNowHour = isToday && h === currentHour;
+            html += `<div class="timeline-hour-row${isNowHour ? ' timeline-now-indicator' : ''}" role="listitem">`;
+            if (isNowHour) {
+                html += `<div class="timeline-now-dot" aria-hidden="true"></div>`;
+            }
+            html += `<div class="timeline-hour-label" aria-hidden="true">${String(h).padStart(2, '0')}:00</div>`;
+            html += `<div class="timeline-slot">`;
+
+            // Tasks in this hour
+            taskItems.filter(t => {
+                const [th] = t.time.split(':').map(Number);
+                return th === h;
+            }).forEach(t => {
+                const doneClass = t.completed ? ' is-done' : '';
+                html += `<div class="timeline-event timeline-event--task${doneClass}" role="listitem">
+                    ${t.completed ? '<svg class="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : '<svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>'}
+                    <span class="font-medium">${escapeHtml(t.title)}</span>
+                    <span class="ml-auto text-[10px] opacity-70">${t.time}</span>
+                </div>`;
+            });
+
+            // Workouts in morning slot (7am) if unscheduled
+            if (h === 7) {
+                workoutItems.forEach(w => {
+                    html += `<div class="timeline-event timeline-event--workout" role="listitem">
+                        <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span class="font-medium">${escapeHtml(w.title)}</span>
+                        <span class="ml-auto text-[10px] opacity-70">Scheduled</span>
+                    </div>`;
+                });
+                occurrenceItems.forEach(o => {
+                    const doneClass = o.completed ? ' is-done' : '';
+                    html += `<div class="timeline-event timeline-event--workout${doneClass}" role="listitem">
+                        <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span class="font-medium">${escapeHtml(o.title)}</span>
+                        <span class="ml-auto text-[10px] opacity-70">Workout</span>
+                    </div>`;
+                });
+            }
+
+            html += `</div></div>`;
+        }
+        html += '</div>';
+
+        // Add legend
+        html = `<div class="mb-3 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+            <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-sm border-l-2 border-l-blue-500 bg-blue-50"></span>Task</span>
+            <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-sm border-l-2 border-l-emerald-500 bg-emerald-50"></span>Workout</span>
+            ${isToday ? '<span class="flex items-center gap-1.5"><span class="inline-block h-2 w-4 bg-red-500 opacity-70 rounded-full"></span>Now</span>' : ''}
+        </div>` + html;
+
+        container.innerHTML = html;
+
+        // Auto-scroll to current hour if today
+        if (isToday) {
+            const nowRow = container.querySelector('.timeline-now-indicator');
+            if (nowRow) {
+                setTimeout(() => nowRow.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+            }
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     // ==================== Initialize Everything ====================
     function init() {
         // Wait for DOM to be ready
@@ -298,6 +527,9 @@
         scrollToCurrentTime();
         initKeyboardShortcuts();
         addHelpButton();
+        initTabs();
+        initTaskFilter();
+        buildTimeline();
         
         // Refresh upcoming task highlights every minute
         setInterval(highlightUpcomingTasks, 60000);
