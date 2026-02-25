@@ -15307,11 +15307,11 @@ body {
   opacity: 0.5;
 }
 /* Light mode overrides */
-body:not(.dark) .field__label {
+html:not(.dark) .field__label {
   --tw-text-opacity: 1;
   color: rgb(51 65 85 / var(--tw-text-opacity, 1));
 }
-body:not(.dark) .field__input {
+html:not(.dark) .field__input {
   --tw-border-opacity: 1;
   border-color: rgb(203 213 225 / var(--tw-border-opacity, 1));
   --tw-bg-opacity: 1;
@@ -15319,15 +15319,15 @@ body:not(.dark) .field__input {
   --tw-text-opacity: 1;
   color: rgb(15 23 42 / var(--tw-text-opacity, 1));
 }
-body:not(.dark) .field__input::-moz-placeholder {
+html:not(.dark) .field__input::-moz-placeholder {
   --tw-text-opacity: 1;
   color: rgb(148 163 184 / var(--tw-text-opacity, 1));
 }
-body:not(.dark) .field__input::placeholder {
+html:not(.dark) .field__input::placeholder {
   --tw-text-opacity: 1;
   color: rgb(148 163 184 / var(--tw-text-opacity, 1));
 }
-body:not(.dark) .field__input:focus {
+html:not(.dark) .field__input:focus {
   --tw-border-opacity: 1;
   border-color: rgb(0 243 255 / var(--tw-border-opacity, 1));
   --tw-bg-opacity: 1;
@@ -15676,6 +15676,14 @@ html.dark .navheader {
         background: rgba(15, 23, 42, 0.85);
         border-bottom-color: rgba(30, 41, 59, 0.6);
     }
+html.dark .navheader.scrolled {
+        background: rgba(15, 23, 42, 0.97);
+    }
+html.dark .navsurface {
+  --tw-border-opacity: 1;
+  border-color: rgb(51 65 85 / var(--tw-border-opacity, 1));
+  background-color: rgb(30 41 59 / 0.8);
+}
 html.dark .navlink {
   --tw-text-opacity: 1;
   color: rgb(203 213 225 / var(--tw-text-opacity, 1));
@@ -15789,7 +15797,7 @@ html.dark .nav-auth-container:hover {
         border-color: rgb(71, 85, 105);
         box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.4), 0 8px 16px -4px rgba(0, 0, 0, 0.3);
     }
-body:not(.dark) .navlink-active {
+html:not(.dark) .navlink-active {
   --tw-text-opacity: 1;
   color: rgb(16 185 129 / var(--tw-text-opacity, 1));
 }
@@ -23798,6 +23806,54 @@ html:not(.dark) body .glass {
 html:not(.dark) body .card-neon {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(0, 243, 255, 0.2);
+}
+/*
+ * Global dark mode overrides
+ *
+ * Many page templates use inline Tailwind light-mode utility classes
+ * (bg-white, text-slate-900, border-slate-200, etc.) without dark: counterparts.
+ * These rules use attribute selectors ([class~="..."]) instead of class selectors
+ * to avoid Tailwind's circular-dependency guard, while still targeting the same
+ * elements.  They apply only when the user has selected the dark theme
+ * (html.dark is set by base.html).
+ */
+/* Backgrounds */
+html.dark [class~="bg-white"] {
+  background-color: rgb(30, 41, 59); /* slate-800 */
+}
+html.dark [class~="bg-slate-50"],
+html.dark [class~="bg-gray-50"] {
+  background-color: rgb(15, 23, 42); /* slate-950 */
+}
+html.dark [class~="bg-slate-100"],
+html.dark [class~="bg-gray-100"] {
+  background-color: rgb(30, 41, 59); /* slate-800 */
+}
+/* Text */
+html.dark [class~="text-slate-900"],
+html.dark [class~="text-gray-900"] {
+  color: rgb(248, 250, 252); /* slate-50 */
+}
+html.dark [class~="text-slate-800"],
+html.dark [class~="text-gray-800"] {
+  color: rgb(226, 232, 240); /* slate-200 */
+}
+html.dark [class~="text-slate-700"],
+html.dark [class~="text-gray-700"] {
+  color: rgb(203, 213, 225); /* slate-300 */
+}
+html.dark [class~="text-slate-600"],
+html.dark [class~="text-gray-600"] {
+  color: rgb(148, 163, 184); /* slate-400 */
+}
+/* Borders */
+html.dark [class~="border-slate-200"],
+html.dark [class~="border-gray-200"] {
+  border-color: rgb(51, 65, 85); /* slate-700 */
+}
+html.dark [class~="border-slate-300"],
+html.dark [class~="border-gray-300"] {
+  border-color: rgb(71, 85, 105); /* slate-600 */
 }
 .week-day-card:has(.group:hover .group-hover\:text-emerald-400) {
         border-color: rgba(16, 185, 129, 0.5);
