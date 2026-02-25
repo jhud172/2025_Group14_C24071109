@@ -13062,6 +13062,245 @@ html:not(.dark) .week-day-card:has(.tcc-insight-value:is(.dark *)) {
 }
 /* Product pages and widgets */
 /* Coach Bot Chat Widget - Premium AI Command Layer Design */
+/* chat-page.css – Pro AI Command Centre styles */
+/* ── Time-of-day CSS variables ───────────────────────────────────────────── */
+/* Applied via body[data-time-theme="..."] or the #coachChatPage wrapper */
+#coachChatPage {
+  --chat-accent-h: 160;     /* emerald hue */
+  --chat-glow-opacity: 0.06;
+  transition: background 0.8s ease;
+}
+/* Morning: fresh, light, slate-cool */
+body[data-time-theme="morning"] #coachChatPage,
+#coachChatPage[data-chat-time="morning"] {
+  --chat-accent-h: 190;
+  --chat-glow-opacity: 0.07;
+  background: linear-gradient(135deg,
+    rgba(240, 249, 255, 0.6) 0%,
+    rgba(224, 242, 254, 0.4) 100%);
+}
+/* Midday: neutral, bright */
+body[data-time-theme="midday"] #coachChatPage,
+#coachChatPage[data-chat-time="midday"] {
+  --chat-accent-h: 160;
+  --chat-glow-opacity: 0.06;
+  background: transparent;
+}
+/* Evening: warm tones */
+body[data-time-theme="evening"] #coachChatPage,
+#coachChatPage[data-chat-time="evening"] {
+  --chat-accent-h: 35;
+  --chat-glow-opacity: 0.08;
+  background: linear-gradient(135deg,
+    rgba(255, 247, 237, 0.5) 0%,
+    rgba(254, 243, 199, 0.3) 100%);
+}
+/* Night: dark, cool, subtle */
+body[data-time-theme="night"] #coachChatPage,
+#coachChatPage[data-chat-time="night"] {
+  --chat-accent-h: 230;
+  --chat-glow-opacity: 0.05;
+  background: linear-gradient(135deg,
+    rgba(15, 23, 42, 0.6) 0%,
+    rgba(30, 41, 59, 0.4) 100%);
+}
+/* Dark mode: preserve tones, keep them subtle */
+.dark body[data-time-theme="morning"] #coachChatPage,
+.dark #coachChatPage[data-chat-time="morning"],
+.dark body[data-time-theme="evening"] #coachChatPage,
+.dark #coachChatPage[data-chat-time="evening"] {
+  background: transparent;
+}
+/* ── Action chips ────────────────────────────────────────────────────────── */
+.chat-action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.06);
+  color: rgb(5, 150, 105);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.chat-action-chip:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
+}
+.chat-action-chip:active {
+  transform: translateY(0);
+}
+.dark .chat-action-chip {
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.08);
+  color: rgb(52, 211, 153);
+}
+.dark .chat-action-chip:hover {
+  background: rgba(52, 211, 153, 0.18);
+  border-color: rgba(52, 211, 153, 0.5);
+}
+/* ── Focus Mode ──────────────────────────────────────────────────────────── */
+#coachChatPage.focus-mode .chat-sidebar-left,
+#coachChatPage.focus-mode .chat-sidebar-right {
+  display: none;
+}
+#coachChatPage.focus-mode .chat-main {
+  grid-column: 1 / -1;
+}
+/* ── Live Metrics panel ──────────────────────────────────────────────────── */
+.metrics-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+}
+.metrics-ring svg {
+  transform: rotate(-90deg);
+}
+.metrics-ring__value {
+  position: absolute;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: rgb(5, 150, 105);
+}
+/* Metric card rows */
+.metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(248, 250, 252, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  font-size: 0.75rem;
+  transition: background 0.15s ease;
+}
+.dark .metric-row {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(30, 41, 59, 0.6);
+}
+.metric-row__label {
+  color: rgb(100, 116, 139);
+  font-weight: 500;
+}
+.metric-row__value {
+  font-weight: 700;
+  color: rgb(15, 23, 42);
+}
+.dark .metric-row__value {
+  color: rgb(241, 245, 249);
+}
+/* ── Greeting / zero-blank state card ───────────────────────────────────── */
+.chat-greeting-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: linear-gradient(135deg,
+    rgba(240, 253, 244, 0.9) 0%,
+    rgba(255, 255, 255, 0.8) 100%);
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.08);
+}
+.dark .chat-greeting-card {
+  background: linear-gradient(135deg,
+    rgba(6, 78, 59, 0.2) 0%,
+    rgba(15, 23, 42, 0.6) 100%);
+  border-color: rgba(52, 211, 153, 0.2);
+}
+.chat-greeting-card__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgb(5, 150, 105);
+}
+.dark .chat-greeting-card__title {
+  color: rgb(52, 211, 153);
+}
+.chat-greeting-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.chat-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  font-size: 0.7rem;
+  color: rgb(4, 120, 87);
+  font-weight: 500;
+}
+.dark .chat-stat-pill {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.25);
+  color: rgb(52, 211, 153);
+}
+/* ── Focus mode toggle button ────────────────────────────────────────────── */
+.chat-focus-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  background: transparent;
+  color: rgb(100, 116, 139);
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chat-focus-btn:hover {
+  background: rgba(226, 232, 240, 0.5);
+  color: rgb(51, 65, 85);
+}
+.chat-focus-btn.active {
+  background: rgba(15, 23, 42, 0.08);
+  color: rgb(15, 23, 42);
+  border-color: rgba(15, 23, 42, 0.2);
+}
+.dark .chat-focus-btn {
+  border-color: rgba(51, 65, 85, 0.7);
+  color: rgb(148, 163, 184);
+}
+.dark .chat-focus-btn:hover {
+  background: rgba(51, 65, 85, 0.4);
+  color: rgb(203, 213, 225);
+}
+.dark .chat-focus-btn.active {
+  background: rgba(241, 245, 249, 0.1);
+  color: rgb(241, 245, 249);
+  border-color: rgba(241, 245, 249, 0.2);
+}
+/* Smooth sidebar transitions */
+.chat-sidebar-left,
+.chat-sidebar-right {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#coachChatPage.focus-mode .chat-sidebar-left,
+#coachChatPage.focus-mode .chat-sidebar-right {
+  opacity: 0;
+  transform: scale(0.97);
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
 /* Quick Actions Widget - Premium Design (Aligned with Chat Widget) */
 /**
  * Training Vault – Component Styles
@@ -22289,6 +22528,9 @@ html:not(.dark) .week-day-card:has(.quick-actions-icon-btn-premium:hover:is(.dar
 .pb-20 {
   padding-bottom: 5rem;
 }
+.pb-3 {
+  padding-bottom: 0.75rem;
+}
 .pb-4 {
   padding-bottom: 1rem;
 }
@@ -22377,6 +22619,9 @@ html:not(.dark) .week-day-card:has(.quick-actions-icon-btn-premium:hover:is(.dar
   font-size: 3rem;
   line-height: 1;
 }
+.text-\[0\.7rem\] {
+  font-size: 0.7rem;
+}
 .text-\[10px\] {
   font-size: 10px;
 }
@@ -22447,6 +22692,9 @@ html:not(.dark) .week-day-card:has(.quick-actions-icon-btn-premium:hover:is(.dar
 }
 .leading-snug {
   line-height: 1.375;
+}
+.leading-tight {
+  line-height: 1.25;
 }
 .tracking-\[0\.2em\] {
   letter-spacing: 0.2em;
@@ -22701,6 +22949,10 @@ html:not(.dark) .week-day-card:has(.quick-actions-icon-btn-premium:hover:is(.dar
   --tw-text-opacity: 1;
   color: rgb(136 19 55 / var(--tw-text-opacity, 1));
 }
+.text-sky-600 {
+  --tw-text-opacity: 1;
+  color: rgb(2 132 199 / var(--tw-text-opacity, 1));
+}
 .text-sky-700 {
   --tw-text-opacity: 1;
   color: rgb(3 105 161 / var(--tw-text-opacity, 1));
@@ -22899,6 +23151,11 @@ html:not(.dark) .week-day-card:has(.quick-actions-icon-btn-premium:hover:is(.dar
 .shadow-neon-blue {
   --tw-shadow-color: #0066ff;
   --tw-shadow: var(--tw-shadow-colored);
+}
+.ring {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
 }
 .ring-1 {
   --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
@@ -24055,6 +24312,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:border-blue-900\/50:is(.dark *) {
   border-color: rgb(30 58 138 / 0.5);
 }
+.dark\:border-emerald-500\/20:is(.dark *) {
+  border-color: rgb(16 185 129 / 0.2);
+}
 .dark\:border-emerald-800:is(.dark *) {
   --tw-border-opacity: 1;
   border-color: rgb(6 95 70 / var(--tw-border-opacity, 1));
@@ -24079,6 +24339,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:border-green-900\/50:is(.dark *) {
   border-color: rgb(20 83 45 / 0.5);
 }
+.dark\:border-indigo-500\/20:is(.dark *) {
+  border-color: rgb(99 102 241 / 0.2);
+}
 .dark\:border-orange-900\/50:is(.dark *) {
   border-color: rgb(124 45 18 / 0.5);
 }
@@ -24098,6 +24361,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 }
 .dark\:border-rose-900\/40:is(.dark *) {
   border-color: rgb(136 19 55 / 0.4);
+}
+.dark\:border-sky-500\/20:is(.dark *) {
+  border-color: rgb(14 165 233 / 0.2);
 }
 .dark\:border-slate-600:is(.dark *) {
   --tw-border-opacity: 1;
@@ -24266,6 +24532,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:bg-rose-950:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(76 5 25 / var(--tw-bg-opacity, 1));
+}
+.dark\:bg-sky-500\/10:is(.dark *) {
+  background-color: rgb(14 165 233 / 0.1);
 }
 .dark\:bg-slate-100:is(.dark *) {
   --tw-bg-opacity: 1;
@@ -24495,6 +24764,10 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
   --tw-text-opacity: 1;
   color: rgb(199 210 254 / var(--tw-text-opacity, 1));
 }
+.dark\:text-indigo-300:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(165 180 252 / var(--tw-text-opacity, 1));
+}
 .dark\:text-indigo-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(129 140 248 / var(--tw-text-opacity, 1));
@@ -24548,6 +24821,14 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:text-rose-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(251 113 133 / var(--tw-text-opacity, 1));
+}
+.dark\:text-sky-300:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(125 211 252 / var(--tw-text-opacity, 1));
+}
+.dark\:text-sky-400:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(56 189 248 / var(--tw-text-opacity, 1));
 }
 .dark\:text-slate-100:is(.dark *) {
   --tw-text-opacity: 1;
