@@ -62,20 +62,39 @@
         }
     }
     
+    // ==================== Time-of-Day Theme ====================
+    function applyTimeOfDayTheme() {
+        const hour = new Date().getHours();
+        let theme;
+        if (hour >= 5 && hour < 12) {
+            theme = 'morning';
+        } else if (hour >= 12 && hour < 17) {
+            theme = 'afternoon';
+        } else if (hour >= 17 && hour < 21) {
+            theme = 'evening';
+        } else {
+            theme = 'night';
+        }
+        document.documentElement.setAttribute('data-time-theme', theme);
+        const header = document.querySelector('[data-testid="day-hub-header"]');
+        if (header) header.setAttribute('data-time-theme', theme);
+    }
+
     // ==================== Smart Time Greetings ====================
     function addTimeGreeting() {
         const header = document.querySelector('[data-testid="day-hub-header"]');
         if (!header) return;
         
-        const timeTheme = header.getAttribute('data-time-theme');
+        const timeTheme = document.documentElement.getAttribute('data-time-theme') || header.getAttribute('data-time-theme');
         const greetings = {
             morning: { emoji: '🌅', text: 'Good morning!', color: 'text-amber-600 dark:text-amber-400' },
+            afternoon: { emoji: '☀️', text: 'Good afternoon!', color: 'text-blue-600 dark:text-blue-400' },
             midday: { emoji: '☀️', text: 'Good afternoon!', color: 'text-blue-600 dark:text-blue-400' },
             evening: { emoji: '🌆', text: 'Good evening!', color: 'text-indigo-600 dark:text-indigo-400' },
             night: { emoji: '🌙', text: 'Good night!', color: 'text-emerald-600 dark:text-emerald-400' }
         };
         
-        const greeting = greetings[timeTheme] || greetings.midday;
+        const greeting = greetings[timeTheme] || greetings.afternoon;
         
         if (!document.getElementById('time-greeting')) {
             const greetingDiv = document.createElement('div');
@@ -273,24 +292,28 @@
         document.addEventListener('keydown', handleEscape);
     }
     
-    // ==================== Add Help Button ====================
-    function addHelpButton() {
-        const header = document.querySelector('[data-testid="day-hub-header"]');
-        if (!header || document.getElementById('keyboard-help-btn')) return;
-        
-        const helpBtn = document.createElement('button');
-        helpBtn.id = 'keyboard-help-btn';
-        helpBtn.className = 'action-hint absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100';
-        helpBtn.setAttribute('aria-label', 'Show keyboard shortcuts');
-        helpBtn.innerHTML = `
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-        `;
-        helpBtn.addEventListener('click', showKeyboardHelp);
-        header.appendChild(helpBtn);
+    // ==================== Focus Mode ====================
+    function initFocusMode() {
+        const btn = document.getElementById('focus-mode-btn');
+        if (!btn) return;
+
+        const wrapper = document.getElementById('day-main-content');
+        if (!wrapper) return;
+
+        btn.addEventListener('click', () => {
+            const isActive = wrapper.getAttribute('data-focus-mode') === 'true';
+            const next = !isActive;
+            wrapper.setAttribute('data-focus-mode', String(next));
+            btn.setAttribute('aria-pressed', String(next));
+            btn.querySelector('.focus-mode-label').textContent = next ? 'Exit focus' : 'Focus mode';
+
+            if (next) {
+                const timelineTab = document.getElementById('tab-btn-timeline');
+                if (timelineTab) timelineTab.click();
+            }
+        });
     }
-    
+
     // ==================== Section Tabs ====================
     function initTabs() {
         const tabNav = document.querySelector('[role="tablist"][aria-label="Day view sections"]');
@@ -524,6 +547,7 @@
             return;
         }
         
+        applyTimeOfDayTheme();
         animateCompletionDots();
         initQuickStats();
         addTimeGreeting();
@@ -531,7 +555,7 @@
         highlightUpcomingTasks();
         scrollToCurrentTime();
         initKeyboardShortcuts();
-        addHelpButton();
+        initFocusMode();
         initTabs();
         initTaskFilter();
         buildTimeline();
