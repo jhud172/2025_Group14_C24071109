@@ -125,15 +125,19 @@
     }
 
     let previewDelegated = false;
+    let longPressTimer = null;
     function bindPreviewDelegation() {
         if (previewDelegated || !preview || !csrfToken || !csrfParam) return;
         previewDelegated = true;
 
+        const ITEM_SELECTOR = '.calendar-item, .calendar-grouped-item';
+
         document.addEventListener('mouseover', (event) => {
-            const item = event.target.closest('.calendar-item');
+            const item = event.target.closest(ITEM_SELECTOR);
             if (!item) return;
             if (activeItem === item) return;
             clearTimeout(closeTimer);
+            clearTimeout(hoverTimer);
             activeItem = item;
             hoverTimer = setTimeout(() => {
                 preview.innerHTML = buildPreviewHtml(item);
@@ -142,15 +146,35 @@
         });
 
         document.addEventListener('mouseout', (event) => {
-            const item = event.target.closest('.calendar-item');
+            const item = event.target.closest(ITEM_SELECTOR);
             if (!item) return;
             const related = event.relatedTarget;
-            if (related && (related.closest?.('.calendar-item') === item || related.closest?.('#preview-card'))) return;
+            if (related && (related.closest?.(ITEM_SELECTOR) === item || related.closest?.('#preview-card'))) return;
             clearTimeout(hoverTimer);
             closeTimer = setTimeout(() => {
                 if (!preview.matches(':hover')) hidePreview();
             }, 200);
         });
+
+        // Long-press for touch devices (iPhone / Android)
+        document.addEventListener('touchstart', (event) => {
+            const item = event.target.closest(ITEM_SELECTOR);
+            if (!item) return;
+            clearTimeout(longPressTimer);
+            longPressTimer = setTimeout(() => {
+                activeItem = item;
+                preview.innerHTML = buildPreviewHtml(item);
+                showPreview(item);
+            }, 600);
+        }, { passive: true });
+
+        document.addEventListener('touchend', () => {
+            clearTimeout(longPressTimer);
+        }, { passive: true });
+
+        document.addEventListener('touchmove', () => {
+            clearTimeout(longPressTimer);
+        }, { passive: true });
     }
 
     function attachPreviewHandlers() {
@@ -321,7 +345,8 @@
             openLogModal(activeItem, 'task');
         }
         if (action === 'workout-log') {
-            openLogModal(activeItem, 'workout');
+            const occId = activeItem.dataset.id;
+            window.location.href = occId ? `/exercise-log/add-occurrence?occId=${occId}` : '/exercise-log';
         }
         if (action === 'workout-review') {
             window.location.href = '/exercise-log/list';
