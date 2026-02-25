@@ -608,17 +608,11 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <form th:action="@{'/schedule-occurrence/' + ${occ.id} + '/toggle'}" method="post" style="display: inline;">
-                                <input type="hidden" th:if="${_csrf != null}"
-                                       th:name="${_csrf.parameterName}"
-                                       th:value="${_csrf.token}"/>
-                                <input type="hidden" name="returnUrl" th:value="@{'/calendar/day/' + ${date}}"/>
-                                <button type="submit" 
-                                        class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2"
-                                        th:classappend="${occ.completed} ? ' bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 focus-visible:ring-slate-500' : ' bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500'"
-                                        th:text="${occ.completed} ? 'Completed ✓' : 'Mark Complete'">
-                                </button>
-                            </form>
+                            <span th:if="${occ.completed}"
+                                  class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">Completed ✓</span>
+                            <a th:if="${!occ.completed}"
+                               th:href="@{'/exercise-log/add-occurrence?occId=' + ${occ.id}}"
+                               class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">Complete Workout</a>
                         </div>
                     </div>
                 </div>

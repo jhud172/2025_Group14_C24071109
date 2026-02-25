@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Chat;
 import java.security.Principal;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ public class ChatController {
 
     private final ChatService chatService;
     private final ChatContextService chatContextService;
+    private final ChatContextBuilder chatContextBuilder;
     private final CoachConversationService coachConversationService;
     private final CoachMessageService coachMessageService;
     private final DailyUsageService dailyUsageService;
@@ -56,6 +58,7 @@ public class ChatController {
     public ChatController(
             ChatService chatService,
             ChatContextService chatContextService,
+            ChatContextBuilder chatContextBuilder,
             CoachConversationService coachConversationService,
             CoachMessageService coachMessageService,
             DailyUsageService dailyUsageService,
@@ -67,6 +70,7 @@ public class ChatController {
     ) {
         this.chatService = chatService;
         this.chatContextService = chatContextService;
+        this.chatContextBuilder = chatContextBuilder;
         this.coachConversationService = coachConversationService;
         this.coachMessageService = coachMessageService;
         this.dailyUsageService = dailyUsageService;
@@ -99,7 +103,39 @@ public class ChatController {
         model.addAttribute("dailyLimit", FREE_DAILY_LIMIT);
         model.addAttribute("dailyUsed", used);
         model.addAttribute("dailyRemaining", remaining);
+
+        // Build personalised page summary for zero-blank state and live metrics
+        try {
+            ChatSummaryDto summary = chatContextBuilder.buildSummary(user);
+            model.addAttribute("chatSummary", summary);
+            String timeTheme = chatContextBuilder.computeTimeTheme(LocalTime.now(clock));
+            model.addAttribute("chatTimeTheme", timeTheme);
+            // Pre-compute ring dashoffset for SVG (circumference=125.66, offset=circ*(1-pct/100))
+            double dashOffset = 125.66 * (1.0 - summary.completionPct() / 100.0);
+            model.addAttribute("metricsRingOffset", String.format("%.2f", dashOffset));
+        } catch (Exception e) {
+            log.warn("Could not build chat summary for page model", e);
+            model.addAttribute("metricsRingOffset", "125.66");
+        }
+
         return "chat/chat";
+    }
+
+    @GetMapping(path = "/context", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<ChatSummaryDto> context(Principal principal) {
+        User user = requireUser(principal);
+        boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
+        if (!isPremium) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        try {
+            ChatSummaryDto summary = chatContextBuilder.buildSummary(user);
+            return ResponseEntity.ok(summary);
+        } catch (Exception e) {
+            log.warn("Could not build chat context", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/ask")

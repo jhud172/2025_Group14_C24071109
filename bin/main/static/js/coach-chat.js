@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.getElementById("coachChat");
+    const page = document.getElementById("coachChatPage");
     if (!root) return;
 
     const listEl = document.getElementById("coachConversationList");
@@ -11,6 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const usageBadge = document.getElementById("coachUsageBadge");
     const limitModal = document.getElementById("limitModal");
     const limitModalClose = document.getElementById("limitModalClose");
+    const focusModeBtn = document.getElementById("focusModeBtn");
+    const metricsRefreshBtn = document.getElementById("metricsRefreshBtn");
 
     const csrfToken = document.getElementById("chat_csrf")?.value || "";
     const csrfHeader = document.getElementById("chat_csrf_header")?.value || "X-CSRF-TOKEN";
@@ -20,6 +23,96 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeId = null;
     let sending = false;
 
+    // ── Time-of-day theme initialiser ─────────────────────────────────────
+    function initTimeTheme() {
+        if (!page) return;
+        const hour = new Date().getHours();
+        let theme;
+        if (hour >= 5 && hour < 12) theme = "morning";
+        else if (hour >= 12 && hour < 17) theme = "midday";
+        else if (hour >= 17 && hour < 21) theme = "evening";
+        else theme = "night";
+        // The server already sets data-chat-time via Thymeleaf; JS refines using local time
+        page.setAttribute("data-chat-time", theme);
+    }
+
+    initTimeTheme();
+
+    // ── Focus mode ────────────────────────────────────────────────────────
+    function initFocusMode() {
+        if (!page || !focusModeBtn) return;
+        const saved = localStorage.getItem("chatFocusMode") === "true";
+        if (saved) {
+            page.classList.add("focus-mode");
+            focusModeBtn.classList.add("active");
+            focusModeBtn.setAttribute("title", "Exit focus mode");
+        }
+        focusModeBtn.addEventListener("click", () => {
+            const active = page.classList.toggle("focus-mode");
+            focusModeBtn.classList.toggle("active", active);
+            focusModeBtn.setAttribute("title", active ? "Exit focus mode" : "Toggle focus mode");
+            localStorage.setItem("chatFocusMode", active ? "true" : "false");
+        });
+    }
+
+    initFocusMode();
+
+    // ── Action chips ──────────────────────────────────────────────────────
+    document.querySelectorAll(".chat-action-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+            const text = chip.dataset.chipText;
+            if (text && inputEl) {
+                inputEl.value = text;
+                inputEl.focus();
+                // Automatically send
+                sendMessage();
+            }
+        });
+    });
+
+    // ── Metrics refresh ───────────────────────────────────────────────────
+    async function refreshMetrics() {
+        try {
+            const res = await fetch("/chat/context");
+            if (!res.ok) return;
+            const data = await res.json();
+            updateMetricsPanel(data);
+        } catch {
+            // Silently fail — metrics will just stay at last known value
+        }
+    }
+
+    function updateMetricsPanel(data) {
+        if (!data) return;
+        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+        const pct = data.completionPct ?? 0;
+        set("metricsCompletionPct", pct + "%");
+        set("metricsRingPct", pct + "%");
+
+        const ring = document.getElementById("metricsRingFill");
+        if (ring) {
+            const offset = 125.66 - pct * 1.2566;
+            ring.setAttribute("stroke-dashoffset", offset.toFixed(2));
+        }
+
+        const tasksLeft = (data.tasksTotal ?? 0) - (data.tasksDone ?? 0);
+        const workoutsLeft = (data.workoutsTotal ?? 0) - (data.workoutsDone ?? 0);
+        set("metricsTasksLeft", tasksLeft);
+        set("metricsWorkoutsLeft", workoutsLeft);
+        set("metricsStreak", data.streakDays > 0 ? data.streakDays + " days 🔥" : "—");
+
+        const nextEl = document.getElementById("metricsNextWorkout");
+        if (nextEl) {
+            nextEl.textContent = data.nextWorkoutName
+                ? (data.nextWorkoutName + (data.nextWorkoutDate ? " · " + data.nextWorkoutDate : ""))
+                : "—";
+        }
+    }
+
+    metricsRefreshBtn?.addEventListener("click", refreshMetrics);
+
+    // ── Helpers ───────────────────────────────────────────────────────────
     function headers() {
         const out = { "Content-Type": "application/json" };
         if (csrfToken) out[csrfHeader] = csrfToken;
@@ -137,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
         clearMessages();
         if (!data.length) {
-            addMessage("assistant", "Ask about workouts, planning, or tomorrow’s momentum.");
+            addMessage("assistant", "Ask about workouts, planning, or tomorrow's momentum.");
             return;
         }
         data.forEach(m => addMessage(m.role === "user" ? "user" : "assistant", m.content));
@@ -169,6 +262,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Hide greeting card once user starts chatting
+        const greetingCard = document.getElementById("chatGreetingCard");
+        if (greetingCard) greetingCard.style.display = "none";
+
         const userRow = addMessage("user", text);
         addTyping();
 
@@ -196,6 +293,9 @@ document.addEventListener("DOMContentLoaded", () => {
             addMessage("assistant", data.reply || "No response");
             updateUsage(data.usage);
             await loadConversations();
+
+            // Refresh metrics after each message (lightweight, throttled by natural send cadence)
+            refreshMetrics();
         } catch {
             removeTyping();
             addMessage("assistant", "Network error. Please try again.");

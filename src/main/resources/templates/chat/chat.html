@@ -1,15 +1,27 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Coach Bot', null, ~{::content}, ~{::scripts})}">
+          th:replace="~{base :: layout('Pro AI Command Centre', null, ~{::content}, ~{::scripts})}">
     <div th:fragment="content">
-        <div class="relative overflow-hidden">
+        <div id="coachChatPage"
+             th:attr="data-chat-time=${chatTimeTheme != null ? chatTimeTheme : 'midday'}"
+             class="relative overflow-hidden">
+
+            <!-- Ambient glow orbs -->
             <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-violet-500/10 via-sky-400/10 to-indigo-500/10"></div>
             <div class="pointer-events-none absolute -top-24 right-0 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl"></div>
             <div class="pointer-events-none absolute -bottom-16 left-12 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl"></div>
 
+<<<<<<< HEAD
+=======
+            <div class="relative mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+
+                <!-- 3-column grid: conversations | chat | metrics -->
+>>>>>>> 7643fe9c9bbfaa908806f182a88a7ce344b60beb
                 <div id="coachChat"
                      th:attr="data-premium=${isPremium}, data-limit=${dailyLimit}, data-used=${dailyUsed}, data-remaining=${dailyRemaining}"
                      class="mt-6 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)_260px]">
-                    <aside class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-slate-800/60 dark:bg-slate-950/70">
+
+                    <!-- Left sidebar: Conversations -->
+                    <aside class="chat-sidebar-left rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-slate-800/60 dark:bg-slate-950/70">
                         <div class="flex items-center justify-between">
                             <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Conversations</div>
                             <span class="text-[11px] uppercase tracking-widest text-slate-400">Coach</span>
@@ -30,14 +42,21 @@
                         </div>
                     </aside>
 
-                    <section class="rounded-2xl border border-slate-200/70 bg-white/90 shadow-lg backdrop-blur dark:border-slate-800/60 dark:bg-slate-950/80"
+                    <!-- Centre: Chat panel -->
+                    <section class="chat-main rounded-2xl border border-slate-200/70 bg-white/90 shadow-lg backdrop-blur dark:border-slate-800/60 dark:bg-slate-950/80"
                              th:classappend="${isPremium} ? ' ring-1 ring-emerald-500/20 shadow-emerald-500/10' : ''">
                         <header class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 px-6 py-4 dark:border-slate-800/60">
                             <div>
-                                <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Coach Bot</h1>
-                                <p class="text-sm text-slate-500 dark:text-slate-400">A mystical guide for your daily momentum.</p>
+                                <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Pro AI Command Centre</h1>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Context-aware coaching, always on.</p>
                             </div>
                             <div class="flex items-center gap-3">
+                                <button id="focusModeBtn" type="button" class="chat-focus-btn" title="Toggle focus mode">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                                    </svg>
+                                    Focus
+                                </button>
                                 <span th:if="${isPremium}"
                                       class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 ring-1 ring-emerald-500/30">
                                     Premium · Unlimited
@@ -57,19 +76,65 @@
                             </div>
                             <div class="relative flex min-h-[60vh] flex-col">
                                 <div id="coachMessages" class="flex-1 space-y-4 overflow-auto px-6 py-6 text-sm">
-                                    <div class="rounded-2xl border border-slate-200/70 bg-slate-50 px-4 py-3 text-slate-700 shadow-sm dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-slate-200">
-                                        Ask about workouts, planning, or tomorrow’s momentum.
+                                    <!-- Personalised zero-blank greeting (server-rendered) -->
+                                    <div th:if="${chatSummary != null}" id="chatGreetingCard" class="chat-greeting-card">
+                                        <div class="chat-greeting-card__title" th:text="${chatSummary.greeting()}">Good morning</div>
+                                        <div class="chat-greeting-card__stats">
+                                            <span class="chat-stat-pill">
+                                                ✓ Tasks
+                                                <strong th:text="${chatSummary.tasksDone()} + '/' + ${chatSummary.tasksTotal()}">0/0</strong>
+                                            </span>
+                                            <span class="chat-stat-pill">
+                                                🏋 Workouts
+                                                <strong th:text="${chatSummary.workoutsDone()} + '/' + ${chatSummary.workoutsTotal()}">0/0</strong>
+                                            </span>
+                                            <span th:if="${chatSummary.streakDays() > 0}" class="chat-stat-pill">
+                                                🔥 <strong th:text="${chatSummary.streakDays()}">0</strong>&nbsp;day streak
+                                            </span>
+                                            <span th:if="${chatSummary.nextWorkoutName() != null}" class="chat-stat-pill">
+                                                ⚡ Next: <strong th:text="${chatSummary.nextWorkoutName()}">Workout</strong>
+                                                <span th:if="${chatSummary.nextWorkoutDate() != null}"
+                                                      th:text="'(' + ${chatSummary.nextWorkoutDate()} + ')'"></span>
+                                            </span>
+                                            <span th:if="${chatSummary.streakDays() == 0}" class="chat-stat-pill" style="opacity:0.7">
+                                                Start your streak today!
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- Fallback if no summary -->
+                                    <div th:if="${chatSummary == null}"
+                                         class="rounded-2xl border border-slate-200/70 bg-slate-50 px-4 py-3 text-slate-700 shadow-sm dark:border-slate-800/60 dark:bg-slate-900/60 dark:text-slate-200">
+                                        Ask about workouts, planning, or tomorrow's momentum.
                                     </div>
                                 </div>
 
                                 <div class="border-t border-slate-200/70 px-6 py-4 dark:border-slate-800/60">
-                                    <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                                    <!-- Action chips -->
+                                    <div id="actionChips" class="flex flex-wrap gap-2 mb-3">
+                                        <button type="button" class="chat-action-chip" data-chip-text="Plan my day for tomorrow">
+                                            �� Plan tomorrow
+                                        </button>
+                                        <button type="button" class="chat-action-chip" data-chip-text="Optimise my training schedule for this week">
+                                            ⚡ Optimise this week
+                                        </button>
+                                        <button type="button" class="chat-action-chip" data-chip-text="Suggest adjustments to today's workout">
+                                            🏋 Adjust today's workout
+                                        </button>
+                                        <button type="button" class="chat-action-chip" data-chip-text="Analyse my missed tasks from this week and suggest improvements">
+                                            📊 Analyse missed tasks
+                                        </button>
+                                        <button type="button" class="chat-action-chip" data-chip-text="Help me reduce my workload for today without losing progress">
+                                            🎯 Reduce workload today
+                                        </button>
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-3">
                                         <span class="rounded-full bg-slate-100 px-2 py-1 dark:bg-slate-900">/plan</span>
                                         <span class="rounded-full bg-slate-100 px-2 py-1 dark:bg-slate-900">/summary</span>
                                         <span class="rounded-full bg-slate-100 px-2 py-1 dark:bg-slate-900">/next</span>
                                         <span class="text-slate-400">Shift + Enter for new line</span>
                                     </div>
-                                    <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+                                    <div class="flex flex-col gap-3 sm:flex-row">
                                         <textarea id="coachInput" rows="3" placeholder="Speak your intent…"
                                                   class="flex-1 resize-none rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-100"></textarea>
                                         <button id="coachSend" type="button"
@@ -82,25 +147,115 @@
                         </div>
                     </section>
 
-                    <aside class="hidden rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm backdrop-blur lg:block dark:border-slate-800/60 dark:bg-slate-950/70"
-                           th:if="${isPremium}">
-                        <div class="text-sm font-semibold text-emerald-600">Premium tools</div>
-                        <p class="mt-2 text-xs text-slate-500">Extra ritual cards and custom flows unlock here.</p>
-                        <div class="mt-4 space-y-3">
-                            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-3 py-3 text-xs text-emerald-700">
-                                ✦ Ritual planner (coming soon)
+                    <!-- Right sidebar: Live Metrics -->
+                    <aside th:if="${isPremium}"
+                           class="chat-sidebar-right hidden rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm backdrop-blur lg:block dark:border-slate-800/60 dark:bg-slate-950/70">
+
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Live Metrics</div>
+                            <button id="metricsRefreshBtn" type="button"
+                                    class="rounded-lg p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                                    title="Refresh metrics">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Completion ring + percentage -->
+                        <div class="mt-4 flex items-center gap-3">
+                            <div class="metrics-ring" id="metricsRingWrap">
+                                <svg width="48" height="48" viewBox="0 0 48 48">
+                                    <circle cx="24" cy="24" r="20" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+                                    <circle id="metricsRingFill" cx="24" cy="24" r="20" fill="none"
+                                            stroke="rgb(16,185,129)" stroke-width="4"
+                                            stroke-linecap="round"
+                                            th:attr="stroke-dasharray='125.66 125.66',stroke-dashoffset=${metricsRingOffset != null ? metricsRingOffset : '125.66'}"
+                                            style="transition: stroke-dashoffset 0.6s ease;"/>
+                                </svg>
+                                <span class="metrics-ring__value" id="metricsRingPct"
+                                      th:text="${chatSummary != null ? chatSummary.completionPct() : 0} + '%'">0%</span>
                             </div>
-                            <div class="rounded-xl border border-sky-500/30 bg-sky-500/5 px-3 py-3 text-xs text-sky-700">
-                                ✦ Weekly energy map (coming soon)
+                            <div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400">Today's completion</div>
+                                <div class="text-lg font-bold text-slate-900 dark:text-slate-100" id="metricsCompletionPct"
+                                     th:text="${chatSummary != null ? chatSummary.completionPct() : 0} + '%'">0%</div>
                             </div>
-                            <div class="rounded-xl border border-indigo-500/30 bg-indigo-500/5 px-3 py-3 text-xs text-indigo-700">
-                                ✦ Insight vault (coming soon)
+                        </div>
+
+                        <!-- Metric rows -->
+                        <div class="mt-4 space-y-2" id="metricsPanel">
+                            <div class="metric-row">
+                                <span class="metric-row__label">Tasks left</span>
+                                <span class="metric-row__value" id="metricsTasksLeft"
+                                      th:text="${chatSummary != null ? (chatSummary.tasksTotal() - chatSummary.tasksDone()) : '—'}">—</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-row__label">Workouts left</span>
+                                <span class="metric-row__value" id="metricsWorkoutsLeft"
+                                      th:text="${chatSummary != null ? (chatSummary.workoutsTotal() - chatSummary.workoutsDone()) : '—'}">—</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-row__label">Streak</span>
+                                <span class="metric-row__value" id="metricsStreak"
+                                      th:text="${chatSummary != null and chatSummary.streakDays() > 0 ? chatSummary.streakDays() + ' days 🔥' : '—'}">—</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-row__label">Next workout</span>
+                                <span class="metric-row__value text-[0.7rem] leading-tight text-right" id="metricsNextWorkout"
+                                      th:text="${chatSummary != null and chatSummary.nextWorkoutName() != null ? chatSummary.nextWorkoutName() + ' · ' + chatSummary.nextWorkoutDate() : '—'}">—</span>
+                            </div>
+                        </div>
+
+                        <!-- Insights (driven by real data) -->
+                        <div class="mt-4">
+                            <div class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Insights</div>
+                            <div class="space-y-2">
+                                <details class="rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+                                    <summary class="cursor-pointer px-3 py-2 text-xs font-medium select-none">✦ Weekly completion</summary>
+                                    <div class="px-3 pb-3 pt-1 text-xs text-emerald-600 dark:text-emerald-400">
+                                        <span th:if="${chatSummary != null}">
+                                            Today you've completed
+                                            <strong th:text="${chatSummary.completionPct()} + '%'">0%</strong>
+                                            of your goals. Keep the momentum to close the week strong.
+                                        </span>
+                                        <span th:if="${chatSummary == null}">Completion data will appear once your day loads.</span>
+                                    </div>
+                                </details>
+
+                                <details class="rounded-xl border border-sky-500/30 bg-sky-500/5 text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
+                                    <summary class="cursor-pointer px-3 py-2 text-xs font-medium select-none">✦ Activity streak</summary>
+                                    <div class="px-3 pb-3 pt-1 text-xs text-sky-600 dark:text-sky-400">
+                                        <span th:if="${chatSummary != null and chatSummary.streakDays() > 0}">
+                                            You're on a <strong th:text="${chatSummary.streakDays()}">0</strong>-day streak.
+                                            Complete at least one item today to keep it going!
+                                        </span>
+                                        <span th:if="${chatSummary == null or chatSummary.streakDays() == 0}">
+                                            No active streak yet. Complete today's tasks to start one!
+                                        </span>
+                                    </div>
+                                </details>
+
+                                <details class="rounded-xl border border-indigo-500/30 bg-indigo-500/5 text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-300">
+                                    <summary class="cursor-pointer px-3 py-2 text-xs font-medium select-none">✦ Next session</summary>
+                                    <div class="px-3 pb-3 pt-1 text-xs text-indigo-600 dark:text-indigo-400">
+                                        <span th:if="${chatSummary != null and chatSummary.nextWorkoutName() != null}">
+                                            Next: <strong th:text="${chatSummary.nextWorkoutName()}">Workout</strong>
+                                            on <strong th:text="${chatSummary.nextWorkoutDate()}">—</strong>.
+                                            Ask the AI to help you prepare!
+                                        </span>
+                                        <span th:if="${chatSummary == null or chatSummary.nextWorkoutName() == null}">
+                                            No upcoming workouts found. Schedule one from the Calendar.
+                                        </span>
+                                    </div>
+                                </details>
                             </div>
                         </div>
                     </aside>
                 </div>
             </div>
 
+            <!-- Daily limit modal -->
             <div id="limitModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 px-4">
                 <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-xl dark:border-slate-800 dark:bg-slate-950">
                     <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">✦</div>
