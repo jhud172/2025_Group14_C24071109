@@ -75,6 +75,36 @@ document.addEventListener("DOMContentLoaded", () => {
         scrollToBottom();
     }
 
+    function addMsgWithNav(text, who, navActions) {
+        const wrap = document.createElement("div");
+        wrap.className = `chat-message-wrapper ${who === "me" ? "user" : "assistant"}`;
+
+        const bubble = document.createElement("div");
+        bubble.className = "chat-message-bubble";
+        bubble.textContent = text;
+        wrap.appendChild(bubble);
+
+        if (Array.isArray(navActions) && navActions.length > 0) {
+            const navRow = document.createElement("div");
+            navRow.className = "chat-nav-actions";
+            navActions.forEach(action => {
+                const btn = document.createElement("a");
+                btn.href = action.url;
+                btn.className = "chat-nav-btn";
+                btn.textContent = action.label;
+                // Safety: only relative paths are rendered (whitelist enforced server-side)
+                if (!action.url.startsWith("/")) return;
+                navRow.appendChild(btn);
+            });
+            if (navRow.children.length > 0) {
+                wrap.appendChild(navRow);
+            }
+        }
+
+        body.appendChild(wrap);
+        scrollToBottom();
+    }
+
     function addTyping() {
         const wrap = document.createElement("div");
         wrap.className = "chat-typing-indicator";
@@ -180,7 +210,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const reply = data?.reply || "No response";
-            addMsg(reply, "ai");
+            const navActions = Array.isArray(data?.navActions) ? data.navActions : [];
+            addMsgWithNav(reply, "ai", navActions);
             saveHistory();
 
         } catch (err) {
@@ -471,6 +502,19 @@ document.addEventListener("DOMContentLoaded", () => {
         panel.classList.contains("open") ? close() : open();
     });
     closeBtn.addEventListener("click", close);
+
+    // Quick-action suggestion chips
+    const suggestions = document.getElementById("chatSuggestions");
+    if (suggestions) {
+        suggestions.addEventListener("click", async (e) => {
+            const chip = e.target.closest(".chat-suggestion-chip");
+            if (!chip || !isAuthenticated) return;
+            const msg = chip.dataset.msg;
+            if (!msg) return;
+            input.value = msg;
+            form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+        });
+    }
 
     if (notificationsToggle && notificationsView && chatView) {
         notificationsToggle.addEventListener("click", async () => {

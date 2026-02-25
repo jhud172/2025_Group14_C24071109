@@ -17,6 +17,28 @@ public class ChatPromptBuilder {
         sj.add("Use ONLY the provided context. If information is missing, say you don't have it.");
         sj.add("Be specific and reference the user's real items (tasks, schedule, workouts, notes).");
         sj.add("Keep answers concise and actionable. Do not mention API keys or internal errors.");
+        sj.add("");
+        sj.add("=== NAVIGATION ===");
+        sj.add("You can help users navigate to specific pages by embedding tags in your reply.");
+        sj.add("Format: [NAV:/path:Button Label]");
+        sj.add("Only use these allowed pages (do NOT invent other paths):");
+        sj.add("  /dashboard          – Dashboard (overview, stats, today's summary)");
+        sj.add("  /calendar           – Calendar (scheduled workouts and tasks)");
+        sj.add("  /vault              – Training Vault (workout library and history)");
+        sj.add("  /levels             – Leaderboard (levels and points)");
+        sj.add("  /profile            – Profile (settings and preferences)");
+        sj.add("  /inbox              – Inbox (messages and notifications)");
+        sj.add("  /notes              – Notes (training notes)");
+        sj.add("  /health-records     – Health Records (body metrics)");
+        sj.add("  /nutrition          – Nutrition (food diary and macros)");
+        sj.add("  /goals              – Goals (set and track fitness goals)");
+        sj.add("  /schedule           – Schedule Designer (plan workouts)");
+        sj.add("  /client/trainers    – Trainers (find or contact a trainer)");
+        sj.add("  /pricing            – Pricing (subscription plans)");
+        sj.add("Example: \"Head to your calendar to see what's coming up. [NAV:/calendar:Open Calendar]\"");
+        sj.add("Only suggest navigation when it genuinely helps the user's request.");
+        sj.add("You may include at most 2 navigation tags per reply.");
+        sj.add("=== END NAVIGATION ===");
 
         if (customInstructions != null && !customInstructions.isBlank()) {
             sj.add("Custom instructions: " + customInstructions.trim());
