@@ -35,29 +35,36 @@
             <form method="post" th:object="${userPreferenceForm}" th:action="@{/select-preferences}" class="space-y-6">
                 <input th:name="${_csrf.parameterName}" th:type="hidden" th:value="${_csrf.token}"/>
 
+                <div th:if="${#fields.hasAnyErrors()}"
+                     class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-100">
+                    Please correct the highlighted errors below and try again.
+                </div>
+
                 <section id="display-settings-section" class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                     <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200" th:text="#{preferences.display.title}">Display settings</h2>
                     <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{preferences.display.subtitle}">These affect the whole site.</p>
 
                     <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <label class="block">
-                            <span class="text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{preferences.display.language}">Language</span>
-                            <select th:field="*{language}"
+                        <div class="block">
+                            <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="language" th:text="#{preferences.display.language}">Language</label>
+                            <select id="language" th:field="*{language}"
                                     class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
                                 <option value="en" th:text="#{preferences.language.en}">English</option>
                                 <option value="cy" th:text="#{preferences.language.cy}">Welsh</option>
                             </select>
-                        </label>
+                            <p class="mt-1 text-sm text-red-600" th:if="${#fields.hasErrors('language')}" th:errors="*{language}"></p>
+                        </div>
 
-                        <label class="block">
-                            <span class="text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{preferences.display.theme}">Theme</span>
-                            <select th:field="*{theme}"
+                        <div class="block">
+                            <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="theme" th:text="#{preferences.display.theme}">Theme</label>
+                            <select id="theme" th:field="*{theme}"
                                     class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
                                 <option value="SYSTEM" th:text="#{preferences.theme.system}">System</option>
                                 <option value="LIGHT" th:text="#{preferences.theme.light}">Light</option>
                                 <option value="DARK" th:text="#{preferences.theme.dark}">Dark</option>
                             </select>
-                        </label>
+                            <p class="mt-1 text-sm text-red-600" th:if="${#fields.hasErrors('theme')}" th:errors="*{theme}"></p>
+                        </div>
                     </div>
 
                     <label class="mt-4 flex items-center justify-between gap-4 rounded-lg border border-slate-200/70 bg-slate-50 px-3 py-3 text-sm dark:border-slate-800 dark:bg-slate-900/30">
@@ -139,21 +146,24 @@
                     </div>
 
                     <div class="mt-4 grid gap-4 sm:grid-cols-3">
-                        <label class="block">
-                            <span class="text-xs font-semibold text-slate-500">Default sets</span>
-                            <input type="number" min="1" max="20" th:field="*{defaultSets}"
+                        <div class="block">
+                            <label class="text-xs font-semibold text-slate-500" for="defaultSets">Default sets</label>
+                            <input type="number" id="defaultSets" min="1" max="20" th:field="*{defaultSets}"
                                    class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                        </label>
-                        <label class="block">
-                            <span class="text-xs font-semibold text-slate-500">Rep range (min)</span>
-                            <input type="number" min="1" max="30" th:field="*{defaultRepMin}"
+                            <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('defaultSets')}" th:errors="*{defaultSets}"></p>
+                        </div>
+                        <div class="block">
+                            <label class="text-xs font-semibold text-slate-500" for="defaultRepMin">Rep range (min)</label>
+                            <input type="number" id="defaultRepMin" min="1" max="30" th:field="*{defaultRepMin}"
                                    class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                        </label>
-                        <label class="block">
-                            <span class="text-xs font-semibold text-slate-500">Rep range (max)</span>
-                            <input type="number" min="1" max="50" th:field="*{defaultRepMax}"
+                            <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('defaultRepMin')}" th:errors="*{defaultRepMin}"></p>
+                        </div>
+                        <div class="block">
+                            <label class="text-xs font-semibold text-slate-500" for="defaultRepMax">Rep range (max)</label>
+                            <input type="number" id="defaultRepMax" min="1" max="50" th:field="*{defaultRepMax}"
                                    class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                        </label>
+                            <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('defaultRepMax')}" th:errors="*{defaultRepMax}"></p>
+                        </div>
                     </div>
 
                     <div class="mt-4">
@@ -189,26 +199,30 @@
                     <div class="mt-4">
                         <p class="text-xs font-semibold text-slate-500">Macro targets (optional)</p>
                         <div class="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                            <label class="block">
-                                <span class="text-xs text-slate-500">Calories</span>
-                                <input type="number" min="0" max="20000" th:field="*{macroTargetCalories}"
+                            <div class="block">
+                                <label class="text-xs text-slate-500" for="macroTargetCalories">Calories</label>
+                                <input type="number" id="macroTargetCalories" min="0" max="20000" th:field="*{macroTargetCalories}"
                                        class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                            </label>
-                            <label class="block">
-                                <span class="text-xs text-slate-500">Protein (g)</span>
-                                <input type="number" min="0" max="1000" th:field="*{macroTargetProtein}"
+                                <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('macroTargetCalories')}" th:errors="*{macroTargetCalories}"></p>
+                            </div>
+                            <div class="block">
+                                <label class="text-xs text-slate-500" for="macroTargetProtein">Protein (g)</label>
+                                <input type="number" id="macroTargetProtein" min="0" max="1000" th:field="*{macroTargetProtein}"
                                        class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                            </label>
-                            <label class="block">
-                                <span class="text-xs text-slate-500">Carbs (g)</span>
-                                <input type="number" min="0" max="1000" th:field="*{macroTargetCarbs}"
+                                <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('macroTargetProtein')}" th:errors="*{macroTargetProtein}"></p>
+                            </div>
+                            <div class="block">
+                                <label class="text-xs text-slate-500" for="macroTargetCarbs">Carbs (g)</label>
+                                <input type="number" id="macroTargetCarbs" min="0" max="1000" th:field="*{macroTargetCarbs}"
                                        class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                            </label>
-                            <label class="block">
-                                <span class="text-xs text-slate-500">Fat (g)</span>
-                                <input type="number" min="0" max="1000" th:field="*{macroTargetFat}"
+                                <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('macroTargetCarbs')}" th:errors="*{macroTargetCarbs}"></p>
+                            </div>
+                            <div class="block">
+                                <label class="text-xs text-slate-500" for="macroTargetFat">Fat (g)</label>
+                                <input type="number" id="macroTargetFat" min="0" max="1000" th:field="*{macroTargetFat}"
                                        class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                            </label>
+                                <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('macroTargetFat')}" th:errors="*{macroTargetFat}"></p>
+                            </div>
                         </div>
                     </div>
                 </section>
