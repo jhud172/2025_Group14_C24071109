@@ -4,9 +4,11 @@ import java.security.Principal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,10 +144,10 @@ public class ChatController {
 
     @PostMapping(path = "/api", consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> api(@RequestBody ChatRequest request, Principal principal) {
+    public ResponseEntity<Map<String, Object>> api(@RequestBody ChatRequest request, Principal principal) {
         String message = request != null ? request.message() : null;
         if (message == null || message.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("reply", "Message is required."));
+            return ResponseEntity.badRequest().body(Map.<String, Object>of("reply", "Message is required."));
         }
 
         User user = requireUser(principal);
@@ -157,7 +159,7 @@ public class ChatController {
         DailyUsageService.UsageStatus usage = dailyUsageService.consume(user.getId(), FREE_DAILY_LIMIT, isPremium);
         if (!usage.allowed()) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                    .body(Map.of("reply", "Daily limit reached. Upgrade to unlock unlimited messages."));
+                    .body(Map.<String, Object>of("reply", "Daily limit reached. Upgrade to unlock unlimited messages."));
         }
 
         coachMessageService.append(conversation, CoachMessage.Role.USER, message);
@@ -171,7 +173,7 @@ public class ChatController {
             log.warn("Chat context build failed; continuing with fallback reply", e);
             coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, CONTEXT_FALLBACK_REPLY);
             coachConversationService.touch(conversation);
-            return ResponseEntity.ok(Map.of("reply", CONTEXT_FALLBACK_REPLY));
+            return ResponseEntity.ok(Map.<String, Object>of("reply", CONTEXT_FALLBACK_REPLY));
         }
 
         try {
@@ -179,7 +181,7 @@ public class ChatController {
                 String reply = ChatRuleBasedResponder.respond(message, ctx);
                 coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, reply);
                 coachConversationService.touch(conversation);
-                return ResponseEntity.ok(Map.of("reply", reply));
+                return ResponseEntity.ok(Map.<String, Object>of("reply", reply));
             }
 
             String systemPrompt = ChatPromptBuilder.buildSystemPrompt(ctx);
@@ -193,22 +195,30 @@ public class ChatController {
             }
 
             ChatResponse response = chatService.chat(msgs);
-                String reply = response != null && response.reply() != null && !response.reply().isBlank()
+                String rawReply = response != null && response.reply() != null && !response.reply().isBlank()
                     ? response.reply()
                     : "AI is unavailable right now. Try again later.";
-                AiNotificationHelper.ExtractedNotification extracted = AiNotificationHelper.extract(reply);
+                AiNotificationHelper.ExtractedNotification extracted = AiNotificationHelper.extract(rawReply);
                 if (extracted.notificationMessage() != null) {
                 aiNotificationService.notify(user, extracted.notificationMessage());
                 }
-                reply = extracted.cleanedText();
+                ChatNavParser.ParseResult navParsed = ChatNavParser.parse(extracted.cleanedText());
+                String reply = navParsed.cleanText();
                 coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, reply);
             coachConversationService.touch(conversation);
-            return ResponseEntity.ok(Map.of("reply", reply));
+            Map<String, Object> result = new HashMap<>();
+            result.put("reply", reply);
+            if (!navParsed.navActions().isEmpty()) {
+                result.put("navActions", navParsed.navActions().stream()
+                    .map(a -> Map.of("url", a.url(), "label", a.label()))
+                    .collect(Collectors.toList()));
+            }
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.warn("Chat API failed; returning fallback reply", e);
                 coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, CONTEXT_FALLBACK_REPLY);
             coachConversationService.touch(conversation);
-            return ResponseEntity.ok(Map.of("reply", CONTEXT_FALLBACK_REPLY));
+            return ResponseEntity.ok(Map.<String, Object>of("reply", CONTEXT_FALLBACK_REPLY));
         }
     }
 
@@ -340,14 +350,20 @@ public class ChatController {
             if (extracted.notificationMessage() != null) {
                 aiNotificationService.notify(user, extracted.notificationMessage());
             }
-            reply = extracted.cleanedText();
+            ChatNavParser.ParseResult navParsed = ChatNavParser.parse(extracted.cleanedText());
+            reply = navParsed.cleanText();
 
             coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, reply);
             coachConversationService.touch(conversation);
-            return ResponseEntity.ok(Map.of(
-                "reply", reply,
-                "usage", usageToMap(usage, isPremium)
-            ));
+            Map<String, Object> convResult = new HashMap<>();
+            convResult.put("reply", reply);
+            convResult.put("usage", usageToMap(usage, isPremium));
+            if (!navParsed.navActions().isEmpty()) {
+                convResult.put("navActions", navParsed.navActions().stream()
+                    .map(a -> Map.of("url", a.url(), "label", a.label()))
+                    .collect(Collectors.toList()));
+            }
+            return ResponseEntity.ok(convResult);
             }
 
             private Map<String, Object> usageToMap(DailyUsageService.UsageStatus usage, boolean isPremium) {
