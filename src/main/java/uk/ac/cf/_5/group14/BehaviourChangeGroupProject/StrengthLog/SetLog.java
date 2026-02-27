@@ -26,4 +26,7 @@ public class SetLog {
     private String notes;
 
     private boolean completed = false;
+
+    @Column(name = "set_type", nullable = false)
+    private String setType = "NORMAL";
 }
