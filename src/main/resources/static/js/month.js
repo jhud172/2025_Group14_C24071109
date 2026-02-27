@@ -749,6 +749,7 @@
     const pendingLoads = new Set();
     let isExpanded = false;
     let isAnimating = false;
+    let isLoadingMore = false;
     let prevSlot = null;
     let currentSlot = null;
     let nextSlot = null;
@@ -974,6 +975,55 @@
         carousel.scrollLeft = paneWidth;
     }
 
+    async function prependMonthToTrack() {
+        if (isLoadingMore || !track || !carousel) return;
+        const panes = getMonthPanes();
+        if (!panes.length) return;
+        const first = panes[0];
+        const firstYear = parseInt(first.getAttribute('data-pane-year'), 10);
+        const firstMonth = parseInt(first.getAttribute('data-pane-month'), 10);
+        if (!Number.isFinite(firstYear) || !Number.isFinite(firstMonth)) return;
+        const prev = addMonths(firstYear, firstMonth, -1);
+        isLoadingMore = true;
+        try {
+            const pane = await fetchMonthPane(prev.year, prev.month);
+            pane.classList.add('calendar-month-container', 'month-pane');
+            const paneWidth = getPaneWidth();
+            const gap = getTrackGap();
+            track.prepend(pane);
+            carousel.scrollLeft += paneWidth + gap;
+            attachDayCardNavigation(pane);
+            updateHeatmapForPane(pane);
+        } catch (err) {
+            console.error('Failed to prepend month:', err);
+        } finally {
+            isLoadingMore = false;
+        }
+    }
+
+    async function appendMonthToTrack() {
+        if (isLoadingMore || !track) return;
+        const panes = getMonthPanes();
+        if (!panes.length) return;
+        const last = panes[panes.length - 1];
+        const lastYear = parseInt(last.getAttribute('data-pane-year'), 10);
+        const lastMonth = parseInt(last.getAttribute('data-pane-month'), 10);
+        if (!Number.isFinite(lastYear) || !Number.isFinite(lastMonth)) return;
+        const next = addMonths(lastYear, lastMonth, 1);
+        isLoadingMore = true;
+        try {
+            const pane = await fetchMonthPane(next.year, next.month);
+            pane.classList.add('calendar-month-container', 'month-pane');
+            track.append(pane);
+            attachDayCardNavigation(pane);
+            updateHeatmapForPane(pane);
+        } catch (err) {
+            console.error('Failed to append month:', err);
+        } finally {
+            isLoadingMore = false;
+        }
+    }
+
     async function go(delta) {
         if (!isExpanded || isAnimating) return;
         isAnimating = true;
@@ -982,30 +1032,56 @@
         monthPrevBtn?.classList.add('pointer-events-none', 'opacity-60');
         monthNextBtn?.classList.add('pointer-events-none', 'opacity-60');
 
-        const target = addMonths(currentYear, currentMonth, delta);
-        await fetchMonthPane(target.year, target.month);
-        await renderAdjacentPanes();
+        try {
+            const panes = getMonthPanes();
+            let currentIdx = panes.indexOf(currentSlot);
+            if (currentIdx < 0) {
+                currentIdx = panes.findIndex((p) => p.getAttribute('data-pane-key') === paneKey(currentYear, currentMonth));
+            }
+            if (currentIdx < 0) return;
+            const targetIdx = currentIdx + delta;
+            let targetPane;
 
-        const paneWidth = getPaneWidth();
-        const targetLeft = delta > 0 ? paneWidth * 2 : 0;
-        await scrollToOffset(targetLeft);
+            if (targetIdx < 0) {
+                await prependMonthToTrack();
+                targetPane = getMonthPanes()[0];
+            } else if (targetIdx >= panes.length) {
+                await appendMonthToTrack();
+                const updated = getMonthPanes();
+                targetPane = updated[updated.length - 1];
+            } else {
+                targetPane = panes[targetIdx];
+            }
 
-        currentYear = target.year;
-        currentMonth = target.month;
-        await renderAdjacentPanes();
-        snapToCenter();
+            if (!targetPane) return;
+            const targetYear = parseInt(targetPane.getAttribute('data-pane-year'), 10);
+            const targetMonth = parseInt(targetPane.getAttribute('data-pane-month'), 10);
+            if (!Number.isFinite(targetYear) || !Number.isFinite(targetMonth)) return;
 
-        const url = new URL(window.location.href);
-        url.searchParams.set('view', 'month');
-        url.searchParams.set('month', String(currentMonth));
-        url.searchParams.set('year', String(currentYear));
-        window.history.pushState({ month: currentMonth, year: currentYear }, '', url.toString());
+            const carouselRect = carousel.getBoundingClientRect();
+            const paneRect = targetPane.getBoundingClientRect();
+            const targetOffset = carousel.scrollLeft + paneRect.left - carouselRect.left;
+            await scrollToOffset(targetOffset);
 
-        monthPrevBtn?.removeAttribute('aria-disabled');
-        monthNextBtn?.removeAttribute('aria-disabled');
-        monthPrevBtn?.classList.remove('pointer-events-none', 'opacity-60');
-        monthNextBtn?.classList.remove('pointer-events-none', 'opacity-60');
-        isAnimating = false;
+            currentYear = targetYear;
+            currentMonth = targetMonth;
+            currentSlot = targetPane;
+            markCenterPane(targetPane);
+            setMonthHeader(currentYear, currentMonth);
+            updateNavHrefs();
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', 'month');
+            url.searchParams.set('month', String(currentMonth));
+            url.searchParams.set('year', String(currentYear));
+            window.history.pushState({ month: currentMonth, year: currentYear }, '', url.toString());
+        } finally {
+            monthPrevBtn?.removeAttribute('aria-disabled');
+            monthNextBtn?.removeAttribute('aria-disabled');
+            monthPrevBtn?.classList.remove('pointer-events-none', 'opacity-60');
+            monthNextBtn?.classList.remove('pointer-events-none', 'opacity-60');
+            isAnimating = false;
+        }
     }
 
 
@@ -1132,19 +1208,61 @@
     if (carousel && track && monthPane) {
         updateCenterState(true);
         onExpandedScroll = () => {
-            if (!isExpanded || isAnimating || !carousel) return;
+            if (!isExpanded || !carousel) return;
+
+            // Debounced header update: show the month most visible in viewport
             if (scrollSettleTimer) {
                 clearTimeout(scrollSettleTimer);
             }
             scrollSettleTimer = setTimeout(() => {
-                const paneWidth = getPaneWidth();
-                if (!paneWidth) return;
-                if (carousel.scrollLeft < paneWidth * 0.5) {
-                    go(-1);
-                } else if (carousel.scrollLeft > paneWidth * 1.5) {
-                    go(1);
+                if (!isExpanded || !carousel) return;
+                const carouselRect = carousel.getBoundingClientRect();
+                const panes = getMonthPanes();
+                let bestPane = null;
+                let bestOverlap = 0;
+                panes.forEach((pane) => {
+                    const paneRect = pane.getBoundingClientRect();
+                    const overlapStart = Math.max(paneRect.left, carouselRect.left);
+                    const overlapEnd = Math.min(paneRect.right, carouselRect.right);
+                    const overlap = Math.max(0, overlapEnd - overlapStart);
+                    if (overlap > bestOverlap) {
+                        bestOverlap = overlap;
+                        bestPane = pane;
+                    }
+                });
+                if (bestPane) {
+                    const year = parseInt(bestPane.getAttribute('data-pane-year'), 10);
+                    const month = parseInt(bestPane.getAttribute('data-pane-month'), 10);
+                    if (Number.isFinite(year) && Number.isFinite(month) && (year !== currentYear || month !== currentMonth)) {
+                        currentYear = year;
+                        currentMonth = month;
+                        currentSlot = bestPane;
+                        markCenterPane(bestPane);
+                        setMonthHeader(year, month);
+                        updateNavHrefs();
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('view', 'month');
+                        url.searchParams.set('month', String(month));
+                        url.searchParams.set('year', String(year));
+                        window.history.replaceState({ month, year }, '', url.toString());
+                    }
                 }
             }, 120);
+
+            // Infinite scroll: load more months when approaching the edges.
+            // isLoadingMore prevents concurrent loads; check runs on each scroll event for
+            // proactive prefetching but returns quickly when a load is already in progress.
+            if (!isLoadingMore && !isAnimating) {
+                const paneWidth = getPaneWidth();
+                if (paneWidth > 0) {
+                    if (carousel.scrollLeft < paneWidth * 1.5) {
+                        prependMonthToTrack();
+                    }
+                    if (carousel.scrollLeft > carousel.scrollWidth - carousel.clientWidth - paneWidth * 1.5) {
+                        appendMonthToTrack();
+                    }
+                }
+            }
         };
         carousel.addEventListener('scroll', onExpandedScroll, { passive: true });
     }
