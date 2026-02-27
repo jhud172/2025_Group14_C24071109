@@ -216,6 +216,7 @@ public class UserController {
     }
 
     // login page
+    @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "expired", required = false) String expired,
                                 @RequestParam(value = "devLogin", required = false) Boolean devLogin,
                                 Model model) {
