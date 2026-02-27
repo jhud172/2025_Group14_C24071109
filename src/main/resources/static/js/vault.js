@@ -113,6 +113,18 @@
             });
         });
 
+        // ── Make vault cards fully clickable ──────────────────────────
+        document.querySelectorAll(".vault-card").forEach(function (card) {
+            var link = card.querySelector("a[data-card-link]");
+            if (!link) return;
+            var href = link.href;
+            card.style.cursor = "pointer";
+            card.addEventListener("click", function (e) {
+                if (e.target.closest("a[href]:not([data-card-link]), button, input, select, textarea")) return;
+                window.location.href = href;
+            });
+        });
+
         // ── Sidebar collapsible sections ──────────────────────────────
         document.querySelectorAll("[data-vault-collapse]").forEach(function (toggle) {
             var targetId = toggle.getAttribute("data-vault-collapse");
