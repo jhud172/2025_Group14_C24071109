@@ -185,8 +185,6 @@
                 const allDone = tbody && [...tbody.querySelectorAll('[data-set-id]')]
                     .every(function (r) { return r.dataset.completed === 'true'; });
                 card.classList.toggle('is-completed', !!allDone);
-                const checkIcon = card.querySelector('.wp-exercise-card-header svg.text-emerald-500');
-                // rebuild check icon state
                 rebuildCardCheckIcon(card, !!allDone);
             }
             recalcSummary();
@@ -419,7 +417,7 @@
                         '<div class="wp-timer-display" data-timer-display>00:00</div>' +
                     '</div>' +
                     '<div class="flex items-center gap-2 flex-wrap">' +
-                        '<input type="number" min="1" max="3600" placeholder="secs" class="wp-timer-input" data-timer-input aria-label="Timer duration" />' +
+                        '<input type="number" min="1" max="3600" placeholder="secs" class="wp-timer-input" data-timer-input aria-label="Timer duration in seconds" />' +
                         '<button type="button" class="wp-timer-start" data-timer-start>Start</button>' +
                         '<button type="button" class="wp-timer-stop hidden" data-timer-stop>Stop</button>' +
                         '<button type="button" class="wp-timer-reset" data-timer-reset>Reset</button>' +

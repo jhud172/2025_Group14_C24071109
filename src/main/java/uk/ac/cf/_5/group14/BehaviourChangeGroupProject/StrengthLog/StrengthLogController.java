@@ -198,7 +198,7 @@ public class StrengthLogController {
         if (!session.getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
 
         var exerciseOpt = exerciseRepository.findById(exerciseId);
-        if (exerciseOpt.isEmpty()) return ResponseEntity.badRequest().body(Map.of("error", "Exercise not found"));
+        if (exerciseOpt.isEmpty()) return ResponseEntity.notFound().build();
 
         int nextOrder = session.getExerciseSessions().stream()
                 .mapToInt(ExerciseSession::getOrderIndex).max().orElse(-1) + 1;
