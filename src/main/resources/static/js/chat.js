@@ -22,6 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const inlineToast = document.getElementById("chatInlineToast");
     const proChatBtn = document.getElementById("chatProChatBtn");
 
+    const clearModal = document.getElementById("chatClearModal");
+    const clearModalCancel = document.getElementById("chatClearCancel");
+    const clearModalConfirm = document.getElementById("chatClearConfirm");
+
     if (!fab || !panel || !closeBtn || !clearBtn || !form || !input || !body || !sendBtn) {
         console.warn("Chat widget elements missing, skipping init");
         return;
@@ -577,7 +581,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     clearBtn.addEventListener("click", () => {
-        if (!confirm("Clear this chat?")) return;
+        if (clearModal) {
+            clearModal.classList.add("show");
+        }
+    });
+
+    clearModalCancel?.addEventListener("click", () => {
+        clearModal?.classList.remove("show");
+    });
+
+    clearModal?.addEventListener("click", (e) => {
+        if (e.target === clearModal) clearModal.classList.remove("show");
+    });
+
+    clearModalConfirm?.addEventListener("click", () => {
+        clearModal?.classList.remove("show");
 
         if (isAuthenticated) {
             renderHistory([]);
@@ -585,6 +603,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderUnauth();
         }
         localStorage.removeItem(STORAGE_KEY);
+        showInlineToast("✓ Chat history cleared");
 
         if (!isAuthenticated) return;
         const headers = {};

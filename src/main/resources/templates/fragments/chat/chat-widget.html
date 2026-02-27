@@ -31,10 +31,18 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                  stroke-linecap="round" stroke-linejoin="round"
                  class="h-7 w-7 text-emerald-600 dark:text-emerald-400">
-                <rect x="3" y="7" width="18" height="13" rx="3"/>
-                <path d="M8 12h.01M12 12h.01M16 12h.01"/>
-                <path d="M8 7V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/>
-                <circle cx="12" cy="2.5" r="1" fill="currentColor" stroke="none"/>
+                <!-- Robot head -->
+                <rect x="4" y="7" width="16" height="12" rx="3"/>
+                <!-- Eyes -->
+                <circle cx="9" cy="13" r="1.5" fill="currentColor" stroke="none"/>
+                <circle cx="15" cy="13" r="1.5" fill="currentColor" stroke="none"/>
+                <!-- Smile -->
+                <path d="M9.5 16.5a3.5 3.5 0 0 0 5 0"/>
+                <!-- Antenna -->
+                <path d="M12 7V4.5"/>
+                <circle cx="12" cy="3.5" r="1" fill="currentColor" stroke="none"/>
+                <!-- Ear bolts -->
+                <path d="M4 12H2M22 12h-2"/>
             </svg>
         </span>
     </button>
@@ -83,8 +91,7 @@
                 <button type="button"
                         id="chatProChatBtn"
                         th:attr="data-locked=${!isPremium}"
-                        class="chat-tab-btn active"
-                        :class="{ 'active': currentTab === 'chat' }">
+                        class="chat-tab-btn">
                     <span>Pro Chat</span>
                     <span th:if="${!isPremium}" aria-hidden="true" class="ml-1">🔒</span>
                 </button>
@@ -146,5 +153,31 @@
             </div>
         </div>
     </section>
+
+    <!-- Clear chat confirmation modal -->
+    <div id="chatClearModal"
+         class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40 p-4 opacity-0 pointer-events-none transition-opacity [&.show]:opacity-100 [&.show]:pointer-events-auto">
+        <div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+             role="dialog" aria-modal="true" aria-labelledby="chatClearModalTitle">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-950/40">
+                    <span class="text-xl" aria-hidden="true">🧹</span>
+                </div>
+                <div>
+                    <h3 id="chatClearModalTitle" class="text-base font-semibold text-slate-900 dark:text-slate-100">Clear Chat History</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">This cannot be undone</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-300">Are you sure you want to remove all chat history? All previous messages will be permanently deleted.</p>
+            <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button id="chatClearCancel"
+                        class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                        type="button">Cancel</button>
+                <button id="chatClearConfirm"
+                        class="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-700"
+                        type="button">Clear Chat</button>
+            </div>
+        </div>
+    </div>
 
 </div>
