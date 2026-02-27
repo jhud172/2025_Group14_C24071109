@@ -176,24 +176,24 @@
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Edit your details</h3>
                     <div class="grid gap-4 sm:grid-cols-2">
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{profile.username}">
-                            Username
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                            <span th:text="#{profile.username}">Username</span>
                             <input type="text" name="username" th:value="${user != null ? user.username : ''}" class="profile-input" th:disabled="${!canChangeUsername}" />
                             <p th:if="${profileFieldErrors != null &amp;&amp; profileFieldErrors.containsKey('username')}" class="mt-1 text-xs text-rose-600" th:text="${profileFieldErrors['username']}">Username error.</p>
                         </label>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{profile.email}">
-                            Email
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                            <span th:text="#{profile.email}">Email</span>
                             <input type="email" name="email" th:value="${user != null ? user.email : ''}" class="profile-input" />
                             <p th:if="${profileFieldErrors != null &amp;&amp; profileFieldErrors.containsKey('email')}" class="mt-1 text-xs text-rose-600" th:text="${profileFieldErrors['email']}">Email error.</p>
                         </label>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{profile.phone}">
-                            Phone number
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                            <span th:text="#{profile.phone}">Phone number</span>
                             <input type="tel" name="phoneNumber" th:value="${user != null &amp;&amp; user.phoneNumber != null ? user.phoneNumber : ''}" class="profile-input" />
                             <p th:if="${profileFieldErrors != null &amp;&amp; profileFieldErrors.containsKey('phoneNumber')}" class="mt-1 text-xs text-rose-600" th:text="${profileFieldErrors['phoneNumber']}">Phone error.</p>
                         </label>
                     </div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{profile.bio}">
-                        Bio
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <span th:text="#{profile.bio}">Bio</span>
                         <textarea name="bio" rows="3" class="profile-input" th:text="${user != null &amp;&amp; user.bio != null ? user.bio : ''}"></textarea>
                         <p th:if="${profileFieldErrors != null &amp;&amp; profileFieldErrors.containsKey('bio')}" class="mt-1 text-xs text-rose-600" th:text="${profileFieldErrors['bio']}">Bio error.</p>
                     </label>
@@ -270,7 +270,17 @@
                 <div class="grid gap-6 lg:grid-cols-2">
                     <!-- Permanent conditions -->
                     <div class="profile-settings-card">
-                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Permanent conditions</h3>
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                            Permanent conditions
+                            <span class="relative inline-flex group/tooltip">
+                                <svg class="h-4 w-4 cursor-pointer text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="About permanent conditions">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal text-slate-700 shadow-lg opacity-0 transition-opacity group-hover/tooltip:opacity-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                    A <strong>permanent condition</strong> affects your training indefinitely. Examples: chronic pain, diabetes. The AI and coaches will always factor this in when suggesting workouts or advice.
+                                </span>
+                            </span>
+                        </h3>
                         <ul class="mt-4 space-y-2">
                             <li th:if="${permanentConditions == null || permanentConditions.isEmpty()}" class="text-sm text-slate-500">No permanent conditions saved.</li>
                             <li th:each="condition : ${permanentConditions}"
@@ -293,7 +303,17 @@
                     </div>
                     <!-- Timed conditions -->
                     <div class="profile-settings-card">
-                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Timed conditions</h3>
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                            Timed conditions
+                            <span class="relative inline-flex group/tooltip">
+                                <svg class="h-4 w-4 cursor-pointer text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="About timed conditions">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal text-slate-700 shadow-lg opacity-0 transition-opacity group-hover/tooltip:opacity-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                    A <strong>timed condition</strong> lasts for a set number of days. Examples: injury recovery, post-surgery. Premium members receive inbox follow-ups when the condition period ends.
+                                </span>
+                            </span>
+                        </h3>
                         <ul class="mt-4 space-y-3">
                             <li th:if="${timedConditions == null || timedConditions.isEmpty()}" class="text-sm text-slate-500">No timed conditions saved.</li>
                             <li th:each="condition : ${timedConditions}"

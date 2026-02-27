@@ -52,7 +52,8 @@ public class SecurityConfig {
                     "/policies/**",
                     "/verify/email",
                     "/verify/email/code",
-                    "/verify/email/confirm"
+                    "/verify/email/confirm",
+                    "/verify/phone/code"
     };
     
     /*

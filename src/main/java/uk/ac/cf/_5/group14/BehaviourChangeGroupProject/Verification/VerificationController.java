@@ -17,6 +17,8 @@ import java.util.Optional;
 @Controller
 public class VerificationController {
 
+    private static final String RETURN_PHONE_CODE = "phone-code";
+
     private final EmailVerificationService emailVerificationService;
     private final PhoneVerificationService phoneVerificationService;
     private final AuthHelper authHelper;
@@ -119,11 +121,17 @@ public class VerificationController {
                 "verifySuccess",
                 messageSource.getMessage("verify.phone.sent", null, locale)
         );
-        return "redirect:/profile";
+        return "redirect:/verify/phone/code";
+    }
+
+    @GetMapping("/verify/phone/code")
+    public String showPhoneCodePage(Model model) {
+        return "verify/phone-code";
     }
 
     @PostMapping("/verify/phone/confirm")
     public String confirmPhoneVerification(@RequestParam("code") String code,
+                                           @RequestParam(name = "returnTo", required = false) String returnTo,
                                            RedirectAttributes redirectAttributes,
                                            Locale locale) {
         User user = authHelper.getAuthenticatedUser();
@@ -137,6 +145,7 @@ public class VerificationController {
                     "verifyError",
                     messageSource.getMessage(key, null, locale)
             );
+            return RETURN_PHONE_CODE.equals(returnTo) ? "redirect:/verify/phone/code" : "redirect:/profile";
         } else {
             redirectAttributes.addFlashAttribute(
                     "verifySuccess",

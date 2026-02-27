@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -85,6 +86,7 @@ public class SmtpEmailService implements EmailService {
         sendEmail(user.getEmail(), subject, body);
     }
 
+    @Async
     @Override
     public void sendEmailVerification(User user, String verifyUrl, String code, Instant expiresAt) {
         String subject = "Verify your email";
