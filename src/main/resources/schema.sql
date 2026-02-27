@@ -250,6 +250,8 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens
     id         BIGSERIAL PRIMARY KEY,
     user_id    BIGINT       NOT NULL,
     token      VARCHAR(120) NOT NULL,
+    code       VARCHAR(120),
+    attempts   INT          NOT NULL DEFAULT 0,
     expires_at TIMESTAMP    NOT NULL,
     used_at    TIMESTAMP,
     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,

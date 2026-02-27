@@ -50,7 +50,9 @@ public class SecurityConfig {
                 "/forgot-password",
                 "/reset-password",
                     "/policies/**",
-                    "/verify/email"
+                    "/verify/email",
+                    "/verify/email/code",
+                    "/verify/email/confirm"
     };
     
     /*

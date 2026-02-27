@@ -11,12 +11,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.GymProfile.GymProfile;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.GymProfile.GymProfileService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerProfile.TrainerProfile;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerProfile.TrainerProfileService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Verification.EmailVerificationService;
 
+@Slf4j
 @Controller
 public class UserController {
 
@@ -31,6 +34,9 @@ public class UserController {
     
     @Autowired
     private DevModeProperties devModeProperties;
+
+    @Autowired
+    private EmailVerificationService emailVerificationService;
 
     // signup choice
     @GetMapping("/signup")
@@ -82,7 +88,14 @@ public class UserController {
 
         userService.saveUser(user);
 
-        return "redirect:/login?registered";
+        try {
+            emailVerificationService.sendVerification(user);
+        } catch (Exception e) {
+            log.warn("Failed to send verification email to {} after client signup", user.getEmail(), e);
+        }
+
+        redirectAttributes.addFlashAttribute("verifyRegistered", true);
+        return "redirect:/verify/email/code?email=" + encodeEmail(user.getEmail());
     }
 
     @GetMapping("/signup/trainer")
@@ -135,7 +148,14 @@ public class UserController {
         profile.setWebsiteUrl(signupForm.getWebsiteUrl());
         trainerProfileService.updateProfile(savedUser.getId(), profile);
 
-        return "redirect:/login?registered";
+        try {
+            emailVerificationService.sendVerification(savedUser);
+        } catch (Exception e) {
+            log.warn("Failed to send verification email to {} after trainer signup", savedUser.getEmail(), e);
+        }
+
+        redirectAttributes.addFlashAttribute("verifyRegistered", true);
+        return "redirect:/verify/email/code?email=" + encodeEmail(savedUser.getEmail());
     }
 
     @GetMapping("/signup/gym")
@@ -185,11 +205,17 @@ public class UserController {
         profile.setContactPhone(signupForm.getContactPhone());
         gymProfileService.saveProfile(profile);
 
-        return "redirect:/login?registered";
+        try {
+            emailVerificationService.sendVerification(savedUser);
+        } catch (Exception e) {
+            log.warn("Failed to send verification email to {} after gym signup", savedUser.getEmail(), e);
+        }
+
+        redirectAttributes.addFlashAttribute("verifyRegistered", true);
+        return "redirect:/verify/email/code?email=" + encodeEmail(savedUser.getEmail());
     }
 
     // login page
-    @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "expired", required = false) String expired,
                                 @RequestParam(value = "devLogin", required = false) Boolean devLogin,
                                 Model model) {
@@ -251,5 +277,12 @@ public class UserController {
             return new String[]{parts[0], "Admin"};
         }
         return new String[]{parts[0], parts[1]};
+    }
+
+    private String encodeEmail(String email) {
+        if (email == null) {
+            return "";
+        }
+        return java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8);
     }
 }

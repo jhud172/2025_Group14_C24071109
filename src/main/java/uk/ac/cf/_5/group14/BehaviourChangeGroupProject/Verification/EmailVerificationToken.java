@@ -24,6 +24,12 @@ public class EmailVerificationToken {
     @Column(name = "token", nullable = false, length = 120, unique = true)
     private String token;
 
+    @Column(name = "code", length = 120)
+    private String code;
+
+    @Column(name = "attempts", nullable = false)
+    private int attempts = 0;
+
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
