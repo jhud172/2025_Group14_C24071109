@@ -193,12 +193,13 @@
             <!-- Note Cards -->
             <div class="vault-cards" th:if="${notes != null and !notes.isEmpty()}">
                 <div th:each="n : ${notes}"
-                     class="vault-card"
+                     class="vault-card group"
                      th:classappend="${n.pinned} ? ' pinned' : ''">
 
                     <!-- Clickable area -->
                     <a th:href="@{/vault/{id}(id=${n.id})}"
                        class="absolute inset-0 rounded-xl z-0"
+                       data-card-link
                        th:aria-label="${'Open: ' + n.title}"></a>
 
                     <div class="relative z-10">
