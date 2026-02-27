@@ -1,10 +1,12 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.ExerciseRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Repository.ExerciseSessionRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Repository.SetLogRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Repository.WorkoutSessionRepository;
@@ -28,6 +30,9 @@ public class StrengthLogController {
     @Autowired
     private SetLogRepository setLogRepository;
 
+    @Autowired
+    private ExerciseRepository exerciseRepository;
+
     @GetMapping("/workout-session/{id}")
     public String viewSession(@PathVariable Long id, @SessionAttribute("user") User user, Model model) {
         var sessionOpt = workoutSessionRepository.findById(id);
@@ -48,6 +53,9 @@ public class StrengthLogController {
             exerciseStateById.put(es.getId(), computeExerciseState(es));
         }
         model.addAttribute("exerciseStateById", exerciseStateById);
+
+        // All available exercises for the "Add Exercise" panel
+        model.addAttribute("allExercises", exerciseRepository.findAll());
 
         return "strengthlog/workout-session";
     }
@@ -87,8 +95,14 @@ public class StrengthLogController {
             dayDate = LocalDate.parse(day);
         }
 
+        List<ExerciseSession> exerciseSessions = session.getExerciseSessions()
+                .stream()
+                .sorted(Comparator.comparingInt(ExerciseSession::getOrderIndex))
+                .toList();
+
         model.addAttribute("workoutSession", session);
         model.addAttribute("day", dayDate);
+        model.addAttribute("exerciseSessions", exerciseSessions);
         return "strengthlog/completion";
     }
 
@@ -167,6 +181,176 @@ public class StrengthLogController {
         rollUpCompletion(es);
 
         return "redirect:/exercise-session/" + es.getId();
+    }
+
+    // ─── AJAX endpoints for the workout player ───────────────────────────────
+
+    @PostMapping("/workout-session/{id}/api/add-exercise")
+    @ResponseBody
+    public ResponseEntity<?> apiAddExercise(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user,
+            @RequestParam Long exerciseId
+    ) {
+        var sessionOpt = workoutSessionRepository.findById(id);
+        if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
+        var session = sessionOpt.get();
+        if (!session.getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
+
+        var exerciseOpt = exerciseRepository.findById(exerciseId);
+        if (exerciseOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        int nextOrder = session.getExerciseSessions().stream()
+                .mapToInt(ExerciseSession::getOrderIndex).max().orElse(-1) + 1;
+
+        ExerciseSession es = new ExerciseSession();
+        es.setWorkoutSession(session);
+        es.setExercise(exerciseOpt.get());
+        es.setOrderIndex(nextOrder);
+
+        SetLog firstSet = new SetLog();
+        firstSet.setExerciseSession(es);
+        firstSet.setSetNumber(1);
+        es.getSetLogs().add(firstSet);
+
+        session.getExerciseSessions().add(es);
+        workoutSessionRepository.save(session);
+
+        ExerciseSession saved = exerciseSessionRepository.findByWorkoutSessionOrderByOrderIndexAsc(session)
+                .stream().filter(e -> e.getOrderIndex() == nextOrder).findFirst().orElse(es);
+
+        return ResponseEntity.ok(Map.of(
+                "exerciseSessionId", saved.getId(),
+                "exerciseName", saved.getExercise().getName(),
+                "exerciseCategory", saved.getExercise().getCategory(),
+                "exerciseType", saved.getExercise().getType(),
+                "orderIndex", saved.getOrderIndex(),
+                "setId", saved.getSetLogs().isEmpty() ? 0 : saved.getSetLogs().get(0).getId()
+        ));
+    }
+
+    @PostMapping("/workout-session/{id}/api/reorder")
+    @ResponseBody
+    public ResponseEntity<?> apiReorder(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user,
+            @RequestParam Long exerciseSessionId,
+            @RequestParam String direction
+    ) {
+        var sessionOpt = workoutSessionRepository.findById(id);
+        if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
+        var session = sessionOpt.get();
+        if (!session.getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
+
+        List<ExerciseSession> ordered = session.getExerciseSessions().stream()
+                .sorted(Comparator.comparingInt(ExerciseSession::getOrderIndex))
+                .collect(java.util.stream.Collectors.toList());
+
+        int idx = -1;
+        for (int i = 0; i < ordered.size(); i++) {
+            if (ordered.get(i).getId().equals(exerciseSessionId)) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx < 0) return ResponseEntity.badRequest().body(Map.of("error", "Exercise session not found"));
+
+        int swapIdx = "up".equals(direction) ? idx - 1 : idx + 1;
+        if (swapIdx < 0 || swapIdx >= ordered.size()) return ResponseEntity.ok(Map.of("moved", false));
+
+        ExerciseSession current = ordered.get(idx);
+        ExerciseSession swap = ordered.get(swapIdx);
+        int tmp = current.getOrderIndex();
+        current.setOrderIndex(swap.getOrderIndex());
+        swap.setOrderIndex(tmp);
+        exerciseSessionRepository.save(current);
+        exerciseSessionRepository.save(swap);
+
+        return ResponseEntity.ok(Map.of("moved", true));
+    }
+
+    @PostMapping("/exercise-session/{id}/api/add-set")
+    @ResponseBody
+    public ResponseEntity<?> apiAddSet(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user
+    ) {
+        var esOpt = exerciseSessionRepository.findById(id);
+        if (esOpt.isEmpty()) return ResponseEntity.notFound().build();
+        var es = esOpt.get();
+        if (!es.getWorkoutSession().getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
+
+        int next = es.getSetLogs().stream().mapToInt(SetLog::getSetNumber).max().orElse(0) + 1;
+        SetLog s = new SetLog();
+        s.setExerciseSession(es);
+        s.setSetNumber(next);
+        es.getSetLogs().add(s);
+        exerciseSessionRepository.save(es);
+
+        SetLog saved = es.getSetLogs().stream()
+                .filter(sl -> sl.getSetNumber() == next).findFirst().orElse(s);
+
+        return ResponseEntity.ok(Map.of(
+                "setId", saved.getId(),
+                "setNumber", saved.getSetNumber()
+        ));
+    }
+
+    @PostMapping("/set-log/{id}/api/update")
+    @ResponseBody
+    public ResponseEntity<?> apiUpdateSet(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user,
+            @RequestParam(required = false) Double weight,
+            @RequestParam(required = false) Integer reps,
+            @RequestParam(required = false) String notes,
+            @RequestParam(name = "completed", defaultValue = "false") boolean completed,
+            @RequestParam(required = false) String setType
+    ) {
+        var opt = setLogRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        var s = opt.get();
+        if (!s.getExerciseSession().getWorkoutSession().getUser().getId().equals(user.getId()))
+            return ResponseEntity.status(403).build();
+
+        s.setWeight(weight);
+        s.setReps(reps);
+        s.setNotes(notes);
+        s.setCompleted(completed);
+        if (setType != null && !setType.isBlank()) {
+            s.setSetType(setType);
+        }
+        setLogRepository.save(s);
+        rollUpCompletion(s.getExerciseSession());
+
+        var ws = s.getExerciseSession().getWorkoutSession();
+        return ResponseEntity.ok(Map.of(
+                "setId", s.getId(),
+                "completed", s.isCompleted(),
+                "workoutCompleted", ws.isCompleted()
+        ));
+    }
+
+    @PostMapping("/set-log/{id}/api/delete")
+    @ResponseBody
+    public ResponseEntity<?> apiDeleteSet(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user
+    ) {
+        var opt = setLogRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.notFound().build();
+        var s = opt.get();
+        var es = s.getExerciseSession();
+        if (!es.getWorkoutSession().getUser().getId().equals(user.getId()))
+            return ResponseEntity.status(403).build();
+
+        es.getSetLogs().removeIf(sl -> sl.getId().equals(id));
+        exerciseSessionRepository.save(es);
+        setLogRepository.delete(s);
+        renumberSets(es);
+        rollUpCompletion(es);
+
+        return ResponseEntity.ok(Map.of("deleted", true));
     }
 
     private void rollUpCompletion(ExerciseSession es) {
