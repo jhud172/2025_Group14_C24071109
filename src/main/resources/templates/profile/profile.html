@@ -375,6 +375,55 @@
             <!-- Body -->
             <div class="profile-settings-panel-body">
 
+                <!-- Appearance -->
+                <div class="profile-settings-panel-section">
+                    <h3 class="profile-settings-panel-section-title">Appearance</h3>
+                    <p class="profile-settings-panel-section-subtitle">Choose between light and dark mode.</p>
+                    <div class="mt-4">
+                        <div class="profile-theme-picker" id="theme-picker">
+                            <button type="button" class="profile-theme-option"
+                                    data-theme="LIGHT"
+                                    th:attr="aria-pressed=${userSettings != null and userSettings.theme.toString() == 'LIGHT' ? 'true' : 'false'}"
+                                    aria-label="Light mode">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                                </svg>
+                                Light
+                            </button>
+                            <button type="button" class="profile-theme-option"
+                                    data-theme="SYSTEM"
+                                    th:attr="aria-pressed=${userSettings != null and userSettings.theme.toString() == 'SYSTEM' ? 'true' : 'false'}"
+                                    aria-label="System default">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                Auto
+                            </button>
+                            <button type="button" class="profile-theme-option"
+                                    data-theme="DARK"
+                                    th:attr="aria-pressed=${userSettings != null and userSettings.theme.toString() == 'DARK' ? 'true' : 'false'}"
+                                    aria-label="Dark mode">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                                </svg>
+                                Dark
+                            </button>
+                        </div>
+                        <!-- Hidden form for no-JS fallback -->
+                        <form th:action="@{/profile/settings/theme}" method="post" id="theme-form" class="hidden">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <input type="hidden" name="theme" id="theme-form-value"
+                                   th:value="${userSettings != null ? userSettings.theme.toString() : 'SYSTEM'}" />
+                        </form>
+                        <p id="theme-save-feedback"
+                           class="mt-2 hidden text-xs text-emerald-600 dark:text-emerald-400"
+                           role="status" aria-live="polite">Appearance saved.</p>
+                    </div>
+                </div>
+
                 <!-- Subscription -->
                 <div class="profile-settings-panel-section">
                     <h3 class="profile-settings-panel-section-title">Subscription</h3>
@@ -686,6 +735,91 @@
         if (settingsUpdated || exportRequested || deleteError) {
             openSettingsDrawer();
         }
+    })();
+
+    /* Theme Picker */
+    (function () {
+        const picker   = document.getElementById('theme-picker');
+        const feedback = document.getElementById('theme-save-feedback');
+        const csrfInput = document.querySelector('#theme-form input[name="_csrf"]') ||
+                          document.querySelector('input[name="_csrf"]');
+
+        if (!picker) return;
+
+        function applyTheme(theme) {
+            if (theme === 'DARK') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else if (theme === 'LIGHT') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+                /* SYSTEM: match OS preference */
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.classList.toggle('dark', prefersDark);
+                document.documentElement.setAttribute('data-theme', 'system');
+            }
+        }
+
+        picker.addEventListener('click', function (e) {
+            const btn = e.target.closest('.profile-theme-option');
+            if (!btn) return;
+
+            const theme = btn.getAttribute('data-theme');
+            if (!theme) return;
+
+            /* Update button pressed states */
+            picker.querySelectorAll('.profile-theme-option').forEach(function (b) {
+                b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+            });
+
+            /* Apply the theme immediately */
+            applyTheme(theme);
+
+            /* Persist via fetch POST */
+            const csrfToken  = csrfInput ? csrfInput.value : null;
+            const csrfName   = csrfInput ? csrfInput.name  : '_csrf';
+            const body = new URLSearchParams({ theme: theme });
+            if (csrfToken) body.append(csrfName, csrfToken);
+
+            fetch('/profile/settings/theme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body.toString()
+            }).then(function (res) {
+                if (res.ok || res.redirected) {
+                    if (feedback) {
+                        feedback.textContent = 'Appearance saved.';
+                        feedback.classList.remove('hidden', 'text-rose-600', 'dark:text-rose-400');
+                        feedback.classList.add('text-emerald-600', 'dark:text-emerald-400');
+                        clearTimeout(feedback._t);
+                        feedback._t = setTimeout(function () {
+                            feedback.classList.add('hidden');
+                        }, 2500);
+                    }
+                } else {
+                    if (feedback) {
+                        feedback.textContent = 'Could not save preference.';
+                        feedback.classList.remove('hidden', 'text-emerald-600', 'dark:text-emerald-400');
+                        feedback.classList.add('text-rose-600', 'dark:text-rose-400');
+                        clearTimeout(feedback._t);
+                        feedback._t = setTimeout(function () {
+                            feedback.classList.add('hidden');
+                        }, 3000);
+                    }
+                }
+            }).catch(function () {
+                if (feedback) {
+                    feedback.textContent = 'Could not save preference.';
+                    feedback.classList.remove('hidden', 'text-emerald-600', 'dark:text-emerald-400');
+                    feedback.classList.add('text-rose-600', 'dark:text-rose-400');
+                    clearTimeout(feedback._t);
+                    feedback._t = setTimeout(function () {
+                        feedback.classList.add('hidden');
+                    }, 3000);
+                }
+            });
+        });
     })();
 </script>
 </th:block>

@@ -17,6 +17,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscription;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.ThemePreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
@@ -267,6 +268,27 @@ public class ProfileController {
                 redirectAttributes.addFlashAttribute("settingsError", "Invalid calendar layout preference.");
             }
         }
+        return "redirect:/profile";
+    }
+
+    @PostMapping("/profile/settings/theme")
+    public String updateTheme(@RequestParam(value = "theme", required = false) String theme,
+                              RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        ThemePreference themePref = ThemePreference.SYSTEM;
+        if (theme != null) {
+            try {
+                themePref = ThemePreference.valueOf(theme.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                themePref = ThemePreference.SYSTEM;
+            }
+        }
+        UserSettings settings = userSettingsService.getOrCreate(user);
+        userSettingsService.update(user,
+                settings != null ? settings.getLanguage() : "en",
+                themePref,
+                settings != null && settings.isEasyMode());
+        redirectAttributes.addFlashAttribute("settingsUpdated", true);
         return "redirect:/profile";
     }
 
