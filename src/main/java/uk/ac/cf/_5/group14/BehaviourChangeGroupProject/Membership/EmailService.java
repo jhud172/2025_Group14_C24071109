@@ -51,14 +51,16 @@ public interface EmailService {
     );
 
     /**
-     * Send an email verification link to a user
+     * Send an email verification link and code to a user
      * @param user The user to notify
      * @param verifyUrl The verification URL containing the token
+     * @param code The 6-digit verification code
      * @param expiresAt When the token expires
      */
     void sendEmailVerification(
         User user,
         String verifyUrl,
+        String code,
         Instant expiresAt
     );
 }

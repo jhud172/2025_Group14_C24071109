@@ -86,12 +86,14 @@ public class SmtpEmailService implements EmailService {
     }
 
     @Override
-    public void sendEmailVerification(User user, String verifyUrl, Instant expiresAt) {
+    public void sendEmailVerification(User user, String verifyUrl, String code, Instant expiresAt) {
         String subject = "Verify your email";
         String body = "Hello " + user.getFirstName() + " " + user.getLastName() + ",\n\n"
-            + "Please verify your email address using the link below.\n"
-            + "This link is valid until " + DATE_FORMATTER.format(expiresAt) + ":\n"
+            + "Please verify your email address.\n\n"
+            + "Your verification code is: " + code + "\n\n"
+            + "Enter this code on the verification page, or click the link below:\n"
             + verifyUrl + "\n\n"
+            + "This code is valid until " + DATE_FORMATTER.format(expiresAt) + ".\n\n"
             + "If you did not request this, you can ignore this email.";
         sendEmail(user.getEmail(), subject, body);
     }

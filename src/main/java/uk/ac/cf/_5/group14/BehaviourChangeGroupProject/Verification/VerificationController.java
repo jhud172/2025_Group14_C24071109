@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -19,15 +20,18 @@ public class VerificationController {
     private final EmailVerificationService emailVerificationService;
     private final PhoneVerificationService phoneVerificationService;
     private final AuthHelper authHelper;
+    private final UserService userService;
     private final MessageSource messageSource;
 
     public VerificationController(EmailVerificationService emailVerificationService,
                                   PhoneVerificationService phoneVerificationService,
                                   AuthHelper authHelper,
+                                  UserService userService,
                                   MessageSource messageSource) {
         this.emailVerificationService = emailVerificationService;
         this.phoneVerificationService = phoneVerificationService;
         this.authHelper = authHelper;
+        this.userService = userService;
         this.messageSource = messageSource;
     }
 
@@ -42,7 +46,7 @@ public class VerificationController {
                 "verifySuccess",
                 messageSource.getMessage("verify.email.sent", null, locale)
         );
-        return "redirect:/profile";
+        return "redirect:/verify/email/code";
     }
 
     @GetMapping("/verify/email")
@@ -55,6 +59,46 @@ public class VerificationController {
             model.addAttribute("verificationSuccess", messageSource.getMessage("verify.email.success", null, locale));
         }
         return "verify/email-confirm";
+    }
+
+    @GetMapping("/verify/email/code")
+    public String showEmailCodePage(@RequestParam(required = false) String email, Model model) {
+        if (email != null && !email.isBlank()) {
+            model.addAttribute("verifyEmail", email);
+        }
+        return "verify/email-code";
+    }
+
+    @PostMapping("/verify/email/confirm")
+    public String confirmEmailCode(@RequestParam("code") String code,
+                                   @RequestParam(name = "email", required = false) String email,
+                                   RedirectAttributes redirectAttributes,
+                                   Locale locale) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null && email != null && !email.isBlank()) {
+            user = userService.findByEmail(email);
+        }
+        if (user == null) {
+            return "redirect:/login";
+        }
+        Optional<String> error = emailVerificationService.confirmCode(user, code);
+        String redirectBase = "redirect:/verify/email/code";
+        if (email != null && !email.isBlank()) {
+            redirectBase += "?email=" + java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8);
+        }
+        if (error.isPresent()) {
+            String key = mapEmailCodeErrorKey(error.get());
+            redirectAttributes.addFlashAttribute(
+                    "verificationError",
+                    messageSource.getMessage(key, null, locale)
+            );
+        } else {
+            redirectAttributes.addFlashAttribute(
+                    "verificationSuccess",
+                    messageSource.getMessage("verify.email.success", null, locale)
+            );
+        }
+        return redirectBase;
     }
 
     @PostMapping("/verify/phone/send")
@@ -111,6 +155,21 @@ public class VerificationController {
             case "Verification token not found." -> "verify.email.error.notFound";
             case "Verification token already used." -> "verify.email.error.used";
             case "Verification token expired." -> "verify.email.error.expired";
+            default -> "verify.email.error.generic";
+        };
+    }
+
+    private String mapEmailCodeErrorKey(String message) {
+        if (message == null) {
+            return "verify.email.error.generic";
+        }
+        return switch (message) {
+            case "User not found." -> "verify.email.error.generic";
+            case "No verification code found. Please request a new code." -> "verify.email.code.error.missing";
+            case "Verification code already used." -> "verify.email.error.used";
+            case "Verification code expired. Please request a new code." -> "verify.email.error.expired";
+            case "Too many attempts. Please request a new code." -> "verify.email.code.error.attempts";
+            case "Invalid code. Please try again." -> "verify.email.code.error.invalid";
             default -> "verify.email.error.generic";
         };
     }
