@@ -12,4 +12,10 @@ public interface WorkoutPlayerSessionService {
     BigDecimal computeTotalVolume(Long sessionId);
 
     Optional<WorkoutSession> findById(Long sessionId);
+
+    WorkoutSessionSet addSet(Long exerciseId, Integer reps, BigDecimal weight, BigDecimal rpe);
+
+    WorkoutSessionSet updateSet(Long setId, Integer reps, BigDecimal weight, BigDecimal rpe);
+
+    WorkoutSessionSet completeSet(Long setId);
 }

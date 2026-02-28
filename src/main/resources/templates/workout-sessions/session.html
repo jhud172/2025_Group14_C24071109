@@ -1,0 +1,359 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Workout Session', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+
+<div th:fragment="styles">
+</div>
+
+<div th:fragment="content">
+<!-- Bootstrap data for JS -->
+<script th:inline="javascript">
+    window.__sessionBootstrap = {
+        sessionId:   /*[[${session.sessionId}]]*/   0,
+        layoutType:  /*[[${layoutType}]]*/           'FLOW',
+        workoutName: /*[[${session.workoutName}]]*/  '',
+        status:      /*[[${session.status}]]*/       'IN_PROGRESS',
+        csrfHeader:  /*[[${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}]]*/ 'X-CSRF-TOKEN',
+        csrfToken:   /*[[${_csrf != null ? _csrf.token : ''}]]*/ '',
+        exercises: /*[[${session.exercises}]]*/ []
+    };
+</script>
+
+<div id="wsu-root" class="wsu-root">
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         START SCREEN
+         Shows before workout begins; hidden via JS once started
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="wsu-start-screen" class="wsu-start-screen">
+
+        <div class="wsu-start-card">
+            <!-- Label -->
+            <p class="wsu-start-label">
+                <svg class="inline-block mr-1 h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+                </svg>
+                Ready to train
+            </p>
+
+            <!-- Workout name -->
+            <h1 class="wsu-start-title" th:text="${session.workoutName ?: 'Workout'}">Workout</h1>
+
+            <!-- Meta: exercises count + template -->
+            <p class="wsu-start-meta">
+                <span th:if="${session.exercises != null}"
+                      th:text="${#lists.size(session.exercises)} + ' exercise' + (${#lists.size(session.exercises)} == 1 ? '' : 's')">0 exercises</span>
+                <th:block th:if="${session.exercises != null and !#lists.isEmpty(session.exercises)}">&bull;</th:block>
+                <span th:text="${session.templateName ?: 'Flow'}">Flow</span> layout
+            </p>
+
+            <!-- Exercise tags / muscle groups -->
+            <div class="wsu-tag-row" th:if="${session.exercises != null and !#lists.isEmpty(session.exercises)}">
+                <th:block th:each="ex, iter : ${session.exercises}" th:if="${iter.index < 6}">
+                    <span class="wsu-tag" th:if="${ex.exerciseName != null}" th:text="${ex.exerciseName}">Exercise</span>
+                </th:block>
+                <span class="wsu-tag wsu-tag-more"
+                      th:if="${session.exercises != null and #lists.size(session.exercises) > 6}"
+                      th:text="'+' + (${#lists.size(session.exercises)} - 6) + ' more'">+N more</span>
+            </div>
+
+            <!-- Estimated duration placeholder -->
+            <div class="wsu-start-duration">
+                <svg class="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z"/>
+                </svg>
+                <span th:text="${session.exercises != null ? #lists.size(session.exercises) * 5 + '–' + #lists.size(session.exercises) * 8 + ' min (est.)' : '—'}">—</span>
+            </div>
+
+            <!-- CTA -->
+            <button id="wsu-start-btn" class="wsu-start-btn" type="button">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"/>
+                </svg>
+                Start Workout
+            </button>
+            <a th:href="@{/workouts}" class="wsu-cancel-link">Back to workouts</a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FLOW TEMPLATE
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="wsu-flow" class="wsu-flow wsu-hidden"
+         th:if="${layoutType == 'FLOW' or layoutType == 'FUTURISTIC_FLOW' or layoutType == null}">
+
+        <!-- Top bar -->
+        <div class="wsu-flow-topbar">
+            <button class="wsu-flow-back" id="wsu-flow-back" type="button" aria-label="Back to start">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                </svg>
+            </button>
+            <span class="wsu-flow-workout-name" th:text="${session.workoutName ?: 'Workout'}">Workout</span>
+            <span class="wsu-flow-counter" id="wsu-flow-counter">1 / <span th:text="${session.exercises != null ? #lists.size(session.exercises) : 0}">0</span></span>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="wsu-flow-progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div class="wsu-flow-progress-fill" id="wsu-flow-progress-fill" style="width:0%"></div>
+        </div>
+
+        <!-- Summary chips -->
+        <div class="wsu-flow-summary">
+            <div class="wsu-flow-chip">
+                <span class="wsu-flow-chip-val" id="wsu-flow-elapsed">00:00</span>
+                <span class="wsu-flow-chip-lbl">elapsed</span>
+            </div>
+            <div class="wsu-flow-chip">
+                <span class="wsu-flow-chip-val" id="wsu-flow-volume">0</span>
+                <span class="wsu-flow-chip-lbl">kg vol.</span>
+            </div>
+            <div class="wsu-flow-chip">
+                <span class="wsu-flow-chip-val" id="wsu-flow-sets-done">0</span>
+                <span class="wsu-flow-chip-lbl">sets done</span>
+            </div>
+        </div>
+
+        <!-- Exercise slides container -->
+        <div class="wsu-flow-slides-wrapper">
+            <div class="wsu-flow-slides" id="wsu-flow-slides">
+
+                <!-- Slide for each exercise -->
+                <div th:each="ex, iter : ${session.exercises}"
+                     class="wsu-flow-slide"
+                     th:attr="data-slide-index=${iter.index},
+                              data-exercise-id=${ex.id},
+                              data-exercise-name=${ex.exerciseName}">
+
+                    <div class="wsu-flow-slide-header">
+                        <div class="wsu-flow-slide-num" th:text="${iter.index + 1}">1</div>
+                        <div class="wsu-flow-slide-info">
+                            <h2 class="wsu-flow-slide-name" th:text="${ex.exerciseName ?: 'Exercise'}">Exercise</h2>
+                            <span class="wsu-flow-slide-cat" th:if="${ex.exerciseCategory != null}" th:text="${ex.exerciseCategory}">Category</span>
+                        </div>
+                    </div>
+
+                    <!-- Set panel -->
+                    <div class="wsu-flow-sets" th:attr="data-exercise-id=${ex.id}">
+                        <div th:each="set, si : ${ex.sets}"
+                             class="wsu-flow-set-row"
+                             th:classappend="${set.completedAt != null} ? ' wsu-set-done' : ''"
+                             th:attr="data-set-id=${set.id},
+                                      data-completed=${set.completedAt != null ? 'true' : 'false'}">
+                            <span class="wsu-set-label" th:text="'Set ' + (${si.index + 1})">Set 1</span>
+                            <div class="wsu-set-inputs">
+                                <label class="wsu-set-field">
+                                    <span>Weight</span>
+                                    <input type="number" step="0.5" min="0" class="wsu-set-input"
+                                           data-field="weight"
+                                           th:value="${set.weight}" placeholder="kg"/>
+                                </label>
+                                <label class="wsu-set-field">
+                                    <span>Reps</span>
+                                    <input type="number" min="0" class="wsu-set-input"
+                                           data-field="reps"
+                                           th:value="${set.reps}" placeholder="—"/>
+                                </label>
+                                <label class="wsu-set-field">
+                                    <span>RPE</span>
+                                    <input type="number" step="0.5" min="1" max="10" class="wsu-set-input"
+                                           data-field="rpe"
+                                           th:value="${set.rpe}" placeholder="—"/>
+                                </label>
+                            </div>
+                            <button type="button" class="wsu-set-complete-btn"
+                                    th:classappend="${set.completedAt != null} ? ' wsu-set-complete-btn--done' : ''"
+                                    th:text="${set.completedAt != null} ? '✓ Done' : 'Complete set'">Complete set</button>
+                        </div>
+
+                        <!-- Empty state when no sets yet -->
+                        <p class="wsu-flow-no-sets" th:if="${ex.sets == null or #lists.isEmpty(ex.sets)}">No sets yet — add one below.</p>
+                    </div>
+
+                    <!-- Add set -->
+                    <button type="button" class="wsu-add-set-btn"
+                            th:attr="data-exercise-id=${ex.id}">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                        </svg>
+                        Add set
+                    </button>
+
+                    <!-- Notes -->
+                    <p class="wsu-flow-notes" th:if="${ex.notes != null and !ex.notes.isEmpty()}" th:text="${ex.notes}"></p>
+                </div>
+
+            </div><!-- /wsu-flow-slides -->
+        </div>
+
+        <!-- Prev / Next navigation -->
+        <div class="wsu-flow-nav">
+            <button id="wsu-flow-prev" class="wsu-flow-nav-btn wsu-flow-prev" type="button" disabled>
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                </svg>
+                Prev
+            </button>
+            <button id="wsu-flow-next" class="wsu-flow-nav-btn wsu-flow-next" type="button">
+                Next
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Finish workout sticky bar -->
+        <div class="wsu-finish-bar">
+            <div>
+                <p class="wsu-finish-vol-label">Total volume</p>
+                <p class="wsu-finish-vol-val" id="wsu-flow-vol-footer">0 kg×reps</p>
+            </div>
+            <button id="wsu-flow-finish-btn" class="wsu-finish-btn" type="button">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Finish Session
+            </button>
+        </div>
+    </div><!-- /wsu-flow -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PROFESSIONAL TEMPLATE  (two-column layout)
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="wsu-professional" class="wsu-professional wsu-hidden"
+         th:if="${layoutType == 'PROFESSIONAL'}">
+
+        <!-- Top bar -->
+        <div class="wsu-pro-topbar">
+            <button class="wsu-flow-back" id="wsu-pro-back" type="button" aria-label="Back to start">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                </svg>
+            </button>
+            <span class="wsu-flow-workout-name" th:text="${session.workoutName ?: 'Workout'}">Workout</span>
+            <div class="wsu-pro-topbar-right">
+                <span class="wsu-flow-chip-val" id="wsu-pro-elapsed">00:00</span>
+                <button id="wsu-pro-finish-btn" class="wsu-finish-btn wsu-pro-finish-inline" type="button">Finish</button>
+            </div>
+        </div>
+
+        <div class="wsu-pro-layout">
+            <!-- Left: exercise list -->
+            <aside class="wsu-pro-sidebar">
+                <div class="wsu-pro-sidebar-header">Exercises</div>
+                <ul class="wsu-pro-exercise-list" id="wsu-pro-exercise-list">
+                    <li th:each="ex, iter : ${session.exercises}"
+                        class="wsu-pro-exercise-item"
+                        th:classappend="${iter.first} ? ' wsu-pro-exercise-item--active' : ''"
+                        th:attr="data-exercise-id=${ex.id},
+                                 data-exercise-name=${ex.exerciseName},
+                                 data-exercise-idx=${iter.index}">
+                        <span class="wsu-pro-ex-check" th:attr="data-ex-id=${ex.id}">○</span>
+                        <span class="wsu-pro-ex-name" th:text="${ex.exerciseName ?: 'Exercise'}">Exercise</span>
+                        <span class="wsu-pro-ex-sets-count" th:attr="data-ex-id=${ex.id}"
+                              th:text="${ex.sets != null ? #lists.size(ex.sets) : 0} + ' sets'">0 sets</span>
+                        <!-- Quick add set button in list -->
+                        <button type="button" class="wsu-pro-quick-add"
+                                th:attr="data-exercise-id=${ex.id}"
+                                title="Add set">+</button>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Right: set editor panel -->
+            <main class="wsu-pro-editor" id="wsu-pro-editor">
+                <div class="wsu-pro-editor-placeholder" id="wsu-pro-placeholder">
+                    <p>Select an exercise to edit sets</p>
+                </div>
+
+                <!-- This is populated by JS when exercise is selected -->
+                <div id="wsu-pro-editor-content" class="wsu-hidden">
+                    <div class="wsu-pro-editor-header">
+                        <h2 id="wsu-pro-ex-title" class="wsu-pro-editor-title">Exercise</h2>
+                        <span id="wsu-pro-ex-cat" class="wsu-flow-slide-cat"></span>
+                    </div>
+
+                    <div id="wsu-pro-sets-container" class="wsu-pro-sets-container">
+                        <!-- Sets rendered by JS -->
+                    </div>
+
+                    <button type="button" id="wsu-pro-add-set-btn" class="wsu-add-set-btn">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                        </svg>
+                        Add set
+                    </button>
+                </div>
+            </main>
+        </div>
+    </div><!-- /wsu-professional -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         REST TIMER OVERLAY
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="wsu-rest-overlay" class="wsu-rest-overlay wsu-hidden" role="dialog" aria-modal="true" aria-label="Rest timer">
+        <div class="wsu-rest-panel">
+            <p class="wsu-rest-label">Rest</p>
+            <div class="wsu-rest-ring-wrapper">
+                <svg class="wsu-rest-ring" viewBox="0 0 120 120" aria-hidden="true">
+                    <circle class="wsu-rest-ring-track" cx="60" cy="60" r="52"/>
+                    <circle class="wsu-rest-ring-fill" id="wsu-rest-ring-fill" cx="60" cy="60" r="52"
+                            stroke-dasharray="326.7" stroke-dashoffset="0"/>
+                </svg>
+                <span class="wsu-rest-time" id="wsu-rest-time">1:30</span>
+            </div>
+            <div class="wsu-rest-controls">
+                <button type="button" class="wsu-rest-adj-btn" id="wsu-rest-minus">−15s</button>
+                <button type="button" class="wsu-rest-skip-btn" id="wsu-rest-skip">Skip</button>
+                <button type="button" class="wsu-rest-adj-btn" id="wsu-rest-plus">+15s</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SUMMARY PANEL (shown after finishing)
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="wsu-summary" class="wsu-summary-panel wsu-hidden">
+        <div class="wsu-summary-card">
+            <div class="wsu-summary-icon" aria-hidden="true">🎉</div>
+            <h2 class="wsu-summary-title">Session Complete!</h2>
+            <p class="wsu-summary-subtitle" th:text="${session.workoutName ?: 'Workout'}">Workout</p>
+
+            <div class="wsu-summary-stats">
+                <div class="wsu-summary-stat">
+                    <span class="wsu-summary-stat-val" id="wsu-sum-volume">—</span>
+                    <span class="wsu-summary-stat-lbl">kg volume</span>
+                </div>
+                <div class="wsu-summary-stat">
+                    <span class="wsu-summary-stat-val" id="wsu-sum-duration">—</span>
+                    <span class="wsu-summary-stat-lbl">duration</span>
+                </div>
+                <div class="wsu-summary-stat">
+                    <span class="wsu-summary-stat-val" id="wsu-sum-sets">—</span>
+                    <span class="wsu-summary-stat-lbl">sets completed</span>
+                </div>
+            </div>
+
+            <p class="wsu-summary-compare">Compare vs. last session: —</p>
+
+            <div class="wsu-summary-actions">
+                <a th:href="@{/workouts}" class="wsu-summary-exit-btn">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/>
+                    </svg>
+                    Save &amp; Exit
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /wsu-root -->
+</div><!-- /content -->
+
+<div th:fragment="pageScripts">
+    <script th:inline="javascript">
+        // Exercises data already set above in __sessionBootstrap
+    </script>
+    <script src="/js/session-ui.js" defer></script>
+</div>
+
+</th:block>

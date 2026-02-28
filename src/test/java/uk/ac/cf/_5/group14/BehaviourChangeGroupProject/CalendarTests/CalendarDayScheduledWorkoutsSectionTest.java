@@ -133,7 +133,7 @@ class CalendarDayScheduledWorkoutsSectionTest {
             .andExpect(content().string(not(containsString("Scheduled exercises"))))
                 .andExpect(content().string(containsString("Leg day")))
                 .andExpect(content().string(containsString("Complete Workout")))
-            .andExpect(content().string(containsString("/workout-session/55/completion?day=2026-01-15")));
+            .andExpect(content().string(containsString("/workout-sessions/start/99")));
     }
 
     @TestConfiguration

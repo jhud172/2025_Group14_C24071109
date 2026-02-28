@@ -21,6 +21,8 @@ public class WorkoutPlayerSessionServiceImpl implements WorkoutPlayerSessionServ
     private final WorkoutTemplateService templateService;
     private final UserRepository userRepository;
     private final WorkoutRepository workoutRepository;
+    private final WorkoutSessionExerciseRepository exerciseRepository;
+    private final WorkoutSessionSetRepository setRepository;
 
     @Override
     public WorkoutSession startSession(Long userId, Long workoutId) {
@@ -92,5 +94,37 @@ public class WorkoutPlayerSessionServiceImpl implements WorkoutPlayerSessionServ
     @Override
     public Optional<WorkoutSession> findById(Long sessionId) {
         return sessionRepository.findById(sessionId);
+    }
+
+    @Override
+    public WorkoutSessionSet addSet(Long sessionExerciseId, Integer reps, BigDecimal weight, BigDecimal rpe) {
+        WorkoutSessionExercise ex = exerciseRepository.findById(sessionExerciseId)
+                .orElseThrow(() -> new IllegalArgumentException("Exercise not found: " + sessionExerciseId));
+        int nextIndex = ex.getSets() != null ? ex.getSets().size() : 0;
+        WorkoutSessionSet set = new WorkoutSessionSet();
+        set.setSessionExercise(ex);
+        set.setSetIndex(nextIndex);
+        set.setReps(reps);
+        set.setWeight(weight);
+        set.setRpe(rpe);
+        return setRepository.save(set);
+    }
+
+    @Override
+    public WorkoutSessionSet updateSet(Long setId, Integer reps, BigDecimal weight, BigDecimal rpe) {
+        WorkoutSessionSet set = setRepository.findById(setId)
+                .orElseThrow(() -> new IllegalArgumentException("Set not found: " + setId));
+        if (reps != null) set.setReps(reps);
+        if (weight != null) set.setWeight(weight);
+        if (rpe != null) set.setRpe(rpe);
+        return setRepository.save(set);
+    }
+
+    @Override
+    public WorkoutSessionSet completeSet(Long setId) {
+        WorkoutSessionSet set = setRepository.findById(setId)
+                .orElseThrow(() -> new IllegalArgumentException("Set not found: " + setId));
+        set.setCompletedAt(Instant.now());
+        return setRepository.save(set);
     }
 }
