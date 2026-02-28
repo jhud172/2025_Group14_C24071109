@@ -235,6 +235,28 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         return userSettingsRepository.save(settings);
     }
 
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public UserSettings updateHideAiOneShotWarning(User user, boolean hide) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+        settings.setHideAiOneShotWarning(hide);
+        return userSettingsRepository.save(settings);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public UserSettings updatePreferredWorkoutTemplate(User user, Long templateId) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+        settings.setPreferredWorkoutTemplateId(templateId);
+        return userSettingsRepository.save(settings);
+    }
+
     private int clamp(Integer value, int min, int max, int fallback) {
         if (value == null) {
             return fallback;

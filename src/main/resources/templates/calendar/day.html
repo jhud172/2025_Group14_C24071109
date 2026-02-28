@@ -10,7 +10,7 @@
 
 <div id="day-main-content"
      class="day-view-wrapper mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4"
-     th:attr="data-date=${date}, data-today=${todayDate}, data-prev-date=${prevDate}, data-next-date=${nextDate}">
+     th:attr="data-date=${date}, data-today=${todayDate}, data-prev-date=${prevDate}, data-next-date=${nextDate}, data-day-theme=${dayTheme}">
 
     <!-- ========== TOP NAVIGATION ROW ========== -->
     <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -152,7 +152,8 @@
                                         name="dailyFocus"
                                         data-testid="daily-focus-select"
                                         onchange="this.form.submit()"
-                                    th:disabled="${hasAnyPreferences != null && !hasAnyPreferences}"
+                                    th:disabled="${(hasAnyPreferences != null && !hasAnyPreferences) || isOptimised}"
+                                    th:title="${isOptimised ? 'Locked by AI Optimise' : ''}"
                                     class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 sm:w-72">
                                     <option value="" th:selected="${dailyFocus == null || #strings.isEmpty(dailyFocus)}">Select a focus…</option>
                                     <option th:if="${dailyFocus != null && !#strings.isEmpty(dailyFocus) && (dailyFocusOptions == null || !dailyFocusOptions.contains(dailyFocus))}"
@@ -172,13 +173,18 @@
                                 <button type="button"
                                         id="ai-optimise-btn"
                                         class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
-                                        th:attr="data-date=${date}">
+                                        th:attr="data-date=${date},data-optimised=${isOptimised},data-hide-warning=${hideAiOneShotWarning}"
+                                        th:disabled="${isOptimised}"
+                                        th:classappend="${isOptimised} ? 'opacity-50 cursor-not-allowed' : ''">
                                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.347a3.001 3.001 0 01-2.003.667H9.009a3.001 3.001 0 01-2.003-.667l-.347-.347z"/>
                                     </svg>
                                     Optimise with AI
                                 </button>
-                                <span id="ai-optimised-badge" class="hidden inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300" title="AI has optimised your daily focus for this date">
+                                <span id="ai-optimised-badge"
+                                      th:classappend="${!isOptimised} ? 'hidden' : ''"
+                                      class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
+                                      title="AI has optimised your daily focus for this date">
                                     <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                     </svg>
