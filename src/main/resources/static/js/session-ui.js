@@ -14,6 +14,10 @@
 
     if (!SESSION_ID) return;
 
+    // ─── SVG Icons ───────────────────────────────────────────────────────────
+
+    var SVG_CHEVRON_RIGHT = '<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>';
+
     // ─── DOM helpers ────────────────────────────────────────────────────────
 
     function $(sel, ctx) { return (ctx || document).querySelector(sel); }
@@ -268,7 +272,6 @@
         if (skip)  skip.addEventListener('click',  hideRestTimer);
         if (minus) minus.addEventListener('click', function () {
             restRemaining = Math.max(0, restRemaining - 15);
-            restTotal     = Math.max(restRemaining, restTotal);
             updateRestDisplay();
         });
         if (plus)  plus.addEventListener('click',  function () {
@@ -385,7 +388,7 @@
                 nextBtn.textContent = 'Last exercise';
             } else {
                 nextBtn.disabled = false;
-                nextBtn.innerHTML = 'Next <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>';
+                nextBtn.innerHTML = 'Next ' + SVG_CHEVRON_RIGHT;
             }
         }
     }

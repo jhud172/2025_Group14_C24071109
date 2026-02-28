@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExercise;
+import org.springframework.web.bind.annotation.*;import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExercise;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExerciseRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Exercise;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.ExerciseRepository;
@@ -109,7 +108,7 @@ public class WorkoutPlayerController {
 
     // ─── Update set ──────────────────────────────────────────────────────────
 
-    @RequestMapping(value = "/workout-session-sets/{setId}", method = {RequestMethod.PATCH, RequestMethod.POST})
+    @PostMapping("/workout-session-sets/{setId}")
     @ResponseBody
     public ResponseEntity<?> updateSet(
             @PathVariable Long setId,
