@@ -321,17 +321,42 @@
 
         const tabs = Array.from(tabNav.querySelectorAll('[role="tab"]'));
         const panels = tabs.map(t => document.getElementById('tab-panel-' + t.dataset.tabTarget));
+        const pill = document.getElementById('day-tab-pill');
 
-        function activateTab(tab) {
+        function updatePill(activeTab) {
+            if (!pill || !activeTab) return;
+            const navRect = tabNav.getBoundingClientRect();
+            const tabRect = activeTab.getBoundingClientRect();
+            const scrollLeft = tabNav.scrollLeft || 0;
+            const left = tabRect.left - navRect.left + scrollLeft;
+            pill.style.width = tabRect.width + 'px';
+            pill.style.transform = 'translateX(' + left + 'px)';
+        }
+
+        function activateTab(tab, pushHash) {
             tabs.forEach((t, i) => {
                 const isActive = t === tab;
                 t.setAttribute('aria-selected', isActive ? 'true' : 'false');
                 t.setAttribute('tabindex', isActive ? '0' : '-1');
                 t.classList.toggle('is-active', isActive);
                 if (panels[i]) {
-                    panels[i].classList.toggle('hidden', !isActive);
+                    if (isActive) {
+                        panels[i].classList.remove('hidden');
+                        // Force re-animation
+                        void panels[i].offsetWidth;
+                    } else {
+                        panels[i].classList.add('hidden');
+                    }
                 }
             });
+            updatePill(tab);
+            // URL hash persistence
+            const hash = tab.dataset.tabTarget;
+            if (hash && pushHash !== false) {
+                try {
+                    history.replaceState(null, '', '#' + hash);
+                } catch(e) {}
+            }
         }
 
         tabs.forEach(tab => {
@@ -358,6 +383,9 @@
                     e.preventDefault();
                     tabs[tabs.length - 1].focus();
                     activateTab(tabs[tabs.length - 1]);
+                } else if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    activateTab(tab);
                 }
             });
         });
@@ -382,6 +410,29 @@
                 const addBtn = document.getElementById('open-add-task');
                 if (addBtn) addBtn.click();
             });
+        });
+
+        // Check URL hash for initial tab
+        const hash = location.hash.replace('#', '');
+        const hashTab = hash ? tabs.find(t => t.dataset.tabTarget === hash) : null;
+        if (hashTab) {
+            activateTab(hashTab, false);
+        }
+
+        // Initialize pill position after paint
+        requestAnimationFrame(() => {
+            const activeTab = tabs.find(t => t.getAttribute('aria-selected') === 'true') || tabs[0];
+            if (activeTab) updatePill(activeTab);
+        });
+
+        // Update pill on resize (debounced)
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const activeTab = tabs.find(t => t.getAttribute('aria-selected') === 'true') || tabs[0];
+                if (activeTab) updatePill(activeTab);
+            }, 100);
         });
     }
 
@@ -539,6 +590,229 @@
             .replace(/"/g, '&quot;');
     }
 
+    // ==================== Timed Focus Countdown ====================
+    function initTimedFocusCountdown() {
+        const section = document.querySelector('[data-testid="timed-focus"]');
+        if (!section) return;
+
+        // Find nearest upcoming task with a time (from task items)
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+        let nearest = null;
+        let nearestMinutes = Infinity;
+
+        document.querySelectorAll('[data-task-item]').forEach(el => {
+            const timeStr = el.getAttribute('data-task-time');
+            const status = el.getAttribute('data-task-status');
+            if (!timeStr || status === 'done') return;
+            const [h, m] = timeStr.split(':').map(Number);
+            const taskMinutes = h * 60 + m;
+            const diff = taskMinutes - currentMinutes;
+            if (diff >= 0 && diff < nearestMinutes) {
+                nearestMinutes = diff;
+                nearest = { timeStr, minutes: taskMinutes, diff };
+            }
+        });
+
+        if (!nearest) return;
+
+        // Check if currently active (within 30-min window)
+        const isActive = nearest.diff === 0 || (currentMinutes >= nearest.minutes - 5 && currentMinutes <= nearest.minutes + 30);
+        if (isActive) {
+            section.setAttribute('data-timed-focus-active', 'true');
+        }
+
+        // Show countdown only if within 60 minutes
+        if (nearest.diff > 60) return;
+
+        // Create countdown element
+        let countdownEl = section.querySelector('.timed-focus-countdown');
+        if (!countdownEl) {
+            countdownEl = document.createElement('span');
+            countdownEl.className = 'timed-focus-countdown block mt-1';
+            const valueEl = section.querySelector('[data-testid="timed-focus-value"]');
+            if (valueEl) valueEl.after(countdownEl);
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            const diffSec = nearest.minutes * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds());
+            if (diffSec <= 0) {
+                countdownEl.textContent = 'Now';
+                return;
+            }
+            const m = Math.floor(diffSec / 60);
+            const s = diffSec % 60;
+            countdownEl.textContent = 'In ' + m + 'm ' + String(s).padStart(2, '0') + 's';
+        }
+
+        updateCountdown();
+        const timer = setInterval(() => {
+            updateCountdown();
+            const currentTime = new Date();
+            if (currentTime.getHours() * 60 + currentTime.getMinutes() > nearest.minutes + 30) {
+                clearInterval(timer);
+                if (countdownEl) countdownEl.remove();
+                section.removeAttribute('data-timed-focus-active');
+            }
+        }, 1000);
+    }
+
+    // ==================== AI Optimise Modal ====================
+    function initAiOptimiseModal() {
+        const btn = document.getElementById('ai-optimise-btn');
+        const modal = document.getElementById('ai-optimise-modal');
+        const cancelBtn = document.getElementById('ai-optimise-cancel');
+        const confirmBtn = document.getElementById('ai-optimise-confirm');
+        const badge = document.getElementById('ai-optimised-badge');
+        const dontShowCheck = document.getElementById('ai-optimise-dont-show');
+
+        if (!btn || !modal) return;
+
+        const dateAttr = btn.getAttribute('data-date');
+        const storageKey = 'ai-optimise-skip-warning';
+        const lockedKey = 'ai-optimise-locked-' + dateAttr;
+
+        // Check if already optimised for this date
+        if (localStorage.getItem(lockedKey) === '1') {
+            applyOptimisedState();
+            return;
+        }
+
+        function openModal() {
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            if (cancelBtn) cancelBtn.focus();
+            document.addEventListener('keydown', handleEscape);
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            document.removeEventListener('keydown', handleEscape);
+            btn.focus();
+        }
+
+        function handleEscape(e) {
+            if (e.key === 'Escape') closeModal();
+        }
+
+        function applyOptimisedState() {
+            btn.disabled = true;
+            btn.setAttribute('aria-disabled', 'true');
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            if (badge) badge.classList.remove('hidden');
+            // Lock the daily focus select
+            const focusSelect = document.getElementById('daily-focus-select');
+            if (focusSelect) {
+                focusSelect.disabled = true;
+                focusSelect.setAttribute('title', 'Locked by AI Optimise');
+            }
+        }
+
+        btn.addEventListener('click', () => {
+            if (localStorage.getItem(storageKey) === '1') {
+                // Skip warning, go straight
+                performOptimise();
+            } else {
+                openModal();
+            }
+        });
+
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                if (dontShowCheck && dontShowCheck.checked) {
+                    localStorage.setItem(storageKey, '1');
+                }
+                closeModal();
+                performOptimise();
+            });
+        }
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        function performOptimise() {
+            localStorage.setItem(lockedKey, '1');
+            applyOptimisedState();
+        }
+    }
+
+    // ==================== Quick Complete Toggle ====================
+    function initQuickComplete() {
+        // Get CSRF token from any existing form in the page
+        function getCsrf() {
+            const inp = document.querySelector('input[name="_csrf"]');
+            return inp ? inp.value : null;
+        }
+
+        function getCsrfParam() {
+            const inp = document.querySelector('input[name="_csrf"]');
+            const name = inp ? inp.getAttribute('name') : '_csrf';
+            return name;
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target && e.target.closest ? e.target.closest('[data-quick-complete]') : null;
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const taskId = btn.getAttribute('data-task-id');
+            const date = btn.getAttribute('data-task-date');
+            if (!taskId || !date) return;
+
+            const csrf = getCsrf();
+            if (!csrf) return;
+
+            const taskItem = btn.closest('[data-task-item]');
+            const isDone = btn.classList.contains('is-done');
+            const originalStatus = taskItem ? (taskItem.getAttribute('data-task-status') || 'todo') : 'todo';
+            const newDone = !isDone;
+
+            // Optimistic UI update
+            btn.classList.toggle('is-done', newDone);
+            btn.setAttribute('aria-pressed', newDone ? 'true' : 'false');
+            if (taskItem) {
+                taskItem.setAttribute('data-task-status', newDone ? 'done' : 'todo');
+                taskItem.classList.toggle('bg-green-50', newDone);
+                taskItem.classList.toggle('dark:bg-green-950/20', newDone);
+                // Update status chip text
+                const chip = taskItem.querySelector('[data-testid="task-status-chip"]');
+                if (chip) chip.textContent = newDone ? 'Done' : (originalStatus === 'late' ? 'Late' : 'To do');
+            }
+
+            const body = new URLSearchParams();
+            body.append('taskId', taskId);
+            body.append(getCsrfParam(), csrf);
+
+            fetch('/calendar/day/' + date + '/toggle-complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: body.toString()
+            }).catch(() => {
+                // Revert on error
+                btn.classList.toggle('is-done', isDone);
+                btn.setAttribute('aria-pressed', isDone ? 'true' : 'false');
+                if (taskItem) {
+                    taskItem.setAttribute('data-task-status', originalStatus);
+                    taskItem.classList.toggle('bg-green-50', isDone);
+                    taskItem.classList.toggle('dark:bg-green-950/20', isDone);
+                    const chip = taskItem.querySelector('[data-testid="task-status-chip"]');
+                    if (chip) chip.textContent = isDone ? 'Done' : (originalStatus === 'late' ? 'Late' : 'To do');
+                }
+            });
+        });
+    }
+
     // ==================== Initialize Everything ====================
     function init() {
         // Wait for DOM to be ready
@@ -559,6 +833,9 @@
         initTabs();
         initTaskFilter();
         buildTimeline();
+        initTimedFocusCountdown();
+        initAiOptimiseModal();
+        initQuickComplete();
         
         // Refresh upcoming task highlights every minute
         setInterval(highlightUpcomingTasks, 60000);
