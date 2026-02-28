@@ -3414,6 +3414,115 @@ body.calendar-schedule-open .calendar-week-view {
     padding: 0.2rem 0.38rem;
   }
 }
+/* ===== WEEK VIEW: PHONE LAYOUT (≤640px) =====
+ * Stack the 7 day-cards vertically (single column) so task/workout
+ * names have full width and are readable on iPhone/small screens.
+ * Must come AFTER the 480px block above so it takes precedence.
+ */
+@media (max-width: 640px) {
+  /* Remove horizontal scroll — not needed in single-column layout */
+  .calendar-week-view .calendar-month-container {
+    overflow-x: visible;
+  }
+
+  /* Hide the top Mon/Tue/…/Sun row — each card shows its own day name */
+  .calendar-week-view .calendar-day-headers {
+    display: none;
+  }
+
+  /* Single-column vertical stack, no forced min-width */
+  .calendar-week-view .calendar-month-grid {
+    min-width: 0 !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+
+  /* Let cards grow to fit their content */
+  .calendar-week-view .calendar-week-card {
+    min-height: auto;
+  }
+
+  /* Allow item titles to wrap so full names are visible */
+  .calendar-week-view .calendar-item-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  /* Allow grouped item labels to wrap */
+  .calendar-week-view .calendar-grouped-item span {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  /* Remove max-height so all items can be seen by scrolling */
+  .calendar-week-view .calendar-singular-list {
+    max-height: none;
+  }
+
+  /* Keep the day header in a compact horizontal row */
+  .calendar-week-view .calendar-week-card-header {
+    flex-direction: row;
+    align-items: center;
+    min-height: auto;
+    padding: 0.75rem;
+  }
+
+  .calendar-week-view .calendar-week-day-number {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .calendar-week-view .calendar-week-day-date {
+    font-size: 1.25rem;
+  }
+
+  .calendar-week-view .calendar-week-day-name {
+    font-size: 0.75rem;
+  }
+
+  .calendar-week-view .calendar-day-content {
+    padding: 0 0.75rem 0.75rem 0.75rem;
+  }
+}
+/* ===== MONTH VIEW: ITEM READABILITY ON MOBILE (≤640px) =====
+ * In the 2-column grid on phones, cards are narrow (~120px content).
+ * Allow item titles to wrap to 2 lines so more of the name shows.
+ */
+@media (max-width: 640px) {
+  /* Slightly taller cards to accommodate 2-line titles */
+  .calendar-month-view .calendar-day-card {
+    min-height: 15rem;
+    height: 15rem;
+    max-height: 15rem;
+  }
+
+  /* Allow item title to show 2 lines instead of 1 */
+  .calendar-month-view .calendar-item-title {
+    white-space: normal;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: unset;
+  }
+
+  /* Allow grouped item labels to wrap to 2 lines */
+  .calendar-month-view .calendar-grouped-item span {
+    white-space: normal;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  /* Give singular list a bit more height for the taller items */
+  .calendar-month-view .calendar-singular-list {
+    max-height: 9rem;
+  }
+}
 .calendar-preview-confirm {
   display: flex;
   align-items: center;
