@@ -355,7 +355,9 @@
             if (hash && pushHash !== false) {
                 try {
                     history.replaceState(null, '', '#' + hash);
-                } catch(e) {}
+                } catch(e) {
+                    // history API may fail in sandboxed iframes; safe to ignore
+                }
             }
         }
 
@@ -617,8 +619,13 @@
 
         if (!nearest) return;
 
+        function getNowMinutes() {
+            const t = new Date();
+            return t.getHours() * 60 + t.getMinutes();
+        }
+
         // Check if currently active (within 30-min window)
-        const isActive = nearest.diff === 0 || (currentMinutes >= nearest.minutes - 5 && currentMinutes <= nearest.minutes + 30);
+        const isActive = currentMinutes >= nearest.minutes - 5 && currentMinutes <= nearest.minutes + 30;
         if (isActive) {
             section.setAttribute('data-timed-focus-active', 'true');
         }
@@ -650,8 +657,7 @@
         updateCountdown();
         const timer = setInterval(() => {
             updateCountdown();
-            const currentTime = new Date();
-            if (currentTime.getHours() * 60 + currentTime.getMinutes() > nearest.minutes + 30) {
+            if (getNowMinutes() > nearest.minutes + 30) {
                 clearInterval(timer);
                 if (countdownEl) countdownEl.remove();
                 section.removeAttribute('data-timed-focus-active');
@@ -757,6 +763,11 @@
             return name;
         }
 
+        function chipLabel(isDone, status) {
+            if (isDone) return 'Done';
+            return status === 'late' ? 'Late' : 'To do';
+        }
+
         document.addEventListener('click', (e) => {
             const btn = e.target && e.target.closest ? e.target.closest('[data-quick-complete]') : null;
             if (!btn) return;
@@ -779,12 +790,11 @@
             btn.classList.toggle('is-done', newDone);
             btn.setAttribute('aria-pressed', newDone ? 'true' : 'false');
             if (taskItem) {
-                taskItem.setAttribute('data-task-status', newDone ? 'done' : 'todo');
+                taskItem.setAttribute('data-task-status', newDone ? 'done' : originalStatus);
                 taskItem.classList.toggle('bg-green-50', newDone);
                 taskItem.classList.toggle('dark:bg-green-950/20', newDone);
-                // Update status chip text
                 const chip = taskItem.querySelector('[data-testid="task-status-chip"]');
-                if (chip) chip.textContent = newDone ? 'Done' : (originalStatus === 'late' ? 'Late' : 'To do');
+                if (chip) chip.textContent = chipLabel(newDone, originalStatus);
             }
 
             const body = new URLSearchParams();
@@ -799,7 +809,7 @@
                 },
                 body: body.toString()
             }).catch(() => {
-                // Revert on error
+                // Revert on network/server error
                 btn.classList.toggle('is-done', isDone);
                 btn.setAttribute('aria-pressed', isDone ? 'true' : 'false');
                 if (taskItem) {
@@ -807,7 +817,7 @@
                     taskItem.classList.toggle('bg-green-50', isDone);
                     taskItem.classList.toggle('dark:bg-green-950/20', isDone);
                     const chip = taskItem.querySelector('[data-testid="task-status-chip"]');
-                    if (chip) chip.textContent = isDone ? 'Done' : (originalStatus === 'late' ? 'Late' : 'To do');
+                    if (chip) chip.textContent = chipLabel(isDone, originalStatus);
                 }
             });
         });

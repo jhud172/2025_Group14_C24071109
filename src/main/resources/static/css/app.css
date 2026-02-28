@@ -4566,6 +4566,111 @@ body.calendar-schedule-open .calendar-week-view {
     max-height: 32rem;
   }
 }
+/* ===== ANIMATED TAB PILL INDICATOR ===== */
+.day-tab-nav {
+  position: relative; /* override existing - needed for pill */
+}
+.day-tab-pill {
+  position: absolute;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, rgb(16, 185, 129), rgb(5, 150, 105));
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  will-change: transform, width;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-pill {
+    transition: none;
+  }
+}
+/* ===== SECTION TRANSITION ANIMATION ===== */
+.day-tab-panel:not(.hidden) {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes sectionEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.hidden) {
+    animation: none;
+  }
+}
+/* ===== TIMED FOCUS PULSE (active window) ===== */
+[data-timed-focus-active="true"] {
+  animation: timedFocusPulse 2.5s ease-in-out infinite;
+}
+@keyframes timedFocusPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+/* Countdown badge */
+.timed-focus-countdown {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgb(5, 150, 105);
+  letter-spacing: 0.02em;
+}
+.dark .timed-focus-countdown {
+  color: rgb(52, 211, 153);
+}
+/* ===== AI OPTIMISE MODAL ===== */
+.ai-optimise-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.ai-optimise-modal {
+  width: 100%;
+  max-width: 28rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: white;
+  padding: 1.5rem;
+  box-shadow: 0 24px 48px -12px rgba(0,0,0,0.25);
+  animation: scaleIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.dark .ai-optimise-modal {
+  background: rgb(15, 23, 42);
+  border-color: rgba(51, 65, 85, 0.8);
+}
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+/* ===== QUICK COMPLETE ANIMATION ===== */
+@keyframes checkPop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.quick-complete-btn.is-done {
+  animation: checkPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
 /**
  * Detail/View Pages - Unified Component
  * 
@@ -6337,6 +6442,14 @@ html:not(.dark) .week-day-card:has(.schedule-day-rest-action:is(.dark *)) {
 .day-tab-panel.workout-preview-tooltip {
   display: none;
 }
+.day-tab-panel:not(.workout-preview-tooltip) {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.workout-preview-tooltip) {
+    animation: none;
+  }
+}
 .group:hover .workout-preview-tooltip {
   display: block;
 }
@@ -6999,6 +7112,14 @@ html:not(.dark) .week-day-card:has(.advanced-control-btn:hover:is(.dark *)) {
   }
 .day-tab-panel.workout-preview-tooltip {
   display: none;
+}
+.day-tab-panel:not(.workout-preview-tooltip) {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.workout-preview-tooltip) {
+    animation: none;
+  }
 }
 }
 @media (max-width: 640px) {
@@ -9958,6 +10079,14 @@ html:not(.dark) .week-day-card:has(.workout-badge.badge-success:is(.dark *)) {
 .day-tab-panel.workout-wizard-step:not(:last-child)::after {
   display: none;
 }
+.day-tab-panel:not(.workout-wizard-step:not(:last-child))::after {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.workout-wizard-step:not(:last-child))::after {
+    animation: none;
+  }
+}
     
     .schedule-day-column {
     grid-column: span 1 / span 1;
@@ -10075,6 +10204,14 @@ html:not(.dark) .week-day-card:has(.workout-badge.badge-success:is(.dark *)) {
 }
 .day-tab-panel.studio-mode-panel {
   display: none;
+}
+.day-tab-panel:not(.studio-mode-panel) {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.studio-mode-panel) {
+    animation: none;
+  }
 }
 .studio-mode-panel.active {
   display: block;
@@ -11409,6 +11546,14 @@ html:not(.dark) .week-day-card:has(.workout-badge.badge-success:is(.dark *)) {
 }
 .day-tab-panel.custom-exercise-overlay {
   display: none;
+}
+.day-tab-panel:not(.custom-exercise-overlay) {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.custom-exercise-overlay) {
+    animation: none;
+  }
 }
 .custom-exercise-overlay.active {
   display: block;
@@ -13173,6 +13318,14 @@ html:not(.dark) .week-day-card:has(.tcc-insight-value:is(.dark *)) {
 }
 .day-tab-panel.tcc-hidden {
   display: none;
+}
+.day-tab-panel:not(.tcc-hidden) {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.tcc-hidden) {
+    animation: none;
+  }
 }
 .tcc-fade-enter {
   opacity: 0;
@@ -20311,6 +20464,14 @@ html:not(.dark) .week-day-card:has(.text-emerald-400) {
 .day-tab-panel.cd-date-badge {
   display: none;
 }
+.day-tab-panel:not(.cd-date-badge) {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.cd-date-badge) {
+    animation: none;
+  }
+}
 @media (min-width: 640px) {
   .cd-date-badge {
     display: flex;
@@ -21718,6 +21879,14 @@ html:not(.dark) .week-day-card:has(.chat-icon-btn-premium:hover:is(.dark *)) {
 .day-tab-panel.chat-fab-premium {
   display: none;
 }
+.day-tab-panel:not(.chat-fab-premium) {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.chat-fab-premium) {
+    animation: none;
+  }
+}
     
     .chat-panel-premium {
       /* Expand nearly full width */
@@ -22577,6 +22746,14 @@ html:not(.dark) .week-day-card:has(.quick-actions-icon-btn-premium:hover:is(.dar
   }
 .day-tab-panel.quick-actions-fab-premium {
   display: none;
+}
+.day-tab-panel:not(.quick-actions-fab-premium) {
+  animation: sectionEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-tab-panel:not(.quick-actions-fab-premium) {
+    animation: none;
+  }
 }
     
     .quick-actions-panel-premium {
@@ -23850,6 +24027,10 @@ html:not(.dark) .week-day-card:has(.quick-actions-icon-btn-premium:hover:is(.dar
 .border-emerald-200\/70 {
   border-color: rgb(167 243 208 / 0.7);
 }
+.border-emerald-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(110 231 183 / var(--tw-border-opacity, 1));
+}
 .border-emerald-400 {
   --tw-border-opacity: 1;
   border-color: rgb(52 211 153 / var(--tw-border-opacity, 1));
@@ -24985,6 +25166,10 @@ html:not(.dark) .week-day-card:has(.quick-actions-icon-btn-premium:hover:is(.dar
 .text-amber-300 {
   --tw-text-opacity: 1;
   color: rgb(252 211 77 / var(--tw-text-opacity, 1));
+}
+.text-amber-500 {
+  --tw-text-opacity: 1;
+  color: rgb(245 158 11 / var(--tw-text-opacity, 1));
 }
 .text-amber-600 {
   --tw-text-opacity: 1;
@@ -26154,6 +26339,10 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
   --tw-bg-opacity: 1;
   background-color: rgb(29 78 216 / var(--tw-bg-opacity, 1));
 }
+.hover\:bg-emerald-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 250 229 / var(--tw-bg-opacity, 1));
+}
 .hover\:bg-emerald-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(236 253 245 / var(--tw-bg-opacity, 1));
@@ -26794,6 +26983,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:bg-emerald-950\/40:is(.dark *) {
   background-color: rgb(2 44 34 / 0.4);
 }
+.dark\:bg-emerald-950\/50:is(.dark *) {
+  background-color: rgb(2 44 34 / 0.5);
+}
 .dark\:bg-gray-700:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(55 65 81 / var(--tw-bg-opacity, 1));
@@ -27292,6 +27484,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:ring-white\/10:is(.dark *) {
   --tw-ring-color: rgb(255 255 255 / 0.1);
 }
+.dark\:ring-white\/20:is(.dark *) {
+  --tw-ring-color: rgb(255 255 255 / 0.2);
+}
 .dark\:scrollbar-thumb-slate-700:is(.dark *) {
   --scrollbar-thumb: #334155 !important;
 }
@@ -27353,6 +27548,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 }
 .dark\:hover\:bg-emerald-950\/30:hover:is(.dark *) {
   background-color: rgb(2 44 34 / 0.3);
+}
+.dark\:hover\:bg-emerald-950\/50:hover:is(.dark *) {
+  background-color: rgb(2 44 34 / 0.5);
 }
 .dark\:hover\:bg-red-600:hover:is(.dark *) {
   --tw-bg-opacity: 1;
