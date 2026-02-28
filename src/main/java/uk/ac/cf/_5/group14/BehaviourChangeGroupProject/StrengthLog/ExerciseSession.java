@@ -27,6 +27,12 @@ public class ExerciseSession {
 
     private int orderIndex = 0;
 
+    @Column(nullable = false)
+    private String mode = "NORMAL";
+
+    @Column(name = "group_key")
+    private String groupKey;
+
     private boolean completed = false;
 
     @OneToMany(mappedBy = "exerciseSession", cascade = CascadeType.ALL, orphanRemoval = true)
