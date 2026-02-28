@@ -677,13 +677,20 @@
         if (!btn || !modal) return;
 
         const dateAttr = btn.getAttribute('data-date');
+        // Server already sets disabled/badge for previously optimised dates.
+        // JS only needs to handle the "skip warning" preference from localStorage.
         const storageKey = 'ai-optimise-skip-warning';
-        const lockedKey = 'ai-optimise-locked-' + dateAttr;
 
-        // Check if already optimised for this date
-        if (localStorage.getItem(lockedKey) === '1') {
-            applyOptimisedState();
+        // If already optimised from server, nothing more to do for init
+        if (btn.getAttribute('data-optimised') === 'true') {
             return;
+        }
+
+        // Pre-populate "don't show" checkbox from server preference
+        const serverHideWarning = btn.getAttribute('data-hide-warning') === 'true';
+        if (serverHideWarning && dontShowCheck) {
+            dontShowCheck.checked = true;
+            localStorage.setItem(storageKey, '1');
         }
 
         function openModal() {
@@ -704,7 +711,7 @@
             if (e.key === 'Escape') closeModal();
         }
 
-        function applyOptimisedState() {
+        function applyOptimisedState(dayTheme) {
             btn.disabled = true;
             btn.setAttribute('aria-disabled', 'true');
             btn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -715,12 +722,20 @@
                 focusSelect.disabled = true;
                 focusSelect.setAttribute('title', 'Locked by AI Optimise');
             }
+            // Apply day theme CSS class to main container
+            if (dayTheme) {
+                const container = document.getElementById('day-main-content');
+                if (container) {
+                    container.setAttribute('data-day-theme', dayTheme);
+                    document.body.classList.remove('day-theme-professional', 'day-theme-futuristic', 'day-theme-clean');
+                    document.body.classList.add('day-theme-' + dayTheme);
+                }
+            }
         }
 
         btn.addEventListener('click', () => {
             if (localStorage.getItem(storageKey) === '1') {
-                // Skip warning, go straight
-                performOptimise();
+                performOptimise(false);
             } else {
                 openModal();
             }
@@ -730,11 +745,12 @@
 
         if (confirmBtn) {
             confirmBtn.addEventListener('click', () => {
-                if (dontShowCheck && dontShowCheck.checked) {
+                const dontShow = dontShowCheck && dontShowCheck.checked;
+                if (dontShow) {
                     localStorage.setItem(storageKey, '1');
                 }
                 closeModal();
-                performOptimise();
+                performOptimise(dontShow);
             });
         }
 
@@ -743,9 +759,38 @@
             if (e.target === modal) closeModal();
         });
 
-        function performOptimise() {
-            localStorage.setItem(lockedKey, '1');
-            applyOptimisedState();
+        function performOptimise(dontShowAgain) {
+            const csrf = document.querySelector('input[name="_csrf"]');
+            const csrfVal = csrf ? csrf.value : null;
+
+            const body = new URLSearchParams();
+            body.set('dontShowAgain', dontShowAgain ? 'true' : 'false');
+            if (csrfVal) body.set('_csrf', csrfVal);
+
+            fetch('/calendar/day/' + dateAttr + '/optimise', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: body.toString()
+            })
+            .then(res => {
+                if (res.ok) return res.json();
+                if (res.status === 409) {
+                    // Already optimised (server-side check)
+                    applyOptimisedState(null);
+                }
+                return null;
+            })
+            .then(data => {
+                if (data && data.dayTheme) {
+                    applyOptimisedState(data.dayTheme);
+                }
+            })
+            .catch(() => {
+                // Silently ignore network errors
+            });
         }
     }
 
@@ -823,6 +868,17 @@
         });
     }
 
+    // ==================== Apply Server-Side Day Theme ====================
+    function applyServerDayTheme() {
+        const container = document.getElementById('day-main-content');
+        if (!container) return;
+        const theme = container.getAttribute('data-day-theme');
+        if (theme) {
+            document.body.classList.remove('day-theme-professional', 'day-theme-futuristic', 'day-theme-clean');
+            document.body.classList.add('day-theme-' + theme);
+        }
+    }
+
     // ==================== Initialize Everything ====================
     function init() {
         // Wait for DOM to be ready
@@ -846,6 +902,7 @@
         initTimedFocusCountdown();
         initAiOptimiseModal();
         initQuickComplete();
+        applyServerDayTheme();
         
         // Refresh upcoming task highlights every minute
         setInterval(highlightUpcomingTasks, 60000);

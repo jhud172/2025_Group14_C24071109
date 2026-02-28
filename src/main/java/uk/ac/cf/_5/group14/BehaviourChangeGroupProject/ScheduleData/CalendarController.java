@@ -33,6 +33,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionCalculator;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionStatus;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyStreakService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DayOptimisation;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DayOptimisationRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DayTheme;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayHealthData.DayHealthPersistenceService;
@@ -116,6 +119,9 @@ public class CalendarController {
 
     @Autowired
     private GoalLinkService goalLinkService;
+
+    @Autowired
+    private DayOptimisationRepository dayOptimisationRepository;
 
     @Autowired
     private uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarDayModelBuilder calendarDayModelBuilder;
@@ -576,6 +582,14 @@ public class CalendarController {
 
         model.addAttribute("dailyFocus", dailyFocus);
 
+        // Day optimisation state (server-side one-shot enforcement)
+        var optimisation = dayOptimisationRepository.findByUserIdAndDate(user.getId(), date);
+        boolean isOptimised = optimisation.isPresent();
+        model.addAttribute("isOptimised", isOptimised);
+        model.addAttribute("dayTheme", isOptimised ? optimisation.get().getDayTheme().name().toLowerCase() : null);
+        boolean hideAiOneShotWarning = settings != null && settings.isHideAiOneShotWarning();
+        model.addAttribute("hideAiOneShotWarning", hideAiOneShotWarning);
+
         int remainingTasks = Math.max(0, totalTasks - completedTasks);
         int remainingWorkouts = Math.max(0, totalWorkouts - completedWorkouts);
 
@@ -745,6 +759,42 @@ public class CalendarController {
             return ResponseEntity.noContent().build();
         }
         return "redirect:/calendar/day/" + dateStr + "?dailyFocus=" + java.net.URLEncoder.encode(dailyFocus, java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    @PostMapping("/day/{dateStr}/optimise")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public ResponseEntity<?> optimiseDay(
+            @PathVariable String dateStr,
+            @RequestParam(name = "dontShowAgain", required = false, defaultValue = "false") boolean dontShowAgain,
+            @SessionAttribute(name = "user", required = false) User user,
+            HttpServletRequest request
+    ) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        LocalDate date = LocalDate.parse(dateStr, DATE_FORMAT);
+
+        // Server-side one-shot check
+        if (dayOptimisationRepository.findByUserIdAndDate(user.getId(), date).isPresent()) {
+            return ResponseEntity.status(409).body(java.util.Map.of("error", "Already optimised for this date"));
+        }
+
+        // Pick a deterministic day theme based on date hash
+        DayTheme[] themes = DayTheme.values();
+        DayTheme chosen = themes[Math.abs(date.hashCode()) % themes.length];
+
+        DayOptimisation opt = new DayOptimisation();
+        opt.setUser(user);
+        opt.setDate(date);
+        opt.setDayTheme(chosen);
+        dayOptimisationRepository.save(opt);
+
+        // Persist "don't show warning again" preference
+        if (dontShowAgain) {
+            userSettingsService.updateHideAiOneShotWarning(user, true);
+        }
+
+        return ResponseEntity.ok(java.util.Map.of("dayTheme", chosen.name().toLowerCase()));
     }
 
     @PostMapping("/day/{dateStr}/task-preferences")

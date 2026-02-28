@@ -1,0 +1,289 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Template Builder', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+
+    <div th:fragment="styles">
+        <style>
+            .builder-layout { display: grid; grid-template-columns: 220px 1fr 260px; gap: 1rem; min-height: calc(100vh - 120px); }
+            @media (max-width: 1024px) { .builder-layout { grid-template-columns: 1fr; } }
+            .builder-panel { border-radius: 1rem; border: 1px solid var(--color-border, #e2e8f0); background: #fff; padding: 1rem; overflow-y: auto; }
+            .dark .builder-panel { background: #0f172a; border-color: #1e293b; }
+            .palette-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; background: #f8fafc; cursor: grab; font-size: 0.8125rem; font-weight: 600; color: #334155; user-select: none; transition: background 0.15s; }
+            .palette-item:hover { background: #e0f2fe; border-color: #38bdf8; color: #0369a1; }
+            .dark .palette-item { background: #1e293b; border-color: #334155; color: #94a3b8; }
+            .dark .palette-item:hover { background: #0c4a6e; border-color: #0ea5e9; color: #7dd3fc; }
+            .canvas-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 0.875rem; border-radius: 0.75rem; border: 1px solid #cbd5e1; background: #fff; font-size: 0.8125rem; font-weight: 500; color: #475569; cursor: grab; }
+            .dark .canvas-item { background: #1e293b; border-color: #334155; color: #94a3b8; }
+            .canvas-item .remove-btn { margin-left: auto; color: #94a3b8; cursor: pointer; padding: 0 0.25rem; line-height: 1; }
+            .canvas-item .remove-btn:hover { color: #ef4444; }
+            .canvas-drop-zone { min-height: 80px; border: 2px dashed #cbd5e1; border-radius: 0.75rem; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+            .canvas-drop-zone.drag-over { border-color: #10b981; background: #f0fdf4; }
+            .dark .canvas-drop-zone { border-color: #334155; }
+            .prop-row { margin-bottom: 0.75rem; }
+            .prop-label { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.25rem; display: block; }
+            .prop-select, .prop-input { width: 100%; padding: 0.375rem 0.625rem; font-size: 0.8125rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #0f172a; }
+            .dark .prop-select, .dark .prop-input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+            .prop-toggle { display: flex; align-items: center; justify-content: space-between; }
+        </style>
+    </div>
+
+    <div th:fragment="content">
+        <main class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6" role="main" aria-label="Template Builder">
+
+            <div class="mb-4 flex items-center gap-3">
+                <a href="/workout-templates"
+                   class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900">
+                    ← Templates
+                </a>
+                <h1 class="text-xl font-bold text-slate-900 dark:text-slate-100"
+                    th:text="${isEdit ? 'Edit Template' : 'New Template'}">Template Builder</h1>
+            </div>
+
+            <div class="builder-layout">
+
+                <!-- ── LEFT: Component Palette ───────────────────────────── -->
+                <aside class="builder-panel" aria-label="Component palette">
+                    <h2 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Components</h2>
+                    <div id="palette" class="flex flex-col gap-2">
+                        <div class="palette-item" draggable="true" data-component="progress">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M12 6v6l4 2"/></svg>
+                            Progress
+                        </div>
+                        <div class="palette-item" draggable="true" data-component="timer">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Timer
+                        </div>
+                        <div class="palette-item" draggable="true" data-component="exerciseCard">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            Exercise Card
+                        </div>
+                        <div class="palette-item" draggable="true" data-component="notes">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Notes
+                        </div>
+                        <div class="palette-item" draggable="true" data-component="setEntry">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+                            Set Entry
+                        </div>
+                        <div class="palette-item" draggable="true" data-component="summary">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            Summary
+                        </div>
+                        <div class="palette-item" draggable="true" data-component="restTimer">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Rest Timer
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- ── CENTRE: Live Canvas Preview ───────────────────────── -->
+                <section class="builder-panel flex flex-col" aria-label="Canvas preview">
+                    <h2 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Canvas</h2>
+                    <div id="canvas-drop-zone"
+                         class="canvas-drop-zone flex-1"
+                         aria-label="Drop components here">
+                        <p id="canvas-empty" class="text-center text-sm text-slate-400 py-6">Drag components here to build your template</p>
+                    </div>
+                </section>
+
+                <!-- ── RIGHT: Properties Editor ──────────────────────────── -->
+                <aside class="builder-panel" aria-label="Properties editor">
+                    <h2 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Properties</h2>
+
+                    <div class="prop-row">
+                        <label class="prop-label" for="prop-name">Template Name</label>
+                        <input id="prop-name" class="prop-input" type="text" placeholder="My Template"
+                               th:value="${editTemplate.name}"/>
+                    </div>
+
+                    <div class="prop-row">
+                        <label class="prop-label" for="prop-layout">Layout</label>
+                        <select id="prop-layout" class="prop-select">
+                            <option value="FLOW" th:selected="${editTemplate.layoutType == null || editTemplate.layoutType.name() == 'FLOW'}">Flow</option>
+                            <option value="FUTURISTIC_FLOW" th:selected="${editTemplate.layoutType != null && editTemplate.layoutType.name() == 'FUTURISTIC_FLOW'}">Futuristic Flow</option>
+                            <option value="PROFESSIONAL" th:selected="${editTemplate.layoutType != null && editTemplate.layoutType.name() == 'PROFESSIONAL'}">Professional</option>
+                            <option value="PLAIN" th:selected="${editTemplate.layoutType != null && editTemplate.layoutType.name() == 'PLAIN'}">Plain</option>
+                            <option value="CUSTOM" th:selected="${editTemplate.layoutType != null && editTemplate.layoutType.name() == 'CUSTOM'}">Custom</option>
+                        </select>
+                    </div>
+
+                    <div class="prop-row">
+                        <label class="prop-label" for="prop-theme">Theme</label>
+                        <select id="prop-theme" class="prop-select">
+                            <option value="default">Default</option>
+                            <option value="dark-pro">Dark Pro</option>
+                            <option value="light-clean">Light Clean</option>
+                            <option value="futuristic">Futuristic</option>
+                        </select>
+                    </div>
+
+                    <div class="prop-row">
+                        <label class="prop-label" for="prop-transition">Transition</label>
+                        <select id="prop-transition" class="prop-select">
+                            <option value="none">None</option>
+                            <option value="slide">Slide</option>
+                            <option value="fade">Fade</option>
+                        </select>
+                    </div>
+
+                    <div class="prop-row">
+                        <label class="prop-label" for="prop-density">Density</label>
+                        <select id="prop-density" class="prop-select">
+                            <option value="comfortable">Comfortable</option>
+                            <option value="compact">Compact</option>
+                            <option value="spacious">Spacious</option>
+                        </select>
+                    </div>
+
+                    <div class="prop-row prop-toggle">
+                        <span class="prop-label mb-0">Show Progress</span>
+                        <input id="prop-progress" type="checkbox" checked class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"/>
+                    </div>
+
+                    <div class="prop-row prop-toggle">
+                        <span class="prop-label mb-0">Rest Timer</span>
+                        <input id="prop-rest-timer" type="checkbox" checked class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"/>
+                    </div>
+
+                    <div class="mt-6 flex flex-col gap-2">
+                        <button type="button" id="save-template-btn"
+                                class="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
+                            Save Template
+                        </button>
+                        <a href="/workout-templates"
+                           class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+                            Cancel
+                        </a>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Hidden form for submission -->
+            <form id="template-save-form" method="post"
+                  th:action="${isEdit ? '/workout-templates/' + editTemplate.id : '/workout-templates'}"
+                  style="display:none">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" id="form-name" name="name"/>
+                <input type="hidden" id="form-layout-type" name="layoutType"/>
+                <input type="hidden" id="form-config-json" name="configJson"/>
+            </form>
+        </main>
+    </div>
+
+    <div th:fragment="pageScripts">
+        <script th:inline="javascript">
+        (function () {
+            // ── State ─────────────────────────────────────────────────────
+            const initialConfigJson = /*[[${editTemplate.configJson}]]*/ null;
+            let canvasComponents = [];
+
+            // ── Elements ──────────────────────────────────────────────────
+            const palette = document.getElementById('palette');
+            const dropZone = document.getElementById('canvas-drop-zone');
+            const emptyMsg = document.getElementById('canvas-empty');
+            const saveBtn = document.getElementById('save-template-btn');
+            const form = document.getElementById('template-save-form');
+
+            // ── Load existing configJson if editing ───────────────────────
+            if (initialConfigJson) {
+                try {
+                    const cfg = JSON.parse(initialConfigJson);
+                    if (cfg.components && Array.isArray(cfg.components)) {
+                        cfg.components.forEach(c => addComponent(c));
+                    }
+                    if (cfg.theme) setSelectValue('prop-theme', cfg.theme);
+                    if (cfg.transition) setSelectValue('prop-transition', cfg.transition);
+                    if (cfg.density) setSelectValue('prop-density', cfg.density);
+                    if (cfg.progress !== undefined) document.getElementById('prop-progress').checked = cfg.progress;
+                    if (cfg.restTimer !== undefined) document.getElementById('prop-rest-timer').checked = cfg.restTimer;
+                } catch (e) { /* ignore bad JSON */ }
+            }
+
+            // ── Drag from palette ─────────────────────────────────────────
+            let draggingComponent = null;
+            palette.querySelectorAll('.palette-item').forEach(item => {
+                item.addEventListener('dragstart', e => {
+                    draggingComponent = item.getAttribute('data-component');
+                    e.dataTransfer.effectAllowed = 'copy';
+                });
+                item.addEventListener('dragend', () => { draggingComponent = null; });
+            });
+
+            dropZone.addEventListener('dragover', e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                dropZone.classList.add('drag-over');
+            });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                if (draggingComponent) {
+                    addComponent(draggingComponent);
+                }
+            });
+
+            function addComponent(name) {
+                canvasComponents.push(name);
+                renderCanvas();
+            }
+
+            function renderCanvas() {
+                // Remove old canvas items
+                dropZone.querySelectorAll('.canvas-item').forEach(el => el.remove());
+                if (canvasComponents.length === 0) {
+                    emptyMsg.style.display = '';
+                } else {
+                    emptyMsg.style.display = 'none';
+                    canvasComponents.forEach((comp, idx) => {
+                        const div = document.createElement('div');
+                        div.className = 'canvas-item';
+                        div.innerHTML = '<span class="flex-1">' + escapeHtml(comp) + '</span>' +
+                            '<button type="button" class="remove-btn" aria-label="Remove ' + escapeHtml(comp) + '" data-index="' + idx + '">✕</button>';
+                        div.querySelector('.remove-btn').addEventListener('click', function () {
+                            canvasComponents.splice(parseInt(this.getAttribute('data-index')), 1);
+                            renderCanvas();
+                        });
+                        dropZone.appendChild(div);
+                    });
+                }
+            }
+
+            function escapeHtml(str) {
+                return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+            function setSelectValue(id, value) {
+                const el = document.getElementById(id);
+                if (el) el.value = value;
+            }
+
+            // ── Save ──────────────────────────────────────────────────────
+            saveBtn.addEventListener('click', function () {
+                const name = document.getElementById('prop-name').value.trim();
+                if (!name) {
+                    alert('Please enter a template name.');
+                    document.getElementById('prop-name').focus();
+                    return;
+                }
+                const layoutType = document.getElementById('prop-layout').value;
+                const configJson = JSON.stringify({
+                    layout: layoutType.toLowerCase(),
+                    theme: document.getElementById('prop-theme').value,
+                    transition: document.getElementById('prop-transition').value,
+                    density: document.getElementById('prop-density').value,
+                    progress: document.getElementById('prop-progress').checked,
+                    restTimer: document.getElementById('prop-rest-timer').checked,
+                    components: canvasComponents
+                });
+
+                document.getElementById('form-name').value = name;
+                document.getElementById('form-layout-type').value = layoutType;
+                document.getElementById('form-config-json').value = configJson;
+                form.submit();
+            });
+
+        })();
+        </script>
+    </div>
+
+</th:block>

@@ -8,12 +8,13 @@
 <!-- Bootstrap data for JS -->
 <script th:inline="javascript">
     window.__sessionBootstrap = {
-        sessionId:   /*[[${session.sessionId}]]*/   0,
-        layoutType:  /*[[${layoutType}]]*/           'FLOW',
-        workoutName: /*[[${session.workoutName}]]*/  '',
-        status:      /*[[${session.status}]]*/       'IN_PROGRESS',
-        csrfHeader:  /*[[${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}]]*/ 'X-CSRF-TOKEN',
-        csrfToken:   /*[[${_csrf != null ? _csrf.token : ''}]]*/ '',
+        sessionId:         /*[[${session.sessionId}]]*/   0,
+        layoutType:        /*[[${layoutType}]]*/           'FLOW',
+        workoutName:       /*[[${session.workoutName}]]*/  '',
+        status:            /*[[${session.status}]]*/       'IN_PROGRESS',
+        csrfHeader:        /*[[${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}]]*/ 'X-CSRF-TOKEN',
+        csrfToken:         /*[[${_csrf != null ? _csrf.token : ''}]]*/ '',
+        templateConfigJson: /*[[${session.templateConfigJson}]]*/ null,
         exercises: /*[[${session.exercises}]]*/ []
     };
 </script>
@@ -347,6 +348,27 @@
     </div>
 
 </div><!-- /wsu-root -->
+
+<!-- ════════════════════════════════════════════════════════════════
+     CUSTOM TEMPLATE  (configJson-driven layout)
+     ════════════════════════════════════════════════════════════════ -->
+<div id="wsu-custom" class="wsu-custom wsu-hidden"
+     th:if="${layoutType == 'CUSTOM'}">
+    <div class="wsu-custom-topbar">
+        <button class="wsu-flow-back" id="wsu-custom-back" type="button" aria-label="Back to start">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+            </svg>
+        </button>
+        <span class="wsu-flow-workout-name" th:text="${session.workoutName ?: 'Workout'}">Workout</span>
+        <button id="wsu-custom-finish-btn" class="wsu-finish-btn" type="button">Finish</button>
+    </div>
+    <!-- Components rendered by JS from configJson -->
+    <div id="wsu-custom-body" class="wsu-custom-body">
+        <p class="wsu-custom-loading text-sm text-slate-500 py-8 text-center">Loading template…</p>
+    </div>
+</div>
+
 </div><!-- /content -->
 
 <div th:fragment="pageScripts">

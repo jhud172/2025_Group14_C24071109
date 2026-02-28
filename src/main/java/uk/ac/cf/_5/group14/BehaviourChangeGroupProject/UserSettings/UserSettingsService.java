@@ -57,4 +57,8 @@ public interface UserSettingsService {
             );
 
             UserSettings resetSmartDefaults(User user);
+
+    UserSettings updateHideAiOneShotWarning(User user, boolean hide);
+
+    UserSettings updatePreferredWorkoutTemplate(User user, Long templateId);
 }
