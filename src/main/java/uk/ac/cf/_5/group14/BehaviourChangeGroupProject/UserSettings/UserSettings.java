@@ -121,6 +121,12 @@ public class UserSettings {
     @Column(name = "quiet_hours_end")
     private LocalTime quietHoursEnd;
 
+    @Column(name = "preferred_workout_template_id")
+    private Long preferredWorkoutTemplateId;
+
+    @Column(name = "hide_ai_one_shot_warning", nullable = false)
+    private boolean hideAiOneShotWarning = false;
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
