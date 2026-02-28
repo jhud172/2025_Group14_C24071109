@@ -36,6 +36,18 @@
         return res.json();
     }
 
+    async function apiFetchJson(url, data) {
+        const headers = { 'Content-Type': 'application/json' };
+        if (CSRF_TOKEN) headers[CSRF_HEADER] = CSRF_TOKEN;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Request failed: ' + res.status);
+        return res.json();
+    }
+
     // ─── Summary counters ───────────────────────────────────────────────────
 
     const elVolume = document.getElementById('wp-total-volume');
@@ -330,6 +342,9 @@
 
     // ─── Add Exercise ───────────────────────────────────────────────────────
 
+    // Tracks the last exercise card the user interacted with (for "after current" insertion)
+    let lastActiveCardOrderIndex = null;
+
     const toggleBtn = document.getElementById('wp-add-ex-toggle');
     const addExBody = document.getElementById('wp-add-ex-body');
     const addExSearch = document.getElementById('wp-add-ex-search');
@@ -357,12 +372,57 @@
         const exerciseId = opt.dataset.exerciseId;
         if (!exerciseId) return;
 
-        apiFetch('/workout-session/' + SESSION_ID + '/api/add-exercise', {
-            exerciseId: exerciseId
-        }).then(function (data) {
-            const card = buildExerciseCard(data);
+        // Read insertion position
+        const positionRadio = document.querySelector('input[name="wp-add-ex-position"]:checked');
+        const position = positionRadio ? positionRadio.value : 'end';
+
+        const params = { exerciseId: exerciseId };
+        if (position === 'after' && lastActiveCardOrderIndex !== null) {
+            params.insertAfterOrderIndex = lastActiveCardOrderIndex;
+        } else if (position === 'superset' && lastActiveCardOrderIndex !== null) {
+            params.insertAfterOrderIndex = lastActiveCardOrderIndex;
+            params.mode = 'SUPERSET';
+            // share groupKey with current card
+            const currentCard = document.querySelector('[data-exercise-session-id][data-order-index="' + lastActiveCardOrderIndex + '"]');
+            if (currentCard) {
+                const existingKey = currentCard.dataset.groupKey;
+                if (existingKey && existingKey.trim()) {
+                    params.groupKey = existingKey;
+                } else {
+                    params.groupKey = 'ss-' + lastActiveCardOrderIndex;
+                    // Also set mode on current card
+                    apiFetch('/exercise-session/' + currentCard.dataset.exerciseSessionId + '/api/set-mode', {
+                        mode: 'SUPERSET',
+                        groupKey: params.groupKey
+                    }).then(function () {
+                        currentCard.dataset.mode = 'SUPERSET';
+                        currentCard.dataset.groupKey = params.groupKey;
+                        applyModeBadge(currentCard, 'SUPERSET');
+                    }).catch(function () { /* ignore */ });
+                }
+            }
+        }
+
+        apiFetch('/workout-session/' + SESSION_ID + '/api/add-exercise', params)
+        .then(function (data) {
+            // Find correct insertion point in DOM
             const container = document.getElementById('wp-exercises-container');
-            if (container) container.appendChild(card);
+            if (!container) return;
+
+            const card = buildExerciseCard(data);
+
+            if (position === 'end' || lastActiveCardOrderIndex === null) {
+                container.appendChild(card);
+            } else {
+                // insert after the card with the matching orderIndex
+                const insertAfterCard = container.querySelector('[data-order-index="' + lastActiveCardOrderIndex + '"]');
+                if (insertAfterCard && insertAfterCard.nextElementSibling) {
+                    container.insertBefore(card, insertAfterCard.nextElementSibling);
+                } else {
+                    container.appendChild(card);
+                }
+            }
+
             initCard(card);
             refreshReorderButtons();
             recalcSummary();
@@ -378,6 +438,8 @@
     function buildExerciseCard(data) {
         const cat = data.exerciseCategory || '';
         const type = data.exerciseType || '';
+        const mode = data.mode || 'NORMAL';
+        const groupKey = data.groupKey || '';
         const isTimed = cat === 'Cardio' || cat === 'Core' || type === 'cardio';
 
         let badgeClass = 'wp-preflight-exercise-badge-default';
@@ -394,6 +456,12 @@
         div.dataset.exerciseCategory = cat;
         div.dataset.exerciseType = type;
         div.dataset.orderIndex = data.orderIndex;
+        div.dataset.mode = mode;
+        div.dataset.groupKey = groupKey;
+
+        const modeBadge =
+            mode === 'SUPERSET' ? '<span class="wp-exercise-category-badge wp-preflight-exercise-badge-superset" data-mode-badge title="Superset">SS</span>' :
+            mode === 'DROPSET'  ? '<span class="wp-exercise-category-badge wp-preflight-exercise-badge-dropset" data-mode-badge title="Dropset">DS</span>' : '';
 
         div.innerHTML =
             '<div class="wp-exercise-card-header">' +
@@ -408,6 +476,7 @@
                 '<div class="flex-1 min-w-0">' +
                     '<span class="wp-exercise-name">' + escapeHtml(data.exerciseName) + '</span>' +
                 '</div>' +
+                modeBadge +
                 '<span class="wp-exercise-category-badge ' + badgeClass + '">' + escapeHtml(cat) + '</span>' +
             '</div>' +
             (isTimed ?
@@ -454,12 +523,108 @@
                 : '') +
                 '</tbody>' +
             '</table></div>' +
-            '<div class="px-4 py-3"><button type="button" class="wp-add-set-btn" data-add-set>' +
-                '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>' +
-                ' Add set' +
-            '</button></div>';
+            '<div class="px-4 py-3 flex flex-wrap gap-2">' +
+                '<button type="button" class="wp-add-set-btn" data-add-set>' +
+                    '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>' +
+                    ' Add set' +
+                '</button>' +
+                '<button type="button" class="wp-add-set-btn" data-add-drop-set aria-label="Add drop set">' +
+                    '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>' +
+                    ' Drop set' +
+                '</button>' +
+                '<button type="button" class="wp-add-set-btn" data-set-superset aria-label="Convert to superset">' +
+                    '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>' +
+                    ' Superset' +
+                '</button>' +
+            '</div>';
 
         return div;
+    }
+
+    // ─── Mode badge helper ───────────────────────────────────────────────────
+
+    function applyModeBadge(card, mode) {
+        const header = card.querySelector('.wp-exercise-card-header');
+        if (!header) return;
+        let existing = header.querySelector('[data-mode-badge]');
+        if (existing) existing.remove();
+        if (mode === 'SUPERSET') {
+            const span = document.createElement('span');
+            span.setAttribute('data-mode-badge', '');
+            span.className = 'wp-exercise-category-badge wp-preflight-exercise-badge-superset';
+            span.title = 'Superset';
+            span.textContent = 'SS';
+            // Insert before category badge
+            const catBadge = header.querySelector('.wp-exercise-category-badge:not([data-mode-badge])');
+            if (catBadge) header.insertBefore(span, catBadge);
+            else header.appendChild(span);
+        } else if (mode === 'DROPSET') {
+            const span = document.createElement('span');
+            span.setAttribute('data-mode-badge', '');
+            span.className = 'wp-exercise-category-badge wp-preflight-exercise-badge-dropset';
+            span.title = 'Dropset';
+            span.textContent = 'DS';
+            const catBadge = header.querySelector('.wp-exercise-category-badge:not([data-mode-badge])');
+            if (catBadge) header.insertBefore(span, catBadge);
+            else header.appendChild(span);
+        }
+    }
+
+    // ─── Drop set ─────────────────────────────────────────────────────────────
+
+    function bindDropSet(card) {
+        const btn = card.querySelector('[data-add-drop-set]');
+        const esId = card.dataset.exerciseSessionId;
+        if (!btn || !esId) return;
+        btn.addEventListener('click', function () {
+            btn.disabled = true;
+            apiFetch('/exercise-session/' + esId + '/api/drop-set', {}).then(function (data) {
+                const tbody = card.querySelector('[data-set-tbody]');
+                if (!tbody) { window.location.reload(); return; }
+                const row = buildSetRow(data.setId, data.setNumber);
+                row.dataset.setType = 'DROPSET';
+                // Pre-fill suggested weight/reps
+                if (data.weight) {
+                    const wInput = row.querySelector('[data-field="weight"]');
+                    if (wInput) wInput.value = data.weight;
+                }
+                if (data.reps) {
+                    const rInput = row.querySelector('[data-field="reps"]');
+                    if (rInput) rInput.value = data.reps;
+                }
+                const typeSelect = row.querySelector('[data-field="setType"]');
+                if (typeSelect) typeSelect.value = 'DROPSET';
+                applySetTypeClass(row, 'DROPSET');
+                tbody.appendChild(row);
+                bindSetRow(row);
+                recalcSummary();
+            }).catch(function () { /* ignore */ }).finally(function () { btn.disabled = false; });
+        });
+    }
+
+    // ─── Superset conversion ──────────────────────────────────────────────────
+
+    function bindSetSuperset(card) {
+        const btn = card.querySelector('[data-set-superset]');
+        const esId = card.dataset.exerciseSessionId;
+        if (!btn || !esId) return;
+        btn.addEventListener('click', function () {
+            const currentMode = card.dataset.mode || 'NORMAL';
+            const newMode = currentMode === 'SUPERSET' ? 'NORMAL' : 'SUPERSET';
+            const gKey = newMode === 'SUPERSET'
+                ? (card.dataset.groupKey && card.dataset.groupKey.trim() ? card.dataset.groupKey : 'ss-' + card.dataset.orderIndex)
+                : '';
+            btn.disabled = true;
+            apiFetch('/exercise-session/' + esId + '/api/set-mode', {
+                mode: newMode,
+                groupKey: gKey
+            }).then(function (data) {
+                card.dataset.mode = data.mode;
+                card.dataset.groupKey = data.groupKey || '';
+                applyModeBadge(card, data.mode);
+                btn.title = data.mode === 'SUPERSET' ? 'Remove superset' : 'Convert to superset';
+            }).catch(function () { /* ignore */ }).finally(function () { btn.disabled = false; });
+        });
     }
 
     // ─── Init card ───────────────────────────────────────────────────────────
@@ -467,9 +632,16 @@
     function initCard(card) {
         bindExerciseTimer(card);
         bindAddSet(card);
+        bindDropSet(card);
+        bindSetSuperset(card);
         bindReorder(card);
         card.querySelectorAll('[data-set-id]').forEach(function (row) {
             bindSetRow(row);
+        });
+        // Track last active card for insertion position
+        card.addEventListener('focusin', function () {
+            const idx = parseInt(card.dataset.orderIndex, 10);
+            if (!isNaN(idx)) lastActiveCardOrderIndex = idx;
         });
     }
 

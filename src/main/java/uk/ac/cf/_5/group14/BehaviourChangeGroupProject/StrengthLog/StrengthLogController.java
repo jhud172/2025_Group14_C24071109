@@ -17,9 +17,15 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class StrengthLogController {
+
+    /** Drop set suggested weight = previous weight × this multiplier (rounded to nearest 0.5 kg). */
+    private static final double DROPSET_WEIGHT_MULTIPLIER = 0.9;
+    /** Rounding factor for drop set weight suggestion (nearest 0.5 kg). */
+    private static final double WEIGHT_ROUNDING_FACTOR = 2.0;
 
     @Autowired
     private WorkoutSessionRepository workoutSessionRepository;
@@ -190,7 +196,10 @@ public class StrengthLogController {
     public ResponseEntity<?> apiAddExercise(
             @PathVariable Long id,
             @SessionAttribute("user") User user,
-            @RequestParam Long exerciseId
+            @RequestParam Long exerciseId,
+            @RequestParam(required = false) Integer insertAfterOrderIndex,
+            @RequestParam(required = false, defaultValue = "NORMAL") String mode,
+            @RequestParam(required = false) String groupKey
     ) {
         var sessionOpt = workoutSessionRepository.findById(id);
         if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
@@ -200,13 +209,32 @@ public class StrengthLogController {
         var exerciseOpt = exerciseRepository.findById(exerciseId);
         if (exerciseOpt.isEmpty()) return ResponseEntity.notFound().build();
 
-        int nextOrder = session.getExerciseSessions().stream()
-                .mapToInt(ExerciseSession::getOrderIndex).max().orElse(-1) + 1;
+        List<ExerciseSession> ordered = session.getExerciseSessions().stream()
+                .sorted(Comparator.comparingInt(ExerciseSession::getOrderIndex))
+                .collect(Collectors.toList());
+
+        int targetIndex;
+        if (insertAfterOrderIndex != null) {
+            // shift all exercises with orderIndex > insertAfterOrderIndex up by 1
+            for (ExerciseSession es : ordered) {
+                if (es.getOrderIndex() > insertAfterOrderIndex) {
+                    es.setOrderIndex(es.getOrderIndex() + 1);
+                    exerciseSessionRepository.save(es);
+                }
+            }
+            targetIndex = insertAfterOrderIndex + 1;
+        } else {
+            targetIndex = ordered.stream().mapToInt(ExerciseSession::getOrderIndex).max().orElse(-1) + 1;
+        }
 
         ExerciseSession es = new ExerciseSession();
         es.setWorkoutSession(session);
         es.setExercise(exerciseOpt.get());
-        es.setOrderIndex(nextOrder);
+        es.setOrderIndex(targetIndex);
+        es.setMode(mode != null ? mode : "NORMAL");
+        if (groupKey != null && !groupKey.isBlank()) {
+            es.setGroupKey(groupKey);
+        }
 
         SetLog firstSet = new SetLog();
         firstSet.setExerciseSession(es);
@@ -217,7 +245,7 @@ public class StrengthLogController {
         workoutSessionRepository.save(session);
 
         ExerciseSession saved = exerciseSessionRepository.findByWorkoutSessionOrderByOrderIndexAsc(session)
-                .stream().filter(e -> e.getOrderIndex() == nextOrder).findFirst().orElse(es);
+                .stream().filter(e -> e.getOrderIndex() == targetIndex).findFirst().orElse(es);
 
         return ResponseEntity.ok(Map.of(
                 "exerciseSessionId", saved.getId(),
@@ -225,6 +253,8 @@ public class StrengthLogController {
                 "exerciseCategory", saved.getExercise().getCategory(),
                 "exerciseType", saved.getExercise().getType(),
                 "orderIndex", saved.getOrderIndex(),
+                "mode", saved.getMode() != null ? saved.getMode() : "NORMAL",
+                "groupKey", saved.getGroupKey() != null ? saved.getGroupKey() : "",
                 "setId", saved.getSetLogs().isEmpty() ? 0 : saved.getSetLogs().get(0).getId()
         ));
     }
@@ -351,6 +381,101 @@ public class StrengthLogController {
         rollUpCompletion(es);
 
         return ResponseEntity.ok(Map.of("deleted", true));
+    }
+
+    @PostMapping("/exercise-session/{id}/api/set-mode")
+    @ResponseBody
+    public ResponseEntity<?> apiSetMode(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user,
+            @RequestParam String mode,
+            @RequestParam(required = false) String groupKey
+    ) {
+        var esOpt = exerciseSessionRepository.findById(id);
+        if (esOpt.isEmpty()) return ResponseEntity.notFound().build();
+        var es = esOpt.get();
+        if (!es.getWorkoutSession().getUser().getId().equals(user.getId()))
+            return ResponseEntity.status(403).build();
+
+        es.setMode(mode);
+        es.setGroupKey(groupKey != null && !groupKey.isBlank() ? groupKey : null);
+        exerciseSessionRepository.save(es);
+
+        return ResponseEntity.ok(Map.of(
+                "exerciseSessionId", es.getId(),
+                "mode", es.getMode(),
+                "groupKey", es.getGroupKey() != null ? es.getGroupKey() : ""
+        ));
+    }
+
+    @PostMapping("/exercise-session/{id}/api/drop-set")
+    @ResponseBody
+    public ResponseEntity<?> apiDropSet(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user
+    ) {
+        var esOpt = exerciseSessionRepository.findById(id);
+        if (esOpt.isEmpty()) return ResponseEntity.notFound().build();
+        var es = esOpt.get();
+        if (!es.getWorkoutSession().getUser().getId().equals(user.getId()))
+            return ResponseEntity.status(403).build();
+
+        SetLog last = es.getSetLogs().stream()
+                .max(Comparator.comparingInt(SetLog::getSetNumber))
+                .orElse(null);
+
+        int next = es.getSetLogs().stream().mapToInt(SetLog::getSetNumber).max().orElse(0) + 1;
+        SetLog drop = new SetLog();
+        drop.setExerciseSession(es);
+        drop.setSetNumber(next);
+        drop.setSetType("DROPSET");
+        if (last != null) {
+            drop.setReps(last.getReps());
+            // suggest ~90% of previous weight
+            if (last.getWeight() != null && last.getWeight() > 0) {
+                    drop.setWeight(Math.round(last.getWeight() * DROPSET_WEIGHT_MULTIPLIER * WEIGHT_ROUNDING_FACTOR) / WEIGHT_ROUNDING_FACTOR);
+                }
+        }
+        es.getSetLogs().add(drop);
+        exerciseSessionRepository.save(es);
+
+        SetLog saved = es.getSetLogs().stream()
+                .filter(sl -> sl.getSetNumber() == next).findFirst().orElse(drop);
+
+        return ResponseEntity.ok(Map.of(
+                "setId", saved.getId(),
+                "setNumber", saved.getSetNumber(),
+                "setType", "DROPSET",
+                "weight", saved.getWeight() != null ? saved.getWeight() : 0,
+                "reps", saved.getReps() != null ? saved.getReps() : 0
+        ));
+    }
+
+    @PostMapping("/workout-session/{id}/api/reorder-all")
+    @ResponseBody
+    public ResponseEntity<?> apiReorderAll(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user,
+            @RequestBody List<Map<String, Long>> entries
+    ) {
+        var sessionOpt = workoutSessionRepository.findById(id);
+        if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
+        var session = sessionOpt.get();
+        if (!session.getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
+
+        for (Map<String, Long> entry : entries) {
+            Long esId = entry.get("sessionExerciseId");
+            Long newIndex = entry.get("orderIndex");
+            if (esId == null || newIndex == null) continue;
+            exerciseSessionRepository.findById(esId).ifPresent(es -> {
+                if (es.getWorkoutSession().getId().equals(session.getId())) {
+                    es.setOrderIndex(newIndex.intValue());
+                    exerciseSessionRepository.save(es);
+                }
+            });
+        }
+
+        return ResponseEntity.ok(Map.of("reordered", true));
     }
 
     private void rollUpCompletion(ExerciseSession es) {
