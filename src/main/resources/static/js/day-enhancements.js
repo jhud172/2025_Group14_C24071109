@@ -724,12 +724,7 @@
             }
             // Apply day theme CSS class to main container
             if (dayTheme) {
-                const container = document.getElementById('day-main-content');
-                if (container) {
-                    container.setAttribute('data-day-theme', dayTheme);
-                    document.body.classList.remove('day-theme-professional', 'day-theme-futuristic', 'day-theme-clean');
-                    document.body.classList.add('day-theme-' + dayTheme);
-                }
+                applyDayThemeClass(dayTheme);
             }
         }
 
@@ -788,8 +783,8 @@
                     applyOptimisedState(data.dayTheme);
                 }
             })
-            .catch(() => {
-                // Silently ignore network errors
+            .catch(err => {
+                console.error('AI Optimise request failed:', err);
             });
         }
     }
@@ -868,14 +863,23 @@
         });
     }
 
+    // ==================== Day Theme Helper ====================
+    function applyDayThemeClass(theme) {
+        const container = document.getElementById('day-main-content');
+        if (container) {
+            container.setAttribute('data-day-theme', theme);
+        }
+        document.body.classList.remove('day-theme-professional', 'day-theme-futuristic', 'day-theme-clean');
+        document.body.classList.add('day-theme-' + theme);
+    }
+
     // ==================== Apply Server-Side Day Theme ====================
     function applyServerDayTheme() {
         const container = document.getElementById('day-main-content');
         if (!container) return;
         const theme = container.getAttribute('data-day-theme');
         if (theme) {
-            document.body.classList.remove('day-theme-professional', 'day-theme-futuristic', 'day-theme-clean');
-            document.body.classList.add('day-theme-' + theme);
+            applyDayThemeClass(theme);
         }
     }
 

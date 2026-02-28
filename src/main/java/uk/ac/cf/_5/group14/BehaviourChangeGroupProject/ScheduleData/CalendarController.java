@@ -779,7 +779,8 @@ public class CalendarController {
             return ResponseEntity.status(409).body(java.util.Map.of("error", "Already optimised for this date"));
         }
 
-        // Pick a deterministic day theme based on date hash
+        // Pick a deterministic day theme based on the date's hash code so the same
+        // date always maps to the same theme (consistent across sessions and reloads).
         DayTheme[] themes = DayTheme.values();
         DayTheme chosen = themes[Math.abs(date.hashCode()) % themes.length];
 
