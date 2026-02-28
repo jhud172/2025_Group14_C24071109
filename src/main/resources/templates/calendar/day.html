@@ -612,8 +612,11 @@
                             <p class="font-semibold text-slate-900 dark:text-slate-100" th:text="${ws.nameSnapshot}"></p>
                             <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${ws.workout != null ? ws.workout.notes : ''}"></p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <a th:href="@{'/workout-session/' + ${ws.id} + '/completion?day=' + ${date}}" class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">Complete Workout</a>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <form method="post" th:action="@{'/workout-sessions/start/' + ${ws.workout.id}}" class="contents">
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">Complete Workout</button>
+                            </form>
                         </div>
                     </div>
                 </div>

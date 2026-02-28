@@ -3,10 +3,15 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.WorkoutTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExercise;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExerciseRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Exercise;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.ExerciseRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,45 +22,117 @@ import java.util.stream.Collectors;
 public class WorkoutPlayerController {
 
     private final WorkoutPlayerSessionService workoutSessionService;
+    private final ExerciseRepository exerciseRepository;
+    private final CustomExerciseRepository customExerciseRepository;
     private final AuthHelper authHelper;
 
-    @GetMapping("/workouts/{id}/start")
-    @ResponseBody
-    public ResponseEntity<?> startSession(@PathVariable Long id) {
+    // ─── Start a new session and redirect to the session page ───────────────
+
+    @PostMapping("/workout-sessions/start/{workoutId}")
+    public String startSession(@PathVariable Long workoutId) {
         User user = authHelper.getAuthenticatedUser();
-        WorkoutSession session = workoutSessionService.startSession(user.getId(), id);
+        if (user == null) return "redirect:/login";
+        WorkoutSession session = workoutSessionService.startSession(user.getId(), workoutId);
+        return "redirect:/workout-sessions/" + session.getId();
+    }
+
+    // ─── Session page (HTML view) ────────────────────────────────────────────
+
+    @GetMapping("/workout-sessions/{id}")
+    public String sessionPage(@PathVariable Long id, Model model) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return "redirect:/login";
+
+        Optional<WorkoutSession> sessionOpt = workoutSessionService.findById(id);
+        if (sessionOpt.isEmpty()) return "redirect:/workouts";
+
+        WorkoutSession session = sessionOpt.get();
+        if (!session.getUser().getId().equals(user.getId())) return "redirect:/workouts";
+
+        WorkoutSessionViewModel vm = toViewModel(session);
+        model.addAttribute("session", vm);
+        model.addAttribute("sessionId", id);
+
+        String layoutType = vm.getTemplateLayoutType() != null ? vm.getTemplateLayoutType() : "FLOW";
+        model.addAttribute("layoutType", layoutType);
+
+        return "workout-sessions/session";
+    }
+
+    // ─── Session data (JSON) ─────────────────────────────────────────────────
+
+    @GetMapping("/workout-sessions/{id}/data")
+    @ResponseBody
+    public ResponseEntity<?> getSessionData(@PathVariable Long id) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return ResponseEntity.status(401).build();
+        Optional<WorkoutSession> sessionOpt = workoutSessionService.findById(id);
+        if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
+        WorkoutSession session = sessionOpt.get();
+        if (!session.getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
         return ResponseEntity.ok(toViewModel(session));
     }
 
-    @GetMapping("/workout-sessions/{id}")
-    @ResponseBody
-    public ResponseEntity<?> getSession(@PathVariable Long id) {
-        User user = authHelper.getAuthenticatedUser();
-        Optional<WorkoutSession> sessionOpt = workoutSessionService.findById(id);
-        if (sessionOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        WorkoutSession session = sessionOpt.get();
-        if (!session.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).build();
-        }
-        return ResponseEntity.ok(toViewModel(session));
-    }
+    // ─── Complete session ────────────────────────────────────────────────────
 
     @PostMapping("/workout-sessions/{id}/complete")
     @ResponseBody
     public ResponseEntity<?> completeSession(@PathVariable Long id) {
         User user = authHelper.getAuthenticatedUser();
+        if (user == null) return ResponseEntity.status(401).build();
         Optional<WorkoutSession> sessionOpt = workoutSessionService.findById(id);
-        if (sessionOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        if (!sessionOpt.get().getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).build();
-        }
+        if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
+        if (!sessionOpt.get().getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
         WorkoutSession completed = workoutSessionService.completeSession(id);
         return ResponseEntity.ok(toViewModel(completed));
     }
+
+    // ─── Add set ─────────────────────────────────────────────────────────────
+
+    @PostMapping("/workout-sessions/{sessionId}/exercises/{exerciseId}/sets")
+    @ResponseBody
+    public ResponseEntity<?> addSet(
+            @PathVariable Long sessionId,
+            @PathVariable Long exerciseId,
+            @RequestParam(required = false) Integer reps,
+            @RequestParam(required = false) BigDecimal weight,
+            @RequestParam(required = false) BigDecimal rpe) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return ResponseEntity.status(401).build();
+        Optional<WorkoutSession> sessionOpt = workoutSessionService.findById(sessionId);
+        if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
+        if (!sessionOpt.get().getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
+        WorkoutSessionSet set = workoutSessionService.addSet(exerciseId, reps, weight, rpe);
+        return ResponseEntity.ok(toSetView(set));
+    }
+
+    // ─── Update set ──────────────────────────────────────────────────────────
+
+    @PostMapping("/workout-session-sets/{setId}")
+    @ResponseBody
+    public ResponseEntity<?> updateSet(
+            @PathVariable Long setId,
+            @RequestParam(required = false) Integer reps,
+            @RequestParam(required = false) BigDecimal weight,
+            @RequestParam(required = false) BigDecimal rpe) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return ResponseEntity.status(401).build();
+        WorkoutSessionSet set = workoutSessionService.updateSet(setId, reps, weight, rpe);
+        return ResponseEntity.ok(toSetView(set));
+    }
+
+    // ─── Complete set ─────────────────────────────────────────────────────────
+
+    @PostMapping("/workout-session-sets/{setId}/complete")
+    @ResponseBody
+    public ResponseEntity<?> completeSet(@PathVariable Long setId) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return ResponseEntity.status(401).build();
+        WorkoutSessionSet set = workoutSessionService.completeSet(setId);
+        return ResponseEntity.ok(toSetView(set));
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private WorkoutSessionViewModel toViewModel(WorkoutSession session) {
         WorkoutSessionViewModel vm = new WorkoutSessionViewModel();
@@ -97,6 +174,22 @@ public class WorkoutPlayerController {
         view.setMode(ex.getMode() != null ? ex.getMode().name() : null);
         view.setGroupKey(ex.getGroupKey());
         view.setNotes(ex.getNotes());
+
+        // Resolve exercise name
+        if (ex.getExerciseId() != null) {
+            exerciseRepository.findById(ex.getExerciseId()).ifPresent(e -> {
+                view.setExerciseName(e.getName());
+                view.setExerciseCategory(e.getCategory());
+            });
+        } else if (ex.getCustomExerciseId() != null) {
+            customExerciseRepository.findById(ex.getCustomExerciseId()).ifPresent(e -> {
+                view.setExerciseName(e.getName());
+                view.setExerciseCategory(e.getCategory());
+            });
+        }
+        if (view.getExerciseName() == null) {
+            view.setExerciseName("Exercise " + (ex.getOrderIndex() + 1));
+        }
 
         List<WorkoutSessionViewModel.SetView> setViews = ex.getSets().stream()
                 .map(this::toSetView)

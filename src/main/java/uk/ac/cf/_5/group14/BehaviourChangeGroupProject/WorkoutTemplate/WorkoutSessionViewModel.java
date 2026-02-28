@@ -34,6 +34,8 @@ public class WorkoutSessionViewModel {
         private Long id;
         private Long exerciseId;
         private Long customExerciseId;
+        private String exerciseName;
+        private String exerciseCategory;
         private int orderIndex;
         private String mode;
         private String groupKey;
