@@ -124,7 +124,9 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
         }
 
+        const date = item.dataset.date || '';
         if (type === "task") {
+            const dayLink = date ? `/calendar/day/${date}#tasks` : '/calendar';
             if (!completed) {
                 html += `
                     <div class="calendar-preview-actions">
@@ -133,13 +135,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 `;
             }
+            html += `<a href="${dayLink}" class="mt-3 block text-center text-xs text-slate-400 underline hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">View full day →</a>`;
         } else if (type === "workout" || type === "occurrence") {
+            const dayLink = date ? `/calendar/day/${date}#workouts` : '/calendar';
             const actionLabel = completed ? 'Review workout log' : 'Complete workout';
             const actionType = completed ? 'workout-review' : 'workout-log';
             html += `
                 <div class="calendar-preview-actions">
                     <button type="button" class="calendar-preview-action" data-preview-action="${actionType}">${actionLabel}</button>
                 </div>
+                <a href="${dayLink}" class="mt-3 block text-center text-xs text-slate-400 underline hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">View full day →</a>
             `;
         }
 
@@ -580,7 +585,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return cards.find((card) => {
             const date = card.dataset.date || '';
             if (date < fromDateIso) return false;
-            return Array.from(card.querySelectorAll('.calendar-item[data-type="task"]')).some((item) => {
+            return Array.from(card.querySelectorAll('.calendar-item[data-type="task"], .calendar-grouped-item[data-type="task"]')).some((item) => {
                 const title = (item.dataset.title || '').toLowerCase();
                 return title.includes(query);
             });

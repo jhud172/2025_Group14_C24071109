@@ -240,16 +240,16 @@
                            th:text="${dayCompletionTotalCount != null ? dayCompletionTotalCount : 0}">0</p>
                         <p class="stat-pill-key">Total</p>
                     </div>
-                    <div class="day-stat-pill" role="listitem">
+                    <button type="button" class="day-stat-pill cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 rounded-xl transition" role="listitem" data-stat-tab-target="tasks" aria-label="Go to tasks tab">
                         <p class="stat-pill-val"
                            th:text="${dayCompletionRemainingTasks != null ? dayCompletionRemainingTasks : 0}">0</p>
                         <p class="stat-pill-key">Tasks left</p>
-                    </div>
-                    <div class="day-stat-pill" role="listitem">
+                    </button>
+                    <button type="button" class="day-stat-pill cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 rounded-xl transition" role="listitem" data-stat-tab-target="workouts" aria-label="Go to workouts tab">
                         <p class="stat-pill-val"
                            th:text="${dayCompletionRemainingWorkouts != null ? dayCompletionRemainingWorkouts : 0}">0</p>
                         <p class="stat-pill-key">Workouts left</p>
-                    </div>
+                    </button>
                 </div>
             </div>
         </div>
@@ -413,7 +413,7 @@
                     <button type="button"
                             class="quick-complete-btn mt-0.5"
                             data-quick-complete
-                            th:attr="data-task-id=${task.id}, data-task-date=${date}, aria-label=${'Mark task ' + task.title + (task.completed ? ' incomplete' : ' complete')}, aria-pressed=${task.completed ? 'true' : 'false'}"
+                            th:attr="data-task-id=${task.id}, data-task-date=${date}, aria-label=${'Mark task ' + task.title + (task.completed ? ' incomplete' : ' complete')}, aria-pressed=${task.completed ? 'true' : 'false'}, title=${task.completed ? 'Mark incomplete' : 'Mark complete'}"
                             th:classappend="${task.completed} ? ' is-done' : ''">
                         <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>

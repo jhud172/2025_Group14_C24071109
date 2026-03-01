@@ -316,9 +316,7 @@
     <div th:fragment="pageScripts">
         <div th:replace="~{fragments/slimselectJs :: slimselectJs}"></div>
         <script>
-            new SlimSelect({
-                select: '#selectElement'
-            });
+            try { new SlimSelect({ select: '#selectElement' }); } catch(e) { /* SlimSelect unavailable */ }
         </script>
 
         <script>
