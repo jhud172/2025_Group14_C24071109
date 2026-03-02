@@ -94,7 +94,7 @@
     <!-- ========== STATUS BAR ========== -->
     <div data-testid="day-status-bar"
          class="day-status-bar mb-4 h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800"
-         th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' bg-green-500 dark:bg-green-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' bg-yellow-300 dark:bg-yellow-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-red-500 dark:bg-red-500' : ' bg-slate-200 dark:bg-slate-800'))">
+         th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' day-status-gold' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' day-status-blue' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' day-status-emerald' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-red-500 dark:bg-red-500' : ' bg-slate-200 dark:bg-slate-800')))">
         <span class="sr-only">Day status bar</span>
     </div>
 
@@ -121,6 +121,12 @@
                               data-testid="today-badge"
                               class="today-badge inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-300">
                             Today
+                        </span>
+                        <!-- Golden medal badge for fully completed day -->
+                        <span th:if="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'}"
+                              data-testid="gold-medal-badge"
+                              class="day-gold-medal inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-200">
+                            🏅 Perfect day!
                         </span>
                         <span class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
                               data-testid="day-completion-summary"
@@ -222,7 +228,7 @@
                         <circle class="ring-track" cx="60" cy="60" r="50"
                                 fill="none" stroke-width="10" stroke-linecap="round"/>
                         <circle class="ring-progress"
-                                th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' ring-green' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' ring-orange' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' ring-red' : ' ring-default'))"
+                                th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' ring-gold' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' ring-blue' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' ring-emerald' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' ring-red' : ' ring-default')))"
                                 cx="60" cy="60" r="50"
                                 fill="none" stroke-width="10"
                                 stroke-linecap="round"
@@ -233,7 +239,7 @@
                         <p class="ring-pct"
                            th:text="${pct + '%'}">0%</p>
                         <p class="ring-label"
-                           th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? 'Complete' : (dayCompletionStatus.name() == 'ORANGE' ? 'Watchlist' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Started'))) : 'Not started'}">
+                           th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? '🏅' : (dayCompletionStatus.name() == 'BLUE' ? 'Today' : (dayCompletionStatus.name() == 'ORANGE' ? 'Partial' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Started')))) : 'Started'}">
                         </p>
                     </div>
                 </div>
@@ -272,8 +278,15 @@
     <div class="day-tabs-container mt-5">
         <nav class="day-tab-nav overflow-x-auto" role="tablist" aria-label="Day view sections">
             <div class="day-tab-pill" id="day-tab-pill" aria-hidden="true"></div>
-            <button role="tab" aria-selected="true" aria-controls="tab-panel-tasks"
-                    id="tab-btn-tasks" class="day-tab-btn is-active" data-tab-target="tasks" tabindex="0">
+            <button role="tab" aria-selected="true" aria-controls="tab-panel-timeline"
+                    id="tab-btn-timeline" class="day-tab-btn is-active" data-tab-target="timeline" tabindex="0">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Timeline</span>
+            </button>
+            <button role="tab" aria-selected="false" aria-controls="tab-panel-tasks"
+                    id="tab-btn-tasks" class="day-tab-btn" data-tab-target="tasks" tabindex="-1">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
@@ -289,13 +302,6 @@
                 <span class="day-tab-badge"
                       th:text="${(workoutSessions != null ? workoutSessions.size() : 0) + (occurrences != null ? occurrences.size() : 0)}">0</span>
             </button>
-            <button role="tab" aria-selected="false" aria-controls="tab-panel-timeline"
-                    id="tab-btn-timeline" class="day-tab-btn" data-tab-target="timeline" tabindex="-1">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>Timeline</span>
-            </button>
             <button role="tab" aria-selected="false" aria-controls="tab-panel-overview"
                     id="tab-btn-overview" class="day-tab-btn" data-tab-target="overview" tabindex="-1">
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -305,8 +311,36 @@
             </button>
         </nav>
 
+        <!-- ===== TIMELINE TAB PANEL ===== -->
+        <div id="tab-panel-timeline" role="tabpanel" aria-labelledby="tab-btn-timeline" class="day-tab-panel">
+            <div class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+                <div class="flex items-start justify-between gap-3 border-b border-slate-200 p-4 dark:border-slate-800">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Day Timeline</h2>
+                        <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Your tasks and workouts visualised across the day. Tasks with a set time appear in their time slots.</p>
+                    </div>
+                    <a th:href="@{'/calendar/focus/' + ${date}}"
+                       class="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900">
+                        <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                        </svg>
+                        <span>Focus mode</span>
+                    </a>
+                </div>
+                <div id="day-timeline"
+                     class="day-timeline p-4 select-none"
+                     aria-label="Daily timeline"
+                     th:attr="data-is-today=${isToday}, data-date=${date}">
+                    <!-- Populated by day-enhancements.js buildTimeline() -->
+                    <noscript>
+                        <p class="py-4 text-sm text-slate-500 dark:text-slate-400">Enable JavaScript to see the timeline view.</p>
+                    </noscript>
+                </div>
+            </div>
+        </div>
+
         <!-- ===== TASKS TAB PANEL ===== -->
-        <div id="tab-panel-tasks" role="tabpanel" aria-labelledby="tab-btn-tasks" class="day-tab-panel">
+        <div id="tab-panel-tasks" role="tabpanel" aria-labelledby="tab-btn-tasks" class="day-tab-panel hidden">
             <section class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" data-testid="tasks-panel">
                 <header class="flex flex-col gap-3 border-b border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-start sm:justify-between">
                     <div>
@@ -454,28 +488,6 @@
                               class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold"
                               th:classappend="${task.completed} ? ' border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-200' : (${task.late} ? ' border-red-200 bg-red-50 text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200' : (${task.inGrace} ? ' border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-900/50 dark:bg-orange-950/30 dark:text-orange-200' : (${task.exercise and task.exerciseLog == null} ? ' border-purple-200 bg-purple-50 text-purple-800 dark:border-purple-900/50 dark:bg-purple-950/30 dark:text-purple-200' : ' border-slate-200 bg-white text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200')))"
                               th:text="${task.completed ? 'Done' : (task.exercise and task.exerciseLog == null ? 'Log needed' : (task.late ? 'Late' : (task.inGrace ? 'In grace' : 'To do')))}"></span>
-
-                        <details class="relative" data-testid="task-actions-menu" th:attr="data-task-id=${task.id}">
-                            <summary aria-label="Task actions" data-testid="task-actions-menu-trigger" class="list-none rounded-lg bg-slate-100 px-3 py-1 text-sm font-medium text-slate-900 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">
-                                <span aria-hidden="true">⋯</span>
-                                <span class="sr-only">Task actions</span>
-                            </summary>
-                            <div class="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-800 dark:bg-slate-950">
-                                <a class="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-slate-200 dark:hover:bg-slate-900"
-                                   data-open-task-drawer
-                                   th:attr="data-task-id=${task.id}"
-                                   th:href="@{'/calendar/task/' + ${task.id}}">Open</a>
-                                <form th:action="@{'/calendar/task/' + ${task.id} + '/delete'}" method="post" class="mt-1">
-                                    <input type="hidden" th:if="${_csrf != null}"
-                                           th:name="${_csrf.parameterName}"
-                                           th:value="${_csrf.token}"/>
-                                    <button type="submit"
-                                            class="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-red-300 dark:hover:bg-slate-900">
-                                        Remove
-                                    </button>
-                                </form>
-                            </div>
-                        </details>
                     </div>
                 </div>
 
@@ -531,40 +543,10 @@
 
                             <a th:href="@{'/calendar/task/' + ${task.id}}"
                                class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">Full details</a>
+
+                            <a th:href="@{'/calendar/task/' + ${task.id} + '/edit'}"
+                               class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-900 shadow-sm hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-blue-900/50 dark:bg-blue-950/20 dark:text-blue-200 dark:hover:bg-blue-950/40">Edit task</a>
                         </div>
-
-                        <form data-testid="task-drawer-edit-form" th:action="@{'/calendar/task/' + ${task.id} + '/edit-inline'}" method="post" class="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40">
-                            <input type="hidden" th:if="${_csrf != null}"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}"/>
-
-                            <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Edit</p>
-
-                            <label class="mt-3 block text-sm font-medium text-slate-700 dark:text-slate-200" for="drawer-title">Title</label>
-                            <input id="drawer-title" name="title" type="text" th:value="${task.title}"
-                                   class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
-
-                            <label class="mt-3 block text-sm font-medium text-slate-700 dark:text-slate-200" for="drawer-time">Time</label>
-                            <input id="drawer-time" name="time" type="time" th:value="${task.time != null ? #temporals.format(task.time, 'HH:mm') : ''}"
-                                   class="mt-1 w-full max-w-xs rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
-
-                            <label class="mt-3 block text-sm font-medium text-slate-700 dark:text-slate-200" for="drawer-notes">Notes</label>
-                            <textarea id="drawer-notes" name="notes" rows="3"
-                                      class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-                                      th:text="${task.notes}"></textarea>
-
-                            <label class="mt-3 block text-sm font-medium text-slate-700 dark:text-slate-200" for="drawer-activity-type">Activity Type</label>
-                            <select id="drawer-activity-type" name="activityType"
-                                    class="mt-1 w-full max-w-xs rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                                <option value="" th:selected="${task.activityType == null}">— None (non-exercise) —</option>
-                                <option th:each="at : ${activityTypes}"
-                                        th:value="${at.name()}"
-                                        th:text="${at.icon + ' ' + at.label}"
-                                        th:selected="${task.activityType == at}"></option>
-                            </select>
-
-                            <button class="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">Save</button>
-                        </form>
 
                         <form data-testid="task-drawer-delete-form" th:action="@{'/calendar/task/' + ${task.id} + '/delete'}" method="post" onsubmit="return confirm('Delete this task?')" class="pt-2">
                             <input type="hidden" th:if="${_csrf != null}"
@@ -632,46 +614,66 @@
 
             <div th:if="${!#lists.isEmpty(workoutSessions) || !#lists.isEmpty(occurrences)}" class="max-h-[32rem] overflow-x-hidden overflow-y-auto rounded-xl border border-slate-200 bg-white scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:scrollbar-thumb-slate-700" id="workouts-list-root" data-testid="workouts-list-root">
                 <!-- Workout Sessions -->
-                <div th:each="ws : ${workoutSessions}" data-fade-in class="border-b border-slate-200 p-4 last:border-b-0 dark:border-slate-800 border-l-4 border-l-emerald-400 dark:border-l-emerald-500" data-workout-item th:attr="data-workout-name=${ws.nameSnapshot != null ? ws.nameSnapshot : (ws.workout != null ? ws.workout.name : '')}">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="min-w-0">
-                            <p class="font-semibold text-slate-900 dark:text-slate-100" th:text="${ws.nameSnapshot}"></p>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${ws.workout != null ? ws.workout.notes : ''}"></p>
+                <div th:each="ws : ${workoutSessions}" data-fade-in class="border-b border-slate-200 last:border-b-0 dark:border-slate-800 border-l-4 border-l-emerald-400 dark:border-l-emerald-500" data-workout-item th:attr="data-workout-name=${ws.nameSnapshot != null ? ws.nameSnapshot : (ws.workout != null ? ws.workout.name : '')}">
+                    <button type="button"
+                            class="w-full p-4 text-left transition hover:bg-slate-50 dark:hover:bg-slate-900/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500"
+                            data-open-workout-popup
+                            th:attr="data-workout-id=${ws.id},
+                                     data-workout-name=${ws.nameSnapshot},
+                                     data-workout-notes=${ws.workout != null ? ws.workout.notes : ''},
+                                     data-workout-completed=${ws.completed},
+                                     data-workout-schedule='Workout session',
+                                     data-workout-complete-url=${'/workout-sessions/start/' + ws.workout.id},
+                                     data-csrf=${_csrf != null ? _csrf.token : ''},
+                                     data-csrf-param=${_csrf != null ? _csrf.parameterName : '_csrf'}">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="min-w-0">
+                                <p class="font-semibold text-slate-900 dark:text-slate-100" th:text="${ws.nameSnapshot}"></p>
+                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${ws.workout != null ? ws.workout.notes : ''}"></p>
+                            </div>
+                            <svg class="mt-0.5 h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <form method="post" th:action="@{'/workout-sessions/start/' + ${ws.workout.id}}" class="contents">
-                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">Complete Workout</button>
-                            </form>
-                        </div>
-                    </div>
+                    </button>
                 </div>
                 
                 <!-- Schedule Occurrences -->
                 <div th:each="occ : ${occurrences}" 
                      th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown Exercise')}"
                      data-fade-in 
-                     class="border-b border-slate-200 p-4 last:border-b-0 dark:border-slate-800 border-l-4"
+                     class="border-b border-slate-200 last:border-b-0 dark:border-slate-800 border-l-4"
                      th:classappend="${occ.completed} ? ' border-l-slate-400 dark:border-l-slate-600' : ' border-l-blue-400 dark:border-l-blue-500'"
                      data-occurrence-item 
                      th:attr="data-occurrence-id=${occ.id},
                               data-occurrence-title=${occTitle},
                               data-completed=${occ.completed}">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="min-w-0">
-                            <p class="font-semibold text-slate-900 dark:text-slate-100" th:text="${occTitle}"></p>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                                <span th:text="'From: ' + ${occ.scheduleName}"></span>
-                            </p>
+                    <button type="button"
+                            class="w-full p-4 text-left transition hover:bg-slate-50 dark:hover:bg-slate-900/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500"
+                            data-open-workout-popup
+                            th:attr="data-workout-id=${occ.id},
+                                     data-workout-name=${occTitle},
+                                     data-workout-notes='',
+                                     data-workout-completed=${occ.completed},
+                                     data-workout-schedule=${occ.scheduleName},
+                                     data-workout-complete-url=${!occ.completed ? '/exercise-log/add-occurrence?occId=' + occ.id : ''},
+                                     data-workout-complete-method='get'">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="min-w-0">
+                                <p class="font-semibold text-slate-900 dark:text-slate-100" th:text="${occTitle}"></p>
+                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                                    <span th:text="'Schedule: ' + ${occ.scheduleName}"></span>
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span th:if="${occ.completed}"
+                                      class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200">✓ Done</span>
+                                <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span th:if="${occ.completed}"
-                                  class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300">Completed ✓</span>
-                            <a th:if="${!occ.completed}"
-                               th:href="@{'/exercise-log/add-occurrence?occId=' + ${occ.id}}"
-                               class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">Complete Workout</a>
-                        </div>
-                    </div>
+                    </button>
                 </div>
             </div>
 
@@ -680,36 +682,6 @@
             </div>
         </div>
     </section>
-        </div>
-
-        <!-- ===== TIMELINE TAB PANEL ===== -->
-        <div id="tab-panel-timeline" role="tabpanel" aria-labelledby="tab-btn-timeline" class="day-tab-panel hidden">
-            <div class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
-                <div class="flex items-start justify-between gap-3 border-b border-slate-200 p-4 dark:border-slate-800">
-                    <div>
-                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Day Timeline</h2>
-                        <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Your tasks and workouts visualised across the day. Tasks with a set time appear in their time slots.</p>
-                    </div>
-                    <button type="button"
-                            id="focus-mode-btn"
-                            aria-pressed="false"
-                            class="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900">
-                        <svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
-                        </svg>
-                        <span class="focus-mode-label">Focus mode</span>
-                    </button>
-                </div>
-                <div id="day-timeline"
-                     class="day-timeline p-4"
-                     aria-label="Daily timeline"
-                     th:attr="data-is-today=${isToday}">
-                    <!-- Populated by day-enhancements.js buildTimeline() -->
-                    <noscript>
-                        <p class="py-4 text-sm text-slate-500 dark:text-slate-400">Enable JavaScript to see the timeline view.</p>
-                    </noscript>
-                </div>
-            </div>
         </div>
 
         <!-- ===== OVERVIEW TAB PANEL ===== -->
@@ -724,9 +696,9 @@
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Completion</h2>
                             <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold"
-                                  th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-950/30 dark:text-green-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-900/50 dark:bg-orange-950/30 dark:text-orange-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' border-red-200 bg-red-50 text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200' : ' border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'))">
+                                  th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' border-red-200 bg-red-50 text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200' : ' border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200')))">
                                 <span class="sr-only">Day status</span>
-                                <span th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? 'Complete' : (dayCompletionStatus.name() == 'ORANGE' ? 'Watchlist' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Not started'))) : 'Not started'}"></span>
+                                <span th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? '🏅 Complete' : (dayCompletionStatus.name() == 'BLUE' ? 'In progress' : (dayCompletionStatus.name() == 'ORANGE' ? 'Partial' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Not started')))) : 'Not started'}"></span>
                             </span>
                         </div>
                         <!-- Animated progress bar with hover tooltip -->
@@ -736,13 +708,13 @@
                             <div class="h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" role="progressbar"
                                  th:attr="aria-valuenow=${pct}, aria-valuemin=0, aria-valuemax=100">
                                 <div class="h-full rounded-full transition-all duration-700"
-                                     th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' bg-green-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' bg-yellow-400' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-red-500' : ' bg-blue-400'))"
+                                     th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' bg-amber-400' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' bg-blue-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' bg-emerald-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-red-500' : ' bg-slate-400')))"
                                      th:style="'width: ' + ${pct} + '%'">
                                 </div>
                             </div>
                         </div>
                         <div class="mt-3 flex flex-wrap items-center justify-between gap-3"
-                             th:with="filledDotClass=${(dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN') ? ' bg-green-500 dark:bg-green-400' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE') ? ' bg-yellow-400 dark:bg-yellow-300' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'RED') ? ' bg-slate-950 dark:bg-slate-100' : ' bg-slate-400 dark:bg-slate-500'))}">
+                             th:with="filledDotClass=${(dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN') ? ' bg-amber-400 dark:bg-amber-300' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE') ? ' bg-blue-500 dark:bg-blue-400' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE') ? ' bg-emerald-500 dark:bg-emerald-400' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'RED') ? ' bg-red-500 dark:bg-red-400' : ' bg-slate-400 dark:bg-slate-500')))}">
                              <div class="completion-dots-container flex items-center gap-1" aria-hidden="true">
                                 <span th:each="i : ${#numbers.sequence(1, 10)}"
                                       class="completion-dot h-2.5 w-2.5 rounded-full"
@@ -755,71 +727,89 @@
                     </section>
 
                     <section data-testid="day-overview"
-                         class="day-overview-section rounded-xl border border-amber-200 bg-amber-50/50 p-4 ring-2 ring-amber-400/70 dark:border-amber-900/40 dark:bg-amber-950/15 dark:ring-amber-300/50"
+                         class="day-overview-section p-4"
                          th:with="isComplete=${dayCompletionStatus == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionStatus).GREEN}">
-                    <div class="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                            <h2 class="text-sm font-semibold text-amber-900 dark:text-amber-100">Day overview</h2>
-                            <p class="mt-0.5 text-sm text-amber-900/80 dark:text-amber-100/80"
-                               th:text="${isComplete} ? 'Unlocked — reflect and ask AI about the day.' : 'Locked — complete the day to unlock AI.'"></p>
-                        </div>
-
-                        <span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold"
-                              th:classappend="${isComplete} ? ' border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200' : ' border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="2">
-                                <path th:if="${!isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M8 11V8a4 4 0 018 0v3" />
-                                <path th:if="${!isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M7 11h10v10H7V11z" />
-                                <path th:if="${isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M7 11h10v10H7V11z" />
-                                <path th:if="${isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M9 11V8a3 3 0 016 0" />
-                            </svg>
-                            <span th:text="${isComplete} ? 'Unlocked' : 'Locked'"></span>
-                        </span>
-                    </div>
-
-                    <form th:action="@{'/calendar/day/' + ${date} + '/reflection'}"
-                          method="post"
-                          class="mt-3 space-y-3">
-                        <input type="hidden" th:if="${_csrf != null}"
-                               th:name="${_csrf.parameterName}"
-                               th:value="${_csrf.token}"/>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-amber-900 dark:text-amber-100" for="reflection-text"
-                                   th:text="${isComplete} ? 'How was today?' : 'Day overview (locked)'"></label>
-                            <textarea id="reflection-text"
-                                      name="reflection"
-                                      rows="3"
-                                      th:disabled="${!isComplete}"
-                                      th:attr="required=${isComplete}"
-                                      placeholder="Write a quick overview of the day..."
-                                      class="mt-1 w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-amber-900/40 dark:bg-slate-950 dark:text-slate-100 dark:disabled:bg-slate-900 dark:disabled:text-slate-500"></textarea>
-                        </div>
-
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button th:if="${isComplete}"
-                                    class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-                                Ask AI about the day
-                            </button>
-
-                            <a th:if="${isComplete}"
-                               th:href="@{/chat}"
-                               class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">
-                                Open Chat
+                        <!-- Premium gate: show lock if not premium -->
+                        <div th:if="${!isPremium}"
+                             class="flex flex-col items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-6 text-center dark:border-amber-900/40 dark:bg-amber-950/15"
+                             data-testid="overview-premium-gate">
+                            <span class="text-3xl" aria-hidden="true">🔒</span>
+                            <div>
+                                <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Overview is a Premium feature</p>
+                                <p class="mt-1 text-xs text-amber-900/70 dark:text-amber-100/70">Upgrade to unlock AI reflection, performance insights, and streak tracking.</p>
+                            </div>
+                            <a href="/subscription"
+                               class="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">
+                                Upgrade to Premium
                             </a>
                         </div>
-                    </form>
 
-                    <div class="mt-4 space-y-3"
-                         th:if="${isComplete && reflectionPerformanceSummary != null && !#strings.isEmpty(reflectionPerformanceSummary)}">
-                        <div>
-                            <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Performance summary</p>
-                            <p class="mt-1 text-sm text-amber-900/90 dark:text-amber-100/90" th:text="${reflectionPerformanceSummary}"></p>
+                        <div th:if="${isPremium}"
+                             class="rounded-xl border border-amber-200 bg-amber-50/50 p-4 ring-2 ring-amber-400/70 dark:border-amber-900/40 dark:bg-amber-950/15 dark:ring-amber-300/50">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                                <h2 class="text-sm font-semibold text-amber-900 dark:text-amber-100">Day overview</h2>
+                                <p class="mt-0.5 text-sm text-amber-900/80 dark:text-amber-100/80"
+                                   th:text="${isComplete} ? 'Unlocked — reflect and ask AI about the day.' : 'Locked — complete all tasks &amp; workouts to unlock.'"></p>
+                            </div>
+
+                            <span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold"
+                                  th:classappend="${isComplete} ? ' border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200' : ' border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200'">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="2">
+                                    <path th:if="${!isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M8 11V8a4 4 0 018 0v3" />
+                                    <path th:if="${!isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M7 11h10v10H7V11z" />
+                                    <path th:if="${isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M7 11h10v10H7V11z" />
+                                    <path th:if="${isComplete}" stroke-linecap="round" stroke-linejoin="round" d="M9 11V8a3 3 0 016 0" />
+                                </svg>
+                                <span th:text="${isComplete} ? 'Unlocked' : 'Locked'"></span>
+                            </span>
                         </div>
-                        <div th:if="${reflectionImprovementSuggestions != null && !#strings.isEmpty(reflectionImprovementSuggestions)}">
-                            <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Improvement suggestions</p>
-                            <p class="mt-1 whitespace-pre-line text-sm text-amber-900/90 dark:text-amber-100/90" th:text="${reflectionImprovementSuggestions}"></p>
+
+                        <form th:action="@{'/calendar/day/' + ${date} + '/reflection'}"
+                              method="post"
+                              class="mt-3 space-y-3">
+                            <input type="hidden" th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-amber-900 dark:text-amber-100" for="reflection-text"
+                                       th:text="${isComplete} ? 'How was today?' : 'Day overview (locked)'"></label>
+                                <textarea id="reflection-text"
+                                          name="reflection"
+                                          rows="3"
+                                          th:disabled="${!isComplete}"
+                                          th:attr="required=${isComplete}"
+                                          placeholder="Write a quick overview of the day..."
+                                          class="mt-1 w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-amber-900/40 dark:bg-slate-950 dark:text-slate-100 dark:disabled:bg-slate-900 dark:disabled:text-slate-500"></textarea>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button th:if="${isComplete}"
+                                        class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                                    Ask AI about the day
+                                </button>
+
+                                <a th:if="${isComplete}"
+                                   th:href="@{/chat}"
+                                   class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">
+                                    Open Chat
+                                </a>
+                            </div>
+                        </form>
+
+                        <div class="mt-4 space-y-3"
+                             th:if="${isComplete && reflectionPerformanceSummary != null && !#strings.isEmpty(reflectionPerformanceSummary)}">
+                            <div>
+                                <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Performance summary</p>
+                                <p class="mt-1 text-sm text-amber-900/90 dark:text-amber-100/90" th:text="${reflectionPerformanceSummary}"></p>
+                            </div>
+                            <div th:if="${reflectionImprovementSuggestions != null && !#strings.isEmpty(reflectionImprovementSuggestions)}">
+                                <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Improvement suggestions</p>
+                                <p class="mt-1 whitespace-pre-line text-sm text-amber-900/90 dark:text-amber-100/90" th:text="${reflectionImprovementSuggestions}"></p>
+                            </div>
                         </div>
-                    </div>
+                        </div>
                     </section>
 
                     <section class="day-health-section p-5"
@@ -1053,6 +1043,43 @@
             </div>
             <div id="task-drawer-body" data-testid="task-drawer-body" class="max-h-[70vh] overflow-y-auto p-4 sm:max-h-none">
                 <p class="text-sm text-slate-600 dark:text-slate-300">Select a task to view details.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== WORKOUT PREVIEW POPUP ===== -->
+    <div id="workout-popup" class="fixed inset-0 z-[65] hidden overflow-y-auto" aria-hidden="true" data-testid="workout-popup">
+        <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" id="workout-popup-backdrop"></div>
+        <div class="relative flex min-h-full items-end justify-center p-4 sm:items-center">
+            <div class="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-950"
+                 role="dialog" aria-modal="true" aria-labelledby="workout-popup-title">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200 mb-2">Workout</span>
+                        <h2 id="workout-popup-title" class="text-lg font-semibold text-slate-900 dark:text-slate-100" data-workout-popup-name>—</h2>
+                        <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400" data-workout-popup-schedule></p>
+                    </div>
+                    <button type="button" id="close-workout-popup"
+                            class="shrink-0 rounded-lg bg-slate-100 px-3 py-1 text-sm font-medium text-slate-900 hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">Close</button>
+                </div>
+
+                <div class="mt-4" data-workout-popup-notes-wrap>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Notes</p>
+                    <p class="mt-1 text-sm text-slate-700 dark:text-slate-300" data-workout-popup-notes>—</p>
+                </div>
+
+                <div class="mt-4 flex flex-wrap gap-3" data-workout-popup-actions>
+                    <!-- Completed badge (shown when workout is done) -->
+                    <span class="hidden items-center gap-1.5 rounded-xl bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200"
+                          data-workout-popup-completed-badge>
+                        ✓ Completed
+                    </span>
+                    <!-- Complete button (hidden when done) -->
+                    <a class="hidden items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                       data-workout-popup-complete-link>
+                        Complete Workout
+                    </a>
+                </div>
             </div>
         </div>
     </div>

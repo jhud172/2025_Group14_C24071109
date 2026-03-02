@@ -630,6 +630,33 @@
                 }), 300);
             }
         }
+
+        // Click-to-add: clicking an empty slot prefills the add-task modal with the hour
+        container.addEventListener('click', (e) => {
+            // Only trigger if clicking on an empty slot (not on an event or button)
+            const slot = e.target.closest('.timeline-slot');
+            const event = e.target.closest('.timeline-event');
+            const qcBtn = e.target.closest('.timeline-qc-btn');
+            if (!slot || event || qcBtn) return;
+
+            // Get the hour from the parent row
+            const row = e.target.closest('.timeline-hour-row');
+            if (!row) return;
+            const label = row.querySelector('.timeline-hour-label');
+            if (!label) return;
+            const hour = label.textContent.split(':')[0];
+            const timeValue = String(hour).padStart(2, '0') + ':00';
+
+            // Open add task modal and prefill time
+            const addBtn = document.getElementById('open-add-task');
+            if (addBtn) addBtn.click();
+
+            // Wait for modal to open, then prefill time
+            setTimeout(() => {
+                const timeInput = document.querySelector('#add-task-modal input[name="time"]');
+                if (timeInput) timeInput.value = timeValue;
+            }, 50);
+        });
     }
 
     function escapeHtml(str) {
@@ -953,6 +980,12 @@
             document.addEventListener('DOMContentLoaded', init);
             return;
         }
+
+        // Apply page enter animation
+        const mainContent = document.getElementById('day-main-content');
+        if (mainContent) {
+            mainContent.classList.add('day-page-enter');
+        }
         
         applyTimeOfDayTheme();
         initTimeThemeToggle();
@@ -968,12 +1001,141 @@
         initTaskFilter();
         buildTimeline();
         initTimedFocusCountdown();
+        initLiveClock();
         initAiOptimiseModal();
         initQuickComplete();
+        initWorkoutPopup();
         applyServerDayTheme();
         
         // Refresh upcoming task highlights every minute
         setInterval(highlightUpcomingTasks, 60000);
+    }
+
+    // ==================== Live Clock in Timed Focus ====================
+    function initLiveClock() {
+        const section = document.querySelector('[data-testid="timed-focus"]');
+        if (!section) return;
+
+        // Add a live clock display
+        let clockEl = section.querySelector('.timed-focus-clock');
+        if (!clockEl) {
+            clockEl = document.createElement('span');
+            clockEl.className = 'timed-focus-clock block text-xs font-mono text-slate-500 dark:text-slate-400 mt-1';
+            const valueEl = section.querySelector('[data-testid="timed-focus-value"]');
+            if (valueEl) valueEl.after(clockEl);
+        }
+
+        // Show next upcoming event
+        function getNextEvent() {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            let nearest = null;
+            let nearestMinutes = Infinity;
+            let nearestTitle = '';
+
+            document.querySelectorAll('[data-task-item]').forEach(el => {
+                const timeStr = el.getAttribute('data-task-time');
+                const status = el.getAttribute('data-task-status');
+                const title = el.getAttribute('data-task-title') || '';
+                if (!timeStr || status === 'done') return;
+                const [h, m] = timeStr.split(':').map(Number);
+                const taskMinutes = h * 60 + m;
+                const diff = taskMinutes - currentMinutes;
+                if (diff >= 0 && diff < nearestMinutes) {
+                    nearestMinutes = diff;
+                    nearest = diff;
+                    nearestTitle = title;
+                }
+            });
+
+            return nearest !== null ? { diff: nearest, title: nearestTitle } : null;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            let text = h + ':' + m + ':' + s;
+
+            const nextEvent = getNextEvent();
+            if (nextEvent && nextEvent.diff <= 60) {
+                const minsLeft = nextEvent.diff;
+                text += ' · Next: ' + nextEvent.title.substring(0, 20) + (nextEvent.title.length > 20 ? '…' : '') + ' in ' + minsLeft + 'm';
+            }
+            clockEl.textContent = text;
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    }
+
+    // ==================== Workout Preview Popup ====================
+    function initWorkoutPopup() {
+        const popup = document.getElementById('workout-popup');
+        if (!popup) return;
+
+        const backdrop = document.getElementById('workout-popup-backdrop');
+        const closeBtn = document.getElementById('close-workout-popup');
+        const titleEl = popup.querySelector('[data-workout-popup-name]');
+        const scheduleEl = popup.querySelector('[data-workout-popup-schedule]');
+        const notesEl = popup.querySelector('[data-workout-popup-notes]');
+        const notesWrap = popup.querySelector('[data-workout-popup-notes-wrap]');
+        const completedBadge = popup.querySelector('[data-workout-popup-completed-badge]');
+        const completeLink = popup.querySelector('[data-workout-popup-complete-link]');
+
+        function openPopup(btn) {
+            const name = btn.getAttribute('data-workout-name') || '—';
+            const schedule = btn.getAttribute('data-workout-schedule') || '';
+            const notes = btn.getAttribute('data-workout-notes') || '';
+            const completed = btn.getAttribute('data-workout-completed') === 'true';
+            const completeUrl = btn.getAttribute('data-workout-complete-url') || '';
+            const completeMethod = btn.getAttribute('data-workout-complete-method') || 'post';
+
+            if (titleEl) titleEl.textContent = name;
+            if (scheduleEl) scheduleEl.textContent = schedule ? 'Schedule: ' + schedule : '';
+            if (notesEl) notesEl.textContent = notes || '—';
+            if (notesWrap) notesWrap.style.display = notes ? '' : 'none';
+
+            if (completed) {
+                if (completedBadge) { completedBadge.style.display = 'inline-flex'; completedBadge.classList.remove('hidden'); }
+                if (completeLink) { completeLink.style.display = 'none'; }
+            } else {
+                if (completedBadge) { completedBadge.style.display = 'none'; }
+                if (completeLink && completeUrl) {
+                    completeLink.href = completeUrl;
+                    completeLink.style.display = 'inline-flex';
+                    completeLink.classList.remove('hidden');
+                }
+            }
+
+            popup.classList.remove('hidden');
+            popup.setAttribute('aria-hidden', 'false');
+            if (closeBtn) closeBtn.focus();
+        }
+
+        function closePopup() {
+            popup.classList.add('hidden');
+            popup.setAttribute('aria-hidden', 'true');
+        }
+
+        // Open popup on workout item click
+        document.addEventListener('click', (e) => {
+            const btn = e.target && e.target.closest ? e.target.closest('[data-open-workout-popup]') : null;
+            if (btn) {
+                e.preventDefault();
+                openPopup(btn);
+            }
+        });
+
+        if (closeBtn) closeBtn.addEventListener('click', closePopup);
+        if (backdrop) backdrop.addEventListener('click', closePopup);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
+                closePopup();
+            }
+        });
     }
     
     init();

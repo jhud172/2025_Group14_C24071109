@@ -661,6 +661,9 @@ public class CalendarController {
         model.addAttribute("taskTemplateAll", taskTemplateService.listAll(user));
         model.addAttribute("activityTypes", ActivityType.values());
 
+        boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
+        model.addAttribute("isPremium", isPremium);
+
         var dailyStreakService = dailyStreakServiceProvider.getIfAvailable();
         if (dailyStreakService != null) {
             LocalDate streakEnd = date;
