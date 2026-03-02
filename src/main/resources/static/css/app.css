@@ -8596,6 +8596,9 @@ html:not(.dark) .week-day-card:has(.insight-success-icon:is(.dark *)) {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
   opacity: 1;
 }
+.sticker-tooltip.advanced-controls-dropdown.show {
+  opacity: 1;
+}
 .advanced-controls-menu {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -9949,6 +9952,9 @@ html:not(.dark) .week-day-card:has(.workout-btn-secondary:is(.dark *)) {
 }
 .workout-tooltip.show {
   visibility: visible;
+  opacity: 1;
+}
+.sticker-tooltip.workout-tooltip.show {
   opacity: 1;
 }
 /* ========================================
@@ -13453,6 +13459,313 @@ html:not(.dark) .week-day-card:has(.tcc-insight-value:is(.dark *)) {
   transition-property: opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 200ms;
+}
+/* ============================================================
+   STICKER CALENDAR — Motivation View
+   Visually rewards completed workouts with sticker badges.
+   ============================================================ */
+/* ===== VIEW TOGGLE ===== */
+.calendar-view-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgb(226, 232, 240);
+  background: rgba(248, 250, 252, 0.85);
+  gap: 0.15rem;
+}
+.dark .calendar-view-mode-toggle {
+  border-color: rgb(51, 65, 85);
+  background: rgba(15, 23, 42, 0.5);
+}
+.calendar-view-mode-btn {
+  padding: 0.45rem 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 0.65rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgb(100, 116, 139);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+.calendar-view-mode-btn:hover {
+  color: rgb(30, 41, 59);
+  background: rgba(255, 255, 255, 0.7);
+}
+.dark .calendar-view-mode-btn:hover {
+  color: rgb(226, 232, 240);
+  background: rgba(51, 65, 85, 0.5);
+}
+.calendar-view-mode-btn.active {
+  background: white;
+  color: rgb(5, 150, 105);
+  border-color: rgba(148, 163, 184, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.dark .calendar-view-mode-btn.active {
+  background: rgb(30, 41, 59);
+  color: rgb(52, 211, 153);
+  border-color: rgb(51, 65, 85);
+}
+/* ===== STICKER VIEW PANEL ===== */
+#sticker-view-panel {
+  display: none;
+}
+#sticker-view-panel.sticker-view-active {
+  display: block;
+}
+/* ===== MONTHLY TARGET BAR ===== */
+.sticker-target-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.85rem;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgb(226, 232, 240);
+  margin-bottom: 1rem;
+}
+.dark .sticker-target-bar {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: rgb(51, 65, 85);
+}
+.sticker-target-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(71, 85, 105);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.dark .sticker-target-label {
+  color: rgb(148, 163, 184);
+}
+.sticker-target-progress-wrap {
+  flex: 1;
+  height: 8px;
+  border-radius: 99px;
+  background: rgb(226, 232, 240);
+  overflow: hidden;
+  min-width: 60px;
+}
+.dark .sticker-target-progress-wrap {
+  background: rgb(51, 65, 85);
+}
+.sticker-target-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, rgb(16, 185, 129), rgb(5, 150, 105));
+  transition: width 0.4s ease;
+}
+.sticker-target-progress-fill.near {
+  background: linear-gradient(90deg, rgb(234, 179, 8), rgb(202, 138, 4));
+}
+.sticker-target-progress-fill.met {
+  background: linear-gradient(90deg, rgb(16, 185, 129), rgb(52, 211, 153));
+}
+.sticker-target-count {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: rgb(30, 41, 59);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.dark .sticker-target-count {
+  color: rgb(226, 232, 240);
+}
+/* ===== PACK SELECTOR ===== */
+.sticker-pack-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.sticker-pack-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(100, 116, 139);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.sticker-pack-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 0.6rem;
+  border: 1px solid rgb(226, 232, 240);
+  background: white;
+  color: rgb(71, 85, 105);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.dark .sticker-pack-btn {
+  background: rgb(15, 23, 42);
+  border-color: rgb(51, 65, 85);
+  color: rgb(148, 163, 184);
+}
+.sticker-pack-btn:hover {
+  border-color: rgb(52, 211, 153);
+  color: rgb(5, 150, 105);
+}
+.sticker-pack-btn.active {
+  border-color: rgb(16, 185, 129);
+  background: rgb(240, 253, 250);
+  color: rgb(5, 150, 105);
+}
+.dark .sticker-pack-btn.active {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgb(52, 211, 153);
+  color: rgb(52, 211, 153);
+}
+/* ===== STICKER GRID — same structure as planning grid ===== */
+.sticker-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+/* ===== STICKER DAY CELL ===== */
+.sticker-day-cell {
+  min-height: 90px;
+  padding: 0.4rem;
+  border: 1px solid rgb(241, 245, 249);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+.dark .sticker-day-cell {
+  border-color: rgb(30, 41, 59);
+}
+.sticker-day-cell.sticker-today {
+  border-color: rgb(16, 185, 129);
+  background: rgba(16, 185, 129, 0.04);
+}
+.sticker-day-number {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(100, 116, 139);
+  line-height: 1;
+  margin-bottom: 0.15rem;
+}
+.dark .sticker-day-number {
+  color: rgb(100, 116, 139);
+}
+.sticker-day-cell.sticker-today .sticker-day-number {
+  color: rgb(5, 150, 105);
+}
+.sticker-placeholder {
+  min-height: 90px;
+}
+/* ===== STICKER BADGE ===== */
+.sticker-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.sticker-badge:hover,
+.sticker-badge:focus {
+  transform: scale(1.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  outline: none;
+  z-index: 1;
+}
+/* Sticker colours by workout type */
+.sticker-badge--legs {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+.sticker-badge--push {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.sticker-badge--pull {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.45);
+}
+.sticker-badge--cardio {
+  background: rgba(249, 115, 22, 0.12);
+  border-color: rgba(249, 115, 22, 0.45);
+}
+.sticker-badge--core {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.45);
+}
+.sticker-badge--default {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+/* Extra sticker when multiple sessions in one day */
+.sticker-badge--extra {
+  background: rgba(148, 163, 184, 0.15);
+  border-color: rgba(148, 163, 184, 0.4);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgb(71, 85, 105);
+}
+.dark .sticker-badge--extra {
+  color: rgb(148, 163, 184);
+}
+/* ===== STICKER TOOLTIP ===== */
+.sticker-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: rgb(15, 23, 42);
+  color: rgb(226, 232, 240);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.85rem;
+  padding: 0.75rem 1rem;
+  max-width: 220px;
+  min-width: 160px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  font-size: 0.8125rem;
+}
+.sticker-tooltip.visible {
+  opacity: 1;
+}
+.sticker-tooltip-title {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: rgb(255, 255, 255);
+  font-size: 0.875rem;
+}
+.sticker-tooltip-meta {
+  font-size: 0.75rem;
+  color: rgb(148, 163, 184);
+}
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .sticker-badge {
+    width: 1.65rem;
+    height: 1.65rem;
+    font-size: 0.95rem;
+  }
+
+  .sticker-day-cell {
+    min-height: 70px;
+    padding: 0.25rem;
+  }
+
+  .sticker-target-bar {
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+  }
 }
 /* Product pages and widgets */
 /* ===== Timeline day tooltip (outside @layer to avoid specificity issues) ===== */
@@ -29162,6 +29475,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:hover\:bg-slate-800\/50:hover:is(.dark *) {
   background-color: rgb(30 41 59 / 0.5);
 }
+.dark\:hover\:bg-slate-800\/60:hover:is(.dark *) {
+  background-color: rgb(30 41 59 / 0.6);
+}
 .dark\:hover\:bg-slate-800\/70:hover:is(.dark *) {
   background-color: rgb(30 41 59 / 0.7);
 }
@@ -29204,6 +29520,10 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:hover\:text-slate-200:hover:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(226 232 240 / var(--tw-text-opacity, 1));
+}
+.dark\:hover\:text-slate-300:hover:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(203 213 225 / var(--tw-text-opacity, 1));
 }
 .dark\:hover\:text-white:hover:is(.dark *) {
   --tw-text-opacity: 1;

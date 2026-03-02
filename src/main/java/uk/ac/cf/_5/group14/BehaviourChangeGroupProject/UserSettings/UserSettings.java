@@ -127,6 +127,13 @@ public class UserSettings {
     @Column(name = "hide_ai_one_shot_warning", nullable = false)
     private boolean hideAiOneShotWarning = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sticker_pack", nullable = false, length = 20)
+    private StickerPackPreference stickerPack = StickerPackPreference.STARS;
+
+    @Column(name = "monthly_workout_target", nullable = false)
+    private int monthlyWorkoutTarget = 12;
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
