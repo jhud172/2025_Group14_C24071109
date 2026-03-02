@@ -104,6 +104,55 @@
                 </div>
             </div>
 
+            <!-- Weekly Progress -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="cd-section-title">Weekly Progress</h2>
+                    <button class="cd-section-link" id="cd-target-edit-btn" aria-expanded="false">Set target</button>
+                </div>
+
+                <div class="cd-progress-panel">
+                    <!-- Streak & last session hints -->
+                    <div class="flex flex-wrap items-center gap-4 mb-5">
+                        <div class="cd-streak-badge">
+                            <span class="cd-streak-badge__fire" aria-hidden="true">🔥</span>
+                            <div>
+                                <div class="cd-streak-badge__value" th:text="${summary.workoutStreak}">0</div>
+                                <div class="cd-streak-badge__label">day streak</div>
+                            </div>
+                        </div>
+                        <div class="cd-last-session-hint">
+                            <span th:if="${summary.daysSinceLastWorkout == 0}">Last session: <strong>today</strong> ✓</span>
+                            <span th:if="${summary.daysSinceLastWorkout == 1}">Last session: <strong>yesterday</strong></span>
+                            <span th:if="${summary.daysSinceLastWorkout > 1}"
+                                  th:text="'Last session: ' + ${summary.daysSinceLastWorkout} + ' days ago'">Last session: 3 days ago</span>
+                            <span th:if="${summary.daysSinceLastWorkout < 0}">No workouts yet – <a th:href="@{/workout}" class="text-emerald-400 hover:text-emerald-300">start today!</a></span>
+                        </div>
+                    </div>
+
+                    <!-- Star progress display -->
+                    <div class="cd-progress-stars"
+                         id="cd-progress-stars"
+                         data-completed="[[${summary.weeklyWorkoutsCompleted}]]">
+                        <!-- Stars injected by JS -->
+                    </div>
+                    <div class="cd-progress-label">
+                        <span th:text="${summary.weeklyWorkoutsCompleted}">0</span>
+                        / <span id="cd-target-value">3</span> workouts this week
+                    </div>
+
+                    <!-- Inline target editor -->
+                    <div id="cd-target-editor" class="cd-target-editor" hidden>
+                        <label class="cd-target-editor__label" for="cd-target-input">Weekly workout target</label>
+                        <div class="cd-target-editor__row">
+                            <input type="number" id="cd-target-input" min="1" max="14" value="3"
+                                   class="cd-target-editor__input" aria-label="Weekly workout target">
+                            <button id="cd-target-save-btn" class="cd-target-editor__save">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Quick Actions -->
             <div>
                 <h2 class="cd-section-title mb-4">Quick Actions</h2>
@@ -165,6 +214,47 @@
                     </a>
 
                 </div>
+            </div>
+
+            <!-- Premium Features Panel -->
+            <div class="mt-8">
+
+                <!-- Premium active -->
+                <div th:if="${summary.premium}" class="cd-premium-panel cd-premium-panel--active">
+                    <div class="cd-premium-panel__header">
+                        <div class="cd-premium-icon cd-premium-icon--active">🏆</div>
+                        <div>
+                            <div class="cd-premium-panel__title">Premium Active</div>
+                            <div class="cd-premium-panel__sub">All features unlocked</div>
+                        </div>
+                    </div>
+                    <ul class="cd-premium-features">
+                        <li><span class="cd-feature-check">✓</span> AI-powered coaching &amp; personalised plans</li>
+                        <li><span class="cd-feature-check">✓</span> Advanced workout templates &amp; tracking</li>
+                        <li><span class="cd-feature-check">✓</span> Connect with certified trainers</li>
+                        <li><span class="cd-feature-check">✓</span> Progress analytics &amp; weekly insights</li>
+                        <li><span class="cd-feature-check">✓</span> Unlimited vault &amp; notes</li>
+                    </ul>
+                </div>
+
+                <!-- Not premium -->
+                <div th:unless="${summary.premium}" class="cd-premium-panel">
+                    <div class="cd-premium-panel__header">
+                        <div class="cd-premium-icon">⭐</div>
+                        <div>
+                            <div class="cd-premium-panel__title">Unlock Premium</div>
+                            <div class="cd-premium-panel__sub">Take your training to the next level</div>
+                        </div>
+                    </div>
+                    <ul class="cd-premium-features">
+                        <li>🤖 AI-powered coaching &amp; personalised plans</li>
+                        <li>📊 Advanced analytics &amp; weekly insights</li>
+                        <li>👨‍💼 Connect with certified trainers</li>
+                        <li>📝 Unlimited vault &amp; notes</li>
+                    </ul>
+                    <a th:href="@{/pricing}" class="cd-premium-cta">View plans &rarr;</a>
+                </div>
+
             </div>
 
         </div>

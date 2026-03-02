@@ -9,13 +9,16 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccu
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,6 +79,48 @@ public class DashboardSummaryService {
             cursor = cursor.plusDays(1);
         }
 
-        return new DashboardSummaryDto(tasksDueToday, workoutsDueToday, today, week);
+        Set<LocalDate> recentCompleted = loadCompletedSet(user, today);
+
+        return new DashboardSummaryDto(tasksDueToday, workoutsDueToday, today, week,
+                computeWeeklyWorkoutsCompleted(user, today),
+                computeWorkoutStreak(recentCompleted, today),
+                computeDaysSinceLastWorkout(recentCompleted, today),
+                user.isSubscriptionStatus());
+    }
+
+    private int computeWeeklyWorkoutsCompleted(User user, LocalDate today) {
+        LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        return scheduleOccurrenceRepository
+                .findCompletedDatesByUserAndDateBetween(user, monday, today).size();
+    }
+
+    private int computeWorkoutStreak(Set<LocalDate> completedSet, LocalDate today) {
+        int streak = 0;
+        int startOffset = completedSet.contains(today) ? 0 : 1;
+        for (int i = startOffset; i <= 89; i++) {
+            if (completedSet.contains(today.minusDays(i))) {
+                streak++;
+            } else {
+                break;
+            }
+        }
+        return streak;
+    }
+
+    private int computeDaysSinceLastWorkout(Set<LocalDate> completedSet, LocalDate today) {
+        List<LocalDate> sorted = completedSet.stream()
+                .sorted((a, b) -> b.compareTo(a))
+                .toList();
+        if (sorted.isEmpty()) {
+            return -1;
+        }
+        LocalDate mostRecent = sorted.get(0);
+        return (int) (today.toEpochDay() - mostRecent.toEpochDay());
+    }
+
+    private Set<LocalDate> loadCompletedSet(User user, LocalDate today) {
+        List<LocalDate> dates = scheduleOccurrenceRepository
+                .findCompletedDatesByUserAndDateBetween(user, today.minusDays(89), today);
+        return new HashSet<>(dates);
     }
 }
