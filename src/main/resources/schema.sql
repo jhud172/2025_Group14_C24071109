@@ -3,6 +3,11 @@
 -- =========================
 DROP VIEW IF EXISTS user_authorities CASCADE;
 
+DROP TABLE IF EXISTS merch_order_items CASCADE;
+DROP TABLE IF EXISTS merch_orders CASCADE;
+DROP TABLE IF EXISTS saved_payment_methods CASCADE;
+DROP TABLE IF EXISTS merch_products CASCADE;
+
 DROP TABLE IF EXISTS review_moderations CASCADE;
 DROP TABLE IF EXISTS client_assessments CASCADE;
 DROP TABLE IF EXISTS trainer_reviews CASCADE;

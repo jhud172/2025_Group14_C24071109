@@ -28,6 +28,8 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.HealthCo
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.UserHealthConditionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelProgress;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.MerchOrderService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PaymentCards.SavedPaymentMethodService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Profile.FileStorageService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Profile.ProfileController;
@@ -61,6 +63,8 @@ class ProfileRouteAccessTest {
     @MockitoBean private UserRepository userRepository;
     @MockitoBean private AuthHelper authHelper;
     @MockitoBean private DayModeService dayModeService;
+    @MockitoBean private SavedPaymentMethodService savedPaymentMethodService;
+    @MockitoBean private MerchOrderService merchOrderService;
 
     @Test
     void profileRouteReturns200WhenSessionUserPresent() throws Exception {
@@ -90,6 +94,8 @@ class ProfileRouteAccessTest {
                 .willReturn(Collections.emptyList());
         given(exerciseLogService.getLogsByUser(eq(user))).willReturn(Collections.emptyList());
         given(dataExportRequestService.getRecentRequests(eq(user))).willReturn(Collections.emptyList());
+        given(savedPaymentMethodService.getCardsForUser(eq(user.getId()))).willReturn(Collections.emptyList());
+        given(merchOrderService.getOrdersForUser(eq(user.getId()))).willReturn(Collections.emptyList());
 
         mvc.perform(get("/profile").sessionAttr("user", user))
                 .andExpect(status().isOk());

@@ -1,0 +1,149 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Checkout', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+
+        <div class="mb-6 flex items-center gap-3">
+            <a th:href="@{/merch}" class="text-neon-cyan hover:underline text-sm">&larr; Back to Shop</a>
+        </div>
+
+        <h1 class="mb-6 text-2xl font-bold gradient-text">Checkout</h1>
+
+        <!-- Error -->
+        <div th:if="${checkoutError}"
+             class="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-400"
+             th:text="${checkoutError}"></div>
+
+        <!-- Product summary -->
+        <div class="card-neon card--cyan mb-6 flex gap-4 p-4">
+            <img th:if="${product.imageUrl != null}"
+                 th:src="${product.imageUrl}" th:alt="${product.name}"
+                 class="h-20 w-20 rounded object-cover flex-shrink-0" />
+            <div>
+                <h2 class="font-semibold text-white" th:text="${product.name}">Product</h2>
+                <p th:if="${product.description != null}"
+                   class="mt-1 text-sm text-slate-400 line-clamp-2"
+                   th:text="${product.description}"></p>
+                <p class="mt-2 text-lg font-bold text-neon-cyan"
+                   th:text="'£' + ${#numbers.formatDecimal(product.price, 1, 2)}">£0.00</p>
+            </div>
+        </div>
+
+        <form th:action="@{/merch/{id}/buy(id=${product.id})}" method="post">
+            <!-- Quantity -->
+            <div class="mb-5">
+                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Quantity</label>
+                <input type="number" name="quantity" min="1"
+                       th:max="${product.stockQuantity}" value="1"
+                       class="input-field w-24" />
+            </div>
+
+            <!-- Card selection -->
+            <div class="mb-5">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-400 mb-3">Payment Method</h3>
+
+                <!-- Saved cards -->
+                <div th:if="${!#lists.isEmpty(cards)}" class="space-y-2 mb-4">
+                    <p class="text-xs text-slate-500 mb-2">Select a saved card or enter new card details below.</p>
+                    <div th:each="card, iter : ${cards}"
+                         class="flex items-center gap-3 rounded-lg border border-slate-700/50 bg-slate-800/40 px-4 py-3 cursor-pointer hover:border-neon-cyan/40 transition-colors">
+                        <input type="radio" name="selectedCardId"
+                               th:id="'card-' + ${card.id}"
+                               th:value="${card.id}"
+                               th:checked="${card.default}"
+                               class="h-4 w-4 text-neon-cyan border-slate-600 bg-slate-800" />
+                        <label th:for="'card-' + ${card.id}" class="flex-1 cursor-pointer">
+                            <span class="font-semibold text-white"
+                                  th:text="${card.brand}">Visa</span>
+                            <span class="text-slate-400 text-sm"
+                                  th:text="' ending in ' + ${card.lastFour}"> ending in 4242</span>
+                            <span th:if="${card.default}"
+                                  class="ml-2 text-xs text-neon-cyan">(default)</span>
+                            <span class="text-xs text-slate-500 block"
+                                  th:text="${card.cardHolderName}">Name</span>
+                        </label>
+                    </div>
+                    <!-- Option to use new card instead -->
+                    <div class="flex items-center gap-3 rounded-lg border border-slate-700/50 bg-slate-800/40 px-4 py-3 cursor-pointer hover:border-neon-cyan/40 transition-colors">
+                        <input type="radio" name="selectedCardId" id="card-new" value=""
+                               th:checked="${#lists.isEmpty(cards)}"
+                               class="h-4 w-4 text-neon-cyan border-slate-600 bg-slate-800"
+                               onchange="document.getElementById('new-card-fields').classList.toggle('hidden', this.value !== '')" />
+                        <label for="card-new" class="cursor-pointer text-slate-300 text-sm">Use a different card</label>
+                    </div>
+                </div>
+
+                <!-- New card fields -->
+                <div id="new-card-fields"
+                     th:classappend="${#lists.isEmpty(cards)} ? '' : ' hidden'"
+                     class="card-neon card--cyan space-y-4 p-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Cardholder Name *</label>
+                        <input type="text" name="newCardHolderName" maxlength="200"
+                               class="input-field w-full" placeholder="Name on card" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Card Number *</label>
+                        <input type="text" name="newCardNumber" maxlength="19"
+                               class="input-field w-full" placeholder="•••• •••• •••• ••••"
+                               autocomplete="cc-number" inputmode="numeric"
+                               oninput="this.value=this.value.replace(/[^\d\s]/g,'')"/>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Month *</label>
+                            <select name="newExpiryMonth" class="input-field w-full">
+                                <option value="">MM</option>
+                                <option th:each="m : ${#numbers.sequence(1, 12)}"
+                                        th:value="${m}"
+                                        th:text="${#strings.leftPad(m, 2, '0')}">01</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Year *</label>
+                            <input type="number" name="newExpiryYear"
+                                   th:min="${#dates.year(#dates.createNow())}"
+                                   th:max="${#dates.year(#dates.createNow()) + 20}"
+                                   class="input-field w-full" placeholder="YYYY" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Brand</label>
+                            <select name="newBrand" class="input-field w-full">
+                                <option value="">Auto</option>
+                                <option value="Visa">Visa</option>
+                                <option value="Mastercard">Mastercard</option>
+                                <option value="Amex">Amex</option>
+                                <option value="Discover">Discover</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Save card toggle -->
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" name="saveCard" id="saveCard" value="true"
+                               class="h-4 w-4 rounded border-slate-600 bg-slate-800 text-neon-cyan" />
+                        <label for="saveCard" class="text-sm text-slate-300">Save this card to my account</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn btn--primary">Confirm Purchase</button>
+                <a th:href="@{/merch}" class="btn btn--secondary">Cancel</a>
+            </div>
+        </form>
+
+        <script>
+        // Show/hide new card fields when radios change
+        document.querySelectorAll('input[name="selectedCardId"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                var newCardFields = document.getElementById('new-card-fields');
+                if (newCardFields) {
+                    newCardFields.classList.toggle('hidden', this.value !== '');
+                }
+            });
+        });
+        </script>
+    </div>
+
+</th:block>

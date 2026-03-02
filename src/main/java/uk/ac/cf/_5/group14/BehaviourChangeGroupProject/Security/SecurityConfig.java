@@ -41,6 +41,7 @@ public class SecurityConfig {
             "/pricing",
             "/pricing/**",
             "/explore",
+            "/merch",
             "/u/**",
             "/error/**",
             "/login/**",
@@ -95,6 +96,7 @@ public class SecurityConfig {
                 .requestMatchers("/client/**").hasAnyRole("CLIENT", "USER")
                 .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
                 .requestMatchers("/admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/merch/**").authenticated()
                 .requestMatchers("/dashboard").authenticated()
                         .anyRequest().authenticated();
                 })

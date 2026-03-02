@@ -1,0 +1,91 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Admin – Merch Form', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+
+        <h1 class="mb-6 text-2xl font-bold gradient-text" th:text="${formTitle}">Product Form</h1>
+
+        <div th:if="${errorMessage}"
+             class="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-400"
+             th:text="${errorMessage}"></div>
+
+        <form th:action="${formAction}" method="post" enctype="multipart/form-data"
+              class="card-neon card--cyan space-y-5 p-6">
+
+            <!-- Name -->
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Product Name *</label>
+                <input type="text" name="name" required maxlength="200"
+                       th:value="${product.name}"
+                       class="input-field w-full" placeholder="e.g. Healthy Habits Hoodie" />
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Description</label>
+                <textarea name="description" rows="3" maxlength="2000"
+                          class="input-field w-full resize-none"
+                          placeholder="Product description..."
+                          th:text="${product.description}"></textarea>
+            </div>
+
+            <!-- Price -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Price (£) *</label>
+                    <input type="number" name="price" required min="0" step="0.01"
+                           th:value="${product.price}"
+                           class="input-field w-full" placeholder="0.00" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Stock Quantity *</label>
+                    <input type="number" name="stockQuantity" required min="0"
+                           th:value="${product.stockQuantity}"
+                           class="input-field w-full" placeholder="0" />
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Category</label>
+                <input type="text" name="category" maxlength="100"
+                       th:value="${product.category}"
+                       class="input-field w-full" placeholder="e.g. Clothing, Accessories" />
+            </div>
+
+            <!-- Product Image -->
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Product Image</label>
+                <div th:if="${product.imageUrl != null}" class="mb-2">
+                    <img th:src="${product.imageUrl}" alt="Current image"
+                         class="h-24 w-24 rounded object-cover border border-slate-700" />
+                    <p class="mt-1 text-xs text-slate-500">Upload a new image to replace the current one.</p>
+                </div>
+                <input type="file" name="image" accept="image/png,image/jpeg,image/webp"
+                       class="block w-full text-sm text-slate-400
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-neon-cyan/10 file:text-neon-cyan
+                              hover:file:bg-neon-cyan/20" />
+                <p class="mt-1 text-xs text-slate-500">PNG, JPG or WEBP. Max 5 MB.</p>
+            </div>
+
+            <!-- Active toggle -->
+            <div class="flex items-center gap-3">
+                <input type="checkbox" name="active" id="active"
+                       th:checked="${product.active}"
+                       class="h-4 w-4 rounded border-slate-600 bg-slate-800 text-neon-cyan" />
+                <label for="active" class="text-sm text-slate-300">Active (visible in shop)</label>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn btn--primary">Save Product</button>
+                <a th:href="@{/admin/merch}" class="btn btn--secondary">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+
+</th:block>
