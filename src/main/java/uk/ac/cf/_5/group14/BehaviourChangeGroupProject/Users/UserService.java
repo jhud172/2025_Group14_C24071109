@@ -111,6 +111,15 @@ public class UserService {
     }
 
     @Transactional
+    public void markTutorialSeen(User user) {
+        if (user == null) {
+            return;
+        }
+        user.setHasSeenTutorial(true);
+        userRepository.save(user);
+    }
+
+    @Transactional
     public void updatePassword(User user, String rawPassword) {
         if (user == null || rawPassword == null) {
             return;
