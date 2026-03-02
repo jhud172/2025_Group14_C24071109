@@ -107,6 +107,7 @@ public class ProfileController {
 
         modelAndView.addObject("user", user);
         modelAndView.addObject("platformSubscription", platformSubscription);
+        modelAndView.addObject("subscriptionDaysLeft", platformSubscriptionService.getDaysUntilRenewal(user.getId(), clock));
         modelAndView.addObject("userSettings", settings);
         modelAndView.addObject("levelProgress", levelProgress);
         modelAndView.addObject("exerciseLogCount", exerciseLogCount);

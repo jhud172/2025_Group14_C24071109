@@ -38,6 +38,11 @@ public class PricingController {
             new CheckoutPlanInfo(PlatformPlan.YEARLY, "Yearly", "£108 / year", "Recommended",
                 List.of("2 months free", "Premium dashboards", "Weekly insights", "Priority support"))
         ));
+        User user = authHelper.getAuthenticatedUser();
+        if (user != null) {
+            model.addAttribute("platformSubscription",
+                platformSubscriptionService.findByUserId(user.getId()).orElse(null));
+        }
         return "payments/pricing";
     }
 
