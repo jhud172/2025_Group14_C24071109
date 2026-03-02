@@ -16,6 +16,19 @@
     <link rel="icon" type="image/png" sizes="16x16" th:href="@{/img/tab_logo.png}">
     <link rel="apple-touch-icon" th:href="@{/img/tab_logo.png}">
 
+    <!-- No-flash theme script: must run before CSS to prevent flash of wrong theme.
+         When theme preference is SYSTEM (the server cannot know OS dark mode),
+         this script checks prefers-color-scheme immediately and adds the 'dark'
+         class before the browser paints anything. -->
+    <script>
+    (function () {
+        var t = document.documentElement.getAttribute('data-theme');
+        if (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+    }());
+    </script>
+
     <!-- Core styles (compiled Tailwind + all component styles) -->
     <link rel="stylesheet" th:href="@{/css/app.css}">
 
