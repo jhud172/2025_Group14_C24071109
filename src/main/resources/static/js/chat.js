@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const sendBtn = document.getElementById("chatSend");
     const dot = document.getElementById("chatNotificationDot");
     const notificationsToggle = document.getElementById("chatNotificationsToggle");
+    const notificationsToggle2 = document.getElementById("chatNotificationsToggle2");
+    const notificationsBackBtn = document.getElementById("chatNotificationsBackBtn");
+    const notifFilterAll = document.getElementById("chatNotifFilterAll");
+    const notifFilterUnread = document.getElementById("chatNotifFilterUnread");
+    const notificationsUnreadCount = document.getElementById("chatNotificationsUnreadCount");
     const notificationsView = document.getElementById("chatNotificationsView");
     const chatView = document.getElementById("chatChatView");
     const notificationsList = document.getElementById("chatNotificationsList");
@@ -116,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const bubble = document.createElement("div");
         bubble.className = "chat-typing-bubble";
-        bubble.textContent = "✨ Coach is thinking…";
+        bubble.textContent = "✨ Charlie is thinking…";
 
         wrap.appendChild(bubble);
         body.appendChild(wrap);
@@ -128,7 +133,30 @@ document.addEventListener("DOMContentLoaded", () => {
         if (t) t.remove();
     }
 
-    function saveHistory() {
+    function getDynamicWelcome() {
+        const hour = new Date().getHours();
+        const greetings = hour < 6
+            ? ["Working late? I've got you covered — here's what's on tonight.",
+               "Burning the midnight oil? Let me know if you need anything."]
+            : hour < 12
+            ? ["Good morning! Ready to make today count?",
+               "Morning! Let me know what you need — I can check your schedule, tasks, and more.",
+               "Rise and grind! What's the plan today?"]
+            : hour < 17
+            ? ["Good afternoon! How's your day going so far?",
+               "Afternoon check-in — need help with anything on your list?",
+               "Hey! I can show what's on today, track your workouts, or navigate you anywhere."]
+            : ["Good evening! Nice work getting through the day.",
+               "Evening! Still things to tick off? I can help.",
+               "Evening — let me know if you want to review today's progress."];
+        return greetings[Math.floor(Math.random() * greetings.length)];
+    }
+
+    function getUnauthWelcome() {
+        return "👋 Hi! I'm Charlie — the built-in assistant for Healthy Habits. This platform helps you track workouts, manage your schedule, log nutrition, set fitness goals, and stay consistent. Log in or sign up to get started, and I'll help you every step of the way.";
+    }
+
+
         const msgs = [];
         body.querySelectorAll(".chat-msg").forEach(m => {
             const who = m.classList.contains("chat-msg-me") ? "me" : "ai";
@@ -154,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderHistory(msgs) {
         body.innerHTML = "";
         if (!Array.isArray(msgs) || msgs.length === 0) {
-            addMsg("Ask me anything about your workouts, progress, notes, or what to do today.", "ai");
+            addMsg(getDynamicWelcome(), "ai");
             return;
         }
         msgs.forEach(m => addMsg(m.text, m.who));
@@ -162,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderUnauth() {
         body.innerHTML = "";
-        addMsg("Please log in to use chat.", "ai");
+        addMsg(getUnauthWelcome(), "ai");
     }
 
     async function fetchServerHistory() {
@@ -182,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function sendMessage(message) {
         if (!isAuthenticated) {
-            addMsg("Please log in to use chat.", "ai");
+            addMsg(getUnauthWelcome(), "ai");
             return;
         }
         sendBtn.disabled = true;
@@ -244,6 +272,18 @@ document.addEventListener("DOMContentLoaded", () => {
             unreadBadge.textContent = "";
             unreadBadge.classList.add("hidden");
             unreadBadge.classList.remove("inline-flex");
+        }
+        // Also update the notifications panel header count
+        if (notificationsUnreadCount) {
+            if (count > 0) {
+                notificationsUnreadCount.textContent = count > 99 ? "99+" : `${count}`;
+                notificationsUnreadCount.classList.remove("hidden");
+                notificationsUnreadCount.classList.add("inline-flex");
+            } else {
+                notificationsUnreadCount.textContent = "";
+                notificationsUnreadCount.classList.add("hidden");
+                notificationsUnreadCount.classList.remove("inline-flex");
+            }
         }
     }
 
@@ -366,10 +406,16 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const res = await fetch("/api/notifications?limit=20");
             if (!res.ok) return;
-            const data = await res.json();
+            let data = await res.json();
             notificationsList.innerHTML = "";
-            if (!Array.isArray(data) || data.length === 0) {
-                notificationsList.innerHTML = `<div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">No notifications yet.</div>`;
+            if (!Array.isArray(data)) return;
+            // Apply filter
+            if (currentFilter === "unread") {
+                data = data.filter(n => !n.readAt && !n.dismissedAt);
+            }
+            if (data.length === 0) {
+                const emptyMsg = currentFilter === "unread" ? "No unread notifications." : "No notifications yet.";
+                notificationsList.innerHTML = `<div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400"><div class="text-2xl mb-1" aria-hidden="true">🔔</div>${emptyMsg}</div>`;
                 return;
             }
 
@@ -520,34 +566,74 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function showNotificationsPanel() {
+        if (!notificationsView || !chatView) return;
+        chatView.classList.add("hidden");
+        notificationsView.classList.remove("hidden");
+        loadNotifications();
+    }
+
+    function hideNotificationsPanel() {
+        if (!notificationsView || !chatView) return;
+        notificationsView.classList.add("hidden");
+        chatView.classList.remove("hidden");
+    }
+
     if (notificationsToggle && notificationsView && chatView) {
         notificationsToggle.addEventListener("click", async () => {
             const showingNotifications = !notificationsView.classList.contains("hidden");
             if (showingNotifications) {
-                notificationsView.classList.add("hidden");
-                chatView.classList.remove("hidden");
-                notificationsToggle.textContent = "Notifications";
+                hideNotificationsPanel();
             } else {
-                chatView.classList.add("hidden");
-                notificationsView.classList.remove("hidden");
-                notificationsToggle.textContent = "Back";
-                await loadNotifications();
+                if (!panel.classList.contains("open")) open();
+                showNotificationsPanel();
             }
         });
     }
 
-    // Mobile notifications toggle button
+    if (notificationsToggle2 && notificationsView && chatView) {
+        notificationsToggle2.addEventListener("click", async () => {
+            const showingNotifications = !notificationsView.classList.contains("hidden");
+            if (showingNotifications) {
+                hideNotificationsPanel();
+            } else {
+                showNotificationsPanel();
+            }
+        });
+    }
+
+    if (notificationsBackBtn && notificationsView && chatView) {
+        notificationsBackBtn.addEventListener("click", hideNotificationsPanel);
+    }
+
+    // Notification filter tabs
+    let currentFilter = "all";
+    if (notifFilterAll) {
+        notifFilterAll.addEventListener("click", async () => {
+            currentFilter = "all";
+            notifFilterAll.classList.add("active");
+            notifFilterUnread?.classList.remove("active");
+            await loadNotifications();
+        });
+    }
+    if (notifFilterUnread) {
+        notifFilterUnread.addEventListener("click", async () => {
+            currentFilter = "unread";
+            notifFilterUnread.classList.add("active");
+            notifFilterAll?.classList.remove("active");
+            await loadNotifications();
+        });
+    }
+
+    // Mobile notifications toggle button (legacy, keep for compat)
     const notificationsToggleMobile = document.getElementById("chatNotificationsToggleMobile");
     if (notificationsToggleMobile && notificationsView && chatView) {
         notificationsToggleMobile.addEventListener("click", async () => {
             const showingNotifications = !notificationsView.classList.contains("hidden");
             if (showingNotifications) {
-                notificationsView.classList.add("hidden");
-                chatView.classList.remove("hidden");
+                hideNotificationsPanel();
             } else {
-                chatView.classList.add("hidden");
-                notificationsView.classList.remove("hidden");
-                await loadNotifications();
+                showNotificationsPanel();
             }
         });
     }
@@ -617,7 +703,7 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
 
         if (!isAuthenticated || input.disabled) {
-            addMsg("Please log in to use chat.", "ai");
+            addMsg(getUnauthWelcome(), "ai");
             return;
         }
 
