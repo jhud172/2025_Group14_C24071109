@@ -1,13 +1,5 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Verification;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Membership.EmailService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -17,6 +9,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Membership.EmailService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 
 @Slf4j
 @Service
@@ -30,7 +31,7 @@ public class EmailVerificationService {
     private final EmailService emailService;
     private final Clock clock;
 
-    @Value("${app.site.base-url:http://localhost:8080}")
+    @Value("${app.site.base-url:https://crystal-production.com}")
     private String baseUrl;
 
     public EmailVerificationService(EmailVerificationTokenRepository tokenRepository,

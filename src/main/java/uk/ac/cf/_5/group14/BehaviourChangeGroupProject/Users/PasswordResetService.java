@@ -1,11 +1,5 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Membership.EmailService;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -13,6 +7,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Membership.EmailService;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,8 @@ public class PasswordResetService {
     private final EmailService emailService;
     private final Clock clock;
 
-    @Value("${app.site.base-url:http://localhost:8080}")
-    private String baseUrl = "http://localhost:8080";
+    @Value("${app.site.base-url:https://crystal-production.com}")
+    private String baseUrl = "https://crystal-production.com";
 
     @Transactional
     public void requestPasswordReset(String email) {

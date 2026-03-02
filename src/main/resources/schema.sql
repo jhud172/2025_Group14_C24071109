@@ -327,6 +327,10 @@ CREATE TABLE IF NOT EXISTS user_settings
     macro_target_fat INT NULL,
     quiet_hours_start TIME NULL,
     quiet_hours_end   TIME NULL,
+    preferred_workout_template_id BIGINT NULL,
+    hide_ai_one_shot_warning BOOLEAN NOT NULL DEFAULT FALSE,
+    sticker_pack VARCHAR(20) NOT NULL DEFAULT 'STARS',
+    monthly_workout_target INT NOT NULL DEFAULT 12,
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_settings_user
@@ -2097,6 +2101,8 @@ CREATE TABLE IF NOT EXISTS exercise_sessions
     workout_session_id BIGINT  NOT NULL,
     exercise_id        BIGINT  NOT NULL,
     order_index        INT     NOT NULL DEFAULT 0,
+    mode               VARCHAR(20) NOT NULL DEFAULT 'NORMAL',
+    group_key          VARCHAR(100),
     completed          BOOLEAN NOT NULL DEFAULT FALSE,
 
     CONSTRAINT fk_exercise_sessions_workout_session

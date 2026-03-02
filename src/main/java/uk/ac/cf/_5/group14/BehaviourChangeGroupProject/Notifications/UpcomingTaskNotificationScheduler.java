@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -14,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+@Slf4j
 @Service
 public class UpcomingTaskNotificationScheduler {
 
@@ -33,28 +36,38 @@ public class UpcomingTaskNotificationScheduler {
 
     @Scheduled(fixedDelay = 60_000)
     public void sendUpcomingTaskNotifications() {
-        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.MINUTES);
-        LocalDate date = now.toLocalDate();
-        LocalTime from = now.toLocalTime();
-        LocalTime to = from.plusMinutes(15);
+        try {
+            LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.MINUTES);
+            LocalDate date = now.toLocalDate();
+            LocalTime from = now.toLocalTime();
+            LocalTime to = from.plusMinutes(15);
 
-        List<CalendarTask> tasks = calendarTaskRepository.findUpcomingTasks(date, from, to);
-        if (tasks == null || tasks.isEmpty()) return;
+            List<CalendarTask> tasks = calendarTaskRepository.findUpcomingTasks(date, from, to);
+            if (tasks == null || tasks.isEmpty()) return;
 
-        Instant cutoff = Instant.now(clock).minus(30, ChronoUnit.MINUTES);
-        for (CalendarTask task : tasks) {
-            if (task == null || task.getUser() == null) continue;
-            if (Boolean.TRUE.equals(task.getCompleted())) continue;
+            Instant cutoff = Instant.now(clock).minus(30, ChronoUnit.MINUTES);
+            for (CalendarTask task : tasks) {
+                try {
+                    if (task == null || task.getUser() == null) continue;
+                    if (Boolean.TRUE.equals(task.getCompleted())) continue;
 
-            String title = task.getTitle() != null ? task.getTitle().trim() : "Task";
-            String timeLabel = task.getTime() != null ? task.getTime().format(TIME_FORMAT) : "soon";
-            String message = "Upcoming: " + title + " starts at " + timeLabel;
+                    String title = task.getTitle() != null ? task.getTitle().trim() : "Task";
+                    String timeLabel = task.getTime() != null ? task.getTime().format(TIME_FORMAT) : "soon";
+                    String message = "Upcoming: " + title + " starts at " + timeLabel;
 
-            if (notificationService.existsRecent(task.getUser(), NotificationType.SYSTEM, message, cutoff)) {
-                continue;
+                    if (notificationService.existsRecent(task.getUser(), NotificationType.SYSTEM, message, cutoff)) {
+                        continue;
+                    }
+
+                    notificationService.create(task.getUser(), NotificationType.SYSTEM, "Schedule reminder", message);
+                } catch (Exception e) {
+                    // Log and continue with next task - don't let one failure break the scheduler
+                    log.warn("Failed to send notification for task {}: {}", task != null ? task.getId() : "null", e.getMessage());
+                }
             }
-
-            notificationService.create(task.getUser(), NotificationType.SYSTEM, "Schedule reminder", message);
+        } catch (Exception e) {
+            // Log but don't throw - scheduled tasks should be resilient
+            log.error("Error in upcoming task notification scheduler: {}", e.getMessage(), e);
         }
     }
 }

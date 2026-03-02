@@ -9,6 +9,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class NotificationSseRegistry {
 
@@ -34,6 +37,21 @@ public class NotificationSseRegistry {
             try {
                 emitter.send(SseEmitter.event().name("notification").data(notification));
             } catch (IOException e) {
+                // Client disconnected - this is expected when users navigate away or close browser
+                log.debug("Client disconnected for user '{}', removing SSE emitter: {}", username, e.getMessage());
+                try {
+                    emitter.completeWithError(e);
+                } catch (Exception ex) {
+                    // Ignore - emitter may already be completed
+                }
+                remove(username, emitter);
+            } catch (Exception e) {
+                log.warn("Unexpected error sending notification to user '{}': {}", username, e.getMessage(), e);
+                try {
+                    emitter.completeWithError(e);
+                } catch (Exception ex) {
+                    // Ignore - emitter may already be completed
+                }
                 remove(username, emitter);
             }
         }
@@ -42,9 +60,13 @@ public class NotificationSseRegistry {
     private void remove(String username, SseEmitter emitter) {
         List<SseEmitter> list = emitters.get(username);
         if (list == null) return;
-        list.remove(emitter);
+        boolean removed = list.remove(emitter);
+        if (removed) {
+            log.debug("Removed SSE emitter for user '{}', {} emitter(s) remaining", username, list.size());
+        }
         if (list.isEmpty()) {
             emitters.remove(username);
+            log.debug("No more SSE emitters for user '{}', cleared from registry", username);
         }
     }
 }
