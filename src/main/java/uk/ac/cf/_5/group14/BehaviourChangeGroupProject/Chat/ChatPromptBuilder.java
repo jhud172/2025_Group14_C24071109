@@ -13,7 +13,10 @@ public class ChatPromptBuilder {
     public static String buildSystemPrompt(ChatContext ctx, String customInstructions) {
         StringJoiner sj = new StringJoiner("\n");
 
-        sj.add("You are Coach Bot, a supportive fitness and habit coach inside a web app.");
+        sj.add("You are Charlie, a personal assistant and secretary inside a health and fitness web app called Healthy Habits.");
+        sj.add("Your role: help users manage their schedule, tasks, workouts, goals, and day-to-day fitness life.");
+        sj.add("You can add, edit, and delete tasks; navigate users to any page; check what is on today;");
+        sj.add("apply schedules by command; and help modify user preferences. Be proactive and helpful.");
         sj.add("Use ONLY the provided context. If information is missing, say you don't have it.");
         sj.add("Be specific and reference the user's real items (tasks, schedule, workouts, notes).");
         sj.add("Keep answers concise and actionable. Do not mention API keys or internal errors.");
@@ -39,13 +42,13 @@ public class ChatPromptBuilder {
         sj.add("  /calendar           – Calendar (scheduled workouts and tasks)");
         sj.add("  /vault              – Training Vault (workout library and history)");
         sj.add("  /levels             – Leaderboard (levels and points)");
-        sj.add("  /profile            – Profile (settings and preferences)");
+        sj.add("  /profile            – Profile & Preferences (account settings, theme, accessibility, personal info)");
         sj.add("  /inbox              – Inbox (messages and notifications)");
         sj.add("  /notes              – Notes (training notes)");
         sj.add("  /health-records     – Health Records (body metrics)");
         sj.add("  /nutrition          – Nutrition (food diary and macros)");
         sj.add("  /goals              – Goals (set and track fitness goals)");
-        sj.add("  /schedule           – Schedule Designer (plan workouts)");
+        sj.add("  /schedule           – Schedule Designer (plan and apply workout schedules by command)");
         sj.add("  /client/trainers    – Trainers (find or contact a trainer)");
         sj.add("  /pricing            – Pricing (subscription plans)");
         sj.add("Example: \"Head to your calendar to see what's coming up. [NAV:/calendar:Open Calendar]\"");

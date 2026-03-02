@@ -17,4 +17,9 @@ public interface TrainerProfileRepository extends JpaRepository<TrainerProfile, 
      * Check if a trainer profile exists for a user.
      */
     boolean existsByUserId(Long userId);
+
+    /**
+     * Check if a trainer code is already in use.
+     */
+    boolean existsByTrainerCode(String trainerCode);
 }

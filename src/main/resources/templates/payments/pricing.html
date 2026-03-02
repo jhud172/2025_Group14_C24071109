@@ -1,15 +1,55 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout('Pricing', null, ~{::content}, null)}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div th:fragment="content" class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8"
+         th:with="sub=${platformSubscription},
+                  isInfinite=${sub != null and sub.plan.name() == 'INFINITE'},
+                  isActive=${sub != null and (sub.status.name() == 'ACTIVE' or sub.status.name() == 'EXPIRES')},
+                  isExpired=${sub != null and sub.status.name() == 'CANCELLED'}">
         <div class="text-center mb-8">
             <h1 class="text-3xl font-semibold gradient-text">Platform Premium</h1>
             <p class="mt-2 text-sm text-slate-400">Upgrade your Healthy Habits experience with premium dashboards and insights.</p>
         </div>
 
+        <!-- Lifetime Premium banner -->
+        <div th:if="${isInfinite}" class="mb-8 card-neon card--purple p-5 flex items-center gap-4">
+            <div class="p-2 rounded-lg bg-neon-purple/10 border border-neon-purple/30">
+                <svg class="h-6 w-6 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636C16.948 4.22 15.026 3.25 13 3.25s-3.948.97-5.364 2.386L5.636 7.636m12.728 0 2 2m-2-2-2 2M5.636 7.636l-2 2m2-2 2 2M7.636 18.364C9.052 19.78 10.974 20.75 13 20.75s3.948-.97 5.364-2.386l2-2m-14.728 0-2-2m2 2 2-2"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-semibold text-neon-purple">∞ Lifetime Premium</p>
+                <p class="text-sm text-slate-400 mt-0.5">You have lifetime access to all Platform Premium features. No renewal required.</p>
+            </div>
+        </div>
+
+        <!-- Reactivate banner (for cancelled subscriptions) -->
+        <div th:if="${isExpired}" class="mb-8 card-neon card--green p-5 flex items-center gap-4">
+            <div class="p-2 rounded-lg bg-neon-green/10 border border-neon-green/30">
+                <svg class="h-6 w-6 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-semibold text-neon-green">Your subscription has ended</p>
+                <p class="text-sm text-slate-400 mt-0.5">Reactivate below to regain access to all premium features.</p>
+            </div>
+        </div>
+
         <div class="mt-8 grid gap-6 md:grid-cols-2">
-            <div th:each="plan : ${plans}" class="card-neon p-6 transition-all duration-300"
+            <div th:each="plan : ${plans}" class="card-neon p-6 transition-all duration-300 relative"
                  th:classappend="${plan.plan.name() == 'YEARLY'} ? ' card--purple shadow-glow-lg' : ' card--cyan'">
+
+                <!-- Active plan indicator -->
+                <div th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}"
+                     class="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full border border-emerald-400/50 bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                    <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Active
+                </div>
+
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold" 
                         th:classappend="${plan.plan.name() == 'YEARLY'} ? 'text-neon-purple' : 'text-neon-cyan'"
@@ -29,11 +69,48 @@
                         <span th:text="${benefit}">Premium dashboards</span>
                     </li>
                 </ul>
-                <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
-                   class="mt-6 btn w-full"
-                   th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">
-                    Choose plan
-                </a>
+
+                <!-- CTA: not subscribed or different plan -->
+                <th:block th:if="${sub == null or (isExpired and sub.plan.name() != plan.plan.name())}">
+                    <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
+                       class="mt-6 btn w-full"
+                       th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">
+                        Choose plan
+                    </a>
+                </th:block>
+
+                <!-- CTA: previously had this plan (cancelled) - reactivate -->
+                <th:block th:if="${isExpired and sub.plan.name() == plan.plan.name()}">
+                    <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
+                       class="mt-6 btn w-full btn--success"
+                       th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">
+                        Reactivate
+                    </a>
+                </th:block>
+
+                <!-- CTA: currently on this plan - manage link -->
+                <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}">
+                    <a th:href="@{/profile}"
+                       class="mt-6 btn w-full btn--ghost">
+                        Manage subscription →
+                    </a>
+                </th:block>
+
+                <!-- CTA: currently on other active plan -->
+                <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() != plan.plan.name()}">
+                    <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
+                       class="mt-6 btn w-full"
+                       th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">
+                        Switch plan
+                    </a>
+                </th:block>
+
+                <!-- CTA: infinite - no action needed -->
+                <th:block th:if="${isInfinite}">
+                    <span class="mt-6 btn w-full btn--ghost inline-flex items-center justify-center gap-1 opacity-60 cursor-default">
+                        ∞ Included in Lifetime
+                    </span>
+                </th:block>
             </div>
         </div>
 

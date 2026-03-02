@@ -104,6 +104,12 @@ public class UserController {
         return "User/signup-trainer";
     }
 
+    @GetMapping("/signup/trainer/success")
+    public String showTrainerSignupSuccess(Model model) {
+        // trainerCode and verifyEmail are flash attributes added after successful signup
+        return "User/signup-trainer-success";
+    }
+
     @PostMapping("/signup/trainer")
     public String signupTrainer(@Valid @ModelAttribute("signupForm") TrainerSignupForm signupForm,
                                 BindingResult result,
@@ -154,8 +160,14 @@ public class UserController {
             log.warn("Failed to send verification email to {} after trainer signup", savedUser.getEmail(), e);
         }
 
-        redirectAttributes.addFlashAttribute("verifyRegistered", true);
-        return "redirect:/verify/email/code?email=" + encodeEmail(savedUser.getEmail());
+        // Show trainer code on success page before proceeding to email verification
+        String trainerCode = profile.getTrainerCode();
+        if (trainerCode != null) {
+            String formatted = trainerCode.substring(0, 4) + "-" + trainerCode.substring(4, 8) + "-" + trainerCode.substring(8, 12);
+            redirectAttributes.addFlashAttribute("trainerCode", formatted);
+        }
+        redirectAttributes.addFlashAttribute("verifyEmail", savedUser.getEmail());
+        return "redirect:/signup/trainer/success";
     }
 
     @GetMapping("/signup/gym")
@@ -219,9 +231,15 @@ public class UserController {
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "expired", required = false) String expired,
                                 @RequestParam(value = "devLogin", required = false) Boolean devLogin,
+                                @RequestParam(value = "role", required = false) String role,
                                 Model model) {
         if (expired != null) {
             return "redirect:/?expired=1";
+        }
+
+        // Pass pre-selected role to template (validated to known roles only)
+        if (role != null && (role.equals("client") || role.equals("trainer") || role.equals("gym"))) {
+            model.addAttribute("preselectedRole", role);
         }
         
         // Check if dev mode is enabled

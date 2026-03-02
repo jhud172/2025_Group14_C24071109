@@ -1,7 +1,12 @@
 <div xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
      xmlns:th="http://www.thymeleaf.org"
      th:fragment="usernameLogout"
-     th:with="authUser=${@authHelper.getAuthenticatedUser()}, isPremium=${authUser != null ? @platformSubscriptionService.isPremium(authUser.id, @systemClock) : false}"
+     th:with="authUser=${@authHelper.getAuthenticatedUser()},
+              isPremium=${authUser != null ? @platformSubscriptionService.isPremium(authUser.id, @systemClock) : false},
+              navSub=${authUser != null ? @platformSubscriptionService.findByUserId(authUser.id).orElse(null) : null},
+              navDaysLeft=${authUser != null ? @platformSubscriptionService.getDaysUntilRenewal(authUser.id, @systemClock) : null},
+              navExpired=${authUser != null ? @platformSubscriptionService.hasExpiredSubscription(authUser.id, @systemClock) : false},
+              navDaysUnit=${navDaysLeft != null and navDaysLeft == 1 ? 'day' : 'days'}"
      class="flex items-center gap-3">
 
     <!-- Authenticated: Username, Role Badge, and Logout -->
@@ -22,7 +27,40 @@
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
                 </button>
-                <div id="premium-tooltip" class="nav-premium-tooltip" role="status">You have premium features</div>
+                <div id="premium-tooltip" class="nav-premium-tooltip" role="status">
+                    <!-- Infinite plan -->
+                    <th:block th:if="${navSub != null and navSub.plan.name() == 'INFINITE'}">
+                        ∞ Lifetime Premium
+                    </th:block>
+                    <!-- Within 5 days of renewal/expiry -->
+                    <th:block th:if="${navSub != null and navSub.plan.name() != 'INFINITE' and navDaysLeft != null and navDaysLeft >= 0 and navDaysLeft <= 5}">
+                        <span th:if="${navSub.status.name() == 'EXPIRES'}">⚠ Access ends in <span th:text="${navDaysLeft}">0</span> <span th:text="${navDaysUnit}">days</span></span>
+                        <span th:if="${navSub.status.name() != 'EXPIRES'}">⚠ Renews in <span th:text="${navDaysLeft}">0</span> <span th:text="${navDaysUnit}">days</span></span>
+                    </th:block>
+                    <!-- Normal premium -->
+                    <th:block th:if="${navSub == null or (navSub.plan.name() != 'INFINITE' and (navDaysLeft == null or navDaysLeft > 5))}">
+                        ✓ Premium Active
+                    </th:block>
+                </div>
+            </div>
+
+            <!-- Expired subscription warning (shown when no longer premium but had a subscription) -->
+            <div th:if="${!isPremium and navExpired}" class="nav-premium-badge-group" data-premium-badge-group data-open="false" aria-label="Subscription ended">
+                <button type="button"
+                        class="nav-premium-badge"
+                        style="background: radial-gradient(circle at 35% 30%, rgba(254,205,205,0.95) 0%, rgba(239,68,68,0.85) 62%, rgba(185,28,28,0.9) 100%); border-color: rgba(239,68,68,0.5); color: rgb(127,29,29);"
+                        data-premium-toggle
+                        aria-label="Subscription ended"
+                        aria-expanded="false"
+                        aria-controls="expired-tooltip">
+                    <svg class="nav-premium-badge__icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <div id="expired-tooltip" class="nav-premium-tooltip" role="status" style="white-space: normal; min-width: 9rem; text-align: center;">
+                    Subscription ended.
+                    <a th:href="@{/pricing}" class="block mt-1 font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">Reactivate →</a>
+                </div>
             </div>
 
             <!-- Admin Shield Icon (PLATFORM_ADMIN / SUPER_ADMIN) -->
@@ -55,7 +93,7 @@
                    th:name="${_csrf.parameterName}"
                    th:value="${_csrf.token}"/>
             <button type="submit"
-                    class="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500/20 transition-colors duration-200 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
+                    class="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500/20 transition-colors duration-200 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600">
                 Logout
             </button>
         </form>

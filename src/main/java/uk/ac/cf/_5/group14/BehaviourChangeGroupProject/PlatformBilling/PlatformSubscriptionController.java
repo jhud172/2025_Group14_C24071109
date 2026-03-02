@@ -29,4 +29,15 @@ public class PlatformSubscriptionController {
         }
         return "redirect:/profile";
     }
+
+    @PostMapping("/profile/subscription/plan")
+    public String updatePlan(@RequestParam("plan") PlatformPlan plan,
+                             RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user != null) {
+            subscriptionService.updatePlan(user.getId(), plan);
+            redirectAttributes.addFlashAttribute("subscriptionUpdated", true);
+        }
+        return "redirect:/profile";
+    }
 }

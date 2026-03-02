@@ -1,6 +1,7 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerProfile;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,7 @@ public class TrainerProfileService {
         return profileRepository.findByUserId(userId)
                 .orElseGet(() -> {
                     TrainerProfile profile = new TrainerProfile(userId);
+                    profile.setTrainerCode(generateUniqueTrainerCode());
                     return profileRepository.save(profile);
                 });
     }
@@ -89,5 +91,21 @@ public class TrainerProfileService {
         profile.setShowWebsite(updatedProfile.getShowWebsite());
 
         return profileRepository.save(profile);
+    }
+
+    /**
+     * Generate a unique 12-character alphanumeric trainer code (format: XXXX-XXXX-XXXX).
+     */
+    private String generateUniqueTrainerCode() {
+        String code;
+        int attempts = 0;
+        do {
+            code = UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
+            attempts++;
+            if (attempts > 100) {
+                throw new IllegalStateException("Unable to generate unique trainer code");
+            }
+        } while (profileRepository.existsByTrainerCode(code));
+        return code;
     }
 }
