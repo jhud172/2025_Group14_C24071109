@@ -60,7 +60,8 @@ public class MerchCheckoutController {
                         @RequestParam(value = "selectedCardId", required = false) Long selectedCardId,
                         // New-card fields (if no existing card selected)
                         @RequestParam(value = "newCardHolderName", required = false) String newCardHolderName,
-                        @RequestParam(value = "newCardNumber", required = false) String newCardNumber,
+                        @RequestParam(value = "newProviderToken", required = false) String newProviderToken,
+                        @RequestParam(value = "newLastFour", required = false) String newLastFour,
                         @RequestParam(value = "newBrand", required = false) String newBrand,
                         @RequestParam(value = "newExpiryMonth", required = false) Short newExpiryMonth,
                         @RequestParam(value = "newExpiryYear", required = false) Short newExpiryYear,
@@ -79,12 +80,10 @@ public class MerchCheckoutController {
         try {
             SavedPaymentMethod paymentMethod = resolvePaymentMethod(
                     user, selectedCardId,
-                    newCardHolderName, newCardNumber, newBrand,
+                    newCardHolderName, newProviderToken, newLastFour, newBrand,
                     newExpiryMonth, newExpiryYear, saveCard);
 
             MerchOrder order = orderService.placeOrder(user, product, quantity, paymentMethod);
-            // Persist stock reduction (product is managed entity – flush via productService)
-            productService.save(product);
 
             ra.addFlashAttribute("orderSuccess", "Order #" + order.getId() + " placed successfully!");
             return "redirect:/profile/orders";
@@ -99,7 +98,8 @@ public class MerchCheckoutController {
     private SavedPaymentMethod resolvePaymentMethod(User user,
                                                      Long selectedCardId,
                                                      String newCardHolderName,
-                                                     String newCardNumber,
+                                                     String newProviderToken,
+                                                     String newLastFour,
                                                      String newBrand,
                                                      Short newExpiryMonth,
                                                      Short newExpiryYear,
@@ -110,46 +110,32 @@ public class MerchCheckoutController {
                     .orElseThrow(() -> new IllegalArgumentException("Selected card not found."));
         }
 
-        // User is entering a new card
-        if (newCardNumber == null || newCardNumber.isBlank()) {
+        // User is entering a new card – provider token must be present
+        if (newProviderToken == null || newProviderToken.isBlank()) {
             throw new IllegalArgumentException(
                     "Please select a saved card or enter your card details.");
         }
-        validateNewCard(newCardHolderName, newCardNumber, newExpiryMonth, newExpiryYear);
-
-        if (saveCard) {
-            String brand = (newBrand != null && !newBrand.isBlank()) ? newBrand : detectBrand(newCardNumber);
-            return cardService.addCard(user, newCardHolderName, newCardNumber,
-                    brand, newExpiryMonth, newExpiryYear, false);
+        if (newLastFour == null || !newLastFour.matches("\\d{4}")) {
+            throw new IllegalArgumentException("Card last four digits are required.");
         }
-
-        // Transient – create unsaved representation for order FK (null = no saved method)
-        return null;
-    }
-
-    private void validateNewCard(String cardHolderName, String cardNumber,
-                                  Short expiryMonth, Short expiryYear) {
-        if (cardHolderName == null || cardHolderName.isBlank()) {
+        if (newCardHolderName == null || newCardHolderName.isBlank()) {
             throw new IllegalArgumentException("Cardholder name is required.");
         }
-        String cleaned = cardNumber.replaceAll("\\s+", "");
-        if (!cleaned.matches("\\d{13,19}")) {
-            throw new IllegalArgumentException("Card number must be 13–19 digits.");
-        }
-        if (expiryMonth == null || expiryMonth < 1 || expiryMonth > 12) {
+        if (newExpiryMonth == null || newExpiryMonth < 1 || newExpiryMonth > 12) {
             throw new IllegalArgumentException("Invalid expiry month.");
         }
         int currentYear = java.time.Year.now().getValue();
-        if (expiryYear == null || expiryYear < currentYear || expiryYear > currentYear + 20) {
+        if (newExpiryYear == null || newExpiryYear < currentYear || newExpiryYear > currentYear + 20) {
             throw new IllegalArgumentException("Invalid expiry year.");
         }
-    }
 
-    private String detectBrand(String cardNumber) {
-        String n = cardNumber.replaceAll("\\s+", "");
-        if (n.startsWith("4")) return "Visa";
-        if (n.startsWith("5") || n.startsWith("2")) return "Mastercard";
-        if (n.startsWith("3")) return "Amex";
-        return "Card";
+        if (saveCard) {
+            String brand = (newBrand != null && !newBrand.isBlank()) ? newBrand : "Card";
+            return cardService.addCard(user, newCardHolderName, newProviderToken,
+                    newLastFour, brand, newExpiryMonth, newExpiryYear, false);
+        }
+
+        // Transient – no saved payment method linked to the order
+        return null;
     }
 }

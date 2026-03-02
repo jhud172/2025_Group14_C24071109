@@ -32,6 +32,12 @@ public class MerchOrderItem {
     @Column(name = "price_snapshot", nullable = false, precision = 10, scale = 2)
     private BigDecimal priceSnapshot;
 
+    @Column(name = "image_url_snapshot", length = 500)
+    private String imageUrlSnapshot;
+
+    @Column(name = "category_snapshot", length = 100)
+    private String categorySnapshot;
+
     @Column(name = "quantity", nullable = false)
     private int quantity = 1;
 }

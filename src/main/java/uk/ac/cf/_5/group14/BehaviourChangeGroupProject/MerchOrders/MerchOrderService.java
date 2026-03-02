@@ -22,9 +22,9 @@ public interface MerchOrderService {
                           SavedPaymentMethod paymentMethod);
 
     /**
-     * Called when a product is being deleted:
-     * cancels all active orders containing that product and marks them
-     * CANCELLED_REFUND_PENDING.
+     * Called when a product is being deactivated:
+     * cancels only PENDING orders containing that product.
+     * CONFIRMED/SHIPPED/DELIVERED orders are left untouched.
      */
-    void cancelActiveOrdersForProduct(Long productId);
+    void cancelPendingOrdersForProduct(Long productId);
 }

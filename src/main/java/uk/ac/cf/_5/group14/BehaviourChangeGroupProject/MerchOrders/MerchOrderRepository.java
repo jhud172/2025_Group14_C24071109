@@ -14,12 +14,12 @@ public interface MerchOrderRepository extends JpaRepository<MerchOrder, Long> {
     Optional<MerchOrder> findByIdAndUserId(Long id, Long userId);
 
     /**
-     * Finds orders that contain the given product and have a status considered
-     * "active" (PENDING or CONFIRMED).
+     * Finds PENDING orders that contain the given product.
+     * CONFIRMED/SHIPPED/DELIVERED orders are intentionally excluded – those must
+     * be handled by explicit admin action, not an automatic cancellation.
      */
     @Query("SELECT DISTINCT o FROM MerchOrder o JOIN o.items i " +
            "WHERE i.product.id = :productId " +
-           "AND o.status IN (uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.OrderStatus.PENDING, " +
-           "                 uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.OrderStatus.CONFIRMED)")
-    List<MerchOrder> findActiveOrdersContainingProduct(@Param("productId") Long productId);
+           "AND o.status = uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.OrderStatus.PENDING")
+    List<MerchOrder> findPendingOrdersContainingProduct(@Param("productId") Long productId);
 }
