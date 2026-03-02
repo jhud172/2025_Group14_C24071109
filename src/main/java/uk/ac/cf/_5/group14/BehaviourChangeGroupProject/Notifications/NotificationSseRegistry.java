@@ -57,6 +57,34 @@ public class NotificationSseRegistry {
         }
     }
 
+    public void sendDayCompletionUpdate(String username, Map<String, Object> data) {
+        if (username == null || username.isBlank() || data == null) return;
+        List<SseEmitter> list = emitters.get(username);
+        if (list == null || list.isEmpty()) return;
+
+        for (SseEmitter emitter : List.copyOf(list)) {
+            try {
+                emitter.send(SseEmitter.event().name("day-completion-update").data(data));
+            } catch (IOException e) {
+                log.debug("Client disconnected for user '{}', removing SSE emitter: {}", username, e.getMessage());
+                try {
+                    emitter.completeWithError(e);
+                } catch (Exception ex) {
+                    // Ignore
+                }
+                remove(username, emitter);
+            } catch (Exception e) {
+                log.warn("Unexpected error sending day completion update to user '{}': {}", username, e.getMessage(), e);
+                try {
+                    emitter.completeWithError(e);
+                } catch (Exception ex) {
+                    // Ignore
+                }
+                remove(username, emitter);
+            }
+        }
+    }
+
     private void remove(String username, SseEmitter emitter) {
         List<SseEmitter> list = emitters.get(username);
         if (list == null) return;

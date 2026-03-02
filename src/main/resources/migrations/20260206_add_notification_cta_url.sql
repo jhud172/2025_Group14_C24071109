@@ -1,1 +1,0 @@
-ALTER TABLE notifications ADD COLUMN IF NOT EXISTS cta_url VARCHAR(500);

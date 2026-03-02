@@ -84,7 +84,14 @@ DROP TABLE IF EXISTS coach_conversations CASCADE;
 DROP TABLE IF EXISTS blood_pressure_readings CASCADE;
 DROP TABLE IF EXISTS daily_usage CASCADE;
 DROP TABLE IF EXISTS chat_messages CASCADE;
+DROP TABLE IF EXISTS chat_threads CASCADE;
+DROP TABLE IF EXISTS chat_folders CASCADE;
 DROP TABLE IF EXISTS ai_form_feedback CASCADE;
+DROP TABLE IF EXISTS workout_session_sets CASCADE;
+DROP TABLE IF EXISTS workout_session_exercises CASCADE;
+DROP TABLE IF EXISTS workout_template_sessions CASCADE;
+DROP TABLE IF EXISTS workout_ui_templates CASCADE;
+DROP TABLE IF EXISTS day_optimisations CASCADE;
 DROP TABLE IF EXISTS workout_set_videos CASCADE;
 DROP TABLE IF EXISTS workout_set_logs CASCADE;
 DROP TABLE IF EXISTS workout_player_sessions CASCADE;
@@ -132,6 +139,7 @@ CREATE TABLE IF NOT EXISTS users
     gym_id              BIGINT       NULL,
     trainer_profile_id  BIGINT       NULL,
     trainer_verified    BOOLEAN      NOT NULL DEFAULT FALSE,
+    has_seen_tutorial   BOOLEAN      NOT NULL DEFAULT FALSE,
 
     -- Needed because users_roles.username references users.username
     CONSTRAINT uq_users_username UNIQUE (username),
@@ -326,6 +334,14 @@ CREATE TABLE IF NOT EXISTS user_settings
     preferred_equipment_machine BOOLEAN NOT NULL DEFAULT FALSE,
     preferred_equipment_bands BOOLEAN NOT NULL DEFAULT FALSE,
     preferred_equipment_kettlebell BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_cable BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_pullup_bar BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_jump_rope BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_medicine_ball BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_foam_roller BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_trx BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_other BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_other_specify VARCHAR(200) NULL,
     macro_target_calories INT NULL,
     macro_target_protein INT NULL,
     macro_target_carbs INT NULL,
@@ -953,6 +969,7 @@ CREATE TABLE IF NOT EXISTS trainer_profiles
     id                BIGSERIAL PRIMARY KEY,
     user_id           BIGINT       NOT NULL UNIQUE,
     bio               VARCHAR(500) NULL,
+        trainer_code      VARCHAR(12)  NULL UNIQUE,
     specializations   VARCHAR(200) NULL,
     location         VARCHAR(120) NULL,
     primary_gym      VARCHAR(200) NULL,
@@ -2129,6 +2146,7 @@ CREATE TABLE IF NOT EXISTS set_logs
     set_number           INT     NULL,
     weight               DOUBLE PRECISION  NULL,
     reps                 INT     NULL,
+        set_type             VARCHAR(20) NULL,
     notes                VARCHAR(500) NULL,
     completed            BOOLEAN NOT NULL DEFAULT FALSE,
 
@@ -2163,19 +2181,68 @@ CREATE TABLE IF NOT EXISTS schedule_applied
 -- =========================
 -- CHAT MESSAGES
 -- =========================
-CREATE TABLE IF NOT EXISTS chat_messages
+CREATE TABLE IF NOT EXISTS chat_folders
 (
     id         BIGSERIAL PRIMARY KEY,
     user_id    BIGINT      NOT NULL,
+    name       VARCHAR(120) NOT NULL,
+    color_hex  VARCHAR(10) NOT NULL,
+    icon_key   VARCHAR(40) NOT NULL,
+    sort_order INT         NOT NULL DEFAULT 0,
     created_at TIMESTAMP   NOT NULL,
-    role       VARCHAR(8)  NOT NULL,
-    content    TEXT        NOT NULL,
+    updated_at TIMESTAMP   NOT NULL,
 
-    CONSTRAINT fk_chat_messages_user
+    CONSTRAINT fk_chat_folders_user
         FOREIGN KEY (user_id) REFERENCES users (id)
             ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS chat_threads
+(
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    BIGINT       NOT NULL,
+    folder_id  BIGINT       NULL,
+    title      VARCHAR(160) NOT NULL,
+    color_hex  VARCHAR(10)  NOT NULL,
+    icon_key   VARCHAR(40)  NOT NULL,
+    pinned     BOOLEAN      NOT NULL DEFAULT FALSE,
+    archived   BOOLEAN      NOT NULL DEFAULT FALSE,
+    custom_instructions TEXT NULL,
+    created_at TIMESTAMP    NOT NULL,
+    updated_at TIMESTAMP    NOT NULL,
+
+    CONSTRAINT fk_chat_threads_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_chat_threads_folder
+        FOREIGN KEY (folder_id) REFERENCES chat_folders (id)
+            ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages
+(
+    id         BIGSERIAL PRIMARY KEY,
+    thread_id  BIGINT      NOT NULL,
+    role       VARCHAR(20) NOT NULL,
+    content    TEXT        NOT NULL,
+    created_at TIMESTAMP   NOT NULL,
+
+    CONSTRAINT fk_chat_messages_thread
+        FOREIGN KEY (thread_id) REFERENCES chat_threads (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_folders_user
+    ON chat_folders (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_chat_threads_user
+    ON chat_threads (user_id);
+
+CREATE INDEX IF NOT EXISTS idx_chat_threads_folder
+    ON chat_threads (folder_id);
+
+CREATE INDEX IF NOT EXISTS idx_chat_messages_thread
+    ON chat_messages (thread_id);
 -- =========================
 -- COACH BOT CONVERSATIONS
 -- =========================
@@ -2282,6 +2349,197 @@ CREATE TABLE IF NOT EXISTS blood_pressure_readings
 );
 
 -- =========================
+-- DAY OPTIMISATIONS
+-- =========================
+CREATE TABLE IF NOT EXISTS day_optimisations
+(
+    user_id    BIGINT      NOT NULL,
+    date       DATE        NOT NULL,
+    day_theme  VARCHAR(30) NOT NULL DEFAULT 'CLEAN',
+    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, date),
+    CONSTRAINT fk_day_optimisations_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_day_optimisations_user_date
+    ON day_optimisations (user_id, date);
+
+-- =========================
+-- WORKOUT TEMPLATE SYSTEM
+-- =========================
+CREATE TABLE IF NOT EXISTS workout_ui_templates
+(
+    id          BIGSERIAL    PRIMARY KEY,
+    user_id     BIGINT       NULL,
+    name        VARCHAR(200) NOT NULL,
+    layout_type VARCHAR(30)  NOT NULL DEFAULT 'FLOW',
+    config_json TEXT         NULL,
+    is_default  BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_workout_ui_templates_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_ui_templates_user
+    ON workout_ui_templates (user_id);
+
+CREATE TABLE IF NOT EXISTS workout_template_sessions
+(
+    id                           BIGSERIAL     PRIMARY KEY,
+    user_id                      BIGINT        NOT NULL,
+    workout_id                   BIGINT        NOT NULL,
+    template_id                  BIGINT        NULL,
+    template_name_snapshot       VARCHAR(200)  NULL,
+    config_json_snapshot         TEXT          NULL,
+    started_at                   TIMESTAMP     NULL,
+    ended_at                     TIMESTAMP     NULL,
+    mood_before                  INT           NULL,
+    mood_after                   INT           NULL,
+    confidence                   INT           NULL,
+    total_volume                 DECIMAL(10,2) NULL,
+    status                       VARCHAR(20)   NOT NULL DEFAULT 'IN_PROGRESS',
+    allow_completed_without_log  BOOLEAN       NOT NULL DEFAULT TRUE,
+    CONSTRAINT fk_workout_template_sessions_user
+        FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_workout_template_sessions_workout
+        FOREIGN KEY (workout_id) REFERENCES workouts (id),
+    CONSTRAINT fk_workout_template_sessions_template
+        FOREIGN KEY (template_id) REFERENCES workout_ui_templates (id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_template_sessions_user
+    ON workout_template_sessions (user_id, started_at);
+
+CREATE TABLE IF NOT EXISTS workout_session_exercises
+(
+    id                 BIGSERIAL    PRIMARY KEY,
+    session_id         BIGINT       NOT NULL,
+    exercise_id        BIGINT       NULL,
+    custom_exercise_id BIGINT       NULL,
+    order_index        INT          NOT NULL DEFAULT 0,
+    mode               VARCHAR(20)  NOT NULL DEFAULT 'NORMAL',
+    group_key          VARCHAR(100) NULL,
+    notes              VARCHAR(1000) NULL,
+    CONSTRAINT fk_workout_session_exercises_session
+        FOREIGN KEY (session_id) REFERENCES workout_template_sessions (id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_session_exercises_session
+    ON workout_session_exercises (session_id, order_index);
+
+CREATE TABLE IF NOT EXISTS workout_session_sets
+(
+    id                  BIGSERIAL    PRIMARY KEY,
+    session_exercise_id BIGINT       NOT NULL,
+    set_index           INT          NOT NULL DEFAULT 0,
+    reps                INT          NULL,
+    weight              DECIMAL(8,2) NULL,
+    rpe                 DECIMAL(4,1) NULL,
+    tempo               VARCHAR(20)  NULL,
+    is_drop             BOOLEAN      NOT NULL DEFAULT FALSE,
+    completed_at        TIMESTAMP    NULL,
+    CONSTRAINT fk_workout_session_sets_exercise
+        FOREIGN KEY (session_exercise_id) REFERENCES workout_session_exercises (id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_session_sets_exercise
+    ON workout_session_sets (session_exercise_id, set_index);
+
+-- =========================
+-- WAITLIST EMAILS
+-- =========================
+CREATE TABLE IF NOT EXISTS waitlist_emails
+(
+    id           BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    email        VARCHAR(255) NOT NULL UNIQUE,
+    signed_up_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    confirmed    BOOLEAN      NOT NULL DEFAULT FALSE
+);
+
+-- =========================
+-- MERCH PRODUCTS
+-- =========================
+CREATE TABLE IF NOT EXISTS merch_products
+(
+    id             BIGSERIAL PRIMARY KEY,
+    name           VARCHAR(200)   NOT NULL,
+    description    TEXT           NULL,
+    price          NUMERIC(10, 2) NOT NULL,
+    image_url      VARCHAR(500)   NULL,
+    stock_quantity INT            NOT NULL DEFAULT 0,
+    category       VARCHAR(100)   NULL,
+    active         BOOLEAN        NOT NULL DEFAULT TRUE,
+    created_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by     BIGINT         NULL,
+    CONSTRAINT fk_merch_product_creator FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_merch_products_active ON merch_products (active);
+
+-- =========================
+-- SAVED PAYMENT METHODS
+-- =========================
+CREATE TABLE IF NOT EXISTS saved_payment_methods
+(
+    id                          BIGSERIAL PRIMARY KEY,
+    user_id                     BIGINT       NOT NULL,
+    card_holder_name            VARCHAR(200) NOT NULL,
+    last_four                   CHAR(4)      NOT NULL,
+    brand                       VARCHAR(50)  NOT NULL,
+    expiry_month                SMALLINT     NOT NULL,
+    expiry_year                 SMALLINT     NOT NULL,
+    provider_payment_method_id  TEXT         NOT NULL DEFAULT '',
+    is_default                  BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at                  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_payment_method_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_payment_methods_user ON saved_payment_methods (user_id);
+
+-- =========================
+-- MERCH ORDERS
+-- =========================
+CREATE TABLE IF NOT EXISTS merch_orders
+(
+    id                BIGSERIAL PRIMARY KEY,
+    user_id           BIGINT         NOT NULL,
+    status            VARCHAR(30)    NOT NULL DEFAULT 'PENDING',
+    total_amount      NUMERIC(10, 2) NOT NULL,
+    payment_method_id BIGINT         NULL,
+    refund_status     VARCHAR(20)    NOT NULL DEFAULT 'NONE',
+    refund_reference  VARCHAR(200)   NULL,
+    created_at        TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_merch_order_user   FOREIGN KEY (user_id)           REFERENCES users                  (id) ON DELETE CASCADE,
+    CONSTRAINT fk_merch_order_pm     FOREIGN KEY (payment_method_id) REFERENCES saved_payment_methods  (id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_merch_orders_user ON merch_orders (user_id, created_at DESC);
+
+-- =========================
+-- MERCH ORDER ITEMS
+-- =========================
+CREATE TABLE IF NOT EXISTS merch_order_items
+(
+    id                    BIGSERIAL PRIMARY KEY,
+    order_id              BIGINT         NOT NULL,
+    product_id            BIGINT         NULL,
+    product_name_snapshot VARCHAR(200)   NOT NULL,
+    price_snapshot        NUMERIC(10, 2) NOT NULL,
+    quantity              INT            NOT NULL DEFAULT 1,
+    image_url_snapshot    VARCHAR(500)   NULL,
+    category_snapshot     VARCHAR(100)   NULL,
+    CONSTRAINT fk_order_item_order   FOREIGN KEY (order_id)   REFERENCES merch_orders   (id) ON DELETE CASCADE,
+    CONSTRAINT fk_order_item_product FOREIGN KEY (product_id) REFERENCES merch_products (id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_items_order ON merch_order_items (order_id);
+
+-- =========================
 -- VIEW: USER_AUTHORITIES
 -- =========================
 CREATE VIEW user_authorities AS
@@ -2313,5 +2571,3 @@ CREATE INDEX IF NOT EXISTS idx_entry_schedule
 CREATE INDEX IF NOT EXISTS idx_schedule_user
     ON schedules (user_id);
 
-CREATE INDEX IF NOT EXISTS idx_chat_user_created
-    ON chat_messages (user_id, created_at);

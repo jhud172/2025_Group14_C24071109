@@ -26,11 +26,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import jakarta.servlet.http.HttpServletRequest;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.ActivityType;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarning;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.ActivityType;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionCalculator;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionStatus;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyStreakService;
@@ -41,9 +41,11 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenera
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayHealthData.DayHealthPersistenceService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationSseRegistry;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionResult;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.WorkoutSession;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskOrderingPreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarViewPreference;
@@ -51,7 +53,6 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarWork
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.WorkoutSession;
 
 @Controller
 @RequestMapping("/calendar")
@@ -97,6 +98,9 @@ public class CalendarController {
 
     @Autowired
     private uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.WorkoutSessionService workoutSessionService;
+
+    @Autowired
+    private NotificationSseRegistry sseRegistry;
 
     @Autowired
     private ObjectProvider<uk.ac.cf._5.group14.BehaviourChangeGroupProject.FocusData.TimedFocusService> timedFocusServiceProvider;
@@ -1001,6 +1005,38 @@ public class CalendarController {
     ) {
         taskService.toggleCompleted(taskId, user);
 
+        // Send real-time SSE update for day completion status
+        try {
+            LocalDate date = LocalDate.parse(dateStr, DATE_FORMAT);
+            List<CalendarTask> tasks = taskService.getTasks(user, date);
+            List<WorkoutSession> sessions = workoutSessionService.findByUserAndDate(user, date);
+            
+            int totalTasks = tasks.size();
+            int completedTasks = (int) tasks.stream().filter(CalendarTask::getCompleted).count();
+            int totalWorkouts = sessions.size();
+            int completedWorkouts = (int) sessions.stream().filter(WorkoutSession::isCompleted).count();
+            
+            int completedItems = completedTasks + completedWorkouts;
+            int totalItems = totalTasks + totalWorkouts;
+            int percentage = DailyCompletionCalculator.computeCompletionPercentage(
+                completedTasks, totalTasks, completedWorkouts, totalWorkouts
+            );
+            DailyCompletionStatus status = DailyCompletionCalculator.computeStatus(
+                date, completedItems, totalItems, LocalDate.now(clock)
+            );
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("date", dateStr);
+            data.put("percentage", percentage);
+            data.put("completedCount", completedItems);
+            data.put("totalCount", totalItems);
+            data.put("status", status.name());
+            
+            sseRegistry.sendDayCompletionUpdate(user.getUsername(), data);
+        } catch (Exception e) {
+            logger.warn("Failed to send SSE day completion update", e);
+        }
+
         return "redirect:/calendar/day/" + dateStr;
     }
 
@@ -1031,6 +1067,32 @@ public class CalendarController {
 
         taskService.deleteTask(id, user);
         return "redirect:/calendar/day/" + task.getDate();
+    }
+
+    @PostMapping("/task/{id}/update-time")
+    public ResponseEntity<Map<String, Object>> updateTaskTime(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user,
+            @RequestParam String date,
+            @RequestParam String time
+    ) {
+        try {
+            CalendarTask task = taskService.getTaskById(id);
+            if (task == null || !task.getUser().equals(user)) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "error", "Task not found"));
+            }
+
+            // Update task time
+            taskService.updateTask(id, user, task.getTitle(), time, task.getNotes(), 
+                                 task.getExercise(), task.getActivityType());
+
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            logger.error("Failed to update task time", e);
+            return ResponseEntity.internalServerError()
+                .body(Map.of("success", false, "error", e.getMessage()));
+        }
     }
 
     @GetMapping("/task/{id}")

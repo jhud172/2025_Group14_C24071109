@@ -695,9 +695,10 @@
                 const doneClass = t.completed ? ' is-done' : '';
                 const checkIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                 const qcBtn = t.id ? `<button type="button" class="timeline-qc-btn${t.completed ? ' is-done' : ''}" data-quick-complete data-task-id="${escapeHtml(t.id)}" data-task-date="${escapeHtml(pageDate)}" aria-label="${t.completed ? 'Mark incomplete' : 'Mark complete'}" title="${t.completed ? 'Mark incomplete' : 'Mark complete'}">${checkIcon}</button>` : '';
-                // Make task clickable to open drawer
-                const clickableAttr = t.id ? ` data-open-task-drawer data-task-id="${escapeHtml(t.id)}" style="cursor: pointer;" title="Click to view task details"` : '';
-                html += `<div class="timeline-event timeline-event--task${doneClass}"${clickableAttr} role="listitem">
+                // Make task clickable to open drawer and draggable
+                const clickableAttr = t.id ? ` data-open-task-drawer data-task-id="${escapeHtml(t.id)}" style="cursor: grab;" title="Click to view details, drag to reschedule"` : '';
+                const draggableAttr = t.id ? ` draggable="true" data-draggable-task data-task-id="${escapeHtml(t.id)}" data-task-time="${escapeHtml(t.time)}"` : '';
+                html += `<div class="timeline-event timeline-event--task${doneClass}"${clickableAttr}${draggableAttr} role="listitem">
                     <span class="font-medium">${escapeHtml(t.title)}</span>
                     <span class="ml-auto text-[10px] opacity-70 mr-1">${t.time}</span>
                     ${qcBtn}
@@ -774,6 +775,120 @@
                 const timeInput = document.querySelector('#add-task-modal input[name="time"]');
                 if (timeInput) timeInput.value = timeValue;
             }, 50);
+        });
+
+        // ===== Drag and Drop Timeline Functionality =====
+        let draggedElement = null;
+        let draggedTaskId = null;
+        let draggedTaskTime = null;
+
+        // Dragstart - when user starts dragging a task
+        container.addEventListener('dragstart', (e) => {
+            const draggable = e.target.closest('[data-draggable-task]');
+            if (!draggable) return;
+
+            draggedElement = draggable;
+            draggedTaskId = draggable.getAttribute('data-task-id');
+            draggedTaskTime = draggable.getAttribute('data-task-time');
+
+            draggable.style.opacity = '0.4';
+            draggable.style.cursor = 'grabbing';
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', draggable.innerHTML);
+        });
+
+        // Dragend - cleanup after drag completes or is cancelled
+        container.addEventListener('dragend', (e) => {
+            if (draggedElement) {
+                draggedElement.style.opacity = '';
+                draggedElement.style.cursor = 'grab';
+            }
+            // Remove all drop zone indicators
+            container.querySelectorAll('.timeline-slot').forEach(slot => {
+                slot.classList.remove('timeline-drop-over');
+            });
+            draggedElement = null;
+            draggedTaskId = null;
+            draggedTaskTime = null;
+        });
+
+        // Dragover - allow drop on timeline slots
+        container.addEventListener('dragover', (e) => {
+            const slot = e.target.closest('.timeline-slot');
+            if (!slot) return;
+
+            e.preventDefault(); // Allow drop
+            e.dataTransfer.dropEffect = 'move';
+            
+            // Add visual indicator
+            slot.classList.add('timeline-drop-over');
+        });
+
+        // Dragleave - remove visual indicator when leaving slot
+        container.addEventListener('dragleave', (e) => {
+            const slot = e.target.closest('.timeline-slot');
+            if (!slot) return;
+            
+            // Only remove if we're actually leaving the slot (not entering a child)
+            if (!slot.contains(e.relatedTarget)) {
+                slot.classList.remove('timeline-drop-over');
+            }
+        });
+
+        // Drop - handle task drop on new time slot
+        container.addEventListener('drop', (e) => {
+            const slot = e.target.closest('.timeline-slot');
+            if (!slot || !draggedTaskId) return;
+
+            e.preventDefault();
+            slot.classList.remove('timeline-drop-over');
+
+            // Get the hour from the parent row
+            const row = slot.closest('.timeline-hour-row');
+            if (!row) return;
+            const label = row.querySelector('.timeline-hour-label');
+            if (!label) return;
+            const newHour = label.textContent.split(':')[0];
+            const newTime = String(newHour).padStart(2, '0') + ':00';
+
+            // Don't do anything if dropped on same time
+            if (draggedTaskTime && draggedTaskTime.startsWith(newHour + ':')) {
+                return;
+            }
+
+            // Update task time via AJAX
+            updateTaskTime(draggedTaskId, pageDate, newTime);
+        });
+    }
+
+    // Function to update task time via AJAX
+    function updateTaskTime(taskId, date, newTime) {
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+        fetch(`/calendar/task/${taskId}/update-time`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {})
+            },
+            body: new URLSearchParams({
+                date: date,
+                time: newTime
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Reload the page to show updated timeline
+                window.location.reload();
+            } else {
+                console.error('Failed to update task time');
+                alert('Failed to reschedule task. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating task time:', error);
+            alert('An error occurred while rescheduling the task.');
         });
     }
 
@@ -1124,6 +1239,7 @@
         initQuickComplete();
         initWorkoutPopup();
         applyServerDayTheme();
+        initSseUpdates();
         
         // Refresh upcoming task highlights every minute
         setInterval(highlightUpcomingTasks, 60000);
@@ -1254,6 +1370,96 @@
                 closePopup();
             }
         });
+    }
+    
+    // ==================== Real-Time SSE Updates ====================
+    function initSseUpdates() {
+        let eventSource = null;
+        
+        function connectSse() {
+            if (eventSource) {
+                if (eventSource.readyState === 0 || eventSource.readyState === 1) return;
+                eventSource.close();
+            }
+            
+            eventSource = new EventSource("/api/notifications/stream");
+            
+            eventSource.addEventListener("day-completion-update", (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    updateDayCompletion(data);
+                } catch (e) {
+                    console.warn("Failed to parse day-completion-update event", e);
+                }
+            });
+            
+            eventSource.onerror = () => {
+                eventSource.close();
+                eventSource = null;
+                // Reconnect after a short delay
+                setTimeout(connectSse, 5000);
+            };
+        }
+        
+        function updateDayCompletion(data) {
+            // Update percentage display
+            const percentageElement = document.getElementById('day-completion-percentage');
+            if (percentageElement) {
+                percentageElement.textContent = `${data.percentage}%`;
+            }
+            
+            // Update completion dots
+            const dotsContainer = document.querySelector('.completion-dots-container');
+            if (dotsContainer && data.completedCount !== undefined && data.totalCount !== undefined) {
+                const completedCount = data.completedCount || 0;
+                const totalCount = data.totalCount || 0;
+                
+                dotsContainer.innerHTML = '';
+                for (let i = 0; i < totalCount; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = i < completedCount ? 'completion-dot completed' : 'completion-dot';
+                    dotsContainer.appendChild(dot);
+                }
+            }
+            
+            // Update status badge
+            const statusBadge = document.querySelector('.day-status-badge');
+            if (statusBadge && data.status) {
+                const statusClasses = {
+                    'COMPLETE': 'status-complete',
+                    'AHEAD': 'status-ahead',
+                    'ON_TRACK': 'status-on-track',
+                    'BEHIND': 'status-behind',
+                    'NOT_STARTED': 'status-not-started'
+                };
+                
+                // Remove all status classes
+                Object.values(statusClasses).forEach(cls => statusBadge.classList.remove(cls));
+                
+                // Add new status class
+                const statusClass = statusClasses[data.status] || statusClasses.NOT_STARTED;
+                statusBadge.classList.add(statusClass);
+                
+                // Update badge text
+                const statusText = {
+                    'COMPLETE': 'Complete',
+                    'AHEAD': 'Ahead',
+                    'ON_TRACK': 'On Track',
+                    'BEHIND': 'Behind',
+                    'NOT_STARTED': 'Not Started'
+                };
+                statusBadge.textContent = statusText[data.status] || 'Not Started';
+            }
+            
+            // Update progress bar
+            const progressBar = document.querySelector('.day-progress-bar-fill');
+            if (progressBar) {
+                progressBar.style.width = `${data.percentage}%`;
+            }
+        }
+        
+        // Initialize connection
+        connectSse();
     }
     
     init();

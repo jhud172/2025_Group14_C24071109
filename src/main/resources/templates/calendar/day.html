@@ -46,6 +46,13 @@
         </div>
     </div>
 
+    <!-- ========== STATUS BAR ========== -->
+    <div data-testid="day-status-bar"
+         class="day-status-bar mb-4 h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800"
+         th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' day-status-gold' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' day-status-blue' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' day-status-emerald' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-red-500 dark:bg-red-500' : ' bg-slate-200 dark:bg-slate-800')))">
+        <span class="sr-only">Day status bar</span>
+    </div>
+
     <!-- ========== WEEK CONTEXT STRIP ========== -->
     <div class="day-week-strip mb-5 overflow-x-auto rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-950"
          aria-label="Week navigation"
@@ -78,24 +85,15 @@
            aria-label="Previous day">
             &#8592; Prev
         </a>
-        <div class="calendar-month-title">
-            <span class="calendar-month-name"
-                  th:text="${#temporals.format(date, 'EEEE')}"></span>
+        <div class="calendar-month-title" th:with="day=${date.dayOfMonth}, mod100=${day % 100}, mod10=${day % 10}, suffix=${(mod100 == 11 || mod100 == 12 || mod100 == 13) ? 'th' : ((mod10 == 1) ? 'st' : ((mod10 == 2) ? 'nd' : ((mod10 == 3) ? 'rd' : 'th')))}">
             <span class="calendar-month-year"
-                  th:text="${#temporals.format(date, 'd MMMM yyyy')}"></span>
+                  th:text="${day + suffix + ' of ' + #temporals.format(date, 'MMMM yyyy')}"></span>
         </div>
         <a th:href="@{'/calendar/day/' + ${nextDate}}"
            class="calendar-nav-btn"
            aria-label="Next day">
             Next &#8594;
         </a>
-    </div>
-
-    <!-- ========== STATUS BAR ========== -->
-    <div data-testid="day-status-bar"
-         class="day-status-bar mb-4 h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800"
-         th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' day-status-gold' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' day-status-blue' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' day-status-emerald' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-red-500 dark:bg-red-500' : ' bg-slate-200 dark:bg-slate-800')))">
-        <span class="sr-only">Day status bar</span>
     </div>
 
     <!-- ========== HERO CARD ========== -->
