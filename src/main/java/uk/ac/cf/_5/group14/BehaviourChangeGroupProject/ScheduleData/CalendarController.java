@@ -302,6 +302,21 @@ public class CalendarController {
         LocalDate monthEnd = current.withDayOfMonth(current.lengthOfMonth());
         model.addAttribute("tasksByDateIso", toIsoDateKeyedTaskMap(tasksByDate, monthStart, monthEnd));
         model.addAttribute("occurrencesByDateIso", toIsoDateKeyedOccurrenceMap(occurrences, monthStart, monthEnd));
+
+        // Sticker calendar data: completed workout sessions grouped by date
+        List<uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.WorkoutSession> completedSessions =
+                workoutSessionService.findCompletedByUserAndDateRange(user, monthStart, monthEnd);
+        Map<String, List<String>> stickerSessionNames = new java.util.LinkedHashMap<>();
+        for (uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.WorkoutSession ws : completedSessions) {
+            String key = ws.getDate().toString();
+            stickerSessionNames.computeIfAbsent(key, k -> new ArrayList<>())
+                    .add(ws.getNameSnapshot() != null ? ws.getNameSnapshot() : "Workout");
+        }
+        model.addAttribute("stickerSessionNames", stickerSessionNames);
+        model.addAttribute("completedSessionCount", completedSessions.size());
+        model.addAttribute("stickerPack", userSettings.getStickerPack());
+        model.addAttribute("monthlyWorkoutTarget", userSettings.getMonthlyWorkoutTarget());
+
         List<Schedule> schedules = scheduleService.findByUser(user);
         model.addAttribute("schedules", schedules);
         populateScheduleDrawerState(user, schedules, model);
@@ -380,6 +395,20 @@ public class CalendarController {
             @RequestParam(name = "redirect", required = false) String redirect
     ) {
         userSettingsService.updateCalendarPreferences(user, null, layout);
+        if (redirect != null && redirect.startsWith("/calendar")) {
+            return "redirect:" + redirect;
+        }
+        return "redirect:/calendar";
+    }
+
+    @PostMapping("/sticker-preferences")
+    public String updateStickerPreferences(
+            @SessionAttribute(name = "user") User user,
+            @RequestParam(name = "stickerPack", required = false) uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.StickerPackPreference stickerPack,
+            @RequestParam(name = "monthlyWorkoutTarget", required = false, defaultValue = "12") int monthlyWorkoutTarget,
+            @RequestParam(name = "redirect", required = false) String redirect
+    ) {
+        userSettingsService.updateStickerPreferences(user, stickerPack, monthlyWorkoutTarget);
         if (redirect != null && redirect.startsWith("/calendar")) {
             return "redirect:" + redirect;
         }

@@ -257,6 +257,21 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         return userSettingsRepository.save(settings);
     }
 
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public UserSettings updateStickerPreferences(User user, StickerPackPreference stickerPack, int monthlyWorkoutTarget) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+        if (stickerPack != null) {
+            settings.setStickerPack(stickerPack);
+        }
+        int target = Math.min(Math.max(monthlyWorkoutTarget, 1), 31);
+        settings.setMonthlyWorkoutTarget(target);
+        return userSettingsRepository.save(settings);
+    }
+
     private int clamp(Integer value, int min, int max, int fallback) {
         if (value == null) {
             return fallback;

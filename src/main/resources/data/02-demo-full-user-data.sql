@@ -412,14 +412,14 @@ WHERE u.username = 'demo'
   );
 
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, exercise_name, requires_log)
-SELECT u.id, CAST((CURRENT_DATE + INTERVAL '1' DAY) AS DATE), 'Prep tomorrow session', TIME '18:00:00', 'Review plan and prep kit for tomorrow.', FALSE, FALSE, NULL, FALSE
+SELECT u.id, CAST((CURRENT_DATE + INTERVAL '1' DAY) AS DATE), 'Prep tomorrow''s session', TIME '18:00:00', 'Review plan and prep kit for tomorrow.', FALSE, FALSE, NULL, FALSE
 FROM users u
 WHERE u.username = 'demo'
   AND NOT EXISTS (
     SELECT 1 FROM calendar_tasks ct
     WHERE ct.user_id = u.id
       AND ct.date = CAST((CURRENT_DATE + INTERVAL '1' DAY) AS DATE)
-      AND ct.title = 'Prep tomorrow session'
+      AND ct.title = 'Prep tomorrow''s session'
   );
 
 INSERT INTO calendar_tasks (user_id, date, title, time, notes, is_exercise, completed, exercise_name, requires_log)

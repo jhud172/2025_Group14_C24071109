@@ -63,9 +63,24 @@
     }
     
     // ==================== Time-of-Day Theme ====================
+    var TIME_THEME_KEY = 'day-time-theme-enabled';
+
+    function isTimeThemeEnabled() {
+        var stored = localStorage.getItem(TIME_THEME_KEY);
+        // Default on if not set
+        return stored !== 'false';
+    }
+
     function applyTimeOfDayTheme() {
-        const hour = new Date().getHours();
-        let theme;
+        if (!isTimeThemeEnabled()) {
+            // Remove any existing time theme
+            document.documentElement.removeAttribute('data-time-theme');
+            var header = document.querySelector('[data-testid="day-hub-header"]');
+            if (header) header.removeAttribute('data-time-theme');
+            return;
+        }
+        var hour = new Date().getHours();
+        var theme;
         if (hour >= 5 && hour < 12) {
             theme = 'morning';
         } else if (hour >= 12 && hour < 17) {
@@ -76,8 +91,25 @@
             theme = 'night';
         }
         document.documentElement.setAttribute('data-time-theme', theme);
-        const header = document.querySelector('[data-testid="day-hub-header"]');
+        var header = document.querySelector('[data-testid="day-hub-header"]');
         if (header) header.setAttribute('data-time-theme', theme);
+    }
+
+    // ==================== Time-Theme Toggle Button ====================
+    function initTimeThemeToggle() {
+        var btn = document.getElementById('time-theme-toggle-btn');
+        if (!btn) return;
+        var enabled = isTimeThemeEnabled();
+        btn.setAttribute('aria-pressed', String(enabled));
+        btn.querySelector('.ttt-label').textContent = enabled ? 'Time theme: on' : 'Time theme: off';
+
+        btn.addEventListener('click', function() {
+            var next = !isTimeThemeEnabled();
+            localStorage.setItem(TIME_THEME_KEY, String(next));
+            btn.setAttribute('aria-pressed', String(next));
+            btn.querySelector('.ttt-label').textContent = next ? 'Time theme: on' : 'Time theme: off';
+            applyTimeOfDayTheme();
+        });
     }
 
     // ==================== Smart Time Greetings ====================
@@ -499,6 +531,8 @@
 
         const isToday = container.getAttribute('data-is-today') === 'true';
         const now = new Date();
+        const dayMainContent = document.getElementById('day-main-content');
+        const pageDate = dayMainContent ? (dayMainContent.getAttribute('data-date') || '') : '';
 
         // Collect tasks with times
         const taskItems = Array.from(document.querySelectorAll('[data-task-item]')).map(el => ({
@@ -544,10 +578,12 @@
                 return th === h;
             }).forEach(t => {
                 const doneClass = t.completed ? ' is-done' : '';
+                const checkIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                const qcBtn = t.id ? `<button type="button" class="timeline-qc-btn${t.completed ? ' is-done' : ''}" data-quick-complete data-task-id="${escapeHtml(t.id)}" data-task-date="${escapeHtml(pageDate)}" aria-label="${t.completed ? 'Mark incomplete' : 'Mark complete'}" title="${t.completed ? 'Mark incomplete' : 'Mark complete'}">${checkIcon}</button>` : '';
                 html += `<div class="timeline-event timeline-event--task${doneClass}" role="listitem">
-                    ${t.completed ? '<svg class="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : '<svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>'}
                     <span class="font-medium">${escapeHtml(t.title)}</span>
-                    <span class="ml-auto text-[10px] opacity-70">${t.time}</span>
+                    <span class="ml-auto text-[10px] opacity-70 mr-1">${t.time}</span>
+                    ${qcBtn}
                 </div>`;
             });
 
@@ -847,7 +883,19 @@
                 taskItem.classList.toggle('dark:bg-green-950/20', newDone);
                 const chip = taskItem.querySelector('[data-testid="task-status-chip"]');
                 if (chip) chip.textContent = chipLabel(newDone, originalStatus);
+                // Flash animation on completion
+                if (newDone) {
+                    taskItem.classList.remove('just-completed');
+                    void taskItem.offsetWidth;
+                    taskItem.classList.add('just-completed');
+                    taskItem.addEventListener('animationend', () => taskItem.classList.remove('just-completed'), { once: true });
+                }
             }
+
+            // Also sync timeline quick-complete button for the same task
+            document.querySelectorAll(`.timeline-qc-btn[data-task-id="${taskId}"]`).forEach(tlBtn => {
+                tlBtn.classList.toggle('is-done', newDone);
+            });
 
             const body = new URLSearchParams();
             body.append('taskId', taskId);
@@ -871,6 +919,9 @@
                     const chip = taskItem.querySelector('[data-testid="task-status-chip"]');
                     if (chip) chip.textContent = chipLabel(isDone, originalStatus);
                 }
+                document.querySelectorAll(`.timeline-qc-btn[data-task-id="${taskId}"]`).forEach(tlBtn => {
+                    tlBtn.classList.toggle('is-done', isDone);
+                });
             });
         });
     }
@@ -904,6 +955,7 @@
         }
         
         applyTimeOfDayTheme();
+        initTimeThemeToggle();
         animateCompletionDots();
         initQuickStats();
         addTimeGreeting();

@@ -78,8 +78,11 @@ public class ProfileController {
 
     @GetMapping("/profile")
     public ModelAndView getProfile() {
-        ModelAndView modelAndView = new ModelAndView("/profile/profile");
         User user = authHelper.getAuthenticatedUser();
+        if (user == null) {
+            return new ModelAndView("redirect:/login");
+        }
+        ModelAndView modelAndView = new ModelAndView("/profile/profile");
         PlatformSubscription platformSubscription = platformSubscriptionService.findByUserId(user.getId()).orElse(null);
         UserSettings settings = userSettingsService.getOrCreate(user);
         LevelProgress levelProgress = levelService.getProgress(user);

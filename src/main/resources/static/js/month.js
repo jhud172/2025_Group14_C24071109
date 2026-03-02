@@ -1320,4 +1320,297 @@
     if (jumpDateFromUrl) {
         runJumpAction(() => jumpToDate(jumpDateFromUrl));
     }
+
+    // ===== STICKER CALENDAR =====
+    (function initStickerCalendar() {
+        const planningPanel = document.getElementById('planning-view-panel');
+        const stickerPanel = document.getElementById('sticker-view-panel');
+        const btnPlanning = document.getElementById('btn-planning-mode');
+        const btnMotivation = document.getElementById('btn-motivation-mode');
+        const stickerGrid = document.getElementById('sticker-month-grid');
+        const targetFill = document.getElementById('sticker-target-fill');
+        const targetCount = document.getElementById('sticker-target-count');
+        const tooltip = document.getElementById('sticker-tooltip');
+
+        if (!planningPanel || !stickerPanel || !stickerGrid) return;
+
+        let currentPack = 'STARS';
+        let isStickerMode = false;
+
+        // ---- Pack icons ----
+        const PACKS = {
+            STARS: {
+                legs:    '🌟',
+                push:    '⭐',
+                pull:    '💫',
+                cardio:  '✨',
+                core:    '🌠',
+                default: '⭐'
+            },
+            SPORT: {
+                legs:    '🦵',
+                push:    '💪',
+                pull:    '🏋️',
+                cardio:  '🏃',
+                core:    '🧘',
+                default: '🏋️'
+            },
+            EMOJI: {
+                legs:    '🔥',
+                push:    '💥',
+                pull:    '🎯',
+                cardio:  '⚡',
+                core:    '🎖️',
+                default: '🎉'
+            }
+        };
+
+        const TYPE_CLASSES = {
+            legs:    'sticker-badge--legs',
+            push:    'sticker-badge--push',
+            pull:    'sticker-badge--pull',
+            cardio:  'sticker-badge--cardio',
+            core:    'sticker-badge--core',
+            default: 'sticker-badge--default'
+        };
+
+        function detectWorkoutType(name) {
+            if (!name) return 'default';
+            const n = name.toLowerCase();
+            if (n.includes('leg') || n.includes('squat') || n.includes('lower')) return 'legs';
+            if (n.includes('push') || n.includes('chest') || n.includes('shoulder') || n.includes('press')) return 'push';
+            if (n.includes('pull') || n.includes('back') || n.includes('row') || n.includes('deadlift')) return 'pull';
+            if (n.includes('run') || n.includes('cardio') || n.includes('cycle') || n.includes('swim')) return 'cardio';
+            if (n.includes('core') || n.includes('abs') || n.includes('plank')) return 'core';
+            return 'default';
+        }
+
+        // ---- Read pane data ----
+        function readPaneData() {
+            const script = document.querySelector('.sticker-pane-data');
+            if (!script) return null;
+            try {
+                return JSON.parse(script.textContent.trim());
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // ---- Build sticker grid ----
+        function buildStickerGrid() {
+            const data = readPaneData();
+            if (!data) { stickerGrid.innerHTML = ''; return; }
+
+            const sessions = data.sessions || {};
+            const target = data.target || 12;
+            const completed = data.completed || 0;
+            const year = data.year;
+            const month = data.month;
+            const pack = currentPack;
+            const icons = PACKS[pack] || PACKS.STARS;
+
+            // Update target bar
+            const pct = target > 0 ? Math.min(100, Math.round((completed / target) * 100)) : 0;
+            if (targetFill) {
+                targetFill.style.width = pct + '%';
+                targetFill.className = 'sticker-target-progress-fill' +
+                    (pct >= 100 ? ' met' : pct >= 70 ? ' near' : '');
+                const progressWrap = targetFill.parentElement;
+                if (progressWrap) progressWrap.setAttribute('aria-valuenow', pct);
+            }
+            if (targetCount) {
+                targetCount.textContent = completed + ' / ' + target;
+            }
+
+            if (!year || !month) { stickerGrid.innerHTML = ''; return; }
+
+            // Build calendar cells
+            const firstDay = new Date(year, month - 1, 1);
+            // ISO week starts Monday (1=Mon,...,7=Sun)
+            let startDow = firstDay.getDay(); // 0=Sun
+            startDow = startDow === 0 ? 6 : startDow - 1; // convert to 0=Mon
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' +
+                String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                String(today.getDate()).padStart(2, '0');
+
+            let html = '';
+            // Leading placeholders
+            for (let i = 0; i < startDow; i++) {
+                html += '<div class="sticker-placeholder"></div>';
+            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                const isoDate = year + '-' + String(month).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+                const isToday = isoDate === todayStr;
+                const daySessions = sessions[isoDate] || [];
+                html += '<div class="sticker-day-cell' + (isToday ? ' sticker-today' : '') + '" data-date="' + isoDate + '">';
+                html += '<span class="sticker-day-number">' + d + '</span>';
+                if (daySessions.length > 0) {
+                    const MAX_VISIBLE = 3;
+                    const visible = daySessions.slice(0, MAX_VISIBLE);
+                    visible.forEach(function(name) {
+                        const type = detectWorkoutType(name);
+                        const icon = icons[type] || icons.default;
+                        const cls = TYPE_CLASSES[type] || TYPE_CLASSES.default;
+                        const safeTitle = name.replace(/'/g, '&#039;').replace(/"/g, '&quot;');
+                        html += '<button type="button" class="sticker-badge ' + cls + '" ' +
+                            'tabindex="0" ' +
+                            'aria-label="Completed workout: ' + safeTitle + '" ' +
+                            'data-sticker-name="' + safeTitle + '" ' +
+                            'data-sticker-date="' + isoDate + '">' +
+                            icon + '</button>';
+                    });
+                    if (daySessions.length > MAX_VISIBLE) {
+                        const extra = daySessions.length - MAX_VISIBLE;
+                        html += '<span class="sticker-badge sticker-badge--extra" aria-label="+' + extra + ' more workouts">+' + extra + '</span>';
+                    }
+                }
+                html += '</div>';
+            }
+            stickerGrid.innerHTML = html;
+        }
+
+        // ---- Tooltip logic ----
+        function showTooltip(badge) {
+            if (!tooltip) return;
+            const name = badge.dataset.stickerName || 'Workout';
+            const date = badge.dataset.stickerDate || '';
+            const formattedDate = date ? new Date(date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+            tooltip.innerHTML =
+                '<div class="sticker-tooltip-title">✓ ' + name + '</div>' +
+                (formattedDate ? '<div class="sticker-tooltip-meta">' + formattedDate + '</div>' : '') +
+                '<div class="sticker-tooltip-meta" style="margin-top:0.25rem">Workout completed 💪</div>';
+
+            const rect = badge.getBoundingClientRect();
+            const tw = 220;
+            let left = rect.right + 10;
+            if (left + tw > window.innerWidth - 8) left = rect.left - tw - 10;
+            left = Math.max(8, left);
+            let top = rect.top;
+            const th2 = tooltip.offsetHeight || 80;
+            if (top + th2 > window.innerHeight - 8) top = window.innerHeight - th2 - 8;
+            top = Math.max(8, top);
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+            tooltip.classList.add('visible');
+        }
+
+        function hideTooltip() {
+            if (tooltip) tooltip.classList.remove('visible');
+        }
+
+        // ---- Event delegation for sticker grid ----
+        stickerGrid.addEventListener('mouseover', function(e) {
+            const badge = e.target.closest('.sticker-badge[data-sticker-name]');
+            if (badge) showTooltip(badge);
+        });
+        stickerGrid.addEventListener('mouseout', function(e) {
+            if (!e.target.closest('.sticker-badge[data-sticker-name]')) return;
+            hideTooltip();
+        });
+        // Touch/tap for mobile
+        stickerGrid.addEventListener('click', function(e) {
+            const badge = e.target.closest('.sticker-badge[data-sticker-name]');
+            if (!badge) { hideTooltip(); return; }
+            if (tooltip && tooltip.classList.contains('visible')) {
+                hideTooltip();
+            } else {
+                showTooltip(badge);
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#sticker-month-grid') && !e.target.closest('#sticker-tooltip')) {
+                hideTooltip();
+            }
+        });
+
+        // ---- Pack selector ----
+        stickerPanel.querySelectorAll('.sticker-pack-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const pack = btn.dataset.pack;
+                if (!pack) return;
+                currentPack = pack;
+                // Persist via form POST
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/calendar/sticker-preferences';
+                form.style.display = 'none';
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = (document.querySelector('meta[name="_csrf_param"]') || {}).content || '_csrf';
+                csrfInput.value = (document.querySelector('meta[name="_csrf"]') || {}).content || '';
+                form.appendChild(csrfInput);
+                const packInput = document.createElement('input');
+                packInput.type = 'hidden';
+                packInput.name = 'stickerPack';
+                packInput.value = pack;
+                form.appendChild(packInput);
+                // Don't redirect — submit via fetch so we stay on page
+                fetch('/calendar/sticker-preferences', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        [(document.querySelector('meta[name="_csrf_header"]') || {}).content || 'X-CSRF-TOKEN']:
+                            (document.querySelector('meta[name="_csrf"]') || {}).content || ''
+                    },
+                    body: 'stickerPack=' + encodeURIComponent(pack) + '&redirect=%2Fcalendar',
+                    credentials: 'same-origin'
+                }).catch(() => {});
+
+                stickerPanel.querySelectorAll('.sticker-pack-btn').forEach(function(b) {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-pressed', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
+                buildStickerGrid();
+            });
+        });
+
+        // ---- Mode toggle ----
+        function switchToMotivation() {
+            isStickerMode = true;
+            planningPanel.style.display = 'none';
+            stickerPanel.style.display = 'block';
+            btnPlanning.classList.remove('active');
+            btnPlanning.setAttribute('aria-pressed', 'false');
+            btnMotivation.classList.add('active');
+            btnMotivation.setAttribute('aria-pressed', 'true');
+            buildStickerGrid();
+            localStorage.setItem('calendarStickerMode', '1');
+        }
+
+        function switchToPlanning() {
+            isStickerMode = false;
+            planningPanel.style.display = '';
+            stickerPanel.style.display = 'none';
+            btnPlanning.classList.add('active');
+            btnPlanning.setAttribute('aria-pressed', 'true');
+            btnMotivation.classList.remove('active');
+            btnMotivation.setAttribute('aria-pressed', 'false');
+            hideTooltip();
+            localStorage.setItem('calendarStickerMode', '0');
+        }
+
+        btnMotivation && btnMotivation.addEventListener('click', switchToMotivation);
+        btnPlanning && btnPlanning.addEventListener('click', switchToPlanning);
+
+        // Restore last mode from localStorage
+        if (localStorage.getItem('calendarStickerMode') === '1') {
+            switchToMotivation();
+        }
+
+        // Re-render sticker grid when carousel navigates to a new month
+        const origSetSlot = typeof setSlot === 'function' ? setSlot : null;
+        // Hook: re-render sticker grid when monthPane changes (carousel navigation)
+        const carouselTrack2 = document.getElementById('month-carousel-track');
+        if (carouselTrack2) {
+            const observer = new MutationObserver(function() {
+                if (isStickerMode) buildStickerGrid();
+            });
+            observer.observe(carouselTrack2, { childList: true, subtree: false });
+        }
+    }());
 })();

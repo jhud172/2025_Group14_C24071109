@@ -138,6 +138,39 @@ public class ChatController {
         }
     }
 
+    @GetMapping(path = "/insights", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> insights(Principal principal) {
+        User user = requireUser(principal);
+        boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
+        if (!isPremium) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        try {
+            ChatSummaryDto summary = chatContextBuilder.buildSummary(user);
+            Map<String, Object> result = new HashMap<>();
+            result.put("sevenDay", Map.of(
+                "tasksCompleted", summary.sevenDayTasksCompleted(),
+                "tasksTotal", summary.sevenDayTasksTotal(),
+                "workoutsCompleted", summary.sevenDayWorkoutsCompleted(),
+                "workoutsTotal", summary.sevenDayWorkoutsTotal(),
+                "missedSessions", summary.sevenDayMissedSessions()
+            ));
+            result.put("thirtyDay", Map.of(
+                "tasksCompleted", summary.thirtyDayTasksCompleted(),
+                "tasksTotal", summary.thirtyDayTasksTotal(),
+                "workoutsCompleted", summary.thirtyDayWorkoutsCompleted(),
+                "workoutsTotal", summary.thirtyDayWorkoutsTotal(),
+                "missedSessions", summary.thirtyDayMissedSessions()
+            ));
+            result.put("trendNote", summary.trendNote() != null ? summary.trendNote() : "");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.warn("Could not build insights", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PostMapping("/ask")
     @ResponseBody
     public ResponseEntity<ChatResponse> ask(@RequestBody ChatRequest request) {

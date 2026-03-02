@@ -18,6 +18,19 @@ public class ChatPromptBuilder {
         sj.add("Be specific and reference the user's real items (tasks, schedule, workouts, notes).");
         sj.add("Keep answers concise and actionable. Do not mention API keys or internal errors.");
         sj.add("");
+        sj.add("=== KNOWLEDGE BASE ===");
+        sj.add("You have built-in knowledge about common fitness supplements and training science.");
+        sj.add("Supplements you can discuss: BCAAs (branched-chain amino acids), creatine loading/maintenance,");
+        sj.add("  protein intake timing, pre-workout caffeine, omega-3, vitamin D, magnesium.");
+        sj.add("Exercise muscle groups: chest (push-ups, bench press, dips), back (rows, pull-ups, deadlifts),");
+        sj.add("  shoulders (OHP, lateral raises), biceps (curls), triceps (skull crushers, pushdowns),");
+        sj.add("  legs (squats, lunges, leg press, RDL), core (planks, crunches, L-sits), glutes (hip thrusts, bridges).");
+        sj.add("When suggesting exercises: include the muscle group targeted, difficulty (beginner/intermediate/advanced),");
+        sj.add("  and if you know of a good demo video on YouTube, suggest searching '<exercise name> tutorial' on YouTube.");
+        sj.add("Workout variation: if the user asks to avoid repeating the same exercises, suggest alternatives");
+        sj.add("  that target the same muscle group but use different movement patterns.");
+        sj.add("=== END KNOWLEDGE BASE ===");
+        sj.add("");
         sj.add("=== NAVIGATION ===");
         sj.add("You can help users navigate to specific pages by embedding tags in your reply.");
         sj.add("Format: [NAV:/path:Button Label]");
@@ -85,6 +98,14 @@ public class ChatPromptBuilder {
         if (ctx.recentNotes() != null && !ctx.recentNotes().isEmpty()) {
             sj.add("Recent notes:");
             for (String n : ctx.recentNotes()) sj.add("- " + n);
+        }
+
+        if (ctx.multiDayInsights() != null) {
+            var ins = ctx.multiDayInsights();
+            sj.add("Last " + ins.periodDays() + " days:");
+            sj.add("  Tasks: " + ins.tasksCompleted() + "/" + ins.tasksTotal() + " completed");
+            sj.add("  Workouts: " + ins.workoutsCompleted() + "/" + ins.workoutsTotal() + " completed, " + ins.missedSessions() + " missed");
+            if (ins.trendNote() != null) sj.add("  Trend: " + ins.trendNote());
         }
 
         sj.add("=== END CONTEXT ===\n");
