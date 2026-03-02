@@ -756,6 +756,10 @@
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let scrollSettleTimer = null;
     let onExpandedScroll = null;
+    let pointerStartX = null;
+    let pointerActive = false;
+    const swipeThresholdPx = 60;
+    const SWIPE_IGNORE_SELECTORS = 'a, button, input, textarea, select, label';
 
     function paneKey(year, month) {
         return `${year}-${String(month).padStart(2, '0')}`;
@@ -1124,20 +1128,27 @@
 
 
     function startSwipe(event) {
-        if (!isExpanded) return;
-        if (event.target.closest('a, button, input, textarea, select, label')) return;
+        if (event.target.closest(SWIPE_IGNORE_SELECTORS)) return;
         pointerStartX = event.clientX;
         pointerActive = true;
         carousel?.setPointerCapture?.(event.pointerId);
     }
 
     function endSwipe(event) {
+        carousel?.classList.remove('is-dragging');
         if (!pointerActive || pointerStartX == null) return;
         const delta = event.clientX - pointerStartX;
         pointerActive = false;
         pointerStartX = null;
         if (Math.abs(delta) > swipeThresholdPx) {
-            go(delta < 0 ? 1 : -1);
+            if (isExpanded) {
+                go(delta < 0 ? 1 : -1);
+            } else {
+                const target = delta < 0 ? monthNextBtn : monthPrevBtn;
+                if (target && target.href && target.getAttribute('aria-disabled') !== 'true') {
+                    window.location.href = target.href;
+                }
+            }
         }
         try {
             carousel?.releasePointerCapture?.(event.pointerId);
@@ -1268,6 +1279,21 @@
     }
 
     expandToggle?.addEventListener('click', toggleCarousel);
+
+    if (carousel) {
+        carousel.addEventListener('pointerdown', startSwipe);
+        carousel.addEventListener('pointerup', endSwipe);
+        carousel.addEventListener('pointercancel', (event) => {
+            carousel.classList.remove('is-dragging');
+            pointerActive = false;
+            pointerStartX = null;
+            try { carousel.releasePointerCapture?.(event.pointerId); } catch (e) { /* noop */ }
+        });
+        carousel.addEventListener('pointermove', () => {
+            if (!pointerActive || pointerStartX == null) return;
+            carousel.classList.add('is-dragging');
+        });
+    }
     monthPrevBtn?.addEventListener('click', (event) => {
         if (!isExpanded) return;
         event.preventDefault();
@@ -1331,6 +1357,7 @@
         const targetFill = document.getElementById('sticker-target-fill');
         const targetCount = document.getElementById('sticker-target-count');
         const tooltip = document.getElementById('sticker-tooltip');
+        const insightsEl = document.getElementById('motivation-insights');
 
         if (!planningPanel || !stickerPanel || !stickerGrid) return;
 
@@ -1399,7 +1426,7 @@
         // ---- Build sticker grid ----
         function buildStickerGrid() {
             const data = readPaneData();
-            if (!data) { stickerGrid.innerHTML = ''; return; }
+            if (!data) { stickerGrid.innerHTML = ''; if (insightsEl) insightsEl.innerHTML = ''; return; }
 
             const sessions = data.sessions || {};
             const target = data.target || 12;
@@ -1420,6 +1447,60 @@
             }
             if (targetCount) {
                 targetCount.textContent = completed + ' / ' + target;
+            }
+
+            // ---- Build motivation insights ----
+            if (insightsEl && year && month) {
+                const activeDays = Object.keys(sessions).filter(d => sessions[d] && sessions[d].length > 0).length;
+
+                // Compute current streak (consecutive days with sessions ending at or before today)
+                // month is 1-indexed; new Date(year, month, 0) gives last day of month (day-0 trick)
+                const now = new Date();
+                const todayIso = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                let streak = 0;
+                const lastDayOfMonth = new Date(year, month, 0);
+                const checkDate = new Date(Math.min(now.getTime(), lastDayOfMonth.getTime()));
+                for (let i = 0; i < 31; i++) {
+                    const ds = checkDate.getFullYear() + '-' + String(checkDate.getMonth() + 1).padStart(2, '0') + '-' + String(checkDate.getDate()).padStart(2, '0');
+                    if (ds > todayIso) { checkDate.setDate(checkDate.getDate() - 1); continue; }
+                    if (sessions[ds] && sessions[ds].length > 0) {
+                        streak++;
+                        checkDate.setDate(checkDate.getDate() - 1);
+                    } else {
+                        break;
+                    }
+                }
+
+                // Pick motivational message
+                const MESSAGES = [
+                    { min: 100, msg: '🏆 Goal smashed! You\'re unstoppable this month!', cls: 'motivation-insights__msg--gold' },
+                    { min: 70,  msg: '🔥 Almost there — keep the fire burning!', cls: 'motivation-insights__msg--amber' },
+                    { min: 40,  msg: '💪 Good progress — stay consistent!', cls: '' },
+                    { min: 1,   msg: '🚀 You\'ve started — now build the habit!', cls: '' },
+                    { min: 0,   msg: '✨ Log your first workout to start your journey!', cls: '' }
+                ];
+                const msgEntry = MESSAGES.find(m => pct >= m.min) || MESSAGES[MESSAGES.length - 1];
+
+                insightsEl.innerHTML =
+                    '<div class="motivation-insights__stats">' +
+                        '<div class="motivation-insights__stat">' +
+                            '<span class="motivation-insights__stat-value">' + activeDays + '</span>' +
+                            '<span class="motivation-insights__stat-label">Active days</span>' +
+                        '</div>' +
+                        '<div class="motivation-insights__stat">' +
+                            '<span class="motivation-insights__stat-value">' + completed + '</span>' +
+                            '<span class="motivation-insights__stat-label">Workouts</span>' +
+                        '</div>' +
+                        (streak > 0 ? '<div class="motivation-insights__stat">' +
+                            '<span class="motivation-insights__stat-value motivation-insights__stat-value--streak">🔥 ' + streak + '</span>' +
+                            '<span class="motivation-insights__stat-label">Day streak</span>' +
+                        '</div>' : '') +
+                        '<div class="motivation-insights__stat">' +
+                            '<span class="motivation-insights__stat-value">' + pct + '%</span>' +
+                            '<span class="motivation-insights__stat-label">Goal complete</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<p class="motivation-insights__msg ' + msgEntry.cls + '">' + msgEntry.msg + '</p>';
             }
 
             if (!year || !month) { stickerGrid.innerHTML = ''; return; }

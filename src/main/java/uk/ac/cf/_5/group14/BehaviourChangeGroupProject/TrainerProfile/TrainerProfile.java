@@ -79,6 +79,9 @@ public class TrainerProfile {
     @Column(name = "show_website", nullable = false)
     private Boolean showWebsite = false;
 
+    @Column(name = "trainer_code", length = 12, unique = true)
+    private String trainerCode;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -237,6 +240,14 @@ public class TrainerProfile {
 
     public void setShowWebsite(Boolean showWebsite) {
         this.showWebsite = showWebsite;
+    }
+
+    public String getTrainerCode() {
+        return trainerCode;
+    }
+
+    public void setTrainerCode(String trainerCode) {
+        this.trainerCode = trainerCode;
     }
 
     public Instant getCreatedAt() {

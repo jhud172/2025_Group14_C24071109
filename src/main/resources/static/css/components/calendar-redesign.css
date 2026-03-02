@@ -83,6 +83,12 @@
   --month-carousel-gap: 1.5rem;
   overflow: hidden;
   border-radius: 1.25rem;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.month-carousel.is-dragging {
+  cursor: grabbing;
 }
 
 .month-carousel.is-expanded {
@@ -260,6 +266,20 @@
 
 .dark .calendar-day-card--placeholder {
   opacity: 0.08;
+}
+
+/* On small screens (2-col layout) minimise placeholder height to avoid wasted space */
+@media (max-width: 640px) {
+  .calendar-month-view .calendar-day-card--placeholder {
+    min-height: 2rem !important;
+    height: 2rem !important;
+  }
+}
+@media (max-width: 1024px) and (min-width: 641px) {
+  .calendar-month-view .calendar-day-card--placeholder {
+    min-height: 3rem !important;
+    height: 3rem !important;
+  }
 }
 
 /* ===== STATUS BAR SYSTEM (Top Indicator) ===== */
@@ -2790,8 +2810,8 @@ body.calendar-schedule-open .calendar-week-view {
     flex-wrap: wrap;
   }
 
-  .calendar-jump-input,
-  .calendar-action-btn {
+  .calendar-jump-field .calendar-jump-input,
+  .calendar-jump-field .calendar-action-btn {
     width: 100%;
   }
 
@@ -3049,7 +3069,8 @@ body.calendar-schedule-open .calendar-week-view {
 }
 
 @media (max-width: 1024px) {
-  .calendar-week-view .calendar-month-grid {
+  .calendar-week-view .calendar-month-grid,
+  .calendar-week-grid {
     gap: 0.58rem;
   }
 
@@ -3071,17 +3092,21 @@ body.calendar-schedule-open .calendar-week-view {
 }
 
 @media (max-width: 768px) {
-  .calendar-week-view .calendar-month-container {
+  .calendar-week-view .calendar-month-container,
+  .calendar-week-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   .calendar-week-view .calendar-day-headers,
-  .calendar-week-view .calendar-month-grid {
-    min-width: 54rem;
+  .calendar-week-view .calendar-month-grid,
+  .calendar-week-grid {
+    /* 52rem gives 7 cols ~7.4rem each — readable on tablets without excess scroll */
+    min-width: 52rem;
   }
 
-  .calendar-week-view .calendar-month-grid {
+  .calendar-week-view .calendar-month-grid,
+  .calendar-week-grid {
     gap: 0.54rem;
   }
 
@@ -3104,8 +3129,9 @@ body.calendar-schedule-open .calendar-week-view {
 
 @media (max-width: 480px) {
   .calendar-week-view .calendar-day-headers,
-  .calendar-week-view .calendar-month-grid {
-    min-width: 48rem;
+  .calendar-week-view .calendar-month-grid,
+  .calendar-week-grid {
+    min-width: 46rem;
   }
 
   .calendar-week-view .calendar-week-card {
@@ -3129,7 +3155,8 @@ body.calendar-schedule-open .calendar-week-view {
  */
 @media (max-width: 640px) {
   /* Remove horizontal scroll — not needed in single-column layout */
-  .calendar-week-view .calendar-month-container {
+  .calendar-week-view .calendar-month-container,
+  .calendar-week-container {
     overflow-x: visible;
   }
 
@@ -3139,7 +3166,8 @@ body.calendar-schedule-open .calendar-week-view {
   }
 
   /* Single-column vertical stack, no forced min-width */
-  .calendar-week-view .calendar-month-grid {
+  .calendar-week-view .calendar-month-grid,
+  .calendar-week-grid {
     min-width: 0 !important;
     grid-template-columns: 1fr !important;
     gap: 0.75rem;
@@ -3357,4 +3385,309 @@ body.calendar-schedule-open .calendar-week-view {
 .calendar-day-content.motivation-mode .calendar-singular-list,
 .calendar-day-content.motivation-mode .space-y-3 {
   opacity: 0.4;
+}
+
+/* ===== WEEK VIEW: DISTINCT CONTAINER & GRID ===== */
+/* Use a week-specific container so week & month can diverge freely */
+.calendar-week-container {
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  background: transparent;
+}
+
+.calendar-week-grid {
+  gap: 0.875rem;
+}
+
+/* Week card: taller than month, with a stronger left-accent border */
+.calendar-week-view .calendar-week-card {
+  min-height: 17.5rem;
+  border-radius: 1rem;
+  border-left-width: 3px;
+  border-left-color: rgba(148, 163, 184, 0.4);
+}
+
+/* Status-based left accent colours for week cards */
+.calendar-week-view .calendar-day-card[data-status="today"] {
+  border-left-color: rgb(16, 185, 129) !important;
+}
+
+.calendar-week-view .calendar-day-card[data-status="tomorrow"] {
+  border-left-color: rgb(59, 130, 246) !important;
+}
+
+.calendar-week-view .calendar-day-card[data-status="past-incomplete"] {
+  border-left-color: rgb(239, 68, 68) !important;
+}
+
+.calendar-week-view .calendar-day-card[data-status="past-complete"] {
+  border-left-color: rgb(16, 185, 129) !important;
+  opacity: 0.85;
+}
+
+/* Section divider between tasks and workouts in detailed week view */
+.calendar-week-section-divider {
+  height: 1px;
+  margin: 0.5rem 0;
+  border: none;
+  background: linear-gradient(90deg, transparent 0%, rgb(226, 232, 240) 20%, rgb(226, 232, 240) 80%, transparent 100%);
+}
+
+.dark .calendar-week-section-divider {
+  background: linear-gradient(90deg, transparent 0%, rgb(51, 65, 85) 20%, rgb(51, 65, 85) 80%, transparent 100%);
+}
+
+/* ===== WEEK STATS BAR ===== */
+/* A compact bar above the slider that shows aggregate week activity */
+.calendar-week-stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgb(226, 232, 240);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease;
+}
+
+.dark .calendar-week-stats-bar {
+  border-color: rgb(51, 65, 85);
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.calendar-week-stats-bar__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.calendar-week-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(71, 85, 105);
+  white-space: nowrap;
+}
+
+.dark .calendar-week-stat {
+  color: rgb(148, 163, 184);
+}
+
+.calendar-week-stat__icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+/* Mini bar chart in stats bar */
+.calendar-week-stats-bar__chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 2rem;
+  flex-shrink: 0;
+}
+
+.calendar-week-stats-bar__day {
+  width: 0.5rem;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 0.25rem;
+  background: rgb(241, 245, 249);
+  overflow: hidden;
+}
+
+.dark .calendar-week-stats-bar__day {
+  background: rgb(30, 41, 59);
+}
+
+.calendar-week-stats-bar__fill {
+  width: 100%;
+  border-radius: 0.25rem;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 2px;
+}
+
+.calendar-week-stats-bar__fill.heat-none {
+  background: transparent;
+  min-height: 0;
+}
+
+.calendar-week-stats-bar__fill.heat-low {
+  background: rgb(110, 231, 183);
+}
+
+.calendar-week-stats-bar__fill.heat-med {
+  background: rgb(245, 158, 11);
+}
+
+.calendar-week-stats-bar__fill.heat-high {
+  background: rgb(239, 68, 68);
+}
+
+.dark .calendar-week-stats-bar__fill.heat-low {
+  background: rgb(5, 150, 105);
+}
+
+/* ===== HEATMAP ICONS IN WEEK VIEW ===== */
+/* Position icons in top-right of week cards */
+.calendar-week-view .calendar-heat-icons {
+  top: 0.5rem;
+  right: 0.5rem;
+  bottom: auto;
+}
+
+/* Make icons slightly larger in week view for better readability */
+.calendar-week-view .calendar-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  opacity: 0.75;
+}
+
+.calendar-week-view .calendar-icon-pr {
+  color: rgb(251, 191, 36);
+}
+
+/* ===== WEEK VIEW RESPONSIVE: MEDIUM SCREENS (≤1024px) ===== */
+@media (max-width: 1024px) {
+  .calendar-week-grid {
+    gap: 0.58rem;
+  }
+
+  .calendar-week-view .calendar-week-card {
+    min-height: 15.25rem;
+  }
+
+  .calendar-week-view .calendar-week-card-header {
+    padding: 0.78rem 0.72rem 0.5rem 0.72rem;
+  }
+
+  .calendar-week-view .calendar-day-content {
+    padding: 0 0.72rem 0.72rem 0.72rem;
+  }
+
+  .calendar-week-view .calendar-week-day-date {
+    font-size: 1.52rem;
+  }
+}
+
+/* ===== WEEK VIEW RESPONSIVE: TABLET (≤768px) ===== */
+/* Horizontal scroll with sticky headers */
+@media (max-width: 768px) {
+  .calendar-week-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.75rem 0;
+  }
+
+  .calendar-week-view .calendar-day-headers,
+  .calendar-week-grid {
+    min-width: 52rem;
+  }
+
+  .calendar-week-grid {
+    gap: 0.54rem;
+  }
+
+  .calendar-week-view .calendar-week-card {
+    min-height: 13rem;
+  }
+
+  .calendar-week-stats-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .calendar-week-stats-bar__chart {
+    align-self: flex-end;
+  }
+}
+
+/* ===== WEEK VIEW RESPONSIVE: PHONE (≤640px) ===== */
+/* Single-column vertical stack so items are fully readable */
+@media (max-width: 640px) {
+  /* Remove horizontal scroll in single-column mode */
+  .calendar-week-container {
+    overflow-x: visible;
+    padding: 0;
+  }
+
+  /* Hide the top Mon/Tue/.../Sun row — each card already shows its day name */
+  .calendar-week-view .calendar-day-headers {
+    display: none;
+  }
+
+  /* Single-column, no forced min-width */
+  .calendar-week-grid {
+    min-width: 0 !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+
+  /* Cards grow to fit their content */
+  .calendar-week-view .calendar-week-card {
+    min-height: auto;
+    border-left-width: 4px;
+  }
+
+  /* Allow item titles to wrap so full names are visible */
+  .calendar-week-view .calendar-item-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  /* Allow grouped item labels to wrap */
+  .calendar-week-view .calendar-grouped-item span {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  /* Remove max-height so all items are visible */
+  .calendar-week-view .calendar-singular-list {
+    max-height: none;
+  }
+
+  /* Compact horizontal header in phone single-column layout */
+  .calendar-week-view .calendar-week-card-header {
+    flex-direction: row;
+    align-items: center;
+    min-height: auto;
+    padding: 0.75rem;
+  }
+
+  .calendar-week-view .calendar-week-day-number {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .calendar-week-view .calendar-week-day-date {
+    font-size: 1.25rem;
+  }
+
+  .calendar-week-view .calendar-week-day-name {
+    font-size: 0.75rem;
+  }
+
+  .calendar-week-view .calendar-day-content {
+    padding: 0 0.75rem 0.75rem 0.75rem;
+  }
+
+  /* Stats bar: compact on phone */
+  .calendar-week-stats-bar {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .calendar-week-stats-bar__chart {
+    display: none;
+  }
 }

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      th:classappend="${userSettings != null and userSettings.theme != null and userSettings.theme.toString() == 'DARK'} ? ' dark'"
+      th:attr="data-theme=${userSettings != null && userSettings.theme != null ? userSettings.theme.toString().toLowerCase() : 'system'}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome – Healthy Habits</title>
+    <link rel="shortcut icon" th:href="@{/favicon.ico}">
+    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/img/tab_logo.png}">
+    <script>
+    (function () {
+        var t = document.documentElement.getAttribute('data-theme');
+        if (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+    }());
+    </script>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="min-h-screen bg-cyber-900 text-slate-100 antialiased">
+
+<!--
+  Tutorial overlay: full-screen, role-aware, step-based walkthrough.
+  Steps are defined in JS below; role is injected from the server.
+-->
+<div id="tutorial-backdrop"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+
+    <div id="tutorial-card"
+         class="relative w-full max-w-lg mx-4 rounded-2xl border border-emerald-400/30
+                bg-cyber-800 shadow-2xl overflow-hidden"
+         role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+
+        <!-- Progress bar -->
+        <div class="h-1 w-full bg-slate-700">
+            <div id="tutorial-progress-bar"
+                 class="h-1 bg-emerald-400 transition-all duration-500"
+                 style="width: 0%"></div>
+        </div>
+
+        <!-- Step counter -->
+        <div class="flex items-center justify-between px-6 pt-4 pb-0">
+            <span id="tutorial-step-label"
+                  class="text-xs font-semibold uppercase tracking-widest text-emerald-400"></span>
+            <!-- Skip button -->
+            <form th:action="@{/tutorial/complete}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit"
+                        class="text-xs text-slate-400 hover:text-slate-200 transition-colors underline underline-offset-2">
+                    Skip tutorial
+                </button>
+            </form>
+        </div>
+
+        <!-- Icon area -->
+        <div class="flex justify-center mt-6 mb-2">
+            <div id="tutorial-icon"
+                 class="h-16 w-16 rounded-full bg-emerald-400/10 border border-emerald-400/30
+                        flex items-center justify-center text-4xl transition-all duration-300">
+            </div>
+        </div>
+
+        <!-- Text content -->
+        <div class="px-8 pb-4 text-center">
+            <h2 id="tutorial-title" class="text-xl font-bold text-white mb-2 transition-all duration-300"></h2>
+            <p id="tutorial-body" class="text-slate-300 text-sm leading-relaxed transition-all duration-300"></p>
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="flex items-center justify-between px-8 pb-8 pt-4 gap-3">
+            <button id="tutorial-back-btn"
+                    onclick="tutorialBack()"
+                    class="px-5 py-2 rounded-lg text-sm font-semibold border border-slate-600
+                           text-slate-300 hover:border-slate-400 hover:text-white transition-colors hidden">
+                &larr; Back
+            </button>
+            <div id="tutorial-dots" class="flex gap-2 mx-auto"></div>
+            <button id="tutorial-next-btn"
+                    onclick="tutorialNext()"
+                    class="px-6 py-2 rounded-lg text-sm font-bold bg-emerald-500 hover:bg-emerald-400
+                           text-white transition-colors ml-auto">
+                Next &rarr;
+            </button>
+        </div>
+
+        <!-- Hidden finish form (submitted by JS on last step) -->
+        <form id="tutorial-finish-form" th:action="@{/tutorial/complete}" method="post" class="hidden">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        </form>
+    </div>
+</div>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+(function () {
+    "use strict";
+
+    var ROLE = /*[[${tutorialRole}]]*/ 'CLIENT';
+
+    // ── Step definitions ─────────────────────────────────────────────────────
+    var CLIENT_STEPS = [
+        {
+            icon: "👋",
+            title: "Welcome to Healthy Habits!",
+            body: "We're thrilled to have you here. This quick tour will help you get the most out of your fitness journey. You can skip at any time."
+        },
+        {
+            icon: "📅",
+            title: "Your Personal Calendar",
+            body: "Plan and track workouts, goals, and daily tasks in one place. Head to <strong>Calendar</strong> to add your first session."
+        },
+        {
+            icon: "💪",
+            title: "Log Workouts",
+            body: "Record every exercise set, rep, and weight. Your progress is tracked automatically so you can see how far you've come."
+        },
+        {
+            icon: "🎯",
+            title: "Set Goals",
+            body: "Create personal goals — weight, strength, cardio — and check in weekly to stay on track."
+        },
+        {
+            icon: "🏆",
+            title: "Earn Points & Level Up",
+            body: "Complete workouts and tasks to earn XP and climb through achievement levels. Fitness just got more fun!"
+        },
+        {
+            icon: "🚀",
+            title: "You're all set!",
+            body: "Your dashboard is ready. Start by logging today's workout or exploring your calendar. Good luck! 💪"
+        }
+    ];
+
+    var TRAINER_STEPS = [
+        {
+            icon: "👋",
+            title: "Welcome, Trainer!",
+            body: "Your professional hub is ready. Let's take a quick look at the tools that will help you manage and grow your client base."
+        },
+        {
+            icon: "🔑",
+            title: "Your Trainer Code",
+            body: "Share your unique Trainer Code with clients so they can connect to you. Find it on your <strong>Profile</strong> page."
+        },
+        {
+            icon: "👥",
+            title: "Manage Clients",
+            body: "View all your linked clients, track their progress, and assign personalised workouts from the <strong>Clients</strong> section."
+        },
+        {
+            icon: "📋",
+            title: "Exercise & Programme Library",
+            body: "Build reusable workout templates and programmes in your <strong>Library</strong>, then assign them to clients in seconds."
+        },
+        {
+            icon: "📊",
+            title: "Check-ins & Assessments",
+            body: "Schedule weekly check-ins, review client assessments, and adjust their coaching phase as they progress."
+        },
+        {
+            icon: "🚀",
+            title: "You're ready to coach!",
+            body: "Your trainer dashboard is set up and waiting. Add your first client or create a programme to get started."
+        }
+    ];
+
+    var GYM_STEPS = [
+        {
+            icon: "👋",
+            title: "Welcome to your Gym Dashboard!",
+            body: "Everything you need to manage your gym is here. Let's walk through the key features together."
+        },
+        {
+            icon: "🏋️",
+            title: "Gym Profile",
+            body: "Keep your gym information up to date — name, location, description, and opening hours — so members always have the latest details."
+        },
+        {
+            icon: "👥",
+            title: "Member Management",
+            body: "View all gym members, check their subscription status, and manage access from the <strong>Members</strong> section."
+        },
+        {
+            icon: "🧑‍🏫",
+            title: "Trainer Management",
+            body: "Approve and manage trainers associated with your gym. Keep your team organised and verified."
+        },
+        {
+            icon: "📊",
+            title: "Analytics",
+            body: "Track membership trends, activity levels, and revenue to make informed decisions about your gym."
+        },
+        {
+            icon: "🚀",
+            title: "You're all set!",
+            body: "Your gym dashboard is live. Start by completing your gym profile or inviting your first trainer."
+        }
+    ];
+
+    var steps = ROLE === 'TRAINER' ? TRAINER_STEPS
+              : ROLE === 'GYM'     ? GYM_STEPS
+              :                      CLIENT_STEPS;
+
+    var current = 0;
+
+    // ── DOM refs ─────────────────────────────────────────────────────────────
+    var icon      = document.getElementById('tutorial-icon');
+    var title     = document.getElementById('tutorial-title');
+    var body      = document.getElementById('tutorial-body');
+    var progress  = document.getElementById('tutorial-progress-bar');
+    var stepLabel = document.getElementById('tutorial-step-label');
+    var nextBtn   = document.getElementById('tutorial-next-btn');
+    var backBtn   = document.getElementById('tutorial-back-btn');
+    var dotsEl    = document.getElementById('tutorial-dots');
+    var finishForm= document.getElementById('tutorial-finish-form');
+
+    // ── Build dots ────────────────────────────────────────────────────────────
+    steps.forEach(function (_, i) {
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.setAttribute('aria-label', 'Go to step ' + (i + 1));
+        dot.className = 'h-2 w-2 rounded-full transition-all duration-300 ' +
+                        (i === 0 ? 'bg-emerald-400 w-4' : 'bg-slate-600');
+        dot.addEventListener('click', function () { goTo(i); });
+        dotsEl.appendChild(dot);
+    });
+
+    function render() {
+        var step = steps[current];
+        icon.textContent  = step.icon;
+        title.textContent = step.title;
+        body.innerHTML    = step.body;
+
+        var pct = steps.length > 1 ? (current / (steps.length - 1)) * 100 : 100;
+        progress.style.width = pct + '%';
+
+        stepLabel.textContent = 'Step ' + (current + 1) + ' of ' + steps.length;
+
+        var isLast = current === steps.length - 1;
+        nextBtn.textContent = isLast ? 'Get started 🚀' : 'Next →';
+
+        backBtn.classList.toggle('hidden', current === 0);
+
+        // Dots
+        var dots = dotsEl.querySelectorAll('button');
+        dots.forEach(function (d, i) {
+            if (i === current) {
+                d.className = 'h-2 w-4 rounded-full bg-emerald-400 transition-all duration-300';
+            } else {
+                d.className = 'h-2 w-2 rounded-full bg-slate-600 transition-all duration-300';
+            }
+        });
+    }
+
+    function goTo(index) {
+        current = index;
+        render();
+    }
+
+    window.tutorialNext = function () {
+        if (current < steps.length - 1) {
+            current++;
+            render();
+        } else {
+            finishForm.submit();
+        }
+    };
+
+    window.tutorialBack = function () {
+        if (current > 0) {
+            current--;
+            render();
+        }
+    };
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === 'Enter') { window.tutorialNext(); }
+        else if (e.key === 'ArrowLeft') { window.tutorialBack(); }
+        else if (e.key === 'Escape') { finishForm.submit(); }
+    });
+
+    render();
+}());
+/*]]>*/
+</script>
+</body>
+</html>

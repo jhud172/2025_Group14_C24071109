@@ -48,6 +48,14 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         User user = userService.findByUsername(username);
         request.getSession().setAttribute("user", user);
 
+        // First-login: redirect to the tutorial before the normal flow
+        if (user != null && !user.isHasSeenTutorial()) {
+            clearAuthenticationAttributes(request);
+            requestCache.removeRequest(request, response);
+            getRedirectStrategy().sendRedirect(request, response, "/tutorial");
+            return;
+        }
+
         String next = request.getParameter("next");
         if (isSafeRedirect(next)) {
             clearAuthenticationAttributes(request);
