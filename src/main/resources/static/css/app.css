@@ -4780,6 +4780,222 @@ body.calendar-schedule-open .calendar-week-view {
 .quick-complete-btn.is-done {
   animation: checkPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+/* ===== IMPROVED COMPLETED STATES ===== */
+[data-task-item][data-task-status="done"] .task-title-text {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+[data-task-item][data-task-status="done"] {
+  position: relative;
+}
+[data-task-item][data-task-status="done"]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 0.375rem;
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.25);
+}
+/* Celebration micro-flash when completing a task */
+@keyframes completeFlash {
+  0%   { background-color: rgba(16, 185, 129, 0.18); }
+  100% { background-color: transparent; }
+}
+[data-task-item].just-completed {
+  animation: completeFlash 0.6s ease forwards;
+}
+/* ===== CUSTOM CHECKBOXES ===== */
+.custom-cb-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.custom-cb-wrap input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.custom-cb-box {
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 0.3125rem;
+  border: 2px solid rgba(148, 163, 184, 0.8);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dark .custom-cb-box {
+  border-color: rgba(71, 85, 105, 0.9);
+  background: transparent;
+}
+.custom-cb-wrap:hover .custom-cb-box {
+  border-color: rgb(59, 130, 246);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+.custom-cb-wrap:focus-within .custom-cb-box {
+  outline: 2px solid rgb(59, 130, 246);
+  outline-offset: 2px;
+}
+.custom-cb-wrap input:checked ~ .custom-cb-box {
+  background: rgb(59, 130, 246);
+  border-color: rgb(59, 130, 246);
+}
+.custom-cb-box svg {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 0.6875rem;
+  height: 0.6875rem;
+  stroke: white;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.custom-cb-wrap input:checked ~ .custom-cb-box svg {
+  opacity: 1;
+  transform: scale(1);
+}
+.custom-cb-label {
+  font-size: 0.875rem;
+  color: rgb(51, 65, 85);
+  font-weight: 500;
+}
+.dark .custom-cb-label {
+  color: rgb(203, 213, 225);
+}
+@media (prefers-reduced-motion: reduce) {
+  .custom-cb-box,
+  .custom-cb-box svg {
+    transition: none;
+  }
+}
+/* ===== PROGRESS BAR HOVER TOOLTIP ===== */
+.progress-bar-wrap {
+  position: relative;
+}
+.progress-bar-tooltip {
+  position: absolute;
+  top: -2.25rem;
+  left: 50%;
+  transform: translateX(-50%) scale(0.85);
+  background: rgb(15, 23, 42);
+  color: rgb(241, 245, 249);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.5rem;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 20;
+}
+.dark .progress-bar-tooltip {
+  background: rgb(241, 245, 249);
+  color: rgb(15, 23, 42);
+}
+.progress-bar-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgb(15, 23, 42);
+}
+.dark .progress-bar-tooltip::after {
+  border-top-color: rgb(241, 245, 249);
+}
+.progress-bar-wrap:hover .progress-bar-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+/* ===== TIME-OF-DAY TOGGLE BUTTON ===== */
+.time-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(203, 213, 225, 0.8);
+  background: rgba(248, 250, 252, 0.9);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(71, 85, 105);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.dark .time-theme-toggle {
+  border-color: rgba(71, 85, 105, 0.6);
+  background: rgba(30, 41, 59, 0.6);
+  color: rgb(148, 163, 184);
+}
+.time-theme-toggle:hover {
+  border-color: rgb(99, 102, 241);
+  color: rgb(67, 56, 202);
+}
+.dark .time-theme-toggle:hover {
+  border-color: rgb(99, 102, 241);
+  color: rgb(129, 140, 248);
+}
+.time-theme-toggle[aria-pressed="true"] {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: rgb(67, 56, 202);
+}
+.dark .time-theme-toggle[aria-pressed="true"] {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: rgb(129, 140, 248);
+}
+/* ===== TIMELINE QUICK COMPLETE ===== */
+.timeline-event .timeline-qc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  background: transparent;
+  opacity: 0.5;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+  margin-left: auto;
+  padding: 0;
+}
+.timeline-event:hover .timeline-qc-btn {
+  opacity: 1;
+}
+.timeline-event .timeline-qc-btn:hover {
+  transform: scale(1.12);
+  opacity: 1;
+}
+.timeline-event .timeline-qc-btn.is-done {
+  background: currentColor;
+  opacity: 1;
+}
+.timeline-event .timeline-qc-btn.is-done svg {
+  stroke: white;
+}
+.dark .timeline-event .timeline-qc-btn.is-done svg {
+  stroke: rgb(15, 23, 42);
+}
 /**
  * Detail/View Pages - Unified Component
  * 
@@ -29162,6 +29378,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:hover\:bg-slate-800\/50:hover:is(.dark *) {
   background-color: rgb(30 41 59 / 0.5);
 }
+.dark\:hover\:bg-slate-800\/60:hover:is(.dark *) {
+  background-color: rgb(30 41 59 / 0.6);
+}
 .dark\:hover\:bg-slate-800\/70:hover:is(.dark *) {
   background-color: rgb(30 41 59 / 0.7);
 }
@@ -29204,6 +29423,10 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .dark\:hover\:text-slate-200:hover:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(226 232 240 / var(--tw-text-opacity, 1));
+}
+.dark\:hover\:text-slate-300:hover:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(203 213 225 / var(--tw-text-opacity, 1));
 }
 .dark\:hover\:text-white:hover:is(.dark *) {
   --tw-text-opacity: 1;
