@@ -7,75 +7,64 @@
 
     <div th:fragment="content" class="auth-container animate-fade-in">
         <div class="auth-card">
-            <div class="auth-accent-bar" style="background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+            <div class="auth-accent-bar" style="background: linear-gradient(90deg, #f59e0b, #10b981);"></div>
 
-            <div class="mb-8 mt-8 text-center">
-                <h1 class="auth-heading">Development Mode</h1>
-                <p class="auth-subheading">Application is running in development/demo mode</p>
-            </div>
-
-            <!-- Dev Mode Banner -->
-            <div class="auth-alert auth-alert--error" role="alert" style="background: #fef2f2; border-left: 4px solid #dc2626;">
-                <div style="display: flex; gap: 12px; align-items: flex-start;">
-                    <div style="font-size: 20px; line-height: 1.4;">⚠️</div>
-                    <div>
-                        <strong>Login is limited in development mode</strong>
-                        <p style="margin-top: 8px; font-size: 14px; color: #666;">
-                            This application is running in development/demo mode. You can still sign in, but some features are restricted for safety.
-                        </p>
-                    </div>
+            <div class="mb-6 mt-8 text-center">
+                <!-- Dev Mode badge -->
+                <div style="margin-bottom:16px;">
+                    <span style="display:inline-flex;align-items:center;gap:6px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:4px 14px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;animation:dmPulse 2s ease-in-out infinite;"></span>
+                        Development Mode
+                    </span>
                 </div>
+                <h1 class="auth-heading">Dev Mode Active</h1>
+                <p class="auth-subheading">You can sign in or browse the application without authentication.</p>
             </div>
 
-            <!-- Instructions -->
-            <div style="margin-top: 24px; padding: 16px; background: #f3f4f6; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                <h2 style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Optional dev login:</h2>
-                <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">
-                    Use the dev login option if you need access to protected pages while keeping development restrictions in place.
-                </p>
-            </div>
-
-            <!-- Dev Mode Info -->
-            <div style="margin-top: 24px; padding: 16px; background: #eff6ff; border-radius: 8px;">
-                <h2 style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #0c4a6e;">Development Mode Features:</h2>
-                <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #0c4a6e; line-height: 1.6;">
-                    <li>✓ Dev mode banner visible across the application</li>
-                    <li>✓ Selected features are restricted for safety</li>
-                    <li>✓ Perfect for testing and demonstrations</li>
-                    <li>✓ Optional dev login is available</li>
-                </ul>
-            </div>
-
-            <!-- Return to Home -->
-            <div style="margin-top: 24px; text-center;">
-                <a href="/login?devLogin=1" style="display: inline-block; padding: 10px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; transition: background 0.2s; margin-right: 12px;">
-                    Continue to Dev Login
+            <!-- Options -->
+            <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:8px;">
+                <a href="/login?devLogin=1"
+                   style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:12px;text-decoration:none;color:#065f46;transition:border-color .2s,box-shadow .2s;"
+                   onmouseover="this.style.borderColor='#10b981';this.style.boxShadow='0 4px 14px rgba(16,185,129,.12)'"
+                   onmouseout="this.style.borderColor='#a7f3d0';this.style.boxShadow='none'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    <div>
+                        <div style="font-weight:600;font-size:14px;">Continue to Login</div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:1px;">Sign in with an existing account</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
                 </a>
-                <a href="/dev-mode" style="display: inline-block; padding: 10px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; transition: background 0.2s; margin-right: 12px;">
-                    Browse Dev Hub
-                </a>
-                <a href="/" style="display: inline-block; padding: 10px 24px; background: #e5e7eb; color: #111827; text-decoration: none; border-radius: 6px; font-weight: 500; transition: background 0.2s;">
-                    Return to Home
-                </a>
-            </div>
 
-            <!-- App Status -->
-            <div style="margin-top: 24px; padding: 12px; background: #f0fdf4; border-radius: 6px; text-align: center; border-left: 4px solid #16a34a;">
-                <p style="margin: 0; font-size: 13px; color: #15803d;">
-                    <strong>Current Environment:</strong> Development/Demo Mode
-                </p>
-                <p style="margin: 4px 0 0 0; font-size: 12px; color: #15803d;">
-                    Application Status: Running with limited access
-                </p>
+                <a href="/dev-mode"
+                   style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;text-decoration:none;color:#1e40af;transition:border-color .2s,box-shadow .2s;"
+                   onmouseover="this.style.borderColor='#3b82f6';this.style.boxShadow='0 4px 14px rgba(59,130,246,.12)'"
+                   onmouseout="this.style.borderColor='#bfdbfe';this.style.boxShadow='none'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                    <div>
+                        <div style="font-weight:600;font-size:14px;">Browse Dev Hub</div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:1px;">Explore pages without logging in</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                </a>
+
+                <a href="/"
+                   style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:12px;text-decoration:none;color:#374151;transition:border-color .2s;"
+                   onmouseover="this.style.borderColor='#d1d5db'"
+                   onmouseout="this.style.borderColor='#e5e7eb'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <div>
+                        <div style="font-weight:600;font-size:14px;">Return to Home</div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:1px;">Go back to the landing page</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                </a>
             </div>
 
         </div>
     </div>
 
     <th:block th:fragment="pageScripts">
-        <script>
-            // No scripts needed for dev mode page
-        </script>
+        <style>@keyframes dmPulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
     </th:block>
 
 </th:block>

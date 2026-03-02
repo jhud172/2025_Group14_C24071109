@@ -1,231 +1,322 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Development Mode Hub', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('Dev Hub', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <th:block th:fragment="pageStyles">
         <style>
-            .dev-hub-container {
-                max-width: 1200px;
+            .dev-hub-wrap {
+                max-width: 1100px;
                 margin: 0 auto;
-                padding: 40px 20px;
+                padding: 32px 20px 56px;
             }
-            
-            .dev-mode-banner {
-                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-                color: white;
-                padding: 30px;
+
+            /* Hero header */
+            .dev-hub-hero {
+                display: flex;
+                align-items: center;
+                gap: 18px;
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                border: 1px solid rgba(251,191,36,.25);
+                border-radius: 16px;
+                padding: 28px 32px;
+                margin-bottom: 36px;
+                position: relative;
+                overflow: hidden;
+            }
+            .dev-hub-hero::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(ellipse at 70% 50%, rgba(251,191,36,.08) 0%, transparent 60%);
+                pointer-events: none;
+            }
+            .dev-hub-hero-icon {
+                flex-shrink: 0;
+                width: 52px;
+                height: 52px;
                 border-radius: 12px;
-                margin-bottom: 40px;
-                box-shadow: 0 10px 25px rgba(217, 119, 6, 0.2);
+                background: rgba(251,191,36,.15);
+                border: 1px solid rgba(251,191,36,.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 26px;
             }
-            
-            .dev-mode-banner h1 {
-                margin: 0 0 10px 0;
-                font-size: 28px;
+            .dev-hub-hero-text h1 {
+                margin: 0 0 6px;
+                font-size: 22px;
                 font-weight: 700;
+                color: #fef3c7;
+                letter-spacing: -.3px;
             }
-            
-            .dev-mode-banner p {
+            .dev-hub-hero-text p {
                 margin: 0;
                 font-size: 14px;
-                opacity: 0.95;
+                color: #d1d5db;
+                line-height: 1.55;
             }
-            
-            .dev-mode-banner code {
-                background: rgba(0, 0, 0, 0.2);
-                padding: 2px 6px;
-                border-radius: 4px;
-                font-family: monospace;
-            }
-            
-            .navigation-section {
-                margin-bottom: 50px;
-            }
-            
-            .section-title {
-                font-size: 20px;
+            .dev-pill {
+                margin-left: auto;
+                flex-shrink: 0;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: rgba(251,191,36,.15);
+                border: 1px solid rgba(251,191,36,.35);
+                color: #fbbf24;
+                padding: 5px 12px;
+                border-radius: 999px;
+                font-size: 11px;
                 font-weight: 700;
-                color: #111827;
-                margin-bottom: 20px;
-                padding-bottom: 10px;
-                border-bottom: 2px solid #10b981;
+                letter-spacing: .6px;
+                text-transform: uppercase;
             }
-            
-            .page-grid {
+            .dev-pill-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #fbbf24;
+                animation: devPulse 2s ease-in-out infinite;
+            }
+            @keyframes devPulse {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: .5; transform: scale(.75); }
+            }
+
+            /* Section headers */
+            .hub-section { margin-bottom: 44px; }
+            .hub-section-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 18px;
+                padding-bottom: 12px;
+                border-bottom: 1px solid rgba(16,185,129,.25);
+            }
+            .hub-section-header h2 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 700;
+                color: #10b981;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+            }
+            .hub-section-badge {
+                margin-left: auto;
+                font-size: 11px;
+                color: #6b7280;
+                font-weight: 500;
+            }
+
+            /* Cards */
+            .hub-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 20px;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 16px;
             }
-            
-            .page-card {
-                background: white;
-                border: 2px solid #e5e7eb;
-                border-radius: 12px;
-                padding: 24px;
+            .hub-card {
+                background: #ffffff;
+                border: 1.5px solid #e5e7eb;
+                border-radius: 14px;
+                padding: 20px;
                 text-decoration: none;
                 color: inherit;
-                transition: all 0.3s ease;
-                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                transition: border-color .2s, box-shadow .2s, transform .2s;
             }
-            
-            .page-card:hover {
+            .hub-card:hover {
                 border-color: #10b981;
-                box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
-                transform: translateY(-4px);
+                box-shadow: 0 8px 24px rgba(16,185,129,.12);
+                transform: translateY(-3px);
+                text-decoration: none;
+                color: inherit;
             }
-            
-            .page-card-icon {
-                font-size: 32px;
-                margin-bottom: 12px;
-                display: inline-block;
+            .hub-card-icon {
+                font-size: 28px;
+                line-height: 1;
             }
-            
-            .page-card-title {
-                font-size: 18px;
+            .hub-card-title {
+                font-size: 15px;
                 font-weight: 600;
                 color: #111827;
-                margin-bottom: 8px;
+                margin: 0;
             }
-            
-            .page-card-description {
-                font-size: 14px;
+            .hub-card-desc {
+                font-size: 13px;
                 color: #6b7280;
                 line-height: 1.5;
+                flex: 1;
             }
-            
-            .page-card-badge {
-                display: inline-block;
-                background: #dbeafe;
-                color: #1e40af;
-                padding: 4px 8px;
-                border-radius: 4px;
-                font-size: 12px;
+            .hub-card-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 3px 8px;
+                border-radius: 999px;
+                font-size: 11px;
                 font-weight: 600;
-                margin-top: 12px;
+                width: fit-content;
+                margin-top: 4px;
             }
-            
-            .feature-status {
-                background: #f0fdf4;
-                border-left: 4px solid #10b981;
-                padding: 16px;
-                border-radius: 8px;
-                margin-top: 30px;
-                font-size: 14px;
-                color: #15803d;
+            .hub-card-tag--open {
+                background: #d1fae5;
+                color: #065f46;
             }
-            
-            .feature-status strong {
-                display: block;
-                margin-bottom: 8px;
+            .hub-card-tag--auth {
+                background: #fef3c7;
+                color: #92400e;
             }
-            
-            .info-box {
-                background: #eff6ff;
-                border-left: 4px solid #3b82f6;
-                padding: 16px;
-                border-radius: 8px;
-                margin-bottom: 30px;
-                font-size: 14px;
-                color: #0c4a6e;
+
+            /* Dark mode overrides */
+            .dark .hub-card {
+                background: #1e293b;
+                border-color: #334155;
             }
+            .dark .hub-card:hover {
+                border-color: #10b981;
+            }
+            .dark .hub-card-title { color: #f1f5f9; }
+            .dark .hub-card-desc  { color: #94a3b8; }
         </style>
     </th:block>
 
-    <div th:fragment="content" class="dev-hub-container">
-        
-        <!-- Dev Mode Banner -->
-        <div class="dev-mode-banner">
-            <h1>🚀 Development Mode Hub</h1>
-            <p>You're in demo mode. Browse the application interface to see how it works. To enable full functionality, set <code>DEV_MODE=false</code> and restart.</p>
+    <div th:fragment="content" class="dev-hub-wrap">
+
+        <!-- Hero -->
+        <div class="dev-hub-hero">
+            <div class="dev-hub-hero-icon">🛠️</div>
+            <div class="dev-hub-hero-text">
+                <h1>Development Hub</h1>
+                <p>Browse the application interface in development mode. Public pages are fully accessible; protected pages require login to display real data.</p>
+            </div>
+            <div class="dev-pill">
+                <span class="dev-pill-dot"></span>
+                Dev Mode
+            </div>
         </div>
-        
-        <!-- Info Box -->
-        <div class="info-box">
-            <strong>ℹ️ About Demo Mode:</strong>
-            <p>In development mode, you can explore the user interface and see how pages are structured. However, you won't have access to real data since you're not logged in. This is perfect for testing the layout, navigation, and overall UX without requiring authentication.</p>
-        </div>
-        
-        <!-- Public Pages -->
-        <div class="navigation-section">
-            <h2 class="section-title">📄 Public Pages</h2>
-            <div class="page-grid">
-                <a href="/" class="page-card">
-                    <div class="page-card-icon">🏠</div>
-                    <div class="page-card-title">Home</div>
-                    <div class="page-card-description">Landing page with overview and key features</div>
-                    <div class="page-card-badge">Accessible</div>
+
+        <!-- Open / Public pages -->
+        <div class="hub-section">
+            <div class="hub-section-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                <h2>Open Pages</h2>
+                <span class="hub-section-badge">No login required</span>
+            </div>
+            <div class="hub-grid">
+                <a href="/" class="hub-card">
+                    <div class="hub-card-icon">🏠</div>
+                    <div class="hub-card-title">Home</div>
+                    <div class="hub-card-desc">Landing page with platform overview and key features</div>
+                    <span class="hub-card-tag hub-card-tag--open">✓ Open</span>
                 </a>
-                
-                <a href="/about" class="page-card">
-                    <div class="page-card-icon">ℹ️</div>
-                    <div class="page-card-title">About</div>
-                    <div class="page-card-description">Learn more about the platform and our mission</div>
-                    <div class="page-card-badge">Accessible</div>
+                <a href="/about" class="hub-card">
+                    <div class="hub-card-icon">ℹ️</div>
+                    <div class="hub-card-title">About</div>
+                    <div class="hub-card-desc">Learn about the platform and our mission</div>
+                    <span class="hub-card-tag hub-card-tag--open">✓ Open</span>
                 </a>
-                
-                <a href="/pricing" class="page-card">
-                    <div class="page-card-icon">💰</div>
-                    <div class="page-card-title">Pricing</div>
-                    <div class="page-card-description">View pricing plans and subscription options</div>
-                    <div class="page-card-badge">Accessible</div>
+                <a href="/pricing" class="hub-card">
+                    <div class="hub-card-icon">💳</div>
+                    <div class="hub-card-title">Pricing</div>
+                    <div class="hub-card-desc">Subscription plans and feature comparison</div>
+                    <span class="hub-card-tag hub-card-tag--open">✓ Open</span>
                 </a>
-                
-                <a href="/explore" class="page-card">
-                    <div class="page-card-icon">🔍</div>
-                    <div class="page-card-title">Explore Trainers</div>
-                    <div class="page-card-description">Browse available trainers and their profiles</div>
-                    <div class="page-card-badge">Accessible</div>
+                <a href="/explore" class="hub-card">
+                    <div class="hub-card-icon">🔍</div>
+                    <div class="hub-card-title">Explore Trainers</div>
+                    <div class="hub-card-desc">Browse available trainers and their profiles</div>
+                    <span class="hub-card-tag hub-card-tag--open">✓ Open</span>
+                </a>
+                <a href="/login" class="hub-card">
+                    <div class="hub-card-icon">🔑</div>
+                    <div class="hub-card-title">Login</div>
+                    <div class="hub-card-desc">Sign in to access protected pages and user data</div>
+                    <span class="hub-card-tag hub-card-tag--open">✓ Open</span>
+                </a>
+                <a href="/signup" class="hub-card">
+                    <div class="hub-card-icon">✍️</div>
+                    <div class="hub-card-title">Sign Up</div>
+                    <div class="hub-card-desc">Create a new account on the platform</div>
+                    <span class="hub-card-tag hub-card-tag--open">✓ Open</span>
+                </a>
+                <a href="/policies/privacy" class="hub-card">
+                    <div class="hub-card-icon">🛡️</div>
+                    <div class="hub-card-title">Privacy Policy</div>
+                    <div class="hub-card-desc">Data handling and privacy information</div>
+                    <span class="hub-card-tag hub-card-tag--open">✓ Open</span>
+                </a>
+                <a href="/policies/terms" class="hub-card">
+                    <div class="hub-card-icon">📋</div>
+                    <div class="hub-card-title">Terms of Service</div>
+                    <div class="hub-card-desc">Platform usage terms and conditions</div>
+                    <span class="hub-card-tag hub-card-tag--open">✓ Open</span>
                 </a>
             </div>
         </div>
-        
-        <!-- Protected Pages (View Only) -->
-        <div class="navigation-section">
-            <h2 class="section-title">🔐 Protected Pages (Demo Only)</h2>
-            <div class="page-grid">
-                <a href="/client/dashboard" class="page-card">
-                    <div class="page-card-icon">📊</div>
-                    <div class="page-card-title">Dashboard</div>
-                    <div class="page-card-description">Main user dashboard (requires login)</div>
-                    <div class="page-card-badge">Login Required</div>
+
+        <!-- Protected pages -->
+        <div class="hub-section">
+            <div class="hub-section-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <h2>Protected Pages</h2>
+                <span class="hub-section-badge">Login required to view data</span>
+            </div>
+            <div class="hub-grid">
+                <a href="/dashboard" class="hub-card">
+                    <div class="hub-card-icon">📊</div>
+                    <div class="hub-card-title">Dashboard</div>
+                    <div class="hub-card-desc">Your main activity dashboard and progress overview</div>
+                    <span class="hub-card-tag hub-card-tag--auth">🔒 Auth</span>
                 </a>
-                
-                <a href="/client/calendar" class="page-card">
-                    <div class="page-card-icon">📅</div>
-                    <div class="page-card-title">Calendar</div>
-                    <div class="page-card-description">View and manage schedule and tasks (requires login)</div>
-                    <div class="page-card-badge">Login Required</div>
+                <a href="/client/calendar" class="hub-card">
+                    <div class="hub-card-icon">📅</div>
+                    <div class="hub-card-title">Calendar</div>
+                    <div class="hub-card-desc">Schedule, tasks, and workout planning</div>
+                    <span class="hub-card-tag hub-card-tag--auth">🔒 Auth</span>
                 </a>
-                
-                <a href="/trainers" class="page-card">
-                    <div class="page-card-icon">👨‍🏫</div>
-                    <div class="page-card-title">My Trainers</div>
-                    <div class="page-card-description">View your connected trainers (requires login)</div>
-                    <div class="page-card-badge">Login Required</div>
+                <a href="/trainers" class="hub-card">
+                    <div class="hub-card-icon">👨‍🏫</div>
+                    <div class="hub-card-title">My Trainers</div>
+                    <div class="hub-card-desc">Manage your connected trainers and coaches</div>
+                    <span class="hub-card-tag hub-card-tag--auth">🔒 Auth</span>
                 </a>
-                
-                <a href="/client/messages" class="page-card">
-                    <div class="page-card-icon">💬</div>
-                    <div class="page-card-title">Messages</div>
-                    <div class="page-card-description">Chat with trainers and coaches (requires login)</div>
-                    <div class="page-card-badge">Login Required</div>
+                <a href="/client/messages" class="hub-card">
+                    <div class="hub-card-icon">💬</div>
+                    <div class="hub-card-title">Messages</div>
+                    <div class="hub-card-desc">Chat with your trainers and coaches</div>
+                    <span class="hub-card-tag hub-card-tag--auth">🔒 Auth</span>
+                </a>
+                <a href="/profile" class="hub-card">
+                    <div class="hub-card-icon">👤</div>
+                    <div class="hub-card-title">Profile</div>
+                    <div class="hub-card-desc">User profile and account settings</div>
+                    <span class="hub-card-tag hub-card-tag--open">✓ Dev Access</span>
+                </a>
+                <a href="/vault" class="hub-card">
+                    <div class="hub-card-icon">🗄️</div>
+                    <div class="hub-card-title">Vault</div>
+                    <div class="hub-card-desc">Exercise library and resource storage</div>
+                    <span class="hub-card-tag hub-card-tag--auth">🔒 Auth</span>
+                </a>
+                <a href="/workouts" class="hub-card">
+                    <div class="hub-card-icon">💪</div>
+                    <div class="hub-card-title">Workouts</div>
+                    <div class="hub-card-desc">Workout plans, templates and history</div>
+                    <span class="hub-card-tag hub-card-tag--auth">🔒 Auth</span>
+                </a>
+                <a href="/goals" class="hub-card">
+                    <div class="hub-card-icon">🎯</div>
+                    <div class="hub-card-title">Goals</div>
+                    <div class="hub-card-desc">Set and track your fitness goals</div>
+                    <span class="hub-card-tag hub-card-tag--auth">🔒 Auth</span>
                 </a>
             </div>
         </div>
-        
-        <!-- Feature Status -->
-        <div class="feature-status">
-            <strong>✓ Development Mode Active</strong>
-            You are viewing the application in demonstration mode. Protected pages will redirect to login since you have not authenticated. This allows you to explore the UI without needing a user account.
-        </div>
-        
+
     </div>
 
     <th:block th:fragment="pageScripts">
-        <script>
-            // Log that user is in dev mode
-            console.log('Development Mode Hub Loaded');
-            console.log('Note: Protected pages will require login to view actual data');
-        </script>
     </th:block>
 
 </th:block>

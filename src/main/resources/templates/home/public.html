@@ -208,21 +208,20 @@
 
     <div th:fragment="content" class="bg-white text-slate-900 font-sans antialiased overflow-x-hidden">
 
-        <!-- Development Mode Banner -->
-        <div th:if="${isDevMode}" style="background: #fef2f2; border-bottom: 3px solid #dc2626; padding: 16px; margin-bottom: 24px;">
+        <!-- Development Mode Notification -->
+        <div th:if="${isDevMode}" style="background: linear-gradient(90deg,#1a1a2e,#0f3460); border-bottom: 1px solid rgba(251,191,36,.2); padding: 10px 0;">
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div style="display: flex; gap: 12px; align-items: center;">
-                    <div style="font-size: 24px; line-height: 1;">⚠️</div>
-                    <div style="flex: 1;">
-                        <strong style="color: #dc2626; font-size: 16px;">DEVELOPMENT MODE</strong>
-                        <p style="margin: 4px 0 0 0; color: #991b1b; font-size: 14px;">
-                            This application is running in development/demo mode. Authentication is disabled.
-                            Set <code style="background: #fee2e2; padding: 2px 6px; border-radius: 4px; font-family: monospace;">DEV_MODE=false</code> to enable login.
-                        </p>
-                    </div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.35);color:#fbbf24;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;display:inline-block;animation:devBannerPulse 2s ease-in-out infinite;"></span>
+                        Dev Mode
+                    </span>
+                    <span style="color:#d1d5db;font-size:13px;">Application is running in development mode.</span>
+                    <a href="/dev-mode" style="margin-left:auto;color:#fbbf24;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">Open Dev Hub →</a>
                 </div>
             </div>
         </div>
+        <style>@keyframes devBannerPulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
 
         <!-- PREMIUM INTRO OVERLAY (Logged out only) -->
         <div id="opening-overlay" sec:authorize="!isAuthenticated()">
