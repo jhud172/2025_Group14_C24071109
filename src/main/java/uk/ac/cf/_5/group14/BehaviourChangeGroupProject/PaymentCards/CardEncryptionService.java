@@ -10,6 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.logging.Logger;
 
 /**
  * AES-256-GCM encryption for sensitive card data.
@@ -22,6 +23,7 @@ public class CardEncryptionService {
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final int GCM_IV_LENGTH = 12;
     private static final int GCM_TAG_LENGTH = 128;
+    private static final Logger log = Logger.getLogger(CardEncryptionService.class.getName());
 
     private final SecretKey secretKey;
 
@@ -36,6 +38,9 @@ public class CardEncryptionService {
             this.secretKey = new SecretKeySpec(keyBytes, "AES");
         } else {
             // Fallback: ephemeral random key (dev / test only)
+            log.warning("SECURITY WARNING: app.encryption.card-key is not configured. " +
+                    "Using an ephemeral in-memory AES key – encrypted card data will NOT survive restarts. " +
+                    "Set app.encryption.card-key to a 32-byte base64-encoded key in production.");
             byte[] keyBytes = new byte[32];
             new SecureRandom().nextBytes(keyBytes);
             this.secretKey = new SecretKeySpec(keyBytes, "AES");

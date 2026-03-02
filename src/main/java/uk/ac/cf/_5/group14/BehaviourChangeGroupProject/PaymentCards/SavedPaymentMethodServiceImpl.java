@@ -51,7 +51,10 @@ public class SavedPaymentMethodServiceImpl implements SavedPaymentMethodService 
         String lastFour = cleaned.substring(cleaned.length() - 4);
         String encrypted = encryptionService.encrypt(cleaned);
 
-        if (makeDefault) {
+        boolean isFirstCard = repo.countByUserId(user.getId()) == 0;
+        boolean shouldBeDefault = makeDefault || isFirstCard;
+
+        if (shouldBeDefault) {
             repo.clearDefaultForUser(user.getId());
         }
 
@@ -63,7 +66,7 @@ public class SavedPaymentMethodServiceImpl implements SavedPaymentMethodService 
         card.setExpiryMonth(expiryMonth);
         card.setExpiryYear(expiryYear);
         card.setEncryptedCardToken(encrypted);
-        card.setDefault(makeDefault || repo.countByUserId(user.getId()) == 0);
+        card.setDefault(shouldBeDefault);
 
         return repo.save(card);
     }
