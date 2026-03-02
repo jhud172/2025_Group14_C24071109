@@ -100,8 +100,7 @@ public class TrainerProfileService {
         String code;
         int attempts = 0;
         do {
-            String raw = UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
-            code = raw.substring(0, 4) + raw.substring(4, 8) + raw.substring(8, 12);
+            code = UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
             attempts++;
             if (attempts > 100) {
                 throw new IllegalStateException("Unable to generate unique trainer code");
