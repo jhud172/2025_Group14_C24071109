@@ -1,2 +1,0 @@
-ALTER TABLE chat_threads ADD COLUMN chat_type VARCHAR(20) NOT NULL DEFAULT 'AI_PERSONAL';
-ALTER TABLE chat_threads ADD COLUMN peer_user_id BIGINT;

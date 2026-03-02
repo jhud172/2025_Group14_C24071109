@@ -9,6 +9,12 @@
         min-height: 72px;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         
+        /* Disable text selection across entire navbar */
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        
         /* Single source of truth for navbar text sizing */
         --nav-text-size: 0.9375rem; /* slightly larger for premium feel */
     }
@@ -148,48 +154,44 @@
         transform: translateY(0);
     }
 
-    /* Brand link - premium hover effect */
+    /* Pulsing border animation for logo hover */
+    @keyframes pulse-green-border {
+        0%, 100% {
+            border-color: rgba(5, 122, 85, 0.6); /* dark green */
+            box-shadow: 0 0 0 2px rgba(5, 122, 85, 0.15);
+        }
+        50% {
+            border-color: rgba(16, 185, 129, 0.9); /* neon green */
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25), 0 0 16px rgba(16, 185, 129, 0.4);
+        }
+    }
+
+    /* Brand link - strong border hover effect */
     .nav-brand-link {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        border-radius: 0.75rem;
-        padding: 0.25rem 0.5rem;
-        margin: -0.25rem -0.5rem;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        gap: 0.75rem; /* Increased spacing from 0.5rem */
+        border-radius: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        margin: -0.5rem -0.75rem;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         text-decoration: none;
         position: relative;
         overflow: visible;
-    }
-
-    .nav-brand-link::before {
-        content: '';
-        position: absolute;
-        inset: -8px;
-        background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 40%, rgba(16, 185, 129, 0) 70%);
-        border-radius: 1rem;
-        opacity: 0;
-        transition: opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    .nav-brand-link:hover::before {
-        opacity: 1;
+        border: 2px solid transparent;
     }
 
     .nav-brand-link:hover {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
+        border-color: rgba(5, 122, 85, 0.6);
+        animation: pulse-green-border 2s ease-in-out infinite;
     }
 
     .nav-brand-link:hover .nav-brand-logo {
-        transform: scale(1.1) rotateY(-8deg) rotateX(4deg);
-        filter: drop-shadow(0 12px 24px rgba(16, 185, 129, 0.25)) drop-shadow(0 0 16px rgba(16, 185, 129, 0.2));
+        transform: scale(1.05);
     }
 
     .nav-brand-link:hover .nav-brand-name {
         color: #10b981;
-        transform: translateX(2px);
     }
 
     .nav-brand-link:hover .nav-brand-name::after {
@@ -200,15 +202,15 @@
     .nav-brand-logo {
         height: 3rem;
         width: auto;
-        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         flex-shrink: 0;
         position: relative;
         z-index: 1;
     }
 
     .nav-brand-name {
-        transition: color 0.25s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        font-size: 0.875rem;
+        transition: color 0.25s ease;
+        font-size: 1.125rem; /* Increased from 0.875rem (14px) to 1.125rem (18px) */
         font-weight: 800;
         letter-spacing: 0.025em;
         color: rgb(15, 23, 42); /* slate-950 in light mode */
@@ -234,16 +236,21 @@
         color: rgb(241, 245, 249); /* slate-100 in dark mode */
     }
 
-    html.dark .nav-brand-link::before {
-        background: radial-gradient(circle at 30% 30%, rgba(52, 211, 153, 0.2) 0%, rgba(52, 211, 153, 0.08) 40%, rgba(52, 211, 153, 0) 70%);
+    /* Dark mode border pulse animation */
+    @keyframes pulse-green-border-dark {
+        0%, 100% {
+            border-color: rgba(6, 78, 59, 0.7); /* darker green for dark mode */
+            box-shadow: 0 0 0 2px rgba(6, 78, 59, 0.2);
+        }
+        50% {
+            border-color: rgba(52, 211, 153, 0.9); /* neon green */
+            box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3), 0 0 20px rgba(52, 211, 153, 0.5);
+        }
     }
 
     html.dark .nav-brand-link:hover {
-        background: linear-gradient(135deg, rgba(52, 211, 153, 0.12) 0%, rgba(52, 211, 153, 0.06) 100%);
-    }
-
-    html.dark .nav-brand-link:hover .nav-brand-logo {
-        filter: drop-shadow(0 12px 28px rgba(52, 211, 153, 0.35)) drop-shadow(0 0 20px rgba(52, 211, 153, 0.25));
+        border-color: rgba(6, 78, 59, 0.7);
+        animation: pulse-green-border-dark 2s ease-in-out infinite;
     }
 
     html.dark .nav-brand-link:hover .nav-brand-name {

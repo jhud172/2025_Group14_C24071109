@@ -42,9 +42,13 @@ public class DashboardSummaryService {
         // Show next 7 days starting from today (not ISO week)
         LocalDate startOfWeek = today;
         LocalDate endOfWeek = today.plusDays(6);
+        LocalDate lastWeekStart = startOfWeek.minusDays(7);
+        LocalDate lastWeekEnd = startOfWeek.minusDays(1);
 
         List<CalendarTask> weekTasks = calendarTaskRepository.findByUserAndDateBetween(user, startOfWeek, endOfWeek);
         List<ScheduleOccurrence> weekWorkouts = scheduleOccurrenceRepository.findByUserAndDateBetween(user, startOfWeek, endOfWeek);
+        
+        List<ScheduleOccurrence> lastWeekWorkouts = scheduleOccurrenceRepository.findByUserAndDateBetween(user, lastWeekStart, lastWeekEnd);
 
         Map<LocalDate, List<CalendarTask>> tasksByDate = weekTasks.stream()
             .collect(Collectors.groupingBy(CalendarTask::getDate));
@@ -66,6 +70,14 @@ public class DashboardSummaryService {
         for (int i = 0; i < 7; i++) {
             List<CalendarTask> dayTasks = tasksByDate.getOrDefault(cursor, List.of());
             List<ScheduleOccurrence> dayWorkouts = workoutsByDate.getOrDefault(cursor, List.of());
+            
+            List<String> taskTitles = dayTasks.stream()
+                .map(CalendarTask::getTitle)
+                .toList();
+            
+            List<String> workoutTitles = dayWorkouts.stream()
+                .map(ScheduleOccurrence::getScheduleName)
+                .toList();
 
             week.add(new DashboardSummaryDto.WeekDaySummary(
                 cursor,
@@ -73,19 +85,28 @@ public class DashboardSummaryService {
                 DAY_NUMBER.format(cursor),
                 dayTasks.size(),
                 dayWorkouts.size(),
-                cursor.equals(today)
+                cursor.equals(today),
+                taskTitles,
+                workoutTitles
             ));
 
             cursor = cursor.plusDays(1);
         }
 
         Set<LocalDate> recentCompleted = loadCompletedSet(user, today);
+        int logsThisWeekCount = (int) weekWorkouts.stream().filter(ScheduleOccurrence::isCompleted).count();
+        int lastWeekLogsCount = (int) lastWeekWorkouts.stream().filter(ScheduleOccurrence::isCompleted).count();
+        int workoutStreak = computeWorkoutStreak(recentCompleted, today);
+        String charlieContext = calculateCharlieContext(user, today, logsThisWeekCount, workoutStreak);
 
         return new DashboardSummaryDto(tasksDueToday, workoutsDueToday, today, week,
                 computeWeeklyWorkoutsCompleted(user, today),
-                computeWorkoutStreak(recentCompleted, today),
+                workoutStreak,
                 computeDaysSinceLastWorkout(recentCompleted, today),
-                user.isSubscriptionStatus());
+                user.isSubscriptionStatus(),
+                logsThisWeekCount,
+                lastWeekLogsCount,
+                charlieContext);
     }
 
     private int computeWeeklyWorkoutsCompleted(User user, LocalDate today) {
@@ -122,5 +143,24 @@ public class DashboardSummaryService {
         List<LocalDate> dates = scheduleOccurrenceRepository
                 .findCompletedDatesByUserAndDateBetween(user, today.minusDays(89), today);
         return new HashSet<>(dates);
+    }
+
+    private String calculateCharlieContext(User user, LocalDate today, int logsThisWeekCount, int workoutStreak) {
+        java.time.LocalTime currentTime = java.time.LocalTime.now();
+        int currentHour = currentTime.getHour();
+        String timeOfDay = currentHour < 12 ? "morning" : (currentHour < 17 ? "afternoon" : "evening");
+        
+        if ("morning".equals(timeOfDay)) {
+            return logsThisWeekCount == 0 ? "morning-low" : "morning-strong";
+        } else if ("evening".equals(timeOfDay)) {
+            return logsThisWeekCount == 0 ? "evening-none" : "evening-strong";
+        } else {
+            // afternoon
+            if (workoutStreak > 0 && logsThisWeekCount > 2) {
+                return "celebrate";
+            } else {
+                return "midday-encourage";
+            }
+        }
     }
 }
