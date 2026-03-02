@@ -60,6 +60,39 @@
                 </a>
             </div>
 
+            <!-- Waitlist email sign-up -->
+            <div style="margin-top:20px;padding-top:20px;border-top:1px solid #e5e7eb;">
+                <p style="font-size:13px;font-weight:600;color:#374151;margin-bottom:10px;text-align:center;">
+                    🚀 Get notified when we launch
+                </p>
+
+                <!-- Flash messages -->
+                <div th:if="${waitlistSuccess}"
+                     style="margin-bottom:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;color:#065f46;font-size:13px;"
+                     th:text="${waitlistSuccess}"></div>
+                <div th:if="${waitlistError}"
+                     style="margin-bottom:10px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#991b1b;font-size:13px;"
+                     th:text="${waitlistError}"></div>
+
+                <form action="/dev-mode/waitlist" method="post"
+                      style="display:flex;gap:8px;align-items:center;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="email" name="email" placeholder="your@email.com" required
+                           style="flex:1;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;"
+                           onfocus="this.style.borderColor='#f59e0b'"
+                           onblur="this.style.borderColor='#d1d5db'" />
+                    <button type="submit"
+                            style="padding:10px 16px;background:#f59e0b;color:#fff;font-weight:600;font-size:13px;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;"
+                            onmouseover="this.style.background='#d97706'"
+                            onmouseout="this.style.background='#f59e0b'">
+                        Notify Me
+                    </button>
+                </form>
+                <p style="font-size:11px;color:#9ca3af;margin-top:6px;text-align:center;">
+                    We'll only email you once when the site is live. No spam.
+                </p>
+            </div>
+
         </div>
     </div>
 
