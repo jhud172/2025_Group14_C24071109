@@ -108,6 +108,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? (data.nextWorkoutName + (data.nextWorkoutDate ? " · " + data.nextWorkoutDate : ""))
                 : "—";
         }
+
+        // Update 7-day insights panel
+        const panel7 = document.getElementById("insights7DayPanel");
+        if (panel7 && data.sevenDayTasksTotal != null) {
+            const missed7 = data.sevenDayMissedSessions ?? 0;
+            let html7 = `Tasks: <strong>${data.sevenDayTasksCompleted ?? 0}/${data.sevenDayTasksTotal ?? 0}</strong> · Workouts: <strong>${data.sevenDayWorkoutsCompleted ?? 0}/${data.sevenDayWorkoutsTotal ?? 0}</strong>`;
+            if (missed7 > 0) html7 += ` · <span style="color:#d97706">${missed7} missed</span>`;
+            if (data.trendNote) html7 += `<div style="margin-top:4px;font-weight:600">${data.trendNote}</div>`;
+            panel7.innerHTML = html7;
+        }
+
+        // Update 30-day insights panel
+        const panel30 = document.getElementById("insights30DayPanel");
+        if (panel30 && data.thirtyDayTasksTotal != null) {
+            const missed30 = data.thirtyDayMissedSessions ?? 0;
+            let html30 = `Tasks: <strong>${data.thirtyDayTasksCompleted ?? 0}/${data.thirtyDayTasksTotal ?? 0}</strong> · Workouts: <strong>${data.thirtyDayWorkoutsCompleted ?? 0}/${data.thirtyDayWorkoutsTotal ?? 0}</strong>`;
+            if (missed30 > 0) html30 += ` · <span style="color:#dc2626">${missed30} missed</span>`;
+            panel30.innerHTML = html30;
+        }
     }
 
     metricsRefreshBtn?.addEventListener("click", refreshMetrics);

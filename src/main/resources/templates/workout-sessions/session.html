@@ -131,6 +131,15 @@
                             <h2 class="wsu-flow-slide-name" th:text="${ex.exerciseName ?: 'Exercise'}">Exercise</h2>
                             <span class="wsu-flow-slide-cat" th:if="${ex.exerciseCategory != null}" th:text="${ex.exerciseCategory}">Category</span>
                         </div>
+                        <a th:if="${ex.demoUrl != null and !#strings.isEmpty(ex.demoUrl)}"
+                           th:href="${ex.demoUrl}" target="_blank" rel="noopener noreferrer"
+                           class="wsu-demo-btn"
+                           title="Watch exercise demo">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"/>
+                            </svg>
+                            Demo
+                        </a>
                     </div>
 
                     <!-- Set panel -->
@@ -247,7 +256,8 @@
                         th:classappend="${iter.first} ? ' wsu-pro-exercise-item--active' : ''"
                         th:attr="data-exercise-id=${ex.id},
                                  data-exercise-name=${ex.exerciseName},
-                                 data-exercise-idx=${iter.index}">
+                                 data-exercise-idx=${iter.index},
+                                 data-demo-url=${ex.demoUrl}">
                         <span class="wsu-pro-ex-check" th:attr="data-ex-id=${ex.id}">○</span>
                         <span class="wsu-pro-ex-name" th:text="${ex.exerciseName ?: 'Exercise'}">Exercise</span>
                         <span class="wsu-pro-ex-sets-count" th:attr="data-ex-id=${ex.id}"

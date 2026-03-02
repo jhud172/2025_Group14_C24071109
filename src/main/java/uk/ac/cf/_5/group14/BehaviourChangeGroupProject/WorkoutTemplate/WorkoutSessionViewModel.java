@@ -40,6 +40,7 @@ public class WorkoutSessionViewModel {
         private String mode;
         private String groupKey;
         private String notes;
+        private String demoUrl;
         private List<SetView> sets;
     }
 
