@@ -9,12 +9,22 @@ public class DashboardSummaryDto {
     private int workoutsDueToday;
     private LocalDate today;
     private List<WeekDaySummary> week;
+    private int weeklyWorkoutsCompleted;
+    private int workoutStreak;
+    private int daysSinceLastWorkout;
+    private boolean premium;
 
-    public DashboardSummaryDto(int tasksDueToday, int workoutsDueToday, LocalDate today, List<WeekDaySummary> week) {
+    public DashboardSummaryDto(int tasksDueToday, int workoutsDueToday, LocalDate today,
+                               List<WeekDaySummary> week, int weeklyWorkoutsCompleted,
+                               int workoutStreak, int daysSinceLastWorkout, boolean premium) {
         this.tasksDueToday = tasksDueToday;
         this.workoutsDueToday = workoutsDueToday;
         this.today = today;
         this.week = week;
+        this.weeklyWorkoutsCompleted = weeklyWorkoutsCompleted;
+        this.workoutStreak = workoutStreak;
+        this.daysSinceLastWorkout = daysSinceLastWorkout;
+        this.premium = premium;
     }
 
     public int getTasksDueToday() {
@@ -31,6 +41,22 @@ public class DashboardSummaryDto {
 
     public List<WeekDaySummary> getWeek() {
         return week;
+    }
+
+    public int getWeeklyWorkoutsCompleted() {
+        return weeklyWorkoutsCompleted;
+    }
+
+    public int getWorkoutStreak() {
+        return workoutStreak;
+    }
+
+    public int getDaysSinceLastWorkout() {
+        return daysSinceLastWorkout;
+    }
+
+    public boolean isPremium() {
+        return premium;
     }
 
     public static class WeekDaySummary {

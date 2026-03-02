@@ -60,5 +60,7 @@ public interface UserSettingsService {
 
     UserSettings updateHideAiOneShotWarning(User user, boolean hide);
 
+    UserSettings updateStickerPreferences(User user, StickerPackPreference stickerPack, int monthlyWorkoutTarget);
+
     UserSettings updatePreferredWorkoutTemplate(User user, Long templateId);
 }

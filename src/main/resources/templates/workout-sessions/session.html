@@ -15,11 +15,12 @@
         csrfHeader:        /*[[${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}]]*/ 'X-CSRF-TOKEN',
         csrfToken:         /*[[${_csrf != null ? _csrf.token : ''}]]*/ '',
         templateConfigJson: /*[[${session.templateConfigJson}]]*/ null,
+        allowCompletedWithoutLog: /*[[${session.allowCompletedWithoutLog}]]*/ true,
         exercises: /*[[${session.exercises}]]*/ []
     };
 </script>
 
-<div id="wsu-root" class="wsu-root">
+<div id="wsu-root" class="wsu-root" th:attr="data-layout=${layoutType}">
 
     <!-- ═══════════════════════════════════════════════════════════════
          START SCREEN
@@ -217,6 +218,11 @@
                 <p class="wsu-finish-vol-label">Total volume</p>
                 <p class="wsu-finish-vol-val" id="wsu-flow-vol-footer">0 kg×reps</p>
             </div>
+            <button type="button" class="wsu-add-exercise-btn" id="wsu-flow-add-ex-btn" title="Add exercise">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                </svg>
+            </button>
             <button id="wsu-flow-finish-btn" class="wsu-finish-btn" type="button">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -249,7 +255,14 @@
         <div class="wsu-pro-layout">
             <!-- Left: exercise list -->
             <aside class="wsu-pro-sidebar">
-                <div class="wsu-pro-sidebar-header">Exercises</div>
+                <div class="wsu-pro-sidebar-header">
+                    Exercises
+                    <button type="button" id="wsu-pro-add-ex-btn" class="wsu-add-exercise-btn" title="Add exercise" style="margin-left:auto">
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                        </svg>
+                    </button>
+                </div>
                 <ul class="wsu-pro-exercise-list" id="wsu-pro-exercise-list">
                     <li th:each="ex, iter : ${session.exercises}"
                         class="wsu-pro-exercise-item"
@@ -297,6 +310,71 @@
             </main>
         </div>
     </div><!-- /wsu-professional -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PLAIN TEMPLATE  (simple list)
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="wsu-plain" class="wsu-plain wsu-hidden"
+         th:if="${layoutType == 'PLAIN'}">
+
+        <!-- Top bar -->
+        <div class="wsu-plain-topbar">
+            <button class="wsu-flow-back" id="wsu-plain-back" type="button" aria-label="Back to start">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                </svg>
+            </button>
+            <span class="wsu-flow-workout-name" th:text="${session.workoutName ?: 'Workout'}">Workout</span>
+            <button id="wsu-plain-finish-btn" class="wsu-finish-btn" type="button">Finish</button>
+        </div>
+
+        <div class="wsu-plain-body">
+            <div th:each="ex, iter : ${session.exercises}"
+                 class="wsu-plain-exercise"
+                 th:attr="data-exercise-id=${ex.id},
+                          data-exercise-name=${ex.exerciseName}">
+
+                <div class="wsu-plain-ex-header">
+                    <span class="wsu-plain-ex-num" th:text="${iter.index + 1}">1</span>
+                    <h3 class="wsu-plain-ex-name" th:text="${ex.exerciseName ?: 'Exercise'}">Exercise</h3>
+                    <span class="wsu-plain-ex-mode-badge"
+                          th:if="${ex.mode != null and ex.mode != 'NORMAL'}"
+                          th:text="${ex.mode}">SUPERSET</span>
+                </div>
+
+                <div class="wsu-flow-sets" th:attr="data-exercise-id=${ex.id}">
+                    <div th:each="set, si : ${ex.sets}"
+                         class="wsu-flow-set-row"
+                         th:classappend="${set.completedAt != null} ? ' wsu-set-done' : ''"
+                         th:attr="data-set-id=${set.id},
+                                  data-completed=${set.completedAt != null ? 'true' : 'false'}">
+                        <span class="wsu-set-label" th:text="'Set ' + (${si.index + 1})">Set 1</span>
+                        <div class="wsu-set-inputs">
+                            <label class="wsu-set-field">
+                                <span>Weight</span>
+                                <input type="number" step="0.5" min="0" class="wsu-set-input"
+                                       data-field="weight"
+                                       th:value="${set.weight}" placeholder="kg"/>
+                            </label>
+                            <label class="wsu-set-field">
+                                <span>Reps</span>
+                                <input type="number" min="0" class="wsu-set-input"
+                                       data-field="reps"
+                                       th:value="${set.reps}" placeholder="—"/>
+                            </label>
+                        </div>
+                        <button type="button" class="wsu-set-complete-btn"
+                                th:classappend="${set.completedAt != null} ? ' wsu-set-complete-btn--done' : ''"
+                                th:text="${set.completedAt != null} ? '✓' : '✓'">✓</button>
+                    </div>
+                    <p class="wsu-flow-no-sets" th:if="${ex.sets == null or #lists.isEmpty(ex.sets)}">No sets yet.</p>
+                </div>
+
+                <button type="button" class="wsu-add-set-btn"
+                        th:attr="data-exercise-id=${ex.id}">+ Add set</button>
+            </div>
+        </div>
+    </div><!-- /wsu-plain -->
 
     <!-- ═══════════════════════════════════════════════════════════════
          REST TIMER OVERLAY
@@ -353,6 +431,37 @@
                     </svg>
                     Save &amp; Exit
                 </a>
+                <a th:href="@{/exercise-log/list}" id="wsu-sum-add-log-btn" class="wsu-sum-add-log-btn">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                    </svg>
+                    Add Log
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         ADD EXERCISE MODAL
+    ════════════════════════════════════════════════════════════════ -->
+    <div id="wsu-add-ex-modal" class="wsu-modal-overlay wsu-hidden" role="dialog" aria-modal="true" aria-label="Add exercise">
+        <div class="wsu-modal-panel">
+            <div class="wsu-modal-header">
+                <h3 class="wsu-modal-title">Add Exercise</h3>
+                <button type="button" id="wsu-add-ex-close" class="wsu-modal-close" aria-label="Close">✕</button>
+            </div>
+            <div class="wsu-modal-body">
+                <label class="wsu-set-field" style="flex-direction:column;align-items:flex-start;gap:0.25rem;width:100%">
+                    <span style="font-size:0.75rem;font-weight:600;color:#64748b">Exercise ID (number)</span>
+                    <input id="wsu-add-ex-id" type="number" min="1" class="wsu-set-input" style="width:100%" placeholder="Enter exercise ID"/>
+                </label>
+                <label class="wsu-set-field" style="flex-direction:column;align-items:flex-start;gap:0.25rem;width:100%;margin-top:0.5rem">
+                    <span style="font-size:0.75rem;font-weight:600;color:#64748b">Notes (optional)</span>
+                    <input id="wsu-add-ex-notes" type="text" class="wsu-set-input" style="width:100%" placeholder="Notes…"/>
+                </label>
+            </div>
+            <div class="wsu-modal-footer">
+                <button type="button" id="wsu-add-ex-confirm" class="wsu-finish-btn" style="width:100%">Add Exercise</button>
             </div>
         </div>
     </div>

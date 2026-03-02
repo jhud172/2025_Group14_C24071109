@@ -22,10 +22,10 @@ module.exports = {
           yellow: '#ffff00',
           orange: '#ff6600',
         },
-        // Dark backgrounds for contrast
+        // Dark backgrounds for contrast (deep charcoal/near-slate, not pure black)
         cyber: {
-          900: '#0a0a0f',
-          800: '#12121a',
+          900: '#111827',
+          800: '#1e2435',
           700: '#1a1a2e',
           600: '#25254a',
           500: '#2d2d5f',

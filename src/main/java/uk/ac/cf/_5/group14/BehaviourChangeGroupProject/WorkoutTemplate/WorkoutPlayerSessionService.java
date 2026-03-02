@@ -1,6 +1,7 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.WorkoutTemplate;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 public interface WorkoutPlayerSessionService {
@@ -18,4 +19,12 @@ public interface WorkoutPlayerSessionService {
     WorkoutSessionSet updateSet(Long setId, Integer reps, BigDecimal weight, BigDecimal rpe);
 
     WorkoutSessionSet completeSet(Long setId);
+
+    WorkoutSessionExercise addExercise(Long sessionId, Long exerciseId, Long customExerciseId, String notes);
+
+    WorkoutSessionExercise updateExerciseMode(Long sessionExerciseId, ExerciseMode mode, String groupKey);
+
+    List<WorkoutSessionExercise> reorderExercises(Long sessionId, List<Long> orderedExerciseIds);
+
+    void deleteSet(Long setId);
 }

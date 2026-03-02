@@ -12,4 +12,5 @@ public interface WorkoutSessionService {
     Optional<WorkoutSession> findByUserDateAndWorkout(User user, LocalDate date, Workout workout);
     WorkoutSession createIfMissing(User user, LocalDate date, Workout workout);
     List<WorkoutSession> findByUserAndDate(User user, LocalDate date);
+    List<WorkoutSession> findCompletedByUserAndDateRange(User user, LocalDate from, LocalDate to);
 }

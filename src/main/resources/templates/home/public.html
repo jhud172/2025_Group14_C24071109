@@ -44,13 +44,13 @@
             }
             .logo-reveal-group {
                 opacity: 0;
-                transform: scale(0.95);
-                animation: premiumReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                transform: perspective(700px) scale(0.88) rotateX(12deg);
+                animation: premiumReveal 1.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             }
             .brand-line {
                 opacity: 0;
                 transform: translateY(10px);
-                animation: textSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+                animation: textSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
             }
 
             @keyframes bloomPulse {
@@ -59,8 +59,9 @@
                 100% { opacity: 0; transform: scale(1.3); }
             }
             @keyframes premiumReveal {
-                0% { opacity: 0; transform: scale(0.95); }
-                100% { opacity: 1; transform: scale(1); }
+                0%   { opacity: 0; transform: perspective(700px) scale(0.88) rotateX(12deg); }
+                60%  { opacity: 1; transform: perspective(700px) scale(1.04) rotateX(-2deg); }
+                100% { opacity: 1; transform: perspective(700px) scale(1)    rotateX(0deg); }
             }
             @keyframes textSlideUp {
                 0% { opacity: 0; transform: translateY(10px); }
@@ -208,21 +209,20 @@
 
     <div th:fragment="content" class="bg-white text-slate-900 font-sans antialiased overflow-x-hidden">
 
-        <!-- Development Mode Banner -->
-        <div th:if="${isDevMode}" style="background: #fef2f2; border-bottom: 3px solid #dc2626; padding: 16px; margin-bottom: 24px;">
+        <!-- Development Mode Notification -->
+        <div th:if="${isDevMode}" style="background: linear-gradient(90deg,#1a1a2e,#0f3460); border-bottom: 1px solid rgba(251,191,36,.2); padding: 10px 0;">
             <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div style="display: flex; gap: 12px; align-items: center;">
-                    <div style="font-size: 24px; line-height: 1;">⚠️</div>
-                    <div style="flex: 1;">
-                        <strong style="color: #dc2626; font-size: 16px;">DEVELOPMENT MODE</strong>
-                        <p style="margin: 4px 0 0 0; color: #991b1b; font-size: 14px;">
-                            This application is running in development/demo mode. Authentication is disabled.
-                            Set <code style="background: #fee2e2; padding: 2px 6px; border-radius: 4px; font-family: monospace;">DEV_MODE=false</code> to enable login.
-                        </p>
-                    </div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.35);color:#fbbf24;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;display:inline-block;animation:devBannerPulse 2s ease-in-out infinite;"></span>
+                        Dev Mode
+                    </span>
+                    <span style="color:#d1d5db;font-size:13px;">Application is running in development mode.</span>
+                    <a href="/dev-mode" style="margin-left:auto;color:#fbbf24;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">Open Dev Hub →</a>
                 </div>
             </div>
         </div>
+        <style>@keyframes devBannerPulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
 
         <!-- PREMIUM INTRO OVERLAY (Logged out only) -->
         <div id="opening-overlay" sec:authorize="!isAuthenticated()">
@@ -233,7 +233,7 @@
                 <!-- Content Group -->
                 <div class="logo-reveal-group relative z-10 flex flex-col items-center gap-6">
                      <!-- Logo -->
-                     <img th:src="@{/img/logo.png}" alt="Logo" class="h-20 w-auto drop-shadow-2xl filter brightness-110" />
+                     <img th:src="@{/img/logo.png}" alt="Logo" class="h-28 w-auto drop-shadow-2xl filter brightness-110" />
                      
                      <!-- Brand Line -->
                      <h1 class="brand-line text-xs font-bold tracking-[0.3em] text-slate-400 uppercase">One To One</h1>
@@ -251,11 +251,11 @@
                         <div class="reveal-up flex flex-col items-center lg:items-start gap-6">
                             <img th:src="@{/img/logo.png}" alt="One To One" class="h-16 w-auto" />
                             <h1 class="text-5xl lg:text-7xl font-bold text-slate-900 tracking-tight leading-[1.1]">
-                                Premium Training,<br>
-                                <span class="text-emerald-500">Verified Results.</span>
+                                Your Programmes,<br>
+                                <span class="text-emerald-500">Your Progress.</span>
                             </h1>
                             <p class="text-lg text-slate-600 max-w-2xl leading-relaxed">
-                                Connect with expert personal trainers who deliver structured programs designed for real progress.
+                                Build your own or follow verified trainer plans. Track workouts and tasks, get AI coaching, and train across gym, swim, and every sport.
                             </p>
                         </div>
 
@@ -270,16 +270,16 @@
 
                         <div class="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-600 font-semibold tracking-wide uppercase">
                             <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                Verified Experts
+                                <svg class="w-4 h-4 text-emerald-500" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                AI Coaching
                             </div>
                             <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                Protected Payments
+                                <svg class="w-4 h-4 text-emerald-500" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                Verified Trainers
                             </div>
                             <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                Real-Time Updates
+                                <svg class="w-4 h-4 text-emerald-500" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Gym, Swim &amp; More
                             </div>
                         </div>
 
@@ -674,7 +674,6 @@
                     </div>
                  </div>
                  </div>
-             </div>
         </section>
 
 
@@ -694,20 +693,20 @@
                         <div class="relative z-10 h-full flex flex-col">
                             <h3 class="text-emerald-500 font-bold tracking-widest text-xs uppercase mb-2">For Athletes</h3>
                             <h4 class="text-3xl lg:text-4xl font-bold text-slate-900 mb-6">Peak Performance.</h4>
-                            <p class="text-slate-600 mb-8 leading-relaxed">Everything you need to execute your training and track your evolution in one ecosystem.</p>
+                            <p class="text-slate-600 mb-8 leading-relaxed">Build your own programmes or follow a verified trainer's plan — with AI coaching always in your corner.</p>
                             
                             <ul class="space-y-4 mb-10 flex-grow">
                                 <li class="flex items-start gap-3">
                                     <svg class="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    <span class="text-slate-700 text-sm font-medium">Custom protocol & schedule</span>
+                                    <span class="text-slate-700 text-sm font-medium">Track tasks, workouts &amp; multi-sport sessions</span>
                                 </li>
                                 <li class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
-                                    <span class="text-slate-700 text-sm font-medium">Real-time analytics</span>
+                                    <svg class="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                    <span class="text-slate-700 text-sm font-medium"><span class="text-emerald-600 font-semibold">AI Coach</span> — instant feedback &amp; optimisation</span>
                                 </li>
                                 <li class="flex items-start gap-3">
-                                    <svg class="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                    <span class="text-slate-700 text-sm font-medium">Direct coach messaging</span>
+                                    <svg class="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    <span class="text-slate-700 text-sm font-medium"><span class="text-blue-600 font-semibold">Real PT</span> — verified trainer-delivered programmes</span>
                                 </li>
                             </ul>
 
@@ -768,8 +767,6 @@
                     </div>
                 </div>
                 </div>
-                </div>
-            </div>
         </section>
 
 
@@ -892,6 +889,20 @@
                         <p class="mt-4 text-slate-600 leading-relaxed text-sm">
                             Quality is our firewall. Every "Pro" trainer undergoes a manual review of their certifications (CIMSPA, REPs, or equivalent) and liability insurance. We reject over 40% of applicants to ensure you only work with legitimate experts.
                         </p>
+                    </details>
+
+                    <!-- AI vs Real Trainer -->
+                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
+                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
+                            What's the difference between the AI Coach and a real trainer?
+                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </summary>
+                        <div class="mt-4 text-slate-600 leading-relaxed text-sm space-y-3">
+                            <p><span class="font-semibold text-emerald-600">AI Coach</span> — available to every user, 24/7. It answers training questions, suggests optimisations based on your logs, and helps you plan sessions. It does not replace human expertise.</p>
+                            <p><span class="font-semibold text-blue-600">Verified PT (Real Trainer)</span> — a credentialled human coach who builds and delivers your full programme, reviews your progress personally, and messages you directly. Real PTs are optional and charge their own rate.</p>
+                        </div>
                     </details>
                     
                     <!-- Item 2: Payments -->

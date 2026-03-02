@@ -2,9 +2,9 @@
           th:replace="~{base :: layout('Calendar — Week', ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="styles">
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-    <meta name="_csrf_param" th:content="${_csrf.parameterName}">
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}">
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta th:if="${_csrf != null}" name="_csrf_param" th:content="${_csrf.parameterName}">
     <link rel="stylesheet" href="/css/calendar-heatmap.css">
 </div>
 
@@ -15,6 +15,7 @@
                 <div class="calendar-view-toggle">
                     <a href="/calendar?view=month" class="calendar-view-btn">Month view</a>
                     <a href="/calendar?view=week" class="calendar-view-btn active">Week view</a>
+                    <a th:href="@{'/calendar/day/' + ${today}}" class="calendar-view-btn">Day view</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="calendar-mode-indicator hidden sm:flex">
