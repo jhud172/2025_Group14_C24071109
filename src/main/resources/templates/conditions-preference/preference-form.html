@@ -1,314 +1,535 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Select Preferences', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('Preferences', ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="styles"></div>
+    <div th:fragment="styles">
+        <style>
+            /* Step wizard */
+            .pref-step-panel { display: none; }
+            .pref-step-panel.pref-step-active { display: block; }
+
+            /* Step indicator */
+            .pref-step-dot {
+                display: flex; align-items: center; justify-content: center;
+                width: 2rem; height: 2rem; border-radius: 9999px;
+                font-size: 0.75rem; font-weight: 700;
+                border: 2px solid #cbd5e1; color: #94a3b8;
+                transition: all 0.2s; flex-shrink: 0;
+            }
+            .pref-step-dot.active { background: #10b981; border-color: #10b981; color: #fff; box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
+            .pref-step-dot.done  { background: #10b981; border-color: #10b981; color: #fff; }
+            .pref-step-line { flex: 1; height: 2px; background: #e2e8f0; margin: 0 0.25rem; transition: background 0.3s; }
+            .pref-step-line.done { background: #10b981; }
+
+            /* Custom toggle switch */
+            .pref-toggle { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; }
+            .pref-toggle__track {
+                position: relative; width: 2.75rem; height: 1.5rem;
+                border-radius: 9999px; background: #cbd5e1;
+                transition: background 0.2s; flex-shrink: 0;
+            }
+            .pref-toggle__thumb {
+                position: absolute; top: 0.2rem; left: 0.2rem;
+                width: 1.1rem; height: 1.1rem; border-radius: 9999px;
+                background: #fff; transition: transform 0.2s;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            }
+            .pref-toggle__input { position: absolute; opacity: 0; width: 0; height: 0; }
+            .pref-toggle__input:checked + .pref-toggle__track { background: #10b981; }
+            .pref-toggle__input:checked + .pref-toggle__track .pref-toggle__thumb { transform: translateX(1.25rem); }
+            .pref-toggle__input:focus-visible + .pref-toggle__track { outline: 2px solid #10b981; outline-offset: 2px; }
+
+            /* Dark mode overrides */
+            html.dark .pref-toggle__track { background: #334155; }
+            html.dark .pref-toggle__input:checked + .pref-toggle__track { background: #10b981; }
+            html.dark .pref-step-line { background: #334155; }
+            html.dark .pref-step-dot { border-color: #334155; color: #64748b; }
+
+            /* Custom select wrapper */
+            .pref-select-wrap { position: relative; }
+            .pref-select-wrap select {
+                appearance: none; -webkit-appearance: none; padding-right: 2.5rem;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+                background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25rem;
+            }
+            html.dark .pref-select-wrap select {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            }
+
+            /* Preset preview panel */
+            .pref-preset-preview { display: none; margin-top: 1rem; border: 1px solid #d1fae5; border-radius: 0.75rem; background: #f0fdf4; padding: 1rem; }
+            .pref-preset-preview.visible { display: block; }
+            html.dark .pref-preset-preview { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); }
+
+            /* Required indicator */
+            .pref-required::after { content: ' *'; color: #ef4444; font-weight: 600; }
+
+            /* Other input */
+            .pref-other-wrap { display: none; margin-top: 0.5rem; }
+            .pref-other-wrap.visible { display: block; }
+
+            /* Pill active */
+            .pref-pill.pref-pill--active { border-color: #10b981 !important; background: #f0fdf4 !important; color: #065f46 !important; }
+            html.dark .pref-pill.pref-pill--active { background: rgba(16,185,129,0.15) !important; color: #6ee7b7 !important; }
+
+            /* Navigation buttons */
+            .pref-btn-primary {
+                display: inline-flex; align-items: center; gap: 0.5rem;
+                border-radius: 0.5rem; background: #0f172a;
+                padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600;
+                color: #fff; transition: background 0.2s; cursor: pointer; border: none;
+            }
+            .pref-btn-primary:hover { background: #1e293b; }
+            html.dark .pref-btn-primary { background: #f1f5f9; color: #0f172a; }
+            html.dark .pref-btn-primary:hover { background: #fff; }
+            .pref-btn-secondary {
+                display: inline-flex; align-items: center; gap: 0.5rem;
+                border-radius: 0.5rem; border: 1px solid #cbd5e1;
+                background: #fff; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500;
+                color: #334155; transition: background 0.2s; cursor: pointer;
+            }
+            .pref-btn-secondary:hover { background: #f8fafc; }
+            html.dark .pref-btn-secondary { border-color: #334155; background: transparent; color: #cbd5e1; }
+            html.dark .pref-btn-secondary:hover { background: rgba(255,255,255,0.05); }
+
+            /* Validation error state */
+            .pref-field-error input, .pref-field-error select { border-color: #ef4444 !important; }
+        </style>
+    </div>
 
     <div th:fragment="content">
         <div th:replace="~{fragments/slimselectCss :: slimselectCss}"></div>
 
-        <div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-            <div class="rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+        <div class="mx-auto max-w-3xl px-4 pt-6 pb-16 sm:px-6 lg:px-8">
+
+            <!-- Page header -->
+            <div class="mb-6 rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Preferences</h1>
-                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Update your physical conditions, training preferences, and display settings.</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Your profile</p>
+                        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Preferences</h1>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Customise your experience — complete all steps and save.</p>
                     </div>
-
                     <a href="/preferences"
                        class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
                         View saved
                     </a>
                 </div>
-
                 <div th:if="${param.saved != null}"
                      class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-100"
-                     th:text="#{preferences.saved}">Saved successfully.</div>
+                     th:text="#{preferences.saved}">Preferences saved successfully.</div>
                 <div th:if="${param.reset != null}"
                      class="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
                     Smart defaults reset to baseline values.
                 </div>
             </div>
-        </div>
 
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <!-- Step indicator bar -->
+            <div class="mb-2 flex items-center px-2" id="pref-steps-indicator" aria-label="Preferences setup progress — 4 steps">
+                <div class="pref-step-dot active" id="dot-1" aria-current="step">1</div>
+                <div class="pref-step-line" id="line-1"></div>
+                <div class="pref-step-dot" id="dot-2">2</div>
+                <div class="pref-step-line" id="line-2"></div>
+                <div class="pref-step-dot" id="dot-3">3</div>
+                <div class="pref-step-line" id="line-3"></div>
+                <div class="pref-step-dot" id="dot-4">4</div>
+            </div>
+            <div class="mb-6 grid grid-cols-4 text-center text-xs text-slate-500 dark:text-slate-400">
+                <span>Quick Setup</span><span>Display</span><span>Training</span><span>Defaults</span>
+            </div>
 
-            <!-- Quick Setup Presets (not a form field – drives other fields via JS) -->
-            <section class="mb-6 rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-5 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
-                <div class="flex flex-wrap items-start gap-4 sm:items-center">
-                    <div class="flex-1">
-                        <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Quick setup</h2>
-                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Choose a ready-made profile to fill in your preferences automatically, then customise as needed.</p>
-                    </div>
-                    <div class="w-full sm:w-72">
-                        <label class="sr-only" for="quickPreset">Select a preset</label>
-                        <select id="quickPreset"
-                                class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100">
-                            <option value="">— Select a preset —</option>
-                            <option value="weight-loss-beginner">Weight Loss – Beginner</option>
-                            <option value="weight-loss-intermediate">Weight Loss – Intermediate</option>
-                            <option value="muscle-building">Muscle Building</option>
-                            <option value="strength">Strength Training</option>
-                            <option value="endurance">Endurance / Cardio</option>
-                            <option value="flexibility">Flexibility &amp; Mobility</option>
-                            <option value="general-fitness">General Health &amp; Fitness</option>
-                            <option value="home-beginner">Home Workout – Beginner</option>
-                        </select>
-                    </div>
-                </div>
-                <p id="preset-applied-msg" class="mt-3 hidden text-xs font-medium text-emerald-700 dark:text-emerald-400" aria-live="polite">
-                    Preset applied — review and adjust your preferences below, then save.
-                </p>
-            </section>
-
-            <form method="post" th:object="${userPreferenceForm}" th:action="@{/select-preferences}" class="space-y-6">
+            <!-- Form — all steps share one form element -->
+            <form method="post" th:object="${userPreferenceForm}" th:action="@{/select-preferences}" id="pref-form" novalidate>
                 <input th:name="${_csrf.parameterName}" th:type="hidden" th:value="${_csrf.token}"/>
 
                 <div th:if="${#fields.hasAnyErrors()}"
-                     class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-100">
-                    Please correct the highlighted errors below and try again.
+                     id="pref-server-errors"
+                     class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-100"
+                     role="alert" aria-live="assertive">
+                    Please correct the highlighted errors and try again.
                 </div>
 
-                <!-- ── DISPLAY SETTINGS ─────────────────────────────────────── -->
-                <section id="display-settings-section" class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
-                    <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200" th:text="#{preferences.display.title}">Display settings</h2>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{preferences.display.subtitle}">These affect the whole site.</p>
+                <!-- ═══ STEP 1 — Quick Setup ══════════════════════════════ -->
+                <div id="step-1" class="pref-step-panel pref-step-active space-y-5">
+                    <div class="rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-5 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
+                        <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">
+                            Quick Setup
+                            <span class="ml-1 text-xs font-normal text-slate-500 dark:text-slate-400">(optional)</span>
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Choose a ready-made profile to pre-fill your preferences, then customise as needed.</p>
 
-                    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div class="block">
-                            <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="language" th:text="#{preferences.display.language}">Language</label>
-                            <select id="language" th:field="*{language}"
-                                    class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
-                                <option value="en" th:text="#{preferences.language.en}">English</option>
-                                <option value="cy" th:text="#{preferences.language.cy}">Welsh</option>
+                        <div class="mt-4 pref-select-wrap">
+                            <label class="sr-only" for="quickPreset">Select a preset</label>
+                            <select id="quickPreset"
+                                    class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100">
+                                <option value="">— Select a preset —</option>
+                                <option value="weight-loss-beginner">Weight Loss – Beginner</option>
+                                <option value="weight-loss-intermediate">Weight Loss – Intermediate</option>
+                                <option value="muscle-building">Muscle Building</option>
+                                <option value="strength">Strength Training</option>
+                                <option value="endurance">Endurance / Cardio</option>
+                                <option value="flexibility">Flexibility &amp; Mobility</option>
+                                <option value="general-fitness">General Health &amp; Fitness</option>
+                                <option value="home-beginner">Home Workout – Beginner</option>
                             </select>
-                            <p class="mt-1 text-sm text-red-600" th:if="${#fields.hasErrors('language')}" th:errors="*{language}"></p>
                         </div>
 
-                        <div class="block">
-                            <label class="text-sm font-medium text-slate-700 dark:text-slate-200" for="theme" th:text="#{preferences.display.theme}">Theme</label>
-                            <select id="theme" th:field="*{theme}"
-                                    class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
-                                <option value="SYSTEM" th:text="#{preferences.theme.system}">System</option>
-                                <option value="LIGHT" th:text="#{preferences.theme.light}">Light</option>
-                                <option value="DARK" th:text="#{preferences.theme.dark}">Dark</option>
-                            </select>
-                            <p class="mt-1 text-sm text-red-600" th:if="${#fields.hasErrors('theme')}" th:errors="*{theme}"></p>
-                        </div>
-                    </div>
-
-                    <label class="mt-4 flex items-center justify-between gap-4 rounded-lg border border-slate-200/70 bg-slate-50 px-3 py-3 text-sm dark:border-slate-800 dark:bg-slate-900/30">
-                        <span>
-                            <span class="block font-medium text-slate-700 dark:text-slate-200" th:text="#{preferences.display.easyMode}">Easy mode</span>
-                            <span class="block text-xs text-slate-600 dark:text-slate-300" th:text="#{preferences.display.easyModeHint}">Larger text and spacing for readability.</span>
-                        </span>
-                        <input type="checkbox" th:field="*{easyMode}" class="h-4 w-4 rounded border-slate-300" />
-                    </label>
-                    <label class="mt-3 flex items-center justify-between gap-4 rounded-lg border border-slate-200/70 bg-slate-50 px-3 py-3 text-sm dark:border-slate-800 dark:bg-slate-900/30">
-                        <span>
-                            <span class="block font-medium text-slate-700 dark:text-slate-200" th:text="#{preferences.display.colorBlind}">Colour blind mode</span>
-                            <span class="block text-xs text-slate-600 dark:text-slate-300" th:text="#{preferences.display.colorBlindHint}">Boost contrast for key UI elements.</span>
-                        </span>
-                        <input type="checkbox" th:field="*{colorBlindMode}" class="h-4 w-4 rounded border-slate-300" />
-                    </label>
-                    <div id="display-settings-feedback" class="mt-3 hidden rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800" role="status" aria-live="polite">
-                        <span th:text="#{preferences.display.saved}">Accessibility settings applied across the site.</span>
-                    </div>
-                </section>
-
-                <!-- ── PHYSICAL CONDITIONS ──────────────────────────────────── -->
-                <section id="conditions-section" class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
-                    <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Physical conditions</h2>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Select any conditions that apply to you. Choose from the list or type to search. Some may be mandatory.</p>
-
-                    <div th:if="${lockedConditions != null and !lockedConditions.isEmpty()}"
-                         class="mt-3 rounded-lg border border-slate-200/70 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-300">
-                        Mandatory conditions are locked and cannot be deselected.
-                    </div>
-
-                    <div class="mt-4">
-                        <select id="selectElement" multiple="multiple" th:field="*{selectedConditionIds}">
-                            <option th:each="physicalCondition: ${allPhysicalConditions}"
-                                    th:text="${physicalCondition.name}"
-                                    th:value="${physicalCondition.id}"
-                                    th:disabled="${lockedConditions.contains(physicalCondition.id)}"
-                                    th:data-mandatory="${lockedConditions.contains(physicalCondition.id)}"></option>
-                        </select>
-                    </div>
-                </section>
-
-                <!-- ── TRAINING PREFERENCES ────────────────────────────────── -->
-                <section class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
-                    <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Training preferences</h2>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Choose your goal, experience level, and workout style to personalise your plan.</p>
-
-                    <div th:if="${preferencesByCategory == null or preferencesByCategory.isEmpty()}"
-                         class="mt-4 rounded-lg border border-slate-200/70 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/30">
-                        No training preferences are available yet.
-                    </div>
-
-                    <div th:if="${preferencesByCategory != null and !preferencesByCategory.isEmpty()}" class="mt-4 space-y-5">
-
-                        <div th:each="category : ${preferencesByCategory}">
-
-                            <!-- Single-select categories rendered as a <select> dropdown -->
-                            <div th:if="${category.key == 'Goal' or category.key == 'Experience Level' or category.key == 'Workout Frequency'}">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200"
-                                       th:text="${category.key}">Category</label>
-                                <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
-                                   th:text="${category.key == 'Goal'} ? 'Pick your primary fitness goal.' :
-                                            (${category.key == 'Experience Level'} ? 'How long have you been exercising?' :
-                                             'How often do you plan to train?')">Hint</p>
-                                <!-- Visible select (not submitted – JS syncs to hidden checkboxes below) -->
-                                <select th:id="'select-' + ${category.key.replace(' ', '-').toLowerCase()}"
-                                        class="pref-single-select mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100"
-                                        th:attr="data-category=${category.key}">
-                                    <option value="">— None selected —</option>
-                                    <option th:each="preference : ${category.value}"
-                                            th:value="${preference.id}"
-                                            th:text="${preference.description}"
-                                            th:selected="${userPreferenceForm.selectedPreferenceIds.contains(preference.id)}">
-                                    </option>
-                                </select>
-                                <!-- Hidden checkboxes bound to the form (synced by JS) -->
-                                <div class="sr-only pref-hidden-checks" th:attr="data-category=${category.key}">
-                                    <input th:each="preference : ${category.value}"
-                                           th:value="${preference.id}"
-                                           th:field="*{selectedPreferenceIds}"
-                                           type="checkbox"
-                                           th:attr="data-pref-id=${preference.id},data-description=${preference.description}"
-                                           class="pref-hidden-checkbox" />
-                                </div>
+                        <!-- Preview panel — shown after preset selection -->
+                        <div id="preset-preview" class="pref-preset-preview" role="region" aria-live="polite">
+                            <div class="flex items-start justify-between gap-3">
+                                <h3 class="text-sm font-semibold text-emerald-800 dark:text-emerald-300" id="preview-title">Preset preview</h3>
+                                <button type="button" id="preset-edit-btn"
+                                        class="text-xs text-slate-500 underline hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                                    Change
+                                </button>
                             </div>
-
-                            <!-- Multi-select categories rendered as pill-style checkboxes -->
-                            <div th:if="${category.key != 'Goal' and category.key != 'Experience Level' and category.key != 'Workout Frequency'}">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200"
-                                       th:text="${category.key}">Category</label>
-                                <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Select all that apply.</p>
-                                <div class="mt-2 flex flex-wrap gap-2">
-                                    <label th:each="preference : ${category.value}"
-                                           class="pref-pill inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"
-                                           th:classappend="${userPreferenceForm.selectedPreferenceIds.contains(preference.id)} ? ' border-emerald-500 bg-emerald-50 text-emerald-800 dark:border-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-200' : ''">
-                                        <input th:value="${preference.id}" th:field="*{selectedPreferenceIds}" type="checkbox"
-                                               class="sr-only pref-pill-checkbox"
-                                               th:attr="data-description=${preference.description}" />
-                                        <span th:text="${preference.description}">Option</span>
-                                    </label>
-                                </div>
+                            <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-3" id="preview-body"></div>
+                            <div class="mt-3 flex items-center gap-2">
+                                <button type="button" id="preset-apply-btn"
+                                        class="rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-700">
+                                    Apply preset &amp; continue
+                                </button>
+                                <button type="button" id="preset-cancel-btn"
+                                        class="rounded-lg border border-slate-300 bg-white px-4 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-transparent dark:text-slate-300">
+                                    Cancel
+                                </button>
                             </div>
-
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ── SMART DEFAULTS ──────────────────────────────────────── -->
-                <section class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
-                    <div class="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                            <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Smart defaults</h2>
-                            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Pre-fill new workouts and nutrition logs. Presets can set these automatically.</p>
-                        </div>
-                        <form method="post" th:action="@{/select-preferences/reset}">
-                            <input th:name="${_csrf.parameterName}" th:type="hidden" th:value="${_csrf.token}"/>
-                            <button type="submit"
-                                    class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
-                                Reset to defaults
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="mt-4 grid gap-4 sm:grid-cols-3">
-                        <div class="block">
-                            <label class="text-xs font-semibold text-slate-500" for="defaultSets">Default sets</label>
-                            <input type="number" id="defaultSets" min="1" max="20" th:field="*{defaultSets}"
-                                   class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                            <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('defaultSets')}" th:errors="*{defaultSets}"></p>
-                        </div>
-                        <div class="block">
-                            <label class="text-xs font-semibold text-slate-500" for="defaultRepMin">Rep range (min)</label>
-                            <input type="number" id="defaultRepMin" min="1" max="30" th:field="*{defaultRepMin}"
-                                   class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                            <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('defaultRepMin')}" th:errors="*{defaultRepMin}"></p>
-                        </div>
-                        <div class="block">
-                            <label class="text-xs font-semibold text-slate-500" for="defaultRepMax">Rep range (max)</label>
-                            <input type="number" id="defaultRepMax" min="1" max="50" th:field="*{defaultRepMax}"
-                                   class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                            <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('defaultRepMax')}" th:errors="*{defaultRepMax}"></p>
+                            <p id="preset-applied-msg" class="mt-2 hidden text-xs font-medium text-emerald-700 dark:text-emerald-400" aria-live="polite">
+                                &#10003; Preset applied — review and adjust your preferences below, then save.
+                            </p>
                         </div>
                     </div>
 
-                    <div class="mt-4">
-                        <p class="text-xs font-semibold text-slate-500">Preferred equipment</p>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
-                                <input type="checkbox" th:field="*{preferredEquipmentBodyweight}" class="sr-only pref-pill-checkbox" id="eq-bodyweight" />
-                                Bodyweight
-                            </label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
-                                <input type="checkbox" th:field="*{preferredEquipmentDumbbell}" class="sr-only pref-pill-checkbox" id="eq-dumbbell" />
-                                Dumbbells
-                            </label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
-                                <input type="checkbox" th:field="*{preferredEquipmentBarbell}" class="sr-only pref-pill-checkbox" id="eq-barbell" />
-                                Barbells
-                            </label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
-                                <input type="checkbox" th:field="*{preferredEquipmentMachine}" class="sr-only pref-pill-checkbox" id="eq-machine" />
-                                Machines
-                            </label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
-                                <input type="checkbox" th:field="*{preferredEquipmentBands}" class="sr-only pref-pill-checkbox" id="eq-bands" />
-                                Bands
-                            </label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
-                                <input type="checkbox" th:field="*{preferredEquipmentKettlebell}" class="sr-only pref-pill-checkbox" id="eq-kettlebell" />
-                                Kettlebells
-                            </label>
-                        </div>
+                    <div class="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" class="pref-btn-secondary" id="step1-skip">Skip</button>
+                        <button type="button" class="pref-btn-primary" id="step1-next">Continue &#8594;</button>
                     </div>
-
-                    <div class="mt-4">
-                        <p class="text-xs font-semibold text-slate-500">Macro targets (optional)</p>
-                        <div class="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                            <div class="block">
-                                <label class="text-xs text-slate-500" for="macroTargetCalories">Calories (kcal)</label>
-                                <input type="number" id="macroTargetCalories" min="0" max="20000" th:field="*{macroTargetCalories}"
-                                       class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                                <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('macroTargetCalories')}" th:errors="*{macroTargetCalories}"></p>
-                            </div>
-                            <div class="block">
-                                <label class="text-xs text-slate-500" for="macroTargetProtein">Protein (g)</label>
-                                <input type="number" id="macroTargetProtein" min="0" max="1000" th:field="*{macroTargetProtein}"
-                                       class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                                <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('macroTargetProtein')}" th:errors="*{macroTargetProtein}"></p>
-                            </div>
-                            <div class="block">
-                                <label class="text-xs text-slate-500" for="macroTargetCarbs">Carbs (g)</label>
-                                <input type="number" id="macroTargetCarbs" min="0" max="1000" th:field="*{macroTargetCarbs}"
-                                       class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                                <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('macroTargetCarbs')}" th:errors="*{macroTargetCarbs}"></p>
-                            </div>
-                            <div class="block">
-                                <label class="text-xs text-slate-500" for="macroTargetFat">Fat (g)</label>
-                                <input type="number" id="macroTargetFat" min="0" max="1000" th:field="*{macroTargetFat}"
-                                       class="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
-                                <p class="mt-1 text-xs text-red-600" th:if="${#fields.hasErrors('macroTargetFat')}" th:errors="*{macroTargetFat}"></p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <div class="flex items-center justify-end gap-3">
-                    <a href="/preferences"
-                       class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
-                        View saved
-                    </a>
-                    <button type="submit"
-                            class="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
-                        Save preferences
-                    </button>
                 </div>
+
+                <!-- ═══ STEP 2 — Display & Accessibility ══════════════════ -->
+                <div id="step-2" class="pref-step-panel space-y-5">
+                    <!-- Inline validation message for step 2 (replaces alert()) -->
+                    <div id="step2-error" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200"
+                         role="alert" aria-live="assertive">
+                        Please select a language and theme before continuing.
+                    </div>
+                    <div class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                        <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">Display &amp; Accessibility</h2>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">These settings apply across the whole site. Fields marked <span class="text-red-500">*</span> are required.</p>
+
+                        <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                            <!-- Language -->
+                            <div id="field-language">
+                                <label class="pref-required block text-sm font-medium text-slate-700 dark:text-slate-200"
+                                       for="language" th:text="#{preferences.display.language}">Language</label>
+                                <div class="mt-2 pref-select-wrap">
+                                    <select id="language" th:field="*{language}"
+                                            class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
+                                        <option value="en" th:text="#{preferences.language.en}">English</option>
+                                        <option value="cy" th:text="#{preferences.language.cy}">Welsh</option>
+                                    </select>
+                                </div>
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('language')}" th:errors="*{language}"></p>
+                            </div>
+
+                            <!-- Theme -->
+                            <div id="field-theme">
+                                <label class="pref-required block text-sm font-medium text-slate-700 dark:text-slate-200"
+                                       for="theme" th:text="#{preferences.display.theme}">Theme</label>
+                                <div class="mt-2 pref-select-wrap">
+                                    <select id="theme" th:field="*{theme}"
+                                            class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
+                                        <option value="SYSTEM" th:text="#{preferences.theme.system}">System default</option>
+                                        <option value="LIGHT"  th:text="#{preferences.theme.light}">Light</option>
+                                        <option value="DARK"   th:text="#{preferences.theme.dark}">Dark</option>
+                                    </select>
+                                </div>
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('theme')}" th:errors="*{theme}"></p>
+                            </div>
+                        </div>
+
+                        <!-- Toggle rows -->
+                        <div class="mt-5 space-y-3">
+                            <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/30">
+                                <span>
+                                    <span class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{preferences.display.easyMode}">Easy mode</span>
+                                    <span class="block text-xs text-slate-500 dark:text-slate-400" th:text="#{preferences.display.easyModeHint}">Larger text and spacing for readability.</span>
+                                </span>
+                                <span class="pref-toggle ml-4 shrink-0">
+                                    <input type="checkbox" th:field="*{easyMode}" class="pref-toggle__input" />
+                                    <span class="pref-toggle__track" aria-hidden="true"><span class="pref-toggle__thumb"></span></span>
+                                </span>
+                            </label>
+
+                            <label class="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200/70 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/30">
+                                <span>
+                                    <span class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{preferences.display.colorBlind}">Colour blind mode</span>
+                                    <span class="block text-xs text-slate-500 dark:text-slate-400" th:text="#{preferences.display.colorBlindHint}">Boost contrast for key UI elements.</span>
+                                </span>
+                                <span class="pref-toggle ml-4 shrink-0">
+                                    <input type="checkbox" th:field="*{colorBlindMode}" class="pref-toggle__input" />
+                                    <span class="pref-toggle__track" aria-hidden="true"><span class="pref-toggle__thumb"></span></span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3 pt-2">
+                        <button type="button" class="pref-btn-secondary" data-pref-prev="1">&#8592; Back</button>
+                        <button type="button" class="pref-btn-primary" data-pref-next="3">Next &#8594;</button>
+                    </div>
+                </div>
+
+                <!-- ═══ STEP 3 — Health & Training ═══════════════════════ -->
+                <div id="step-3" class="pref-step-panel space-y-5">
+
+                    <!-- Physical Conditions -->
+                    <div class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                        <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">
+                            Physical conditions
+                            <span class="ml-1 text-xs font-normal text-slate-500 dark:text-slate-400">(optional)</span>
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Select any conditions that apply. Conditions from your health record are locked and cannot be removed.</p>
+
+                        <div th:if="${lockedConditions != null and !lockedConditions.isEmpty()}"
+                             class="mt-3 rounded-lg border border-slate-200/70 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-300">
+                            &#128274; Some conditions are locked from your health assessment.
+                        </div>
+
+                        <div class="mt-4">
+                            <select id="selectElement" multiple="multiple" th:field="*{selectedConditionIds}">
+                                <option th:each="physicalCondition: ${allPhysicalConditions}"
+                                        th:text="${physicalCondition.name}"
+                                        th:value="${physicalCondition.id}"
+                                        th:disabled="${lockedConditions.contains(physicalCondition.id)}"
+                                        th:data-mandatory="${lockedConditions.contains(physicalCondition.id)}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Training Preferences -->
+                    <div class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                        <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">
+                            Training preferences
+                            <span class="ml-1 text-xs font-normal text-slate-500 dark:text-slate-400">(optional)</span>
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Personalise your plan by choosing your goal, experience, and training style.</p>
+
+                        <div th:if="${preferencesByCategory == null or preferencesByCategory.isEmpty()}"
+                             class="mt-4 rounded-lg border border-slate-200/70 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/30">
+                            No training preferences available yet.
+                        </div>
+
+                        <div th:if="${preferencesByCategory != null and !preferencesByCategory.isEmpty()}" class="mt-4 space-y-5">
+                            <div th:each="category : ${preferencesByCategory}">
+
+                                <!-- Single-select categories (dropdown) -->
+                                <div th:if="${category.key == 'Goal' or category.key == 'Experience Level' or category.key == 'Workout Frequency'}">
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200"
+                                           th:text="${category.key}">Category</label>
+                                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
+                                       th:text="${category.key == 'Goal'} ? 'Pick your primary fitness goal.' :
+                                                (${category.key == 'Experience Level'} ? 'How long have you been exercising?' :
+                                                 'How often do you plan to train?')">Hint</p>
+                                    <div class="mt-2 pref-select-wrap">
+                                        <select th:id="'select-' + ${category.key.replace(' ', '-').toLowerCase()}"
+                                                class="pref-single-select block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100"
+                                                th:attr="data-category=${category.key}">
+                                            <option value="">&#8212; None selected &#8212;</option>
+                                            <option th:each="preference : ${category.value}"
+                                                    th:value="${preference.id}"
+                                                    th:text="${preference.description}"
+                                                    th:selected="${userPreferenceForm.selectedPreferenceIds.contains(preference.id)}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <!-- Hidden checkboxes synced by JS -->
+                                    <div class="sr-only pref-hidden-checks" th:attr="data-category=${category.key}">
+                                        <input th:each="preference : ${category.value}"
+                                               th:value="${preference.id}"
+                                               th:field="*{selectedPreferenceIds}"
+                                               type="checkbox"
+                                               th:attr="data-pref-id=${preference.id},data-description=${preference.description}"
+                                               class="pref-hidden-checkbox" />
+                                    </div>
+                                </div>
+
+                                <!-- Multi-select categories (pill checkboxes + Other input) -->
+                                <div th:if="${category.key != 'Goal' and category.key != 'Experience Level' and category.key != 'Workout Frequency'}">
+                                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200"
+                                           th:text="${category.key}">Category</label>
+                                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Select all that apply.</p>
+                                    <div class="mt-2 flex flex-wrap gap-2">
+                                        <label th:each="preference : ${category.value}"
+                                               class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"
+                                               th:classappend="${userPreferenceForm.selectedPreferenceIds.contains(preference.id)} ? ' pref-pill--active' : ''">
+                                            <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <input th:value="${preference.id}" th:field="*{selectedPreferenceIds}" type="checkbox"
+                                                   class="sr-only pref-pill-checkbox"
+                                                   th:attr="data-description=${preference.description}" />
+                                            <span th:text="${preference.description}">Option</span>
+                                        </label>
+
+                                        <!-- "Other" pill for custom input -->
+                                        <label th:attr="data-other-category=${category.key}"
+                                               class="pref-other-pill pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-dashed border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-600 dark:bg-slate-900/30 dark:text-slate-400 dark:hover:border-emerald-600">
+                                            <input type="checkbox" class="sr-only pref-other-trigger"
+                                                   th:attr="data-target=${'other-' + category.key.replace(' ', '-').toLowerCase()}" />
+                                            + Other
+                                        </label>
+                                    </div>
+
+                                    <!-- Custom text input, revealed when "Other" is selected -->
+                                    <div th:id="'other-' + ${category.key.replace(' ', '-').toLowerCase()}"
+                                         class="pref-other-wrap">
+                                        <input type="text"
+                                               th:placeholder="'Describe your ' + ${category.key.toLowerCase()} + ' preference…'"
+                                               th:name="'customOther[' + ${category.key} + ']'"
+                                               maxlength="100"
+                                               class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100 dark:placeholder:text-slate-500" />
+                                        <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">This note is for reference only and will not be saved.</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3 pt-2">
+                        <button type="button" class="pref-btn-secondary" data-pref-prev="2">&#8592; Back</button>
+                        <button type="button" class="pref-btn-primary" data-pref-next="4">Next &#8594;</button>
+                    </div>
+                </div>
+
+                <!-- ═══ STEP 4 — Smart Defaults ════════════════════════════ -->
+                <div id="step-4" class="pref-step-panel space-y-5">
+                    <!-- Inline validation message for step 4 (replaces alert()) -->
+                    <div id="step4-error" class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-200"
+                         role="alert" aria-live="assertive">
+                        Please correct the highlighted fields before saving.
+                    </div>
+                    <div class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">
+                                    Smart defaults
+                                    <span class="ml-1 text-xs font-normal text-slate-500 dark:text-slate-400">(optional)</span>
+                                </h2>
+                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Pre-fill new workouts and nutrition logs. Leave blank to use system defaults.</p>
+                            </div>
+                            <form method="post" th:action="@{/select-preferences/reset}">
+                                <input th:name="${_csrf.parameterName}" th:type="hidden" th:value="${_csrf.token}"/>
+                                <button type="submit"
+                                        class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
+                                    Reset to defaults
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="mt-5 grid gap-4 sm:grid-cols-3">
+                            <div id="field-defaultSets">
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400" for="defaultSets">Default sets</label>
+                                <input type="number" id="defaultSets" min="1" max="20" th:field="*{defaultSets}" placeholder="e.g. 3"
+                                       class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('defaultSets')}" th:errors="*{defaultSets}"></p>
+                            </div>
+                            <div id="field-defaultRepMin">
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400" for="defaultRepMin">Rep range (min)</label>
+                                <input type="number" id="defaultRepMin" min="1" max="30" th:field="*{defaultRepMin}" placeholder="e.g. 8"
+                                       class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('defaultRepMin')}" th:errors="*{defaultRepMin}"></p>
+                            </div>
+                            <div id="field-defaultRepMax">
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400" for="defaultRepMax">Rep range (max)</label>
+                                <input type="number" id="defaultRepMax" min="1" max="50" th:field="*{defaultRepMax}" placeholder="e.g. 12"
+                                       class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
+                                <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('defaultRepMax')}" th:errors="*{defaultRepMax}"></p>
+                            </div>
+                        </div>
+
+                        <!-- Equipment -->
+                        <div class="mt-5">
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Preferred equipment</p>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentBodyweight}" class="sr-only pref-pill-checkbox" />
+                                    Bodyweight
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentDumbbell}" class="sr-only pref-pill-checkbox" />
+                                    Dumbbells
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentBarbell}" class="sr-only pref-pill-checkbox" />
+                                    Barbells
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentMachine}" class="sr-only pref-pill-checkbox" />
+                                    Machines
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentBands}" class="sr-only pref-pill-checkbox" />
+                                    Bands
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentKettlebell}" class="sr-only pref-pill-checkbox" />
+                                    Kettlebells
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Macro targets -->
+                        <div class="mt-5">
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Macro targets <span class="font-normal">(optional)</span></p>
+                            <div class="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                                <div>
+                                    <label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetCalories">Calories (kcal)</label>
+                                    <input type="number" id="macroTargetCalories" min="0" max="20000" th:field="*{macroTargetCalories}" placeholder="e.g. 2200"
+                                           class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
+                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('macroTargetCalories')}" th:errors="*{macroTargetCalories}"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetProtein">Protein (g)</label>
+                                    <input type="number" id="macroTargetProtein" min="0" max="1000" th:field="*{macroTargetProtein}" placeholder="e.g. 150"
+                                           class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
+                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('macroTargetProtein')}" th:errors="*{macroTargetProtein}"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetCarbs">Carbs (g)</label>
+                                    <input type="number" id="macroTargetCarbs" min="0" max="1000" th:field="*{macroTargetCarbs}" placeholder="e.g. 250"
+                                           class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
+                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('macroTargetCarbs')}" th:errors="*{macroTargetCarbs}"></p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetFat">Fat (g)</label>
+                                    <input type="number" id="macroTargetFat" min="0" max="1000" th:field="*{macroTargetFat}" placeholder="e.g. 70"
+                                           class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
+                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('macroTargetFat')}" th:errors="*{macroTargetFat}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Final step — single Save button -->
+                    <div class="flex items-center justify-between gap-3 pt-2">
+                        <button type="button" class="pref-btn-secondary" data-pref-prev="3">&#8592; Back</button>
+                        <button type="submit"
+                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Save preferences
+                        </button>
+                    </div>
+                </div>
+
             </form>
         </div>
     </div>
@@ -316,201 +537,351 @@
     <div th:fragment="pageScripts">
         <div th:replace="~{fragments/slimselectJs :: slimselectJs}"></div>
         <script>
-            try { new SlimSelect({ select: '#selectElement' }); } catch(e) { /* SlimSelect unavailable */ }
-        </script>
+            /* ================================================================
+               PREFERENCES WIZARD
+               ================================================================ */
+            var CURRENT_STEP = 1;
+            var TOTAL_STEPS = 4;
 
-        <script>
-            /* ── Display-settings live feedback ──────────────────────────── */
-            const displaySettingsSection = document.getElementById('display-settings-section');
-            const displayFeedback = document.getElementById('display-settings-feedback');
-            if (displaySettingsSection && displayFeedback) {
-                displaySettingsSection.addEventListener('change', () => {
-                    displayFeedback.classList.remove('hidden');
-                    clearTimeout(displayFeedback._timeout);
-                    displayFeedback._timeout = setTimeout(() => displayFeedback.classList.add('hidden'), 3000);
-                });
-            }
-
-            /* ── Pill-style checkbox visual toggle ───────────────────────── */
-            function updatePillStyle(checkbox) {
-                const pill = checkbox.closest('.pref-pill');
-                if (!pill) return;
-                const activeClasses = [
-                    'border-emerald-500', 'bg-emerald-50', 'text-emerald-800',
-                    'dark:border-emerald-600', 'dark:bg-emerald-950/40', 'dark:text-emerald-200'
-                ];
-                if (checkbox.checked) {
-                    pill.classList.add(...activeClasses);
+            /* ── Step navigation ────────────────────────────────────────────── */
+            function showStep(n) {
+                for (var i = 1; i <= TOTAL_STEPS; i++) {
+                    var panel = document.getElementById('step-' + i);
+                    if (panel) panel.classList.toggle('pref-step-active', i === n);
+                }
+                updateStepIndicator(n);
+                CURRENT_STEP = n;
+                /* Respect prefers-reduced-motion */
+                var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (prefersReduced) {
+                    window.scrollTo(0, 0);
+                    /* Move focus to the step heading for screen readers */
+                    var heading = document.querySelector('#step-' + n + ' h2');
+                    if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus(); }
                 } else {
-                    pill.classList.remove(...activeClasses);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    var heading = document.querySelector('#step-' + n + ' h2');
+                    if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus(); }
                 }
             }
 
-            document.querySelectorAll('.pref-pill-checkbox').forEach(cb => {
-                updatePillStyle(cb);
-                cb.addEventListener('change', () => updatePillStyle(cb));
+            function updateStepIndicator(active) {
+                for (var i = 1; i <= TOTAL_STEPS; i++) {
+                    var dot = document.getElementById('dot-' + i);
+                    if (!dot) continue;
+                    dot.classList.remove('active', 'done');
+                    dot.removeAttribute('aria-current');
+                    if (i < active)       { dot.classList.add('done'); }
+                    else if (i === active) { dot.classList.add('active'); dot.setAttribute('aria-current', 'step'); }
+                    if (i < TOTAL_STEPS) {
+                        var line = document.getElementById('line-' + i);
+                        if (line) line.classList.toggle('done', i < active);
+                    }
+                }
+            }
+
+            /* Wire up all next/prev buttons */
+            document.querySelectorAll('[data-pref-next]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var target = parseInt(this.dataset.prefNext, 10);
+                    if (validateStep(CURRENT_STEP)) showStep(target);
+                });
+            });
+            document.querySelectorAll('[data-pref-prev]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    showStep(parseInt(this.dataset.prefPrev, 10));
+                });
             });
 
-            /* ── Single-select <select> ↔ hidden checkbox sync ───────────── */
-            document.querySelectorAll('.pref-single-select').forEach(sel => {
-                const category = sel.dataset.category;
-                const hiddenContainer = document.querySelector(
-                    '.pref-hidden-checks[data-category="' + category + '"]'
-                );
-                if (!hiddenContainer) return;
+            var step1Next = document.getElementById('step1-next');
+            if (step1Next) step1Next.addEventListener('click', function() { showStep(2); });
+            var step1Skip = document.getElementById('step1-skip');
+            if (step1Skip) step1Skip.addEventListener('click', function() { showStep(2); });
 
-                sel.addEventListener('change', () => {
-                    const selectedId = sel.value;
-                    hiddenContainer.querySelectorAll('.pref-hidden-checkbox').forEach(cb => {
-                        cb.checked = (cb.value === selectedId);
+            /* ── Per-step validation ────────────────────────────────────────── */
+            function showStepError(stepId, msg) {
+                var errEl = document.getElementById('step' + stepId + '-error');
+                if (errEl) {
+                    if (msg) errEl.textContent = msg;
+                    errEl.classList.remove('hidden');
+                    errEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+            function hideStepError(stepId) {
+                var errEl = document.getElementById('step' + stepId + '-error');
+                if (errEl) errEl.classList.add('hidden');
+            }
+
+            function validateStep(step) {
+                if (step === 2) {
+                    var ok = true;
+                    ['language', 'theme'].forEach(function(id) {
+                        var el = document.getElementById(id);
+                        var wrap = document.getElementById('field-' + id);
+                        if (el && !el.value) {
+                            if (wrap) wrap.classList.add('pref-field-error');
+                            ok = false;
+                        } else if (wrap) {
+                            wrap.classList.remove('pref-field-error');
+                        }
+                    });
+                    if (!ok) { showStepError(2); return false; }
+                    hideStepError(2);
+                }
+                if (step === 4) {
+                    var ok = true;
+                    var sets = document.getElementById('defaultSets');
+                    if (sets && sets.value !== '' && (parseInt(sets.value) < 1 || parseInt(sets.value) > 20)) {
+                        document.getElementById('field-defaultSets').classList.add('pref-field-error'); ok = false;
+                    } else if (sets) { document.getElementById('field-defaultSets').classList.remove('pref-field-error'); }
+
+                    var repMin = document.getElementById('defaultRepMin');
+                    var repMax = document.getElementById('defaultRepMax');
+                    if (repMin && repMax && repMin.value !== '' && repMax.value !== '' &&
+                        parseInt(repMin.value) >= parseInt(repMax.value)) {
+                        document.getElementById('field-defaultRepMax').classList.add('pref-field-error');
+                        showStepError(4, 'Rep range max must be greater than min.');
+                        ok = false;
+                    } else {
+                        if (document.getElementById('field-defaultRepMin')) document.getElementById('field-defaultRepMin').classList.remove('pref-field-error');
+                        if (document.getElementById('field-defaultRepMax')) document.getElementById('field-defaultRepMax').classList.remove('pref-field-error');
+                    }
+                    if (!ok) { showStepError(4); return false; }
+                    hideStepError(4);
+                }
+                return true;
+            }
+
+            /* If server returned validation errors, jump to the smart defaults step */
+            (function() {
+                var errBox = document.getElementById('pref-server-errors');
+                if (errBox) showStep(4);
+            })();
+
+            /* ── SlimSelect for physical conditions ─────────────────────────── */
+            try { new SlimSelect({ select: '#selectElement' }); } catch(e) {}
+
+            /* ── Pill checkbox visual state ─────────────────────────────────── */
+            function updatePillStyle(checkbox) {
+                var pill = checkbox.closest('.pref-pill');
+                if (!pill) return;
+                var icon = pill.querySelector('.pref-pill-check');
+                if (checkbox.checked) {
+                    pill.classList.add('pref-pill--active');
+                    if (icon) icon.classList.remove('hidden');
+                } else {
+                    pill.classList.remove('pref-pill--active');
+                    if (icon) icon.classList.add('hidden');
+                }
+            }
+
+            document.querySelectorAll('.pref-pill-checkbox').forEach(function(cb) {
+                updatePillStyle(cb);
+                cb.addEventListener('change', function() { updatePillStyle(this); });
+            });
+
+            /* ── Single-select dropdown <-> hidden checkboxes sync ──────────── */
+            document.querySelectorAll('.pref-single-select').forEach(function(sel) {
+                var cat = sel.dataset.category;
+                var hc  = document.querySelector('.pref-hidden-checks[data-category="' + cat + '"]');
+                if (!hc) return;
+                sel.addEventListener('change', function() {
+                    hc.querySelectorAll('.pref-hidden-checkbox').forEach(function(cb) {
+                        cb.checked = (cb.value === sel.value);
                     });
                 });
             });
 
-            /* ── Quick-setup preset definitions ─────────────────────────── */
-            const PRESETS = {
+            /* ── "Other" pill ───────────────────────────────────────────────── */
+            document.querySelectorAll('.pref-other-trigger').forEach(function(cb) {
+                var wrap = document.getElementById(cb.dataset.target);
+                var pill = cb.closest('.pref-other-pill');
+                cb.addEventListener('change', function() {
+                    if (wrap) wrap.classList.toggle('visible', cb.checked);
+                    if (pill) {
+                        if (cb.checked) {
+                            pill.classList.add('pref-pill--active');
+                            var inp = wrap && wrap.querySelector('input[type=text]');
+                            if (inp) setTimeout(function(){ inp.focus(); }, 50);
+                        } else {
+                            pill.classList.remove('pref-pill--active');
+                            var inp2 = wrap && wrap.querySelector('input[type=text]');
+                            if (inp2) inp2.value = '';
+                        }
+                    }
+                });
+            });
+
+            /* ── Quick-setup presets ────────────────────────────────────────── */
+            var PRESETS = {
                 'weight-loss-beginner': {
+                    label: 'Weight Loss \u2013 Beginner',
                     preferences: ['Weight Loss', 'Beginner (New to exercise)', '3\u20134 times per week',
-                                  'Home Workouts', 'Low Impact', 'Calorie Deficit (Cutting)', 'High Protein',
-                                  'Prioritise Recovery Days'],
-                    sets: 3, repMin: 12, repMax: 20,
-                    equipment: ['bodyweight'],
+                                  'Home Workouts', 'Low Impact', 'Calorie Deficit (Cutting)', 'High Protein', 'Prioritise Recovery Days'],
+                    sets: 3, repMin: 12, repMax: 20, equipment: ['bodyweight'],
                     calories: 1800, protein: 140, carbs: 160, fat: 60
                 },
                 'weight-loss-intermediate': {
+                    label: 'Weight Loss \u2013 Intermediate',
                     preferences: ['Weight Loss', 'Intermediate (Exercising regularly)', '3\u20134 times per week',
                                   'Gym Workouts', 'HIIT / High Intensity', 'Calorie Deficit (Cutting)', 'High Protein'],
-                    sets: 4, repMin: 10, repMax: 15,
-                    equipment: ['dumbbell', 'machine'],
+                    sets: 4, repMin: 10, repMax: 15, equipment: ['dumbbell', 'machine'],
                     calories: 2000, protein: 160, carbs: 180, fat: 65
                 },
                 'muscle-building': {
+                    label: 'Muscle Building',
                     preferences: ['Muscle Gain / Hypertrophy', 'Intermediate (Exercising regularly)',
-                                  '3\u20134 times per week', 'Gym Workouts', 'Solo Training',
-                                  'Calorie Surplus (Bulking)', 'High Protein'],
-                    sets: 4, repMin: 8, repMax: 12,
-                    equipment: ['barbell', 'dumbbell', 'machine'],
+                                  '3\u20134 times per week', 'Gym Workouts', 'Solo Training', 'Calorie Surplus (Bulking)', 'High Protein'],
+                    sets: 4, repMin: 8, repMax: 12, equipment: ['barbell', 'dumbbell', 'machine'],
                     calories: 3000, protein: 180, carbs: 300, fat: 90
                 },
                 'strength': {
+                    label: 'Strength Training',
                     preferences: ['Increase Strength', 'Intermediate (Exercising regularly)',
                                   '3\u20134 times per week', 'Gym Workouts', 'Solo Training', 'High Protein'],
-                    sets: 5, repMin: 3, repMax: 6,
-                    equipment: ['barbell', 'dumbbell'],
+                    sets: 5, repMin: 3, repMax: 6, equipment: ['barbell', 'dumbbell'],
                     calories: 2800, protein: 175, carbs: 280, fat: 85
                 },
                 'endurance': {
+                    label: 'Endurance / Cardio',
                     preferences: ['Improve Endurance', 'Intermediate (Exercising regularly)',
-                                  '5+ times per week', 'Outdoor Activities', 'Solo Training',
-                                  'Active Recovery (light movement)'],
-                    sets: 3, repMin: 15, repMax: 25,
-                    equipment: ['bodyweight'],
+                                  '5+ times per week', 'Outdoor Activities', 'Solo Training', 'Active Recovery (light movement)'],
+                    sets: 3, repMin: 15, repMax: 25, equipment: ['bodyweight'],
                     calories: 2600, protein: 130, carbs: 320, fat: 70
                 },
                 'flexibility': {
+                    label: 'Flexibility & Mobility',
                     preferences: ['Improve Flexibility & Mobility', 'Beginner (New to exercise)',
-                                  '3\u20134 times per week', 'Home Workouts', 'Low Impact',
-                                  'Regular Stretching / Yoga', 'Active Recovery (light movement)'],
-                    sets: 3, repMin: 10, repMax: 20,
-                    equipment: ['bodyweight'],
+                                  '3\u20134 times per week', 'Home Workouts', 'Low Impact', 'Regular Stretching / Yoga', 'Active Recovery (light movement)'],
+                    sets: 3, repMin: 10, repMax: 20, equipment: ['bodyweight'],
                     calories: null, protein: null, carbs: null, fat: null
                 },
                 'general-fitness': {
+                    label: 'General Health & Fitness',
                     preferences: ['General Health & Fitness', 'Beginner (New to exercise)',
-                                  '3\u20134 times per week', 'Gym Workouts', 'Solo Training',
-                                  'Prioritise Recovery Days'],
-                    sets: 3, repMin: 10, repMax: 15,
-                    equipment: ['bodyweight', 'dumbbell'],
+                                  '3\u20134 times per week', 'Gym Workouts', 'Solo Training', 'Prioritise Recovery Days'],
+                    sets: 3, repMin: 10, repMax: 15, equipment: ['bodyweight', 'dumbbell'],
                     calories: 2200, protein: 130, carbs: 230, fat: 70
                 },
                 'home-beginner': {
+                    label: 'Home Workout \u2013 Beginner',
                     preferences: ['General Health & Fitness', 'Beginner (New to exercise)',
-                                  '1\u20132 times per week', 'Home Workouts', 'Low Impact',
-                                  'Prioritise Recovery Days'],
-                    sets: 3, repMin: 10, repMax: 15,
-                    equipment: ['bodyweight'],
+                                  '1\u20132 times per week', 'Home Workouts', 'Low Impact', 'Prioritise Recovery Days'],
+                    sets: 3, repMin: 10, repMax: 15, equipment: ['bodyweight'],
                     calories: null, protein: null, carbs: null, fat: null
                 }
             };
 
-            /* Maps preset equipment key → the Thymeleaf-generated checkbox field name */
-            const EQUIPMENT_FIELD_MAP = {
-                bodyweight:  'preferredEquipmentBodyweight',
-                dumbbell:    'preferredEquipmentDumbbell',
-                barbell:     'preferredEquipmentBarbell',
-                machine:     'preferredEquipmentMachine',
-                bands:       'preferredEquipmentBands',
-                kettlebell:  'preferredEquipmentKettlebell'
+            var EQUIP_MAP = {
+                bodyweight: 'preferredEquipmentBodyweight', dumbbell: 'preferredEquipmentDumbbell',
+                barbell: 'preferredEquipmentBarbell',       machine:  'preferredEquipmentMachine',
+                bands:   'preferredEquipmentBands',         kettlebell:'preferredEquipmentKettlebell'
             };
 
-            function applyPreset(presetKey) {
-                if (!presetKey || !PRESETS[presetKey]) return;
-                const p = PRESETS[presetKey];
+            var PRESET_PENDING = null;
 
-                /* 1. Training preference checkboxes */
-                /* Uncheck all first */
-                document.querySelectorAll('input.pref-hidden-checkbox, input.pref-pill-checkbox').forEach(cb => {
-                    cb.checked = false;
-                    updatePillStyle(cb);
+            function showPresetPreview(key) {
+                var p = PRESETS[key];
+                if (!p) { hidePresetPreview(); return; }
+                PRESET_PENDING = key;
+                document.getElementById('preview-title').textContent = p.label;
+                var body = document.getElementById('preview-body');
+                body.innerHTML = '';
+                var rows = [
+                    ['Goal',      p.preferences[0] || '\u2014'],
+                    ['Level',     p.preferences[1] || '\u2014'],
+                    ['Frequency', p.preferences[2] || '\u2014'],
+                    ['Sets',      p.sets],
+                    ['Reps',      p.repMin + '\u2013' + p.repMax],
+                    ['Calories',  p.calories != null ? p.calories + ' kcal' : '\u2014'],
+                    ['Equipment', p.equipment.map(function(e){ return e.charAt(0).toUpperCase()+e.slice(1); }).join(', ')]
+                ];
+                rows.forEach(function(row) {
+                    var lbl = document.createElement('div');
+                    lbl.className = 'font-medium text-slate-500 dark:text-slate-400';
+                    lbl.textContent = row[0];
+                    var val = document.createElement('div');
+                    val.className = 'text-slate-800 dark:text-slate-200';
+                    val.textContent = row[1];
+                    body.appendChild(lbl);
+                    body.appendChild(val);
                 });
-                /* Check those matching the preset descriptions */
-                p.preferences.forEach(desc => {
-                    /* Pill checkboxes — matched by data-description attribute */
-                    document.querySelectorAll('.pref-pill-checkbox[data-description]').forEach(cb => {
-                        if (cb.dataset.description === desc) {
-                            cb.checked = true;
-                            updatePillStyle(cb);
-                        }
+                document.getElementById('preset-applied-msg').classList.add('hidden');
+                var applyBtn = document.getElementById('preset-apply-btn');
+                if (applyBtn) { applyBtn.textContent = 'Apply preset & continue'; applyBtn.disabled = false; applyBtn.className = 'rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-700'; }
+                document.getElementById('preset-preview').classList.add('visible');
+            }
+
+            function hidePresetPreview() {
+                PRESET_PENDING = null;
+                document.getElementById('preset-preview').classList.remove('visible');
+            }
+
+            function applyPresetData(key) {
+                var p = PRESETS[key]; if (!p) return;
+                /* Uncheck all */
+                document.querySelectorAll('input.pref-hidden-checkbox, input.pref-pill-checkbox').forEach(function(cb) {
+                    cb.checked = false; updatePillStyle(cb);
+                });
+                /* Apply matching preferences */
+                p.preferences.forEach(function(desc) {
+                    document.querySelectorAll('.pref-pill-checkbox[data-description="' + desc + '"]').forEach(function(cb) {
+                        cb.checked = true; updatePillStyle(cb);
                     });
-                    /* Hidden checkboxes (single-select) — matched by data-description */
-                    document.querySelectorAll('.pref-hidden-checkbox[data-description]').forEach(cb => {
-                        if (cb.dataset.description === desc) {
-                            cb.checked = true;
-                        }
+                    document.querySelectorAll('.pref-hidden-checkbox[data-description="' + desc + '"]').forEach(function(cb) {
+                        cb.checked = true;
                     });
                 });
-
-                /* 2. Sync single-select <select> elements from hidden checkboxes */
-                document.querySelectorAll('.pref-single-select').forEach(sel => {
-                    const category = sel.dataset.category;
-                    const hiddenContainer = document.querySelector(
-                        '.pref-hidden-checks[data-category="' + category + '"]'
-                    );
-                    if (!hiddenContainer) return;
-                    const checkedCb = hiddenContainer.querySelector('.pref-hidden-checkbox:checked');
-                    sel.value = checkedCb ? checkedCb.value : '';
+                /* Sync single-select dropdowns */
+                document.querySelectorAll('.pref-single-select').forEach(function(sel) {
+                    var cat = sel.dataset.category;
+                    var hc = document.querySelector('.pref-hidden-checks[data-category="' + cat + '"]');
+                    if (!hc) return;
+                    var checked = hc.querySelector('.pref-hidden-checkbox:checked');
+                    sel.value = checked ? checked.value : '';
                 });
-
-                /* 3. Smart defaults */
-                const setField = (id, val) => {
-                    const el = document.getElementById(id);
-                    if (el && val !== null && val !== undefined) el.value = val;
-                };
-                setField('defaultSets', p.sets);
-                setField('defaultRepMin', p.repMin);
-                setField('defaultRepMax', p.repMax);
-                setField('macroTargetCalories', p.calories);
-                setField('macroTargetProtein', p.protein);
-                setField('macroTargetCarbs', p.carbs);
-                setField('macroTargetFat', p.fat);
-
-                /* 4. Equipment pills */
-                Object.entries(EQUIPMENT_FIELD_MAP).forEach(([key, fieldName]) => {
-                    const cb = document.querySelector('input[name="' + fieldName + '"]');
+                /* Smart defaults */
+                function sf(id, val) { var el=document.getElementById(id); if(el) el.value = (val!==null && val!==undefined) ? val : ''; }
+                sf('defaultSets', p.sets); sf('defaultRepMin', p.repMin); sf('defaultRepMax', p.repMax);
+                sf('macroTargetCalories', p.calories); sf('macroTargetProtein', p.protein);
+                sf('macroTargetCarbs', p.carbs); sf('macroTargetFat', p.fat);
+                /* Equipment */
+                Object.keys(EQUIP_MAP).forEach(function(key) {
+                    var cb = document.querySelector('input[name="' + EQUIP_MAP[key] + '"]');
                     if (!cb) return;
-                    cb.checked = p.equipment.includes(key);
+                    cb.checked = p.equipment.indexOf(key) !== -1;
                     updatePillStyle(cb);
                 });
-
-                /* 5. Show confirmation banner */
-                const msg = document.getElementById('preset-applied-msg');
-                if (msg) msg.classList.remove('hidden');
             }
 
-            const quickPreset = document.getElementById('quickPreset');
-            if (quickPreset) {
-                quickPreset.addEventListener('change', () => applyPreset(quickPreset.value));
-            }
+            var quickPreset = document.getElementById('quickPreset');
+            if (quickPreset) quickPreset.addEventListener('change', function() {
+                if (this.value) showPresetPreview(this.value);
+                else hidePresetPreview();
+            });
+
+            var applyBtn = document.getElementById('preset-apply-btn');
+            if (applyBtn) applyBtn.addEventListener('click', function() {
+                if (!PRESET_PENDING) return;
+                applyPresetData(PRESET_PENDING);
+                document.getElementById('preset-applied-msg').classList.remove('hidden');
+                applyBtn.textContent = '\u2713 Applied';
+                applyBtn.disabled = true;
+                applyBtn.className = 'rounded-lg bg-slate-400 px-4 py-1.5 text-xs font-semibold text-white cursor-default';
+                setTimeout(function() { showStep(2); }, 700);
+            });
+
+            var cancelBtn = document.getElementById('preset-cancel-btn');
+            if (cancelBtn) cancelBtn.addEventListener('click', function() {
+                if (quickPreset) quickPreset.value = '';
+                hidePresetPreview();
+            });
+
+            var editBtn = document.getElementById('preset-edit-btn');
+            if (editBtn) editBtn.addEventListener('click', function() {
+                if (quickPreset) quickPreset.value = '';
+                hidePresetPreview();
+            });
         </script>
     </div>
 
