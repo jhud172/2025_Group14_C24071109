@@ -1685,6 +1685,7 @@ CREATE TABLE IF NOT EXISTS calendar_tasks
     requires_log    BOOLEAN      NOT NULL DEFAULT FALSE,
     trainer_template_id BIGINT   NULL,
     trainer_template_entry_id BIGINT NULL,
+    activity_type       VARCHAR(20)  NULL,
 
     CONSTRAINT fk_calendar_tasks_user
         FOREIGN KEY (user_id) REFERENCES users (id)
@@ -1735,6 +1736,7 @@ CREATE TABLE IF NOT EXISTS task_templates
     is_favourite BOOLEAN      NOT NULL DEFAULT FALSE,
     last_used_at TIMESTAMP    NULL,
     created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    activity_type VARCHAR(20) NULL,
 
     CONSTRAINT fk_task_templates_user
         FOREIGN KEY (user_id) REFERENCES users (id)

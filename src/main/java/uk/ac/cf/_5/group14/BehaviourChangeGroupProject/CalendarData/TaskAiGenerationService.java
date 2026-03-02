@@ -19,18 +19,19 @@ public class TaskAiGenerationService {
         this.mapper = mapper;
     }
 
-    public record GeneratedTask(String title, String notes, boolean exercise, String time) {}
+    public record GeneratedTask(String title, String notes, boolean exercise, String time, ActivityType activityType) {}
 
     public GeneratedTask generateFromFreeText(String freeText) {
         String fallbackTitle = (freeText == null || freeText.isBlank()) ? "New task" : freeText.trim();
 
         if (freeText == null || freeText.isBlank()) {
-            return new GeneratedTask(fallbackTitle, null, false, null);
+            return new GeneratedTask(fallbackTitle, null, false, null, null);
         }
 
-        String prompt = "Convert the user's message into a single task. " +
+        String prompt = "Convert the user's message into a single activity or task. " +
                 "Return ONLY valid JSON (no markdown, no backticks) with fields: " +
-                "title (string, required), notes (string or null), exercise (boolean), time (string HH:mm or null).";
+                "title (string, required), notes (string or null), exercise (boolean), time (string HH:mm or null), " +
+                "activityType (one of GYM, SWIM, RUN, BIKE, CUSTOM, or null if not an exercise).";
 
         List<ChatService.Message> messages = List.of(
                 new ChatService.Message("system", prompt),
@@ -42,14 +43,15 @@ public class TaskAiGenerationService {
 
         Parsed parsed = tryParseJson(raw);
         if (parsed == null || parsed.title == null || parsed.title.isBlank()) {
-            return new GeneratedTask(fallbackTitle, null, false, null);
+            return new GeneratedTask(fallbackTitle, null, false, null, null);
         }
 
         return new GeneratedTask(
                 parsed.title.trim(),
                 parsed.notes,
-                parsed.exercise,
-                parsed.time
+                parsed.exercise || parsed.activityType != null,
+                parsed.time,
+                parsed.activityType
         );
     }
 
@@ -58,12 +60,14 @@ public class TaskAiGenerationService {
         private final String notes;
         private final boolean exercise;
         private final String time;
+        private final ActivityType activityType;
 
-        private Parsed(String title, String notes, boolean exercise, String time) {
+        private Parsed(String title, String notes, boolean exercise, String time, ActivityType activityType) {
             this.title = title;
             this.notes = notes;
             this.exercise = exercise;
             this.time = time;
+            this.activityType = activityType;
         }
     }
 
@@ -84,7 +88,17 @@ public class TaskAiGenerationService {
             String time = root.path("time").asText(null);
             if (time != null && time.isBlank()) time = null;
 
-            return new Parsed(title, notes, exercise, time);
+            ActivityType activityType = null;
+            String activityTypeStr = root.path("activityType").asText(null);
+            if (activityTypeStr != null && !activityTypeStr.isBlank()) {
+                try {
+                    activityType = ActivityType.valueOf(activityTypeStr.toUpperCase());
+                } catch (IllegalArgumentException ignored) {
+                    activityType = null;
+                }
+            }
+
+            return new Parsed(title, notes, exercise, time, activityType);
         } catch (Exception ignored) {
             return null;
         }

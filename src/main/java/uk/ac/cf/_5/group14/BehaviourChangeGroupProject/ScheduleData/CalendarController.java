@@ -30,6 +30,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarning;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.ActivityType;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionCalculator;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionStatus;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyStreakService;
@@ -320,6 +321,7 @@ public class CalendarController {
         model.addAttribute("schedules", schedules);
         populateScheduleDrawerState(user, schedules, model);
         model.addAttribute("view", "month");
+        model.addAttribute("activityTypes", ActivityType.values());
 
         if ("monthPane".equals(fragment)) {
             return "calendar/month :: monthPane";
@@ -657,6 +659,7 @@ public class CalendarController {
         model.addAttribute("taskTemplateRecents", taskTemplateService.listRecents(user, 6));
         model.addAttribute("taskTemplateFavourites", taskTemplateService.listFavourites(user));
         model.addAttribute("taskTemplateAll", taskTemplateService.listAll(user));
+        model.addAttribute("activityTypes", ActivityType.values());
 
         var dailyStreakService = dailyStreakServiceProvider.getIfAvailable();
         if (dailyStreakService != null) {
@@ -874,6 +877,15 @@ public class CalendarController {
         return any ? "IN_PROGRESS" : "NOT_STARTED";
     }
 
+    private ActivityType parseActivityType(String activityType) {
+        if (activityType == null || activityType.isBlank()) return null;
+        try {
+            return ActivityType.valueOf(activityType.toUpperCase());
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
     @PostMapping("/day/{dateStr}/add-task")
     public String addTask(
             @PathVariable String dateStr,
@@ -882,7 +894,8 @@ public class CalendarController {
             @RequestParam(required = false) String time,
             @RequestParam(required = false) String notes,
             @RequestParam(defaultValue = "false") boolean exercise,
-            @RequestParam(defaultValue = "false") boolean completed
+            @RequestParam(defaultValue = "false") boolean completed,
+            @RequestParam(required = false) String activityType
     ) {
         LocalDate date = LocalDate.parse(dateStr, CalendarTaskService.DATE_FORMAT);
 
@@ -890,8 +903,10 @@ public class CalendarController {
                 ? LocalTime.NOON
                 : LocalTime.parse(time);
 
-        taskService.createTask(user, date, parsedTime, title, notes, exercise, completed);
-        taskTemplateService.upsertFromTask(user, title, notes, exercise);
+        ActivityType parsedActivityType = parseActivityType(activityType);
+
+        taskService.createTask(user, date, parsedTime, title, notes, exercise, completed, parsedActivityType);
+        taskTemplateService.upsertFromTask(user, title, notes, exercise, parsedActivityType);
 
         return "redirect:/calendar/day/" + dateStr;
     }
@@ -915,8 +930,8 @@ public class CalendarController {
             }
         }
 
-        taskService.createTask(user, date, parsedTime, generated.title(), generated.notes(), generated.exercise(), false);
-        taskTemplateService.upsertFromTask(user, generated.title(), generated.notes(), generated.exercise());
+        taskService.createTask(user, date, parsedTime, generated.title(), generated.notes(), generated.exercise(), false, generated.activityType());
+        taskTemplateService.upsertFromTask(user, generated.title(), generated.notes(), generated.exercise(), generated.activityType());
 
         return "redirect:/calendar/day/" + dateStr;
     }
@@ -939,11 +954,13 @@ public class CalendarController {
             @RequestParam String title,
             @RequestParam(required = false) String time,
             @RequestParam(required = false) String notes,
-            @RequestParam(defaultValue = "false") boolean exercise
+            @RequestParam(defaultValue = "false") boolean exercise,
+            @RequestParam(required = false) String activityType
     ) {
         CalendarTask task = taskService.getTaskById(id);
         if (task == null) return "redirect:/calendar";
-        taskService.updateTask(id, user, title, time, notes, exercise);
+        ActivityType parsedActivityType = parseActivityType(activityType);
+        taskService.updateTask(id, user, title, time, notes, exercise, parsedActivityType);
         return "redirect:/calendar/day/" + task.getDate();
     }
 

@@ -38,6 +38,10 @@ public class CalendarTask {
     @Column(name = "is_exercise", nullable = false)
     private Boolean exercise = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "activity_type", length = 20)
+    private ActivityType activityType;
+
     @Column(nullable = false)
     private Boolean completed = false;
 

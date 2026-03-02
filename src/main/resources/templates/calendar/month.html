@@ -39,6 +39,7 @@
                         </span>
                     </div>
                     <button type="button" id="scheduleDrawerButton" class="calendar-action-btn calendar-action-btn--primary">Schedules</button>
+                    <button type="button" id="motivation-mode-toggle" class="calendar-action-btn" aria-pressed="false" title="Toggle Motivation Mode — shows activity stickers">🏅 Motivation</button>
                 </div>
             </div>
 
@@ -126,6 +127,29 @@
                                                           <span th:if="${dayModel.tomorrow}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
                                         </div>
                                     <div class="calendar-day-content" th:with="grouped=${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
+                                        <!-- Activity sticker row (visible in motivation mode) -->
+                                        <div class="activity-sticker-row hidden">
+                                            <th:block th:each="task : ${tasks}">
+                                                <span th:if="${task.activityType != null and task.completed}"
+                                                      class="activity-sticker"
+                                                      th:attr="data-activity-type=${task.activityType.name()},title=${task.activityType.label}"
+                                                      th:text="${task.activityType.icon}"></span>
+                                                <span th:if="${task.activityType != null and !task.completed}"
+                                                      class="activity-sticker activity-sticker--pending"
+                                                      th:attr="data-activity-type=${task.activityType.name()},title=${task.activityType.label + ' (pending)'}"
+                                                      th:text="${task.activityType.icon}"></span>
+                                            </th:block>
+                                            <th:block th:each="occ : ${sched}">
+                                                <span th:if="${occ.completed}"
+                                                      class="activity-sticker"
+                                                      data-activity-type="GYM"
+                                                      title="Gym workout">🏋️</span>
+                                                <span th:if="${!occ.completed}"
+                                                      class="activity-sticker activity-sticker--pending"
+                                                      data-activity-type="GYM"
+                                                      title="Gym workout (pending)">🏋️</span>
+                                            </th:block>
+                                        </div>
                                         <!-- Empty state when no tasks or schedules -->
                                         <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
                                             <span class="calendar-empty-state-text">Free day</span>
