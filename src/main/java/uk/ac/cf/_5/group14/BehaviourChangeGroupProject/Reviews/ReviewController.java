@@ -91,13 +91,15 @@ public class ReviewController {
         }
         mav.addObject("clientsById", clientsById);
 
-        // Check if current user can review
+        // Check if current user can review, and whether they are the owner
         try {
             User currentUser = currentUserOrThrow();
             boolean canReview = reviewService.canClientReviewTrainer(currentUser.getId(), trainerId);
             mav.addObject("canReview", canReview);
+            mav.addObject("isOwner", currentUser.getId().equals(trainerId));
         } catch (Exception e) {
             mav.addObject("canReview", false);
+            mav.addObject("isOwner", false);
         }
 
         return mav;

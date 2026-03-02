@@ -1,12 +1,20 @@
 @layer components {
-    /* Auth page container - clean white background with emerald accents */
+    /* Auth page container - clean background with emerald accents */
     .auth-container {
-        @apply mx-auto w-full max-w-md px-4 sm:px-6 lg:px-8 min-h-screen flex items-center;
-        padding-top: 2rem;
-        padding-bottom: 2rem;
+        @apply mx-auto w-full max-w-md px-4 sm:px-6 lg:px-8 flex items-start justify-center;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+        min-height: calc(100vh - 5rem);
         background: 
             radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
             radial-gradient(circle at 80% 80%, rgba(52, 211, 153, 0.03) 0%, transparent 50%);
+    }
+
+    /* On larger screens, vertically centre the card */
+    @media (min-height: 600px) {
+        .auth-container {
+            @apply items-center;
+        }
     }
 
     .auth-container--wide {
@@ -26,7 +34,7 @@
     @keyframes slideUp {
         from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(16px);
         }
         to {
             opacity: 1;
@@ -72,8 +80,8 @@
 
     .role-slider__option {
         @apply flex-1 px-4 py-2.5 text-center cursor-pointer rounded-full relative z-10;
-        transform-origin: center;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
     }
 
     .role-slider__option.active {
@@ -82,19 +90,7 @@
             0 4px 6px -1px rgba(16, 185, 129, 0.3),
             0 2px 4px -1px rgba(16, 185, 129, 0.2),
             inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-
-    @keyframes popIn {
-        0% {
-            transform: scale(0.95);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-        100% {
-            transform: scale(1);
-        }
+        transform: scale(1.04);
     }
 
     .role-slider__option:not(.active):hover {
