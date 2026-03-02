@@ -28,6 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let actions = [];
     let customizeOpen = false;
 
+    const PREMIUM_BADGE_CLASS = "text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200/60 rounded-md px-1.5 py-0.5 dark:bg-amber-950/40 dark:border-amber-800/60 dark:text-amber-400";
+
     const ACTION_META = {
         OPEN_CALENDAR: { icon: "🗓️", desc: "View schedule" },
         LOG_NUTRITION: { icon: "🥗", desc: "Log today" },
@@ -56,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shelf?.classList.add("open");
         shelf?.setAttribute("aria-hidden", "false");
         toggleBtn?.setAttribute("aria-expanded", "true");
+        if (customizeOpen) setCustomizeMode(false);
     }
 
     function closeShelf() {
@@ -79,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         customizeOpen = enabled;
         viewPane?.classList.toggle("hidden", enabled);
         customizePane?.classList.toggle("hidden", !enabled);
+        if (!enabled) renderActive();
     }
 
     customizeToggle?.addEventListener("click", () => {
@@ -141,8 +145,10 @@ document.addEventListener("DOMContentLoaded", () => {
             top.appendChild(icon);
 
             const badge = document.createElement("span");
-            badge.className = "text-[10px] text-slate-400";
-            badge.textContent = action.type === "CUSTOM_AI" ? (isPremium ? "AI" : "🔒") : "";
+            badge.className = action.type === "CUSTOM_AI" && !isPremium
+                ? PREMIUM_BADGE_CLASS
+                : "text-[10px] text-slate-400";
+            badge.textContent = action.type === "CUSTOM_AI" ? (isPremium ? "AI" : "🔒 Premium") : "";
             top.appendChild(badge);
 
             const label = document.createElement("div");
@@ -158,6 +164,12 @@ document.addEventListener("DOMContentLoaded", () => {
             button.appendChild(desc);
 
             button.addEventListener("click", () => handleActionClick(action));
+            if (action.type === "CUSTOM_AI" && !isPremium) {
+                button.classList.add("cursor-not-allowed", "opacity-60");
+                button.title = "Premium required";
+                button.setAttribute("aria-disabled", "true");
+                button.setAttribute("aria-label", `${action.name} — Premium required`);
+            }
             listEl.appendChild(button);
         });
     }
@@ -192,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
             checkbox.type = "checkbox";
             checkbox.checked = action.isActive;
             checkbox.disabled = action.type === "CUSTOM_AI" && !isPremium;
-            checkbox.className = "h-4 w-4 rounded border-slate-300 text-slate-900";
+            checkbox.className = "h-4 w-4 rounded border-slate-300 accent-emerald-500";
             checkbox.addEventListener("change", () => toggleActive(action, checkbox));
             left.appendChild(checkbox);
 
@@ -201,14 +213,14 @@ document.addEventListener("DOMContentLoaded", () => {
             label.innerHTML = `<div class="font-semibold">${action.name}</div><div class="text-[10px] text-slate-400">${meta.desc || (action.type === "CUSTOM_AI" ? "Custom AI" : action.actionKey)}</div>`;
             left.appendChild(label);
 
-            if (action.type === "CUSTOM_AI" && !isPremium) {
-                const lock = document.createElement("span");
-                lock.className = "text-[10px] text-slate-400";
-                lock.textContent = "🔒";
-                left.appendChild(lock);
-            }
-
             item.appendChild(left);
+            if (action.type === "CUSTOM_AI" && !isPremium) {
+                item.classList.add("cursor-not-allowed");
+                const lock = document.createElement("span");
+                lock.className = PREMIUM_BADGE_CLASS;
+                lock.textContent = "🔒 Premium";
+                item.appendChild(lock);
+            }
             customizeList.appendChild(item);
         });
 
