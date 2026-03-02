@@ -104,6 +104,9 @@ public class User {
     @Column(name = "trainer_verified", nullable = false)
     private boolean trainerVerified = false;
 
+    @Column(name = "has_seen_tutorial", nullable = false)
+    private boolean hasSeenTutorial = false;
+
     @Setter(AccessLevel.NONE)
     @Column(name = "public_id", nullable = false, length = 36, unique = true, updatable = false)
     private String publicId;
