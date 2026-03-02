@@ -6,8 +6,8 @@
             <!-- Page Header -->
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
                 <div>
-                    <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Training Control Centre</h1>
-                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Strategic overview of your training system</p>
+                    <h1 class="tcc-page-title">Training Control Centre</h1>
+                    <p class="tcc-page-subtitle">Strategic overview of your training system</p>
                 </div>
                 <button onclick="showCreateModal()"
                    class="tcc-btn-primary">
@@ -46,7 +46,7 @@
 
             <!-- Active Schedule Status Panel -->
             <section class="mb-8">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Active Schedule Status</h2>
+                <h2 class="tcc-section-title">Active Schedule Status</h2>
                 
                 <div th:if="${#lists.isEmpty(activeSchedules)}" class="tcc-active-empty">
                     <svg class="tcc-active-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,7 +159,7 @@
             <!-- Status Tabs and Schedule Cards Section -->
             <section>
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">All Schedules</h2>
+                    <h2 class="tcc-section-title" style="margin-bottom:0">All Schedules</h2>
                     <div class="tcc-search-bar">
                         <input id="schedule-search" type="text" placeholder="Search schedules..."
                                class="tcc-search-input" />
@@ -181,20 +181,22 @@
 
                 <!-- Empty search state -->
                 <div id="schedule-search-empty"
-                     class="tcc-hidden mt-4 rounded-2xl border border-dashed border-slate-200 bg-white/70 p-6 text-sm text-slate-600 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
+                     class="tcc-hidden mt-4 rounded-2xl p-6 text-sm"
+                     style="background:rgba(26,26,46,0.6);border:1px dashed rgba(0,243,255,0.15);color:rgba(148,163,184,0.8)">
                     No schedules match your search.
                 </div>
 
                 <!-- My Schedules Tab Content -->
                 <div id="tab-my-schedules" class="tab-content">
                     <div th:if="${#lists.isEmpty(schedules)}"
-                         class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
-                        <svg class="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         class="mt-4 rounded-2xl p-8 text-center"
+                         style="background:rgba(26,26,46,0.6);border:2px dashed rgba(0,243,255,0.15)">
+                        <svg class="w-16 h-16 mx-auto mb-4" style="color:rgba(0,243,255,0.25)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">No schedules yet</h3>
-                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">Create your first training schedule to get started</p>
+                        <h3 class="text-lg font-semibold mb-2" style="color:#e2e8f0">No schedules yet</h3>
+                        <p class="text-sm mb-4" style="color:rgba(148,163,184,0.7)">Create your first training schedule to get started</p>
                         <button onclick="showCreateModal()" class="tcc-btn-primary">Create New Schedule</button>
                     </div>
 
@@ -280,8 +282,8 @@
                                 </span>
                             </div>
 
-                            <p class="text-sm text-slate-700 dark:text-slate-300 mb-2">
-                                Shared by <span class="font-semibold" th:text="${schedule.user.username}">Trainer</span>
+                            <p class="text-sm mb-2" style="color:rgba(148,163,184,0.8)">
+                                Shared by <span class="font-semibold" style="color:#e2e8f0" th:text="${schedule.user.username}">Trainer</span>
                             </p>
 
                             <p th:if="${schedule.description}" 
@@ -328,32 +330,40 @@
                 <div class="tcc-preview-body">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <a href="/schedules/builder" 
-                           class="group p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-emerald-500 dark:hover:border-emerald-500 hover:shadow-lg transition-all duration-200">
+                           class="group p-6 rounded-2xl transition-all duration-200"
+                           style="background:rgba(0,243,255,0.04);border:1px solid rgba(0,243,255,0.2)"
+                           onmouseover="this.style.borderColor='rgba(0,243,255,0.55)';this.style.boxShadow='0 0 20px rgba(0,243,255,0.15)'"
+                           onmouseout="this.style.borderColor='rgba(0,243,255,0.2)';this.style.boxShadow=''">
                             <div class="flex flex-col items-center text-center gap-3">
-                                <div class="w-14 h-14 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500 transition-all duration-200">
-                                    <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200"
+                                     style="background:rgba(0,243,255,0.1);border:1px solid rgba(0,243,255,0.3)">
+                                    <svg class="w-7 h-7" style="color:#00f3ff" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-slate-900 dark:text-slate-100 mb-1">Create from Scratch</h4>
-                                    <p class="text-sm text-slate-600 dark:text-slate-400">Build a custom schedule using the builder</p>
+                                    <h4 class="font-bold mb-1" style="color:#f1f5f9">Create from Scratch</h4>
+                                    <p class="text-sm" style="color:rgba(148,163,184,0.8)">Build a custom schedule using the builder</p>
                                 </div>
                             </div>
                         </a>
 
                         <button onclick="handleTemplateNavigation()" 
                                 th:if="${sharedSchedules != null and !#lists.isEmpty(sharedSchedules)}"
-                                class="group p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-lg transition-all duration-200">
+                                class="group p-6 rounded-2xl transition-all duration-200"
+                                style="background:rgba(181,55,242,0.04);border:1px solid rgba(181,55,242,0.2)"
+                                onmouseover="this.style.borderColor='rgba(181,55,242,0.55)';this.style.boxShadow='0 0 20px rgba(181,55,242,0.15)'"
+                                onmouseout="this.style.borderColor='rgba(181,55,242,0.2)';this.style.boxShadow=''">
                             <div class="flex flex-col items-center text-center gap-3">
-                                <div class="w-14 h-14 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500 transition-all duration-200">
-                                    <svg class="w-7 h-7 text-indigo-600 dark:text-indigo-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200"
+                                     style="background:rgba(181,55,242,0.1);border:1px solid rgba(181,55,242,0.3)">
+                                    <svg class="w-7 h-7" style="color:#b537f2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-slate-900 dark:text-slate-100 mb-1">Use a Template</h4>
-                                    <p class="text-sm text-slate-600 dark:text-slate-400">Start from a trainer-shared template</p>
+                                    <h4 class="font-bold mb-1" style="color:#f1f5f9">Use a Template</h4>
+                                    <p class="text-sm" style="color:rgba(148,163,184,0.8)">Start from a trainer-shared template</p>
                                 </div>
                             </div>
                         </button>
@@ -362,7 +372,7 @@
             </div>
         </div>
 
-        <!-- Schedule Preview Modal (placeholder for future implementation) -->
+        <!-- Schedule Preview Modal -->
         <div id="preview-modal" class="tcc-preview-overlay tcc-hidden" onclick="if(event.target === this) hidePreviewModal()">
             <div class="tcc-preview-modal" onclick="event.stopPropagation()">
                 <div class="tcc-preview-header">
@@ -375,8 +385,8 @@
                 </div>
                 <div class="tcc-preview-body">
                     <div id="preview-content" class="text-center py-8">
-                        <div class="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p class="mt-4 text-slate-600 dark:text-slate-400">Loading preview...</p>
+                        <div class="inline-block w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style="border-color:rgba(0,243,255,0.6);border-top-color:transparent"></div>
+                        <p class="mt-4" style="color:rgba(148,163,184,0.8)">Loading preview...</p>
                     </div>
                 </div>
             </div>
@@ -428,11 +438,8 @@
                     input.addEventListener("input", runFilter);
                 }
 
-                // Load schedule metadata
+                // Load schedule metadata and update insights
                 loadScheduleMetadata();
-                
-                // Calculate insights
-                calculateInsights();
             });
 
             // Load schedule metadata (frequency, days) using batch endpoint
@@ -472,6 +479,9 @@
                                 }
                             }
                         });
+
+                        // Update insights bar using active schedule IDs
+                        updateInsightsFromBatch(batchData);
                     }
                 } catch (e) {
                     // Silently fail - use placeholder text
@@ -484,20 +494,42 @@
                 }
             }
 
-            // Calculate insights from active schedules
-            function calculateInsights() {
-                const activeSchedules = document.querySelectorAll('.tcc-active-panel');
-                
+            // Collect active schedule IDs from the active panel data attributes
+            function getActiveScheduleIds() {
+                return Array.from(document.querySelectorAll('.tcc-active-panel'))
+                    .map(panel => {
+                        const previewBtn = panel.querySelector('[data-schedule-id]');
+                        return previewBtn ? previewBtn.getAttribute('data-schedule-id') : null;
+                    })
+                    .filter(Boolean);
+            }
+
+            // Update insights bar with real data from batch API response
+            function updateInsightsFromBatch(batchData) {
+                const activeIds = getActiveScheduleIds();
+                if (activeIds.length === 0) return;
+
+                let totalSessions = 0;
+                let totalRestDays = 0;
+                let count = 0;
+
+                activeIds.forEach(id => {
+                    const data = batchData[id];
+                    if (data) {
+                        totalSessions += (data.sessionsPerWeek || 0);
+                        totalRestDays += (data.restDays != null ? data.restDays : Math.max(0, 7 - (data.activeDays || 0)));
+                        count++;
+                    }
+                });
+
                 const weeklyFreqEl = document.getElementById('weekly-frequency');
                 const restDaysEl = document.getElementById('rest-days');
-                
-                // Display placeholders until proper backend calculation is implemented
-                if (activeSchedules.length > 0) {
-                    if (weeklyFreqEl) weeklyFreqEl.textContent = '—';
-                    if (restDaysEl) restDaysEl.textContent = '—';
-                } else {
-                    if (weeklyFreqEl) weeklyFreqEl.textContent = '—';
-                    if (restDaysEl) restDaysEl.textContent = '—';
+
+                if (weeklyFreqEl && count > 0) {
+                    weeklyFreqEl.textContent = totalSessions;
+                }
+                if (restDaysEl && count > 0) {
+                    restDaysEl.textContent = Math.round(totalRestDays / count);
                 }
             }
 

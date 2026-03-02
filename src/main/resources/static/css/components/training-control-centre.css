@@ -1,5 +1,5 @@
 /* Training Control Centre Component Styles */
-/* Premium emerald accent with clean white/grey structure */
+/* Cyber/Neon visual identity — glassmorphism + neon accents */
 
 /* ========================================
    Control Centre Container
@@ -12,8 +12,13 @@
    Insights Bar
    ======================================== */
 .tcc-insights-bar {
-    @apply bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-500/5 dark:to-slate-900/50;
-    @apply border border-emerald-200 dark:border-emerald-800 rounded-2xl p-6 shadow-sm mb-8;
+    background: rgba(30, 36, 53, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: 1rem;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.08), inset 0 0 40px rgba(0, 243, 255, 0.03);
+    @apply p-6 mb-8;
 }
 
 .tcc-insights-grid {
@@ -21,28 +26,51 @@
 }
 
 .tcc-insight-item {
-    @apply text-center;
+    @apply text-center relative;
+}
+
+.tcc-insight-item:not(:last-child)::after {
+    content: '';
+    @apply absolute right-0 top-1/2 -translate-y-1/2 w-px h-8;
+    background: rgba(0, 243, 255, 0.15);
 }
 
 .tcc-insight-value {
-    @apply text-2xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400;
+    @apply text-2xl sm:text-3xl font-bold;
+    color: #00f3ff;
+    text-shadow: 0 0 12px rgba(0, 243, 255, 0.6);
 }
 
 .tcc-insight-label {
-    @apply text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400 mt-1;
+    @apply text-xs sm:text-sm font-medium mt-1;
+    color: rgba(148, 163, 184, 0.9);
+    letter-spacing: 0.04em;
 }
 
 /* ========================================
    Active Schedule Status Panel
    ======================================== */
 .tcc-active-panel {
-    @apply bg-white dark:bg-slate-900/50 border-2 border-emerald-500 dark:border-emerald-600;
-    @apply rounded-2xl p-6 shadow-lg mb-8 relative overflow-hidden;
+    background: rgba(26, 26, 46, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 243, 255, 0.35);
+    border-radius: 1rem;
+    box-shadow: 0 0 24px rgba(0, 243, 255, 0.12), inset 0 0 0 1px rgba(0, 243, 255, 0.05);
+    @apply p-6 mb-8 relative overflow-hidden;
 }
 
 .tcc-active-panel::before {
     content: '';
-    @apply absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-emerald-500 to-emerald-600;
+    @apply absolute top-0 left-0 w-1 h-full;
+    background: linear-gradient(180deg, #00f3ff 0%, #b537f2 100%);
+    box-shadow: 0 0 12px rgba(0, 243, 255, 0.8);
+}
+
+.tcc-active-panel::after {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: radial-gradient(ellipse at 0% 0%, rgba(0, 243, 255, 0.04) 0%, transparent 60%);
 }
 
 .tcc-active-header {
@@ -50,22 +78,31 @@
 }
 
 .tcc-active-title {
-    @apply text-xl font-bold text-slate-900 dark:text-slate-100;
+    @apply text-xl font-bold;
+    color: #f1f5f9;
+    text-shadow: 0 0 8px rgba(0, 243, 255, 0.2);
 }
 
 .tcc-active-badge {
     @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full;
-    @apply bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300;
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    color: #00f3ff;
     @apply text-sm font-semibold;
+    box-shadow: 0 0 8px rgba(0, 243, 255, 0.15);
 }
 
 .tcc-active-badge::before {
     content: '';
-    @apply w-2 h-2 rounded-full bg-emerald-500 animate-pulse;
+    @apply w-2 h-2 rounded-full;
+    background: #00f3ff;
+    box-shadow: 0 0 6px rgba(0, 243, 255, 0.9);
+    animation: pulse-neon 2s ease-in-out infinite;
 }
 
 .tcc-active-meta {
-    @apply grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 pb-4 border-b border-slate-200 dark:border-slate-800;
+    @apply grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 pb-4;
+    border-bottom: 1px solid rgba(0, 243, 255, 0.1);
 }
 
 .tcc-active-meta-item {
@@ -73,11 +110,13 @@
 }
 
 .tcc-active-meta-label {
-    @apply text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400;
+    @apply text-xs font-semibold uppercase tracking-wide;
+    color: rgba(148, 163, 184, 0.7);
 }
 
 .tcc-active-meta-value {
-    @apply text-base font-semibold text-slate-900 dark:text-slate-100 mt-1;
+    @apply text-base font-semibold mt-1;
+    color: #e2e8f0;
 }
 
 .tcc-active-actions {
@@ -86,20 +125,25 @@
 
 /* Empty state for active panel */
 .tcc-active-empty {
-    @apply bg-white dark:bg-slate-900/50 border-2 border-dashed border-slate-300 dark:border-slate-700;
+    background: rgba(30, 36, 53, 0.5);
+    backdrop-filter: blur(8px);
+    border: 2px dashed rgba(0, 243, 255, 0.2);
     @apply rounded-2xl p-8 text-center mb-8;
 }
 
 .tcc-active-empty-icon {
-    @apply w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-700;
+    @apply w-16 h-16 mx-auto mb-4;
+    color: rgba(0, 243, 255, 0.3);
 }
 
 .tcc-active-empty-title {
-    @apply text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2;
+    @apply text-lg font-semibold mb-2;
+    color: #e2e8f0;
 }
 
 .tcc-active-empty-text {
-    @apply text-sm text-slate-600 dark:text-slate-400 mb-6;
+    @apply text-sm mb-6;
+    color: rgba(148, 163, 184, 0.8);
 }
 
 /* ========================================
@@ -110,25 +154,35 @@
 }
 
 .tcc-tab {
-    @apply px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200;
-    @apply border border-slate-200 dark:border-slate-800;
-    @apply text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900/50;
-    @apply hover:border-emerald-300 dark:hover:border-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/5;
-    @apply cursor-pointer;
+    @apply px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer;
+    background: rgba(30, 36, 53, 0.6);
+    border: 1px solid rgba(0, 243, 255, 0.15);
+    color: rgba(148, 163, 184, 0.9);
+}
+
+.tcc-tab:hover {
+    border-color: rgba(0, 243, 255, 0.4);
+    color: #00f3ff;
+    background: rgba(0, 243, 255, 0.05);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
 }
 
 .tcc-tab.active {
-    @apply border-emerald-500 bg-emerald-500 text-white;
-    @apply hover:bg-emerald-600 hover:border-emerald-600;
+    background: rgba(0, 243, 255, 0.12);
+    border-color: rgba(0, 243, 255, 0.5);
+    color: #00f3ff;
+    box-shadow: 0 0 14px rgba(0, 243, 255, 0.2);
 }
 
 .tcc-tab-count {
     @apply ml-2 px-2 py-0.5 rounded-full text-xs font-bold;
-    @apply bg-white/20;
+    background: rgba(0, 243, 255, 0.15);
+    color: rgba(0, 243, 255, 0.9);
 }
 
 .tcc-tab:not(.active) .tcc-tab-count {
-    @apply bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300;
+    background: rgba(30, 36, 53, 0.8);
+    color: rgba(148, 163, 184, 0.7);
 }
 
 /* ========================================
@@ -139,9 +193,27 @@
 }
 
 .tcc-card {
-    @apply bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800;
-    @apply rounded-2xl p-5 shadow-sm transition-all duration-200;
-    @apply hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700;
+    background: rgba(26, 26, 46, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 243, 255, 0.15);
+    @apply rounded-2xl p-5 transition-all duration-300 relative overflow-hidden;
+}
+
+.tcc-card::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0, 243, 255, 0.06) 0%, transparent 70%);
+}
+
+.tcc-card:hover {
+    border-color: rgba(0, 243, 255, 0.4);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.12), 0 8px 32px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.tcc-card:hover::before {
+    opacity: 1;
 }
 
 .tcc-card-header {
@@ -149,7 +221,8 @@
 }
 
 .tcc-card-title {
-    @apply text-base font-bold text-slate-900 dark:text-slate-100;
+    @apply text-base font-bold;
+    color: #f1f5f9;
 }
 
 .tcc-card-status-badge {
@@ -157,23 +230,31 @@
 }
 
 .tcc-card-status-badge.status-active {
-    @apply bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300;
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    color: #00f3ff;
 }
 
 .tcc-card-status-badge.status-draft {
-    @apply bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300;
+    background: rgba(30, 36, 53, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: rgba(148, 163, 184, 0.8);
 }
 
 .tcc-card-status-badge.status-archived {
-    @apply bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300;
+    background: rgba(181, 55, 242, 0.1);
+    border: 1px solid rgba(181, 55, 242, 0.3);
+    color: #b537f2;
 }
 
 .tcc-card-description {
-    @apply text-sm text-slate-600 dark:text-slate-400 mb-4;
+    @apply text-sm mb-4;
+    color: rgba(148, 163, 184, 0.8);
 }
 
 .tcc-card-meta {
-    @apply grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-slate-200 dark:border-slate-800;
+    @apply grid grid-cols-2 gap-3 mb-4 pb-4;
+    border-bottom: 1px solid rgba(0, 243, 255, 0.08);
 }
 
 .tcc-card-meta-item {
@@ -181,11 +262,14 @@
 }
 
 .tcc-card-meta-icon {
-    @apply w-4 h-4 text-emerald-500;
+    @apply w-4 h-4;
+    color: #00f3ff;
+    filter: drop-shadow(0 0 3px rgba(0, 243, 255, 0.5));
 }
 
 .tcc-card-meta-text {
-    @apply text-xs text-slate-600 dark:text-slate-400;
+    @apply text-xs;
+    color: rgba(148, 163, 184, 0.8);
 }
 
 .tcc-card-tags {
@@ -194,7 +278,9 @@
 
 .tcc-card-tag {
     @apply px-2 py-1 rounded-md text-xs font-medium;
-    @apply bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300;
+    background: rgba(30, 36, 53, 0.8);
+    border: 1px solid rgba(0, 243, 255, 0.1);
+    color: rgba(148, 163, 184, 0.8);
 }
 
 .tcc-card-footer {
@@ -204,27 +290,48 @@
 .tcc-card-action {
     @apply inline-flex items-center justify-center px-3 py-2 rounded-xl;
     @apply text-sm font-semibold transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
+    @apply focus:outline-none;
 }
 
 .tcc-card-action-primary {
     @apply tcc-card-action;
-    @apply bg-emerald-500 text-white hover:bg-emerald-600;
-    @apply focus:ring-emerald-500;
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.2) 0%, rgba(0, 243, 255, 0.12) 100%);
+    border: 1px solid rgba(0, 243, 255, 0.4);
+    color: #00f3ff;
+    box-shadow: 0 0 8px rgba(0, 243, 255, 0.1);
+}
+
+.tcc-card-action-primary:hover {
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.3) 0%, rgba(0, 243, 255, 0.2) 100%);
+    border-color: rgba(0, 243, 255, 0.7);
+    box-shadow: 0 0 16px rgba(0, 243, 255, 0.25);
+    transform: scale(1.02);
 }
 
 .tcc-card-action-secondary {
     @apply tcc-card-action;
-    @apply border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/50;
-    @apply text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800;
-    @apply focus:ring-slate-500;
+    background: rgba(30, 36, 53, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: rgba(148, 163, 184, 0.9);
+}
+
+.tcc-card-action-secondary:hover {
+    border-color: rgba(0, 243, 255, 0.3);
+    color: #00f3ff;
+    background: rgba(0, 243, 255, 0.06);
 }
 
 .tcc-card-action-danger {
     @apply tcc-card-action;
-    @apply border border-rose-500 text-rose-600 dark:text-rose-400;
-    @apply hover:bg-rose-50 dark:hover:bg-rose-500/10;
-    @apply focus:ring-rose-500;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: rgba(252, 165, 165, 0.9);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.tcc-card-action-danger:hover {
+    border-color: rgba(239, 68, 68, 0.5);
+    background: rgba(239, 68, 68, 0.12);
+    color: #fca5a5;
 }
 
 /* ========================================
@@ -232,12 +339,21 @@
    ======================================== */
 .tcc-template-card {
     @apply tcc-card;
-    @apply border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/30 dark:bg-indigo-950/20;
+    border-color: rgba(181, 55, 242, 0.2);
+    background: rgba(26, 20, 40, 0.65);
+}
+
+.tcc-template-card:hover {
+    border-color: rgba(181, 55, 242, 0.45);
+    box-shadow: 0 0 20px rgba(181, 55, 242, 0.12), 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .tcc-template-badge {
     @apply px-2.5 py-1 rounded-lg text-xs font-semibold;
-    @apply bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300;
+    background: rgba(181, 55, 242, 0.12);
+    border: 1px solid rgba(181, 55, 242, 0.3);
+    color: #b537f2;
+    text-shadow: 0 0 6px rgba(181, 55, 242, 0.4);
 }
 
 /* ========================================
@@ -248,11 +364,22 @@
 }
 
 .tcc-search-input {
-    @apply flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700;
-    @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100;
-    @apply placeholder:text-slate-400 dark:placeholder:text-slate-500;
-    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500;
+    @apply flex-1 px-4 py-2.5 rounded-xl;
+    background: rgba(26, 26, 46, 0.7);
+    border: 1px solid rgba(0, 243, 255, 0.15);
+    color: #e2e8f0;
     @apply transition-all duration-200;
+}
+
+.tcc-search-input::placeholder {
+    color: rgba(148, 163, 184, 0.5);
+}
+
+.tcc-search-input:focus {
+    outline: none;
+    border-color: rgba(0, 243, 255, 0.5);
+    box-shadow: 0 0 12px rgba(0, 243, 255, 0.15);
+    background: rgba(26, 26, 46, 0.85);
 }
 
 .tcc-filter-group {
@@ -260,41 +387,68 @@
 }
 
 .tcc-filter-chip {
-    @apply px-3 py-2 rounded-xl text-sm font-medium border cursor-pointer;
+    @apply px-3 py-2 rounded-xl text-sm font-medium cursor-pointer;
     @apply transition-all duration-200;
-    @apply border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300;
-    @apply hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10;
+    background: rgba(30, 36, 53, 0.6);
+    border: 1px solid rgba(0, 243, 255, 0.15);
+    color: rgba(148, 163, 184, 0.9);
+}
+
+.tcc-filter-chip:hover {
+    border-color: rgba(0, 243, 255, 0.4);
+    color: #00f3ff;
+    background: rgba(0, 243, 255, 0.06);
 }
 
 .tcc-filter-chip.active {
-    @apply border-emerald-500 bg-emerald-500 text-white;
+    background: rgba(0, 243, 255, 0.12);
+    border-color: rgba(0, 243, 255, 0.5);
+    color: #00f3ff;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
 }
 
 /* ========================================
    Preview Modal
    ======================================== */
 .tcc-preview-overlay {
-    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50;
+    @apply fixed inset-0 z-50;
+    background: rgba(10, 10, 20, 0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     @apply flex items-center justify-center p-4;
 }
 
 .tcc-preview-modal {
-    @apply bg-white dark:bg-slate-900 rounded-2xl shadow-2xl;
-    @apply w-full max-w-4xl max-h-[90vh] overflow-hidden;
-    @apply border border-slate-200 dark:border-slate-800;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 243, 255, 0.25);
+    box-shadow: 0 0 40px rgba(0, 243, 255, 0.1), 0 25px 60px rgba(0, 0, 0, 0.5);
+    @apply w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl;
 }
 
 .tcc-preview-header {
-    @apply flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800;
+    @apply flex items-center justify-between p-6;
+    border-bottom: 1px solid rgba(0, 243, 255, 0.12);
+    background: rgba(0, 243, 255, 0.02);
 }
 
 .tcc-preview-title {
-    @apply text-xl font-bold text-slate-900 dark:text-slate-100;
+    @apply text-xl font-bold;
+    color: #f1f5f9;
+    text-shadow: 0 0 6px rgba(0, 243, 255, 0.2);
 }
 
 .tcc-preview-close {
-    @apply p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200;
-    @apply hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200;
+    @apply p-2 rounded-xl transition-all duration-200;
+    color: rgba(148, 163, 184, 0.7);
+    border: 1px solid transparent;
+}
+
+.tcc-preview-close:hover {
+    border-color: rgba(0, 243, 255, 0.3);
+    color: #00f3ff;
+    background: rgba(0, 243, 255, 0.08);
 }
 
 .tcc-preview-body {
@@ -306,11 +460,14 @@
 }
 
 .tcc-preview-day {
-    @apply bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3;
+    background: rgba(26, 26, 46, 0.6);
+    border: 1px solid rgba(0, 243, 255, 0.1);
+    @apply rounded-xl p-3;
 }
 
 .tcc-preview-day-header {
-    @apply text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2;
+    @apply text-sm font-semibold mb-2;
+    color: rgba(0, 243, 255, 0.9);
 }
 
 .tcc-preview-day-content {
@@ -318,12 +475,15 @@
 }
 
 .tcc-preview-workout {
-    @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700;
-    @apply rounded-lg p-2 text-xs text-slate-700 dark:text-slate-300;
+    background: rgba(0, 243, 255, 0.06);
+    border: 1px solid rgba(0, 243, 255, 0.15);
+    @apply rounded-lg p-2 text-xs;
+    color: rgba(226, 232, 240, 0.9);
 }
 
 .tcc-preview-rest {
-    @apply text-xs text-slate-500 dark:text-slate-400 italic;
+    @apply text-xs italic;
+    color: rgba(148, 163, 184, 0.5);
 }
 
 /* ========================================
@@ -331,56 +491,92 @@
    ======================================== */
 .tcc-btn-primary {
     @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl;
-    @apply font-semibold text-sm text-white;
-    @apply bg-gradient-to-r from-emerald-500 to-emerald-600;
-    @apply hover:from-emerald-600 hover:to-emerald-700;
-    @apply shadow-sm hover:shadow-md transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
+    @apply font-semibold text-sm transition-all duration-200;
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.2) 0%, rgba(0, 243, 255, 0.1) 100%);
+    border: 1px solid rgba(0, 243, 255, 0.45);
+    color: #00f3ff;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.12);
+}
+
+.tcc-btn-primary:hover {
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.3) 0%, rgba(0, 243, 255, 0.18) 100%);
+    border-color: rgba(0, 243, 255, 0.7);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.25), 0 0 40px rgba(0, 243, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.tcc-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 243, 255, 0.5);
 }
 
 .tcc-btn-secondary {
     @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl;
-    @apply font-semibold text-sm border border-slate-300 dark:border-slate-700;
-    @apply text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900/50;
-    @apply hover:bg-slate-50 dark:hover:bg-slate-800;
-    @apply transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
+    @apply font-semibold text-sm transition-all duration-200;
+    background: rgba(30, 36, 53, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: rgba(148, 163, 184, 0.9);
+}
+
+.tcc-btn-secondary:hover {
+    border-color: rgba(0, 243, 255, 0.3);
+    color: #00f3ff;
+    background: rgba(0, 243, 255, 0.06);
 }
 
 .tcc-btn-danger {
     @apply inline-flex items-center justify-center px-4 py-2.5 rounded-xl;
-    @apply font-semibold text-sm border border-rose-500;
-    @apply text-rose-600 dark:text-rose-400 bg-white dark:bg-slate-900/50;
-    @apply hover:bg-rose-50 dark:hover:bg-rose-500/10;
-    @apply transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
+    @apply font-semibold text-sm transition-all duration-200;
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: rgba(252, 165, 165, 0.9);
+}
+
+.tcc-btn-danger:hover {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.55);
+    color: #fca5a5;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.15);
 }
 
 /* ========================================
    Toggle Switches
    ======================================== */
 .tcc-toggle-label {
-    @apply flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800;
-    @apply bg-white/80 dark:bg-slate-950/40 px-3 py-2;
-    @apply text-sm font-semibold text-slate-700 dark:text-slate-200;
-    @apply shadow-sm cursor-pointer;
+    @apply flex items-center gap-3 rounded-xl;
+    background: rgba(26, 26, 46, 0.6);
+    border: 1px solid rgba(0, 243, 255, 0.12);
+    @apply px-3 py-2 text-sm font-semibold cursor-pointer transition-all duration-200;
+    color: rgba(226, 232, 240, 0.85);
+}
+
+.tcc-toggle-label:hover {
+    border-color: rgba(0, 243, 255, 0.25);
+    background: rgba(0, 243, 255, 0.04);
 }
 
 .tcc-toggle-switch {
-    @apply relative inline-flex h-5 w-9 items-center rounded-full;
-    @apply bg-slate-200 dark:bg-slate-700 transition;
+    @apply relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200;
+    background: rgba(30, 36, 53, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 .tcc-toggle-switch.checked {
-    @apply bg-emerald-500;
+    background: rgba(0, 243, 255, 0.25);
+    border-color: rgba(0, 243, 255, 0.5);
+    box-shadow: 0 0 8px rgba(0, 243, 255, 0.2);
 }
 
 .tcc-toggle-dot {
-    @apply inline-block h-4 w-4 translate-x-0.5 rounded-full bg-white transition;
+    @apply inline-block h-4 w-4 translate-x-0.5 rounded-full transition-transform duration-200;
+    background: rgba(148, 163, 184, 0.5);
 }
 
+.tcc-toggle-switch.checked .tcc-toggle-dot,
 .tcc-toggle-dot.checked {
     @apply translate-x-4;
+    background: #00f3ff;
+    box-shadow: 0 0 6px rgba(0, 243, 255, 0.8);
 }
 
 /* ========================================
@@ -389,6 +585,10 @@
 @media (max-width: 640px) {
     .tcc-insights-grid {
         @apply grid-cols-2;
+    }
+    
+    .tcc-insight-item:not(:last-child)::after {
+        display: none;
     }
     
     .tcc-card-grid {
@@ -425,4 +625,22 @@
 
 .tcc-fade-exit-active {
     @apply opacity-0 transition-opacity duration-200;
+}
+
+/* ========================================
+   Page-level header (neon gradient)
+   ======================================== */
+.tcc-page-title {
+    @apply text-3xl font-bold tracking-tight;
+    color: #f1f5f9;
+}
+
+.tcc-page-subtitle {
+    @apply mt-1 text-sm;
+    color: rgba(148, 163, 184, 0.75);
+}
+
+.tcc-section-title {
+    @apply text-lg font-semibold mb-4;
+    color: #e2e8f0;
 }
