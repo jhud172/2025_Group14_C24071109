@@ -1,0 +1,81 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Merch Shop', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold gradient-text">Merch Shop</h1>
+                <p class="mt-1 text-sm text-slate-400">Official Healthy Habits gear &amp; accessories.</p>
+            </div>
+            <a th:href="@{/profile/orders}"
+               class="btn btn--secondary text-sm">View My Orders</a>
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(products)}"
+             class="card-neon card--cyan p-10 text-center">
+            <p class="text-slate-400">No products available right now. Check back soon!</p>
+        </div>
+
+        <!-- Product grid -->
+        <div th:if="${!#lists.isEmpty(products)}"
+             class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+            <div th:each="product : ${products}"
+                 class="card-neon card--cyan flex flex-col overflow-hidden transition-all duration-200 hover:shadow-glow-sm">
+
+                <!-- Product image -->
+                <div class="aspect-square w-full overflow-hidden bg-slate-800">
+                    <img th:if="${product.imageUrl != null}"
+                         th:src="${product.imageUrl}"
+                         th:alt="${product.name}"
+                         class="h-full w-full object-cover" />
+                    <div th:if="${product.imageUrl == null}"
+                         class="flex h-full items-center justify-center">
+                        <svg class="h-16 w-16 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="flex flex-1 flex-col gap-2 p-4">
+                    <div class="flex items-start justify-between gap-2">
+                        <h2 class="text-base font-semibold text-white" th:text="${product.name}">Product Name</h2>
+                        <span th:if="${product.category != null}"
+                              class="shrink-0 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 px-2 py-0.5 text-[11px] text-neon-cyan"
+                              th:text="${product.category}">Category</span>
+                    </div>
+
+                    <p th:if="${product.description != null}"
+                       class="text-sm text-slate-400 line-clamp-2"
+                       th:text="${product.description}">Description</p>
+
+                    <div class="mt-auto flex items-center justify-between pt-3">
+                        <span class="text-lg font-bold text-neon-cyan"
+                              th:text="'£' + ${#numbers.formatDecimal(product.price, 1, 2)}">£0.00</span>
+                        <span th:if="${product.stockQuantity == 0}"
+                              class="text-xs text-red-400 font-semibold">Out of stock</span>
+                        <span th:if="${product.stockQuantity > 0 and product.stockQuantity <= 5}"
+                              class="text-xs text-amber-400 font-semibold"
+                              th:text="${product.stockQuantity} + ' left'">3 left</span>
+                    </div>
+
+                    <a th:if="${product.stockQuantity > 0}"
+                       th:href="@{/merch/{id}/buy(id=${product.id})}"
+                       class="btn btn--primary w-full text-sm mt-1">Buy Now</a>
+                    <button th:if="${product.stockQuantity == 0}"
+                            disabled
+                            class="btn w-full text-sm mt-1 opacity-50 cursor-not-allowed bg-slate-700 text-slate-400 border border-slate-600">
+                        Out of Stock
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</th:block>

@@ -20,6 +20,10 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTask
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.ThemePreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PaymentCards.SavedPaymentMethod;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PaymentCards.SavedPaymentMethodService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.MerchOrder;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.MerchOrderService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
@@ -49,6 +53,8 @@ public class ProfileController {
     private final FileStorageService profileImageStorageService;
     private final UserRepository userRepository;
     private final Clock clock;
+    private final SavedPaymentMethodService cardService;
+    private final MerchOrderService orderService;
 
     @Autowired
     private AuthHelper authHelper;
@@ -63,7 +69,9 @@ public class ProfileController {
                              LevelService levelService,
                              FileStorageService profileImageStorageService,
                              UserRepository userRepository,
-                             Clock clock) {
+                             Clock clock,
+                             SavedPaymentMethodService cardService,
+                             MerchOrderService orderService) {
         this.userService = userService;
         this.exerciseLogService = exerciseLogService;
         this.platformSubscriptionService = platformSubscriptionService;
@@ -74,6 +82,8 @@ public class ProfileController {
         this.profileImageStorageService = profileImageStorageService;
         this.userRepository = userRepository;
         this.clock = clock;
+        this.cardService = cardService;
+        this.orderService = orderService;
     }
 
     @GetMapping("/profile")
@@ -106,7 +116,24 @@ public class ProfileController {
         modelAndView.addObject("nextUsernameChangeAt", nextUsernameChangeAt);
         modelAndView.addObject("recentExportRequests", dataExportRequestService.getRecentRequests(user));
         modelAndView.addObject("today", LocalDate.now(clock));
+
+        // Payment cards & orders
+        List<SavedPaymentMethod> savedCards = cardService.getCardsForUser(user.getId());
+        List<MerchOrder> recentOrders = orderService.getOrdersForUser(user.getId());
+        modelAndView.addObject("savedCards", savedCards);
+        modelAndView.addObject("recentOrders", recentOrders);
+
         return modelAndView;
+    }
+
+    @GetMapping("/profile/orders")
+    public ModelAndView getOrders() {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return new ModelAndView("redirect:/login");
+        ModelAndView mav = new ModelAndView("merch/orders");
+        mav.addObject("orders", orderService.getOrdersForUser(user.getId()));
+        mav.addObject("user", user);
+        return mav;
     }
 
     @PostMapping("/profile/update")
