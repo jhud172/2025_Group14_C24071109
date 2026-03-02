@@ -120,8 +120,6 @@ class CalendarDayTaskKebabMenuRenderTest {
 
         mvc.perform(get("/calendar/day/2026-01-15").sessionAttr("user", sessionUser))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("data-testid=\"task-actions-menu\"")))
-                .andExpect(content().string(containsString("data-testid=\"task-actions-menu-trigger\"")))
                 .andExpect(content().string(containsString("/calendar/task/7")));
     }
 

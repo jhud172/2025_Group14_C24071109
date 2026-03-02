@@ -11,6 +11,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const minSwipeDistance = 50; // Minimum distance for a swipe
     const maxVerticalDistance = 100; // Maximum vertical movement allowed
 
+    /** Animate exit then navigate */
+    function navigateWithTransition(href) {
+        const mainContent = document.getElementById('day-main-content');
+        if (mainContent) {
+            mainContent.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+            mainContent.style.opacity = '0';
+            mainContent.style.transform = 'translateY(-6px)';
+        }
+        setTimeout(() => { window.location.href = href; }, 150);
+    }
+
     function handleSwipe() {
         const horizontalDistance = touchEndX - touchStartX;
         const verticalDistance = Math.abs(touchEndY - touchStartY);
@@ -23,11 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (horizontalDistance > 0) {
             // Swiped right - go to previous day
             const prevLink = document.querySelector('a[aria-label="Previous day"]');
-            if (prevLink) prevLink.click();
+            if (prevLink) navigateWithTransition(prevLink.href);
         } else {
             // Swiped left - go to next day
             const nextLink = document.querySelector('a[aria-label="Next day"]');
-            if (nextLink) nextLink.click();
+            if (nextLink) navigateWithTransition(nextLink.href);
         }
     }
 
@@ -53,11 +64,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === 'ArrowLeft') {
             e.preventDefault();
             const prevLink = document.querySelector('a[aria-label="Previous day"]');
-            if (prevLink) prevLink.click();
+            if (prevLink) navigateWithTransition(prevLink.href);
         } else if (e.key === 'ArrowRight') {
             e.preventDefault();
             const nextLink = document.querySelector('a[aria-label="Next day"]');
-            if (nextLink) nextLink.click();
+            if (nextLink) navigateWithTransition(nextLink.href);
         }
+    });
+
+    // Smooth transition on nav link clicks (prev/next day buttons)
+    document.querySelectorAll('a[aria-label="Previous day"], a[aria-label="Next day"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateWithTransition(link.href);
+        });
     });
 });

@@ -4,5 +4,7 @@ public enum DailyCompletionStatus {
     GREY,
     ORANGE,
     GREEN,
-    RED
+    RED,
+    /** Today is in progress (some items done, not all). Displayed in blue. */
+    BLUE
 }

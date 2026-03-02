@@ -23,6 +23,10 @@ public final class DailyCompletionCalculator {
             return DailyCompletionStatus.GREEN;
         }
         if (completedItems > 0 && completedItems < totalItems) {
+            // Distinguish today (in-progress = BLUE) from past partial (ORANGE)
+            if (date != null && today != null && date.equals(today)) {
+                return DailyCompletionStatus.BLUE;
+            }
             return DailyCompletionStatus.ORANGE;
         }
         return DailyCompletionStatus.GREY;

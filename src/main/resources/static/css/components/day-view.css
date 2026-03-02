@@ -540,6 +540,21 @@
   stroke: rgb(16, 185, 129);
 }
 
+/* Gold ring for fully completed day (GREEN status) */
+.ring-progress.ring-gold {
+  stroke: rgb(251, 191, 36);
+}
+
+/* Emerald ring for partially completed (ORANGE status) */
+.ring-progress.ring-emerald {
+  stroke: rgb(16, 185, 129);
+}
+
+/* Blue ring for today in-progress (BLUE status) */
+.ring-progress.ring-blue {
+  stroke: rgb(59, 130, 246);
+}
+
 .ring-progress.ring-orange {
   stroke: rgb(245, 158, 11);
 }
@@ -1612,4 +1627,57 @@
 
 .dark .timeline-event .timeline-qc-btn.is-done svg {
   stroke: rgb(15, 23, 42);
+}
+
+/* ===== Status Bar Colour Classes ===== */
+.day-status-gold {
+  background: linear-gradient(90deg, rgb(251, 191, 36), rgb(245, 158, 11));
+}
+.day-status-blue {
+  background: rgb(59, 130, 246);
+}
+.day-status-emerald {
+  background: rgb(16, 185, 129);
+}
+
+/* ===== Golden Medal Badge ===== */
+.day-gold-medal {
+  animation: medal-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes medal-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== Day Navigation Page Transition ===== */
+.day-page-enter {
+  animation: day-slide-in 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes day-slide-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Timeline: disable text selection ===== */
+.day-timeline, .timeline-grid, .timeline-hour-row, .timeline-slot {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ===== Workout Popup Close Button ===== */
+#workout-popup .rounded-2xl {
+  animation: popup-fade-in 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes popup-fade-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ===== Live clock in Timed Focus ===== */
+.timed-focus-clock {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
