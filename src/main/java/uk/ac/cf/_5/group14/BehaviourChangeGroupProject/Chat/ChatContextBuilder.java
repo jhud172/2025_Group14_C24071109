@@ -120,6 +120,34 @@ public class ChatContextBuilder {
         int doneItems = tasksDone + workoutsDone;
         int completionPct = totalItems > 0 ? (doneItems * 100) / totalItems : 0;
 
+        // Multi-day insights
+        int s7TasksDone = 0, s7TasksTotal = 0, s7WoDone = 0, s7WoTotal = 0, s7Missed = 0;
+        int s30TasksDone = 0, s30TasksTotal = 0, s30WoDone = 0, s30WoTotal = 0, s30Missed = 0;
+        String trendNote = null;
+        try {
+            LocalDate from7 = today.minusDays(6);
+            List<CalendarTask> tasks7 = calendarTaskRepository.findByUserAndDateBetween(user, from7, today);
+            s7TasksTotal = tasks7.size();
+            s7TasksDone = (int) tasks7.stream().filter(t -> Boolean.TRUE.equals(t.getCompleted())).count();
+            List<ScheduleOccurrence> occs7 = scheduleOccurrenceRepository.findByUserAndDateBetween(user, from7, today);
+            s7WoTotal = occs7.size();
+            s7WoDone = (int) occs7.stream().filter(ScheduleOccurrence::isCompleted).count();
+            s7Missed = s7WoTotal - s7WoDone;
+
+            LocalDate from30 = today.minusDays(29);
+            List<CalendarTask> tasks30 = calendarTaskRepository.findByUserAndDateBetween(user, from30, today);
+            s30TasksTotal = tasks30.size();
+            s30TasksDone = (int) tasks30.stream().filter(t -> Boolean.TRUE.equals(t.getCompleted())).count();
+            List<ScheduleOccurrence> occs30 = scheduleOccurrenceRepository.findByUserAndDateBetween(user, from30, today);
+            s30WoTotal = occs30.size();
+            s30WoDone = (int) occs30.stream().filter(ScheduleOccurrence::isCompleted).count();
+            s30Missed = s30WoTotal - s30WoDone;
+
+            trendNote = buildTrendNote(s7TasksDone, s7TasksTotal, s7WoDone, s7WoTotal);
+        } catch (Exception e) {
+            log.warn("Could not compute multi-day insights for chat summary", e);
+        }
+
         return new ChatSummaryDto(
                 greeting,
                 today.toString(),
@@ -130,8 +158,21 @@ public class ChatContextBuilder {
                 completionPct,
                 nextWorkoutName,
                 nextWorkoutDate,
-                streakDays
+                streakDays,
+                s7TasksDone, s7TasksTotal, s7WoDone, s7WoTotal, s7Missed,
+                s30TasksDone, s30TasksTotal, s30WoDone, s30WoTotal, s30Missed,
+                trendNote
         );
+    }
+
+    private String buildTrendNote(int tasksDone, int tasksTotal, int woDone, int woTotal) {
+        if (tasksTotal == 0 && woTotal == 0) return "No scheduled items in the last 7 days.";
+        int total = tasksTotal + woTotal;
+        int done = tasksDone + woDone;
+        int pct = total > 0 ? (done * 100) / total : 0;
+        if (pct >= 80) return "🔥 Great week — " + pct + "% completion rate!";
+        if (pct >= 50) return "📈 Solid effort this week (" + pct + "% done). Keep pushing!";
+        return "⚠️ Only " + pct + "% completed this week. Consider reducing workload or improving consistency.";
     }
 
     private String computeGreeting(LocalTime now, User user) {

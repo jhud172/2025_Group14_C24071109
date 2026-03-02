@@ -245,16 +245,22 @@ public class WorkoutPlayerController {
         view.setGroupKey(ex.getGroupKey());
         view.setNotes(ex.getNotes());
 
-        // Resolve exercise name
+        // Resolve exercise name and demo URL
         if (ex.getExerciseId() != null) {
             exerciseRepository.findById(ex.getExerciseId()).ifPresent(e -> {
                 view.setExerciseName(e.getName());
                 view.setExerciseCategory(e.getCategory());
+                if (e.getVideoUrl() != null && !e.getVideoUrl().isBlank()) {
+                    view.setDemoUrl(e.getVideoUrl());
+                }
             });
         } else if (ex.getCustomExerciseId() != null) {
             customExerciseRepository.findById(ex.getCustomExerciseId()).ifPresent(e -> {
                 view.setExerciseName(e.getName());
                 view.setExerciseCategory(e.getCategory());
+                if (e.getVideoUrl() != null && !e.getVideoUrl().isBlank()) {
+                    view.setDemoUrl(e.getVideoUrl());
+                }
             });
         }
         if (view.getExerciseName() == null) {

@@ -85,7 +85,29 @@ public class ChatContextService {
         Integer points = lpOpt.map(lp -> lp.getPoints()).orElse(null);
         Integer level = lpOpt.map(lp -> lp.getLevel()).orElse(null);
 
-        return new ChatContext(today, req, todaysTasks, todaysScheduled, reqItems, recentWorkouts, recentNotes, points, level);
+        // Multi-day insights for AI context
+        ChatContext.MultiDayInsights multiDayInsights = null;
+        try {
+            LocalDate from7 = today.minusDays(6);
+            List<CalendarTask> tasks7 = calendarTaskRepository.findByUserAndDateBetween(user, from7, today);
+            int t7Total = tasks7.size();
+            int t7Done = (int) tasks7.stream().filter(t -> Boolean.TRUE.equals(t.getCompleted())).count();
+            List<ScheduleOccurrence> occs7 = scheduleOccurrenceRepository.findByUserAndDateBetween(user, from7, today);
+            int w7Total = occs7.size();
+            int w7Done = (int) occs7.stream().filter(ScheduleOccurrence::isCompleted).count();
+            int w7Missed = w7Total - w7Done;
+            int total7 = t7Total + w7Total;
+            int done7 = t7Done + w7Done;
+            int pct7 = total7 > 0 ? (done7 * 100) / total7 : 0;
+            String trend = pct7 >= 80 ? "Great week – " + pct7 + "% completion."
+                    : pct7 >= 50 ? "Solid week – " + pct7 + "% done."
+                    : "Challenging week – only " + pct7 + "% completion.";
+            multiDayInsights = new ChatContext.MultiDayInsights(7, t7Done, t7Total, w7Done, w7Total, w7Missed, trend);
+        } catch (Exception e) {
+            log.warn("Could not compute multi-day insights for chat context", e);
+        }
+
+        return new ChatContext(today, req, todaysTasks, todaysScheduled, reqItems, recentWorkouts, recentNotes, points, level, multiDayInsights);
     }
 
     private List<String> summarizeTasks(List<CalendarTask> tasks) {

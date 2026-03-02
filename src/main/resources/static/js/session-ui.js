@@ -466,10 +466,26 @@
         if (!exerciseItem) return;
 
         var name = exerciseItem.dataset.exerciseName || 'Exercise';
+        var demoUrl = exerciseItem.dataset.demoUrl || '';
 
         if (placeholder) placeholder.classList.add('wsu-hidden');
         if (editorContent) editorContent.classList.remove('wsu-hidden');
         if (titleEl) titleEl.textContent = name;
+
+        // Render demo link in the editor header
+        var editorHeader = editorContent.querySelector('.wsu-pro-editor-header');
+        var existingDemo = editorHeader ? editorHeader.querySelector('.wsu-demo-btn') : null;
+        if (existingDemo) existingDemo.remove();
+        if (demoUrl && editorHeader) {
+            var demoLink = document.createElement('a');
+            demoLink.href = demoUrl;
+            demoLink.target = '_blank';
+            demoLink.rel = 'noopener noreferrer';
+            demoLink.className = 'wsu-demo-btn';
+            demoLink.title = 'Watch exercise demo';
+            demoLink.innerHTML = '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"/></svg> Demo';
+            editorHeader.appendChild(demoLink);
+        }
 
         // Re-render sets from server data on exercise selection
         apiFetch('/workout-sessions/' + SESSION_ID + '/data', 'GET')
