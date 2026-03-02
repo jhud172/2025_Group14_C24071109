@@ -708,7 +708,40 @@ document.addEventListener("DOMContentLoaded", () => {
         return "heat-high";
     }
 
-    function applySummaryToPane(pane, summaries) {
+    const weekStatsBar = document.getElementById("week-stats-bar");
+
+    function updateWeekStatsBar(summaries) {
+        if (!weekStatsBar) return;
+        const workoutDays = summaries.filter((s) => s.hasWorkout).length;
+        const daysWithNutrition = summaries.filter((s) => s.hasNutrition).length;
+        const activeDays = summaries.filter((s) => s.loadScore > 0).length;
+        const maxLoad = summaries.reduce((max, s) => Math.max(max, s.loadScore), 0);
+
+        if (workoutDays === 0 && daysWithNutrition === 0 && activeDays === 0) {
+            weekStatsBar.classList.add("hidden");
+            return;
+        }
+
+        const bars = summaries.map((s) => {
+            const pct = maxLoad > 0 ? Math.round((s.loadScore / maxLoad) * 100) : 0;
+            const heatClass = heatClassFor(s.loadScore);
+            return `<div class="calendar-week-stats-bar__day" aria-label="${s.date}: load ${s.loadScore}">
+                <div class="calendar-week-stats-bar__fill ${heatClass}" style="height:${pct}%"></div>
+            </div>`;
+        }).join('');
+
+        weekStatsBar.innerHTML = `
+            <div class="calendar-week-stats-bar__meta">
+                ${workoutDays > 0 ? `<span class="calendar-week-stat"><span class="calendar-icon-dot"></span> ${workoutDays} workout${workoutDays !== 1 ? 's' : ''}</span>` : ''}
+                ${daysWithNutrition > 0 ? `<span class="calendar-week-stat"><svg class="calendar-week-stat__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v7"/><path d="M9 3v7"/><path d="M5 10h4"/><path d="M14 3c0 4 0 7 4 7v11"/></svg> ${daysWithNutrition} day${daysWithNutrition !== 1 ? 's' : ''} logged</span>` : ''}
+                ${activeDays > 0 ? `<span class="calendar-week-stat"><span style="font-size:0.75rem">⚡</span> ${activeDays} active day${activeDays !== 1 ? 's' : ''}</span>` : ''}
+            </div>
+            <div class="calendar-week-stats-bar__chart" aria-hidden="true">${bars}</div>
+        `;
+        weekStatsBar.classList.remove("hidden");
+    }
+
+    function applySummaryToPane(pane, summaries, isCurrentPane) {
         if (!pane) return;
         const summaryMap = new Map(summaries.map((item) => [item.date, item]));
 
@@ -737,6 +770,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         });
+
+        if (isCurrentPane) {
+            updateWeekStatsBar(summaries);
+        }
     }
 
     async function fetchHeatmapSummary(start, end) {
@@ -759,6 +796,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const weekYear = parseInt(pane.getAttribute("data-week-year") || "", 10);
         if (!Number.isFinite(week) || !Number.isFinite(weekYear)) return;
 
+        const isCurrentPane = week === currentWeek && weekYear === currentWeekYear;
+
         const startDate = getIsoWeekStart(weekYear, week);
         const endDate = new Date(startDate);
         endDate.setDate(startDate.getDate() + 6);
@@ -767,7 +806,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             const summary = await fetchHeatmapSummary(start, end);
-            applySummaryToPane(pane, summary);
+            applySummaryToPane(pane, summary, isCurrentPane);
         } catch (err) {
             console.error(err);
         }
