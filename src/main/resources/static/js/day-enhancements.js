@@ -414,6 +414,18 @@
             });
         });
 
+        // Stat pill navigation: clicking "Tasks left" / "Workouts left" switches to the relevant tab
+        document.querySelectorAll('[data-stat-tab-target]').forEach((btn) => {
+            const target = btn.getAttribute('data-stat-tab-target');
+            const tab = target ? tabs.find(t => t.dataset.tabTarget === target) : null;
+            if (!tab) return;
+            btn.addEventListener('click', () => {
+                activateTab(tab);
+                tab.focus();
+                tab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            });
+        });
+
         // Check URL hash for initial tab
         const hash = location.hash.replace('#', '');
         const hashTab = hash ? tabs.find(t => t.dataset.tabTarget === hash) : null;
