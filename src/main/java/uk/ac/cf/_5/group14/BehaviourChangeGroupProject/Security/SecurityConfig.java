@@ -83,7 +83,11 @@ public class SecurityConfig {
                                                    LogoutHandler logoutHandler,
                                                    AccessDeniedHandler accessDeniedHandler) throws Exception {
         http
-                .authorizeHttpRequests(request -> request
+                .authorizeHttpRequests(request -> {
+                        if (devModeProperties.isDevMode()) {
+                            request.requestMatchers("/profile/**").permitAll();
+                        }
+                        request
                         .requestMatchers(ENDPOINTS_WHITELIST).permitAll()
                         .requestMatchers("/confirm-logout").authenticated()
                 .requestMatchers("/trainer/**").hasRole("TRAINER")
@@ -92,7 +96,8 @@ public class SecurityConfig {
                 .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
                 .requestMatchers("/admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/dashboard").authenticated()
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated();
+                })
 
                 .formLogin(form -> form.loginPage("/login")
                     .permitAll()
