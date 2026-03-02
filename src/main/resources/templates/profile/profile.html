@@ -114,6 +114,13 @@
                     </svg>
                     <span th:text="#{profile.customise}">Edit Profile</span>
                 </button>
+                <a th:href="@{/profile/orders}"
+                   class="profile-btn-secondary flex items-center justify-center gap-2">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    View My Orders
+                </a>
                 <button type="button" id="open-settings-drawer"
                         class="profile-btn-secondary flex items-center justify-center gap-2">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -736,6 +743,131 @@
                     </div>
                 </div>
 
+                <!-- Payment & Cards -->
+                <div class="profile-settings-panel-section">
+                    <h3 class="profile-settings-panel-section-title">Payment &amp; Cards</h3>
+                    <p class="profile-settings-panel-section-subtitle">Manage saved payment methods. Only the last 4 digits are shown.</p>
+
+                    <!-- Flash -->
+                    <div th:if="${cardSuccess}"
+                         class="mt-3 rounded border border-neon-green/40 bg-neon-green/10 p-2 text-sm text-neon-green"
+                         th:text="${cardSuccess}"></div>
+                    <div th:if="${cardError}"
+                         class="mt-3 rounded border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-400"
+                         th:text="${cardError}"></div>
+
+                    <!-- Saved cards list -->
+                    <div th:if="${savedCards != null and !#lists.isEmpty(savedCards)}" class="mt-3 space-y-2">
+                        <div th:each="card : ${savedCards}"
+                             class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-700/50 bg-slate-800/40 px-4 py-3">
+                            <div>
+                                <span class="font-semibold text-white" th:text="${card.brand}">Visa</span>
+                                <span class="text-slate-400 text-sm" th:text="' •••• ' + ${card.lastFour}"> •••• 4242</span>
+                                <span th:if="${card.default}"
+                                      class="ml-2 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 px-2 py-0.5 text-xs text-neon-cyan">Default</span>
+                                <p class="text-xs text-slate-500 mt-0.5"
+                                   th:text="${card.cardHolderName} + ' · Exp ' + ${#strings.leftPad(card.expiryMonth, 2, '0')} + '/' + ${card.expiryYear}">Name · Exp 01/2030</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <form th:if="${!card.default}"
+                                      th:action="@{/profile/settings/cards/{id}/default(id=${card.id})}"
+                                      method="post">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" class="btn btn--secondary text-xs px-3 py-1">Set Default</button>
+                                </form>
+                                <button type="button"
+                                        th:attr="data-card-id=${card.id},
+                                                 data-holder=${card.cardHolderName},
+                                                 data-brand=${card.brand},
+                                                 data-month=${card.expiryMonth},
+                                                 data-year=${card.expiryYear},
+                                                 data-default=${card.default}"
+                                        onclick="openEditCard(this)"
+                                        class="btn btn--secondary text-xs px-3 py-1">Edit</button>
+                                <form th:action="@{/profile/settings/cards/{id}/delete(id=${card.id})}"
+                                      method="post"
+                                      onsubmit="return confirm('Remove this card?');">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit"
+                                            class="btn text-xs px-3 py-1 bg-red-900/40 border border-red-700/50 text-red-400 hover:bg-red-800/60">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <p th:if="${savedCards == null or #lists.isEmpty(savedCards)}"
+                       class="mt-3 text-sm text-slate-500">No saved cards yet.</p>
+
+                    <!-- Add new card -->
+                    <details class="group mt-4">
+                        <summary class="cursor-pointer text-sm font-semibold text-neon-cyan hover:underline select-none">
+                            + Add New Card
+                        </summary>
+                        <form th:action="@{/profile/settings/cards/add}" method="post"
+                              id="add-card-form-settings"
+                              class="mt-4 space-y-4 border-t border-slate-700/40 pt-4">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <input type="hidden" name="providerToken" id="addProviderTokenSettings" />
+                            <input type="hidden" name="lastFour" id="addLastFourSettings" />
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Cardholder Name *</label>
+                                <input type="text" name="cardHolderName" required maxlength="200"
+                                       class="input-field w-full" placeholder="Name on card" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Card Number *</label>
+                                <div class="relative">
+                                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                        <line x1="1" y1="10" x2="23" y2="10"/>
+                                    </svg>
+                                    <input type="text" id="addCardNumberDisplaySettings" required maxlength="19"
+                                           class="input-field w-full pl-9" placeholder="•••• •••• •••• ••••"
+                                           autocomplete="cc-number" inputmode="numeric"
+                                           oninput="this.value=this.value.replace(/[^\d\s]/g,'')"/>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Brand *</label>
+                                    <select name="brand" required class="input-field w-full">
+                                        <option value="">Select brand</option>
+                                        <option value="Visa">Visa</option>
+                                        <option value="Mastercard">Mastercard</option>
+                                        <option value="Amex">Amex</option>
+                                        <option value="Discover">Discover</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Expiry Month *</label>
+                                        <select name="expiryMonth" required class="input-field w-full">
+                                            <option value="">MM</option>
+                                            <option th:each="m : ${#numbers.sequence(1, 12)}"
+                                                    th:value="${m}"
+                                                    th:text="${#strings.leftPad(m, 2, '0')}">01</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Year *</label>
+                                        <input type="number" name="expiryYear" required
+                                               th:min="${#dates.year(#dates.createNow())}"
+                                               th:max="${#dates.year(#dates.createNow()) + 20}"
+                                               class="input-field w-full" placeholder="YYYY" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" name="makeDefault" id="addCardDefaultSettings"
+                                       class="h-4 w-4 rounded border-slate-600 bg-slate-800 text-neon-cyan" />
+                                <label for="addCardDefaultSettings" class="text-sm text-slate-300">Set as default card</label>
+                            </div>
+                            <button type="submit" class="btn btn--primary text-sm w-full">Save Card</button>
+                        </form>
+                    </details>
+                </div>
+
                 <!-- Danger zone -->
                 <div class="profile-danger-zone">
                     <h3 class="text-sm font-semibold text-rose-900 dark:text-rose-100">Delete account</h3>
@@ -754,131 +886,6 @@
             </div><!-- end panel body -->
         </aside>
     </div><!-- end settings drawer -->
-
-    <!-- ═══════════════════════════════════════════════════════════
-         PAYMENT CARDS SECTION (anchored via #cards)
-         ═══════════════════════════════════════════════════════════ -->
-    <div id="cards" class="mt-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <div class="card-neon card--cyan p-6">
-            <h2 class="text-lg font-bold text-white mb-1">Payment &amp; Cards</h2>
-            <p class="text-xs text-slate-400 mb-4">Manage saved payment methods. Only the last 4 digits are shown.</p>
-
-            <!-- Flash -->
-            <div th:if="${cardSuccess}"
-                 class="mb-3 rounded border border-neon-green/40 bg-neon-green/10 p-2 text-sm text-neon-green"
-                 th:text="${cardSuccess}"></div>
-            <div th:if="${cardError}"
-                 class="mb-3 rounded border border-red-500/40 bg-red-500/10 p-2 text-sm text-red-400"
-                 th:text="${cardError}"></div>
-
-            <!-- Saved cards list -->
-            <div th:if="${!#lists.isEmpty(savedCards)}" class="space-y-3 mb-5">
-                <div th:each="card : ${savedCards}"
-                     class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-700/50 bg-slate-800/40 px-4 py-3">
-                    <div>
-                        <span class="font-semibold text-white" th:text="${card.brand}">Visa</span>
-                        <span class="text-slate-400 text-sm"
-                              th:text="' •••• ' + ${card.lastFour}"> •••• 4242</span>
-                        <span th:if="${card.default}"
-                              class="ml-2 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 px-2 py-0.5 text-xs text-neon-cyan">Default</span>
-                        <p class="text-xs text-slate-500 mt-0.5"
-                           th:text="${card.cardHolderName} + ' · Exp ' + ${#strings.leftPad(card.expiryMonth, 2, '0')} + '/' + ${card.expiryYear}">Name · Exp 01/2030</p>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <!-- Set Default -->
-                        <form th:if="${!card.default}"
-                              th:action="@{/profile/settings/cards/{id}/default(id=${card.id})}"
-                              method="post">
-                            <button type="submit" class="btn btn--secondary text-xs px-3 py-1">Set Default</button>
-                        </form>
-                        <!-- Edit -->
-                        <button type="button"
-                                th:attr="data-card-id=${card.id},
-                                         data-holder=${card.cardHolderName},
-                                         data-brand=${card.brand},
-                                         data-month=${card.expiryMonth},
-                                         data-year=${card.expiryYear},
-                                         data-default=${card.default}"
-                                onclick="openEditCard(this)"
-                                class="btn btn--secondary text-xs px-3 py-1">Edit</button>
-                        <!-- Delete -->
-                        <form th:action="@{/profile/settings/cards/{id}/delete(id=${card.id})}"
-                              method="post"
-                              onsubmit="return confirm('Remove this card?');">
-                            <button type="submit"
-                                    class="btn text-xs px-3 py-1 bg-red-900/40 border border-red-700/50 text-red-400 hover:bg-red-800/60">Remove</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <p th:if="${#lists.isEmpty(savedCards)}"
-               class="text-sm text-slate-500 mb-4">No saved cards yet.</p>
-
-            <!-- Add new card -->
-            <details class="group">
-                <summary class="cursor-pointer text-sm font-semibold text-neon-cyan hover:underline select-none">
-                    + Add New Card
-                </summary>
-                <form th:action="@{/profile/settings/cards/add}" method="post"
-                      id="add-card-form"
-                      class="mt-4 space-y-4 border-t border-slate-700/40 pt-4">
-                    <!-- Hidden fields populated by JS before submit – raw PAN is never sent to the server -->
-                    <input type="hidden" name="providerToken" id="addProviderToken" />
-                    <input type="hidden" name="lastFour" id="addLastFour" />
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Cardholder Name *</label>
-                            <input type="text" name="cardHolderName" required maxlength="200"
-                                   class="input-field w-full" placeholder="Name on card" />
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Card Number *</label>
-                            <!-- Card number is collected only client-side; a stub token is generated and submitted instead -->
-                            <input type="text" id="addCardNumberDisplay" required maxlength="19"
-                                   class="input-field w-full" placeholder="•••• •••• •••• ••••"
-                                   autocomplete="cc-number" inputmode="numeric"
-                                   oninput="this.value=this.value.replace(/[^\d\s]/g,'')"/>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Brand *</label>
-                            <select name="brand" required class="input-field w-full">
-                                <option value="">Select brand</option>
-                                <option value="Visa">Visa</option>
-                                <option value="Mastercard">Mastercard</option>
-                                <option value="Amex">Amex</option>
-                                <option value="Discover">Discover</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Expiry Month *</label>
-                                <select name="expiryMonth" required class="input-field w-full">
-                                    <option value="">MM</option>
-                                    <option th:each="m : ${#numbers.sequence(1, 12)}"
-                                            th:value="${m}"
-                                            th:text="${#strings.leftPad(m, 2, '0')}">01</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Year *</label>
-                                <input type="number" name="expiryYear" required
-                                       th:min="${#dates.year(#dates.createNow())}"
-                                       th:max="${#dates.year(#dates.createNow()) + 20}"
-                                       class="input-field w-full" placeholder="YYYY" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" name="makeDefault" id="addCardDefault"
-                               class="h-4 w-4 rounded border-slate-600 bg-slate-800 text-neon-cyan" />
-                        <label for="addCardDefault" class="text-sm text-slate-300">Set as default card</label>
-                    </div>
-                    <button type="submit" class="btn btn--primary text-sm">Save Card</button>
-                </form>
-            </details>
-        </div>
-    </div>
 
     <!-- Edit Card Modal -->
     <div id="edit-card-modal"
@@ -997,10 +1004,10 @@
 
     // Add-card form: extract last4 + generate stub provider token before submit.
     // In production this would be replaced with a real payment-provider JS SDK.
-    var addCardForm = document.getElementById('add-card-form');
+    var addCardForm = document.getElementById('add-card-form-settings');
     if (addCardForm) {
         addCardForm.addEventListener('submit', function(e) {
-            var displayInput = document.getElementById('addCardNumberDisplay');
+            var displayInput = document.getElementById('addCardNumberDisplaySettings');
             var cleaned = displayInput.value.replace(/\s+/g, '');
             if (cleaned.length < 4) {
                 e.preventDefault();
@@ -1009,8 +1016,8 @@
             }
             var last4 = cleaned.slice(-4);
             var token = 'tok_' + last4 + '_' + Date.now();
-            document.getElementById('addLastFour').value = last4;
-            document.getElementById('addProviderToken').value = token;
+            document.getElementById('addLastFourSettings').value = last4;
+            document.getElementById('addProviderTokenSettings').value = token;
             // Clear the raw number so it is not sent to the server
             displayInput.value = '';
             displayInput.removeAttribute('required');

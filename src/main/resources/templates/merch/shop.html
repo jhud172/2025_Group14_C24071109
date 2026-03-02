@@ -1,16 +1,27 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Merch Shop', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Merch Shop', null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
 
         <!-- Header -->
-        <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold gradient-text">Merch Shop</h1>
-                <p class="mt-1 text-sm text-slate-400">Official Healthy Habits gear &amp; accessories.</p>
+                <h1 class="text-3xl font-bold gradient-text">One To One Store</h1>
+                <p class="mt-1 text-sm text-slate-400">Official One To One gear &amp; accessories.</p>
             </div>
-            <a th:href="@{/profile/orders}"
-               class="btn btn--secondary text-sm">View My Orders</a>
+        </div>
+
+        <!-- Search bar -->
+        <div th:if="${!#lists.isEmpty(products)}" class="mb-6">
+            <div class="relative max-w-md">
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input type="text" id="product-search"
+                       placeholder="Search products…"
+                       class="input-field w-full pl-9" />
+            </div>
         </div>
 
         <!-- Empty state -->
@@ -19,12 +30,19 @@
             <p class="text-slate-400">No products available right now. Check back soon!</p>
         </div>
 
+        <!-- No search results state -->
+        <div id="no-results" class="hidden card-neon card--cyan p-10 text-center">
+            <p class="text-slate-400">No products match your search.</p>
+        </div>
+
         <!-- Product grid -->
         <div th:if="${!#lists.isEmpty(products)}"
+             id="product-grid"
              class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
             <div th:each="product : ${products}"
-                 class="card-neon card--cyan flex flex-col overflow-hidden transition-all duration-200 hover:shadow-glow-sm">
+                 class="product-card card-neon card--cyan flex flex-col overflow-hidden transition-all duration-200 hover:shadow-glow-sm"
+                 th:attr="data-search=${product.name + ' ' + (product.description != null ? product.description : '') + ' ' + (product.category != null ? product.category : '')}">
 
                 <!-- Product image -->
                 <div class="aspect-square w-full overflow-hidden bg-slate-800">
@@ -76,6 +94,29 @@
             </div>
 
         </div>
+    </div>
+
+    <div th:fragment="pageScripts">
+        <script>
+        (function() {
+            var searchInput = document.getElementById('product-search');
+            var grid = document.getElementById('product-grid');
+            var noResults = document.getElementById('no-results');
+            if (!searchInput || !grid) return;
+            searchInput.addEventListener('input', function() {
+                var query = this.value.toLowerCase().trim();
+                var cards = grid.querySelectorAll('.product-card');
+                var visible = 0;
+                cards.forEach(function(card) {
+                    var text = (card.getAttribute('data-search') || '').toLowerCase();
+                    var show = !query || text.includes(query);
+                    card.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+                if (noResults) noResults.classList.toggle('hidden', visible > 0 || !query);
+            });
+        })();
+        </script>
     </div>
 
 </th:block>
