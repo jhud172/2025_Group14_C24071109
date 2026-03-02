@@ -148,6 +148,62 @@
         transform: translateY(0);
     }
 
+    /* Brand link - premium hover effect */
+    .nav-brand-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        margin: -0.25rem -0.5rem;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        text-decoration: none;
+    }
+
+    .nav-brand-link:hover {
+        background: rgba(16, 185, 129, 0.06);
+    }
+
+    .nav-brand-link:hover .nav-brand-logo {
+        transform: scale(1.06) rotate(-1deg);
+        filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.35));
+    }
+
+    .nav-brand-link:hover .nav-brand-name {
+        color: #10b981;
+    }
+
+    .nav-brand-logo {
+        height: 3rem;
+        width: auto;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s ease;
+        flex-shrink: 0;
+    }
+
+    .nav-brand-name {
+        transition: color 0.2s ease;
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: 0.025em;
+        color: rgb(15, 23, 42); /* slate-950 in light mode */
+    }
+
+    html.dark .nav-brand-name {
+        color: rgb(241, 245, 249); /* slate-100 in dark mode */
+    }
+
+    html.dark .nav-brand-link:hover {
+        background: rgba(16, 185, 129, 0.1);
+    }
+
+    html.dark .nav-brand-link:hover .nav-brand-logo {
+        filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.5));
+    }
+
+    html.dark .nav-brand-link:hover .nav-brand-name {
+        color: #34d399;
+    }
+
     /* Dark mode overrides (keeping for compatibility) */
     html.dark .navheader {
         background: rgba(15, 23, 42, 0.85);
