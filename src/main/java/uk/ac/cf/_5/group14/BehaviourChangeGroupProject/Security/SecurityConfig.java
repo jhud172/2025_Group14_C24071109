@@ -86,19 +86,35 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(request -> {
                         if (devModeProperties.isDevMode()) {
-                            request.requestMatchers("/profile/**").permitAll();
+                            // DEV MODE: Unauthenticated ("dev mode") users can browse most of the
+                            // site without logging in. The three sections below are explicitly
+                            // excluded from this open access and still enforce the same
+                            // authentication/role rules that apply in production.
+
+                            // Leaderboard (/levels/**): keep protected — not open in dev mode
+                            request.requestMatchers("/levels/**").authenticated()
+                            // Trainers area: trainer-facing pages keep TRAINER role requirement;
+                            // client-facing trainer directory keeps CLIENT/USER role requirement
+                            .requestMatchers("/trainer/**").hasRole("TRAINER")
+                            .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
+                            // Training Vault (/vault/**): keep protected — not open in dev mode
+                            .requestMatchers("/vault/**").authenticated()
+                            // All other routes: open to unauthenticated dev mode users
+                            .anyRequest().permitAll();
+                        } else {
+                            // Normal mode: keep existing security configuration unchanged.
+                            request
+                            .requestMatchers(ENDPOINTS_WHITELIST).permitAll()
+                            .requestMatchers("/confirm-logout").authenticated()
+                            .requestMatchers("/trainer/**").hasRole("TRAINER")
+                            .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
+                            .requestMatchers("/client/**").hasAnyRole("CLIENT", "USER")
+                            .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
+                            .requestMatchers("/admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
+                            .requestMatchers("/merch/**").authenticated()
+                            .requestMatchers("/dashboard").authenticated()
+                            .anyRequest().authenticated();
                         }
-                        request
-                        .requestMatchers(ENDPOINTS_WHITELIST).permitAll()
-                        .requestMatchers("/confirm-logout").authenticated()
-                .requestMatchers("/trainer/**").hasRole("TRAINER")
-                .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
-                .requestMatchers("/client/**").hasAnyRole("CLIENT", "USER")
-                .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
-                .requestMatchers("/admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/merch/**").authenticated()
-                .requestMatchers("/dashboard").authenticated()
-                        .anyRequest().authenticated();
                 })
 
                 .formLogin(form -> form.loginPage("/login")
