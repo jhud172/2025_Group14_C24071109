@@ -21,6 +21,8 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
 
     List<WorkoutSession> findByUserAndDateBetweenOrderByDateDesc(User user, LocalDate from, LocalDate to);
 
+    List<WorkoutSession> findByUserAndDateBetweenAndCompletedTrue(User user, LocalDate from, LocalDate to);
+
     @Query("select distinct ws.user from WorkoutSession ws where ws.date = :date and ws.completed = true")
     List<User> findDistinctUsersWithCompletedWorkouts(@Param("date") LocalDate date);
 }

@@ -55,4 +55,9 @@ public class WorkoutSessionServiceImpl implements WorkoutSessionService {
     public List<WorkoutSession> findByUserAndDate(User user, LocalDate date) {
         return repository.findByUserAndDate(user, date);
     }
+
+    @Override
+    public List<WorkoutSession> findCompletedByUserAndDateRange(User user, LocalDate from, LocalDate to) {
+        return repository.findByUserAndDateBetweenAndCompletedTrue(user, from, to);
+    }
 }
