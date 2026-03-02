@@ -18,6 +18,11 @@
                     <a th:href="@{'/calendar/day/' + ${today}}" class="calendar-view-btn">Day view</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
+                    <!-- Planning / Motivation toggle -->
+                    <div class="calendar-view-mode-toggle" role="group" aria-label="Calendar mode">
+                        <button type="button" id="btn-planning-mode" class="calendar-view-mode-btn active" aria-pressed="true">Planning View</button>
+                        <button type="button" id="btn-motivation-mode" class="calendar-view-mode-btn" aria-pressed="false">Motivation View</button>
+                    </div>
                     <div class="calendar-expand-toggle" aria-label="Expand month view">
                         <button type="button" id="month-expand-toggle" class="calendar-expand-toggle__btn" aria-pressed="false">Expand</button>
                     </div>
@@ -64,7 +69,8 @@
                 <a id="month-next" th:href="@{'/calendar?view=month&month=' + ${nextMonth} + '&year=' + ${nextYear}}" class="calendar-nav-btn">Next →</a>
             </div>
 
-            <div class="mt-6">
+            <!-- Planning view (existing) -->
+            <div id="planning-view-panel" class="mt-6">
                 <div id="month-carousel" class="month-carousel" role="region" aria-label="Calendar month carousel">
                     <div id="month-carousel-track" class="month-carousel__track">
                         <div class="calendar-month-container month-pane" th:fragment="monthPane"
@@ -72,6 +78,17 @@
                                       data-pane-year=${year},
                                       data-pane-month=${month},
                                       data-pane-key=${year + '-' + (month < 10 ? '0' + month : month)}">
+                            <!-- Sticker data for this month (read by JS sticker calendar module) -->
+                            <script type="application/json" class="sticker-pane-data" th:inline="javascript">
+                            {
+                                "sessions": /*[[${stickerSessionNames}]]*/ {},
+                                "pack": /*[[${stickerPack != null ? stickerPack.name() : 'STARS'}]]*/ "STARS",
+                                "target": /*[[${monthlyWorkoutTarget}]]*/ 12,
+                                "completed": /*[[${completedSessionCount}]]*/ 0,
+                                "year": /*[[${year}]]*/ 0,
+                                "month": /*[[${month}]]*/ 0
+                            }
+                            </script>
                             <div class="calendar-day-headers grid grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm">
                                 <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 1} ? ' calendar-weekday-pill--today' : ''">Mon</div>
                                 <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 2} ? ' calendar-weekday-pill--today' : ''">Tue</div>
@@ -207,9 +224,38 @@
                 </div>
             </div>
 
+            <!-- Motivation View (sticker calendar) — populated by JS -->
+            <div id="sticker-view-panel" aria-label="Motivation sticker calendar" style="display:none">
+                <!-- Monthly target progress bar -->
+                <div class="sticker-target-bar">
+                    <span class="sticker-target-label">Monthly goal:</span>
+                    <div class="sticker-target-progress-wrap" role="progressbar"
+                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div id="sticker-target-fill" class="sticker-target-progress-fill" style="width:0%"></div>
+                    </div>
+                    <span id="sticker-target-count" class="sticker-target-count">0 / 12</span>
+                </div>
+                <!-- Sticker pack selector -->
+                <div class="sticker-pack-selector mb-4" role="group" aria-label="Sticker style">
+                    <span class="sticker-pack-label">Style:</span>
+                    <button type="button" class="sticker-pack-btn active" data-pack="STARS" aria-pressed="true">⭐ Stars</button>
+                    <button type="button" class="sticker-pack-btn" data-pack="SPORT" aria-pressed="false">🏋️ Sport</button>
+                    <button type="button" class="sticker-pack-btn" data-pack="EMOJI" aria-pressed="false">🎉 Emoji</button>
+                </div>
+                <!-- Day header row (same as planning) -->
+                <div class="calendar-day-headers grid grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm mb-1">
+                    <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                </div>
+                <!-- Sticker grid (populated by JS) -->
+                <div id="sticker-month-grid" class="sticker-month-grid" aria-live="polite"></div>
+            </div>
+
             <div id="preview-card" class="fixed z-50 hidden max-w-xs rounded-2xl border border-white/10 bg-slate-900/95 p-4 text-slate-100 shadow-2xl opacity-0 transition-opacity duration-150"></div>
         </div>
     </div>
+
+    <!-- Sticker tooltip (populated by JS) -->
+    <div id="sticker-tooltip" class="sticker-tooltip" role="tooltip" aria-live="polite"></div>
 
     <!-- Schedule Drawer Fragment -->
     <div th:replace="~{calendar/fragments/schedule-drawer-month :: scheduleDrawer}"></div>
@@ -220,3 +266,4 @@
 </div>
 
 </th:block>
+

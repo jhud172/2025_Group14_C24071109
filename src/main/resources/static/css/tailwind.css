@@ -162,6 +162,34 @@
   /* Dark mode is the default for this theme */
 }
 
+/* Dark mode readability: use slate-200 (light gray, #e2e8f0) as default text
+   instead of slate-100 (#f1f5f9), reducing glare while keeping strong contrast */
+html.dark body {
+  @apply text-slate-200;
+  line-height: 1.65;
+}
+
+html.dark p,
+html.dark li,
+html.dark dd,
+html.dark td,
+html.dark label {
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+/* Respect prefers-reduced-motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Light mode overrides for accessibility */
 html:not(.dark) body {
   @apply bg-slate-50 text-slate-900;
@@ -209,7 +237,7 @@ html.dark [class~="bg-gray-100"] {
 /* Text */
 html.dark [class~="text-slate-900"],
 html.dark [class~="text-gray-900"] {
-  color: rgb(248, 250, 252); /* slate-50 */
+  color: rgb(241, 245, 249); /* slate-100 — off-white, not glaring pure white */
 }
 
 html.dark [class~="text-slate-800"],

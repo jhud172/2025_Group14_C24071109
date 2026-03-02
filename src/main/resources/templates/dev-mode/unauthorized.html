@@ -1,129 +1,162 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Dev Mode - Login Required', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('Login Required', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <th:block th:fragment="pageStyles">
         <style>
-            .unauthorized-container {
-                min-height: 60vh;
+            .dev-unauth-wrap {
+                min-height: 65vh;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 padding: 40px 20px;
             }
-            
-            .unauthorized-card {
-                background: white;
-                border-radius: 12px;
-                padding: 40px;
-                max-width: 600px;
+
+            .dev-unauth-card {
+                background: #ffffff;
+                border: 1.5px solid #e5e7eb;
+                border-radius: 20px;
+                padding: 48px 40px 40px;
+                max-width: 520px;
+                width: 100%;
                 text-align: center;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 32px rgba(0,0,0,.07);
             }
-            
-            .unauthorized-icon {
-                font-size: 64px;
-                margin-bottom: 20px;
-            }
-            
-            .unauthorized-card h1 {
-                font-size: 28px;
-                color: #111827;
-                margin-bottom: 12px;
-            }
-            
-            .unauthorized-card p {
-                color: #6b7280;
-                font-size: 16px;
-                line-height: 1.6;
+
+            .dev-unauth-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: #fef3c7;
+                border: 1px solid #fde68a;
+                color: #92400e;
+                padding: 4px 12px;
+                border-radius: 999px;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: .5px;
+                text-transform: uppercase;
                 margin-bottom: 24px;
             }
-            
-            .button-group {
+            .dev-unauth-badge-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #f59e0b;
+                animation: unaPulse 2s ease-in-out infinite;
+            }
+            @keyframes unaPulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: .4; }
+            }
+
+            .dev-unauth-icon {
+                font-size: 56px;
+                margin-bottom: 20px;
+                line-height: 1;
+            }
+
+            .dev-unauth-card h1 {
+                font-size: 24px;
+                font-weight: 700;
+                color: #111827;
+                margin: 0 0 12px;
+            }
+
+            .dev-unauth-card p {
+                font-size: 15px;
+                color: #6b7280;
+                line-height: 1.65;
+                margin: 0 0 28px;
+            }
+
+            .dev-unauth-actions {
                 display: flex;
-                gap: 12px;
+                gap: 10px;
                 justify-content: center;
                 flex-wrap: wrap;
             }
-            
-            .btn-primary, .btn-secondary {
-                padding: 12px 24px;
-                border-radius: 8px;
-                font-weight: 600;
-                text-decoration: none;
-                display: inline-block;
-                transition: all 0.3s ease;
-                border: none;
-                cursor: pointer;
-                font-size: 14px;
-            }
-            
-            .btn-primary {
+
+            .dev-btn-primary {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 11px 22px;
                 background: #10b981;
-                color: white;
+                color: #ffffff;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 14px;
+                text-decoration: none;
+                transition: background .2s, transform .2s, box-shadow .2s;
             }
-            
-            .btn-primary:hover {
+            .dev-btn-primary:hover {
                 background: #059669;
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 14px rgba(16,185,129,.3);
+                text-decoration: none;
+                color: #ffffff;
             }
-            
-            .btn-secondary {
+
+            .dev-btn-secondary {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 11px 22px;
+                background: #f3f4f6;
+                color: #374151;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 14px;
+                text-decoration: none;
+                transition: background .2s, transform .2s;
+            }
+            .dev-btn-secondary:hover {
                 background: #e5e7eb;
-                color: #111827;
+                transform: translateY(-1px);
+                text-decoration: none;
+                color: #374151;
             }
-            
-            .btn-secondary:hover {
-                background: #d1d5db;
-                transform: translateY(-2px);
+
+            /* Dark mode */
+            .dark .dev-unauth-card {
+                background: #1e293b;
+                border-color: #334155;
             }
-            
-            .info-section {
-                background: #f0fdf4;
-                border-left: 4px solid #10b981;
-                padding: 20px;
-                border-radius: 8px;
-                margin-top: 30px;
-                text-align: left;
-            }
-            
-            .info-section h3 {
-                color: #15803d;
-                margin-top: 0;
-                margin-bottom: 10px;
-            }
-            
-            .info-section p {
-                color: #166534;
-                margin: 0;
-            }
+            .dark .dev-unauth-card h1 { color: #f1f5f9; }
+            .dark .dev-unauth-card p  { color: #94a3b8; }
+            .dark .dev-btn-secondary  { background: #334155; color: #e2e8f0; }
+            .dark .dev-btn-secondary:hover { background: #475569; color: #f1f5f9; }
         </style>
     </th:block>
 
-    <div th:fragment="content" class="unauthorized-container">
-        <div class="unauthorized-card">
-            <div class="unauthorized-icon">🔐</div>
-            
-            <h1>This Page Requires Login</h1>
-            
-            <p>You're viewing a protected page in development mode. To see the actual content and data for this page, you'll need to log in with a user account.</p>
-            
-            <div class="button-group">
-                <a href="/dev-mode" class="btn-primary">⬅️ Back to Dev Hub</a>
-                <a href="/login" class="btn-secondary">🔓 Try Demo Login</a>
+    <div th:fragment="content" class="dev-unauth-wrap">
+        <div class="dev-unauth-card">
+
+            <div class="dev-unauth-badge">
+                <span class="dev-unauth-badge-dot"></span>
+                Development Mode
             </div>
-            
-            <div class="info-section">
-                <h3>💡 About Development Mode</h3>
-                <p>In development mode, you can explore the public pages of the application freely. Protected pages (dashboard, calendar, messages, etc.) still require authentication to display real user data. Try clicking on public pages like Home, Pricing, or Explore Trainers to see them in action!</p>
+
+            <div class="dev-unauth-icon">🔒</div>
+
+            <h1>Login Required</h1>
+            <p>This page needs an authenticated session to display content. Sign in to explore it with real data, or return to the Dev Hub to browse open pages.</p>
+
+            <div class="dev-unauth-actions">
+                <a href="/login" class="dev-btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Sign In
+                </a>
+                <a href="/dev-mode" class="dev-btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                    Dev Hub
+                </a>
             </div>
+
         </div>
     </div>
 
     <th:block th:fragment="pageScripts">
-        <script>
-            console.log('Unauthorized in dev mode');
-        </script>
     </th:block>
 
 </th:block>

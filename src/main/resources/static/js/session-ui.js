@@ -1,6 +1,6 @@
 /**
  * session-ui.js — Workout Session UI controller
- * Handles FLOW (one exercise per screen) and PROFESSIONAL (two-column) templates.
+ * Handles FLOW, FUTURISTIC_FLOW, PROFESSIONAL, PLAIN templates.
  * Communicates with backend via AJAX for set persistence.
  */
 (function () {
@@ -11,6 +11,7 @@
     const LAYOUT       = (boot.layoutType || 'FLOW').toUpperCase();
     const CSRF_HEADER  = boot.csrfHeader || 'X-CSRF-TOKEN';
     const CSRF_TOKEN   = boot.csrfToken  || '';
+    const ALLOW_NO_LOG = boot.allowCompletedWithoutLog !== false;
 
     if (!SESSION_ID) return;
 
@@ -292,18 +293,30 @@
                 if (elDur) elDur.textContent = formatTime(elapsed);
 
                 // Hide active panel, show summary
-                $$('#wsu-flow, #wsu-professional').forEach(function (el) { el.classList.add('wsu-hidden'); });
+                $$('#wsu-flow, #wsu-professional, #wsu-plain').forEach(function (el) { el.classList.add('wsu-hidden'); });
                 var summary = $('#wsu-summary');
                 if (summary) summary.classList.remove('wsu-hidden');
+
+                // Show "Add log" button if allowCompletedWithoutLog
+                var addLogBtn = $('#wsu-sum-add-log-btn');
+                if (addLogBtn) {
+                    if (ALLOW_NO_LOG) {
+                        addLogBtn.style.display = '';
+                    } else {
+                        addLogBtn.style.display = 'none';
+                    }
+                }
             })
             .catch(console.error);
     }
 
     function bindFinishButtons() {
-        var flowBtn = $('#wsu-flow-finish-btn');
-        var proBtn  = $('#wsu-pro-finish-btn');
-        if (flowBtn) flowBtn.addEventListener('click', finishSession);
-        if (proBtn)  proBtn.addEventListener('click',  finishSession);
+        var flowBtn  = $('#wsu-flow-finish-btn');
+        var proBtn   = $('#wsu-pro-finish-btn');
+        var plainBtn = $('#wsu-plain-finish-btn');
+        if (flowBtn)  flowBtn.addEventListener('click',  finishSession);
+        if (proBtn)   proBtn.addEventListener('click',   finishSession);
+        if (plainBtn) plainBtn.addEventListener('click', finishSession);
     }
 
     // ─── START SCREEN ────────────────────────────────────────────────────────
@@ -312,14 +325,26 @@
         var startScreen = $('#wsu-start-screen');
         if (startScreen) startScreen.classList.add('wsu-hidden');
 
+        // Apply FUTURISTIC CSS class for visual distinction
+        var root = $('#wsu-root');
+        if (root && LAYOUT === 'FUTURISTIC_FLOW') {
+            root.classList.add('wsu-futuristic');
+        }
+
         if (LAYOUT === 'PROFESSIONAL') {
             var proEl = $('#wsu-professional');
             if (proEl) {
                 proEl.classList.remove('wsu-hidden');
                 initProfessional();
             }
+        } else if (LAYOUT === 'PLAIN') {
+            var plainEl = $('#wsu-plain');
+            if (plainEl) {
+                plainEl.classList.remove('wsu-hidden');
+                initPlain();
+            }
         } else {
-            // FLOW (default)
+            // FLOW / FUTURISTIC_FLOW (default)
             var flowEl = $('#wsu-flow');
             if (flowEl) {
                 flowEl.classList.remove('wsu-hidden');
@@ -331,6 +356,8 @@
         bindAddSetButtons();
         bindRestControls();
         bindFinishButtons();
+        bindAddExerciseModal();
+        bindModeSelects();
         startElapsedTimer([
             $('#wsu-flow-elapsed'),
             $('#wsu-pro-elapsed')
@@ -439,10 +466,26 @@
         if (!exerciseItem) return;
 
         var name = exerciseItem.dataset.exerciseName || 'Exercise';
+        var demoUrl = exerciseItem.dataset.demoUrl || '';
 
         if (placeholder) placeholder.classList.add('wsu-hidden');
         if (editorContent) editorContent.classList.remove('wsu-hidden');
         if (titleEl) titleEl.textContent = name;
+
+        // Render demo link in the editor header
+        var editorHeader = editorContent.querySelector('.wsu-pro-editor-header');
+        var existingDemo = editorHeader ? editorHeader.querySelector('.wsu-demo-btn') : null;
+        if (existingDemo) existingDemo.remove();
+        if (demoUrl && editorHeader) {
+            var demoLink = document.createElement('a');
+            demoLink.href = demoUrl;
+            demoLink.target = '_blank';
+            demoLink.rel = 'noopener noreferrer';
+            demoLink.className = 'wsu-demo-btn';
+            demoLink.title = 'Watch exercise demo';
+            demoLink.innerHTML = '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"/></svg> Demo';
+            editorHeader.appendChild(demoLink);
+        }
 
         // Re-render sets from server data on exercise selection
         apiFetch('/workout-sessions/' + SESSION_ID + '/data', 'GET')
@@ -527,6 +570,199 @@
             proCurrentExerciseId = first.dataset.exerciseId;
             renderProSets(proCurrentExerciseId);
         }
+    }
+
+    // ─── PLAIN template ──────────────────────────────────────────────────────
+
+    function initPlain() {
+        var backBtn = $('#wsu-plain-back');
+        if (backBtn) backBtn.addEventListener('click', function () {
+            var plainEl = $('#wsu-plain');
+            if (plainEl) plainEl.classList.add('wsu-hidden');
+            var startEl = $('#wsu-start-screen');
+            if (startEl) startEl.classList.remove('wsu-hidden');
+        });
+    }
+
+    // ─── ADD EXERCISE MODAL ──────────────────────────────────────────────────
+
+    function openAddExerciseModal() {
+        var modal = $('#wsu-add-ex-modal');
+        if (modal) {
+            modal.classList.remove('wsu-hidden');
+            var idInput = $('#wsu-add-ex-id');
+            if (idInput) { idInput.value = ''; idInput.focus(); }
+            var notesInput = $('#wsu-add-ex-notes');
+            if (notesInput) notesInput.value = '';
+        }
+    }
+
+    function closeAddExerciseModal() {
+        var modal = $('#wsu-add-ex-modal');
+        if (modal) modal.classList.add('wsu-hidden');
+    }
+
+    function addExerciseToSession(exerciseId, notes) {
+        return apiFetch('/workout-sessions/' + SESSION_ID + '/exercises', 'POST', {
+            exerciseId: exerciseId || '',
+            notes: notes || ''
+        });
+    }
+
+    function appendExerciseToUI(exData) {
+        // FLOW: add a new slide
+        var slides = $('#wsu-flow-slides');
+        if (slides) {
+            var idx = $$('.wsu-flow-slide').length;
+            var html = '<div class="wsu-flow-slide" style="min-width:100%"'
+                + ' data-slide-index="' + idx + '"'
+                + ' data-exercise-id="' + escHtml(String(exData.id)) + '"'
+                + ' data-exercise-name="' + escHtml(exData.exerciseName || '') + '">'
+                + '<div class="wsu-flow-slide-header">'
+                + '<div class="wsu-flow-slide-num">' + (idx + 1) + '</div>'
+                + '<div class="wsu-flow-slide-info">'
+                + '<h2 class="wsu-flow-slide-name">' + escHtml(exData.exerciseName || 'Exercise') + '</h2>'
+                + '</div>'
+                + '<div class="wsu-ex-mode-controls">'
+                + '<select class="wsu-ex-mode-select" data-exercise-id="' + escHtml(String(exData.id)) + '" title="Set type">'
+                + '<option value="NORMAL" selected>Normal</option>'
+                + '<option value="SUPERSET">Superset</option>'
+                + '<option value="DROPSET">Drop Set</option>'
+                + '</select></div></div>'
+                + '<div class="wsu-flow-sets" data-exercise-id="' + escHtml(String(exData.id)) + '">'
+                + '<p class="wsu-flow-no-sets">No sets yet — add one below.</p>'
+                + '</div>'
+                + '<button type="button" class="wsu-add-set-btn" data-exercise-id="' + escHtml(String(exData.id)) + '">'
+                + '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>'
+                + 'Add set</button></div>';
+            slides.insertAdjacentHTML('beforeend', html);
+            var newSlide = slides.lastElementChild;
+            // Bind add set button
+            var addBtn = newSlide.querySelector('.wsu-add-set-btn');
+            if (addBtn) addBtn.addEventListener('click', function () {
+                var exId = addBtn.dataset.exerciseId;
+                persistAddSet(exId, null, null, null)
+                    .then(function (setData) {
+                        var container = slides.querySelector('.wsu-flow-sets[data-exercise-id="' + exId + '"]');
+                        if (container) {
+                            var noSets = container.querySelector('.wsu-flow-no-sets');
+                            if (noSets) noSets.remove();
+                            var index = container.querySelectorAll('[data-set-id]').length;
+                            container.insertAdjacentHTML('beforeend', buildSetRow(setData, index));
+                            bindSetRow(container.lastElementChild);
+                        }
+                        recalcStats();
+                    }).catch(console.error);
+            });
+            // Bind mode select
+            var modeSelect = newSlide.querySelector('.wsu-ex-mode-select');
+            if (modeSelect) bindModeSelect(modeSelect);
+            // Update counter
+            updateFlowSlide();
+        }
+
+        // PROFESSIONAL: add to sidebar list
+        var proList = $('#wsu-pro-exercise-list');
+        if (proList) {
+            var proIdx = $$('.wsu-pro-exercise-item').length;
+            var li = document.createElement('li');
+            li.className = 'wsu-pro-exercise-item';
+            li.dataset.exerciseId   = String(exData.id);
+            li.dataset.exerciseName = exData.exerciseName || 'Exercise';
+            li.dataset.exerciseIdx  = String(proIdx);
+            li.innerHTML = '<span class="wsu-pro-ex-check" data-ex-id="' + escHtml(String(exData.id)) + '">○</span>'
+                + '<span class="wsu-pro-ex-name">' + escHtml(exData.exerciseName || 'Exercise') + '</span>'
+                + '<span class="wsu-pro-ex-sets-count" data-ex-id="' + escHtml(String(exData.id)) + '">0 sets</span>'
+                + '<button type="button" class="wsu-pro-quick-add" data-exercise-id="' + escHtml(String(exData.id)) + '" title="Add set">+</button>';
+            li.addEventListener('click', function (e) {
+                if (e.target.closest('.wsu-pro-quick-add')) return;
+                $$('.wsu-pro-exercise-item').forEach(function (i) { i.classList.remove('wsu-pro-exercise-item--active'); });
+                li.classList.add('wsu-pro-exercise-item--active');
+                proCurrentExerciseId = li.dataset.exerciseId;
+                renderProSets(proCurrentExerciseId);
+            });
+            proList.appendChild(li);
+        }
+
+        // PLAIN: add exercise block
+        var plainBody = $('#wsu-plain .wsu-plain-body');
+        if (plainBody) {
+            var pIdx = $$('.wsu-plain-exercise').length;
+            var pDiv = document.createElement('div');
+            pDiv.className = 'wsu-plain-exercise';
+            pDiv.dataset.exerciseId   = String(exData.id);
+            pDiv.dataset.exerciseName = exData.exerciseName || 'Exercise';
+            pDiv.innerHTML = '<div class="wsu-plain-ex-header">'
+                + '<span class="wsu-plain-ex-num">' + (pIdx + 1) + '</span>'
+                + '<h3 class="wsu-plain-ex-name">' + escHtml(exData.exerciseName || 'Exercise') + '</h3>'
+                + '</div>'
+                + '<div class="wsu-flow-sets" data-exercise-id="' + escHtml(String(exData.id)) + '">'
+                + '<p class="wsu-flow-no-sets">No sets yet.</p>'
+                + '</div>'
+                + '<button type="button" class="wsu-add-set-btn" data-exercise-id="' + escHtml(String(exData.id)) + '">+ Add set</button>';
+            plainBody.appendChild(pDiv);
+            var plainAddBtn = pDiv.querySelector('.wsu-add-set-btn');
+            if (plainAddBtn) plainAddBtn.addEventListener('click', function () {
+                var exId = plainAddBtn.dataset.exerciseId;
+                persistAddSet(exId, null, null, null)
+                    .then(function (setData) {
+                        var container = pDiv.querySelector('.wsu-flow-sets');
+                        if (container) {
+                            var noSets = container.querySelector('.wsu-flow-no-sets');
+                            if (noSets) noSets.remove();
+                            var index = container.querySelectorAll('[data-set-id]').length;
+                            container.insertAdjacentHTML('beforeend', buildSetRow(setData, index));
+                            bindSetRow(container.lastElementChild);
+                        }
+                        recalcStats();
+                    }).catch(console.error);
+            });
+        }
+    }
+
+    function bindAddExerciseModal() {
+        var closeBtn   = $('#wsu-add-ex-close');
+        var confirmBtn = $('#wsu-add-ex-confirm');
+        var overlay    = $('#wsu-add-ex-modal');
+
+        if (closeBtn)  closeBtn.addEventListener('click',  closeAddExerciseModal);
+        if (overlay)   overlay.addEventListener('click', function (e) { if (e.target === overlay) closeAddExerciseModal(); });
+        if (confirmBtn) confirmBtn.addEventListener('click', function () {
+            var idEl    = $('#wsu-add-ex-id');
+            var notesEl = $('#wsu-add-ex-notes');
+            var exIdVal = idEl ? idEl.value : '';
+            var notes   = (notesEl && notesEl.value) ? notesEl.value : null;
+            var exId    = exIdVal ? parseInt(exIdVal, 10) : null;
+            addExerciseToSession(exId, notes)
+                .then(function (exData) {
+                    appendExerciseToUI(exData);
+                    closeAddExerciseModal();
+                })
+                .catch(function (err) {
+                    console.error('Failed to add exercise', err);
+                    alert('Could not add exercise. Please check the exercise ID.');
+                });
+        });
+
+        // Wire "Add Exercise" buttons
+        $$('.wsu-add-exercise-btn').forEach(function (btn) {
+            btn.addEventListener('click', openAddExerciseModal);
+        });
+    }
+
+    // ─── MODE SELECTS (superset / dropset) ───────────────────────────────────
+
+    function bindModeSelect(select) {
+        select.addEventListener('change', function () {
+            var exId = select.dataset.exerciseId;
+            var mode = select.value;
+            apiFetch('/workout-sessions/' + SESSION_ID + '/exercises/' + exId + '/mode', 'POST', { mode: mode })
+                .catch(console.error);
+        });
+    }
+
+    function bindModeSelects() {
+        $$('.wsu-ex-mode-select').forEach(bindModeSelect);
     }
 
     // ─── Init ────────────────────────────────────────────────────────────────

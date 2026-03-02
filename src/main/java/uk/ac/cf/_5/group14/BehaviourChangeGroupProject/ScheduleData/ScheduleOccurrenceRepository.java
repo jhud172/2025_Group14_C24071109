@@ -43,6 +43,9 @@ public interface ScheduleOccurrenceRepository extends JpaRepository<ScheduleOccu
     @Query("SELECT o FROM ScheduleOccurrence o WHERE o.user = :user AND o.date >= CURRENT_DATE")
     List<ScheduleOccurrence> findActiveByUser(User user);
 
+    @Query("SELECT o.date FROM ScheduleOccurrence o WHERE o.user = :user AND o.date BETWEEN :from AND :to AND o.completed = true")
+    List<LocalDate> findCompletedDatesByUserAndDateBetween(User user, LocalDate from, LocalDate to);
+
     void deleteBySchedule(Schedule schedule);
 
     void deleteByScheduleIdAndUserId(Long scheduleId, Long userId);
