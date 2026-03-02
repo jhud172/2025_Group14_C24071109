@@ -47,10 +47,10 @@
     </div>
 
     <!-- ========== WEEK CONTEXT STRIP ========== -->
-    <div class="day-week-strip mb-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-800 dark:bg-slate-950"
+    <div class="day-week-strip mb-5 overflow-x-auto rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-950"
          aria-label="Week navigation"
          th:with="weekStart=${date.minusDays(date.dayOfWeek.value - 1)}">
-        <div class="flex min-w-max items-center gap-1.5">
+        <div class="flex min-w-max items-center justify-center gap-2">
             <a th:href="@{'/calendar/day/' + ${#temporals.format(weekStart, 'yyyy-MM-dd')}}"
                class="day-week-btn"
                th:classappend="${date.equals(weekStart)} ? ' active' : ''"
@@ -137,17 +137,23 @@
 
                 <!-- Focus cards row -->
                 <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <!-- Timed Focus -->
-                    <section class="day-focus-card cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50/60 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60"
+                    <!-- Timed Focus with Live Clock -->
+                    <section class="day-focus-card cursor-not-allowed rounded-xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 px-4 py-4 shadow-sm dark:border-emerald-800 dark:from-emerald-950/40 dark:to-teal-950/40"
                              data-testid="timed-focus"
                              title="Timed Focus is automatic and can't be changed">
                         <div class="flex items-center justify-between gap-2">
-                            <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Timed Focus</h2>
-                            <span class="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">Auto &#183; Locked</span>
+                            <h2 class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Timed Focus</h2>
+                            <span class="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:bg-emerald-900 dark:text-emerald-300">Auto &#183; Locked</span>
                         </div>
-                        <p class="mt-1.5 text-sm font-semibold text-slate-800 dark:text-slate-200"
-                           data-testid="timed-focus-value"
-                           th:text="${timedFocus != null ? timedFocus.label : '—'}"></p>
+                        <div class="mt-2 flex items-baseline gap-3">
+                            <div id="live-clock" class="text-3xl font-bold tracking-tight text-emerald-900 dark:text-emerald-100 tabular-nums">
+                                --:-- --
+                            </div>
+                            <div class="text-lg font-semibold text-emerald-700 dark:text-emerald-300"
+                                 data-testid="timed-focus-value"
+                                 th:text="${timedFocus != null ? timedFocus.label : '—'}">
+                            </div>
+                        </div>
                     </section>
 
                     <!-- Daily Focus -->
@@ -213,6 +219,14 @@
                                class="mt-1 inline-flex w-fit items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
                                 choose preferences
                             </a>
+                            
+                            <div th:if="${hasAnyPreferences != null && hasAnyPreferences}"
+                                 class="mt-1 inline-flex w-fit items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-300">
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Preferences have been set
+                            </div>
                         </div>
                     </section>
                 </div>
@@ -316,7 +330,7 @@
             <div class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
                 <div class="flex items-start justify-between gap-3 border-b border-slate-200 p-4 dark:border-slate-800">
                     <div>
-                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Day Timeline</h2>
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Your Timeline for Today</h2>
                         <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Your tasks and workouts visualised across the day. Tasks with a set time appear in their time slots.</p>
                     </div>
                     <a th:href="@{'/calendar/focus/' + ${date}}"
@@ -344,55 +358,11 @@
             <section class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" data-testid="tasks-panel">
                 <header class="flex flex-col gap-3 border-b border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Tasks</h2>
-                        <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Your actions for the day.</p>
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Your Tasks for Today</h2>
+                        <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Track and complete your personalized actions for the day.</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <details id="tasks-config-details" class="relative" data-click-off-details>
-                            <summary id="tasks-configure"
-                                     class="inline-flex cursor-pointer list-none items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900 [&::-webkit-details-marker]:hidden">
-                                Configure
-                            </summary>
-
-                            <div class="absolute right-0 z-20 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-4 shadow-lg dark:border-slate-800 dark:bg-slate-950 sm:w-80">
-                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Task preferences</p>
-
-                                <form th:action="@{'/calendar/day/' + ${date} + '/task-preferences'}" method="post" class="mt-3 grid grid-cols-1 gap-3" data-ajax-form>
-                                    <input type="hidden" th:if="${_csrf != null}"
-                                           th:name="${_csrf.parameterName}"
-                                           th:value="${_csrf.token}"/>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="task-ordering">Order</label>
-                                        <select id="task-ordering"
-                                                name="ordering"
-                                                data-testid="task-ordering-select"
-                                                onchange="this.form.submit()"
-                                                class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                                            <option value="CHRONOLOGICAL"
-                                                    th:selected="${userSettings == null || userSettings.calendarTaskOrdering.name() == 'CHRONOLOGICAL'}">Chronological</option>
-                                            <option value="ALPHABETICAL"
-                                                    th:selected="${userSettings != null && userSettings.calendarTaskOrdering.name() == 'ALPHABETICAL'}">Alphabetical</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="task-layout">Layout</label>
-                                        <select id="task-layout"
-                                                name="layout"
-                                                data-testid="task-layout-select"
-                                                onchange="this.form.submit()"
-                                                class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                                            <option value="COMBINED_LIST"
-                                                    th:selected="${userSettings == null || userSettings.calendarTaskLayout.name() == 'COMBINED_LIST'}">Combined</option>
-                                            <option value="SEPARATED_BY_CATEGORY"
-                                                    th:selected="${userSettings != null && userSettings.calendarTaskLayout.name() == 'SEPARATED_BY_CATEGORY'}">Separated</option>
-                                        </select>
-                                    </div>
-                                </form>
-                            </div>
-                        </details>
                         <button type="button"
                                 id="open-add-task"
                                 data-testid="open-add-task"
@@ -572,40 +542,9 @@
             <section class="rounded-b-xl rounded-tr-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950" data-testid="workouts-panel">
         <header class="flex flex-col gap-3 border-b border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-start sm:justify-between">
             <div>
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Scheduled Workouts</h2>
-                <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Exercise sessions on your schedule.</p>
+                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Your Workouts for Today</h2>
+                <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300">Your personalized exercise sessions and training schedule.</p>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <details id="workouts-config-details" class="relative" data-click-off-details>
-                    <summary class="inline-flex cursor-pointer list-none items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 [&::-webkit-details-marker]:hidden">
-                        Configure
-                    </summary>
-
-                    <div class="absolute right-0 z-20 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-4 shadow-lg dark:border-slate-800 dark:bg-slate-950 sm:w-80">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Order & layout</p>
-                        <p class="mt-1 text-sm leading-5 text-slate-600 dark:text-slate-300">Applies to your scheduled workouts list.</p>
-
-                        <form th:action="@{'/calendar/day/' + ${date} + '/workout-preferences'}" method="post" class="mt-3 grid grid-cols-1 gap-3" data-ajax-form>
-                            <input type="hidden" th:if="${_csrf != null}"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}"/>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="workout-ordering">Order</label>
-                                <select id="workout-ordering"
-                                        name="ordering"
-                                        data-testid="workout-ordering-select"
-                                        onchange="this.form.submit()"
-                                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                                    <option value="SCHEDULE_ORDER"
-                                            th:selected="${userSettings == null || userSettings.calendarWorkoutOrdering.name() == 'SCHEDULE_ORDER'}">Schedule order</option>
-                                    <option value="ALPHABETICAL"
-                                            th:selected="${userSettings != null && userSettings.calendarWorkoutOrdering.name() == 'ALPHABETICAL'}">Alphabetical</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                </details>
             </div>
         </header>
 
@@ -690,38 +629,55 @@
                 <div class="divide-y divide-slate-100 dark:divide-slate-800">
 
                     <!-- Completion progress card -->
-                    <section class="p-5"
+                    <section class="p-6"
                              th:with="pct=${dayCompletionPercentage != null ? dayCompletionPercentage : 0}"
                              aria-label="Day completion">
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Completion</h2>
-                            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold"
-                                  th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' border-red-200 bg-red-50 text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200' : ' border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200')))">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Your Day Completion</h2>
+                            <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-semibold shadow-sm"
+                                  th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' border-amber-300 bg-gradient-to-r from-amber-50 to-amber-100 text-amber-900 dark:border-amber-700/50 dark:from-amber-950/40 dark:to-amber-900/40 dark:text-amber-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' border-blue-300 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-900 dark:border-blue-900/50 dark:from-blue-950/40 dark:to-blue-900/40 dark:text-blue-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' border-emerald-300 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-900 dark:border-emerald-900/50 dark:from-emerald-950/40 dark:to-emerald-900/40 dark:text-emerald-200' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' border-red-300 bg-gradient-to-r from-red-50 to-red-100 text-red-900 dark:border-red-900/50 dark:from-red-950/40 dark:to-red-900/40 dark:text-red-200' : ' border-slate-300 bg-gradient-to-r from-slate-50 to-slate-100 text-slate-700 dark:border-slate-700 dark:from-slate-900 dark:to-slate-800 dark:text-slate-200')))">
                                 <span class="sr-only">Day status</span>
-                                <span th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? '🏅 Complete' : (dayCompletionStatus.name() == 'BLUE' ? 'In progress' : (dayCompletionStatus.name() == 'ORANGE' ? 'Partial' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Not started')))) : 'Not started'}"></span>
+                                <span th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? '🏅 Complete' : (dayCompletionStatus.name() == 'BLUE' ? '⏳ In progress' : (dayCompletionStatus.name() == 'ORANGE' ? '⚠️ Partial' : (dayCompletionStatus.name() == 'RED' ? '🔴 Late' : '⭕ Not started')))) : '⭕ Not started'}"></span>
                             </span>
                         </div>
-                        <!-- Animated progress bar with hover tooltip -->
-                        <div class="progress-bar-wrap mt-4">
+                        
+                        <!-- Large percentage display -->
+                        <div class="mb-3 text-center">
+                            <div class="inline-flex items-baseline gap-1"
+                                 th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' text-amber-600 dark:text-amber-400' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' text-blue-600 dark:text-blue-400' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' text-emerald-600 dark:text-emerald-400' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' text-red-600 dark:text-red-400' : ' text-slate-600 dark:text-slate-400')))">
+                                <span class="text-5xl font-bold tabular-nums" th:text="${pct}">0</span>
+                                <span class="text-2xl font-semibold">%</span>
+                            </div>
+                            <p class="mt-1 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Complete</p>
+                        </div>
+                        
+                        <!-- Enhanced progress bar with gradient and shadow -->
+                        <div class="progress-bar-wrap relative mb-4">
                             <div class="progress-bar-tooltip"
                                  th:text="${(100 - pct) + '% remaining'}">0% remaining</div>
-                            <div class="h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" role="progressbar"
+                            <div class="relative h-5 w-full overflow-hidden rounded-full bg-slate-100 shadow-inner ring-1 ring-slate-200/50 dark:bg-slate-800 dark:ring-slate-700/50" 
+                                 role="progressbar"
                                  th:attr="aria-valuenow=${pct}, aria-valuemin=0, aria-valuemax=100">
-                                <div class="h-full rounded-full transition-all duration-700"
-                                     th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' bg-amber-400' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' bg-blue-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' bg-emerald-500' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-red-500' : ' bg-slate-400')))"
+                                <div class="h-full rounded-full shadow-lg transition-all duration-700 ease-out relative overflow-hidden"
+                                     th:classappend="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'} ? ' bg-gradient-to-r from-amber-400 to-amber-500 dark:from-amber-500 dark:to-amber-600' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE'} ? ' bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE'} ? ' bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700' : (${dayCompletionStatus != null && dayCompletionStatus.name() == 'RED'} ? ' bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700' : ' bg-gradient-to-r from-slate-400 to-slate-500 dark:from-slate-500 dark:to-slate-600')))"
                                      th:style="'width: ' + ${pct} + '%'">
+                                    <!-- Shine effect -->
+                                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-3 flex flex-wrap items-center justify-between gap-3"
-                             th:with="filledDotClass=${(dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN') ? ' bg-amber-400 dark:bg-amber-300' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE') ? ' bg-blue-500 dark:bg-blue-400' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE') ? ' bg-emerald-500 dark:bg-emerald-400' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'RED') ? ' bg-red-500 dark:bg-red-400' : ' bg-slate-400 dark:bg-slate-500')))}">
-                             <div class="completion-dots-container flex items-center gap-1" aria-hidden="true">
+                        
+                        <!-- Enhanced completion dots with larger size -->
+                        <div class="flex flex-wrap items-center justify-between gap-4"
+                             th:with="filledDotClass=${(dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN') ? ' bg-amber-500 ring-amber-300 dark:bg-amber-400 dark:ring-amber-500/30' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'BLUE') ? ' bg-blue-600 ring-blue-300 dark:bg-blue-500 dark:ring-blue-500/30' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'ORANGE') ? ' bg-emerald-600 ring-emerald-300 dark:bg-emerald-500 dark:ring-emerald-500/30' : ((dayCompletionStatus != null && dayCompletionStatus.name() == 'RED') ? ' bg-red-600 ring-red-300 dark:bg-red-500 dark:ring-red-500/30' : ' bg-slate-500 ring-slate-300 dark:bg-slate-400 dark:ring-slate-500/30')))}">
+                            <div class="completion-dots-container flex items-center gap-1.5" aria-hidden="true">
                                 <span th:each="i : ${#numbers.sequence(1, 10)}"
-                                      class="completion-dot h-2.5 w-2.5 rounded-full"
-                                      th:classappend="${pct >= (i * 10)} ? (' filled' + ${filledDotClass}) : ' bg-slate-200 dark:bg-slate-800'"></span>
+                                      class="completion-dot h-3 w-3 rounded-full transition-all duration-300"
+                                      th:classappend="${pct >= (i * 10)} ? (' filled ring-2' + ${filledDotClass}) : ' bg-slate-200 dark:bg-slate-700'"
+                                      th:title="${i * 10} + '% completion threshold'"></span>
                             </div>
-                            <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                <span th:text="${pct}"></span><span>%</span>
+                            <p class="text-xs font-medium text-slate-600 dark:text-slate-400">
+                                <span th:text="${100 - pct}">0</span><span>% remaining</span>
                             </p>
                         </div>
                     </section>
@@ -815,20 +771,20 @@
                     <section class="day-health-section p-5"
                  data-testid="day-health">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <h2 class="text-lg font-semibold text-orange-900 dark:text-orange-100">Day Health</h2>
-                <p class="text-xs font-semibold uppercase tracking-wide text-orange-700/80 dark:text-orange-200/80">Advisory</p>
+                <h2 class="text-lg font-semibold text-emerald-900 dark:text-emerald-100">Your Day Health</h2>
+                <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700/80 dark:text-emerald-200/80">Personalized Insights</p>
             </div>
 
             <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
                  th:if="${dayHealthPrimary == null || #strings.isEmpty(dayHealthPrimary)}">
-                <p class="text-sm text-orange-900/90 dark:text-orange-100/90">
+                <p class="text-sm text-emerald-900/90 dark:text-emerald-100/90">
                     Generate a one-time health check for this day.
                 </p>
                 <form th:action="@{'/calendar/day/' + ${date} + '/day-health/generate'}" method="post">
                     <input type="hidden" th:if="${_csrf != null}"
                            th:name="${_csrf.parameterName}"
                            th:value="${_csrf.token}"/>
-                    <button class="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                    <button class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                             data-testid="day-health-generate">
                         Generate
                     </button>
@@ -836,18 +792,42 @@
             </div>
 
             <th:block th:if="${dayHealthPrimary != null && !#strings.isEmpty(dayHealthPrimary)}">
-                <p class="mt-2 text-sm text-orange-900/90 dark:text-orange-100/90" data-testid="day-health-primary" th:text="${dayHealthPrimary}"></p>
+                <div class="mt-3 rounded-xl bg-emerald-50 border border-emerald-200 p-4 dark:bg-emerald-950/30 dark:border-emerald-800/50">
+                    <div class="flex items-start gap-3">
+                        <svg class="h-5 w-5 mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <p class="text-sm leading-relaxed text-emerald-900 dark:text-emerald-100" data-testid="day-health-primary" th:text="${dayHealthPrimary}"></p>
+                    </div>
+                </div>
 
-                <ul class="mt-3 list-disc space-y-1 pl-5 text-sm text-orange-900/90 dark:text-orange-100/90" data-testid="day-health-suggestions"
-                    th:if="${dayHealthSuggestions != null && dayHealthSuggestions.size() == 2}">
-                    <li th:each="s : ${dayHealthSuggestions}" th:text="${s}"></li>
-                </ul>
+                <div th:if="${dayHealthSuggestions != null && dayHealthSuggestions.size() == 2}"
+                     class="mt-3 rounded-xl bg-emerald-50/50 border border-emerald-100 p-4 dark:bg-emerald-950/20 dark:border-emerald-800/30">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300 mb-2">Suggestions</p>
+                    <ul class="space-y-2" data-testid="day-health-suggestions">
+                        <li th:each="s : ${dayHealthSuggestions}" 
+                            class="flex items-start gap-2 text-sm text-emerald-900/90 dark:text-emerald-100/90">
+                            <svg class="h-4 w-4 mt-0.5 shrink-0 text-emerald-500 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span th:text="${s}"></span>
+                        </li>
+                    </ul>
+                </div>
 
-                <p class="mt-3 text-sm font-semibold text-orange-900 dark:text-orange-100"
-                   data-testid="day-health-watchout"
-                   th:if="${dayHealthWatchOut != null && !#strings.isEmpty(dayHealthWatchOut)}">
-                    Watch out: <span class="font-normal text-orange-900/90 dark:text-orange-100/90" th:text="${dayHealthWatchOut}"></span>
-                </p>
+                <div th:if="${dayHealthWatchOut != null && !#strings.isEmpty(dayHealthWatchOut)}"
+                     class="mt-3 rounded-xl bg-amber-50 border border-amber-200 p-4 dark:bg-amber-950/30 dark:border-amber-800/50"
+                     data-testid="day-health-watchout">
+                    <div class="flex items-start gap-3">
+                        <svg class="h-5 w-5 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300 mb-1">Watch Out</p>
+                            <p class="text-sm text-amber-900/90 dark:text-amber-100/90" th:text="${dayHealthWatchOut}"></p>
+                        </div>
+                    </div>
+                </div>
             </th:block>
                     </section>
 

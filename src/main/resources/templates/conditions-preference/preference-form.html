@@ -4,21 +4,97 @@
     <div th:fragment="styles">
         <style>
             /* Step wizard */
-            .pref-step-panel { display: none; }
-            .pref-step-panel.pref-step-active { display: block; }
+            .pref-step-panel { 
+                display: none; 
+                opacity: 0;
+                transform: translateY(10px);
+                transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            }
+            .pref-step-panel.pref-step-active { 
+                display: block; 
+                animation: slideIn 0.4s ease-out forwards;
+            }
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            /* Respect prefers-reduced-motion */
+            @media (prefers-reduced-motion: reduce) {
+                .pref-step-panel {
+                    transition: none;
+                    animation: none;
+                }
+                .pref-step-panel.pref-step-active {
+                    opacity: 1;
+                    transform: none;
+                }
+            }
 
             /* Step indicator */
+            .pref-steps-container {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
+            }
+            .pref-step-labels {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                text-align: center;
+                gap: 0.5rem;
+            }
+            .pref-step-label {
+                font-size: 0.75rem;
+                color: #64748b;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+            .pref-step-label.active {
+                color: #10b981;
+                font-weight: 600;
+            }
+            html.dark .pref-step-label {
+                color: #64748b;
+            }
+            html.dark .pref-step-label.active {
+                color: #6ee7b7;
+            }
+            .pref-step-dots-row {
+                display: flex;
+                align-items: center;
+                padding: 0 0.5rem;
+            }
             .pref-step-dot {
                 display: flex; align-items: center; justify-content: center;
                 width: 2rem; height: 2rem; border-radius: 9999px;
                 font-size: 0.75rem; font-weight: 700;
                 border: 2px solid #cbd5e1; color: #94a3b8;
-                transition: all 0.2s; flex-shrink: 0;
+                transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+                flex-shrink: 0; position: relative; z-index: 2;
             }
-            .pref-step-dot.active { background: #10b981; border-color: #10b981; color: #fff; box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
+            .pref-step-dot.active {
+                background: #10b981; border-color: #10b981; color: #fff;
+                box-shadow: 0 0 0 4px rgba(16,185,129,0.2);
+                transform: scale(1.1);
+            }
             .pref-step-dot.done  { background: #10b981; border-color: #10b981; color: #fff; }
-            .pref-step-line { flex: 1; height: 2px; background: #e2e8f0; margin: 0 0.25rem; transition: background 0.3s; }
-            .pref-step-line.done { background: #10b981; }
+            .pref-step-line {
+                flex: 1; height: 2px; background: #e2e8f0; margin: 0 0.25rem;
+                transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+                position: relative; z-index: 1;
+            }
+            .pref-step-line.done {
+                background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            }
+            .pref-step-line.animating {
+                background: linear-gradient(90deg, #10b981 0%, #10b981 var(--progress, 0%), #e2e8f0 var(--progress, 0%));
+            }
 
             /* Custom toggle switch */
             .pref-toggle { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; }
@@ -71,28 +147,203 @@
             .pref-pill.pref-pill--active { border-color: #10b981 !important; background: #f0fdf4 !important; color: #065f46 !important; }
             html.dark .pref-pill.pref-pill--active { background: rgba(16,185,129,0.15) !important; color: #6ee7b7 !important; }
 
+            /* Info icon tooltips */
+            .pref-info-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 1rem;
+                height: 1rem;
+                margin-left: 0.375rem;
+                cursor: help;
+                color: #64748b;
+                transition: color 0.2s;
+                position: relative;
+            }
+            .pref-info-icon:hover {
+                color: #10b981;
+            }
+            html.dark .pref-info-icon {
+                color: #94a3b8;
+            }
+            html.dark .pref-info-icon:hover {
+                color: #6ee7b7;
+            }
+            .pref-info-icon svg {
+                width: 100%;
+                height: 100%;
+            }
+            .pref-info-tooltip {
+                position: absolute;
+                bottom: calc(100% + 0.5rem);
+                left: 50%;
+                transform: translateX(-50%);
+                background: #1e293b;
+                color: #f1f5f9;
+                padding: 0.5rem 0.75rem;
+                border-radius: 0.5rem;
+                font-size: 0.75rem;
+                line-height: 1.4;
+                width: max-content;
+                max-width: 16rem;
+                white-space: normal;
+                pointer-events: none;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.2s, visibility 0.2s;
+                z-index: 50;
+                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.3);
+            }
+            .pref-info-tooltip::after {
+                content: '';
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 0.375rem 0.375rem 0 0.375rem;
+                border-color: #1e293b transparent transparent transparent;
+            }
+            .pref-info-icon:hover .pref-info-tooltip,
+            .pref-info-icon:focus .pref-info-tooltip {
+                opacity: 1;
+                visibility: visible;
+            }
+            html.dark .pref-info-tooltip {
+                background: #0f172a;
+                color: #e2e8f0;
+            }
+            html.dark .pref-info-tooltip::after {
+                border-color: #0f172a transparent transparent transparent;
+            }
+
             /* Navigation buttons */
             .pref-btn-primary {
                 display: inline-flex; align-items: center; gap: 0.5rem;
                 border-radius: 0.5rem; background: #0f172a;
                 padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600;
-                color: #fff; transition: background 0.2s; cursor: pointer; border: none;
+                color: #fff; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; border: none;
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             }
-            .pref-btn-primary:hover { background: #1e293b; }
+            .pref-btn-primary:hover { 
+                background: #1e293b; 
+                transform: translateY(-1px);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            .pref-btn-primary:active {
+                transform: translateY(0);
+            }
             html.dark .pref-btn-primary { background: #f1f5f9; color: #0f172a; }
             html.dark .pref-btn-primary:hover { background: #fff; }
             .pref-btn-secondary {
                 display: inline-flex; align-items: center; gap: 0.5rem;
                 border-radius: 0.5rem; border: 1px solid #cbd5e1;
                 background: #fff; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500;
-                color: #334155; transition: background 0.2s; cursor: pointer;
+                color: #334155; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer;
             }
-            .pref-btn-secondary:hover { background: #f8fafc; }
+            .pref-btn-secondary:hover { 
+                background: #f8fafc; 
+                border-color: #94a3b8;
+                transform: translateX(-2px);
+            }
+            .pref-btn-secondary:active {
+                transform: translateX(0);
+            }
             html.dark .pref-btn-secondary { border-color: #334155; background: transparent; color: #cbd5e1; }
             html.dark .pref-btn-secondary:hover { background: rgba(255,255,255,0.05); }
 
             /* Validation error state */
             .pref-field-error input, .pref-field-error select { border-color: #ef4444 !important; }
+
+            /* ── SlimSelect Dark Mode Overrides ────────────────────────────── */
+            html.dark .ss-main .ss-single-selected,
+            html.dark .ss-main .ss-multi-selected {
+                background-color: #1e293b !important;
+                border-color: #334155 !important;
+                color: #e2e8f0 !important;
+            }
+            html.dark .ss-main .ss-single-selected .ss-arrow path,
+            html.dark .ss-main .ss-multi-selected .ss-arrow path {
+                fill: #94a3b8 !important;
+            }
+            html.dark .ss-content {
+                background-color: #1e293b !important;
+                border-color: #334155 !important;
+            }
+            html.dark .ss-content .ss-search input {
+                background-color: #0f172a !important;
+                border-color: #334155 !important;
+                color: #e2e8f0 !important;
+            }
+            html.dark .ss-content .ss-search input::placeholder {
+                color: #64748b !important;
+            }
+            html.dark .ss-content .ss-list .ss-option {
+                background-color: #1e293b !important;
+                color: #e2e8f0 !important;
+            }
+            html.dark .ss-content .ss-list .ss-option:hover,
+            html.dark .ss-content .ss-list .ss-option.ss-highlighted {
+                background-color: rgba(16, 185, 129, 0.15) !important;
+                color: #6ee7b7 !important;
+            }
+            html.dark .ss-content .ss-list .ss-option.ss-disabled {
+                background-color: #0f172a !important;
+                color: #475569 !important;
+            }
+            html.dark .ss-content .ss-list .ss-option.ss-option-selected {
+                background-color: rgba(16, 185, 129, 0.2) !important;
+                color: #10b981 !important;
+            }
+            html.dark .ss-main .ss-values .ss-value {
+                background-color: rgba(16, 185, 129, 0.15) !important;
+                color: #6ee7b7 !important;
+            }
+            html.dark .ss-main .ss-values .ss-value .ss-value-delete {
+                background-color: rgba(239, 68, 68, 0.2) !important;
+                color: #fca5a5 !important;
+            }
+            html.dark .ss-main .ss-values .ss-value .ss-value-delete:hover {
+                background-color: rgba(239, 68, 68, 0.3) !important;
+            }
+
+            /* ─── Card Hover Effects ────────────────────────────────────────── */
+            .pref-card {
+                transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                            box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                            border-color 0.2s ease;
+            }
+            
+            .pref-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+            }
+            
+            html.dark .pref-card:hover {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            }
+            
+            @media (prefers-reduced-motion: reduce) {
+                .pref-card {
+                    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+                }
+                .pref-card:hover {
+                    transform: none;
+                }
+            }
+
+            /* ─── Section Dividers ──────────────────────────────────────────── */
+            .pref-section-divider {
+                height: 1px;
+                background: linear-gradient(to right, transparent, rgba(148, 163, 184, 0.2), transparent);
+                margin: 1.5rem 0;
+            }
+            
+            html.dark .pref-section-divider {
+                background: linear-gradient(to right, transparent, rgba(148, 163, 184, 0.1), transparent);
+            }
         </style>
     </div>
 
@@ -102,7 +353,7 @@
         <div class="mx-auto max-w-3xl px-4 pt-6 pb-16 sm:px-6 lg:px-8">
 
             <!-- Page header -->
-            <div class="mb-6 rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+            <div class="pref-card mb-6 rounded-2xl border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Your profile</p>
@@ -124,17 +375,22 @@
             </div>
 
             <!-- Step indicator bar -->
-            <div class="mb-2 flex items-center px-2" id="pref-steps-indicator" aria-label="Preferences setup progress — 4 steps">
-                <div class="pref-step-dot active" id="dot-1" aria-current="step">1</div>
-                <div class="pref-step-line" id="line-1"></div>
-                <div class="pref-step-dot" id="dot-2">2</div>
-                <div class="pref-step-line" id="line-2"></div>
-                <div class="pref-step-dot" id="dot-3">3</div>
-                <div class="pref-step-line" id="line-3"></div>
-                <div class="pref-step-dot" id="dot-4">4</div>
-            </div>
-            <div class="mb-6 grid grid-cols-4 text-center text-xs text-slate-500 dark:text-slate-400">
-                <span>Quick Setup</span><span>Display</span><span>Training</span><span>Defaults</span>
+            <div class="pref-steps-container" id="pref-steps-indicator" aria-label="Preferences setup progress — 4 steps">
+                <div class="pref-step-labels">
+                    <span class="pref-step-label active" id="label-1">Quick Setup</span>
+                    <span class="pref-step-label" id="label-2">Display</span>
+                    <span class="pref-step-label" id="label-3">Training</span>
+                    <span class="pref-step-label" id="label-4">Defaults</span>
+                </div>
+                <div class="pref-step-dots-row">
+                    <div class="pref-step-dot active" id="dot-1" aria-current="step">1</div>
+                    <div class="pref-step-line" id="line-1"></div>
+                    <div class="pref-step-dot" id="dot-2">2</div>
+                    <div class="pref-step-line" id="line-2"></div>
+                    <div class="pref-step-dot" id="dot-3">3</div>
+                    <div class="pref-step-line" id="line-3"></div>
+                    <div class="pref-step-dot" id="dot-4">4</div>
+                </div>
             </div>
 
             <!-- Form — all steps share one form element -->
@@ -150,7 +406,7 @@
 
                 <!-- ═══ STEP 1 — Quick Setup ══════════════════════════════ -->
                 <div id="step-1" class="pref-step-panel pref-step-active space-y-5">
-                    <div class="rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-5 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
+                    <div class="pref-card rounded-xl border border-emerald-200/70 bg-emerald-50/40 p-5 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
                         <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">
                             Quick Setup
                             <span class="ml-1 text-xs font-normal text-slate-500 dark:text-slate-400">(optional)</span>
@@ -212,7 +468,7 @@
                          role="alert" aria-live="assertive">
                         Please select a language and theme before continuing.
                     </div>
-                    <div class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                    <div class="pref-card rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                         <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">Display &amp; Accessibility</h2>
                         <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">These settings apply across the whole site. Fields marked <span class="text-red-500">*</span> are required.</p>
 
@@ -226,6 +482,18 @@
                                             class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
                                         <option value="en" th:text="#{preferences.language.en}">English</option>
                                         <option value="cy" th:text="#{preferences.language.cy}">Welsh</option>
+                                        <option value="es" th:text="#{preferences.language.es}">Spanish</option>
+                                        <option value="fr" th:text="#{preferences.language.fr}">French</option>
+                                        <option value="de" th:text="#{preferences.language.de}">German</option>
+                                        <option value="it" th:text="#{preferences.language.it}">Italian</option>
+                                        <option value="pt" th:text="#{preferences.language.pt}">Portuguese</option>
+                                        <option value="pl" th:text="#{preferences.language.pl}">Polish</option>
+                                        <option value="nl" th:text="#{preferences.language.nl}">Dutch</option>
+                                        <option value="zh" th:text="#{preferences.language.zh}">Chinese</option>
+                                        <option value="ja" th:text="#{preferences.language.ja}">Japanese</option>
+                                        <option value="ko" th:text="#{preferences.language.ko}">Korean</option>
+                                        <option value="ar" th:text="#{preferences.language.ar}">Arabic</option>
+                                        <option value="hi" th:text="#{preferences.language.hi}">Hindi</option>
                                     </select>
                                 </div>
                                 <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('language')}" th:errors="*{language}"></p>
@@ -283,7 +551,7 @@
                 <div id="step-3" class="pref-step-panel space-y-5">
 
                     <!-- Physical Conditions -->
-                    <div class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                    <div class="pref-card rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                         <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">
                             Physical conditions
                             <span class="ml-1 text-xs font-normal text-slate-500 dark:text-slate-400">(optional)</span>
@@ -307,7 +575,7 @@
                     </div>
 
                     <!-- Training Preferences -->
-                    <div class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                    <div class="pref-card rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                         <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">
                             Training preferences
                             <span class="ml-1 text-xs font-normal text-slate-500 dark:text-slate-400">(optional)</span>
@@ -323,13 +591,11 @@
                             <div th:each="category : ${preferencesByCategory}">
 
                                 <!-- Single-select categories (dropdown) -->
-                                <div th:if="${category.key == 'Goal' or category.key == 'Experience Level' or category.key == 'Workout Frequency'}">
+                                <div th:if="${category.key == 'Experience Level' or category.key == 'Workout Frequency'}">
                                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-200"
                                            th:text="${category.key}">Category</label>
                                     <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
-                                       th:text="${category.key == 'Goal'} ? 'Pick your primary fitness goal.' :
-                                                (${category.key == 'Experience Level'} ? 'How long have you been exercising?' :
-                                                 'How often do you plan to train?')">Hint</p>
+                                       th:text="${category.key == 'Experience Level'} ? 'How long have you been exercising?' : 'How often do you plan to train?'">Hint</p>
                                     <div class="mt-2 pref-select-wrap">
                                         <select th:id="'select-' + ${category.key.replace(' ', '-').toLowerCase()}"
                                                 class="pref-single-select block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100"
@@ -354,10 +620,11 @@
                                 </div>
 
                                 <!-- Multi-select categories (pill checkboxes + Other input) -->
-                                <div th:if="${category.key != 'Goal' and category.key != 'Experience Level' and category.key != 'Workout Frequency'}">
+                                <div th:if="${category.key != 'Experience Level' and category.key != 'Workout Frequency'}">
                                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-200"
                                            th:text="${category.key}">Category</label>
-                                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Select all that apply.</p>
+                                    <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400"
+                                       th:text="${category.key == 'Goal'} ? 'Select all your fitness goals.' : 'Select all that apply.'">Hint</p>
                                     <div class="mt-2 flex flex-wrap gap-2">
                                         <label th:each="preference : ${category.value}"
                                                class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"
@@ -409,20 +676,36 @@
                          role="alert" aria-live="assertive">
                         Please correct the highlighted fields before saving.
                     </div>
-                    <div class="rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+                    <div class="pref-card rounded-xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div>
                                 <h2 class="text-base font-semibold text-slate-800 dark:text-slate-100">
                                     Smart defaults
                                     <span class="ml-1 text-xs font-normal text-slate-500 dark:text-slate-400">(optional)</span>
+                                    <span class="pref-info-icon" tabindex="0" role="tooltip">
+                                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span class="pref-info-tooltip">
+                                            Default values used when creating new workouts and nutrition logs. These adapt to your goals and preferences.
+                                        </span>
+                                    </span>
                                 </h2>
                                 <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Pre-fill new workouts and nutrition logs. Leave blank to use system defaults.</p>
                             </div>
                             <form method="post" th:action="@{/select-preferences/reset}">
                                 <input th:name="${_csrf.parameterName}" th:type="hidden" th:value="${_csrf.token}"/>
                                 <button type="submit"
-                                        class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
+                                        class="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
                                     Reset to defaults
+                                    <span class="pref-info-icon" tabindex="0" role="tooltip" onclick="event.preventDefault();">
+                                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span class="pref-info-tooltip">
+                                            Resets sets, reps, equipment, and macro values to baseline. Your goals and preferences remain unchanged.
+                                        </span>
+                                    </span>
                                 </button>
                             </form>
                         </div>
@@ -482,12 +765,65 @@
                                     <input type="checkbox" th:field="*{preferredEquipmentKettlebell}" class="sr-only pref-pill-checkbox" />
                                     Kettlebells
                                 </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentCable}" class="sr-only pref-pill-checkbox" />
+                                    Cable Machine
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentPullupBar}" class="sr-only pref-pill-checkbox" />
+                                    Pull-up Bar
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentJumpRope}" class="sr-only pref-pill-checkbox" />
+                                    Jump Rope
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentMedicineBall}" class="sr-only pref-pill-checkbox" />
+                                    Medicine Ball
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentFoamRoller}" class="sr-only pref-pill-checkbox" />
+                                    Foam Roller
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentTrx}" class="sr-only pref-pill-checkbox" />
+                                    TRX/Suspension
+                                </label>
+                                <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30">
+                                    <svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    <input type="checkbox" th:field="*{preferredEquipmentOther}" class="sr-only pref-pill-checkbox" id="equipment-other-checkbox" />
+                                    Other (specify)
+                                </label>
+                            </div>
+                            <!-- Conditionally show text input when "Other" is checked -->
+                            <div id="equipment-other-container" class="mt-2 hidden">
+                                <input type="text" 
+                                       th:field="*{preferredEquipmentOtherSpecify}" 
+                                       placeholder="Specify other equipment..."
+                                       maxlength="200"
+                                       class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
                             </div>
                         </div>
 
                         <!-- Macro targets -->
                         <div class="mt-5">
-                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Macro targets <span class="font-normal">(optional)</span></p>
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                Macro targets <span class="font-normal">(optional)</span>
+                                <span class="pref-info-icon" tabindex="0" role="tooltip">
+                                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="pref-info-tooltip">
+                                        Daily nutrition targets based on your TDEE (Total Daily Energy Expenditure). Calculate TDEE using your age, weight, height, and activity level.
+                                    </span>
+                                </span>
+                            </p>
                             <div class="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                                 <div>
                                     <label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetCalories">Calories (kcal)</label>
@@ -566,6 +902,14 @@
             }
 
             function updateStepIndicator(active) {
+                // Update labels
+                var labels = document.querySelectorAll('.pref-step-label');
+                labels.forEach(function(label, idx) {
+                    var stepNum = idx + 1;
+                    label.classList.toggle('active', stepNum === active);
+                });
+                
+                // Update dots and lines
                 for (var i = 1; i <= TOTAL_STEPS; i++) {
                     var dot = document.getElementById('dot-' + i);
                     if (!dot) continue;
@@ -575,7 +919,20 @@
                     else if (i === active) { dot.classList.add('active'); dot.setAttribute('aria-current', 'step'); }
                     if (i < TOTAL_STEPS) {
                         var line = document.getElementById('line-' + i);
-                        if (line) line.classList.toggle('done', i < active);
+                        if (line) {
+                            line.classList.toggle('done', i < active);
+                            // Update CSS custom property for gradient animation
+                            if (i < active) {
+                                line.style.setProperty('--progress', '100%');
+                            } else if (i === active - 1) {
+                                // Animate current line
+                                setTimeout(function() {
+                                    line.style.setProperty('--progress', '100%');
+                                }, 50);
+                            } else {
+                                line.style.setProperty('--progress', '0%');
+                            }
+                        }
                     }
                 }
             }
@@ -659,7 +1016,17 @@
             })();
 
             /* ── SlimSelect for physical conditions ─────────────────────────── */
-            try { new SlimSelect({ select: '#selectElement' }); } catch(e) {}
+            try { 
+                new SlimSelect({ 
+                    select: '#selectElement',
+                    settings: {
+                        searchText: 'No conditions found',
+                        searchPlaceholder: 'Search conditions...',
+                        searchHighlight: true,
+                        allowDeselect: true
+                    }
+                }); 
+            } catch(e) {}
 
             /* ── Pill checkbox visual state ─────────────────────────────────── */
             function updatePillStyle(checkbox) {
@@ -775,7 +1142,10 @@
             var EQUIP_MAP = {
                 bodyweight: 'preferredEquipmentBodyweight', dumbbell: 'preferredEquipmentDumbbell',
                 barbell: 'preferredEquipmentBarbell',       machine:  'preferredEquipmentMachine',
-                bands:   'preferredEquipmentBands',         kettlebell:'preferredEquipmentKettlebell'
+                bands:   'preferredEquipmentBands',         kettlebell:'preferredEquipmentKettlebell',
+                cable: 'preferredEquipmentCable',           pullupBar: 'preferredEquipmentPullupBar',
+                jumpRope: 'preferredEquipmentJumpRope',     medicineBall: 'preferredEquipmentMedicineBall',
+                foamRoller: 'preferredEquipmentFoamRoller', trx: 'preferredEquipmentTrx'
             };
 
             var PRESET_PENDING = null;
@@ -882,6 +1252,28 @@
                 if (quickPreset) quickPreset.value = '';
                 hidePresetPreview();
             });
+
+            /* ── Equipment "Other" conditional input ──────────────────────── */
+            var equipOtherCheckbox = document.getElementById('equipment-other-checkbox');
+            var equipOtherContainer = document.getElementById('equipment-other-container');
+            
+            function toggleEquipmentOtherInput() {
+                if (equipOtherCheckbox && equipOtherContainer) {
+                    if (equipOtherCheckbox.checked) {
+                        equipOtherContainer.classList.remove('hidden');
+                    } else {
+                        equipOtherContainer.classList.add('hidden');
+                    }
+                }
+            }
+            
+            // Initialize on page load
+            toggleEquipmentOtherInput();
+            
+            // Listen for changes
+            if (equipOtherCheckbox) {
+                equipOtherCheckbox.addEventListener('change', toggleEquipmentOtherInput);
+            }
         </script>
     </div>
 

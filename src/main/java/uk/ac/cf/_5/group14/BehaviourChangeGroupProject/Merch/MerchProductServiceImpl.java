@@ -1,5 +1,6 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Merch;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +28,7 @@ public class MerchProductServiceImpl implements MerchProductService {
     private final MerchOrderService orderService;
 
     public MerchProductServiceImpl(MerchProductRepository productRepo,
-                                   MerchOrderService orderService) {
+                                   @Lazy MerchOrderService orderService) {
         this.productRepo = productRepo;
         this.orderService = orderService;
     }

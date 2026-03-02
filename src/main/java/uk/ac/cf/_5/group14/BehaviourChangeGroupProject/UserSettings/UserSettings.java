@@ -1,12 +1,23 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings;
 
-import jakarta.persistence.*;
+import java.time.Instant;
+import java.time.LocalTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-
-import java.time.Instant;
-import java.time.LocalTime;
 
 @Entity
 @Table(name = "user_settings")
@@ -102,6 +113,30 @@ public class UserSettings {
 
     @Column(name = "preferred_equipment_kettlebell", nullable = false)
     private boolean preferredEquipmentKettlebell = false;
+
+    @Column(name = "preferred_equipment_cable", nullable = false)
+    private boolean preferredEquipmentCable = false;
+
+    @Column(name = "preferred_equipment_pullup_bar", nullable = false)
+    private boolean preferredEquipmentPullupBar = false;
+
+    @Column(name = "preferred_equipment_jump_rope", nullable = false)
+    private boolean preferredEquipmentJumpRope = false;
+
+    @Column(name = "preferred_equipment_medicine_ball", nullable = false)
+    private boolean preferredEquipmentMedicineBall = false;
+
+    @Column(name = "preferred_equipment_foam_roller", nullable = false)
+    private boolean preferredEquipmentFoamRoller = false;
+
+    @Column(name = "preferred_equipment_trx", nullable = false)
+    private boolean preferredEquipmentTrx = false;
+
+    @Column(name = "preferred_equipment_other", nullable = false)
+    private boolean preferredEquipmentOther = false;
+
+    @Column(name = "preferred_equipment_other_specify", length = 200)
+    private String preferredEquipmentOtherSpecify;
 
     @Column(name = "macro_target_calories")
     private Integer macroTargetCalories;

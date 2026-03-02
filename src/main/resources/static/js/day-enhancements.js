@@ -11,6 +11,37 @@
         });
     }
     
+    // ==================== Live Digital Clock ====================
+    function initLiveClock() {
+        const clockElement = document.getElementById('live-clock');
+        if (!clockElement) return;
+        
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            // Convert to 12-hour format
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 should be 12
+            
+            // Pad with zeros
+            const hoursStr = String(hours).padStart(2, '0');
+            const minutesStr = String(minutes).padStart(2, '0');
+            const secondsStr = String(seconds).padStart(2, '0');
+            
+            clockElement.textContent = `${hoursStr}:${minutesStr}:${secondsStr} ${ampm}`;
+        }
+        
+        // Update immediately
+        updateClock();
+        
+        // Update every second
+        setInterval(updateClock, 1000);
+    }
+    
     // ==================== Quick Stats Display ====================
     function initQuickStats() {
         const tasksPanel = document.querySelector('[data-testid="tasks-panel"]');
@@ -131,15 +162,15 @@
         if (!document.getElementById('time-greeting')) {
             const greetingDiv = document.createElement('div');
             greetingDiv.id = 'time-greeting';
-            greetingDiv.className = `mb-3 flex items-center gap-2 ${greeting.color}`;
+            greetingDiv.className = `mb-4 flex items-center gap-3 animate-fade-in ${greeting.color}`;
             greetingDiv.innerHTML = `
-                <span class="text-2xl" aria-hidden="true">${greeting.emoji}</span>
-                <span class="text-sm font-semibold">${greeting.text}</span>
+                <span class="text-4xl animate-bounce-subtle" aria-hidden="true">${greeting.emoji}</span>
+                <span class="text-2xl font-bold tracking-tight">${greeting.text}</span>
             `;
             
-            const firstChild = header.querySelector('.flex.flex-col');
-            if (firstChild) {
-                firstChild.insertBefore(greetingDiv, firstChild.firstChild);
+            const slot = document.getElementById('time-greeting-slot');
+            if (slot) {
+                slot.appendChild(greetingDiv);
             }
         }
     }
@@ -366,18 +397,34 @@
         }
 
         function activateTab(tab, pushHash) {
+            const currentIndex = tabs.findIndex(t => t.classList.contains('is-active'));
+            const newIndex = tabs.indexOf(tab);
+            const slideDirection = newIndex > currentIndex ? 'left' : 'right';
+            
             tabs.forEach((t, i) => {
                 const isActive = t === tab;
                 t.setAttribute('aria-selected', isActive ? 'true' : 'false');
                 t.setAttribute('tabindex', isActive ? '0' : '-1');
                 t.classList.toggle('is-active', isActive);
+                
                 if (panels[i]) {
                     if (isActive) {
+                        // Slide in new panel
                         panels[i].classList.remove('hidden');
-                        // Force re-animation
-                        void panels[i].offsetWidth;
-                    } else {
-                        panels[i].classList.add('hidden');
+                        panels[i].classList.add('tab-slide-in-' + (slideDirection === 'left' ? 'left' : 'right'));
+                        
+                        // Remove animation classes after animation completes
+                        setTimeout(() => {
+                            panels[i].classList.remove('tab-slide-in-left', 'tab-slide-in-right');
+                        }, 300);
+                    } else if (panels[i].classList.contains('hidden') === false) {
+                        // Slide out old panel
+                        panels[i].classList.add('tab-slide-out-' + (slideDirection === 'left' ? 'right' : 'left'));
+                        
+                        setTimeout(() => {
+                            panels[i].classList.add('hidden');
+                            panels[i].classList.remove('tab-slide-out-left', 'tab-slide-out-right');
+                        }, 300);
                     }
                 }
             });
@@ -557,6 +604,74 @@
             completed: el.getAttribute('data-completed') === 'true'
         }));
 
+        // Calculate timeline state message
+        let stateMessage = '';
+        let stateIcon = '';
+        let stateClass = '';
+        
+        if (isToday && taskItems.length > 0) {
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTimeInMinutes = currentHour * 60 + currentMinute;
+            
+            // Find next upcoming incomplete task
+            const upcomingTasks = taskItems.filter(t => !t.completed).map(t => {
+                const [h, m] = t.time.split(':').map(Number);
+                const taskTimeInMinutes = h * 60 + m;
+                return { ...t, taskTimeInMinutes };
+            }).filter(t => t.taskTimeInMinutes >= currentTimeInMinutes)
+              .sort((a, b) => a.taskTimeInMinutes - b.taskTimeInMinutes);
+            
+            if (upcomingTasks.length > 0) {
+                const nextTask = upcomingTasks[0];
+                const minutesUntilNext = nextTask.taskTimeInMinutes - currentTimeInMinutes;
+                
+                if (minutesUntilNext === 0) {
+                    stateMessage = `⏰ "${nextTask.title}" starts now!`;
+                    stateIcon = '⏰';
+                    stateClass = 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/30 dark:border-amber-900/40 dark:text-amber-200';
+                } else if (minutesUntilNext <= 10) {
+                    stateMessage = `🔔 Your next task "${nextTask.title}" starts in ${minutesUntilNext} minute${minutesUntilNext !== 1 ? 's' : ''}`;
+                    stateIcon = '🔔';
+                    stateClass = 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/30 dark:border-blue-900/40 dark:text-blue-200';
+                } else if (minutesUntilNext <= 60) {
+                    stateMessage = `📅 Next task in ${minutesUntilNext} minutes`;
+                    stateIcon = '📅';
+                    stateClass = 'bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-950/30 dark:border-emerald-900/40 dark:text-emerald-200';
+                } else {
+                    const hoursUntil = Math.floor(minutesUntilNext / 60);
+                    const minsRemainder = minutesUntilNext % 60;
+                    if (minsRemainder > 0) {
+                        stateMessage = `📅 Next task in ${hoursUntil}h ${minsRemainder}m`;
+                    } else {
+                        stateMessage = `📅 Next task in ${hoursUntil} hour${hoursUntil !== 1 ? 's' : ''}`;
+                    }
+                    stateIcon = '📅';
+                    stateClass = 'bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-900/50 dark:border-slate-700 dark:text-slate-300';
+                }
+            } else {
+                // All upcoming tasks are done, check if any tasks exist at all
+                const hasCompletedTasks = taskItems.some(t => t.completed);
+                if (hasCompletedTasks) {
+                    stateMessage = '✅ All scheduled tasks completed for today!';
+                    stateIcon = '✅';
+                    stateClass = 'bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-950/30 dark:border-emerald-900/40 dark:text-emerald-200';
+                } else {
+                    stateMessage = '📭 No more timed tasks for today';
+                    stateIcon = '📭';
+                    stateClass = 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900/50 dark:border-slate-700 dark:text-slate-400';
+                }
+            }
+        } else if (!isToday && taskItems.length > 0) {
+            stateMessage = `📅 ${taskItems.length} task${taskItems.length !== 1 ? 's' : ''} scheduled for this day`;
+            stateIcon = '📅';
+            stateClass = 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/30 dark:border-blue-900/40 dark:text-blue-200';
+        } else if (taskItems.length === 0) {
+            stateMessage = '🌟 No timed tasks scheduled for this day';
+            stateIcon = '🌟';
+            stateClass = 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900/50 dark:border-slate-700 dark:text-slate-400';
+        }
+
         // Build hour grid 6-23
         let html = '<div class="timeline-grid" role="list" aria-label="Day timeline">';
 
@@ -580,22 +695,17 @@
                 const doneClass = t.completed ? ' is-done' : '';
                 const checkIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
                 const qcBtn = t.id ? `<button type="button" class="timeline-qc-btn${t.completed ? ' is-done' : ''}" data-quick-complete data-task-id="${escapeHtml(t.id)}" data-task-date="${escapeHtml(pageDate)}" aria-label="${t.completed ? 'Mark incomplete' : 'Mark complete'}" title="${t.completed ? 'Mark incomplete' : 'Mark complete'}">${checkIcon}</button>` : '';
-                html += `<div class="timeline-event timeline-event--task${doneClass}" role="listitem">
+                // Make task clickable to open drawer
+                const clickableAttr = t.id ? ` data-open-task-drawer data-task-id="${escapeHtml(t.id)}" style="cursor: pointer;" title="Click to view task details"` : '';
+                html += `<div class="timeline-event timeline-event--task${doneClass}"${clickableAttr} role="listitem">
                     <span class="font-medium">${escapeHtml(t.title)}</span>
                     <span class="ml-auto text-[10px] opacity-70 mr-1">${t.time}</span>
                     ${qcBtn}
                 </div>`;
             });
 
-            // Workouts in morning slot (7am) if unscheduled
+            // Workouts in morning slot (7am) - only show scheduled occurrences
             if (h === 7) {
-                workoutItems.forEach(w => {
-                    html += `<div class="timeline-event timeline-event--workout" role="listitem">
-                        <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        <span class="font-medium">${escapeHtml(w.title)}</span>
-                        <span class="ml-auto text-[10px] opacity-70">Scheduled</span>
-                    </div>`;
-                });
                 occurrenceItems.forEach(o => {
                     const doneClass = o.completed ? ' is-done' : '';
                     html += `<div class="timeline-event timeline-event--workout${doneClass}" role="listitem">
@@ -610,8 +720,16 @@
         }
         html += '</div>';
 
-        // Add legend
-        html = `<div class="mb-3 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+        // Add state message banner and legend
+        let bannerHtml = '';
+        if (stateMessage) {
+            bannerHtml = `<div class="mb-3 flex items-start gap-2 rounded-lg border p-3 ${stateClass}">
+                <span class="text-xl flex-shrink-0" aria-hidden="true">${stateIcon}</span>
+                <p class="text-sm font-medium leading-relaxed">${stateMessage}</p>
+            </div>`;
+        }
+        
+        html = bannerHtml + `<div class="mb-3 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
             <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-sm border-l-2 border-l-blue-500 bg-blue-50"></span>Task</span>
             <span class="flex items-center gap-1.5"><span class="h-3 w-3 rounded-sm border-l-2 border-l-emerald-500 bg-emerald-50"></span>Workout</span>
             ${isToday ? '<span class="flex items-center gap-1.5"><span class="inline-block h-2 w-4 bg-red-500 opacity-70 rounded-full"></span>Now</span>' : ''}

@@ -147,7 +147,7 @@ public class UserPreferenceController {
             localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
         }
 
-        return new ModelAndView("redirect:/select-preferences?saved=1");
+        return new ModelAndView("redirect:/preferences");
     }
 
     @PostMapping("/select-preferences/reset")

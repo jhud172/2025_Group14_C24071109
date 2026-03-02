@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" th:lang="${#locale.language}" class="">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Focus Mode - Crystal Productions</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}"/>
+    <link rel="stylesheet" th:href="@{/css/components/day-view.css}"/>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+        }
+        .dark body {
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+        }
+        .focus-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .focus-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .focus-timeline {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .dark .focus-timeline {
+            background: #1e293b;
+        }
+        .exit-focus {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Exit Focus Mode Button -->
+<a th:href="@{'/calendar/day/' + ${date}}"
+   class="exit-focus inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+    </svg>
+    Exit Focus Mode
+</a>
+
+<div class="focus-container">
+    <!-- Header -->
+    <div class="focus-header">
+        <h1 class="text-4xl font-bold text-slate-900 dark:text-slate-100">
+            <span th:text="${#temporals.format(date, 'd MMMM yyyy')}"></span>
+        </h1>
+        <p class="mt-2 text-lg text-slate-600 dark:text-slate-300">
+            <span th:if="${dailyFocus != null && !dailyFocus.isEmpty()}" th:text="${dailyFocus}">Daily Focus</span>
+            <span th:if="${dailyFocus == null || dailyFocus.isEmpty()}">Stay focused on your goals</span>
+        </p>
+    </div>
+
+    <!-- Timeline Container -->
+    <div class="focus-timeline">
+        <div class="mb-4 flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-700">
+            <h2 class="text-2xl font-semibold text-slate-900 dark:text-slate-100">Timeline</h2>
+            <div class="text-sm text-slate-600 dark:text-slate-400">
+                <span th:text="${timedFocus != null ? timedFocus.label() : 'Today'}">Morning</span>
+            </div>
+        </div>
+        
+        <!-- Timeline will be populated by JavaScript -->
+        <div id="day-timeline"
+             class="day-timeline select-none"
+             aria-label="Daily timeline"
+             th:attr="data-is-today=${isToday}, data-date=${date}">
+            <noscript>
+                <p class="py-4 text-sm text-slate-500 dark:text-slate-400">Enable JavaScript to see the timeline view.</p>
+            </noscript>
+        </div>
+    </div>
+
+    <!-- Tasks Quick View (Hidden data for JavaScript) -->
+    <div class="hidden">
+        <!-- Tasks data for timeline population -->
+        <div th:each="task : ${tasks}"
+             data-task-item
+             th:attr="data-task-id=${task.id},
+                      data-task-title=${task.title},
+                      data-task-start-time=${task.startTime != null ? task.startTime.toString() : ''},
+                      data-task-duration=${task.duration != null ? task.duration.toMinutes() : ''},
+                      data-task-completed=${task.completed}">
+        </div>
+
+        <!-- Workouts data for timeline population -->
+        <div th:each="ws : ${workoutSessions}"
+             data-workout-item
+             th:attr="data-workout-id=${ws.id},
+                      data-workout-name=${ws.nameSnapshot}">
+        </div>
+
+        <!-- Schedule occurrences data -->
+        <div th:each="occ : ${occurrences}"
+             data-occurrence-item
+             th:attr="data-occurrence-id=${occ.id},
+                      data-occurrence-title=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}">
+        </div>
+    </div>
+</div>
+
+<!-- Include the day enhancements JavaScript for timeline functionality -->
+<script th:src="@{/js/day-enhancements.js}" defer></script>
+
+</body>
+</html>

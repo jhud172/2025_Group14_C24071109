@@ -1,0 +1,279 @@
+/* =============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   Easy mode & colorblind mode global styling
+   ============================================================================= */
+
+/* ─── COLORBLIND MODE ────────────────────────────────────────────────────── */
+
+/* Enhanced contrast for all emerald/green accent colors */
+.color-blind {
+    /* Primary accent: Use brighter, more saturated emerald with higher contrast */
+    --emerald-primary: #0d9488; /* Teal-600 - better contrast than emerald-500 */
+    --emerald-hover: #0f766e; /* Teal-700 */
+    --emerald-light: #5eead4; /* Teal-300 */
+}
+
+/* Buttons - Higher contrast backgrounds and borders */
+.color-blind .bg-emerald-600,
+.color-blind .bg-emerald-500 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(13 148 136 / var(--tw-bg-opacity, 1)) !important; /* Teal-600 */
+}
+
+.color-blind .hover\:bg-emerald-700:hover,
+.color-blind .hover\:bg-emerald-600:hover {
+    --tw-bg-opacity: 1;
+    background-color: rgb(15 118 110 / var(--tw-bg-opacity, 1)) !important; /* Teal-700 */
+}
+
+/* Text colors - Enhanced visibility */
+.color-blind .text-emerald-600,
+.color-blind .text-emerald-500 {
+    --tw-text-opacity: 1;
+    color: rgb(13 148 136 / var(--tw-text-opacity, 1)) !important;
+}
+
+.dark .color-blind [class*="text-emerald-400"] {
+    --tw-text-opacity: 1;
+    color: rgb(94 234 212 / var(--tw-text-opacity, 1)) !important; /* Teal-300 */
+}
+
+/* Border colors */
+.color-blind .border-emerald-400,
+.color-blind .border-emerald-500 {
+    --tw-border-opacity: 1;
+    border-color: rgb(20 184 166 / var(--tw-border-opacity, 1)) !important; /* Teal-500 */
+}
+
+/* Focus rings - More prominent */
+.color-blind .focus\:ring-emerald-400:focus {
+    --tw-ring-color: rgb(45 212 191 / 0.5) !important; /* Teal-400 with opacity */
+}
+
+/* Success states - Use blue instead of green to avoid red-green confusion */
+.color-blind .bg-green-50 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(240 249 255 / var(--tw-bg-opacity, 1)) !important; /* Sky-50 */
+}
+
+.color-blind .text-green-600 {
+    --tw-text-opacity: 1;
+    color: rgb(2 132 199 / var(--tw-text-opacity, 1)) !important; /* Sky-600 */
+}
+
+/* Error states - Use orange/amber instead of pure red */
+.color-blind .text-red-600 {
+    --tw-text-opacity: 1;
+    color: rgb(217 119 6 / var(--tw-text-opacity, 1)) !important; /* Amber-600 */
+}
+
+.dark .color-blind [class*="text-red-400"] {
+    --tw-text-opacity: 1;
+    color: rgb(251 191 36 / var(--tw-text-opacity, 1)) !important; /* Amber-400 */
+}
+
+.color-blind .bg-red-50 {
+    --tw-bg-opacity: 1;
+    background-color: rgb(255 251 235 / var(--tw-bg-opacity, 1)) !important; /* Amber-50 */
+}
+
+/* Warning states - Enhanced amber */
+.color-blind .text-yellow-600 {
+    --tw-text-opacity: 1;
+    color: rgb(217 119 6 / var(--tw-text-opacity, 1)) !important; /* Amber-600 */
+    font-weight: 600; /* Extra emphasis */
+}
+
+/* Add patterns/icons to color-coded elements for extra distinction */
+.color-blind [data-status="success"]::before,
+.color-blind [data-status="completed"]::before {
+    content: "✓ ";
+    font-weight: bold;
+}
+
+.color-blind [data-status="error"]::before,
+.color-blind [data-status="failed"]::before {
+    content: "✗ ";
+    font-weight: bold;
+}
+
+.color-blind [data-status="warning"]::before {
+    content: "⚠ ";
+    font-weight: bold;
+}
+
+/* Enhanced outline for focused elements */
+.color-blind *:focus-visible {
+    outline: 3px solid rgb(13 148 136 / 1) !important; /* Teal-600 */
+    outline-offset: 2px;
+}
+
+/* Calendar heatmap - Use blue gradient instead of green */
+.color-blind .calendar-heatmap [data-level="1"] {
+    background-color: #dbeafe !important; /* Blue-100 */
+}
+
+.color-blind .calendar-heatmap [data-level="2"] {
+    background-color: #93c5fd !important; /* Blue-300 */
+}
+
+.color-blind .calendar-heatmap [data-level="3"] {
+    background-color: #3b82f6 !important; /* Blue-500 */
+}
+
+.color-blind .calendar-heatmap [data-level="4"] {
+    background-color: #1d4ed8 !important; /* Blue-700 */
+}
+
+/* Progress bars - Add stripes for additional visual distinction */
+.color-blind .progress-bar {
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 255, 255, 0.1) 10px,
+        rgba(255, 255, 255, 0.1) 20px
+    );
+}
+
+/* Toggle switches - Make state more obvious */
+.color-blind .pref-toggle__input:checked + .pref-toggle__track {
+    background: rgb(13 148 136) !important; /* Teal-600 */
+    border: 2px solid rgb(15 118 110) !important; /* Teal-700 */
+}
+
+.color-blind .pref-toggle__thumb {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Pills/Chips - Enhanced contrast */
+.color-blind .pref-pill--active {
+    background-color: rgb(204 251 241) !important; /* Teal-100 */
+    border-color: rgb(13 148 136) !important; /* Teal-600 */
+    border-width: 2px !important;
+    font-weight: 600;
+}
+
+.color-blind .dark .pref-pill--active {
+    background-color: rgb(19 78 74) !important; /* Teal-900 */
+    border-color: rgb(94 234 212) !important; /* Teal-300 */
+}
+
+/* Links - Underline all links for better distinction */
+.color-blind a:not(.btn):not(.card):not([role="button"]) {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+
+.color-blind a:hover:not(.btn):not(.card):not([role="button"]) {
+    text-decoration-thickness: 3px;
+}
+
+/* Chart colors - Use colorblind-safe palette */
+.color-blind [data-chart-color="primary"] {
+    fill: #0d9488 !important; /* Teal */
+}
+
+.color-blind [data-chart-color="secondary"] {
+    fill: #f59e0b !important; /* Amber */
+}
+
+.color-blind [data-chart-color="tertiary"] {
+    fill: #3b82f6 !important; /* Blue */
+}
+
+.color-blind [data-chart-color="quaternary"] {
+    fill: #8b5cf6 !important; /* Violet */
+}
+
+/* Ensure adequate contrast for all interactive elements */
+.color-blind button,
+.color-blind .btn,
+.color-blind input[type="submit"] {
+    border-width: 2px;
+    font-weight: 600;
+}
+
+/* ─── EASY MODE ──────────────────────────────────────────────────────────── */
+
+/* Base text sizing is handled in base.html via th:classappend */
+/* Additional spacing and padding enhancements */
+
+body[data-easy-mode="on"] {
+    /* Increased line height globally */
+    line-height: 1.75;
+}
+
+body[data-easy-mode="on"] button,
+body[data-easy-mode="on"] .btn,
+body[data-easy-mode="on"] a[role="button"] {
+    /* Larger tap targets - minimum 44x44px */
+    min-height: 44px;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+}
+
+body[data-easy-mode="on"] input,
+body[data-easy-mode="on"] select,
+body[data-easy-mode="on"] textarea {
+    /* Larger input fields */
+    font-size: 1.125rem;
+    padding: 0.875rem;
+    min-height: 48px;
+}
+
+body[data-easy-mode="on"] label {
+    /* Clearer labels */
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+body[data-easy-mode="on"] .card,
+body[data-easy-mode="on"] .panel,
+body[data-easy-mode="on"] .section {
+    /* More generous spacing */
+    padding: 1.5rem;
+}
+
+body[data-easy-mode="on"] .gap-2 {
+    gap: 0.75rem !important;
+}
+
+body[data-easy-mode="on"] .gap-3 {
+    gap: 1rem !important;
+}
+
+body[data-easy-mode="on"] .gap-4 {
+    gap: 1.25rem !important;
+}
+
+/* Enhanced focus indicators for keyboard navigation */
+body[data-easy-mode="on"] *:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+}
+
+/* Clearer interactive state indicators */
+body[data-easy-mode="on"] a,
+body[data-easy-mode="on"] button {
+    transition: all 0.2s ease;
+}
+
+body[data-easy-mode="on"] a:hover,
+body[data-easy-mode="on"] button:hover {
+    transform: scale(1.02);
+}
+
+/* ─── COMBINED EASY MODE + COLORBLIND MODE ───────────────────────────────── */
+
+body[data-easy-mode="on"].color-blind *:focus-visible {
+    /* Extra prominent focus for both modes active */
+    outline: 4px solid rgb(13 148 136) !important;
+    outline-offset: 4px;
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2);
+}

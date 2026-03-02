@@ -51,6 +51,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarWork
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.WorkoutSession;
 
 @Controller
 @RequestMapping("/calendar")
@@ -675,6 +676,59 @@ public class CalendarController {
         }
 
         return "calendar/day";
+    }
+
+    /**
+     * Focus mode - minimal, distraction-free view of the day's timeline
+     */
+    @GetMapping("/focus/{dateStr}")
+    public String focusView(
+            @PathVariable String dateStr,
+            @SessionAttribute("user") User user,
+            Model model
+    ) {
+        LocalDate date = LocalDate.parse(dateStr, DATE_FORMAT);
+        LocalDate today = LocalDate.now();
+
+        model.addAttribute("isToday", date.equals(today));
+        model.addAttribute("todayDate", today.format(DATE_FORMAT));
+        model.addAttribute("date", date);
+        model.addAttribute("prevDate", date.minusDays(1).format(DATE_FORMAT));
+        model.addAttribute("nextDate", date.plusDays(1).format(DATE_FORMAT));
+
+        // Get timed focus for this day
+        var timedFocusService = timedFocusServiceProvider.getIfAvailable();
+        var timedFocus = (timedFocusService != null)
+            ? timedFocusService.getTimedFocus()
+            : uk.ac.cf._5.group14.BehaviourChangeGroupProject.FocusData.TimedFocus.defaultFocus();
+        model.addAttribute("timedFocus", timedFocus);
+
+        String timeTheme = computeTimeThemeValue(timedFocus != null ? timedFocus.label() : null);
+        model.addAttribute("timeTheme", timeTheme);
+
+        // Get tasks for the timeline
+        List<CalendarTask> tasks = taskService.getTasks(user, date);
+        model.addAttribute("tasks", tasks);
+
+        // Get daily focus
+        var dailyFocusService = dailyFocusServiceProvider.getIfAvailable();
+        String dailyFocus = null;
+        if (dailyFocusService != null) {
+            String persisted = dailyFocusService.getDailyFocus(user, date);
+            if (persisted != null && !persisted.isBlank()) {
+                dailyFocus = persisted;
+            }
+        }
+        model.addAttribute("dailyFocus", dailyFocus);
+
+        // Get workouts
+        List<WorkoutSession> workoutSessions = workoutSessionService.findByUserAndDate(user, date);
+        model.addAttribute("workoutSessions", workoutSessions);
+
+        List<ScheduleOccurrence> occurrences = scheduleOccurrenceService.getOccurrencesForUserOnDate(user, date);
+        model.addAttribute("occurrences", occurrences);
+
+        return "calendar/focus";
     }
 
     private static String computeTimeOfDayMoodClass(String timedFocusLabel) {

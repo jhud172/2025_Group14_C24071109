@@ -95,6 +95,18 @@ INSERT INTO preferences (category, description)
 SELECT 'Experience Level', 'Advanced (Experienced athlete)'
 WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Experience Level' AND description = 'Advanced (Experienced athlete)');
 
+INSERT INTO preferences (category, description)
+SELECT 'Experience Level', 'Absolute Beginner (Never exercised)'
+WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Experience Level' AND description = 'Absolute Beginner (Never exercised)');
+
+INSERT INTO preferences (category, description)
+SELECT 'Experience Level', 'Early Intermediate (6-12 months)'
+WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Experience Level' AND description = 'Early Intermediate (6-12 months)');
+
+INSERT INTO preferences (category, description)
+SELECT 'Experience Level', 'Elite / Competitive Level'
+WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Experience Level' AND description = 'Elite / Competitive Level');
+
 -- Category: Workout Style
 INSERT INTO preferences (category, description)
 SELECT 'Workout Style', 'Home Workouts'
@@ -126,6 +138,18 @@ WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Style' AND
 
 -- Category: Workout Frequency
 INSERT INTO preferences (category, description)
+SELECT 'Workout Frequency', 'Occasional (Less than weekly)'
+WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Frequency' AND description = 'Occasional (Less than weekly)');
+
+INSERT INTO preferences (category, description)
+SELECT 'Workout Frequency', '1 time per week'
+WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Frequency' AND description = '1 time per week');
+
+INSERT INTO preferences (category, description)
+SELECT 'Workout Frequency', '2 times per week'
+WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Frequency' AND description = '2 times per week');
+
+INSERT INTO preferences (category, description)
 SELECT 'Workout Frequency', '1–2 times per week'
 WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Frequency' AND description = '1–2 times per week');
 
@@ -134,12 +158,20 @@ SELECT 'Workout Frequency', '3–4 times per week'
 WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Frequency' AND description = '3–4 times per week');
 
 INSERT INTO preferences (category, description)
+SELECT 'Workout Frequency', '5–6 times per week'
+WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Frequency' AND description = '5–6 times per week');
+
+INSERT INTO preferences (category, description)
 SELECT 'Workout Frequency', '5+ times per week'
 WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Frequency' AND description = '5+ times per week');
 
 INSERT INTO preferences (category, description)
 SELECT 'Workout Frequency', 'Daily'
 WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Frequency' AND description = 'Daily');
+
+INSERT INTO preferences (category, description)
+SELECT 'Workout Frequency', 'Multiple sessions per day'
+WHERE NOT EXISTS (SELECT 1 FROM preferences WHERE category = 'Workout Frequency' AND description = 'Multiple sessions per day');
 
 -- Category: Diet / Nutrition
 INSERT INTO preferences (category, description)
