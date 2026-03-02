@@ -10,7 +10,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Workout.WorkoutRepository
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -126,5 +128,53 @@ public class WorkoutPlayerSessionServiceImpl implements WorkoutPlayerSessionServ
                 .orElseThrow(() -> new IllegalArgumentException("Set not found: " + setId));
         set.setCompletedAt(Instant.now());
         return setRepository.save(set);
+    }
+
+    @Override
+    public WorkoutSessionExercise addExercise(Long sessionId, Long exerciseId, Long customExerciseId, String notes) {
+        WorkoutSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session not found: " + sessionId));
+        int nextIndex = session.getExercises() != null ? session.getExercises().size() : 0;
+        WorkoutSessionExercise ex = new WorkoutSessionExercise();
+        ex.setSession(session);
+        ex.setExerciseId(exerciseId);
+        ex.setCustomExerciseId(customExerciseId);
+        ex.setOrderIndex(nextIndex);
+        ex.setMode(ExerciseMode.NORMAL);
+        ex.setNotes(notes);
+        return exerciseRepository.save(ex);
+    }
+
+    @Override
+    public WorkoutSessionExercise updateExerciseMode(Long sessionExerciseId, ExerciseMode mode, String groupKey) {
+        WorkoutSessionExercise ex = exerciseRepository.findById(sessionExerciseId)
+                .orElseThrow(() -> new IllegalArgumentException("Exercise not found: " + sessionExerciseId));
+        if (mode != null) ex.setMode(mode);
+        ex.setGroupKey(groupKey);
+        return exerciseRepository.save(ex);
+    }
+
+    @Override
+    public List<WorkoutSessionExercise> reorderExercises(Long sessionId, List<Long> orderedExerciseIds) {
+        WorkoutSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Session not found: " + sessionId));
+        List<WorkoutSessionExercise> exercises = session.getExercises();
+        Map<Long, WorkoutSessionExercise> byId = new HashMap<>();
+        for (WorkoutSessionExercise ex : exercises) {
+            byId.put(ex.getId(), ex);
+        }
+        for (int i = 0; i < orderedExerciseIds.size(); i++) {
+            WorkoutSessionExercise ex = byId.get(orderedExerciseIds.get(i));
+            if (ex != null) {
+                ex.setOrderIndex(i);
+            }
+        }
+        exercises.forEach(exerciseRepository::save);
+        return exerciseRepository.findBySessionOrderByOrderIndexAsc(session);
+    }
+
+    @Override
+    public void deleteSet(Long setId) {
+        setRepository.deleteById(setId);
     }
 }

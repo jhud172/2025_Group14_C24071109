@@ -132,6 +132,76 @@ public class WorkoutPlayerController {
         return ResponseEntity.ok(toSetView(set));
     }
 
+    // ─── Delete set ───────────────────────────────────────────────────────────
+
+    @PostMapping("/workout-session-sets/{setId}/delete")
+    @ResponseBody
+    public ResponseEntity<?> deleteSet(@PathVariable Long setId) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return ResponseEntity.status(401).build();
+        workoutSessionService.deleteSet(setId);
+        return ResponseEntity.ok(Map.of("deleted", true));
+    }
+
+    // ─── Add exercise mid-session ─────────────────────────────────────────────
+
+    @PostMapping("/workout-sessions/{sessionId}/exercises")
+    @ResponseBody
+    public ResponseEntity<?> addExercise(
+            @PathVariable Long sessionId,
+            @RequestParam(required = false) Long exerciseId,
+            @RequestParam(required = false) Long customExerciseId,
+            @RequestParam(required = false) String notes) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return ResponseEntity.status(401).build();
+        Optional<WorkoutSession> sessionOpt = workoutSessionService.findById(sessionId);
+        if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
+        if (!sessionOpt.get().getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
+        WorkoutSessionExercise ex = workoutSessionService.addExercise(sessionId, exerciseId, customExerciseId, notes);
+        return ResponseEntity.ok(toExerciseView(ex));
+    }
+
+    // ─── Update exercise mode (superset / dropset) ────────────────────────────
+
+    @PostMapping("/workout-sessions/{sessionId}/exercises/{exerciseId}/mode")
+    @ResponseBody
+    public ResponseEntity<?> updateExerciseMode(
+            @PathVariable Long sessionId,
+            @PathVariable Long exerciseId,
+            @RequestParam(required = false) String mode,
+            @RequestParam(required = false) String groupKey) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return ResponseEntity.status(401).build();
+        Optional<WorkoutSession> sessionOpt = workoutSessionService.findById(sessionId);
+        if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
+        if (!sessionOpt.get().getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
+        ExerciseMode exerciseMode = null;
+        if (mode != null) {
+            try { exerciseMode = ExerciseMode.valueOf(mode.toUpperCase()); } catch (Exception ignored) {}
+        }
+        WorkoutSessionExercise ex = workoutSessionService.updateExerciseMode(exerciseId, exerciseMode, groupKey);
+        return ResponseEntity.ok(toExerciseView(ex));
+    }
+
+    // ─── Reorder exercises ────────────────────────────────────────────────────
+
+    @PostMapping("/workout-sessions/{sessionId}/reorder")
+    @ResponseBody
+    public ResponseEntity<?> reorderExercises(
+            @PathVariable Long sessionId,
+            @RequestParam("exerciseIds") List<Long> exerciseIds) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) return ResponseEntity.status(401).build();
+        Optional<WorkoutSession> sessionOpt = workoutSessionService.findById(sessionId);
+        if (sessionOpt.isEmpty()) return ResponseEntity.notFound().build();
+        if (!sessionOpt.get().getUser().getId().equals(user.getId())) return ResponseEntity.status(403).build();
+        List<WorkoutSessionExercise> exercises = workoutSessionService.reorderExercises(sessionId, exerciseIds);
+        List<WorkoutSessionViewModel.ExerciseView> views = exercises.stream()
+                .map(this::toExerciseView)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(Map.of("exercises", views));
+    }
+
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private WorkoutSessionViewModel toViewModel(WorkoutSession session) {
