@@ -83,6 +83,12 @@
   --month-carousel-gap: 1.5rem;
   overflow: hidden;
   border-radius: 1.25rem;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.month-carousel.is-dragging {
+  cursor: grabbing;
 }
 
 .month-carousel.is-expanded {
@@ -260,6 +266,20 @@
 
 .dark .calendar-day-card--placeholder {
   opacity: 0.08;
+}
+
+/* On small screens (2-col layout) minimise placeholder height to avoid wasted space */
+@media (max-width: 640px) {
+  .calendar-month-view .calendar-day-card--placeholder {
+    min-height: 2rem !important;
+    height: 2rem !important;
+  }
+}
+@media (max-width: 1024px) and (min-width: 641px) {
+  .calendar-month-view .calendar-day-card--placeholder {
+    min-height: 3rem !important;
+    height: 3rem !important;
+  }
 }
 
 /* ===== STATUS BAR SYSTEM (Top Indicator) ===== */
@@ -2790,8 +2810,8 @@ body.calendar-schedule-open .calendar-week-view {
     flex-wrap: wrap;
   }
 
-  .calendar-jump-input,
-  .calendar-action-btn {
+  .calendar-jump-field .calendar-jump-input,
+  .calendar-jump-field .calendar-action-btn {
     width: 100%;
   }
 
