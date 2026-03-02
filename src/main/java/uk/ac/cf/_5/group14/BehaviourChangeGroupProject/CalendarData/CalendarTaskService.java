@@ -12,6 +12,8 @@ public interface CalendarTaskService {
 
     void createTask(User user, LocalDate date, LocalTime time, String title, String notes, boolean exercise, boolean completed);
 
+    void createTask(User user, LocalDate date, LocalTime time, String title, String notes, boolean exercise, boolean completed, ActivityType activityType);
+
     List<CalendarTask> getTasks(User user, LocalDate date);
 
     Map<LocalDate, List<CalendarTask>> getTasksGroupedByDate(User user);
@@ -23,6 +25,8 @@ public interface CalendarTaskService {
     CalendarTask getTaskById(Long id);
 
     void updateTask(Long id, User user, String title, String time, String notes, boolean exercise);
+
+    void updateTask(Long id, User user, String title, String time, String notes, boolean exercise, ActivityType activityType);
 
     void updateGracePeriodMinutes(Long id, User user, Integer gracePeriodMinutes);
 

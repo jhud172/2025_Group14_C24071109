@@ -34,6 +34,11 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
 
     @Override
     public void updateTask(Long id, User user, String title, String time, String notes, boolean exercise) {
+        updateTask(id, user, title, time, notes, exercise, null);
+    }
+
+    @Override
+    public void updateTask(Long id, User user, String title, String time, String notes, boolean exercise, ActivityType activityType) {
         CalendarTask task = repo.findById(id).orElse(null);
         if (task == null || !task.getUser().getId().equals(user.getId())) return;
         task.setTitle(title);
@@ -43,7 +48,8 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
             task.setTime(LocalTime.parse(time));
         }
         task.setNotes(notes);
-        task.setExercise(exercise);
+        task.setExercise(exercise || activityType != null);
+        task.setActivityType(activityType);
         repo.save(task);
     }
 
@@ -85,13 +91,19 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
 
     @Override
     public void createTask(User user, LocalDate date, LocalTime time, String title, String notes, boolean exercise, boolean completed) {
+        createTask(user, date, time, title, notes, exercise, completed, null);
+    }
+
+    @Override
+    public void createTask(User user, LocalDate date, LocalTime time, String title, String notes, boolean exercise, boolean completed, ActivityType activityType) {
         CalendarTask task = new CalendarTask();
         task.setUser(user);
         task.setDate(date);
         task.setTime(time);
         task.setTitle(title);
         task.setNotes(notes);
-        task.setExercise(exercise);
+        task.setExercise(exercise || activityType != null);
+        task.setActivityType(activityType);
         task.setCompleted(completed);
 
         repo.save(task);

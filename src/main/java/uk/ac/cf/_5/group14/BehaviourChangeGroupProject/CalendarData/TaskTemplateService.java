@@ -35,6 +35,11 @@ public class TaskTemplateService {
 
     @Transactional
     public TaskTemplate upsertFromTask(User user, String title, String notes, boolean exercise) {
+        return upsertFromTask(user, title, notes, exercise, null);
+    }
+
+    @Transactional
+    public TaskTemplate upsertFromTask(User user, String title, String notes, boolean exercise, ActivityType activityType) {
         if (user == null) return null;
         String t = title == null ? "" : title.trim();
         if (t.isBlank()) return null;
@@ -48,7 +53,8 @@ public class TaskTemplateService {
                 });
 
         template.setNotes(notes);
-        template.setExercise(exercise);
+        template.setExercise(exercise || activityType != null);
+        template.setActivityType(activityType);
         template.setLastUsedAt(LocalDateTime.now());
 
         return repository.save(template);

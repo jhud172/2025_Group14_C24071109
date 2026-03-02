@@ -1284,6 +1284,37 @@
     setMonthHeader(currentYear, currentMonth);
     updateHeatmapForPane(monthPane);
 
+    // Motivation Mode toggle — shows activity type stickers on calendar day cells
+    (function initMotivationMode() {
+        const btn = document.getElementById('motivation-mode-toggle');
+        if (!btn) return;
+        let active = false;
+
+        function applyMotivationMode(on) {
+            document.querySelectorAll('.activity-sticker-row').forEach(row => {
+                if (on) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+            document.querySelectorAll('.calendar-day-content').forEach(cell => {
+                if (on) {
+                    cell.classList.add('motivation-mode');
+                } else {
+                    cell.classList.remove('motivation-mode');
+                }
+            });
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            btn.classList.toggle('calendar-action-btn--active', on);
+        }
+
+        btn.addEventListener('click', () => {
+            active = !active;
+            applyMotivationMode(active);
+        });
+    }());
+
     const urlParams = new URLSearchParams(window.location.search);
     const jumpDateFromUrl = urlParams.get('jumpDate');
     if (jumpDateFromUrl) {

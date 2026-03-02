@@ -94,7 +94,8 @@ class CalendarDayAiTaskAddTest {
                 "Make bed",
                 "Quick win",
                 false,
-                "07:30"
+                "07:30",
+                null
         );
 
         given(taskAiGenerationService.generateFromFreeText(eq(prompt))).willReturn(generated);
