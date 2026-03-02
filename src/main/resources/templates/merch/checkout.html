@@ -151,12 +151,21 @@
         // In production this would be replaced with a real payment-provider JS SDK.
         var checkoutForm = document.querySelector('form[action*="/buy"]');
         if (checkoutForm) {
-            checkoutForm.addEventListener('submit', function() {
+            checkoutForm.addEventListener('submit', function(e) {
                 var newCardFields = document.getElementById('new-card-fields');
                 if (!newCardFields || newCardFields.classList.contains('hidden')) return;
                 var displayInput = document.getElementById('checkoutCardNumberDisplay');
-                if (!displayInput || !displayInput.value.trim()) return;
+                if (!displayInput || !displayInput.value.trim()) {
+                    e.preventDefault();
+                    alert('Please enter your card number.');
+                    return;
+                }
                 var cleaned = displayInput.value.replace(/\s+/g, '');
+                if (cleaned.length < 4) {
+                    e.preventDefault();
+                    alert('Please enter a valid card number.');
+                    return;
+                }
                 var last4 = cleaned.slice(-4);
                 var token = 'tok_' + last4 + '_' + Date.now();
                 document.getElementById('checkoutLastFour').value = last4;

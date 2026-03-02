@@ -94,6 +94,7 @@ public class MerchOrderServiceImpl implements MerchOrderService {
         List<MerchOrder> pending = orderRepo.findPendingOrdersContainingProduct(productId);
         for (MerchOrder order : pending) {
             order.setStatus(OrderStatus.CANCELLED);
+            order.setRefundStatus(RefundStatus.NONE);
             orderRepo.save(order);
         }
         if (!pending.isEmpty()) {

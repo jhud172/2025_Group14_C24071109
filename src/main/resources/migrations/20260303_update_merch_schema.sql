@@ -4,6 +4,8 @@
 --   3. Add richer snapshots to order items
 
 -- 1. saved_payment_methods: drop encrypted PAN column, add provider token column
+--    The empty-string default allows the ALTER TABLE to succeed on existing rows;
+--    the service layer validates that the token is non-blank before any row is saved.
 ALTER TABLE saved_payment_methods
     ADD COLUMN IF NOT EXISTS provider_payment_method_id TEXT NOT NULL DEFAULT '';
 
