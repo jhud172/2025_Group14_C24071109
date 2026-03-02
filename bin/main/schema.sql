@@ -76,6 +76,7 @@ DROP TABLE IF EXISTS daily_completion CASCADE;
 DROP TABLE IF EXISTS coach_action_logs CASCADE;
 DROP TABLE IF EXISTS coach_messages CASCADE;
 DROP TABLE IF EXISTS coach_conversations CASCADE;
+DROP TABLE IF EXISTS blood_pressure_readings CASCADE;
 DROP TABLE IF EXISTS daily_usage CASCADE;
 DROP TABLE IF EXISTS chat_messages CASCADE;
 DROP TABLE IF EXISTS ai_form_feedback CASCADE;
@@ -1684,6 +1685,7 @@ CREATE TABLE IF NOT EXISTS calendar_tasks
     requires_log    BOOLEAN      NOT NULL DEFAULT FALSE,
     trainer_template_id BIGINT   NULL,
     trainer_template_entry_id BIGINT NULL,
+    activity_type       VARCHAR(20)  NULL,
 
     CONSTRAINT fk_calendar_tasks_user
         FOREIGN KEY (user_id) REFERENCES users (id)
@@ -1734,6 +1736,7 @@ CREATE TABLE IF NOT EXISTS task_templates
     is_favourite BOOLEAN      NOT NULL DEFAULT FALSE,
     last_used_at TIMESTAMP    NULL,
     created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    activity_type VARCHAR(20) NULL,
 
     CONSTRAINT fk_task_templates_user
         FOREIGN KEY (user_id) REFERENCES users (id)
@@ -2244,6 +2247,27 @@ CREATE TABLE IF NOT EXISTS daily_usage
     CONSTRAINT fk_daily_usage_user
         FOREIGN KEY (user_id) REFERENCES users (id)
             ON DELETE CASCADE
+);
+
+-- =========================
+-- BLOOD PRESSURE READINGS
+-- =========================
+CREATE TABLE IF NOT EXISTS blood_pressure_readings
+(
+    id           BIGSERIAL PRIMARY KEY,
+    user_id      BIGINT       NOT NULL,
+    reading_date DATE         NOT NULL,
+    reading_time TIME         NULL,
+    systolic     INT          NOT NULL,
+    diastolic    INT          NOT NULL,
+    pulse        INT          NULL,
+    arm          VARCHAR(10)  NULL,
+    position     VARCHAR(10)  NULL,
+    notes        VARCHAR(500) NULL,
+    source       VARCHAR(10)  NOT NULL DEFAULT 'MANUAL',
+    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_bp_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 -- =========================
