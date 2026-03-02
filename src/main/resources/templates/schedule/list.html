@@ -504,6 +504,12 @@
                     .filter(Boolean);
             }
 
+            // Calculate rest days from API data (prefer explicit field, fallback to 7 minus active days)
+            function getRestDaysFromData(data) {
+                if (data.restDays != null) return data.restDays;
+                return Math.max(0, 7 - (data.activeDays || 0));
+            }
+
             // Update insights bar with real data from batch API response
             function updateInsightsFromBatch(batchData) {
                 const activeIds = getActiveScheduleIds();
@@ -517,7 +523,7 @@
                     const data = batchData[id];
                     if (data) {
                         totalSessions += (data.sessionsPerWeek || 0);
-                        totalRestDays += (data.restDays != null ? data.restDays : Math.max(0, 7 - (data.activeDays || 0)));
+                        totalRestDays += getRestDaysFromData(data);
                         count++;
                     }
                 });
