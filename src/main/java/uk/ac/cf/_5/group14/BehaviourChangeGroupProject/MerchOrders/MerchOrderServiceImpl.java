@@ -3,21 +3,28 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Merch.MerchProduct;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Merch.MerchProductService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PaymentCards.SavedPaymentMethod;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 @Transactional
 public class MerchOrderServiceImpl implements MerchOrderService {
 
-    private final MerchOrderRepository orderRepo;
+    private static final Logger log = Logger.getLogger(MerchOrderServiceImpl.class.getName());
 
-    public MerchOrderServiceImpl(MerchOrderRepository orderRepo) {
+    private final MerchOrderRepository orderRepo;
+    private final MerchProductService productService;
+
+    public MerchOrderServiceImpl(MerchOrderRepository orderRepo,
+                                  MerchProductService productService) {
         this.orderRepo = orderRepo;
+        this.productService = productService;
     }
 
     @Override
@@ -43,7 +50,12 @@ public class MerchOrderServiceImpl implements MerchOrderService {
         if (quantity < 1) {
             throw new IllegalArgumentException("Quantity must be at least 1.");
         }
-        if (product.getStockQuantity() < quantity) {
+
+        // Atomic stock decrement – race-safe; fails if stock is insufficient
+        boolean decremented = productService.decrementStock(product.getId(), quantity);
+        if (!decremented) {
+            log.warning(() -> "Stock decrement failed: product=" + product.getId()
+                    + " requestedQty=" + quantity);
             throw new IllegalStateException("Insufficient stock.");
         }
 
@@ -54,28 +66,38 @@ public class MerchOrderServiceImpl implements MerchOrderService {
         order.setTotalAmount(total);
         order.setPaymentMethod(paymentMethod);
         order.setStatus(OrderStatus.CONFIRMED);
+        order.setRefundStatus(RefundStatus.NONE);
 
         MerchOrderItem item = new MerchOrderItem();
         item.setOrder(order);
         item.setProduct(product);
         item.setProductNameSnapshot(product.getName());
         item.setPriceSnapshot(product.getPrice());
+        item.setImageUrlSnapshot(product.getImageUrl());
+        item.setCategorySnapshot(product.getCategory());
         item.setQuantity(quantity);
 
         order.getItems().add(item);
 
-        // Decrement stock
-        product.setStockQuantity(product.getStockQuantity() - quantity);
-
-        return orderRepo.save(order);
+        MerchOrder saved = orderRepo.save(order);
+        log.info(() -> "Order created: orderId=" + saved.getId()
+                + " userId=" + user.getId()
+                + " productId=" + product.getId()
+                + " qty=" + quantity
+                + " total=" + total
+                + " status=" + saved.getStatus());
+        return saved;
     }
 
     @Override
-    public void cancelActiveOrdersForProduct(Long productId) {
-        List<MerchOrder> active = orderRepo.findActiveOrdersContainingProduct(productId);
-        for (MerchOrder order : active) {
-            order.setStatus(OrderStatus.CANCELLED_REFUND_PENDING);
+    public void cancelPendingOrdersForProduct(Long productId) {
+        List<MerchOrder> pending = orderRepo.findPendingOrdersContainingProduct(productId);
+        for (MerchOrder order : pending) {
+            order.setStatus(OrderStatus.CANCELLED);
             orderRepo.save(order);
+        }
+        if (!pending.isEmpty()) {
+            log.info(() -> "Cancelled " + pending.size() + " PENDING orders for product=" + productId);
         }
     }
 }

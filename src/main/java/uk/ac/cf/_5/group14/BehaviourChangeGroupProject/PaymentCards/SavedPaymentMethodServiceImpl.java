@@ -7,20 +7,19 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 @Transactional
 public class SavedPaymentMethodServiceImpl implements SavedPaymentMethodService {
 
     private static final int MAX_CARDS_PER_USER = 10;
+    private static final Logger log = Logger.getLogger(SavedPaymentMethodServiceImpl.class.getName());
 
     private final SavedPaymentMethodRepository repo;
-    private final CardEncryptionService encryptionService;
 
-    public SavedPaymentMethodServiceImpl(SavedPaymentMethodRepository repo,
-                                         CardEncryptionService encryptionService) {
+    public SavedPaymentMethodServiceImpl(SavedPaymentMethodRepository repo) {
         this.repo = repo;
-        this.encryptionService = encryptionService;
     }
 
     @Override
@@ -38,7 +37,8 @@ public class SavedPaymentMethodServiceImpl implements SavedPaymentMethodService 
     @Override
     public SavedPaymentMethod addCard(User user,
                                       String cardHolderName,
-                                      String fullCardNumber,
+                                      String providerToken,
+                                      String lastFour,
                                       String brand,
                                       short expiryMonth,
                                       short expiryYear,
@@ -46,10 +46,12 @@ public class SavedPaymentMethodServiceImpl implements SavedPaymentMethodService 
         if (repo.countByUserId(user.getId()) >= MAX_CARDS_PER_USER) {
             throw new IllegalStateException("Maximum of " + MAX_CARDS_PER_USER + " cards allowed per account.");
         }
-
-        String cleaned = fullCardNumber.replaceAll("\\s+", "");
-        String lastFour = cleaned.substring(cleaned.length() - 4);
-        String encrypted = encryptionService.encrypt(cleaned);
+        if (providerToken == null || providerToken.isBlank()) {
+            throw new IllegalArgumentException("A valid payment provider token is required.");
+        }
+        if (lastFour == null || !lastFour.matches("\\d{4}")) {
+            throw new IllegalArgumentException("Last four digits are required.");
+        }
 
         boolean isFirstCard = repo.countByUserId(user.getId()) == 0;
         boolean shouldBeDefault = makeDefault || isFirstCard;
@@ -65,9 +67,10 @@ public class SavedPaymentMethodServiceImpl implements SavedPaymentMethodService 
         card.setBrand(brand.trim());
         card.setExpiryMonth(expiryMonth);
         card.setExpiryYear(expiryYear);
-        card.setEncryptedCardToken(encrypted);
+        card.setProviderPaymentMethodId(providerToken.trim());
         card.setDefault(shouldBeDefault);
 
+        log.info(() -> "Payment method added for user=" + user.getId() + " brand=" + brand + " last4=" + lastFour);
         return repo.save(card);
     }
 

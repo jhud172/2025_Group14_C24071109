@@ -76,6 +76,9 @@
                 <div id="new-card-fields"
                      th:classappend="${#lists.isEmpty(cards)} ? '' : ' hidden'"
                      class="card-neon card--cyan space-y-4 p-4">
+                    <!-- Hidden fields populated by JS before submit – raw PAN is never sent to the server -->
+                    <input type="hidden" name="newProviderToken" id="checkoutProviderToken" />
+                    <input type="hidden" name="newLastFour" id="checkoutLastFour" />
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Cardholder Name *</label>
                         <input type="text" name="newCardHolderName" maxlength="200"
@@ -83,7 +86,8 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Card Number *</label>
-                        <input type="text" name="newCardNumber" maxlength="19"
+                        <!-- Card number collected client-side only; stub token submitted instead -->
+                        <input type="text" id="checkoutCardNumberDisplay" maxlength="19"
                                class="input-field w-full" placeholder="•••• •••• •••• ••••"
                                autocomplete="cc-number" inputmode="numeric"
                                oninput="this.value=this.value.replace(/[^\d\s]/g,'')"/>
@@ -142,6 +146,24 @@
                 }
             });
         });
+
+        // Checkout form: extract last4 + generate stub provider token before submit.
+        // In production this would be replaced with a real payment-provider JS SDK.
+        var checkoutForm = document.querySelector('form[action*="/buy"]');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function() {
+                var newCardFields = document.getElementById('new-card-fields');
+                if (!newCardFields || newCardFields.classList.contains('hidden')) return;
+                var displayInput = document.getElementById('checkoutCardNumberDisplay');
+                if (!displayInput || !displayInput.value.trim()) return;
+                var cleaned = displayInput.value.replace(/\s+/g, '');
+                var last4 = cleaned.slice(-4);
+                var token = 'tok_' + last4 + '_' + Date.now();
+                document.getElementById('checkoutLastFour').value = last4;
+                document.getElementById('checkoutProviderToken').value = token;
+                displayInput.value = '';
+            });
+        }
         </script>
     </div>
 

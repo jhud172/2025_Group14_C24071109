@@ -119,7 +119,7 @@ public class AdminMerchController {
         try {
             productService.deleteProduct(id);
             ra.addFlashAttribute("successMessage",
-                    "Product removed. Any confirmed orders have been flagged for refund.");
+                    "Product deactivated. Any pending orders have been cancelled.");
         } catch (Exception e) {
             ra.addFlashAttribute("errorMessage", "Error removing product: " + e.getMessage());
         }

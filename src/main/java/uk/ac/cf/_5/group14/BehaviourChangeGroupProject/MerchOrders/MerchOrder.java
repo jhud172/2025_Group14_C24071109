@@ -29,6 +29,13 @@ public class MerchOrder {
     @Column(name = "status", nullable = false, length = 30)
     private OrderStatus status = OrderStatus.PENDING;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "refund_status", nullable = false, length = 20)
+    private RefundStatus refundStatus = RefundStatus.NONE;
+
+    @Column(name = "refund_reference", length = 200)
+    private String refundReference;
+
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 

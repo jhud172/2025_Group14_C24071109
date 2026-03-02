@@ -13,18 +13,24 @@ public interface SavedPaymentMethodService {
 
     /**
      * Adds a new card for the user.
-     * @param user           owner
-     * @param cardHolderName name on card
-     * @param fullCardNumber raw PAN – encrypted before storage
-     * @param brand          Visa / Mastercard / Amex etc.
-     * @param expiryMonth    1-12
-     * @param expiryYear     4-digit year
-     * @param makeDefault    whether to mark this card as default
+     * The raw PAN must never be passed here; callers should instead obtain a
+     * provider-issued token (e.g. from Stripe/Adyen hosted fields) client-side and
+     * pass only that opaque token alongside display metadata.
+     *
+     * @param user            owner
+     * @param cardHolderName  name on card
+     * @param providerToken   opaque token from the payment provider – never the raw PAN
+     * @param lastFour        last 4 digits of the card (for display only)
+     * @param brand           Visa / Mastercard / Amex etc.
+     * @param expiryMonth     1-12
+     * @param expiryYear      4-digit year
+     * @param makeDefault     whether to mark this card as default
      * @return the persisted entity
      */
     SavedPaymentMethod addCard(User user,
                                String cardHolderName,
-                               String fullCardNumber,
+                               String providerToken,
+                               String lastFour,
                                String brand,
                                short expiryMonth,
                                short expiryYear,

@@ -21,7 +21,8 @@ public class PaymentCardsController {
     /** Add a new card */
     @PostMapping("/add")
     public String addCard(@RequestParam("cardHolderName") String cardHolderName,
-                          @RequestParam("cardNumber") String cardNumber,
+                          @RequestParam("providerToken") String providerToken,
+                          @RequestParam("lastFour") String lastFour,
                           @RequestParam("brand") String brand,
                           @RequestParam("expiryMonth") short expiryMonth,
                           @RequestParam("expiryYear") short expiryYear,
@@ -30,8 +31,10 @@ public class PaymentCardsController {
         User user = authHelper.getAuthenticatedUser();
         if (user == null) return "redirect:/login";
         try {
-            validateCardInput(cardHolderName, cardNumber, expiryMonth, expiryYear);
-            cardService.addCard(user, cardHolderName, cardNumber, brand, expiryMonth, expiryYear, makeDefault);
+            if (cardHolderName == null || cardHolderName.isBlank()) {
+                throw new IllegalArgumentException("Cardholder name is required.");
+            }
+            cardService.addCard(user, cardHolderName, providerToken, lastFour, brand, expiryMonth, expiryYear, makeDefault);
             ra.addFlashAttribute("cardSuccess", "Card added successfully.");
         } catch (Exception e) {
             ra.addFlashAttribute("cardError", e.getMessage());
@@ -88,30 +91,5 @@ public class PaymentCardsController {
             ra.addFlashAttribute("cardError", e.getMessage());
         }
         return "redirect:/profile#cards";
-    }
-
-    // ── Validation helpers ────────────────────────────────────────────────────
-
-    private void validateCardInput(String cardHolderName,
-                                   String cardNumber,
-                                   short expiryMonth,
-                                   short expiryYear) {
-        if (cardHolderName == null || cardHolderName.isBlank()) {
-            throw new IllegalArgumentException("Cardholder name is required.");
-        }
-        if (cardNumber == null) {
-            throw new IllegalArgumentException("Card number is required.");
-        }
-        String cleaned = cardNumber.replaceAll("\\s+", "");
-        if (!cleaned.matches("\\d{13,19}")) {
-            throw new IllegalArgumentException("Card number must be 13–19 digits.");
-        }
-        if (expiryMonth < 1 || expiryMonth > 12) {
-            throw new IllegalArgumentException("Expiry month must be 1–12.");
-        }
-        int currentYear = java.time.Year.now().getValue();
-        if (expiryYear < currentYear || expiryYear > currentYear + 20) {
-            throw new IllegalArgumentException("Invalid expiry year.");
-        }
     }
 }

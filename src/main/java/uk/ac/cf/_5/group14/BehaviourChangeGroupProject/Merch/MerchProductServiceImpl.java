@@ -88,12 +88,17 @@ public class MerchProductServiceImpl implements MerchProductService {
     }
 
     @Override
+    public boolean decrementStock(Long productId, int qty) {
+        return productRepo.decrementStock(productId, qty) == 1;
+    }
+
+    @Override
     public void deleteProduct(Long productId) {
         MerchProduct product = productRepo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
 
-        // Cancel any active orders that contain this product before removing
-        orderService.cancelActiveOrdersForProduct(productId);
+        // Cancel only PENDING orders; CONFIRMED/SHIPPED/DELIVERED are left for explicit admin action
+        orderService.cancelPendingOrdersForProduct(productId);
 
         // Soft-delete: deactivate so existing order snapshots remain intact
         product.setActive(false);

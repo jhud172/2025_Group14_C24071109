@@ -21,8 +21,14 @@ public interface MerchProductService {
     MerchProduct saveWithImage(MerchProduct product, MultipartFile image);
 
     /**
-     * Deactivates the product and cancels all CONFIRMED orders that contain it,
-     * marking them CANCELLED_REFUND_PENDING.
+     * Atomically decrements stock for the given product by qty.
+     * Returns true if successful, false if stock was insufficient.
+     */
+    boolean decrementStock(Long productId, int qty);
+
+    /**
+     * Deactivates the product. PENDING orders that contain it are cancelled;
+     * CONFIRMED/SHIPPED/DELIVERED orders are left untouched.
      */
     void deleteProduct(Long productId);
 }

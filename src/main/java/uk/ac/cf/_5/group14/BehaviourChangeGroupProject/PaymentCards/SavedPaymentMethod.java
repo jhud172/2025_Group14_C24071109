@@ -39,11 +39,11 @@ public class SavedPaymentMethod {
     private short expiryYear;
 
     /**
-     * AES-GCM encrypted token that holds the full card number (PAN).
-     * Never returned to the client.
+     * Opaque token issued by the payment provider (e.g. Stripe/Adyen).
+     * The raw card number (PAN) is never stored.
      */
-    @Column(name = "encrypted_card_token", nullable = false, columnDefinition = "TEXT")
-    private String encryptedCardToken;
+    @Column(name = "provider_payment_method_id", nullable = false, columnDefinition = "TEXT")
+    private String providerPaymentMethodId;
 
     @Column(name = "is_default", nullable = false)
     private boolean isDefault = false;
