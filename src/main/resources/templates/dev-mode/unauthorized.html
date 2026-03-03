@@ -3,152 +3,140 @@
 
     <th:block th:fragment="pageStyles">
         <style>
-            .dev-unauth-wrap {
+            .devunauth-wrap {
                 min-height: 65vh;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: 40px 20px;
+                padding: 40px 16px;
             }
-
-            .dev-unauth-card {
-                background: #ffffff;
-                border: 1.5px solid #e5e7eb;
+            .devunauth-card {
+                background: #1e293b;
+                border: 1px solid #334155;
                 border-radius: 20px;
-                padding: 48px 40px 40px;
-                max-width: 520px;
+                padding: 48px 36px 40px;
+                max-width: 480px;
                 width: 100%;
                 text-align: center;
-                box-shadow: 0 4px 32px rgba(0,0,0,.07);
+                box-shadow: 0 20px 60px rgba(0,0,0,.3);
             }
-
-            .dev-unauth-badge {
+            .devunauth-badge {
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
-                background: #fef3c7;
-                border: 1px solid #fde68a;
-                color: #92400e;
+                background: rgba(251,191,36,.12);
+                border: 1px solid rgba(251,191,36,.35);
+                color: #fbbf24;
                 padding: 4px 12px;
                 border-radius: 999px;
-                font-size: 11px;
+                font-size: 10px;
                 font-weight: 700;
-                letter-spacing: .5px;
+                letter-spacing: .7px;
                 text-transform: uppercase;
-                margin-bottom: 24px;
+                margin-bottom: 22px;
             }
-            .dev-unauth-badge-dot {
-                width: 6px;
-                height: 6px;
+            .devunauth-badge-dot {
+                width: 6px; height: 6px;
                 border-radius: 50%;
-                background: #f59e0b;
-                animation: unaPulse 2s ease-in-out infinite;
+                background: #fbbf24;
+                animation: unauthPulse 2s ease-in-out infinite;
             }
-            @keyframes unaPulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: .4; }
-            }
-
-            .dev-unauth-icon {
-                font-size: 56px;
-                margin-bottom: 20px;
-                line-height: 1;
-            }
-
-            .dev-unauth-card h1 {
-                font-size: 24px;
+            @keyframes unauthPulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+            .devunauth-icon { font-size: 52px; margin-bottom: 18px; line-height: 1; }
+            .devunauth-card h1 {
+                font-size: 22px;
                 font-weight: 700;
-                color: #111827;
-                margin: 0 0 12px;
+                color: #e2e8f0;
+                margin: 0 0 10px;
             }
-
-            .dev-unauth-card p {
-                font-size: 15px;
-                color: #6b7280;
+            .devunauth-card p {
+                font-size: 14px;
+                color: #94a3b8;
                 line-height: 1.65;
-                margin: 0 0 28px;
+                margin: 0 0 26px;
             }
-
-            .dev-unauth-actions {
+            .devunauth-actions {
                 display: flex;
                 gap: 10px;
                 justify-content: center;
                 flex-wrap: wrap;
             }
-
-            .dev-btn-primary {
+            .devunauth-btn-primary {
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
                 padding: 11px 22px;
-                background: #10b981;
-                color: #ffffff;
+                background: #6366f1;
+                color: #fff;
                 border-radius: 10px;
-                font-weight: 600;
+                font-weight: 700;
                 font-size: 14px;
                 text-decoration: none;
-                transition: background .2s, transform .2s, box-shadow .2s;
+                transition: background .2s, transform .15s;
             }
-            .dev-btn-primary:hover {
-                background: #059669;
+            .devunauth-btn-primary:hover {
+                background: #4f46e5;
                 transform: translateY(-1px);
-                box-shadow: 0 4px 14px rgba(16,185,129,.3);
-                text-decoration: none;
-                color: #ffffff;
+                text-decoration: none; color: #fff;
             }
-
-            .dev-btn-secondary {
+            .devunauth-btn-secondary {
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
                 padding: 11px 22px;
-                background: #f3f4f6;
-                color: #374151;
-                border-radius: 10px;
-                font-weight: 600;
-                font-size: 14px;
-                text-decoration: none;
-                transition: background .2s, transform .2s;
-            }
-            .dev-btn-secondary:hover {
-                background: #e5e7eb;
-                transform: translateY(-1px);
-                text-decoration: none;
-                color: #374151;
-            }
-
-            /* Dark mode */
-            .dark .dev-unauth-card {
                 background: #1e293b;
-                border-color: #334155;
+                border: 1.5px solid #334155;
+                color: #94a3b8;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 14px;
+                text-decoration: none;
+                transition: border-color .2s, color .2s, transform .15s;
             }
-            .dark .dev-unauth-card h1 { color: #f1f5f9; }
-            .dark .dev-unauth-card p  { color: #94a3b8; }
-            .dark .dev-btn-secondary  { background: #334155; color: #e2e8f0; }
-            .dark .dev-btn-secondary:hover { background: #475569; color: #f1f5f9; }
+            .devunauth-btn-secondary:hover {
+                border-color: #475569;
+                color: #e2e8f0;
+                transform: translateY(-1px);
+                text-decoration: none;
+            }
+
+            html:not(.dark) .devunauth-card {
+                background: #f8fafc;
+                border-color: #e2e8f0;
+            }
+            html:not(.dark) .devunauth-card h1 { color: #0f172a; }
+            html:not(.dark) .devunauth-card p  { color: #475569; }
+            html:not(.dark) .devunauth-btn-secondary {
+                background: #fff;
+                border-color: #e2e8f0;
+                color: #475569;
+            }
+            html:not(.dark) .devunauth-btn-secondary:hover {
+                border-color: #cbd5e1;
+                color: #0f172a;
+            }
         </style>
     </th:block>
 
-    <div th:fragment="content" class="dev-unauth-wrap">
-        <div class="dev-unauth-card">
+    <div th:fragment="content" class="devunauth-wrap">
+        <div class="devunauth-card">
 
-            <div class="dev-unauth-badge">
-                <span class="dev-unauth-badge-dot"></span>
+            <div class="devunauth-badge">
+                <span class="devunauth-badge-dot"></span>
                 Development Mode
             </div>
 
-            <div class="dev-unauth-icon">🔒</div>
-
+            <div class="devunauth-icon">🔒</div>
             <h1>Login Required</h1>
-            <p>This page needs an authenticated session to display content. Sign in to explore it with real data, or return to the Dev Hub to browse open pages.</p>
+            <p>This page needs an authenticated session to display content. Sign in to explore it with real data, or return to the Dev Hub to browse public pages.</p>
 
-            <div class="dev-unauth-actions">
-                <a href="/login" class="dev-btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            <div class="devunauth-actions">
+                <a href="/login?devLogin=1" class="devunauth-btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                     Sign In
                 </a>
-                <a href="/dev-mode" class="dev-btn-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                <a href="/dev-mode" class="devunauth-btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
                     Dev Hub
                 </a>
             </div>
@@ -160,3 +148,4 @@
     </th:block>
 
 </th:block>
+
