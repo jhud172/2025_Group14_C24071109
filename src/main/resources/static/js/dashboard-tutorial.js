@@ -8,31 +8,114 @@ class DashboardTutorial {
     constructor() {
         this.storageKey = 'onetoone.tutorial.completed';
         this.currentStep = 0;
-        this.totalSteps = 3;
         this.isActive = false;
         this.targetElement = null;
         this.intersectionObserver = null;
         this.focusTrapLastFocusedElement = null;
+        this.userRole = this.getUserRole();
 
-        // Tutorial step definitions
-        this.steps = [
+        this.steps = this.getStepsForRole(this.userRole);
+        this.totalSteps = this.steps.length;
+
+        this.init();
+    }
+
+    getUserRole() {
+        const overlay = document.getElementById('tutorial-overlay');
+        const roleFromOverlay = overlay?.dataset?.userRole;
+        const roleFromDashboard = document.querySelector('[data-dashboard-role]')?.dataset?.dashboardRole;
+        const roleFromBody = document.body?.dataset?.userRole;
+        const role = roleFromOverlay || roleFromDashboard || roleFromBody || 'CLIENT';
+        return String(role).toUpperCase();
+    }
+
+    getStepsForRole(role) {
+        if (role === 'TRAINER') {
+            return [
+                {
+                    id: 'welcome-trainer',
+                    title: 'Welcome to your coaching command center',
+                    message: 'This quick flow highlights where to manage clients and programmes.',
+                    targetSelector: '[aria-label="Next action"]',
+                    highlight: true,
+                    visitPath: '/trainer/clients',
+                    visitLabel: 'Open clients',
+                    ariaLabel: 'Step 1: Trainer welcome and overview.'
+                },
+                {
+                    id: 'trainer-planning',
+                    title: 'Plan and review sessions',
+                    message: 'Use Calendar and Library to build structured client progressions.',
+                    targetSelector: '[aria-label="This week at a glance"]',
+                    highlight: true,
+                    visitPath: '/trainer/library',
+                    visitLabel: 'Open library',
+                    ariaLabel: 'Step 2: Navigate to planning tools.'
+                },
+                {
+                    id: 'trainer-done',
+                    title: 'You are ready to coach',
+                    message: 'Continue with your top priority action from this dashboard.',
+                    targetSelector: '[aria-label="Next action"] .btn--primary',
+                    highlight: true,
+                    ariaLabel: 'Step 3: Trainer completion step.'
+                }
+            ];
+        }
+
+        if (role === 'GYM' || role === 'GYM_ADMIN') {
+            return [
+                {
+                    id: 'welcome-gym',
+                    title: 'Welcome to your gym dashboard',
+                    message: 'We will walk through daily operations and team management.',
+                    targetSelector: '[aria-label="Next action"]',
+                    highlight: true,
+                    visitPath: '/gym/trainers',
+                    visitLabel: 'Open staff',
+                    ariaLabel: 'Step 1: Gym welcome step.'
+                },
+                {
+                    id: 'gym-operations',
+                    title: 'Keep operations in flow',
+                    message: 'Use the calendar and insights to keep member delivery consistent.',
+                    targetSelector: '[aria-label="This week at a glance"]',
+                    highlight: true,
+                    visitPath: '/calendar',
+                    visitLabel: 'Open calendar',
+                    ariaLabel: 'Step 2: Gym operations step.'
+                },
+                {
+                    id: 'gym-done',
+                    title: 'All set',
+                    message: 'You can start with the top action on this page or jump to staff tools.',
+                    targetSelector: '[aria-label="Next action"] .btn--primary',
+                    highlight: true,
+                    ariaLabel: 'Step 3: Gym completion step.'
+                }
+            ];
+        }
+
+        return [
             {
                 id: 'welcome',
                 title: 'Welcome to your fitness command center!',
                 message: "Let's show you around 🚀",
                 targetSelector: '[aria-label="Next action"]',
                 highlight: true,
-                buttons: ['Skip', 'Next →'],
+                visitPath: '/calendar',
+                visitLabel: 'Open calendar',
                 ariaLabel: 'Step 1 of 3: Welcome. Introducing your fitness dashboard.'
             },
             {
                 id: 'features',
                 title: 'Track your progress with ease',
-                message: 'Plan workouts, log activities, and see your streak in one place',
+                message: 'Plan workouts, log activities, and see your streak in one place.',
                 targetSelector: '[aria-label="This week at a glance"]',
                 highlight: true,
-                buttons: ['← Back', 'Skip', 'Next →'],
-                ariaLabel: 'Step 2 of 3: Key Features. Explore dashboard sections—Week Strip, Timeline, and Progress Signals.'
+                visitPath: '/workout',
+                visitLabel: 'Open workout builder',
+                ariaLabel: 'Step 2 of 3: Key features in context.'
             },
             {
                 id: 'cta',
@@ -40,12 +123,11 @@ class DashboardTutorial {
                 message: 'Log your first workout and build your streak! 💪',
                 targetSelector: '[aria-label="Next action"] .btn--primary',
                 highlight: true,
-                buttons: ['← Back', 'Done ✓'],
-                ariaLabel: 'Step 3 of 3: Getting Started. Your primary action button is ready to help you log workouts.'
+                visitPath: '/exercise-log',
+                visitLabel: 'Open workout log',
+                ariaLabel: 'Step 3 of 3: Getting started with your first action.'
             }
         ];
-
-        this.init();
     }
 
     init() {
@@ -77,6 +159,17 @@ class DashboardTutorial {
 
         // Check if user is new and should see tutorial
         this.checkAndStartTutorial();
+
+        // Backdrop click skips tutorial
+        const overlay = this.getOverlay();
+        const backdrop = overlay?.querySelector('.tutorial-backdrop');
+        if (backdrop) {
+            backdrop.addEventListener('click', () => {
+                if (this.isActive) {
+                    this.skipTutorial();
+                }
+            });
+        }
     }
 
     createIntersectionObserver() {
@@ -206,7 +299,7 @@ class DashboardTutorial {
         }
 
         // Update buttons
-        this.setupButtons(buttonsContainer, step.buttons, stepIndex);
+        this.setupButtons(buttonsContainer, step, stepIndex);
 
         // Highlight target element
         this.highlightTarget(step.targetSelector, highlightBox);
@@ -271,33 +364,55 @@ class DashboardTutorial {
         }
     }
 
-    setupButtons(container, buttons, stepIndex) {
+    setupButtons(container, step, stepIndex) {
         if (!container) return;
 
         container.innerHTML = '';
 
-        buttons.forEach((label) => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className =
-                label.includes('Done') || label.includes('Next')
-                    ? 'btn btn--primary btn--sm'
-                    : 'btn btn--secondary btn--sm';
+        if (stepIndex > 0) {
+            const backButton = document.createElement('button');
+            backButton.type = 'button';
+            backButton.className = 'btn btn--secondary btn--sm';
+            backButton.textContent = '← Back';
+            backButton.addEventListener('click', () => this.prevStep());
+            container.appendChild(backButton);
+        }
 
-            button.textContent = label;
+        const skipButton = document.createElement('button');
+        skipButton.type = 'button';
+        skipButton.className = 'btn btn--secondary btn--sm';
+        skipButton.textContent = 'Skip';
+        skipButton.addEventListener('click', () => this.skipTutorial());
+        container.appendChild(skipButton);
 
-            if (label.includes('Skip')) {
-                button.addEventListener('click', () => this.skipTutorial());
-            } else if (label.includes('Next')) {
-                button.addEventListener('click', () => this.nextStep());
-            } else if (label.includes('Back')) {
-                button.addEventListener('click', () => this.prevStep());
-            } else if (label.includes('Done')) {
-                button.addEventListener('click', () => this.completeTutorial());
+        if (step.visitPath) {
+            const visitButton = document.createElement('button');
+            visitButton.type = 'button';
+            visitButton.className = 'btn btn--secondary btn--sm';
+            visitButton.textContent = step.visitLabel || 'Open page';
+            visitButton.addEventListener('click', () => this.openStepPage(step.visitPath));
+            container.appendChild(visitButton);
+        }
+
+        const isLast = stepIndex === this.totalSteps - 1;
+        const continueButton = document.createElement('button');
+        continueButton.type = 'button';
+        continueButton.className = 'btn btn--primary btn--sm';
+        continueButton.textContent = isLast ? 'Done ✓' : 'Continue →';
+        continueButton.addEventListener('click', () => {
+            if (isLast) {
+                this.completeTutorial();
+                return;
             }
-
-            container.appendChild(button);
+            this.nextStep();
         });
+        container.appendChild(continueButton);
+    }
+
+    openStepPage(path) {
+        if (!path || typeof path !== 'string') return;
+        if (!path.startsWith('/')) return;
+        window.location.assign(path);
     }
 
     nextStep() {

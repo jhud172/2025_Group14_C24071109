@@ -42,6 +42,10 @@ function initCalendarUx() {
     const filterFavourites = document.getElementById('schedule-filter-favourites');
     const filterRecent = document.getElementById('schedule-filter-recent');
     const sortSelect = document.getElementById('schedule-sort');
+    const scopeButtons = Array.from(scheduleDrawer?.querySelectorAll('[data-schedule-scope]') || []);
+    const customScopeRow = scheduleDrawer?.querySelector('[data-scope-custom]') || null;
+    const scopeStartInput = document.getElementById('schedule-scope-start');
+    const scopeEndInput = document.getElementById('schedule-scope-end');
 
     const pinnedList = document.getElementById('schedule-pinned-list');
     const recentList = document.getElementById('schedule-recent-list');
@@ -72,6 +76,8 @@ function initCalendarUx() {
     let lastFocusedElement = null;
     let undoTimeout = null;
     let searchFilterTimer = null;
+    let searchQuery = '';
+    let selectedScope = 'visible';
     const scheduleMetadataCache = new Map();
 
     function getCurrentPane() {
@@ -169,6 +175,7 @@ function initCalendarUx() {
         if (!scheduleList) return;
         const lis = Array.from(scheduleList.querySelectorAll('li[data-schedule-id]'));
         const favourites = loadSet(favouriteStorageKey);
+        const pinned = loadSet(pinnedStorageKey);
         const recent = new Set(loadRecent());
 
         const selectedType = filterType?.value || 'all';
@@ -183,6 +190,8 @@ function initCalendarUx() {
             const status = (li.getAttribute('data-schedule-status') || '').toLowerCase();
             const type = typeLabelToFilterValue(li.getAttribute('data-schedule-type'));
             const frequencyBucket = card?.getAttribute('data-frequency-bucket') || 'all';
+            const name = (li.getAttribute('data-schedule-name') || '').toLowerCase();
+            const matchSearch = !searchQuery || name.includes(searchQuery);
 
             const matchType = selectedType === 'all' || selectedType === type;
             const matchStatus = selectedStatus === 'all' || selectedStatus === status;
@@ -190,11 +199,26 @@ function initCalendarUx() {
             const matchFavourite = !onlyFavourites || favourites.has(scheduleId);
             const matchRecent = !onlyRecent || recent.has(scheduleId);
 
-            li.style.display = (matchType && matchStatus && matchFrequency && matchFavourite && matchRecent) ? '' : 'none';
+            li.style.display = (matchType && matchStatus && matchFrequency && matchFavourite && matchRecent && matchSearch) ? '' : 'none';
+
+            const title = li.querySelector('.calendar-schedule-card-title');
+            if (title) {
+                const base = li.getAttribute('data-schedule-name') || title.textContent || '';
+                if (searchQuery && base.toLowerCase().includes(searchQuery)) {
+                    const escaped = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    title.innerHTML = base.replace(new RegExp(`(${escaped})`, 'ig'), '<mark>$1</mark>');
+                } else {
+                    title.textContent = base;
+                }
+            }
         });
 
         const sortMode = sortSelect?.value || 'recentlyApplied';
         const sorted = lis.slice().sort((a, b) => {
+            const aPinned = pinned.has(a.getAttribute('data-schedule-id') || '');
+            const bPinned = pinned.has(b.getAttribute('data-schedule-id') || '');
+            if (aPinned !== bPinned) return aPinned ? -1 : 1;
+
             if (sortMode === 'mostUsed') {
                 return Number(b.getAttribute('data-schedule-apply-count') || 0) - Number(a.getAttribute('data-schedule-apply-count') || 0);
             }
@@ -203,12 +227,32 @@ function initCalendarUx() {
                 return Number(b.getAttribute('data-schedule-id') || 0) - Number(a.getAttribute('data-schedule-id') || 0);
             }
 
+            if (sortMode === 'name') {
+                return (a.getAttribute('data-schedule-name') || '').localeCompare(b.getAttribute('data-schedule-name') || '');
+            }
+
             const aDate = a.getAttribute('data-schedule-latest-applied') || '';
             const bDate = b.getAttribute('data-schedule-latest-applied') || '';
             return bDate.localeCompare(aDate);
         });
 
         sorted.forEach((li) => scheduleList.appendChild(li));
+
+        const visibleCount = lis.filter((li) => li.style.display !== 'none').length;
+        let empty = scheduleList.querySelector('[data-empty-results]');
+        if (!visibleCount) {
+            if (!empty) {
+                empty = document.createElement('li');
+                empty.className = 'calendar-schedule-empty';
+                empty.setAttribute('data-empty-results', 'true');
+                scheduleList.appendChild(empty);
+            }
+            empty.textContent = searchQuery
+                ? 'No matching schedules. Try a different search or filter.'
+                : (selectedStatus === 'archived' ? 'All schedules in this view are archived.' : 'No schedules for this filter yet.');
+        } else if (empty) {
+            empty.remove();
+        }
     }
 
     function renderQuickAccessChips() {
@@ -841,12 +885,13 @@ function initCalendarUx() {
             custom: 'Custom'
         };
         const repeatLabel = repeatLabels[config.repeat] || 'Custom';
+        const scopeLabel = selectedScope === 'day' ? 'Selected day' : selectedScope === 'custom' ? 'Custom range' : 'Visible range';
         const endText = config.repeat === 'forever' || !config.endDate
             ? ''
             : ` • Ends ${formatDateLabel(config.endDate)}`;
 
         if (contextSummary) {
-            contextSummary.textContent = `Starts ${formatDateLabel(config.startDate)} • ${repeatLabel}${endText}`;
+            contextSummary.textContent = `${scopeLabel} • Starts ${formatDateLabel(config.startDate)} • ${repeatLabel}${endText}`;
         }
         setScopeBadge(entryCount);
     }
@@ -996,13 +1041,45 @@ function initCalendarUx() {
             window.clearTimeout(searchFilterTimer);
         }
         searchFilterTimer = window.setTimeout(() => {
-            const items = scheduleList?.querySelectorAll("li");
-            items?.forEach((item) => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(query) ? "" : "none";
-            });
+            searchQuery = query;
             applyFiltersAndSort();
         }, 80);
+    });
+
+    scopeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            selectedScope = button.getAttribute('data-schedule-scope') || 'visible';
+            scopeButtons.forEach((candidate) => candidate.classList.toggle('is-active', candidate === button));
+            if (customScopeRow) {
+                customScopeRow.hidden = selectedScope !== 'custom';
+            }
+            if (selectedScope === 'custom') {
+                if (scopeStartInput?.value) deployStartInput.value = scopeStartInput.value;
+                if (scopeEndInput?.value) repeatEndInput.value = scopeEndInput.value;
+            }
+            if (selectedScope === 'day' && selectedDay && deployStartInput) {
+                deployStartInput.value = selectedDay;
+            }
+            invalidateImpact();
+            updateContextHeader();
+            refreshImpactIfReady();
+        });
+    });
+
+    scopeStartInput?.addEventListener('change', () => {
+        if (selectedScope !== 'custom') return;
+        if (deployStartInput) deployStartInput.value = scopeStartInput.value || deployStartInput.value;
+        invalidateImpact();
+        updateContextHeader();
+        refreshImpactIfReady();
+    });
+
+    scopeEndInput?.addEventListener('change', () => {
+        if (selectedScope !== 'custom') return;
+        if (repeatEndInput) repeatEndInput.value = scopeEndInput.value || repeatEndInput.value;
+        invalidateImpact();
+        updateContextHeader();
+        refreshImpactIfReady();
     });
 
     document.addEventListener('click', (event) => {

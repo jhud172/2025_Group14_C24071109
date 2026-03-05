@@ -18,13 +18,16 @@
                     <a th:href="@{'/calendar/day/' + ${today}}" class="calendar-view-btn">Day view</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <!-- Planning / Motivation toggle -->
-                    <div class="calendar-view-mode-toggle" role="group" aria-label="Calendar mode">
-                        <button type="button" id="btn-planning-mode" class="calendar-view-mode-btn active" aria-pressed="true">Planning View</button>
-                        <button type="button" id="btn-motivation-mode" class="calendar-view-mode-btn" aria-pressed="false">Motivation View</button>
-                    </div>
                     <div class="calendar-expand-toggle" aria-label="Expand month view">
                         <button type="button" id="month-expand-toggle" class="calendar-expand-toggle__btn" aria-pressed="false">Expand</button>
+                    </div>
+                    <div class="calendar-info-link" aria-label="Expand mode information">
+                        <button type="button" class="calendar-info-link__button" aria-label="How expand mode works">
+                            <span class="calendar-info-link__icon">i</span>
+                        </button>
+                        <span class="calendar-info-link__tip" role="tooltip">
+                            Expand mode loads adjacent months as you scroll near either edge.
+                        </span>
                     </div>
                     <div class="calendar-mode-indicator hidden sm:flex">
                         Month View — <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
@@ -39,7 +42,7 @@
                         </span>
                     </div>
                     <button type="button" id="scheduleDrawerButton" class="calendar-action-btn calendar-action-btn--primary">Schedules</button>
-                    <button type="button" id="motivation-mode-toggle" class="calendar-action-btn" aria-pressed="false" title="Toggle Motivation Mode — shows activity stickers">🏅 Motivation</button>
+                    <button type="button" id="motivation-mode-toggle" class="calendar-action-btn" aria-pressed="false" title="Show monthly goal progress and motivation insights">🏅 Motivation</button>
                 </div>
             </div>
 
@@ -122,7 +125,7 @@
                                         <div class="calendar-heat-overlay"></div>
                                         <div class="calendar-day-header">
                                             <a th:href="@{'/calendar/day/' + ${dayModel.isoDate}}"
-                                               class="calendar-day-number" th:text="${dayModel.dayOfMonth}"></a>
+                                                              class="calendar-day-number" th:text="${dayModel.dayOfMonth + (dayModel.dayOfMonth == 1 || dayModel.dayOfMonth == 21 || dayModel.dayOfMonth == 31 ? 'st' : (dayModel.dayOfMonth == 2 || dayModel.dayOfMonth == 22 ? 'nd' : (dayModel.dayOfMonth == 3 || dayModel.dayOfMonth == 23 ? 'rd' : 'th')))}"></a>
                                             <span th:if="${dayModel.today}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
                                                           <span th:if="${dayModel.tomorrow}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
                                         </div>
@@ -152,7 +155,7 @@
                                         </div>
                                         <!-- Empty state when no tasks or schedules -->
                                         <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
-                                            <span class="calendar-empty-state-text">Free day</span>
+                                            <span class="calendar-empty-state-icon">＋</span>
                                         </div>
                                         <!-- Detailed mode (COMBINED_LIST) -->
                                         <div th:if="${!grouped}" class="calendar-singular-list">

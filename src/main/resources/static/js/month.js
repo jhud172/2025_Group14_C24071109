@@ -85,12 +85,13 @@
         const time = item.dataset.time || '—';
         const notes = item.dataset.notes || 'No description';
         const isCompleted = completed === 'true';
+        const isWorkout = type === 'occurrence';
 
         let html = `
             <p class="mb-1 text-lg font-semibold text-slate-900 dark:text-slate-100">${title}</p>
-            <p class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">${type === 'occurrence' ? 'Schedule' : 'Task'}</p>
+            <p class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">${isWorkout ? 'Workout' : 'Task'}</p>
             <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">Time: ${time}</p>
-            <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">${notes}</p>
+            <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">${isWorkout ? `From: ${notes || 'Schedule'}` : notes}</p>
         `;
 
         if (isCompleted) {
@@ -1141,14 +1142,7 @@
         pointerActive = false;
         pointerStartX = null;
         if (Math.abs(delta) > swipeThresholdPx) {
-            if (isExpanded) {
-                go(delta < 0 ? 1 : -1);
-            } else {
-                const target = delta < 0 ? monthNextBtn : monthPrevBtn;
-                if (target && target.href && target.getAttribute('aria-disabled') !== 'true') {
-                    window.location.href = target.href;
-                }
-            }
+            go(delta < 0 ? 1 : -1);
         }
         try {
             carousel?.releasePointerCapture?.(event.pointerId);
@@ -1218,6 +1212,7 @@
 
     if (carousel && track && monthPane) {
         updateCenterState(true);
+        let lastExpandedScrollLeft = carousel.scrollLeft;
         onExpandedScroll = () => {
             if (!isExpanded || !carousel) return;
 
@@ -1264,16 +1259,17 @@
             // isLoadingMore prevents concurrent loads; check runs on each scroll event for
             // proactive prefetching but returns quickly when a load is already in progress.
             if (!isLoadingMore && !isAnimating) {
-                const paneWidth = getPaneWidth();
-                if (paneWidth > 0) {
-                    if (carousel.scrollLeft < paneWidth * 1.5) {
+                const proximityThreshold = Math.max(120, carousel.clientWidth * 0.5);
+                const scrollingRight = carousel.scrollLeft > lastExpandedScrollLeft;
+                const scrollingLeft = carousel.scrollLeft < lastExpandedScrollLeft;
+                if (scrollingLeft && carousel.scrollLeft <= proximityThreshold) {
                         prependMonthToTrack();
-                    }
-                    if (carousel.scrollLeft > carousel.scrollWidth - carousel.clientWidth - paneWidth * 1.5) {
+                }
+                if (scrollingRight && carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth - proximityThreshold) {
                         appendMonthToTrack();
-                    }
                 }
             }
+            lastExpandedScrollLeft = carousel.scrollLeft;
         };
         carousel.addEventListener('scroll', onExpandedScroll, { passive: true });
     }
@@ -1295,12 +1291,10 @@
         });
     }
     monthPrevBtn?.addEventListener('click', (event) => {
-        if (!isExpanded) return;
         event.preventDefault();
         go(-1);
     });
     monthNextBtn?.addEventListener('click', (event) => {
-        if (!isExpanded) return;
         event.preventDefault();
         go(1);
     });
@@ -1655,10 +1649,10 @@
             isStickerMode = true;
             planningPanel.style.display = 'none';
             stickerPanel.style.display = 'block';
-            btnPlanning.classList.remove('active');
-            btnPlanning.setAttribute('aria-pressed', 'false');
-            btnMotivation.classList.add('active');
-            btnMotivation.setAttribute('aria-pressed', 'true');
+            btnPlanning?.classList.remove('active');
+            btnPlanning?.setAttribute('aria-pressed', 'false');
+            btnMotivation?.classList.add('active');
+            btnMotivation?.setAttribute('aria-pressed', 'true');
             buildStickerGrid();
             localStorage.setItem('calendarStickerMode', '1');
         }
@@ -1667,10 +1661,10 @@
             isStickerMode = false;
             planningPanel.style.display = '';
             stickerPanel.style.display = 'none';
-            btnPlanning.classList.add('active');
-            btnPlanning.setAttribute('aria-pressed', 'true');
-            btnMotivation.classList.remove('active');
-            btnMotivation.setAttribute('aria-pressed', 'false');
+            btnPlanning?.classList.add('active');
+            btnPlanning?.setAttribute('aria-pressed', 'true');
+            btnMotivation?.classList.remove('active');
+            btnMotivation?.setAttribute('aria-pressed', 'false');
             hideTooltip();
             localStorage.setItem('calendarStickerMode', '0');
         }
@@ -1679,7 +1673,7 @@
         btnPlanning && btnPlanning.addEventListener('click', switchToPlanning);
 
         // Restore last mode from localStorage
-        if (localStorage.getItem('calendarStickerMode') === '1') {
+        if (btnPlanning && btnMotivation && localStorage.getItem('calendarStickerMode') === '1') {
             switchToMotivation();
         }
 

@@ -766,7 +766,7 @@
                                 <span th:if="${card.default}"
                                       class="ml-2 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 px-2 py-0.5 text-xs text-neon-cyan">Default</span>
                                 <p class="text-xs text-slate-500 mt-0.5"
-                                   th:text="${card.cardHolderName} + ' · Exp ' + ${#strings.leftPad(card.expiryMonth, 2, '0')} + '/' + ${card.expiryYear}">Name · Exp 01/2030</p>
+                                   th:text="${card.cardHolderName} + ' · Exp ' + ${card.expiryMonth < 10 ? '0' + card.expiryMonth : card.expiryMonth} + '/' + ${card.expiryYear}">Name · Exp 01/2030</p>
                             </div>
                             <div class="flex flex-wrap gap-2">
                                 <form th:if="${!card.default}"
@@ -846,7 +846,7 @@
                                             <option value="">MM</option>
                                             <option th:each="m : ${#numbers.sequence(1, 12)}"
                                                     th:value="${m}"
-                                                    th:text="${#strings.leftPad(m, 2, '0')}">01</option>
+                                                    th:text="${m < 10 ? '0' + m : m}">01</option>
                                         </select>
                                     </div>
                                     <div>
@@ -914,7 +914,7 @@
                         <select name="expiryMonth" id="editCardMonth" required class="input-field w-full">
                             <option th:each="m : ${#numbers.sequence(1, 12)}"
                                     th:value="${m}"
-                                    th:text="${#strings.leftPad(m, 2, '0')}">01</option>
+                                    th:text="${m < 10 ? '0' + m : m}">01</option>
                         </select>
                     </div>
                     <div>

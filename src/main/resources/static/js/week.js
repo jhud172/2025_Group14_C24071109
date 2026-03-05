@@ -108,11 +108,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const notes = item.dataset.notes || "No notes";
         const completed = item.dataset.completed === "true";
         const type = item.dataset.type;
+        const isWorkout = type === "occurrence" || type === "workout";
         let html = `
             <p class="mb-1 text-lg font-semibold text-slate-900 dark:text-slate-100">${title}</p>
-            <p class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">${type === "occurrence" || type === "workout" ? "Schedule" : "Task"}</p>
+            <p class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">${isWorkout ? "Workout" : "Task"}</p>
             <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">Time: ${time}</p>
-            <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">${notes}</p>
+            <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">${isWorkout ? `From: ${notes || 'Schedule'}` : notes}</p>
         `;
 
         if (completed) {
@@ -434,8 +435,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const track = document.getElementById("week-slider-track");
     const prevLink = document.getElementById("week-prev");
     const nextLink = document.getElementById("week-next");
-    const weekStartEl = document.getElementById("week-start");
-    const weekEndEl = document.getElementById("week-end");
+    const weekRangeEl = document.getElementById("week-range");
+    const weekRangeYearEl = document.getElementById("week-range-year");
     const weekRedirectInput = document.getElementById("week-redirect");
     const jumpTodayBtn = document.getElementById("week-jump-today");
     const jumpDateInput = document.getElementById("week-jump-date");
@@ -576,7 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return cards.find((card) => {
             const date = card.dataset.date || '';
             if (date < fromDateIso) return false;
-            return !!card.querySelector('.calendar-item[data-type="workout"]');
+            return !!card.querySelector('.calendar-item[data-type="workout"], .calendar-item[data-type="occurrence"], .calendar-grouped-item[data-type="occurrence"]');
         }) || null;
     }
 
@@ -841,13 +842,29 @@ document.addEventListener("DOMContentLoaded", () => {
         return date.toISOString().slice(0, 10);
     }
 
+    function ordinalDay(day) {
+        if (day % 10 === 1 && day % 100 !== 11) return `${day}st`;
+        if (day % 10 === 2 && day % 100 !== 12) return `${day}nd`;
+        if (day % 10 === 3 && day % 100 !== 13) return `${day}rd`;
+        return `${day}th`;
+    }
+
+    function formatWeekRange(start, end) {
+        const startMonth = start.toLocaleDateString('en-GB', { month: 'short' });
+        const endMonth = end.toLocaleDateString('en-GB', { month: 'short' });
+        if (startMonth === endMonth) {
+            return `${startMonth} ${ordinalDay(start.getDate())} – ${ordinalDay(end.getDate())}`;
+        }
+        return `${startMonth} ${ordinalDay(start.getDate())} – ${endMonth} ${ordinalDay(end.getDate())}`;
+    }
+
     function updateWeekHeaderAndStrip() {
         const start = getIsoWeekStart(currentWeekYear, currentWeek);
         const end = new Date(start);
         end.setDate(start.getDate() + 6);
 
-        if (weekStartEl) weekStartEl.textContent = formatIsoDate(start);
-        if (weekEndEl) weekEndEl.textContent = formatIsoDate(end);
+        if (weekRangeEl) weekRangeEl.textContent = formatWeekRange(start, end);
+        if (weekRangeYearEl) weekRangeYearEl.textContent = String(start.getFullYear());
         if (weekRedirectInput) {
             weekRedirectInput.value = `/calendar?view=week&week=${currentWeek}&weekYear=${currentWeekYear}`;
         }

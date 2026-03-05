@@ -6,6 +6,215 @@
 (function () {
     'use strict';
 
+    const initWeekStripHoverDetails = () => {
+        const cards = document.querySelectorAll('[aria-label="Week strip"] a[data-day-label]');
+        if (!cards.length) return;
+
+        let tooltip = document.getElementById('week-strip-tooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'week-strip-tooltip';
+            tooltip.className = 'fixed z-50 pointer-events-none hidden max-w-72 rounded-xl border border-cyber-700 bg-cyber-900/95 px-3 py-2 text-xs text-slate-200 shadow-xl';
+            document.body.appendChild(tooltip);
+        }
+
+        let detailTimer = null;
+
+        const renderTooltip = (card, secondaryVisible) => {
+            const dayLabel = card.dataset.dayLabel || 'Day';
+            const prettyDate = card.dataset.prettyDate || '';
+            const taskCount = parseInt(card.dataset.taskCount || '0', 10);
+            const workoutCount = parseInt(card.dataset.workoutCount || '0', 10);
+
+            const taskNames = taskCount > 0
+                ? Array.from({ length: Math.min(taskCount, 2) }, (_, index) => `Task ${index + 1}`).join(', ')
+                : 'No tasks';
+            const workoutNames = workoutCount > 0
+                ? Array.from({ length: Math.min(workoutCount, 2) }, (_, index) => `Workout ${index + 1}`).join(', ')
+                : 'No workouts';
+
+            tooltip.innerHTML = `
+                <div class="font-semibold text-neon-cyan">${dayLabel} ${prettyDate ? '· ' + prettyDate : ''}</div>
+                <div class="mt-1 text-slate-300">${taskCount} tasks · ${workoutCount} workouts</div>
+                <div class="mt-1 text-[11px] text-slate-400 ${secondaryVisible ? '' : 'opacity-0 h-0 overflow-hidden'}">
+                    Tasks: ${taskNames}<br/>Workouts: ${workoutNames}
+                </div>
+            `;
+        };
+
+        const positionTooltip = (event) => {
+            const offset = 14;
+            tooltip.style.left = `${event.clientX + offset}px`;
+            tooltip.style.top = `${event.clientY + offset}px`;
+        };
+
+        cards.forEach((card) => {
+            card.addEventListener('mouseenter', (event) => {
+                clearTimeout(detailTimer);
+                renderTooltip(card, false);
+                tooltip.classList.remove('hidden');
+                positionTooltip(event);
+
+                detailTimer = setTimeout(() => {
+                    renderTooltip(card, true);
+                }, 420);
+            });
+
+            card.addEventListener('mousemove', (event) => {
+                positionTooltip(event);
+            });
+
+            card.addEventListener('mouseleave', () => {
+                clearTimeout(detailTimer);
+                tooltip.classList.add('hidden');
+            });
+        });
+    };
+
+    const initDayTimeline = () => {
+        const section = document.getElementById('dashboard-day-timeline');
+        if (!section) return;
+
+        const track = section.querySelector('[data-day-timeline-track]');
+        const scrollArea = section.querySelector('[data-day-timeline-scroll]');
+        const prevBtn = section.querySelector('[data-day-prev]');
+        const nextBtn = section.querySelector('[data-day-next]');
+        const label = section.querySelector('[data-day-timeline-label]');
+        const subtitle = section.querySelector('[data-day-timeline-subtitle]');
+        const hint = section.querySelector('[data-day-timeline-hint]');
+
+        if (!track || !scrollArea || !prevBtn || !nextBtn || !label || !subtitle || !hint) return;
+
+        const days = Array.from(document.querySelectorAll('#dashboard-day-timeline-data .dashboard-day-data')).map((node) => ({
+            dayLabel: node.dataset.dayLabel || 'Day',
+            prettyDate: node.dataset.prettyDate || '',
+            taskCount: parseInt(node.dataset.taskCount || '0', 10),
+            workoutCount: parseInt(node.dataset.workoutCount || '0', 10),
+            today: node.dataset.today === 'true'
+        }));
+
+        if (!days.length) return;
+
+        let index = Math.max(days.findIndex((day) => day.today), 0);
+
+        const createHourLabel = (hour) => `${String(hour).padStart(2, '0')}:00`;
+
+        const seededSlots = (day) => {
+            const slots = [];
+            const total = day.taskCount + day.workoutCount;
+            if (total === 0) return slots;
+
+            const taskHours = [9, 11, 14, 16, 18];
+            const workoutHours = [6, 8, 12, 17, 19, 20];
+
+            for (let taskIndex = 0; taskIndex < day.taskCount; taskIndex += 1) {
+                const hour = taskHours[taskIndex % taskHours.length];
+                slots.push({ type: 'task', title: `Task ${taskIndex + 1}`, hour, minute: 15 });
+            }
+            for (let workoutIndex = 0; workoutIndex < day.workoutCount; workoutIndex += 1) {
+                const hour = workoutHours[workoutIndex % workoutHours.length];
+                slots.push({ type: 'workout', title: `Workout ${workoutIndex + 1}`, hour, minute: 40 });
+            }
+
+            return slots.sort((first, second) => (first.hour * 60 + first.minute) - (second.hour * 60 + second.minute));
+        };
+
+        const densityForHour = (hour, slots) => {
+            const count = slots.filter((slot) => slot.hour === hour).length;
+            if (count >= 2) return 'bg-neon-green/20';
+            if (count === 1) return 'bg-neon-cyan/10';
+            return 'bg-transparent';
+        };
+
+        const renderDay = (day) => {
+            const slots = seededSlots(day);
+            const now = new Date();
+            const isToday = day.today;
+            const totalMinutes = isToday ? now.getHours() * 60 + now.getMinutes() : null;
+
+            label.textContent = day.today ? 'Today' : `${day.dayLabel}`;
+            subtitle.textContent = day.prettyDate;
+            hint.textContent = slots.length
+                ? 'Hover activity chips for item names. Density tint marks busy hours.'
+                : 'No scheduled items for this day. Add items in Calendar to populate timeline.';
+
+            track.classList.add('opacity-0', 'translate-y-1');
+
+            window.setTimeout(() => {
+                const hourColumns = Array.from({ length: 24 }, (_, hour) => {
+                    const startMinutes = hour * 60;
+                    const hourSlots = slots.filter((slot) => slot.hour === hour);
+                    const chips = hourSlots.map((slot) => {
+                        const chipClass = slot.type === 'task'
+                            ? 'border-neon-cyan/40 bg-neon-cyan/10 text-neon-cyan'
+                            : 'border-neon-purple/40 bg-neon-purple/10 text-neon-purple';
+                        return `<div class="mt-1 rounded-md border px-2 py-1 text-[10px] font-medium ${chipClass}" title="${slot.title}">${slot.title}</div>`;
+                    }).join('');
+
+                    return `
+                        <div class="relative min-w-[50px] border-r border-cyber-800/70 px-1 ${densityForHour(hour, slots)}">
+                            <div class="text-[10px] font-semibold text-slate-500">${createHourLabel(hour)}</div>
+                            <div class="mt-1 min-h-14">${chips}</div>
+                            <div class="mt-1 h-10 rounded-sm border border-dashed border-cyber-800/70"></div>
+                        </div>
+                    `;
+                }).join('');
+
+                const nowLine = isToday && totalMinutes !== null
+                    ? `<div class="pointer-events-none absolute top-4 bottom-4 w-0.5 bg-neon-green shadow-[0_0_8px_rgba(52,211,153,0.7)]" style="left: calc(${(totalMinutes / (24 * 60)) * 100}% - 1px);">
+                            <div class="-ml-3 -mt-1 rounded-full bg-neon-green px-2 py-0.5 text-[10px] font-bold text-cyber-900">Now</div>
+                       </div>`
+                    : '';
+
+                track.innerHTML = `
+                    <div class="relative">
+                        ${nowLine}
+                        <div class="flex min-w-[1200px]">${hourColumns}</div>
+                    </div>
+                `;
+
+                track.classList.remove('opacity-0', 'translate-y-1');
+                track.classList.add('transition-all', 'duration-200');
+
+                if (isToday && totalMinutes !== null) {
+                    const target = Math.max(0, ((totalMinutes / (24 * 60)) * scrollArea.scrollWidth) - (scrollArea.clientWidth / 2));
+                    scrollArea.scrollTo({ left: target, behavior: 'smooth' });
+                } else {
+                    scrollArea.scrollTo({ left: 0, behavior: 'smooth' });
+                }
+            }, 120);
+
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === days.length - 1;
+            prevBtn.classList.toggle('opacity-40', prevBtn.disabled);
+            nextBtn.classList.toggle('opacity-40', nextBtn.disabled);
+        };
+
+        const goTo = (nextIndex) => {
+            if (nextIndex < 0 || nextIndex >= days.length || nextIndex === index) return;
+            index = nextIndex;
+            renderDay(days[index]);
+        };
+
+        prevBtn.addEventListener('click', () => goTo(index - 1));
+        nextBtn.addEventListener('click', () => goTo(index + 1));
+
+        let touchStart = 0;
+        section.addEventListener('touchstart', (event) => {
+            touchStart = event.changedTouches[0].screenX;
+        }, { passive: true });
+
+        section.addEventListener('touchend', (event) => {
+            const touchEnd = event.changedTouches[0].screenX;
+            const delta = touchStart - touchEnd;
+            if (Math.abs(delta) < 50) return;
+            if (delta > 0) goTo(index + 1);
+            if (delta < 0) goTo(index - 1);
+        }, { passive: true });
+
+        renderDay(days[index]);
+    };
+
     // Fetch timeline data from backend API
     const fetchTimelineData = async () => {
         try {
@@ -36,54 +245,9 @@
             }));
         } catch (error) {
             console.error('Failed to fetch timeline data:', error);
-            // Fall back to empty array - component will handle gracefully
+            // Return empty array if API fails - component will handle gracefully
             return [];
         }
-    };
-
-    // Mock data structure (12 months) - fallback if API fails
-    const generateTimelineData = async () => {
-        // First try to fetch real data from backend
-        const apiData = await fetchTimelineData();
-        
-        if (apiData.length > 0) {
-            return apiData;
-        }
-        
-        // Fallback to mock data if API fails
-        const months = [
-            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-        ];
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
-        const data = [];
-
-        for (let i = 11; i >= 0; i--) {
-            const monthIndex = (currentMonth - i + 12) % 12;
-            const year = currentMonth - i < 0 ? currentYear - 1 : currentYear;
-            const monthName = `${months[monthIndex]} ${year}`;
-            
-            // Generate random mock data (replace with real data from backend)
-            const totalLogs = Math.floor(Math.random() * 25);
-            const totalSessions = Math.floor(Math.random() * 15);
-            const totalTasks = Math.floor(Math.random() * 30);
-            const totalActivity = totalLogs + totalSessions + totalTasks;
-
-            data.push({
-                month: monthName,
-                monthShort: months[monthIndex],
-                year: year,
-                totalLogs: totalLogs,
-                totalSessions: totalSessions,
-                totalTasks: totalTasks,
-                totalActivity: totalActivity,
-                isCurrent: i === 0
-            });
-        }
-
-        return data;
     };
 
     // Determine activity level and color class
@@ -321,8 +485,8 @@
         
         if (!scrollWrapper || !segmentsContainer) return;
         
-        // Generate/fetch data and create tooltip
-        const timelineData = await generateTimelineData();
+        // Fetch data from backend API
+        const timelineData = await fetchTimelineData();
         
         // Handle empty data
         if (timelineData.length === 0) {
@@ -383,8 +547,14 @@
 
     // Initialize on DOM ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initTimeline);
+        document.addEventListener('DOMContentLoaded', () => {
+            initWeekStripHoverDetails();
+            initDayTimeline();
+            initTimeline();
+        });
     } else {
+        initWeekStripHoverDetails();
+        initDayTimeline();
         initTimeline();
     }
 })();

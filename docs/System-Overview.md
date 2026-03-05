@@ -383,7 +383,6 @@ Thymeleaf is used for server-rendered HTML to keep UI state aligned with server-
 - templates/fragments/tailwind-components.html — UI component fragments. Access: Shared. Data: component parameters.
 - templates/fragments/slimselectCss.html — SlimSelect CSS include. Access: Shared. Data: none.
 - templates/fragments/slimselectJs.html — SlimSelect JS include. Access: Shared. Data: none.
-- templates/fragments/AccountHomePage.html — Account home fragment. Access: Shared. Data: account summary.
 - templates/fragments/workout/searchbar.html — Workout search. Access: Shared. Data: search params.
 - templates/fragments/workout/workout-frags.html — Workout fragments. Access: Shared. Data: workout UI elements.
 

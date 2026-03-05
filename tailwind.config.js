@@ -12,39 +12,48 @@ module.exports = {
         nav: '1125px',
       },
       colors: {
-        // Neon color palette for futuristic gym theme
-        neon: {
-          cyan: '#00f3ff',
-          blue: '#0066ff',
-          purple: '#b537f2',
-          pink: '#ff00ff',
-          green: '#39ff14',
-          yellow: '#ffff00',
-          orange: '#ff6600',
+        // Professional color palette: Emerald green, Golden orange, White, Black, Light blue
+        brand: {
+          emerald: '#10b981',    // Primary emerald green
+          emeraldDark: '#059669',  // Darker emerald for hover states
+          orange: '#f59e0b',     // Golden orange accent
+          orangeDark: '#d97706', // Darker orange
+          lightBlue: '#7dd3fc',  // Light blue for secondary accents
+          lightBlueDark: '#0ea5e9', // Sky blue for hover
         },
-        // Dark backgrounds for contrast (deep charcoal/near-slate, not pure black)
+        // Keep neon colors but muted for backwards compatibility
+        neon: {
+          cyan: '#7dd3fc',       // Changed to light blue
+          blue: '#3b82f6',       // Changed to regular blue
+          purple: '#8b5cf6',     // Changed to violet
+          pink: '#ec4899',       // Changed to pink
+          green: '#10b981',      // Changed to emerald
+          yellow: '#fbbf24',     // Changed to amber
+          orange: '#f59e0b',     // Changed to golden orange
+        },
+        // Dark backgrounds - cleaner for professional look
         cyber: {
-          900: '#111827',
-          800: '#1e2435',
-          700: '#1a1a2e',
-          600: '#25254a',
-          500: '#2d2d5f',
+          900: '#0f172a',
+          800: '#1e293b',
+          700: '#334155',
+          600: '#475569',
+          500: '#64748b',
         },
       },
       backgroundImage: {
-        'gradient-neon': 'linear-gradient(135deg, rgba(0, 243, 255, 0.1) 0%, rgba(181, 55, 242, 0.1) 100%)',
-        'gradient-cyber': 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%)',
-        'gradient-glow': 'radial-gradient(circle at center, rgba(0, 243, 255, 0.15), transparent 70%)',
+        'gradient-neon': 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%)',
+        'gradient-cyber': 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+        'gradient-glow': 'radial-gradient(circle at center, rgba(16, 185, 129, 0.15), transparent 70%)',
       },
       boxShadow: {
-        'neon-cyan': '0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3)',
-        'neon-blue': '0 0 10px rgba(0, 102, 255, 0.5), 0 0 20px rgba(0, 102, 255, 0.3)',
-        'neon-purple': '0 0 10px rgba(181, 55, 242, 0.5), 0 0 20px rgba(181, 55, 242, 0.3)',
-        'neon-green': '0 0 10px rgba(57, 255, 20, 0.5), 0 0 20px rgba(57, 255, 20, 0.3)',
-        'neon-pink': '0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3)',
-        'glow-sm': '0 0 5px rgba(0, 243, 255, 0.3)',
-        'glow-md': '0 0 10px rgba(0, 243, 255, 0.4), 0 0 20px rgba(0, 243, 255, 0.2)',
-        'glow-lg': '0 0 15px rgba(0, 243, 255, 0.5), 0 0 30px rgba(0, 243, 255, 0.3)',
+        'neon-cyan': '0 0 10px rgba(125, 211, 252, 0.3), 0 0 20px rgba(125, 211, 252, 0.15)',
+        'neon-blue': '0 0 10px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.15)',
+        'neon-purple': '0 0 10px rgba(139, 92, 246, 0.3), 0 0 20px rgba(139, 92, 246, 0.15)',
+        'neon-green': '0 0 10px rgba(16, 185, 129, 0.3), 0 0 20px rgba(16, 185, 129, 0.15)',
+        'neon-pink': '0 0 10px rgba(236, 72, 153, 0.3), 0 0 20px rgba(236, 72, 153, 0.15)',
+        'glow-sm': '0 0 5px rgba(16, 185, 129, 0.2)',
+        'glow-md': '0 0 10px rgba(16, 185, 129, 0.25), 0 0 20px rgba(16, 185, 129, 0.12)',
+        'glow-lg': '0 0 15px rgba(16, 185, 129, 0.3), 0 0 30px rgba(16, 185, 129, 0.15)',
       },
       animation: {
         'pulse-neon': 'pulse-neon 2s ease-in-out infinite',
@@ -54,12 +63,12 @@ module.exports = {
       },
       keyframes: {
         'pulse-neon': {
-          '0%, 100%': { opacity: '1', boxShadow: '0 0 10px rgba(0, 243, 255, 0.5)' },
-          '50%': { opacity: '0.8', boxShadow: '0 0 20px rgba(0, 243, 255, 0.8)' },
+          '0%, 100%': { opacity: '1', boxShadow: '0 0 10px rgba(16, 185, 129, 0.3)' },
+          '50%': { opacity: '0.8', boxShadow: '0 0 20px rgba(16, 185, 129, 0.5)' },
         },
         'glow': {
-          '0%, 100%': { filter: 'brightness(1) drop-shadow(0 0 5px rgba(0, 243, 255, 0.5))' },
-          '50%': { filter: 'brightness(1.2) drop-shadow(0 0 10px rgba(0, 243, 255, 0.8))' },
+          '0%, 100%': { filter: 'brightness(1) drop-shadow(0 0 5px rgba(16, 185, 129, 0.3))' },
+          '50%': { filter: 'brightness(1.1) drop-shadow(0 0 10px rgba(16, 185, 129, 0.5))' },
         },
         'slide-in': {
           '0%': { transform: 'translateY(-10px)', opacity: '0' },

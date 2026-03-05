@@ -30,7 +30,7 @@
     </script>
 
     <!-- Core styles (compiled Tailwind + all component styles) -->
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260303')}">
 
     <!-- Page-specific styles -->
     <th:block th:if="${pageStyles != null}">
@@ -71,9 +71,9 @@
 <div th:replace="~{fragments/quick-actions :: quickActionsShelf}"></div>
 
 <!-- Core scripts -->
-<script th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false'}" src="/js/chat.js" defer></script>
-<script src="/js/quick-actions.js" defer></script>
-<script src="/js/navbar-premium.js" defer></script>
+<script th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false'}" th:src="@{/js/chat.js(v='20260303')}" defer></script>
+<script th:src="@{/js/quick-actions.js(v='20260303')}" defer></script>
+<script th:src="@{/js/navbar-premium.js(v='20260303')}" defer></script>
 
 <!-- Page-specific scripts -->
 <th:block th:if="${pageScripts != null}">

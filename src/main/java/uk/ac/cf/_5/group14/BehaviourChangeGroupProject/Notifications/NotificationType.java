@@ -1,6 +1,7 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications;
 
 public enum NotificationType {
+    INFO,
     SYSTEM,
     AI,
     MANUAL,

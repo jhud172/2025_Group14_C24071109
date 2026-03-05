@@ -216,12 +216,7 @@
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 }
 
-.calendar-day-card:hover {
-  border-color: rgb(16, 185, 129);
-  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.15),
-              0 2px 6px -1px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
+
 
 .calendar-day-card--jump-target {
   border-color: rgb(16, 185, 129) !important;
@@ -246,9 +241,7 @@
   }
 }
 
-.dark .calendar-day-card:hover {
-  border-color: rgb(52, 211, 153);
-}
+
 
 /* Remove clipped edges - ensure proper gaps */
 .calendar-month-grid {
@@ -446,11 +439,14 @@
 }
 
 .calendar-empty-state-icon {
-  width: 2rem;
-  height: 2rem;
-  margin-bottom: 0.5rem;
+  width: 4rem;
+  height: 4rem;
+  font-size: 3rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: rgb(148, 163, 184);
-  stroke-width: 1.5;
 }
 
 .calendar-empty-state-text {
@@ -718,16 +714,7 @@
   border-color: rgb(51, 65, 85);
 }
 
-.calendar-item:hover {
-  border-color: rgb(16, 185, 129);
-  background: rgb(240, 253, 250);
-  transform: translateX(2px);
-}
 
-.dark .calendar-item:hover {
-  background: rgba(6, 78, 59, 0.15);
-  border-color: rgb(52, 211, 153);
-}
 
 /* Task items - blue accent */
 .calendar-item[data-type="task"] {
@@ -1369,7 +1356,7 @@
 
 .dark .calendar-action-btn--primary {
   border-color: rgb(52, 211, 153);
-  color: rgb(2, 44, 34);
+  color: rgb(240, 253, 250);
 }
 
 .calendar-action-btn--accent {
@@ -1569,6 +1556,21 @@
   border-color: rgb(51, 65, 85);
   background: rgb(15, 23, 42);
   color: rgb(226, 232, 240);
+}
+
+.dark .calendar-jump-input[type="date"] {
+  color-scheme: dark;
+}
+
+.dark .calendar-jump-input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.9);
+}
+
+.calendar-schedule-card-title mark {
+  background: rgba(16, 185, 129, 0.2);
+  color: inherit;
+  border-radius: 0.25rem;
+  padding: 0 0.2rem;
 }
 
 .calendar-jump-field--task .calendar-jump-input {
@@ -3007,8 +3009,8 @@ body.calendar-schedule-open .calendar-week-view {
 }
 
 .calendar-week-view .calendar-week-day-date {
-  font-size: 1.95rem;
-  font-weight: 800;
+  font-size: 1.55rem;
+  font-weight: 700;
   letter-spacing: -0.015em;
   color: rgb(15, 23, 42);
 }

@@ -1,3 +1,22 @@
+// Global fallback toggle function (in case DOMContentLoaded hasn't fired yet)
+window.toggleChatPanel = function() {
+    const panel = document.getElementById("chatPanel");
+    const fab = document.getElementById("chatFab");
+    if (!panel || !fab) return;
+    
+    const isOpen = panel.classList.contains("open");
+    if (isOpen) {
+        panel.classList.remove("open");
+        panel.setAttribute("aria-hidden", "true");
+        fab.setAttribute("aria-expanded", "false");
+    } else {
+        panel.classList.add("open");
+        panel.setAttribute("aria-hidden", "false");
+        fab.setAttribute("aria-expanded", "true");
+    }
+    console.log("Chat panel toggled via fallback:", !isOpen ? "open" : "closed");
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.getElementById("chatWidget") || document;
     if (root !== document && root.dataset.chatInitialized === "true") return;
@@ -31,8 +50,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const clearModalCancel = document.getElementById("chatClearCancel");
     const clearModalConfirm = document.getElementById("chatClearConfirm");
 
+    // Detailed error logging for debugging
     if (!fab || !panel || !closeBtn || !clearBtn || !form || !input || !body || !sendBtn) {
-        console.warn("Chat widget elements missing, skipping init");
+        console.error("Chat widget init failed - missing elements:", {
+            fab: !!fab, panel: !!panel, closeBtn: !!closeBtn, clearBtn: !!clearBtn,
+            form: !!form, input: !!input, body: !!body, sendBtn: !!sendBtn
+        });
+        
+        // Fallback: Create a minimal toggle function if panel exists
+        if (panel && fab) {
+            window.toggleChatPanel = function() {
+                const isOpen = panel.classList.contains("open");
+                if (isOpen) {
+                    panel.classList.remove("open");
+                    panel.setAttribute("aria-hidden", "true");
+                    fab.setAttribute("aria-expanded", "false");
+                } else {
+                    panel.classList.add("open");
+                    panel.setAttribute("aria-hidden", "false");
+                    fab.setAttribute("aria-expanded", "true");
+                }
+                console.log("Chat panel toggled:", !isOpen ? "open" : "closed");
+            };
+            console.log("Chat: Using fallback toggle function");
+        }
         return;
     }
 
@@ -156,12 +197,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return "👋 Hi! I'm Charlie — the built-in assistant for Healthy Habits. This platform helps you track workouts, manage your schedule, log nutrition, set fitness goals, and stay consistent. Log in or sign up to get started, and I'll help you every step of the way.";
     }
 
+    function saveHistory() {
+        if (!historyAllowed) return;
 
         const msgs = [];
-        body.querySelectorAll(".chat-msg").forEach(m => {
-            const who = m.classList.contains("chat-msg-me") ? "me" : "ai";
-            const text = m.querySelector(".bubble")?.textContent || "";
-            if (text.trim().length > 0 && text !== "Typing…") msgs.push({ who, text });
+        body.querySelectorAll(".chat-message-wrapper, .chat-msg").forEach(m => {
+            const isUser = m.classList.contains("user") || m.classList.contains("chat-msg-me");
+            const text = m.querySelector(".chat-message-bubble, .bubble")?.textContent || "";
+            if (text.trim().length > 0 && text !== "Typing…") msgs.push({ who: isUser ? "me" : "ai", text });
         });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs.slice(-200)));
     }
@@ -548,10 +591,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Events
-    fab.addEventListener("click", () => {
-        panel.classList.contains("open") ? close() : open();
+    fab.addEventListener("click", (e) => {
+        try {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = panel.classList.contains("open");
+            console.log("Chat FAB clicked, current state:", isOpen ? "open" : "closed");
+            isOpen ? close() : open();
+        } catch (err) {
+            console.error("Error handling chat FAB click:", err);
+        }
     });
-    closeBtn.addEventListener("click", close);
+    
+    // Enhanced FAB click handler for better reliability
+    fab.addEventListener("click", function(e) {
+        // This is a second listener for redundancy
+        window.toggleChatPanel();
+    }, true); // Use capture phase to ensure it fires
+    
+    closeBtn.addEventListener("click", (e) => {
+        try {
+            e.preventDefault();
+            close();
+        } catch (err) {
+            console.error("Error handling chat close:", err);
+        }
+    });
+    
+    // Global toggle function for fallback (overrides the earlier fallback)
+    window.toggleChatPanel = function() {
+        try {
+            const isOpen = panel.classList.contains("open");
+            console.log("toggleChatPanel called, current state:", isOpen ? "open" : "closed");
+            isOpen ? close() : open();
+        } catch (err) {
+            console.error("Error in toggleChatPanel:", err);
+        }
+    };
+    
+    console.log("Chat widget initialized successfully. FAB element:", fab);
 
     // Quick-action suggestion chips
     const suggestions = document.getElementById("chatSuggestions");
