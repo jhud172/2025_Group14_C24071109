@@ -1,121 +1,435 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Merch Shop', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('One To One Store', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <th:block th:fragment="pageStyles">
+        <style>
+            /* ── Store Hero ───────────────────────────────────── */
+            .store-hero {
+                position: relative;
+                overflow: hidden;
+                padding: 4rem 1rem 3rem;
+                text-align: center;
+            }
+            .store-hero::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background:
+                    radial-gradient(ellipse 70% 50% at 30% 0%, rgba(0,243,255,0.1) 0%, transparent 65%),
+                    radial-gradient(ellipse 50% 40% at 70% 100%, rgba(181,55,242,0.1) 0%, transparent 65%);
+                pointer-events: none;
+            }
+            .store-hero-grid {
+                position: absolute;
+                inset: 0;
+                background-image:
+                    linear-gradient(rgba(0,243,255,0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,243,255,0.04) 1px, transparent 1px);
+                background-size: 40px 40px;
+                pointer-events: none;
+            }
+            /* ── Category Pills ───────────────────────────────── */
+            .cat-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                padding: 0.45rem 1rem;
+                border-radius: 99px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                border: 1px solid rgba(0,243,255,0.25);
+                background: rgba(0,243,255,0.06);
+                color: #94a3b8;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                white-space: nowrap;
+            }
+            .cat-pill:hover,
+            .cat-pill.active {
+                border-color: rgba(0,243,255,0.6);
+                background: rgba(0,243,255,0.12);
+                color: #00f3ff;
+                box-shadow: 0 0 12px rgba(0,243,255,0.2);
+            }
+            .cat-pill.all.active {
+                background: linear-gradient(135deg, rgba(0,243,255,0.15), rgba(181,55,242,0.15));
+                border-color: rgba(0,243,255,0.5);
+                color: #00f3ff;
+            }
+            /* ── Product Cards ────────────────────────────────── */
+            .product-card {
+                background: rgba(26,26,46,0.6);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(0,243,255,0.2);
+                border-radius: 1rem;
+                overflow: hidden;
+                transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease;
+                display: flex;
+                flex-direction: column;
+            }
+            .product-card:hover {
+                transform: translateY(-5px);
+                border-color: rgba(0,243,255,0.5);
+                box-shadow: 0 0 25px rgba(0,243,255,0.15), 0 16px 32px rgba(0,0,0,0.3);
+            }
+            .product-card.out-of-stock {
+                opacity: 0.65;
+            }
+            .product-img-wrap {
+                position: relative;
+                width: 100%;
+                padding-top: 100%;
+                overflow: hidden;
+                background: rgba(15,15,30,0.8);
+            }
+            .product-img-wrap img,
+            .product-img-wrap .img-placeholder {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.4s ease;
+            }
+            .product-card:hover .product-img-wrap img {
+                transform: scale(1.06);
+            }
+            .product-img-wrap .img-placeholder {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .stock-badge {
+                position: absolute;
+                top: 0.6rem;
+                right: 0.6rem;
+                font-size: 0.7rem;
+                font-weight: 700;
+                padding: 0.2rem 0.6rem;
+                border-radius: 99px;
+            }
+            .cat-tag {
+                position: absolute;
+                top: 0.6rem;
+                left: 0.6rem;
+                font-size: 0.7rem;
+                font-weight: 600;
+                padding: 0.2rem 0.6rem;
+                border-radius: 99px;
+                background: rgba(10,10,20,0.8);
+                border: 1px solid rgba(0,243,255,0.3);
+                color: #00f3ff;
+                backdrop-filter: blur(4px);
+            }
+            /* ── Demo Banner ──────────────────────────────────── */
+            .demo-banner {
+                background: linear-gradient(135deg, rgba(181,55,242,0.1), rgba(0,243,255,0.08));
+                border: 1px solid rgba(181,55,242,0.35);
+                border-radius: 1rem;
+                padding: 1rem 1.25rem;
+            }
+            /* ── Featured Row ─────────────────────────────────── */
+            .featured-strip {
+                position: relative;
+                background: linear-gradient(135deg, rgba(0,243,255,0.06) 0%, rgba(181,55,242,0.06) 100%);
+                border: 1px solid rgba(0,243,255,0.15);
+                border-radius: 1.25rem;
+                overflow: hidden;
+            }
+            .featured-strip::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, #00f3ff, #b537f2, transparent);
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .product-card { transition: none; }
+                .product-card:hover { transform: none; }
+            }
+        </style>
+    </th:block>
 
-        <!-- Header -->
-        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h1 class="text-3xl font-bold gradient-text">One To One Store</h1>
-                <p class="mt-1 text-sm text-slate-400">Official One To One gear &amp; accessories.</p>
+    <div th:fragment="content">
+
+        <!-- ══════════════════════════════════════════════════
+             STORE HERO
+        ══════════════════════════════════════════════════ -->
+        <section class="store-hero">
+            <div class="store-hero-grid" aria-hidden="true"></div>
+            <div class="relative z-10 max-w-2xl mx-auto">
+                <span class="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 text-neon-cyan text-xs font-semibold">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                    Official Store
+                </span>
+                <h1 class="text-4xl sm:text-5xl font-extrabold gradient-text mb-3 leading-tight">One To One Store</h1>
+                <p class="text-slate-400 text-base leading-relaxed">Premium gear, accessories, and equipment hand-picked for serious athletes. Built to perform, designed to impress.</p>
             </div>
-        </div>
+        </section>
 
-        <!-- Search bar -->
-        <div th:if="${!#lists.isEmpty(products)}" class="mb-6">
-            <div class="relative max-w-md">
-                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input type="text" id="product-search"
-                       placeholder="Search products…"
-                       class="input-field w-full pl-9" />
+        <div class="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+
+            <!-- Demo mode notice -->
+            <div th:if="${demoMode}" class="demo-banner mb-8 flex items-start gap-3">
+                <svg class="h-5 w-5 text-neon-purple flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div>
+                    <p class="text-sm font-semibold text-neon-purple">Store Preview Mode</p>
+                    <p class="text-xs text-slate-400 mt-0.5">These are sample products for demonstration. An admin can add real products via the store admin panel.</p>
+                </div>
             </div>
-        </div>
 
-        <!-- Empty state -->
-        <div th:if="${#lists.isEmpty(products)}"
-             class="card-neon card--cyan p-10 text-center">
-            <p class="text-slate-400">No products available right now. Check back soon!</p>
-        </div>
-
-        <!-- No search results state -->
-        <div id="no-results" class="hidden card-neon card--cyan p-10 text-center">
-            <p class="text-slate-400">No products match your search.</p>
-        </div>
-
-        <!-- Product grid -->
-        <div th:if="${!#lists.isEmpty(products)}"
-             id="product-grid"
-             class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
-            <div th:each="product : ${products}"
-                 class="product-card card-neon card--cyan flex flex-col overflow-hidden transition-all duration-200 hover:shadow-glow-sm"
-                 th:attr="data-search=${product.name + ' ' + (product.description != null ? product.description : '') + ' ' + (product.category != null ? product.category : '')}">
-
-                <!-- Product image -->
-                <div class="aspect-square w-full overflow-hidden bg-slate-800">
-                    <img th:if="${product.imageUrl != null}"
-                         th:src="${product.imageUrl}"
-                         th:alt="${product.name}"
-                         class="h-full w-full object-cover" />
-                    <div th:if="${product.imageUrl == null}"
-                         class="flex h-full items-center justify-center">
-                        <svg class="h-16 w-16 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
+            <!-- ══════════════════════════════════════════════════
+                 FEATURED PROMO STRIP
+            ══════════════════════════════════════════════════ -->
+            <div class="featured-strip mb-10 p-6 flex flex-col sm:flex-row items-center gap-6">
+                <div class="flex-1">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-neon-cyan mb-2">
+                        <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        New Season Drop
+                    </span>
+                    <h2 class="text-xl font-bold text-white mb-1">Train Harder. Look Better.</h2>
+                    <p class="text-sm text-slate-400">Explore our latest performance apparel, recovery tools, and premium accessories — all built around your active lifestyle.</p>
+                </div>
+                <div class="flex flex-wrap gap-3 flex-shrink-0">
+                    <div class="text-center px-5 py-3 rounded-xl" style="background:rgba(0,243,255,0.08);border:1px solid rgba(0,243,255,0.2);">
+                        <div class="text-2xl font-extrabold text-neon-cyan">100%</div>
+                        <div class="text-xs text-slate-400 mt-0.5">Premium Quality</div>
+                    </div>
+                    <div class="text-center px-5 py-3 rounded-xl" style="background:rgba(181,55,242,0.08);border:1px solid rgba(181,55,242,0.2);">
+                        <div class="text-2xl font-extrabold text-neon-purple">Free</div>
+                        <div class="text-xs text-slate-400 mt-0.5">UK Delivery £50+</div>
+                    </div>
+                    <div class="text-center px-5 py-3 rounded-xl" style="background:rgba(57,255,20,0.06);border:1px solid rgba(57,255,20,0.2);">
+                        <div class="text-2xl font-extrabold text-neon-green">30</div>
+                        <div class="text-xs text-slate-400 mt-0.5">Day Returns</div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Info -->
-                <div class="flex flex-1 flex-col gap-2 p-4">
-                    <div class="flex items-start justify-between gap-2">
-                        <h2 class="text-base font-semibold text-white" th:text="${product.name}">Product Name</h2>
-                        <span th:if="${product.category != null}"
-                              class="shrink-0 rounded-full bg-neon-cyan/10 border border-neon-cyan/30 px-2 py-0.5 text-[11px] text-neon-cyan"
-                              th:text="${product.category}">Category</span>
-                    </div>
-
-                    <p th:if="${product.description != null}"
-                       class="text-sm text-slate-400 line-clamp-2"
-                       th:text="${product.description}">Description</p>
-
-                    <div class="mt-auto flex items-center justify-between pt-3">
-                        <span class="text-lg font-bold text-neon-cyan"
-                              th:text="'£' + ${#numbers.formatDecimal(product.price, 1, 2)}">£0.00</span>
-                        <span th:if="${product.stockQuantity == 0}"
-                              class="text-xs text-red-400 font-semibold">Out of stock</span>
-                        <span th:if="${product.stockQuantity > 0 and product.stockQuantity <= 5}"
-                              class="text-xs text-amber-400 font-semibold"
-                              th:text="${product.stockQuantity} + ' left'">3 left</span>
-                    </div>
-
-                    <a th:if="${product.stockQuantity > 0}"
-                       th:href="@{/merch/{id}/buy(id=${product.id})}"
-                       class="btn btn--primary w-full text-sm mt-1">Buy Now</a>
-                    <button th:if="${product.stockQuantity == 0}"
-                            disabled
-                            class="btn w-full text-sm mt-1 opacity-50 cursor-not-allowed bg-slate-700 text-slate-400 border border-slate-600">
-                        Out of Stock
+            <!-- ══════════════════════════════════════════════════
+                 SEARCH + FILTERS
+            ══════════════════════════════════════════════════ -->
+            <div class="flex flex-col sm:flex-row gap-4 mb-8 items-start sm:items-center">
+                <!-- Search -->
+                <div class="relative flex-1 max-w-sm">
+                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <input type="text" id="product-search"
+                           placeholder="Search products…"
+                           class="input-field w-full pl-9" />
+                </div>
+                <!-- Category filters -->
+                <div id="category-filters" class="flex flex-wrap gap-2">
+                    <button class="cat-pill all active" data-cat="all">All</button>
+                    <button class="cat-pill" data-cat="Apparel">
+                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                        Apparel
+                    </button>
+                    <button class="cat-pill" data-cat="Accessories">
+                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                        Accessories
+                    </button>
+                    <button class="cat-pill" data-cat="Equipment">
+                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5"/></svg>
+                        Equipment
+                    </button>
+                    <button class="cat-pill" data-cat="in-stock">
+                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        In Stock
                     </button>
                 </div>
             </div>
 
-        </div>
-    </div>
+            <!-- Results count -->
+            <p id="results-count" class="text-xs text-slate-500 mb-5">
+                Showing <span id="count-num" th:text="${products != null} ? ${#lists.size(products)} : 0">0</span> products
+            </p>
+
+            <!-- ══════════════════════════════════════════════════
+                 NO RESULTS STATE
+            ══════════════════════════════════════════════════ -->
+            <div id="no-results" class="hidden text-center py-16">
+                <svg class="h-12 w-12 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <p class="text-slate-400 font-medium">No products match your search.</p>
+                <button id="clear-search" class="mt-3 text-neon-cyan text-sm underline">Clear filters</button>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════
+                 TRULY EMPTY STORE
+            ══════════════════════════════════════════════════ -->
+            <div th:if="${#lists.isEmpty(products) and !demoMode}"
+                 class="py-20 text-center rounded-2xl"
+                 style="background:rgba(0,243,255,0.04);border:1px solid rgba(0,243,255,0.12);">
+                <svg class="h-16 w-16 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                <p class="text-slate-300 font-semibold text-lg">Store Coming Soon</p>
+                <p class="text-slate-500 text-sm mt-1">Our gear is on its way. Check back soon!</p>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════
+                 PRODUCT GRID
+            ══════════════════════════════════════════════════ -->
+            <div th:if="${!#lists.isEmpty(products)}"
+                 id="product-grid"
+                 class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+                <div th:each="product : ${products}"
+                     class="product-card"
+                     th:classappend="${product.stockQuantity == 0} ? ' out-of-stock' : ''"
+                     th:attr="data-search=${product.name + ' ' + (product.description != null ? product.description : '') + ' ' + (product.category != null ? product.category : '')},
+                              data-cat=${product.category != null ? product.category : ''},
+                              data-in-stock=${product.stockQuantity > 0 ? 'true' : 'false'}">
+
+                    <!-- Image -->
+                    <div class="product-img-wrap">
+                        <img th:if="${product.imageUrl != null}"
+                             th:src="${product.imageUrl}"
+                             th:alt="${product.name}"
+                             loading="lazy" />
+                        <div th:if="${product.imageUrl == null}" class="img-placeholder">
+                            <svg class="h-16 w-16 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <!-- Category tag overlay -->
+                        <span th:if="${product.category != null}" class="cat-tag" th:text="${product.category}">Category</span>
+                        <!-- Stock warning -->
+                        <span th:if="${product.stockQuantity == 0}"
+                              class="stock-badge bg-red-900/80 border border-red-500/50 text-red-300">
+                            Out of Stock
+                        </span>
+                        <span th:if="${product.stockQuantity > 0 and product.stockQuantity <= 5}"
+                              class="stock-badge bg-amber-900/80 border border-amber-500/50 text-amber-300"
+                              th:text="${product.stockQuantity} + ' left'">3 left</span>
+                    </div>
+
+                    <!-- Product info -->
+                    <div class="flex flex-1 flex-col p-4 gap-2">
+                        <h2 class="text-sm font-bold text-white leading-snug" th:text="${product.name}">Product Name</h2>
+                        <p th:if="${product.description != null}"
+                           class="text-xs text-slate-400 leading-relaxed line-clamp-2 flex-1"
+                           th:text="${product.description}">Description</p>
+
+                        <div class="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
+                            <span class="text-lg font-extrabold text-neon-cyan"
+                                  th:text="'£' + ${#numbers.formatDecimal(product.price, 1, 2)}">£0.00</span>
+                            <div>
+                                <a th:if="${product.stockQuantity > 0}"
+                                   th:href="@{/merch/{id}/buy(id=${product.id})}"
+                                   class="inline-flex items-center gap-1.5 btn btn--primary text-xs px-3 py-1.5">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    Buy Now
+                                </a>
+                                <button th:if="${product.stockQuantity == 0}"
+                                        disabled
+                                        class="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-slate-600 text-slate-500 cursor-not-allowed">
+                                    Sold Out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div><!-- end grid -->
+
+            <!-- ══════════════════════════════════════════════════
+                 TRUST / INFO STRIP
+            ══════════════════════════════════════════════════ -->
+            <div class="mt-16 grid gap-4 sm:grid-cols-3">
+                <div class="card-neon card--cyan p-5 flex items-center gap-4">
+                    <div class="p-2.5 rounded-xl flex-shrink-0" style="background:rgba(0,243,255,0.1);border:1px solid rgba(0,243,255,0.25);">
+                        <svg class="h-6 w-6 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Fast Dispatch</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Orders dispatched within 1–2 business days.</p>
+                    </div>
+                </div>
+                <div class="card-neon card--purple p-5 flex items-center gap-4">
+                    <div class="p-2.5 rounded-xl flex-shrink-0" style="background:rgba(181,55,242,0.1);border:1px solid rgba(181,55,242,0.25);">
+                        <svg class="h-6 w-6 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Quality Guarantee</p>
+                        <p class="text-xs text-slate-400 mt-0.5">All products are tested and approved by our team.</p>
+                    </div>
+                </div>
+                <div class="card-neon card--green p-5 flex items-center gap-4">
+                    <div class="p-2.5 rounded-xl flex-shrink-0" style="background:rgba(57,255,20,0.08);border:1px solid rgba(57,255,20,0.25);">
+                        <svg class="h-6 w-6 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Easy Returns</p>
+                        <p class="text-xs text-slate-400 mt-0.5">30-day hassle-free returns on all unused items.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end max-w-7xl -->
+    </div><!-- end content -->
 
     <div th:fragment="pageScripts">
         <script>
         (function() {
-            var searchInput = document.getElementById('product-search');
-            var grid = document.getElementById('product-grid');
-            var noResults = document.getElementById('no-results');
-            if (!searchInput || !grid) return;
-            searchInput.addEventListener('input', function() {
-                var query = this.value.toLowerCase().trim();
+            'use strict';
+            var searchInput  = document.getElementById('product-search');
+            var grid         = document.getElementById('product-grid');
+            var noResults    = document.getElementById('no-results');
+            var countNum     = document.getElementById('count-num');
+            var clearBtn     = document.getElementById('clear-search');
+            var catButtons   = document.querySelectorAll('#category-filters .cat-pill');
+
+            var activeCategory = 'all';
+
+            function applyFilters() {
+                if (!grid) return;
+                var query = searchInput ? searchInput.value.toLowerCase().trim() : '';
                 var cards = grid.querySelectorAll('.product-card');
                 var visible = 0;
+
                 cards.forEach(function(card) {
-                    var text = (card.getAttribute('data-search') || '').toLowerCase();
-                    var show = !query || text.includes(query);
+                    var text    = (card.getAttribute('data-search') || '').toLowerCase();
+                    var cat     = (card.getAttribute('data-cat') || '').toLowerCase();
+                    var inStock = card.getAttribute('data-in-stock') === 'true';
+
+                    var matchSearch = !query || text.includes(query);
+                    var matchCat    = activeCategory === 'all'
+                                   || (activeCategory === 'in-stock' ? inStock : cat === activeCategory.toLowerCase());
+
+                    var show = matchSearch && matchCat;
                     card.style.display = show ? '' : 'none';
                     if (show) visible++;
                 });
-                if (noResults) noResults.classList.toggle('hidden', visible > 0 || !query);
+
+                if (countNum) countNum.textContent = visible;
+                if (noResults) noResults.classList.toggle('hidden', visible > 0 || (!query && activeCategory === 'all'));
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilters);
+            }
+
+            catButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    catButtons.forEach(function(b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    activeCategory = btn.getAttribute('data-cat');
+                    applyFilters();
+                });
             });
-        })();
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
+                    if (searchInput) searchInput.value = '';
+                    activeCategory = 'all';
+                    catButtons.forEach(function(b) { b.classList.remove('active'); });
+                    var allBtn = document.querySelector('.cat-pill.all');
+                    if (allBtn) allBtn.classList.add('active');
+                    applyFilters();
+                });
+            }
+        }());
         </script>
     </div>
 
