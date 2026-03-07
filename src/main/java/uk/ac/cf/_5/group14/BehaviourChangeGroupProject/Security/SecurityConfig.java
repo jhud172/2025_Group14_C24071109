@@ -106,6 +106,7 @@ public class SecurityConfig {
                             .requestMatchers("/calendar/**").authenticated()
                             .requestMatchers("/workouts/**").authenticated()
                             .requestMatchers("/goals/**").authenticated()
+                            .requestMatchers(HttpMethod.GET, "/profile").permitAll()
                             .requestMatchers("/profile/**").authenticated()
                             .requestMatchers("/merch/**").authenticated()
                             // All other routes: open for dev browsing

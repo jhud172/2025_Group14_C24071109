@@ -1,34 +1,5 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Profile;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DataExport.DataExportRequestService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLogService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.HealthConditionType;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.UserHealthCondition;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.UserHealthConditionService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelProgress;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscription;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.ThemePreference;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PaymentCards.SavedPaymentMethod;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PaymentCards.SavedPaymentMethodService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.MerchOrder;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.MerchOrderService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
-
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Instant;
@@ -39,6 +10,41 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DataExport.DataExportRequestService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseLog.ExerciseLogService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.HealthConditionType;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.UserHealthCondition;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthConditions.UserHealthConditionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelProgress;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.MerchOrder;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.MerchOrders.MerchOrderService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PaymentCards.SavedPaymentMethod;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PaymentCards.SavedPaymentMethodService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscription;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.ThemePreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
 
 @Controller
 public class ProfileController {
@@ -55,6 +61,7 @@ public class ProfileController {
     private final Clock clock;
     private final SavedPaymentMethodService cardService;
     private final MerchOrderService orderService;
+    private final DevModeProperties devModeProperties;
 
     @Autowired
     private AuthHelper authHelper;
@@ -71,7 +78,8 @@ public class ProfileController {
                              UserRepository userRepository,
                              Clock clock,
                              SavedPaymentMethodService cardService,
-                             MerchOrderService orderService) {
+                             MerchOrderService orderService,
+                             DevModeProperties devModeProperties) {
         this.userService = userService;
         this.exerciseLogService = exerciseLogService;
         this.platformSubscriptionService = platformSubscriptionService;
@@ -84,11 +92,19 @@ public class ProfileController {
         this.clock = clock;
         this.cardService = cardService;
         this.orderService = orderService;
+        this.devModeProperties = devModeProperties;
     }
 
     @GetMapping("/profile")
     public ModelAndView getProfile() {
         User user = authHelper.getAuthenticatedUser();
+        boolean devProfilePreview = false;
+
+        if (user == null && devModeProperties.isDevMode()) {
+            user = resolveDevPreviewUser();
+            devProfilePreview = user != null;
+        }
+
         if (user == null) {
             return new ModelAndView("redirect:/login");
         }
@@ -117,6 +133,7 @@ public class ProfileController {
         modelAndView.addObject("nextUsernameChangeAt", nextUsernameChangeAt);
         modelAndView.addObject("recentExportRequests", dataExportRequestService.getRecentRequests(user));
         modelAndView.addObject("today", LocalDate.now(clock));
+        modelAndView.addObject("devProfilePreview", devProfilePreview);
 
         // Payment cards & orders
         List<SavedPaymentMethod> savedCards = cardService.getCardsForUser(user.getId());
@@ -125,6 +142,17 @@ public class ProfileController {
         modelAndView.addObject("recentOrders", recentOrders);
 
         return modelAndView;
+    }
+
+    private User resolveDevPreviewUser() {
+        List<String> candidateUsernames = List.of("client_demo", "demo_client", "trainer_demo", "user_demo");
+        for (String username : candidateUsernames) {
+            User candidate = userService.findByUsername(username);
+            if (candidate != null) {
+                return candidate;
+            }
+        }
+        return userRepository.findAll().stream().findFirst().orElse(null);
     }
 
     @GetMapping("/profile/orders")

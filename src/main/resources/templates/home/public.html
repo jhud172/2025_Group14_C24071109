@@ -208,27 +208,34 @@
             /* ── SECTION DIVIDER ── */
             .section-divider {
                 position: relative;
-                height: 1px;
+                height: 48px;
+                width: 100%;
+                max-width: 80rem;
+                margin: 0 auto;
+                padding: 0 1.5rem;
+                box-sizing: border-box;
                 overflow: visible;
                 z-index: 10;
+                isolation: isolate;
+                background: transparent !important;
             }
             .section-divider::before {
                 content: '';
                 position: absolute;
-                left: 50%;
+                left: 1.5rem;
+                right: 1.5rem;
                 top: 50%;
-                transform: translate(-50%, -50%);
-                width: min(320px, 60%);
-                height: 3px;
+                transform: translateY(-50%);
+                height: 2px;
                 border-radius: 999px;
                 background: linear-gradient(90deg,
-                    transparent 0%,
-                    var(--emerald-accent) 30%,
-                    var(--emerald-light) 50%,
-                    var(--emerald-accent) 70%,
-                    transparent 100%
+                    rgba(5, 150, 105, 0) 0%,
+                    rgba(16, 185, 129, 0.55) 16%,
+                    rgba(16, 185, 129, 0.9) 50%,
+                    rgba(16, 185, 129, 0.55) 84%,
+                    rgba(5, 150, 105, 0) 100%
                 );
-                box-shadow: 0 0 12px 2px var(--emerald-glow);
+                box-shadow: none;
             }
             .section-divider::after {
                 content: '';
@@ -236,67 +243,160 @@
                 left: 50%;
                 top: 50%;
                 transform: translate(-50%, -50%);
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                background: var(--emerald-accent);
-                box-shadow: 0 0 0 3px white, 0 0 0 4px var(--emerald-accent), 0 0 10px 4px var(--emerald-glow);
+                width: 14px;
+                height: 14px;
+                border-radius: 999px;
+                border: 2px solid rgba(5, 150, 105, 0.72);
+                background: #ffffff;
+                box-shadow:
+                    0 0 0 6px rgba(255, 255, 255, 0.95),
+                    0 0 0 9px rgba(16, 185, 129, 0.14);
+            }
+            @media (min-width: 1024px) {
+                .section-divider {
+                    padding: 0 2rem;
+                }
+                .section-divider::before {
+                    left: 2rem;
+                    right: 2rem;
+                }
+            }
+            @media (max-width: 640px) {
+                .section-divider {
+                    height: 40px;
+                    padding: 0 1rem;
+                }
+                .section-divider::before {
+                    left: 1rem;
+                    right: 1rem;
+                }
+                .section-divider::after {
+                    width: 12px;
+                    height: 12px;
+                }
             }
 
-            /* ── DEV MODE IMMERSIVE OVERLAY ── */
-            .dev-mode-env {
+            /* ── DEV MODE IMMERSIVE PANEL ── */
+            .dev-mode-immersive {
+                max-width: 80rem;
+                margin: 1.25rem auto 0;
+                padding: 0 1.5rem;
                 position: relative;
-                background: #0d1117;
-                border-bottom: 1px solid rgba(16, 185, 129, 0.35);
+                z-index: 20;
+            }
+            .dev-mode-immersive-card {
+                position: relative;
                 overflow: hidden;
-                font-family: 'Courier New', Courier, monospace;
+                border-radius: 20px;
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                background:
+                    radial-gradient(circle at 90% 10%, rgba(52, 211, 153, 0.22), transparent 45%),
+                    radial-gradient(circle at 10% 110%, rgba(16, 185, 129, 0.18), transparent 50%),
+                    linear-gradient(140deg, #f5fff9 0%, #ecfdf4 45%, #f8fffc 100%);
+                box-shadow: 0 14px 38px -18px rgba(5, 150, 105, 0.45);
+                padding: 1.1rem 1.25rem;
             }
-            .dev-mode-env::before {
-                content: '';
+            .dev-mode-aurora {
                 position: absolute;
                 inset: 0;
+                pointer-events: none;
                 background-image:
-                    linear-gradient(rgba(16, 185, 129, 0.04) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(16, 185, 129, 0.04) 1px, transparent 1px);
-                background-size: 24px 24px;
-                pointer-events: none;
+                    linear-gradient(rgba(5, 150, 105, 0.07) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(5, 150, 105, 0.07) 1px, transparent 1px);
+                background-size: 28px 28px;
+                opacity: 0.35;
             }
-            .dev-mode-env::after {
-                content: '';
-                position: absolute;
-                inset: 0;
-                background: linear-gradient(90deg,
-                    rgba(16, 185, 129, 0.08) 0%,
-                    transparent 30%,
-                    transparent 70%,
-                    rgba(16, 185, 129, 0.08) 100%
-                );
-                pointer-events: none;
+            .dev-mode-grid {
+                position: relative;
+                z-index: 1;
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1rem;
             }
-            .dev-mode-scanline {
-                position: absolute;
-                top: 0; left: 0; right: 0;
-                height: 2px;
-                background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.6), transparent);
-                animation: devScanline 3s linear infinite;
+            .dev-mode-stack {
+                display: flex;
+                flex-direction: column;
+                gap: 0.55rem;
             }
-            @keyframes devScanline {
-                0%   { transform: translateX(-100%); }
-                100% { transform: translateX(100%); }
+            .dev-mode-title {
+                margin: 0;
+                font-size: clamp(1rem, 1.4vw, 1.25rem);
+                line-height: 1.2;
+                font-weight: 800;
+                letter-spacing: -0.01em;
+                color: #064e3b;
+            }
+            .dev-mode-copy {
+                margin: 0;
+                color: #14532d;
+                font-size: 0.875rem;
+                line-height: 1.45;
+                max-width: 65ch;
+            }
+            .dev-mode-chip-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.45rem;
+                font-size: 0.75rem;
+                color: #065f46;
+            }
+            .dev-mode-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                border-radius: 999px;
+                border: 1px solid rgba(16, 185, 129, 0.35);
+                background: rgba(255, 255, 255, 0.7);
+                padding: 0.22rem 0.62rem;
+                font-weight: 700;
+            }
+            .dev-mode-actions {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                justify-content: center;
+                gap: 0.45rem;
+            }
+            .dev-mode-hub-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                border-radius: 12px;
+                border: 1px solid #059669;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: #ffffff;
+                text-decoration: none;
+                padding: 0.6rem 0.95rem;
+                font-size: 0.82rem;
+                font-weight: 800;
+                letter-spacing: 0.02em;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .dev-mode-hub-link:hover {
+                color: #ffffff;
+                transform: translateY(-1px);
+                box-shadow: 0 10px 24px -14px rgba(5, 150, 105, 0.8);
+                text-decoration: none;
+            }
+            .dev-mode-hint {
+                color: #166534;
+                font-size: 0.74rem;
+                font-weight: 600;
             }
             .dev-badge {
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
-                background: rgba(16, 185, 129, 0.12);
-                border: 1px solid rgba(16, 185, 129, 0.4);
-                color: #10b981;
-                padding: 3px 10px;
-                border-radius: 4px;
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 2px;
+                background: rgba(6, 95, 70, 0.1);
+                border: 1px solid rgba(6, 95, 70, 0.3);
+                color: #065f46;
+                padding: 4px 11px;
+                border-radius: 999px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 1.2px;
                 text-transform: uppercase;
+                width: fit-content;
             }
             .dev-dot {
                 width: 7px; height: 7px;
@@ -308,44 +408,27 @@
                 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,.6); }
                 50%       { opacity: .5; box-shadow: 0 0 0 4px rgba(16,185,129,0); }
             }
-            .dev-corner-badge {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                z-index: 9000;
-                background: #0d1117;
-                border: 1px solid rgba(16, 185, 129, 0.5);
-                border-radius: 8px;
-                padding: 8px 14px;
-                font-family: 'Courier New', monospace;
-                font-size: 11px;
-                color: #10b981;
-                letter-spacing: 1px;
-                box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), 0 4px 12px rgba(0,0,0,.4);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                text-decoration: none;
-                transition: all 0.3s ease;
+            @media (min-width: 992px) {
+                .dev-mode-grid {
+                    grid-template-columns: 1.35fr auto;
+                    align-items: center;
+                }
+                .dev-mode-actions {
+                    align-items: flex-end;
+                    text-align: right;
+                }
             }
-            .dev-corner-badge:hover {
-                border-color: rgba(16, 185, 129, 0.8);
-                box-shadow: 0 0 30px rgba(16, 185, 129, 0.35), 0 4px 16px rgba(0,0,0,.5);
-                color: #34d399;
-            }
-            /* Page-level dev overlay glow */
-            .dev-mode-page-glow {
-                position: fixed;
-                top: 0; left: 0;
-                width: 3px;
-                height: 100vh;
-                background: linear-gradient(180deg, #10b981 0%, transparent 40%, transparent 60%, #10b981 100%);
-                opacity: 0.35;
-                pointer-events: none;
-                z-index: 8999;
-            }
-            .dev-mode-page-glow.right {
-                left: auto; right: 0;
+            @media (max-width: 640px) {
+                .dev-mode-immersive {
+                    padding: 0 1rem;
+                }
+                .dev-mode-immersive-card {
+                    border-radius: 16px;
+                    padding: 0.95rem;
+                }
+                .dev-mode-copy {
+                    font-size: 0.8rem;
+                }
             }
 
             /* ── ROLE CARD BUTTONS ── */
@@ -412,46 +495,31 @@
 
     <div th:fragment="content" class="bg-white text-slate-900 font-sans antialiased overflow-x-hidden">
 
-        <!-- Development Mode — Immersive Environment Banner -->
+        <!-- Development Mode — Immersive Context Panel -->
         <th:block th:if="${isDevMode}">
-            <!-- Vertical glow strips on page edges -->
-            <div class="dev-mode-page-glow"></div>
-            <div class="dev-mode-page-glow right"></div>
-
-            <!-- Fixed corner badge -->
-            <a href="/dev-mode" class="dev-corner-badge" title="Open Dev Hub">
-                <span class="dev-dot"></span>
-                <span>DEV</span>
-                <svg style="width:12px;height:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-            </a>
-
-            <!-- Top dev environment bar -->
-            <div class="dev-mode-env">
-                <div class="dev-mode-scanline"></div>
-                <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex flex-wrap items-center gap-x-6 gap-y-2">
-                    <!-- Left: environment identity -->
-                    <div class="flex items-center gap-3">
-                        <span class="dev-badge"><span class="dev-dot"></span>DEV ENV</span>
-                        <span style="color:#6b7280;font-size:11px;font-family:'Courier New',monospace;">localhost</span>
-                        <span style="color:#374151;font-size:11px;">·</span>
-                        <span style="color:#6b7280;font-size:11px;font-family:'Courier New',monospace;">Spring Boot</span>
+            <div class="dev-mode-immersive">
+                <div class="dev-mode-immersive-card">
+                    <div class="dev-mode-aurora"></div>
+                    <div class="dev-mode-grid">
+                        <div class="dev-mode-stack">
+                            <span class="dev-badge"><span class="dev-dot"></span>DEV MODE</span>
+                            <h2 class="dev-mode-title">You are in a live development session.</h2>
+                            <p class="dev-mode-copy">Public pages are browseable and feedback loops are shortened for rapid iteration. This environment is optimized for test velocity, not production hardening.</p>
+                            <div class="dev-mode-chip-row">
+                                <span class="dev-mode-chip">localhost</span>
+                                <span class="dev-mode-chip">Spring Boot</span>
+                                <span class="dev-mode-chip">hot-reload active</span>
+                                <span class="dev-mode-chip">security relaxed</span>
+                            </div>
+                        </div>
+                        <div class="dev-mode-actions">
+                            <a href="/dev-mode" class="dev-mode-hub-link">
+                                Open Dev Hub
+                                <svg style="width:12px;height:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </a>
+                            <span class="dev-mode-hint">Built for local testing and UX checks.</span>
+                        </div>
                     </div>
-
-                    <!-- Middle: status indicators -->
-                    <div class="hidden sm:flex items-center gap-4" style="font-family:'Courier New',monospace;font-size:11px;">
-                        <span style="color:#10b981;">▶ server running</span>
-                        <span style="color:#374151;">·</span>
-                        <span style="color:#6b7280;">hot-reload <span style="color:#fbbf24;">active</span></span>
-                        <span style="color:#374151;">·</span>
-                        <span style="color:#6b7280;">security <span style="color:#10b981;">relaxed</span></span>
-                    </div>
-
-                    <!-- Right: nav link -->
-                    <a href="/dev-mode" style="margin-left:auto;font-family:'Courier New',monospace;font-size:12px;color:#10b981;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:color .2s;"
-                       onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#10b981'">
-                        $ open dev-hub
-                        <svg style="width:12px;height:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                    </a>
                 </div>
             </div>
         </th:block>
