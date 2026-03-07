@@ -54,6 +54,8 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Workout.Workout;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationSseRegistry;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 
 /**
  * Tests verifying that the month view includes sticker calendar data and UI elements.
@@ -121,6 +123,9 @@ class StickerCalendarMonthMvcTest {
 
     @Autowired
     private CalendarDayModelBuilder calendarDayModelBuilder;
+
+    @MockitoBean
+    private NotificationSseRegistry sseRegistry;
 
     /** Month view model contains sticker-related attributes */
     @Test
@@ -298,5 +303,10 @@ class StickerCalendarMonthMvcTest {
         CalendarDayModelBuilder calendarDayModelBuilder() {
             return new CalendarDayModelBuilder();
         }
-    }
+    
+        @Bean
+        public DevModeProperties devModeProperties() {
+            return new DevModeProperties();
+        }
+}
 }

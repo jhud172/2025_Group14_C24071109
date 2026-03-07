@@ -41,6 +41,11 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.Worko
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationSseRegistry;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleAppliedRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DayOptimisationRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarDayModelBuilder;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 
 @WebMvcTest(CalendarController.class)
 @ActiveProfiles("test")
@@ -84,6 +89,18 @@ public class CalendarDayCompletionAutoUpdateTest {
 
     @MockitoBean
     private GoalLinkService goalLinkService;
+
+    @MockitoBean
+    private ScheduleAppliedRepository scheduleAppliedRepository;
+
+    @MockitoBean
+    private NotificationSseRegistry sseRegistry;
+
+    @MockitoBean
+    private DayOptimisationRepository dayOptimisationRepository;
+
+    @MockitoBean
+    private CalendarDayModelBuilder calendarDayModelBuilder;
 
     @Test
     public void streakBarSummaryShouldUpdateAfterTaskToggle() throws Exception {
@@ -153,5 +170,10 @@ public class CalendarDayCompletionAutoUpdateTest {
         public PlatformSubscriptionService platformSubscriptionService() {
             return mock(PlatformSubscriptionService.class);
         }
-    }
+    
+        @Bean
+        public DevModeProperties devModeProperties() {
+            return new DevModeProperties();
+        }
+}
 }

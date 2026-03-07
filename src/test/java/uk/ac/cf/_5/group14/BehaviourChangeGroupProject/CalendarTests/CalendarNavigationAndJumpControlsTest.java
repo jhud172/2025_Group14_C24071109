@@ -50,6 +50,8 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationSseRegistry;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 
 /**
  * Tests that calendar routes (month, week, day) return HTTP 200 with required
@@ -80,6 +82,9 @@ class CalendarNavigationAndJumpControlsTest {
     @MockitoBean private DailyStreakService dailyStreakService;
     @MockitoBean private DayHealthPersistenceService dayHealthPersistenceService;
     @MockitoBean private DayOptimisationRepository dayOptimisationRepository;
+
+    @MockitoBean
+    private NotificationSseRegistry sseRegistry;
 
     private User testUser() {
         User u = new User();
@@ -304,5 +309,10 @@ class CalendarNavigationAndJumpControlsTest {
         public CalendarDayModelBuilder calendarDayModelBuilder() {
             return new CalendarDayModelBuilder();
         }
-    }
+    
+        @Bean
+        public DevModeProperties devModeProperties() {
+            return new DevModeProperties();
+        }
+}
 }

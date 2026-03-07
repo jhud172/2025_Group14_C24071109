@@ -39,6 +39,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 
 /**
  * Verifies that the profile route returns HTTP 200 when a valid session user
@@ -133,5 +134,10 @@ class ProfileRouteAccessTest {
         public Clock systemClock() {
             return Clock.fixed(Instant.parse("2026-03-15T12:00:00Z"), ZoneId.of("UTC"));
         }
-    }
+    
+        @Bean
+        public DevModeProperties devModeProperties() {
+            return new DevModeProperties();
+        }
+}
 }
