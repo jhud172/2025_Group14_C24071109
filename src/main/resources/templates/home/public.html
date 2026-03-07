@@ -204,25 +204,257 @@
                 background: rgba(249, 250, 251, 0.85);
                 border-bottom: 1px solid rgba(229, 231, 235, 0.6);
             }
+
+            /* ── SECTION DIVIDER ── */
+            .section-divider {
+                position: relative;
+                height: 1px;
+                overflow: visible;
+                z-index: 10;
+            }
+            .section-divider::before {
+                content: '';
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: min(320px, 60%);
+                height: 3px;
+                border-radius: 999px;
+                background: linear-gradient(90deg,
+                    transparent 0%,
+                    var(--emerald-accent) 30%,
+                    var(--emerald-light) 50%,
+                    var(--emerald-accent) 70%,
+                    transparent 100%
+                );
+                box-shadow: 0 0 12px 2px var(--emerald-glow);
+            }
+            .section-divider::after {
+                content: '';
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--emerald-accent);
+                box-shadow: 0 0 0 3px white, 0 0 0 4px var(--emerald-accent), 0 0 10px 4px var(--emerald-glow);
+            }
+
+            /* ── DEV MODE IMMERSIVE OVERLAY ── */
+            .dev-mode-env {
+                position: relative;
+                background: #0d1117;
+                border-bottom: 1px solid rgba(16, 185, 129, 0.35);
+                overflow: hidden;
+                font-family: 'Courier New', Courier, monospace;
+            }
+            .dev-mode-env::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image:
+                    linear-gradient(rgba(16, 185, 129, 0.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(16, 185, 129, 0.04) 1px, transparent 1px);
+                background-size: 24px 24px;
+                pointer-events: none;
+            }
+            .dev-mode-env::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(90deg,
+                    rgba(16, 185, 129, 0.08) 0%,
+                    transparent 30%,
+                    transparent 70%,
+                    rgba(16, 185, 129, 0.08) 100%
+                );
+                pointer-events: none;
+            }
+            .dev-mode-scanline {
+                position: absolute;
+                top: 0; left: 0; right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.6), transparent);
+                animation: devScanline 3s linear infinite;
+            }
+            @keyframes devScanline {
+                0%   { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+            }
+            .dev-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: rgba(16, 185, 129, 0.12);
+                border: 1px solid rgba(16, 185, 129, 0.4);
+                color: #10b981;
+                padding: 3px 10px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+            }
+            .dev-dot {
+                width: 7px; height: 7px;
+                border-radius: 50%;
+                background: #10b981;
+                animation: devDot 1.5s ease-in-out infinite;
+            }
+            @keyframes devDot {
+                0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,.6); }
+                50%       { opacity: .5; box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+            }
+            .dev-corner-badge {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 9000;
+                background: #0d1117;
+                border: 1px solid rgba(16, 185, 129, 0.5);
+                border-radius: 8px;
+                padding: 8px 14px;
+                font-family: 'Courier New', monospace;
+                font-size: 11px;
+                color: #10b981;
+                letter-spacing: 1px;
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), 0 4px 12px rgba(0,0,0,.4);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+            .dev-corner-badge:hover {
+                border-color: rgba(16, 185, 129, 0.8);
+                box-shadow: 0 0 30px rgba(16, 185, 129, 0.35), 0 4px 16px rgba(0,0,0,.5);
+                color: #34d399;
+            }
+            /* Page-level dev overlay glow */
+            .dev-mode-page-glow {
+                position: fixed;
+                top: 0; left: 0;
+                width: 3px;
+                height: 100vh;
+                background: linear-gradient(180deg, #10b981 0%, transparent 40%, transparent 60%, #10b981 100%);
+                opacity: 0.35;
+                pointer-events: none;
+                z-index: 8999;
+            }
+            .dev-mode-page-glow.right {
+                left: auto; right: 0;
+            }
+
+            /* ── ROLE CARD BUTTONS ── */
+            .role-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+                padding: 0.875rem 1.5rem;
+                border-radius: 14px;
+                font-weight: 700;
+                font-size: 0.9375rem;
+                text-decoration: none;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                position: relative;
+                overflow: hidden;
+            }
+            .role-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: rgba(255,255,255,0.1);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            .role-btn:hover::before { opacity: 1; }
+            .role-btn-arrow {
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            .role-btn:hover .role-btn-arrow { transform: translateX(5px); }
+
+            .role-btn-primary {
+                background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+                color: white;
+                box-shadow: 0 4px 14px -2px rgba(16, 185, 129, 0.45);
+            }
+            .role-btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 22px -4px rgba(16, 185, 129, 0.6);
+            }
+            .role-btn-secondary {
+                background: white;
+                color: #111827;
+                border: 1.5px solid #e5e7eb;
+            }
+            .role-btn-secondary:hover {
+                border-color: #10b981;
+                background: #f0fdf4;
+                color: #059669;
+            }
+            .role-btn-outline {
+                background: transparent;
+                color: #374151;
+                border: 1.5px solid #d1d5db;
+            }
+            .role-btn-outline:hover {
+                border-color: #10b981;
+                color: #059669;
+                background: #f0fdf4;
+            }
         </style>
     </th:block>
 
     <div th:fragment="content" class="bg-white text-slate-900 font-sans antialiased overflow-x-hidden">
 
-        <!-- Development Mode Notification -->
-        <div th:if="${isDevMode}" style="background: linear-gradient(90deg,#1a1a2e,#0f3460); border-bottom: 1px solid rgba(251,191,36,.2); padding: 10px 0;">
-            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.35);color:#fbbf24;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">
-                        <span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;display:inline-block;animation:devBannerPulse 2s ease-in-out infinite;"></span>
-                        Dev Mode
-                    </span>
-                    <span style="color:#d1d5db;font-size:13px;">Application is running in development mode.</span>
-                    <a href="/dev-mode" style="margin-left:auto;color:#fbbf24;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">Open Dev Hub →</a>
+        <!-- Development Mode — Immersive Environment Banner -->
+        <th:block th:if="${isDevMode}">
+            <!-- Vertical glow strips on page edges -->
+            <div class="dev-mode-page-glow"></div>
+            <div class="dev-mode-page-glow right"></div>
+
+            <!-- Fixed corner badge -->
+            <a href="/dev-mode" class="dev-corner-badge" title="Open Dev Hub">
+                <span class="dev-dot"></span>
+                <span>DEV</span>
+                <svg style="width:12px;height:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+
+            <!-- Top dev environment bar -->
+            <div class="dev-mode-env">
+                <div class="dev-mode-scanline"></div>
+                <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex flex-wrap items-center gap-x-6 gap-y-2">
+                    <!-- Left: environment identity -->
+                    <div class="flex items-center gap-3">
+                        <span class="dev-badge"><span class="dev-dot"></span>DEV ENV</span>
+                        <span style="color:#6b7280;font-size:11px;font-family:'Courier New',monospace;">localhost</span>
+                        <span style="color:#374151;font-size:11px;">·</span>
+                        <span style="color:#6b7280;font-size:11px;font-family:'Courier New',monospace;">Spring Boot</span>
+                    </div>
+
+                    <!-- Middle: status indicators -->
+                    <div class="hidden sm:flex items-center gap-4" style="font-family:'Courier New',monospace;font-size:11px;">
+                        <span style="color:#10b981;">▶ server running</span>
+                        <span style="color:#374151;">·</span>
+                        <span style="color:#6b7280;">hot-reload <span style="color:#fbbf24;">active</span></span>
+                        <span style="color:#374151;">·</span>
+                        <span style="color:#6b7280;">security <span style="color:#10b981;">relaxed</span></span>
+                    </div>
+
+                    <!-- Right: nav link -->
+                    <a href="/dev-mode" style="margin-left:auto;font-family:'Courier New',monospace;font-size:12px;color:#10b981;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:color .2s;"
+                       onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#10b981'">
+                        $ open dev-hub
+                        <svg style="width:12px;height:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </a>
                 </div>
             </div>
-        </div>
-        <style>@keyframes devBannerPulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+        </th:block>
 
         <!-- PREMIUM INTRO OVERLAY (Logged out only) -->
         <div id="opening-overlay" sec:authorize="!isAuthenticated()">
@@ -378,6 +610,9 @@
 
         </section>
 
+        <!-- ── Section Divider ── -->
+        <div class="section-divider bg-gray-50"></div>
+
         <!-- 2. FRICTION VS FLOW (Outcomes) -->
         <section class="section-spacer bg-gray-50 relative z-30">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -456,6 +691,9 @@
         </section>
 
 
+        <!-- ── Section Divider ── -->
+        <div class="section-divider bg-white"></div>
+
         <!-- 3. TRUST & STANDARDS -->
         <section class="py-20 bg-white section-spacer relative overflow-hidden">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -515,6 +753,9 @@
         </section>
 
 
+        <!-- ── Section Divider ── -->
+        <div class="section-divider bg-gray-50"></div>
+
         <!-- 4. HOW IT WORKS (Cinematic 3-Step) -->
            <section class="py-24 bg-gray-50 section-spacer relative z-20">
                <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -567,6 +808,9 @@
                   </div>
          </section>
 
+
+        <!-- ── Section Divider ── -->
+        <div class="section-divider bg-white"></div>
 
         <!-- 4.1 CYCLE OF PROGRESS (5-Step Loop) -->
            <section class="py-24 bg-white section-spacer">
@@ -677,6 +921,9 @@
         </section>
 
 
+        <!-- ── Section Divider ── -->
+        <div class="section-divider bg-gray-50"></div>
+
         <!-- 5. DEPLOYMENT VECTORS (Roles) -->
         <section id="roles" class="py-24 bg-gray-50 relative overflow-hidden section-spacer">
                 <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -710,8 +957,10 @@
                                 </li>
                             </ul>
 
-                            <a th:href="@{/signup}" class="btn btn--primary h-14 flex items-center justify-center">
-                                Start as a client
+                            <a th:href="@{/signup}" class="role-btn role-btn-primary">
+                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                Start as a Client
+                                <svg class="w-4 h-4 role-btn-arrow shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                             </a>
                         </div>
                     </div>
@@ -736,8 +985,10 @@
                             </li>
                         </ul>
 
-                        <a th:href="@{/signup?role=trainer}" class="mt-auto inline-flex items-center font-bold text-slate-900 hover:text-emerald-500 transition-colors group-hover:gap-2">
-                            Become verified trainer <svg class="w-4 h-4 ml-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        <a th:href="@{/signup?role=trainer}" class="role-btn role-btn-secondary mt-auto">
+                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                            Become a Trainer
+                            <svg class="w-4 h-4 role-btn-arrow shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                         </a>
                     </div>
 
@@ -761,14 +1012,19 @@
                             </li>
                         </ul>
 
-                         <a th:href="@{/signup?role=gym}" class="mt-auto inline-flex items-center font-bold text-slate-900 hover:text-emerald-500 transition-colors group-hover:gap-2">
-                            Partner with One to One <svg class="w-4 h-4 ml-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                         <a th:href="@{/signup?role=gym}" class="role-btn role-btn-outline mt-auto">
+                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            Partner as a Gym
+                            <svg class="w-4 h-4 role-btn-arrow shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                         </a>
                     </div>
                 </div>
                 </div>
         </section>
 
+
+        <!-- ── Section Divider ── -->
+        <div class="section-divider bg-white"></div>
 
         <!-- 6. PRODUCT GALLERY -->
         <section class="py-24 bg-white section-spacer overflow-hidden">
@@ -871,6 +1127,9 @@
                 </div>
         </section>
 
+
+        <!-- ── Section Divider ── -->
+        <div class="section-divider bg-gray-50"></div>
 
         <!-- 7. FAQ -->
         <section class="py-24 bg-gray-50 section-spacer">
