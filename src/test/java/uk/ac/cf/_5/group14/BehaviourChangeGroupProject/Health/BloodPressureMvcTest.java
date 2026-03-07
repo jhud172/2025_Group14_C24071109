@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -121,5 +122,10 @@ class BloodPressureMvcTest {
         public Clock systemClock() {
             return Clock.fixed(Instant.parse("2026-03-02T12:00:00Z"), ZoneId.of("UTC"));
         }
-    }
+    
+        @Bean
+        public DevModeProperties devModeProperties() {
+            return new DevModeProperties();
+        }
+}
 }

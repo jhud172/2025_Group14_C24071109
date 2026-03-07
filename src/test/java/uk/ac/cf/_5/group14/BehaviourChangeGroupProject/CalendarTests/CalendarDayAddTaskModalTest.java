@@ -29,6 +29,8 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalLinkService;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Collections;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationSseRegistry;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleAppliedRepository;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,6 +39,9 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DayOptimisationRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarDayModelBuilder;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 
 @WebMvcTest(CalendarController.class)
 @ActiveProfiles("test")
@@ -80,6 +85,18 @@ class CalendarDayAddTaskModalTest {
 
     @MockitoBean
     private GoalLinkService goalLinkService;
+
+    @MockitoBean
+    private ScheduleAppliedRepository scheduleAppliedRepository;
+
+    @MockitoBean
+    private NotificationSseRegistry sseRegistry;
+
+    @MockitoBean
+    private DayOptimisationRepository dayOptimisationRepository;
+
+    @MockitoBean
+    private CalendarDayModelBuilder calendarDayModelBuilder;
 
     @Test
     void dayViewRendersAddTaskButtonAndModal() throws Exception {
@@ -127,5 +144,10 @@ class CalendarDayAddTaskModalTest {
         public PlatformSubscriptionService platformSubscriptionService() {
             return mock(PlatformSubscriptionService.class);
         }
-    }
+    
+        @Bean
+        public DevModeProperties devModeProperties() {
+            return new DevModeProperties();
+        }
+}
 }

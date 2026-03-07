@@ -62,6 +62,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationSseRegistry;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DayOptimisationRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
 
 /**
  * Tests to verify that the calendar month and week views correctly display tasks and schedules.
@@ -128,6 +131,12 @@ class CalendarMonthWeekViewDataDisplayTest {
 
     @Autowired
     private CalendarDayModelBuilder calendarDayModelBuilder;
+
+    @MockitoBean
+    private NotificationSseRegistry sseRegistry;
+
+    @MockitoBean
+    private DayOptimisationRepository dayOptimisationRepository;
 
     /**
      * Test that the month view correctly displays tasks and schedules for February 2026.
@@ -1009,5 +1018,10 @@ class CalendarMonthWeekViewDataDisplayTest {
         CalendarDayModelBuilder calendarDayModelBuilder() {
             return new CalendarDayModelBuilder();
         }
-    }
+    
+        @Bean
+        public DevModeProperties devModeProperties() {
+            return new DevModeProperties();
+        }
+}
 }
