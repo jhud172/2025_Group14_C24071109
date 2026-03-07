@@ -9,5 +9,8 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 
+# Render deployments should use production profile by default.
+ENV SPRING_PROFILES_ACTIVE=render
+
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
