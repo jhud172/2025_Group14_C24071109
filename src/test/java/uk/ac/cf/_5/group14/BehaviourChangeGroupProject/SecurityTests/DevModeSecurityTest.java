@@ -43,13 +43,18 @@ class DevModeSecurityTest {
      */
     @TestConfiguration
     static class DevModeEnabledConfig {
-        @Bean
+        @Bean("devModeProperties")
         @Primary
         public DevModeProperties devModePropertiesEnabled() {
             return new DevModeProperties() {
                 @Override
                 public boolean isDevMode() {
                     return true;
+                }
+
+                @Override
+                public void loadEnvFile() {
+                    // No-op: prevent .env loading in tests to avoid polluting system properties
                 }
             };
         }
