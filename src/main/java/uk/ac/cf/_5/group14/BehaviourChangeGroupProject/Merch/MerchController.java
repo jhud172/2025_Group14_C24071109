@@ -37,7 +37,10 @@ public class MerchController {
         return mav;
     }
 
-    /** Demo products displayed when no real products have been added yet. */
+    /** Demo products displayed when no real products have been added yet.
+     *  Image URLs point to the Unsplash CDN for demonstration purposes only.
+     *  Admins can replace products (and their images) via the store admin panel.
+     */
     private List<MerchProduct> buildDemoProducts() {
         return List.of(
             demo(1L, "Performance Training Tee", "Moisture-wicking, anti-odour fabric engineered for high-intensity workouts. Features reflective logo detail and flatlock seams.", new BigDecimal("29.99"), "Apparel", "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80", 50, true),
