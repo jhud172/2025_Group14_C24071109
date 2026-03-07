@@ -6,19 +6,36 @@
     </th:block>
 
     <div th:fragment="content">
-        <!-- Development Mode Notification -->
-        <div th:if="${isDevMode}" style="background: linear-gradient(90deg,#1a1a2e,#0f3460); border-bottom: 1px solid rgba(251,191,36,.2); padding: 10px 0;">
-            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.35);color:#fbbf24;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">
-                        <span style="width:6px;height:6px;border-radius:50%;background:#fbbf24;display:inline-block;"></span>
-                        Dev Mode
-                    </span>
-                    <span style="color:#d1d5db;font-size:13px;">Application is running in development mode.</span>
-                    <a href="/dev-mode" style="margin-left:auto;color:#fbbf24;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">Open Dev Hub →</a>
+        <!-- Development Mode — Immersive Environment Banner -->
+        <th:block th:if="${isDevMode}">
+            <div class="dev-mode-page-glow"></div>
+            <div class="dev-mode-page-glow right"></div>
+            <a href="/dev-mode" class="dev-corner-badge" title="Open Dev Hub">
+                <span class="dev-dot"></span>
+                <span>DEV</span>
+                <svg style="width:12px;height:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+            <div class="dev-mode-env">
+                <div class="dev-mode-scanline"></div>
+                <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-2.5 flex flex-wrap items-center gap-x-6 gap-y-2">
+                    <div class="flex items-center gap-3">
+                        <span class="dev-badge"><span class="dev-dot"></span>DEV ENV</span>
+                        <span style="color:#6b7280;font-size:11px;font-family:'Courier New',monospace;">localhost</span>
+                        <span style="color:#374151;font-size:11px;">·</span>
+                        <span style="color:#6b7280;font-size:11px;font-family:'Courier New',monospace;">Spring Boot</span>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-4" style="font-family:'Courier New',monospace;font-size:11px;">
+                        <span style="color:#10b981;">▶ server running</span>
+                        <span style="color:#374151;">·</span>
+                        <span style="color:#6b7280;">hot-reload <span style="color:#fbbf24;">active</span></span>
+                    </div>
+                    <a href="/dev-mode" style="margin-left:auto;font-family:'Courier New',monospace;font-size:12px;color:#10b981;font-weight:700;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">
+                        $ open dev-hub
+                        <svg style="width:12px;height:12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </a>
                 </div>
             </div>
-        </div>
+        </th:block>
 
         <div th:replace="~{dashboard/client-dashboard :: contentMain}"></div>
         <div th:replace="~{home/public :: content}"></div>
