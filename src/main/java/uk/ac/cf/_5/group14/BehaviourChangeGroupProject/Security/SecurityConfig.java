@@ -60,19 +60,19 @@ public class SecurityConfig {
     /*
      * DEVELOPMENT MODE:
      * When DEV_MODE environment variable is set to "true":
-     * - GET /login is redirected to /login-demo by HomeController
-     * - Home page displays development mode indicator
-     * - Login functionality is disabled (no authentication required)
-     * 
+     * - GET /login renders the dev-mode landing page (login-demo.html)
+     * - Home page displays a development mode indicator badge
+     * - Public pages are freely accessible without login
+     * - Auth pages (dashboard, calendar, workouts, goals, profile) still require login
+     *   but are fully functional once the user signs in via /login?devLogin=1
+     *
      * To enable dev mode:
      * 1. Set environment variable: DEV_MODE=true
      * 2. Restart the application
-     * 3. All login endpoints will show demo page instead of actual login form
-     * 
+     *
      * To disable dev mode:
      * 1. Set environment variable: DEV_MODE=false (or unset)
      * 2. Restart the application
-     * 3. Normal Spring Security login flow will be activated
      */
 
     @Bean
@@ -86,20 +86,29 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(request -> {
                         if (devModeProperties.isDevMode()) {
-                            // DEV MODE: Unauthenticated ("dev mode") users can browse most of the
-                            // site without logging in. The three sections below are explicitly
-                            // excluded from this open access and still enforce the same
-                            // authentication/role rules that apply in production.
-
-                            // Leaderboard (/levels/**): keep protected — not open in dev mode
-                            request.requestMatchers("/levels/**").authenticated()
-                            // Trainers area: trainer-facing pages keep TRAINER role requirement;
-                            // client-facing trainer directory keeps CLIENT/USER role requirement
+                            // DEV MODE: Public pages are freely accessible without login.
+                            // Authenticated pages (dashboard, calendar, workouts, goals, profile)
+                            // require login but are fully functional once signed in.
+                            // Restricted sections keep the same auth/role rules as production.
+                            request
+                            // Static assets and public pages: always open
+                            .requestMatchers(ENDPOINTS_WHITELIST).permitAll()
+                            // Leaderboard: keep protected — not open in dev mode
+                            .requestMatchers("/levels/**").authenticated()
+                            // Trainers area: keep role requirements
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
+                            .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
                             .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
-                            // Training Vault (/vault/**): keep protected — not open in dev mode
+                            // Training Vault: keep protected
                             .requestMatchers("/vault/**").authenticated()
-                            // All other routes: open to unauthenticated dev mode users
+                            // Core authenticated pages: require login in dev mode
+                            .requestMatchers("/dashboard", "/client/dashboard").authenticated()
+                            .requestMatchers("/calendar/**").authenticated()
+                            .requestMatchers("/workouts/**").authenticated()
+                            .requestMatchers("/goals/**").authenticated()
+                            .requestMatchers("/profile/**").authenticated()
+                            .requestMatchers("/merch/**").authenticated()
+                            // All other routes: open for dev browsing
                             .anyRequest().permitAll();
                         } else {
                             // Normal mode: keep existing security configuration unchanged.

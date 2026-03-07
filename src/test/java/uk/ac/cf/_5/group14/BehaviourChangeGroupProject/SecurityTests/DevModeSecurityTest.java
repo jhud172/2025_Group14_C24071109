@@ -21,7 +21,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 /**
  * Verifies dev-mode security rules in SecurityConfig:
- *   - Most pages are open to unauthenticated users in dev mode.
+ *   - Public pages remain open to unauthenticated users in dev mode.
+ *   - Core authenticated pages (dashboard, calendar, workouts, goals, profile)
+ *     require login in dev mode — they are NOT open to unauthenticated users.
  *   - Leaderboard (/levels/**), Trainers area (/trainer/**, /trainers/**), and
  *     Training Vault (/vault/**) remain protected even when dev mode is active.
  *   - Normal mode (dev mode off) keeps all existing access controls unchanged.
@@ -76,17 +78,62 @@ class DevModeSecurityTest {
                 .isTrue();
     }
 
-    // --- Dev mode: normally-protected pages should be open ---
+    // --- Dev mode: public pages remain open to unauthenticated users ---
 
     @Test
-    void devMode_unauthenticatedCanAccessDashboard() throws Exception {
-        // /dashboard normally requires authentication; in dev mode security must not redirect to login.
+    void devMode_unauthenticatedCanAccessHome() throws Exception {
+        int status = mockMvc.perform(get("/")).andReturn().getResponse().getStatus();
+        assertThat(status).as("Home page should be accessible in dev mode without auth")
+                .isBetween(200, 399);
+    }
+
+    @Test
+    void devMode_unauthenticatedCanAccessDevHub() throws Exception {
+        int status = mockMvc.perform(get("/dev-mode")).andReturn().getResponse().getStatus();
+        assertThat(status).as("Dev hub should be accessible in dev mode without auth")
+                .isBetween(200, 399);
+    }
+
+    // --- Dev mode: core auth pages require login ---
+
+    @Test
+    void devMode_unauthenticatedCannotAccessDashboard() throws Exception {
+        // In dev mode, /dashboard still requires authentication.
         String redirectUrl = mockMvc.perform(get("/dashboard"))
                 .andReturn().getResponse().getHeader("Location");
-        // Either no redirect at all (2xx/5xx from controller), or redirect somewhere other than /login
+        // Must redirect to login (not open to unauthenticated users in dev mode)
         if (redirectUrl != null) {
-            assertThat(redirectUrl).as("Dev mode should not redirect /dashboard to login")
-                    .doesNotContain("/login");
+            assertThat(redirectUrl).as("Dev mode must redirect /dashboard to login for unauthenticated users")
+                    .contains("/login");
+        } else {
+            int status = mockMvc.perform(get("/dashboard")).andReturn().getResponse().getStatus();
+            assertBlockedStatus(status, "/dashboard");
+        }
+    }
+
+    @Test
+    void devMode_unauthenticatedCannotAccessCalendar() throws Exception {
+        String redirectUrl = mockMvc.perform(get("/calendar"))
+                .andReturn().getResponse().getHeader("Location");
+        if (redirectUrl != null) {
+            assertThat(redirectUrl).as("Dev mode must redirect /calendar to login for unauthenticated users")
+                    .contains("/login");
+        } else {
+            int status = mockMvc.perform(get("/calendar")).andReturn().getResponse().getStatus();
+            assertBlockedStatus(status, "/calendar");
+        }
+    }
+
+    @Test
+    void devMode_unauthenticatedCannotAccessGoals() throws Exception {
+        String redirectUrl = mockMvc.perform(get("/goals"))
+                .andReturn().getResponse().getHeader("Location");
+        if (redirectUrl != null) {
+            assertThat(redirectUrl).as("Dev mode must redirect /goals to login for unauthenticated users")
+                    .contains("/login");
+        } else {
+            int status = mockMvc.perform(get("/goals")).andReturn().getResponse().getStatus();
+            assertBlockedStatus(status, "/goals");
         }
     }
 
