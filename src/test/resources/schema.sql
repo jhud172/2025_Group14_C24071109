@@ -70,6 +70,7 @@ DROP TABLE IF EXISTS day_health CASCADE;
 DROP TABLE IF EXISTS daily_nutrition_logs CASCADE;
 DROP TABLE IF EXISTS daily_focus CASCADE;
 DROP TABLE IF EXISTS adaptive_feedback CASCADE;
+DROP TABLE IF EXISTS blood_pressure_readings CASCADE;
 DROP TABLE IF EXISTS daily_completion CASCADE;
 DROP TABLE IF EXISTS coach_action_logs CASCADE;
 DROP TABLE IF EXISTS coach_messages CASCADE;
@@ -119,6 +120,7 @@ CREATE TABLE IF NOT EXISTS users
     gym_id              BIGINT       NULL,
     trainer_profile_id  BIGINT       NULL,
     trainer_verified    BOOLEAN      NOT NULL DEFAULT FALSE,
+    has_seen_tutorial   BOOLEAN      NOT NULL DEFAULT FALSE,
 
     -- Needed because users_roles.username references users.username
     CONSTRAINT uq_users_username UNIQUE (username),
@@ -332,6 +334,14 @@ CREATE TABLE IF NOT EXISTS user_settings
     preferred_equipment_machine BOOLEAN NOT NULL DEFAULT FALSE,
     preferred_equipment_bands BOOLEAN NOT NULL DEFAULT FALSE,
     preferred_equipment_kettlebell BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_cable BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_pullup_bar BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_jump_rope BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_medicine_ball BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_foam_roller BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_trx BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_other BOOLEAN NOT NULL DEFAULT FALSE,
+    preferred_equipment_other_specify VARCHAR(200) NULL,
     macro_target_calories INT NULL,
     macro_target_protein INT NULL,
     macro_target_carbs INT NULL,
@@ -1566,6 +1576,7 @@ CREATE TABLE IF NOT EXISTS calendar_tasks
     requires_log    BOOLEAN      NOT NULL DEFAULT FALSE,
     trainer_template_id BIGINT   NULL,
     trainer_template_entry_id BIGINT NULL,
+    activity_type VARCHAR(20) NULL,
 
     CONSTRAINT fk_calendar_tasks_user
         FOREIGN KEY (user_id) REFERENCES users (id)
@@ -1615,6 +1626,7 @@ CREATE TABLE IF NOT EXISTS task_templates
     is_exercise  BOOLEAN      NOT NULL DEFAULT FALSE,
     is_favourite BOOLEAN      NOT NULL DEFAULT FALSE,
     last_used_at TIMESTAMP    NULL,
+    activity_type VARCHAR(20) NULL,
     created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_task_templates_user
@@ -1738,6 +1750,27 @@ CREATE INDEX IF NOT EXISTS idx_daily_nutrition_user
 
 CREATE INDEX IF NOT EXISTS idx_daily_nutrition_user_date
     ON daily_nutrition_logs (user_id, log_date);
+
+-- =========================
+-- BLOOD PRESSURE READINGS
+-- =========================
+CREATE TABLE IF NOT EXISTS blood_pressure_readings
+(
+    id           BIGSERIAL PRIMARY KEY,
+    user_id      BIGINT       NOT NULL,
+    reading_date DATE         NOT NULL,
+    reading_time TIME         NULL,
+    systolic     INT          NOT NULL,
+    diastolic    INT          NOT NULL,
+    pulse        INT          NULL,
+    arm          VARCHAR(10)  NULL,
+    position     VARCHAR(10)  NULL,
+    notes        VARCHAR(500) NULL,
+    source       VARCHAR(10)  NOT NULL DEFAULT 'MANUAL',
+    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_bp_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
 
 -- =========================
 -- WORKOUTS
