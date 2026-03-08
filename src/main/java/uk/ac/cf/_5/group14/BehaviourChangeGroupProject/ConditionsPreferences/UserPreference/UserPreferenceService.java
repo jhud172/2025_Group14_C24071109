@@ -22,4 +22,6 @@ public interface UserPreferenceService {
     Set<Long> getLockedConditions(User user );
 
     Map<String, List<Preference>> getUserPreferencesByCategory(User user);
+
+    boolean hasCompletedPreferenceSetup(User user);
 }

@@ -54,8 +54,24 @@ public class UserPreferenceController {
 
     @GetMapping("/select-preferences")
     public ModelAndView getPreferenceForm() {
-        ModelAndView modelAndView = new ModelAndView("conditions-preference/preference-form");
         User user = authHelper.getAuthenticatedUser();
+        if (userPreferenceService.hasCompletedPreferenceSetup(user)) {
+            return new ModelAndView("redirect:/preferences/edit");
+        }
+        return buildPreferenceFormModelAndView(user, 1);
+    }
+
+    @GetMapping("/preferences/edit")
+    public ModelAndView editPreferencesForm() {
+        User user = authHelper.getAuthenticatedUser();
+        if (!userPreferenceService.hasCompletedPreferenceSetup(user)) {
+            return new ModelAndView("redirect:/select-preferences");
+        }
+        return buildPreferenceFormModelAndView(user, 2);
+    }
+
+    private ModelAndView buildPreferenceFormModelAndView(User user, int initialStep) {
+        ModelAndView modelAndView = new ModelAndView("conditions-preference/preference-form");
 
         List<PhysicalCondition> allPhysicalConditions = physicalConditionService.getAllPhysicalConditions();
         List<PhysicalCondition> userPhysicalConditions = userPreferenceService.getUsersPhysicalConditions(user);
@@ -76,6 +92,9 @@ public class UserPreferenceController {
             userPreferenceForm.setPreferredEquipmentMachine(settings.isPreferredEquipmentMachine());
             userPreferenceForm.setPreferredEquipmentBands(settings.isPreferredEquipmentBands());
             userPreferenceForm.setPreferredEquipmentKettlebell(settings.isPreferredEquipmentKettlebell());
+            userPreferenceForm.setPreferredEquipmentCable(settings.isPreferredEquipmentCable());
+            userPreferenceForm.setPreferredEquipmentPullupBar(settings.isPreferredEquipmentPullupBar());
+            userPreferenceForm.setPreferredEquipmentJumpRope(settings.isPreferredEquipmentJumpRope());
             userPreferenceForm.setMacroTargetCalories(settings.getMacroTargetCalories());
             userPreferenceForm.setMacroTargetProtein(settings.getMacroTargetProtein());
             userPreferenceForm.setMacroTargetCarbs(settings.getMacroTargetCarbs());
@@ -89,6 +108,7 @@ public class UserPreferenceController {
         modelAndView.addObject("allPhysicalConditions", allPhysicalConditions);
         modelAndView.addObject("userPreferenceForm", userPreferenceForm);
         modelAndView.addObject("physicalConditions", userPhysicalConditions);
+        modelAndView.addObject("initialStep", initialStep);
 
         return modelAndView;
     }
@@ -137,6 +157,9 @@ public class UserPreferenceController {
                     userPreferenceForm.isPreferredEquipmentMachine(),
                     userPreferenceForm.isPreferredEquipmentBands(),
                     userPreferenceForm.isPreferredEquipmentKettlebell(),
+                    userPreferenceForm.isPreferredEquipmentCable(),
+                    userPreferenceForm.isPreferredEquipmentPullupBar(),
+                    userPreferenceForm.isPreferredEquipmentJumpRope(),
                     userPreferenceForm.getMacroTargetCalories(),
                     userPreferenceForm.getMacroTargetProtein(),
                     userPreferenceForm.getMacroTargetCarbs(),

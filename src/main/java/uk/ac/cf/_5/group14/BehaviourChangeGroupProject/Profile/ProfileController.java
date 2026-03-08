@@ -45,6 +45,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
+import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.util.Collections;
 
 @Controller
 public class ProfileController {
@@ -137,11 +140,53 @@ public class ProfileController {
 
         // Payment cards & orders
         List<SavedPaymentMethod> savedCards = cardService.getCardsForUser(user.getId());
-        List<MerchOrder> recentOrders = orderService.getOrdersForUser(user.getId());
+        List<MerchOrder> allOrders = orderService.getOrdersForUser(user.getId());
         modelAndView.addObject("savedCards", savedCards);
-        modelAndView.addObject("recentOrders", recentOrders);
+        modelAndView.addObject("allOrders", allOrders);
 
         return modelAndView;
+    }
+
+    /**
+     * Groups a list of orders by their primary product name.
+     * This is called from Thymeleaf templates to organize purchases in the purchases drawer.
+     * 
+     * @param orders List of MerchOrder to group
+     * @return List of OrderGroup objects, each representing a product with all matching orders
+     */
+    public List<OrderGroup> groupOrdersByProduct(List<MerchOrder> orders) {
+        if (orders == null || orders.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Group orders by the first item's product name (assuming single-item orders)
+        Map<String, List<MerchOrder>> grouped = orders.stream()
+            .collect(Collectors.groupingBy(
+                order -> {
+                    if (order.getItems() != null && !order.getItems().isEmpty()) {
+                        return order.getItems().get(0).getProductNameSnapshot();
+                    }
+                    return "Unknown Product";
+                },
+                LinkedHashMap::new,
+                Collectors.toList()
+            ));
+
+        // Convert to OrderGroup objects
+        return grouped.entrySet().stream()
+            .map(entry -> {
+                String productName = entry.getKey();
+                List<MerchOrder> productOrders = entry.getValue();
+                int count = productOrders.size();
+                
+                // Sum up total amount across all orders for this product
+                BigDecimal totalAmount = productOrders.stream()
+                    .map(MerchOrder::getTotalAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+                
+                return new OrderGroup(productName, count, totalAmount, productOrders);
+            })
+            .collect(Collectors.toList());
     }
 
     private User resolveDevPreviewUser() {

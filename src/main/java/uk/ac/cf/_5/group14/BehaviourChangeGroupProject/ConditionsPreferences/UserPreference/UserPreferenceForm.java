@@ -44,6 +44,9 @@ public class UserPreferenceForm {
     boolean preferredEquipmentMachine = false;
     boolean preferredEquipmentBands = false;
     boolean preferredEquipmentKettlebell = false;
+    boolean preferredEquipmentCable = false;
+    boolean preferredEquipmentPullupBar = false;
+    boolean preferredEquipmentJumpRope = false;
 
     @Min(value = 0, message = "Calories must be 0 or more.")
     @Max(value = 20000, message = "Calories must be 20000 or less.")

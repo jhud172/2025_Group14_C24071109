@@ -1,16 +1,19 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Tag;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Tag;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+
 public interface UserPreferenceRepository extends JpaRepository<UserPreference, Long> {
     Optional<UserPreference> getByUser(User user);
+
+        boolean existsByUser(User user);
 
     @Query("select preferenceTags from UserPreference up " +
             "join up.preferences p " +

@@ -229,4 +229,22 @@ public class UserPreferenceServiceUnitTests {
         assertEquals(1, savedUserPreference.getPhysicalConditions().size());
         assertTrue(savedUserPreference.getPhysicalConditions().contains(expectedPhysicalCondition));
     }
+
+    @Test
+    public void shouldReportCompletedPreferenceSetupWhenRecordExists() {
+        when(userPreferenceRepository.existsByUser(testUser)).thenReturn(true);
+
+        boolean result = userPreferenceService.hasCompletedPreferenceSetup(testUser);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void shouldReportIncompletePreferenceSetupWhenNoRecordExists() {
+        when(userPreferenceRepository.existsByUser(testUser)).thenReturn(false);
+
+        boolean result = userPreferenceService.hasCompletedPreferenceSetup(testUser);
+
+        assertFalse(result);
+    }
 }

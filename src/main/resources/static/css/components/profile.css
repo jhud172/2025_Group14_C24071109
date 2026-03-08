@@ -3,42 +3,45 @@
 
     /* Page Layout: sidebar + main content */
     .profile-page-layout {
-        @apply mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8;
+        @apply mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
         display: grid;
-        gap: 1.5rem;
+        gap: 2.5rem;
         grid-template-columns: 1fr;
         align-items: start;
     }
 
     @media (min-width: 1024px) {
         .profile-page-layout {
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 320px 1fr;
+            gap: 3rem;
         }
     }
 
-    /* Sidebar profile card */
+    /* Sidebar profile card - Enhanced and wider */
     .profile-sidebar-card {
-        @apply rounded-3xl border border-slate-200/70 p-6 shadow-sm;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        @apply rounded-2xl border border-slate-200/60 p-6;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 244, 0.95) 100%);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
         display: flex;
         flex-direction: column;
-        gap: 1.25rem;
+        gap: 1.75rem;
         position: sticky;
         top: 5rem;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
     }
 
     html.dark .profile-sidebar-card {
         @apply border-slate-800;
-        background: linear-gradient(135deg, rgba(17, 24, 39, 0.7) 0%, rgba(30, 36, 53, 0.5) 100%);
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.86) 0%, rgba(15, 23, 42, 0.72) 100%);
+        box-shadow: 0 10px 24px rgba(2, 6, 23, 0.45);
     }
 
-    /* Main content area */
+    /* Main content area - Increased spacing */
     .profile-main-content {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 3rem;
         min-width: 0;
     }
 
@@ -60,8 +63,8 @@
         background: rgba(0, 0, 0, 0.45);
         opacity: 0;
         transition: opacity 0.3s ease;
-        backdrop-filter: blur(2px);
         -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
     }
 
     .profile-settings-drawer.is-open .profile-settings-overlay {
@@ -102,16 +105,18 @@
     }
 
     .profile-settings-panel-body {
-        @apply flex-1 overflow-y-auto px-6 py-5 space-y-6;
+        @apply flex-1 overflow-y-auto px-6 py-6 space-y-8;
     }
 
     .profile-settings-panel-section {
-        @apply rounded-2xl border border-slate-200/70 p-5;
-        background: rgba(248, 250, 252, 0.6);
+        @apply rounded-2xl border border-slate-200/60 p-6;
+        background: rgba(248, 250, 252, 0.72);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
     }
 
     html.dark .profile-settings-panel-section {
-        @apply border-slate-800 bg-slate-900/30;
+        @apply border-slate-800 bg-slate-900/40;
+        box-shadow: 0 4px 14px rgba(2, 6, 23, 0.25);
     }
 
     .profile-settings-panel-section-title {
@@ -122,6 +127,46 @@
         @apply mt-1 text-xs text-slate-500 dark:text-slate-400;
     }
 
+    .profile-settings-group {
+        @apply space-y-4;
+    }
+
+    .profile-settings-category-title {
+        @apply mb-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400;
+    }
+
+    .profile-settings-category-title--danger {
+        @apply text-rose-600 dark:text-rose-400;
+    }
+
+    .profile-activity-card {
+        @apply rounded-2xl border border-slate-200/70 bg-white/80 p-4 dark:border-slate-800 dark:bg-slate-900/30;
+    }
+
+    .profile-activity-item {
+        @apply flex items-start gap-3 rounded-xl border border-slate-200/70 bg-slate-50/70 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900/40;
+    }
+
+    .profile-activity-icon {
+        @apply mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full;
+    }
+
+    .profile-activity-icon--order {
+        @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300;
+    }
+
+    .profile-activity-icon--export {
+        @apply bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300;
+    }
+
+    .profile-activity-icon--notice {
+        @apply bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300;
+    }
+
+    .profile-activity-icon--subscription {
+        @apply bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300;
+    }
+
     /* Profile Container (legacy, kept for compatibility) */
     .profile-container {
         @apply mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-8;
@@ -129,10 +174,11 @@
     
     /* Profile Header Card - Premium glass style */
     .profile-header {
-        @apply rounded-3xl border border-slate-200/70 p-6 shadow-sm;
+        @apply rounded-2xl border border-slate-200/60 p-6;
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.9) 100%);
-        backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
     }
     
     html.dark .profile-header {
@@ -164,10 +210,11 @@
     
     /* Section Cards - Glass morphism */
     .profile-section {
-        @apply rounded-3xl border border-slate-200/70 p-6 shadow-sm;
+        @apply rounded-2xl border border-slate-200/60 p-6;
         background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
     }
     
     html.dark .profile-section {
@@ -177,13 +224,14 @@
     
     /* Settings Cards with hover effects */
     .profile-settings-card {
-        @apply rounded-2xl border border-slate-200/70 p-5 transition-all duration-300;
-        background: rgba(248, 250, 252, 0.6);
+        @apply rounded-2xl border border-slate-200/60 p-6 transition-all duration-200;
+        background: rgba(248, 250, 252, 0.72);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
     }
     
     .profile-settings-card:hover {
-        @apply border-emerald-200/50;
-        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+        @apply border-slate-300/70;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
     }
     
     html.dark .profile-settings-card {
@@ -191,69 +239,93 @@
     }
     
     html.dark .profile-settings-card:hover {
-        @apply border-emerald-500/20;
-        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.05);
+        @apply border-slate-700;
+        box-shadow: 0 6px 16px rgba(2, 6, 23, 0.35);
+    }
+
+    .profile-condition-card {
+        @apply flex h-full flex-col p-5;
+    }
+
+    .condition-input {
+        @apply mt-1 w-full rounded-lg border border-slate-200/80 bg-white px-3 py-2 text-sm text-slate-800;
+        box-shadow: none;
+    }
+
+    .condition-input:focus {
+        @apply border-emerald-400 ring-1 ring-emerald-200/60 outline-none;
+    }
+
+    html.dark .condition-input {
+        @apply border-slate-700 bg-slate-950 text-slate-100;
+    }
+
+    html.dark .condition-input:focus {
+        @apply border-emerald-500/60 ring-emerald-500/30;
     }
     
     /* Primary Buttons - Emerald gradient */
     .profile-btn-primary {
-        @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-300;
+        @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200;
         background: linear-gradient(135deg, rgb(16, 185, 129) 0%, rgb(5, 150, 105) 100%);
+        border: 1px solid rgba(5, 150, 105, 0.28);
     }
     
     .profile-btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 6px 14px rgba(5, 150, 105, 0.24);
+        filter: brightness(1.02);
     }
     
     .profile-btn-primary:active {
-        transform: translateY(0);
+        filter: brightness(0.98);
     }
     
     /* Secondary Buttons - Outlined */
     .profile-btn-secondary {
-        @apply inline-flex items-center justify-center rounded-xl border border-slate-300/80 bg-white px-4 py-2 text-sm font-medium text-slate-900 shadow-sm transition-all duration-300;
+        @apply inline-flex items-center justify-center rounded-xl border border-slate-300/70 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-all duration-200;
     }
     
     .profile-btn-secondary:hover {
-        @apply border-emerald-300 bg-emerald-50 text-emerald-700;
+        @apply border-slate-400/70 bg-slate-50 text-slate-900;
     }
     
     html.dark .profile-btn-secondary {
-        @apply border-slate-800 bg-slate-950/40 text-slate-100;
+        @apply border-slate-700 bg-slate-900/70 text-slate-100;
     }
     
     html.dark .profile-btn-secondary:hover {
-        @apply border-emerald-500/30 bg-emerald-950/30 text-emerald-400;
+        @apply border-slate-600 bg-slate-800/80 text-slate-50;
     }
     
     /* Small Buttons */
     .profile-btn-small {
-        @apply inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium shadow-sm transition-all duration-300;
+        @apply inline-flex items-center justify-center rounded-xl px-3.5 py-2.5 text-sm font-semibold shadow-sm transition-all duration-200;
         background: linear-gradient(135deg, rgb(16, 185, 129) 0%, rgb(5, 150, 105) 100%);
         color: white;
+        border: 1px solid rgba(5, 150, 105, 0.28);
     }
     
     .profile-btn-small:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 6px 14px rgba(5, 150, 105, 0.24);
+        filter: brightness(1.02);
     }
     
     /* Danger Button - Rose */
     .profile-btn-danger {
-        @apply inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-300;
+        @apply inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200;
+        border: 1px solid rgba(190, 24, 93, 0.35);
     }
     
     .profile-btn-danger:hover {
         @apply bg-rose-700;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+        box-shadow: 0 6px 14px rgba(190, 24, 93, 0.28);
     }
     
     /* Danger Zone Card */
     .profile-danger-zone {
-        @apply rounded-2xl border border-rose-200/70 p-5 transition-all duration-300;
+        @apply rounded-2xl border border-rose-200/70 p-6 transition-all duration-200;
         background: rgba(255, 241, 242, 0.5);
+        box-shadow: 0 6px 16px rgba(190, 24, 93, 0.08);
     }
     
     html.dark .profile-danger-zone {
@@ -263,12 +335,16 @@
     
     /* Avatar with hover overlay */
     .profile-avatar {
-        @apply relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm cursor-pointer transition-all duration-300;
+        @apply relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm cursor-pointer transition-all duration-200;
+    }
+
+    .profile-avatar--large {
+        @apply h-36 w-36 rounded-3xl;
     }
     
     .profile-avatar:hover {
-        @apply border-emerald-300;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        @apply border-slate-300;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
     }
     
     html.dark .profile-avatar {
@@ -276,7 +352,7 @@
     }
     
     html.dark .profile-avatar:hover {
-        @apply border-emerald-500/50;
+        @apply border-slate-600;
     }
     
     .profile-avatar-overlay {
@@ -286,10 +362,70 @@
     .profile-avatar:hover .profile-avatar-overlay {
         @apply opacity-100;
     }
+
+    .profile-inline-field {
+        position: relative;
+    }
+
+    .profile-inline-view {
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .profile-inline-edit {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        visibility: hidden;
+        transform: translateY(-4px);
+        transition: max-height 0.25s ease, opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    #profile-shell[data-edit-mode='true'] .profile-inline-view {
+        opacity: 0.35;
+    }
+
+    #profile-shell[data-edit-mode='true'] .profile-inline-edit {
+        max-height: 220px;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        margin-top: 0.5rem;
+    }
+
+    .profile-edit-actions {
+        display: none;
+    }
+
+    #profile-shell[data-edit-mode='true'] .profile-edit-actions {
+        display: flex;
+    }
+
+    #profile-image-dropzone.is-drag-over {
+        @apply border-emerald-400 bg-emerald-50/70 dark:border-emerald-500/60 dark:bg-emerald-900/20;
+    }
+
+    .profile-stats-strip {
+        @apply flex items-stretch rounded-2xl bg-slate-50/90 dark:bg-slate-900/45;
+    }
+
+    .profile-stat-segment {
+        @apply flex-1 px-2 py-3 text-center;
+    }
+
+    .profile-stat-segment + .profile-stat-segment {
+        @apply border-l border-slate-200/70 dark:border-slate-800;
+    }
+
+    .profile-sidebar-actions .profile-btn-primary,
+    .profile-sidebar-actions .profile-btn-secondary,
+    .profile-sidebar-actions a,
+    .profile-sidebar-actions button {
+        width: 100%;
+    }
     
     /* Section Headers */
     .profile-section-header {
-        @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6;
+        @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-7;
     }
     
     .profile-section-title {
@@ -322,7 +458,7 @@
     
     /* Alert Messages with emerald theme */
     .profile-alert-success {
-        @apply rounded-xl border border-emerald-200 px-4 py-3 text-sm text-emerald-800;
+        @apply rounded-xl border border-emerald-200/70 px-4 py-3 text-sm text-emerald-800;
         background: rgba(209, 250, 229, 0.5);
     }
     
@@ -332,7 +468,7 @@
     }
     
     .profile-alert-error {
-        @apply rounded-xl border border-rose-200 px-4 py-3 text-sm text-rose-800;
+        @apply rounded-xl border border-rose-200/70 px-4 py-3 text-sm text-rose-800;
         background: rgba(254, 226, 226, 0.5);
     }
     
@@ -349,7 +485,7 @@
     
     /* Form Inputs with emerald focus */
     .profile-input {
-        @apply mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition-all duration-200;
+        @apply mt-2 w-full rounded-xl border border-slate-300/80 bg-white px-3 py-2.5 text-sm shadow-sm transition-all duration-200;
         @apply focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20;
     }
     

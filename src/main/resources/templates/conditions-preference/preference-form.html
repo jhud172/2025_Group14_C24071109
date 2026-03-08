@@ -872,11 +872,11 @@
 
     <div th:fragment="pageScripts">
         <div th:replace="~{fragments/slimselectJs :: slimselectJs}"></div>
-        <script>
+        <script th:inline="javascript">
             /* ================================================================
                PREFERENCES WIZARD
                ================================================================ */
-            var CURRENT_STEP = 1;
+            var CURRENT_STEP = /*[[${initialStep != null ? initialStep : 1}]]*/ 1;
             var TOTAL_STEPS = 4;
 
             /* ── Step navigation ────────────────────────────────────────────── */
@@ -954,6 +954,9 @@
             if (step1Next) step1Next.addEventListener('click', function() { showStep(2); });
             var step1Skip = document.getElementById('step1-skip');
             if (step1Skip) step1Skip.addEventListener('click', function() { showStep(2); });
+
+            // Ensure returning users can start directly on the edit step.
+            showStep(CURRENT_STEP);
 
             /* ── Per-step validation ────────────────────────────────────────── */
             function showStepError(stepId, msg) {

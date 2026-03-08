@@ -180,6 +180,9 @@ public class UserSettingsServiceImpl implements UserSettingsService {
                                             boolean preferredEquipmentMachine,
                                             boolean preferredEquipmentBands,
                                             boolean preferredEquipmentKettlebell,
+                                            boolean preferredEquipmentCable,
+                                            boolean preferredEquipmentPullupBar,
+                                            boolean preferredEquipmentJumpRope,
                                             Integer macroTargetCalories,
                                             Integer macroTargetProtein,
                                             Integer macroTargetCarbs,
@@ -202,6 +205,9 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         settings.setPreferredEquipmentMachine(preferredEquipmentMachine);
         settings.setPreferredEquipmentBands(preferredEquipmentBands);
         settings.setPreferredEquipmentKettlebell(preferredEquipmentKettlebell);
+        settings.setPreferredEquipmentCable(preferredEquipmentCable);
+        settings.setPreferredEquipmentPullupBar(preferredEquipmentPullupBar);
+        settings.setPreferredEquipmentJumpRope(preferredEquipmentJumpRope);
         settings.setMacroTargetCalories(normalizeOptional(macroTargetCalories, 0, 20000));
         settings.setMacroTargetProtein(normalizeOptional(macroTargetProtein, 0, 1000));
         settings.setMacroTargetCarbs(normalizeOptional(macroTargetCarbs, 0, 1000));
@@ -227,6 +233,9 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         settings.setPreferredEquipmentMachine(false);
         settings.setPreferredEquipmentBands(false);
         settings.setPreferredEquipmentKettlebell(false);
+        settings.setPreferredEquipmentCable(false);
+        settings.setPreferredEquipmentPullupBar(false);
+        settings.setPreferredEquipmentJumpRope(false);
         settings.setMacroTargetCalories(null);
         settings.setMacroTargetProtein(null);
         settings.setMacroTargetCarbs(null);

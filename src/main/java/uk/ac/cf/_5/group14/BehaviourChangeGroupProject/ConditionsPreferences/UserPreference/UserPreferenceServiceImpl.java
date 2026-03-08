@@ -110,4 +110,8 @@ public class UserPreferenceServiceImpl implements UserPreferenceService {
         userPreferenceRepository.save(userPreference);
     }
 
+    public boolean hasCompletedPreferenceSetup(User user) {
+        return userPreferenceRepository.existsByUser(user);
+    }
+
 }

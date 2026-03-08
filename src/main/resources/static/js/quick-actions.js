@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const context = buildContext();
-        const message = `You are a quick action assistant. Respond ONLY with JSON.\n\nAllowed actions:\n- create_note: {action, title, content}\n- navigate: {action, url}\n- fill_form: {action, selector, value}\n- none: {action, message}\n\nRules:\n- url must be a relative path starting with '/'.\n- selector must target a visible input, textarea, or select on the page.\n- Keep responses concise.\n\nUser prompt: ${prompt}\n\nPage context: title='${context.title}', url='${context.url}', selection='${context.selection}'`;
+        const message = `You are a quick action assistant. Respond ONLY with JSON in the exact format shown below.\n\nAllowed actions:\n\n1. Create a note:\n{"action": "create_note", "title": "Note title", "content": "Note content"}\n\n2. Navigate to a page:\n{"action": "navigate", "url": "/profile"}\n\n3. Fill a form field (input/textarea/select only, NOT buttons):\n{"action": "fill_form", "selector": "#fieldId", "value": "text to insert"}\n\n4. No action (just inform user):\n{"action": "none", "message": "Explanation why no action was taken"}\n\nRules:\n- url must be a relative path starting with '/'.\n- selector must target a visible input, textarea, or select element on the current page.\n- To change theme/preferences, navigate to /profile instead of using fill_form.\n- Keep responses concise.\n\nUser prompt: ${prompt}\n\nPage context: title='${context.title}', url='${context.url}', selection='${context.selection}'`;
 
         try {
             const res = await fetch("/chat/api", {
@@ -429,12 +429,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const reply = data?.reply || "";
             const actionObj = parseActionJson(reply);
             if (!actionObj) {
-                showMessage("AI response was not usable.");
+                console.warn("AI response could not be parsed as JSON:", reply);
+                showMessage("AI response was not usable. Please try rephrasing your request.");
                 return;
             }
             await executeAction(actionObj);
-        } catch {
-            showMessage("AI request failed.");
+        } catch (err) {
+            console.error("AI request failed:", err);
+            showMessage("AI request failed. Please try again.");
         }
     }
 
@@ -476,14 +478,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (action === "fill_form") {
             const selector = actionObj.selector || "";
             const value = actionObj.value || "";
+            if (!selector) {
+                showMessage("No field selector provided.");
+                return;
+            }
             const field = document.querySelector(selector);
-            if (!field || !["INPUT", "TEXTAREA", "SELECT"].includes(field.tagName)) {
-                showMessage("Form field not found.");
+            if (!field) {
+                showMessage(`Field not found: ${selector}`);
+                return;
+            }
+            if (!["INPUT", "TEXTAREA", "SELECT"].includes(field.tagName)) {
+                showMessage(`Field ${selector} is not a form input.`);
                 return;
             }
             field.value = value;
             field.dispatchEvent(new Event("input", { bubbles: true }));
             field.focus();
+            showMessage("Field updated.");
             return;
         }
 
