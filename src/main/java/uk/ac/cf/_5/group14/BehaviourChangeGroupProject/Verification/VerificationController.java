@@ -13,6 +13,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.time.Instant;
 
 @Controller
 public class VerificationController {
@@ -43,6 +44,15 @@ public class VerificationController {
         if (user == null) {
             return "redirect:/login";
         }
+
+        if (user.isEmailVerified()) {
+            redirectAttributes.addFlashAttribute(
+                    "verifySuccess",
+                    messageSource.getMessage("verify.email.already", null, locale)
+            );
+            return "redirect:/profile";
+        }
+
         emailVerificationService.sendVerification(user);
         redirectAttributes.addFlashAttribute(
                 "verifySuccess",
@@ -58,6 +68,11 @@ public class VerificationController {
             String key = mapEmailErrorKey(error.get());
             model.addAttribute("verificationError", messageSource.getMessage(key, null, locale));
         } else {
+            User sessionUser = authHelper.getAuthenticatedUser();
+            if (sessionUser != null) {
+                sessionUser.setEmailVerified(true);
+                sessionUser.setEmailVerifiedAt(Instant.now());
+            }
             model.addAttribute("verificationSuccess", messageSource.getMessage("verify.email.success", null, locale));
         }
         return "verify/email-confirm";
@@ -76,7 +91,8 @@ public class VerificationController {
                                    @RequestParam(name = "email", required = false) String email,
                                    RedirectAttributes redirectAttributes,
                                    Locale locale) {
-        User user = authHelper.getAuthenticatedUser();
+        User sessionUser = authHelper.getAuthenticatedUser();
+        User user = sessionUser;
         if (user == null && email != null && !email.isBlank()) {
             user = userService.findByEmail(email);
         }
@@ -95,10 +111,19 @@ public class VerificationController {
                     messageSource.getMessage(key, null, locale)
             );
         } else {
+            if (sessionUser != null) {
+                sessionUser.setEmailVerified(true);
+                sessionUser.setEmailVerifiedAt(Instant.now());
+            }
             redirectAttributes.addFlashAttribute(
                     "verificationSuccess",
                     messageSource.getMessage("verify.email.success", null, locale)
             );
+
+            // For signed-in users, go back to profile where status badges update immediately.
+            if (sessionUser != null && (email == null || email.isBlank())) {
+                return "redirect:/profile";
+            }
         }
         return redirectBase;
     }
@@ -109,6 +134,15 @@ public class VerificationController {
         if (user == null) {
             return "redirect:/login";
         }
+
+        if (user.isPhoneVerified()) {
+            redirectAttributes.addFlashAttribute(
+                    "verifySuccess",
+                    messageSource.getMessage("verify.phone.already", null, locale)
+            );
+            return "redirect:/profile";
+        }
+
         if (user.getPhoneNumber() == null || user.getPhoneNumber().isBlank()) {
             redirectAttributes.addFlashAttribute(
                     "verifyError",
@@ -147,6 +181,8 @@ public class VerificationController {
             );
             return RETURN_PHONE_CODE.equals(returnTo) ? "redirect:/verify/phone/code" : "redirect:/profile";
         } else {
+            user.setPhoneVerified(true);
+            user.setPhoneVerifiedAt(Instant.now());
             redirectAttributes.addFlashAttribute(
                     "verifySuccess",
                     messageSource.getMessage("verify.phone.success", null, locale)

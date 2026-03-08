@@ -44,6 +44,11 @@ public class PhoneVerificationService {
         if (user == null || user.getPhoneNumber() == null || user.getPhoneNumber().isBlank()) {
             return;
         }
+
+        if (user.isPhoneVerified()) {
+            return;
+        }
+
         String code = String.format("%06d", RANDOM.nextInt(1_000_000));
         Instant expiresAt = Instant.now(clock).plus(10, ChronoUnit.MINUTES);
 
@@ -63,6 +68,11 @@ public class PhoneVerificationService {
         if (user == null) {
             return Optional.of("User not found.");
         }
+
+        if (user.isPhoneVerified()) {
+            return Optional.empty();
+        }
+
         PhoneVerificationCode latest = codeRepository.findTopByUserOrderByCreatedAtDesc(user).orElse(null);
         if (latest == null) {
             return Optional.of("No verification code found. Please request a new code.");

@@ -49,6 +49,11 @@ public class EmailVerificationService {
         if (user == null) {
             return;
         }
+
+        if (user.isEmailVerified()) {
+            return;
+        }
+
         String token = UUID.randomUUID().toString();
         String plainCode = String.format("%06d", RANDOM.nextInt(1_000_000));
         Instant expiresAt = Instant.now(clock).plus(24, ChronoUnit.HOURS);
@@ -99,6 +104,11 @@ public class EmailVerificationService {
         if (user == null) {
             return Optional.of("User not found.");
         }
+
+        if (user.isEmailVerified()) {
+            return Optional.empty();
+        }
+
         EmailVerificationToken latest = tokenRepository.findTopByUserOrderByCreatedAtDesc(user).orElse(null);
         if (latest == null) {
             return Optional.of("No verification code found. Please request a new code.");
