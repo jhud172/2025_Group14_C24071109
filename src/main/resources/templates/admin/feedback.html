@@ -1,0 +1,67 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Admin Feedback Inbox', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex items-center justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100">Support Feedback Inbox</h1>
+                <p class="mt-1 text-slate-600 dark:text-slate-300">Review submissions, mark viewed, update status, and respond by email.</p>
+            </div>
+            <a th:href="@{/admin/dashboard}" class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200">Back to admin panel</a>
+        </div>
+
+        <div th:if="${adminFeedbackSuccess}" class="mb-4 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" th:text="${adminFeedbackSuccess}">Saved.</div>
+        <div th:if="${adminFeedbackError}" class="mb-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800" th:text="${adminFeedbackError}">Error.</div>
+
+        <div class="space-y-4" th:if="${feedbackItems != null and !#lists.isEmpty(feedbackItems)}">
+            <article th:each="item : ${feedbackItems}" class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100" th:text="${item.subject}">Subject</h2>
+                        <p class="mt-1 text-xs text-slate-500" th:text="${item.requestType} + ' • ' + ${#temporals.format(item.submittedAt, 'yyyy-MM-dd HH:mm')}">Meta</p>
+                        <p class="mt-1 text-xs text-slate-500" th:if="${item.submitterEmail != null}" th:text="'From: ' + ${item.submitterEmail}">From</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="rounded-full px-2 py-1 text-xs font-semibold"
+                              th:classappend="${item.viewed} ? ' bg-emerald-100 text-emerald-700' : ' bg-amber-100 text-amber-700'"
+                              th:text="${item.viewed} ? 'Viewed' : 'Not viewed'">Not viewed</span>
+                        <span class="rounded-full px-2 py-1 text-xs font-semibold bg-slate-100 text-slate-700" th:text="${item.status}">NEW</span>
+                    </div>
+                </div>
+
+                <p class="mt-3 whitespace-pre-line text-sm text-slate-700 dark:text-slate-200" th:text="${item.message}">Message body.</p>
+
+                <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3">
+                    <form th:action="@{/admin/feedback/{id}/viewed(id=${item.id})}" method="post" class="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="w-full rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white dark:bg-slate-100 dark:text-slate-900" th:text="${item.viewed} ? 'Mark as not viewed' : 'Mark as viewed'">Toggle viewed</button>
+                    </form>
+
+                    <form th:action="@{/admin/feedback/{id}/status(id=${item.id})}" method="post" class="rounded-xl border border-slate-200 p-3 dark:border-slate-700 space-y-2">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Status</label>
+                        <select name="status" class="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs dark:border-slate-600 dark:bg-slate-900">
+                            <option th:each="status : ${statuses}" th:value="${status.name()}" th:text="${status.name()}" th:selected="${status == item.status}">NEW</option>
+                        </select>
+                        <button type="submit" class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-500">Update status</button>
+                    </form>
+
+                    <form th:action="@{/admin/feedback/{id}/respond(id=${item.id})}" method="post" class="rounded-xl border border-slate-200 p-3 dark:border-slate-700 space-y-2">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Reply email</label>
+                        <textarea name="response" rows="3" maxlength="5000" class="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs dark:border-slate-600 dark:bg-slate-900" placeholder="Type response for requester"></textarea>
+                        <p class="text-[11px] text-slate-500" th:text="${item.allowEmailReply} ? 'Requester opted in for email reply.' : 'Requester did NOT opt in for email reply.'">Opt-in state</p>
+                        <button type="submit" class="w-full rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">Send response email</button>
+                    </form>
+                </div>
+
+                <div th:if="${item.adminResponse != null}" class="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                    <p class="font-semibold">Last admin response</p>
+                    <p class="mt-1 whitespace-pre-line" th:text="${item.adminResponse}">Response</p>
+                </div>
+            </article>
+        </div>
+
+        <p th:if="${feedbackItems == null or #lists.isEmpty(feedbackItems)}" class="text-sm text-slate-500">No feedback found.</p>
+    </div>
+</th:block>

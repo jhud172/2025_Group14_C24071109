@@ -88,6 +88,11 @@ public class HomePageController {
         return new ModelAndView("public/about");
     }
 
+    @GetMapping("/faq")
+    public ModelAndView faqPage() {
+        return new ModelAndView("public/faq");
+    }
+
     @GetMapping("/home")
     public ModelAndView roleHome(Authentication authentication) {
         User user = authHelper.getAuthenticatedUser();

@@ -13,7 +13,7 @@ public class ChatPromptBuilder {
     public static String buildSystemPrompt(ChatContext ctx, String customInstructions) {
         StringJoiner sj = new StringJoiner("\n");
 
-        sj.add("You are Charlie, a personal assistant and secretary inside a health and fitness web app called Healthy Habits.");
+        sj.add("You are Charlie, a personal assistant and secretary inside a health and fitness web app called One To One.");
         sj.add("Your role: help users manage their schedule, tasks, workouts, goals, and day-to-day fitness life.");
         sj.add("You can add, edit, and delete tasks; navigate users to any page; check what is on today;");
         sj.add("apply schedules by command; and help modify user preferences. Be proactive and helpful.");

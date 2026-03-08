@@ -63,4 +63,13 @@ public interface EmailService {
         String code,
         Instant expiresAt
     );
+
+    /**
+     * Send an admin-authored outbound email message.
+     *
+     * @param to Recipient email
+     * @param subject Email subject
+     * @param body Email plain text body
+     */
+    void sendAdminMessage(String to, String subject, String body);
 }

@@ -1199,105 +1199,66 @@
         <!-- ── Section Divider ── -->
         <div class="section-divider bg-gray-50"></div>
 
-        <!-- 7. FAQ -->
+        <!-- 7. Support Feedback -->
         <section class="py-24 bg-gray-50 section-spacer">
             <div class="max-w-3xl mx-auto px-6 lg:px-8 relative z-10">
-                <h2 class="text-3xl font-bold text-slate-900 mb-12 text-center">Clarity.</h2>
-                
-                <div class="space-y-4">
-                    <!-- Item 1: Verification -->
-                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
-                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
-                            How are trainers verified?
-                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </span>
-                        </summary>
-                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
-                            Quality is our firewall. Every "Pro" trainer undergoes a manual review of their certifications (CIMSPA, REPs, or equivalent) and liability insurance. We reject over 40% of applicants to ensure you only work with legitimate experts.
-                        </p>
-                    </details>
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-slate-900">Support feedback</h2>
+                    <p class="mt-2 text-slate-600">Report a bug, suggest an improvement, raise an error, or ask a query. Our admin team tracks each submission.</p>
+                    <p class="mt-3 text-sm text-slate-500">Need answers first? Visit <a th:href="@{/faq}" class="text-emerald-600 font-semibold hover:text-emerald-500">FAQ</a>.</p>
+                </div>
 
-                    <!-- AI vs Real Trainer -->
-                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
-                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
-                            What's the difference between the AI Coach and a real trainer?
-                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </span>
-                        </summary>
-                        <div class="mt-4 text-slate-600 leading-relaxed text-sm space-y-3">
-                            <p><span class="font-semibold text-emerald-600">AI Coach</span> — available to every user, 24/7. It answers training questions, suggests optimisations based on your logs, and helps you plan sessions. It does not replace human expertise.</p>
-                            <p><span class="font-semibold text-blue-600">Verified PT (Real Trainer)</span> — a credentialled human coach who builds and delivers your full programme, reviews your progress personally, and messages you directly. Real PTs are optional and charge their own rate.</p>
+                <div class="premium-card">
+                    <div th:if="${feedbackSuccess}" class="mb-4 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" th:text="${feedbackSuccess}">Submitted.</div>
+                    <div th:if="${feedbackError}" class="mb-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800" th:text="${feedbackError}">Error.</div>
+
+                    <form th:action="@{/support/feedback}" method="post" class="space-y-4" id="public-feedback-form">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Your name</label>
+                                <input type="text" name="name" maxlength="120" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" placeholder="Jane Doe" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Email (for replies)</label>
+                                <input type="email" name="email" maxlength="255" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" placeholder="jane@email.com" />
+                            </div>
                         </div>
-                    </details>
-                    
-                    <!-- Item 2: Payments -->
-                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
-                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
-                            How do payments work?
-                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </span>
-                        </summary>
-                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
-                            Securely. Payments are processed via Stripe and held in escrow. Your trainer is paid only after they deliver your promised coaching block or session. This "Deployment Protection" ensures you get exactly what you pay for.
-                        </p>
-                    </details>
 
-                    <!-- Item 3: Switching -->
-                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
-                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
-                            Can I switch trainers?
-                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </span>
-                        </summary>
-                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
-                            Yes. You are never locked into a long-term contract unless you specifically agree to one. You can switch coaches at the end of any billing cycle (usually monthly) without penalty.
-                        </p>
-                    </details>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Support type</label>
+                            <select id="feedback-type" name="requestType" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+                                <option value="">Choose one</option>
+                                <option value="BUG">Report a bug</option>
+                                <option value="IMPROVEMENT">Improvement suggestion</option>
+                                <option value="ERROR">Platform error</option>
+                                <option value="QUERY">General query</option>
+                            </select>
+                        </div>
 
-                    <!-- Item 4: GDPR -->
-                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
-                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
-                            What data is stored / GDPR?
-                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </span>
-                        </summary>
-                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
-                            We operate on a privacy-first architecture. Your health data, progress photos, and chat logs are encrypted at rest. We are fully UK-GDPR compliant and will never sell your personal performance metrics to advertisers.
-                        </p>
-                    </details>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Subject</label>
+                            <input type="text" name="subject" maxlength="180" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" placeholder="Short summary" />
+                        </div>
 
-                    <!-- Item 5: Subscription -->
-                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
-                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
-                            Do I need a subscription?
-                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </span>
-                        </summary>
-                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
-                            The platform itself is free for clients. You can create an account, browse verified trainers, and read articles at no cost. You only pay the specific rate set by a coach when you hire them.
-                        </p>
-                    </details>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Details</label>
+                            <textarea name="message" maxlength="5000" required rows="5" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" placeholder="Describe what happened, what you expected, and any steps to reproduce."></textarea>
+                        </div>
 
-                    <!-- Item 6: UK First -->
-                    <details class="group p-6 premium-card open:shadow-lg transition-all duration-300">
-                        <summary class="flex items-center justify-between font-bold text-slate-900 cursor-pointer list-none hover:text-emerald-500 transition-colors">
-                            Is this UK-first?
-                            <span class="transform transition-transform duration-300 group-open:rotate-180 text-emerald-500">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </span>
-                        </summary>
-                        <p class="mt-4 text-slate-600 leading-relaxed text-sm">
-                            Yes. One To One is built in the UK, for the UK fitness ecosystem. All transactions are in GBP, and our verification standards are aligned with British governing bodies like CIMSPA.
-                        </p>
-                    </details>
+                        <label class="flex items-start gap-3 text-sm text-slate-700">
+                            <input id="allow-email-reply" type="checkbox" name="allowEmailReply" class="mt-1 rounded border-slate-300 text-emerald-600" />
+                            <span>I allow One To One support/admin to email me a response to this request.</span>
+                        </label>
+                        <p id="query-reply-hint" class="hidden text-xs text-amber-700">For queries, please tick the email reply consent box so we can send your answer.</p>
+
+                        <div class="pt-2">
+                            <button type="submit" class="btn-primary">Send to support</button>
+                        </div>
+                    </form>
                 </div>
-                </div>
+            </div>
         </section>
 
 
@@ -1372,6 +1333,26 @@
                 }, { threshold: 0.1 });
 
                 document.querySelectorAll('.reveal-up').forEach((el) => observer.observe(el));
+
+                const feedbackType = document.getElementById('feedback-type');
+                const allowReply = document.getElementById('allow-email-reply');
+                const queryReplyHint = document.getElementById('query-reply-hint');
+
+                function syncReplyHint() {
+                    if (!feedbackType || !allowReply || !queryReplyHint) return;
+                    const isQuery = feedbackType.value === 'QUERY';
+                    queryReplyHint.classList.toggle('hidden', !isQuery);
+                    if (isQuery) {
+                        allowReply.required = true;
+                    } else {
+                        allowReply.required = false;
+                    }
+                }
+
+                if (feedbackType) {
+                    feedbackType.addEventListener('change', syncReplyHint);
+                    syncReplyHint();
+                }
             });
         </script>
     </th:block>

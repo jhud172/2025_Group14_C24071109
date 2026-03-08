@@ -25288,6 +25288,8 @@ html:not(.dark) .cd-target-editor {
     
     justify-content: center;
     
+    overflow: hidden;
+    
     /* Smooth transitions */
     
     transition-property: all;
@@ -25304,6 +25306,13 @@ html:not(.dark) .cd-target-editor {
     border-color: rgb(51 65 85 / 0.6);
     --tw-bg-opacity: 1;
     background-color: rgb(15 23 42 / var(--tw-bg-opacity, 1));
+}
+.chat-fab-pulse-ring {
+    position: absolute;
+    inset: 0px;
+    border-radius: 9999px;
+    border: 2px solid rgba(16, 185, 129, 0.22);
+    animation: chat-fab-pulse 2.4s ease-out infinite;
 }
 .chat-fab-premium:hover {
     /* Lift upward */
@@ -25327,8 +25336,17 @@ html:not(.dark) .cd-target-editor {
     transition-duration: 150ms;
   }
 .chat-fab-icon {
-    font-size: 1.5rem;
-    line-height: 2rem;
+    position: relative;
+    z-index: 2;
+    border-radius: 9999px;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+}
+.chat-fab-avatar {
+    height: 2.75rem;
+    width: 2.75rem;
+    border-radius: 9999px;
+    -o-object-fit: cover;
+       object-fit: cover;
 }
 /* Notification dot */
 .chat-fab-notification-dot {
@@ -25352,6 +25370,7 @@ html:not(.dark) .cd-target-editor {
     transition-property: opacity;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
+    z-index: 10003;
   }
 .chat-fab-notification-dot.active {
     opacity: 1;
@@ -25468,6 +25487,7 @@ body[data-easy-mode="on"] .chat-header-premium {
     border-bottom-width: 1px;
     
     border-color: rgb(226 232 240 / 0.6);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(15, 23, 42, 0.03));
   }
 .chat-header-premium:is(.dark *) {
     border-color: rgb(51 65 85 / 0.6);
@@ -25496,7 +25516,7 @@ body[data-easy-mode="on"] .chat-title-section {
     
     /* Shape */
     
-    border-radius: 0.75rem;
+    border-radius: 9999px;
     
     /* Styling - Subtle emerald tint */
     
@@ -25527,6 +25547,9 @@ body[data-easy-mode="on"] .chat-title-section {
     --tw-text-opacity: 1;
     
     color: rgb(4 120 87 / var(--tw-text-opacity, 1));
+    
+    overflow: hidden;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
   }
 .week-day-card:has(.chat-badge-premium:is(.dark *)) {
         border-color: rgba(16, 185, 129, 0.5);
@@ -25541,6 +25564,13 @@ html:not(.dark) .week-day-card:has(.chat-badge-premium:is(.dark *)) {
     background-color: rgb(2 44 34 / 0.4);
     --tw-text-opacity: 1;
     color: rgb(52 211 153 / var(--tw-text-opacity, 1));
+}
+.chat-header-avatar {
+    height: 100%;
+    width: 100%;
+    border-radius: 9999px;
+    -o-object-fit: cover;
+       object-fit: cover;
 }
 .chat-title-text {
     display: flex;
@@ -25894,6 +25924,9 @@ body[data-easy-mode="on"] .chat-conversation-premium {
     --tw-text-opacity: 1;
     color: rgb(241 245 249 / var(--tw-text-opacity, 1));
 }
+.chat-message-wrapper.assistant .chat-message-bubble {
+    background-image: linear-gradient(135deg, rgba(16, 185, 129, 0.09), rgba(255, 255, 255, 0));
+  }
 .chat-typing-indicator {
     display: flex;
     justify-content: flex-start;
@@ -26173,6 +26206,20 @@ body[data-easy-mode="on"] .chat-input-container {
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+@keyframes chat-fab-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.75;
+    }
+    70% {
+      transform: scale(1.28);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.28);
+      opacity: 0;
     }
   }
 /* === NAVIGATION ACTION BUTTONS === */
@@ -28225,9 +28272,6 @@ body[data-easy-mode="on"] .quick-actions-grid {
 .list-disc {
     list-style-type: disc;
 }
-.list-none {
-    list-style-type: none;
-}
 .grid-cols-1 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
 }
@@ -28553,6 +28597,9 @@ body[data-easy-mode="on"] .quick-actions-grid {
 }
 .border-amber-300\/50 {
     border-color: rgb(252 211 77 / 0.5);
+}
+.border-amber-400\/30 {
+    border-color: rgb(251 191 36 / 0.3);
 }
 .border-amber-400\/50 {
     border-color: rgb(251 191 36 / 0.5);
@@ -31305,11 +31352,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .last\:pb-0:last-child {
     padding-bottom: 0px;
 }
-.open\:shadow-lg[open] {
-    --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
-    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
 .focus-within\:border-blue-500:focus-within {
     --tw-border-opacity: 1;
     border-color: rgb(59 130 246 / var(--tw-border-opacity, 1));
@@ -31322,10 +31364,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .focus-within\:ring-blue-500:focus-within {
     --tw-ring-opacity: 1;
     --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1));
-}
-.group[open] .group-open\:rotate-180 {
-    --tw-rotate: 180deg;
-    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 .group:hover .group-hover\:block {
     display: block;
@@ -31341,6 +31379,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .group:hover .group-hover\:border-emerald-400 {
     --tw-border-opacity: 1;
     border-color: rgb(52 211 153 / var(--tw-border-opacity, 1));
+}
+.group:hover .group-hover\:bg-amber-400\/20 {
+    background-color: rgb(251 191 36 / 0.2);
 }
 .group:hover .group-hover\:bg-blue-400\/20 {
     background-color: rgb(96 165 250 / 0.2);
@@ -31510,6 +31551,10 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 }
 .hover\:bg-blue-400\/15:hover {
     background-color: rgb(96 165 250 / 0.15);
+}
+.hover\:bg-blue-500:hover {
+    --tw-bg-opacity: 1;
+    background-color: rgb(59 130 246 / var(--tw-bg-opacity, 1));
 }
 .hover\:bg-blue-700:hover {
     --tw-bg-opacity: 1;
@@ -33356,6 +33401,9 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
     }
     .sm\:p-10 {
         padding: 2.5rem;
+    }
+    .sm\:p-6 {
+        padding: 1.5rem;
     }
     .sm\:p-8 {
         padding: 2rem;

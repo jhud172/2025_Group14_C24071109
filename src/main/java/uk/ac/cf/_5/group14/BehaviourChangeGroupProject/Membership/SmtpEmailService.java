@@ -100,6 +100,12 @@ public class SmtpEmailService implements EmailService {
         sendEmail(user.getEmail(), subject, body);
     }
 
+    @Async
+    @Override
+    public void sendAdminMessage(String to, String subject, String body) {
+        sendEmail(to, subject, body);
+    }
+
     private void sendEmail(String to, String subject, String body) {
         try {
             if (smtpUsername == null || smtpUsername.isBlank() || smtpPassword == null || smtpPassword.isBlank()) {

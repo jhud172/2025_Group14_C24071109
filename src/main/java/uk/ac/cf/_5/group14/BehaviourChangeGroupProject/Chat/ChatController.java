@@ -231,8 +231,12 @@ public class ChatController {
                     .body(Map.<String, Object>of("reply", "Daily limit reached. Upgrade to unlock unlimited messages."));
         }
 
-        coachMessageService.append(conversation, CoachMessage.Role.USER, message);
-        coachConversationService.updateTitleIfNew(conversation, message);
+        // Skip history persistence for quick-action internal prompts
+        boolean skipHistory = request.skipHistory() != null && request.skipHistory();
+        if (!skipHistory) {
+            coachMessageService.append(conversation, CoachMessage.Role.USER, message);
+            coachConversationService.updateTitleIfNew(conversation, message);
+        }
 
         ChatContext ctx;
         try {
@@ -240,16 +244,20 @@ public class ChatController {
             ctx = chatContextService.build(user, requestedDate.orElse(null));
         } catch (Exception e) {
             log.warn("Chat context build failed; continuing with fallback reply", e);
-            coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, CONTEXT_FALLBACK_REPLY);
-            coachConversationService.touch(conversation);
+            if (!skipHistory) {
+                coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, CONTEXT_FALLBACK_REPLY);
+                coachConversationService.touch(conversation);
+            }
             return ResponseEntity.ok(Map.<String, Object>of("reply", CONTEXT_FALLBACK_REPLY));
         }
 
         try {
             if (apiKey == null || apiKey.isBlank()) {
                 String reply = ChatRuleBasedResponder.respond(message, ctx);
-                coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, reply);
-                coachConversationService.touch(conversation);
+                if (!skipHistory) {
+                    coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, reply);
+                    coachConversationService.touch(conversation);
+                }
                 return ResponseEntity.ok(Map.<String, Object>of("reply", reply));
             }
 
@@ -273,8 +281,10 @@ public class ChatController {
                 }
                 ChatNavParser.ParseResult navParsed = ChatNavParser.parse(extracted.cleanedText());
                 String reply = navParsed.cleanText();
-                coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, reply);
-            coachConversationService.touch(conversation);
+                if (!skipHistory) {
+                    coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, reply);
+                    coachConversationService.touch(conversation);
+                }
             Map<String, Object> result = new HashMap<>();
             result.put("reply", reply);
             if (!navParsed.navActions().isEmpty()) {
@@ -285,8 +295,10 @@ public class ChatController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.warn("Chat API failed; returning fallback reply", e);
+            if (!skipHistory) {
                 coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, CONTEXT_FALLBACK_REPLY);
-            coachConversationService.touch(conversation);
+                coachConversationService.touch(conversation);
+            }
             return ResponseEntity.ok(Map.<String, Object>of("reply", CONTEXT_FALLBACK_REPLY));
         }
     }

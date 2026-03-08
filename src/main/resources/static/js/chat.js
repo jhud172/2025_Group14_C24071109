@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getUnauthWelcome() {
-        return "👋 Hi! I'm Charlie — the built-in assistant for Healthy Habits. This platform helps you track workouts, manage your schedule, log nutrition, set fitness goals, and stay consistent. Log in or sign up to get started, and I'll help you every step of the way.";
+        return "Hi, I am Charlie, the built-in AI assistant for One To One. I help with workouts, schedules, nutrition, goals, and momentum tracking. Log in or sign up to unlock personalized guidance.";
     }
 
     function saveHistory() {

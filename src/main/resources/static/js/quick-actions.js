@@ -423,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch("/chat/api", {
                 method: "POST",
                 headers: authHeaders(),
-                body: JSON.stringify({ message })
+                body: JSON.stringify({ message, skipHistory: true })
             });
             const data = await res.json();
             const reply = data?.reply || "";

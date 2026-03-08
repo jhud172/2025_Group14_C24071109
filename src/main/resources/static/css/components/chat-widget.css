@@ -22,12 +22,19 @@
     
     /* Content centering */
     @apply flex items-center justify-center;
+    @apply overflow-hidden;
     
     /* Smooth transitions */
     @apply transition-all duration-300 ease-out;
     
     /* Dark mode */
     @apply dark:bg-slate-900 dark:border-slate-700/60;
+  }
+
+  .chat-fab-pulse-ring {
+    @apply absolute inset-0 rounded-full;
+    border: 2px solid rgba(16, 185, 129, 0.22);
+    animation: chat-fab-pulse 2.4s ease-out infinite;
   }
   
   .chat-fab-premium:hover {
@@ -53,7 +60,12 @@
   }
   
   .chat-fab-icon {
-    @apply text-2xl;
+    @apply relative z-[2] rounded-full;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+  }
+
+  .chat-fab-avatar {
+    @apply h-11 w-11 rounded-full object-cover;
   }
   
   /* Notification dot */
@@ -63,6 +75,7 @@
     @apply bg-emerald-500;
     box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
     @apply opacity-0 transition-opacity duration-200;
+    z-index: 10003;
   }
   
   .chat-fab-notification-dot.active {
@@ -121,6 +134,7 @@
     
     /* Separator - Subtle line */
     @apply border-b border-slate-200/60;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(15, 23, 42, 0.03));
     
     @apply dark:border-slate-700/60;
   }
@@ -138,7 +152,7 @@
     @apply h-10 w-10;
     
     /* Shape */
-    @apply rounded-xl;
+    @apply rounded-full;
     
     /* Styling - Subtle emerald tint */
     @apply bg-emerald-50 border border-emerald-200/60;
@@ -146,8 +160,14 @@
     /* Content */
     @apply flex items-center justify-center;
     @apply text-sm font-black tracking-wide text-emerald-700;
+    @apply overflow-hidden;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
     
     @apply dark:bg-emerald-950/40 dark:border-emerald-800/60 dark:text-emerald-400;
+  }
+
+  .chat-header-avatar {
+    @apply h-full w-full rounded-full object-cover;
   }
   
   .chat-title-text {
@@ -306,6 +326,7 @@
     @apply border border-slate-200/60;
     
     @apply dark:bg-slate-800/60 dark:text-slate-100 dark:border-slate-700/60;
+    background-image: linear-gradient(135deg, rgba(16, 185, 129, 0.09), rgba(255, 255, 255, 0));
   }
   
   .chat-typing-indicator {
@@ -450,6 +471,21 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes chat-fab-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.75;
+    }
+    70% {
+      transform: scale(1.28);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.28);
+      opacity: 0;
     }
   }
 

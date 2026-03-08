@@ -43,4 +43,9 @@ public class NoOpEmailService implements EmailService {
     public void sendEmailVerification(User user, String verifyUrl, String code, Instant expiresAt) {
         log.warn("No email provider configured – skipping email verification to {}", user.getEmail());
     }
+
+    @Override
+    public void sendAdminMessage(String to, String subject, String body) {
+        log.warn("No email provider configured – skipping admin email to {}", to);
+    }
 }

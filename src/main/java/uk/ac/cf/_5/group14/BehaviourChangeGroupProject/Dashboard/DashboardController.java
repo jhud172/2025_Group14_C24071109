@@ -50,6 +50,9 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String dashboardRouter(Authentication authentication, Model model) {
+        if (SecurityUtils.hasRole(authentication, "SUPER_ADMIN") || SecurityUtils.hasRole(authentication, "PLATFORM_ADMIN")) {
+            return "redirect:/admin/dashboard";
+        }
         if (SecurityUtils.hasRole(authentication, "GYM_ADMIN")) {
             return "redirect:/gym/dashboard";
         }

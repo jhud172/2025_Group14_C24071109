@@ -38,10 +38,12 @@ public class SecurityConfig {
             "/",
             "/home-public",
             "/about",
+            "/faq",
             "/pricing",
             "/pricing/**",
             "/explore",
             "/merch",
+            "/support/feedback",
             "/u/**",
             "/error/**",
             "/login/**",
@@ -98,6 +100,8 @@ public class SecurityConfig {
                             // Trainers area: keep role requirements
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
+                            .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**")
+                            .hasAnyRole("GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
                             // Training Vault: keep protected
                             .requestMatchers("/vault/**").authenticated()
@@ -120,6 +124,8 @@ public class SecurityConfig {
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
                             .requestMatchers("/client/**").hasAnyRole("CLIENT", "USER")
                             .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
+                            .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**")
+                            .hasAnyRole("GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/merch/**").authenticated()
                             .requestMatchers("/dashboard").authenticated()

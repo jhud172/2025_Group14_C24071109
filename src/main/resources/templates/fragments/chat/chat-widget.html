@@ -24,27 +24,14 @@
             aria-label="Open chat"
             aria-controls="chatPanel"
             aria-expanded="false">
+        <span class="chat-fab-pulse-ring" aria-hidden="true"></span>
         <span class="chat-fab-notification-dot" id="chatNotificationDot"></span>
         <span id="chatUnreadBadge"
               class="pointer-events-none absolute -right-1 -top-1 hidden min-w-[1.25rem] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-semibold text-white shadow-lg"
               aria-live="polite"></span>
         <span class="chat-fab-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                 stroke-linecap="round" stroke-linejoin="round"
-                 class="h-7 w-7 text-emerald-600 dark:text-emerald-400">
-                <!-- Robot head -->
-                <rect x="4" y="7" width="16" height="12" rx="3"/>
-                <!-- Eyes -->
-                <circle cx="9" cy="13" r="1.5" fill="currentColor" stroke="none"/>
-                <circle cx="15" cy="13" r="1.5" fill="currentColor" stroke="none"/>
-                <!-- Smile -->
-                <path d="M9.5 16.5a3.5 3.5 0 0 0 5 0"/>
-                <!-- Antenna -->
-                <path d="M12 7V4.5"/>
-                <circle cx="12" cy="3.5" r="1" fill="currentColor" stroke="none"/>
-                <!-- Ear bolts -->
-                <path d="M4 12H2M22 12h-2"/>
-            </svg>
+            <img th:src="@{/img/charlie-avatar.svg}" src="/img/charlie-avatar.svg" alt=""
+                 class="chat-fab-avatar" loading="lazy" decoding="async" />
         </span>
     </button>
 
@@ -58,10 +45,13 @@
         <header class="chat-header-premium">
             <div class="chat-header-top">
                 <div class="chat-title-section">
-                    <div class="chat-badge-premium">C</div>
+                    <div class="chat-badge-premium" aria-hidden="true">
+                        <img th:src="@{/img/charlie-avatar.svg}" src="/img/charlie-avatar.svg"
+                             alt="" class="chat-header-avatar" loading="lazy" decoding="async" />
+                    </div>
                     <div class="chat-title-text">
                         <div class="chat-title-main">Charlie</div>
-                        <div class="chat-title-subtitle">Your personal assistant</div>
+                        <div class="chat-title-subtitle">One To One AI performance concierge</div>
                     </div>
                 </div>
                 
@@ -112,13 +102,13 @@
                 <div class="chat-conversation-premium" id="chatBody">
                     <div class="chat-message-wrapper assistant" sec:authorize="isAuthenticated()">
                         <div class="chat-message-bubble" id="charlieWelcome">
-                            Hi! I'm Charlie, your personal assistant. I can check what's on today, manage your tasks and workouts, apply schedules, and navigate you anywhere in the app. How can I help?
+                            Hi, I am Charlie, your One To One AI concierge. I can map your day, tune your training plan, surface priorities, and navigate you anywhere in the platform. What would you like to optimize first?
                         </div>
                     </div>
 
                     <div class="chat-message-wrapper assistant" sec:authorize="!isAuthenticated()">
                         <div class="chat-message-bubble">
-                            👋 Hi! I'm Charlie — the built-in assistant for Healthy Habits. This platform helps you track workouts, manage schedules, log nutrition, set goals, and stay consistent. Log in or sign up to get started, and I'll be here to help you every step of the way.
+                            Hi, I am Charlie, the built-in AI assistant for One To One. I help with workouts, schedules, nutrition, goals, and momentum tracking. Log in or sign up to unlock personalized guidance.
                         </div>
                     </div>
                 </div>
