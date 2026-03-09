@@ -1,15 +1,21 @@
 /* Quick Actions Widget - Premium Design (Aligned with Chat Widget) */
 
 @layer components {
+  :root {
+    --qa-fab-size: clamp(3.25rem, 2.9rem + 1vw, 4rem);
+    --qa-fab-offset: clamp(0.9rem, 0.6rem + 0.8vw, 1.5rem);
+  }
+
   /* === FLOATING ACTION BUTTON === */
   .quick-actions-fab-premium {
     /* Position - Fixed bottom-left */
     @apply fixed z-[9999];
-    bottom: 1.5rem;
-    left: 1.5rem;
+    bottom: var(--qa-fab-offset);
+    left: var(--qa-fab-offset);
     
     /* Size - Match chat button */
-    @apply h-16 w-16;
+    height: var(--qa-fab-size);
+    width: var(--qa-fab-size);
     
     /* Shape - Fully circular */
     @apply rounded-full;
@@ -49,21 +55,23 @@
   }
   
   .quick-actions-fab-icon {
-    @apply text-2xl;
+    font-size: clamp(1.2rem, 1rem + 0.45vw, 1.5rem);
+    line-height: 1;
   }
   
   /* === QUICK ACTIONS PANEL CONTAINER === */
   .quick-actions-panel-premium {
     /* Position - Bottom-left, above the toggle button */
     @apply fixed z-[9998];
-    bottom: 7.5rem;
-    left: 1.5rem;
+    bottom: calc(var(--qa-fab-offset) + var(--qa-fab-size) + 0.75rem);
+    left: var(--qa-fab-offset);
     
     /* Size - Match chat panel */
     @apply w-full;
-    max-width: 400px;
-    @apply h-auto;
-    max-height: calc(100vh - 8rem);
+    max-width: min(24rem, calc(100vw - 2rem));
+    height: clamp(22rem, 78vh, calc(100dvh - var(--qa-fab-size) - 2.25rem));
+    max-height: calc(100dvh - var(--qa-fab-size) - 2.25rem);
+    min-height: 20rem;
     
     /* Shape - Rounded corners */
     @apply rounded-2xl;
@@ -86,6 +94,10 @@
     
     /* Dark mode */
     @apply dark:bg-slate-900 dark:border-slate-700/80;
+
+    /* Internal layout */
+    @apply flex flex-col;
+    overflow: hidden;
   }
   
   .quick-actions-panel-premium.open {
@@ -187,22 +199,22 @@
   
   /* === CONTENT WRAPPER === */
   .quick-actions-content-wrapper {
-    @apply flex flex-col;
-    height: calc(100% - 80px);
+    @apply flex flex-col flex-1;
+    min-height: 0;
   }
   
   /* === MAIN VIEW (Actions List) === */
   .quick-actions-main-view {
     /* Spacing */
-    @apply px-4 py-4;
+    @apply px-3 py-3;
     
     /* Layout */
-    @apply flex flex-col gap-3;
+    @apply flex flex-col gap-2;
     
     /* Scroll */
     @apply overflow-y-auto;
-    min-height: 320px;
-    max-height: calc(100vh - 16rem);
+    @apply flex-1;
+    min-height: 0;
   }
   
   .quick-actions-actions-list-header {
@@ -214,7 +226,9 @@
   }
   
   .quick-actions-grid {
-    @apply grid grid-cols-2 gap-3;
+    @apply grid grid-cols-1 gap-2;
+    @apply flex-1 overflow-y-auto;
+    min-height: 0;
   }
   
   /* Empty state */
@@ -245,17 +259,18 @@
   
   /* === CUSTOMIZE VIEW === */
   .quick-actions-customize-view {
-    @apply flex flex-col;
-    height: 100%;
+    @apply flex flex-col flex-1;
+    min-height: 0;
   }
   
   .quick-actions-search-section {
-    @apply border-b border-slate-200/60 px-4 py-3;
+    @apply border-b border-slate-200/60 px-3 py-2;
     @apply dark:border-slate-700/60;
   }
   
   .quick-actions-customize-list-wrapper {
-    @apply flex-1 overflow-auto px-4 py-3;
+    @apply flex-1 overflow-auto px-3 py-2;
+    min-height: 0;
   }
   
   .quick-actions-customize-list {
@@ -263,12 +278,12 @@
   }
   
   .quick-actions-custom-ai-section {
-    @apply border-t border-slate-200/60 px-4 py-4;
+    @apply border-t border-slate-200/60 px-3 py-2;
     @apply dark:border-slate-700/60;
   }
   
   .quick-actions-custom-ai-header {
-    @apply flex items-center justify-between mb-3;
+    @apply flex items-center justify-between mb-2;
   }
   
   .quick-actions-custom-ai-title {
@@ -282,13 +297,13 @@
   }
   
   .quick-actions-custom-ai-form {
-    @apply space-y-3;
+    @apply space-y-2;
   }
   
   /* === INPUT FIELDS === */
   .quick-actions-input-premium {
     /* Size - Increased height */
-    @apply w-full h-12;
+    @apply w-full h-11;
     
     /* Shape - Rounded and soft */
     @apply rounded-xl;
@@ -317,13 +332,15 @@
   
   .quick-actions-textarea {
     @apply h-auto resize-none;
-    @apply py-3;
+    @apply py-2.5;
+    min-height: 4.25rem;
+    max-height: 7rem;
   }
   
   /* === PRIMARY BUTTON === */
   .quick-actions-btn-premium {
     /* Size */
-    @apply w-full h-12 px-5;
+    @apply w-full h-10 px-4;
     
     /* Shape - Rounded */
     @apply rounded-xl;
@@ -383,13 +400,19 @@
       left: 1rem;
       right: 1rem;
       max-width: calc(100vw - 2rem);
-      bottom: 1rem;
+      bottom: 0.75rem;
+      height: min(calc(100dvh - 1.5rem), 42rem);
+      max-height: calc(100dvh - 1.5rem);
     }
     
     .quick-actions-input-premium,
     .quick-actions-btn-premium {
       /* Increase tap targets */
-      @apply h-11;
+      @apply h-10;
+    }
+
+    .quick-actions-grid {
+      @apply gap-1.5;
     }
   }
   
@@ -397,7 +420,12 @@
   @media (min-width: 641px) and (max-width: 1024px) {
     .quick-actions-fab-premium {
       /* Keep side by side on tablets with proper spacing */
-      left: 6.5rem;
+      left: calc(var(--qa-fab-offset) + var(--qa-fab-size) + 0.9rem);
+    }
+
+    .quick-actions-panel-premium {
+      left: var(--qa-fab-offset);
+      max-width: min(22rem, calc(100vw - 2rem));
     }
   }
   

@@ -1,16 +1,22 @@
 /* Coach Bot Chat Widget - Premium AI Command Layer Design */
 
 @layer components {
+  :root {
+    --chat-fab-size: clamp(3.25rem, 2.9rem + 1vw, 4rem);
+    --chat-fab-offset: clamp(0.9rem, 0.6rem + 0.8vw, 1.5rem);
+  }
+
   /* === FLOATING CHAT BUTTON === */
   .chat-fab-premium {
     /* Position - Fixed bottom-right with consistent margins */
     @apply fixed;
     z-index: 10001;
-    bottom: 1.5rem;
-    right: 1.5rem;
+    bottom: var(--chat-fab-offset);
+    right: var(--chat-fab-offset);
     
     /* Size - Slightly larger than before */
-    @apply h-16 w-16;
+    height: var(--chat-fab-size);
+    width: var(--chat-fab-size);
     
     /* Shape - Fully circular */
     @apply rounded-full;
@@ -22,7 +28,7 @@
     
     /* Content centering */
     @apply flex items-center justify-center;
-    @apply overflow-hidden;
+    overflow: visible;
     
     /* Smooth transitions */
     @apply transition-all duration-300 ease-out;
@@ -65,12 +71,16 @@
   }
 
   .chat-fab-avatar {
-    @apply h-11 w-11 rounded-full object-cover;
+    height: calc(var(--chat-fab-size) - 1.25rem);
+    width: calc(var(--chat-fab-size) - 1.25rem);
+    @apply rounded-full object-cover;
   }
   
   /* Notification dot */
   .chat-fab-notification-dot {
-    @apply absolute top-3 right-3;
+    @apply absolute;
+    top: 0.75rem;
+    right: 0.75rem;
     @apply h-3 w-3 rounded-full;
     @apply bg-emerald-500;
     box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
@@ -86,14 +96,15 @@
   .chat-panel-premium {
     /* Position - Bottom-right with proper spacing */
     @apply fixed z-[9998];
-    bottom: 7.5rem;
-    right: 1.5rem;
+    bottom: calc(var(--chat-fab-offset) + var(--chat-fab-size) + 0.75rem);
+    right: var(--chat-fab-offset);
     
     /* Size - Reduced max width for readability */
     @apply w-full;
-    max-width: 400px;
-    @apply h-auto;
-    max-height: calc(100vh - 8rem);
+    max-width: min(24rem, calc(100vw - 2rem));
+    height: clamp(22rem, 76vh, calc(100dvh - var(--chat-fab-size) - 2.25rem));
+    max-height: calc(100dvh - var(--chat-fab-size) - 2.25rem);
+    min-height: 20rem;
     
     /* Shape - Rounded corners */
     @apply rounded-2xl;
@@ -116,6 +127,10 @@
     
     /* Dark mode */
     @apply dark:bg-slate-900 dark:border-slate-700/80;
+
+    /* Internal layout */
+    @apply flex flex-col;
+    overflow: hidden;
   }
   
   .chat-panel-premium.open {
@@ -123,11 +138,22 @@
     @apply opacity-100 pointer-events-auto;
     transform: translateY(0);
   }
+
+  .chat-fab-unread-badge {
+    z-index: 10020;
+    top: -0.45rem;
+    right: -0.45rem;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 10px 20px rgba(244, 63, 94, 0.4);
+  }
+
+  html.dark .chat-fab-unread-badge {
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.96), 0 10px 20px rgba(244, 63, 94, 0.35);
+  }
   
   /* === HEADER SECTION === */
   .chat-header-premium {
     /* Spacing - Increased padding */
-    @apply px-5 py-4;
+    @apply px-4 py-3;
     
     /* Layout */
     @apply flex flex-col gap-3;
@@ -192,7 +218,7 @@
   
   .chat-icon-btn-premium {
     /* Size */
-    @apply h-9 w-9;
+    @apply h-8 w-8;
     
     /* Shape */
     @apply rounded-xl;
@@ -225,7 +251,7 @@
   /* === TABS SECTION === */
   .chat-tabs-premium {
     /* Spacing */
-    @apply px-5 py-0;
+    @apply px-4 py-0;
     
     /* Layout */
     @apply flex items-center gap-4;
@@ -235,7 +261,7 @@
   
   .chat-tab-btn {
     /* Base styling */
-    @apply relative px-0 py-3;
+    @apply relative px-0 py-2.5;
     @apply text-sm font-medium;
     @apply bg-transparent border-0;
     
@@ -273,21 +299,26 @@
   
   /* === CONVERSATION AREA === */
   .chat-panel-content-wrapper {
-    @apply flex flex-col;
-    height: calc(100% - 140px);
+    @apply flex flex-col flex-1;
+    min-height: 0;
+  }
+
+  #chatChatView {
+    @apply flex flex-col flex-1;
+    min-height: 0;
   }
   
   .chat-conversation-premium {
     /* Spacing */
-    @apply px-4 py-4;
+    @apply px-3 py-3;
     
     /* Layout */
     @apply flex flex-col gap-3;
     
     /* Scroll */
     @apply overflow-y-auto;
-    min-height: 320px;
-    max-height: calc(100vh - 20rem);
+    @apply flex-1;
+    min-height: 0;
   }
   
   .chat-message-wrapper {
@@ -356,13 +387,14 @@
   /* Notifications view */
   .chat-notifications-view {
     @apply flex-col;
-    height: 100%;
+    @apply flex-1;
+    min-height: 0;
   }
   
   /* === MESSAGE INPUT AREA === */
   .chat-input-container {
     /* Spacing */
-    @apply px-4 py-3;
+    @apply px-3 py-2.5;
     
     /* Layout */
     @apply flex items-center gap-2;
@@ -375,7 +407,7 @@
   
   .chat-input-premium {
     /* Size - Increased height */
-    @apply flex-1 h-12;
+    @apply flex-1 h-10;
     
     /* Shape - Rounded and soft */
     @apply rounded-xl;
@@ -404,7 +436,7 @@
   
   .chat-send-btn-premium {
     /* Size - Slightly larger */
-    @apply h-12 px-5;
+    @apply h-10 px-4;
     
     /* Shape - Rounded */
     @apply rounded-xl;
@@ -452,13 +484,32 @@
       left: 1rem;
       right: 1rem;
       max-width: calc(100vw - 2rem);
-      bottom: 1rem;
+      bottom: 0.75rem;
+      height: min(calc(100dvh - 1.5rem), 42rem);
+      max-height: calc(100dvh - 1.5rem);
     }
     
     .chat-input-premium,
     .chat-send-btn-premium {
       /* Increase tap targets */
-      @apply h-11;
+      @apply h-10;
+    }
+
+    .chat-header-premium {
+      @apply px-3 py-2.5;
+    }
+
+    .chat-tabs-premium {
+      @apply px-3;
+    }
+
+    .chat-tab-btn {
+      @apply text-xs py-2;
+    }
+
+    .chat-icon-btn-premium {
+      @apply h-7 w-7;
+      font-size: 0.85rem;
     }
   }
   

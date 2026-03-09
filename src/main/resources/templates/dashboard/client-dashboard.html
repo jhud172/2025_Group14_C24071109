@@ -1,1530 +1,315 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
           th:replace="~{base :: layout('Client Dashboard', null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content">
-    <section
-        sec:authorize="isAuthenticated()"
-        class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8"
-        data-dashboard-role="CLIENT"
-        th:with="
-            d0=${miniWeek != null and #lists.size(miniWeek) > 0 ? miniWeek[0] : null},
-            d1=${miniWeek != null and #lists.size(miniWeek) > 1 ? miniWeek[1] : null},
-            d2=${miniWeek != null and #lists.size(miniWeek) > 2 ? miniWeek[2] : null},
-            d3=${miniWeek != null and #lists.size(miniWeek) > 3 ? miniWeek[3] : null},
-            d4=${miniWeek != null and #lists.size(miniWeek) > 4 ? miniWeek[4] : null},
-            d5=${miniWeek != null and #lists.size(miniWeek) > 5 ? miniWeek[5] : null},
-            d6=${miniWeek != null and #lists.size(miniWeek) > 6 ? miniWeek[6] : null},
-
-            t0=${d0 != null ? d0.taskCount : 0}, w0=${d0 != null ? d0.scheduledCount : 0},
-            t1=${d1 != null ? d1.taskCount : 0}, w1=${d1 != null ? d1.scheduledCount : 0},
-            t2=${d2 != null ? d2.taskCount : 0}, w2=${d2 != null ? d2.scheduledCount : 0},
-            t3=${d3 != null ? d3.taskCount : 0}, w3=${d3 != null ? d3.scheduledCount : 0},
-            t4=${d4 != null ? d4.taskCount : 0}, w4=${d4 != null ? d4.scheduledCount : 0},
-            t5=${d5 != null ? d5.taskCount : 0}, w5=${d5 != null ? d5.scheduledCount : 0},
-            t6=${d6 != null ? d6.taskCount : 0}, w6=${d6 != null ? d6.scheduledCount : 0},
-
-            c0=${t0 + w0}, c1=${t1 + w1}, c2=${t2 + w2}, c3=${t3 + w3}, c4=${t4 + w4}, c5=${t5 + w5}, c6=${t6 + w6},
-            totalTasks=${t0 + t1 + t2 + t3 + t4 + t5 + t6},
-            totalWorkouts=${w0 + w1 + w2 + w3 + w4 + w5 + w6},
-            maxCount=${T(java.lang.Math).max(c0, T(java.lang.Math).max(c1, T(java.lang.Math).max(c2, T(java.lang.Math).max(c3, T(java.lang.Math).max(c4, T(java.lang.Math).max(c5, c6))))))},
-            busyDay=${c0 == maxCount ? d0 : (c1 == maxCount ? d1 : (c2 == maxCount ? d2 : (c3 == maxCount ? d3 : (c4 == maxCount ? d4 : (c5 == maxCount ? d5 : d6)))))} ,
-            minCount=${T(java.lang.Math).min(c0, T(java.lang.Math).min(c1, T(java.lang.Math).min(c2, T(java.lang.Math).min(c3, T(java.lang.Math).min(c4, T(java.lang.Math).min(c5, c6))))))},
-            lightDay=${c0 == minCount ? d0 : (c1 == minCount ? d1 : (c2 == minCount ? d2 : (c3 == minCount ? d3 : (c4 == minCount ? d4 : (c5 == minCount ? d5 : d6)))))} ,
-            nextUpCandidate=${miniWeek != null ? miniWeek.^[(taskCount + scheduledCount) > 0] : null},
-            nextUp=${nextUpCandidate != null ? nextUpCandidate : d0},
-            todayPath=${d0 != null ? '/calendar/day/' + #temporals.format(d0.date, 'yyyy-MM-dd') : '/calendar'},
-            nextUpPath=${nextUp != null ? '/calendar/day/' + #temporals.format(nextUp.date, 'yyyy-MM-dd') : '/calendar'},
-            busyDayPath=${busyDay != null ? '/calendar/day/' + #temporals.format(busyDay.date, 'yyyy-MM-dd') : '/calendar'},
-            lightDayPath=${lightDay != null ? '/calendar/day/' + #temporals.format(lightDay.date, 'yyyy-MM-dd') : '/calendar'},
-            currentHour=${T(java.time.LocalTime).now().getHour()},
-            timeOfDay=${currentHour < 12 ? 'morning' : (currentHour < 17 ? 'afternoon' : 'evening')},
-            timeGreeting=${currentHour < 12 ? 'Good morning' : (currentHour < 17 ? 'Good afternoon' : 'Good evening')},
-            timeContext=${currentHour < 12 ? 'Time to prep and plan your day' : (currentHour < 17 ? 'Let''s execute what you planned' : 'Time to wrap up and review')},
-            timeEmoji=${currentHour < 12 ? '☀️' : (currentHour < 17 ? '⚡' : '🌙')},
-            logsThisWeekSafe=${logsThisWeekCount != null ? logsThisWeekCount : 0},
-            weekPlannedSafe=${weekPlannedCount != null ? weekPlannedCount : 0},
-            weekCompletedSafe=${weekCompletedCount != null ? weekCompletedCount : 0},
-            streakSafe=${streakCount != null ? streakCount : 0},
-            consistencySafe=${consistencyScore != null ? consistencyScore : 0},
-            bestMoodUpliftSafe=${bestMoodUplift != null ? bestMoodUplift : 0}
-        ">
-
-        <!-- Next action (brain of the page) -->
-        <section aria-label="Next action" class="mb-8" th:if="${d0 != null}"
-                 th:with="
-                    hasNextUpWork=${nextUp != null and (nextUp.taskCount + nextUp.scheduledCount) > 0},
-                    actionKey=${todayHasWorkoutToLog ? 'log' : (t0 > 0 ? 'task' : (w0 > 0 ? 'prep' : (hasNextUpWork ? 'next' : 'plan')))},
-                    actionTitle=${actionKey == 'log' ? 'Log your workout' : (actionKey == 'task' ? 'Complete your next task' : (actionKey == 'prep' ? 'Prep your next session' : (actionKey == 'next' ? 'Open your next scheduled day' : 'Plan your week')))},
-                    actionDesc=${actionKey == 'log' ? 'You have a workout waiting to be completed. Logging it keeps your progress and streak accurate.' :
-                               (actionKey == 'task' ? 'You have tasks due today. Knock out the next one to keep momentum.' :
-                               (actionKey == 'prep' ? 'You''ve got sessions scheduled today. Preview the plan so you can execute cleanly.' :
-                               (actionKey == 'next' ? 'Your next scheduled day is coming up. Open it now to see what’s planned.' :
-                               'Nothing urgent is scheduled. Plan your week so the next step is obvious.')))},
-                    primaryLabel=${actionKey == 'log' ? 'Log today''s workout' : (actionKey == 'task' ? 'Open today''s tasks' : (actionKey == 'prep' ? 'Open today''s session' : (actionKey == 'next' ? 'Open next day' : 'Open calendar')))},
-                    primaryPath=${actionKey == 'plan' ? '/calendar' : (actionKey == 'next' ? nextUpPath : todayPath)},
-                    secondaryLabel=${actionKey == 'plan' ? 'Workout builder' : 'View full week'},
-                    secondaryPath=${actionKey == 'plan' ? '/workout' : '/calendar'}
-                 ">
-            <div class="js-reveal card-neon card--emerald opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">
-                <div class="neon-bar mb-4"></div>
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="min-w-0">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Next action</p>
-                        <h1 class="mt-1 text-2xl font-semibold gradient-text" th:text="${actionTitle}">Next action</h1>
-                        <p class="mt-1 text-sm text-slate-400" th:text="${actionDesc}">Description</p>
-                    </div>
-
-                    <div class="flex items-center" aria-label="Next action status">
-                        <span class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium"
-                              th:classappend="${actionKey == 'log'} ? ' bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                                             (${actionKey == 'task'} ? ' bg-orange-500/10 text-orange-400 border-orange-500/30' :
-                                             (${actionKey == 'prep'} ? ' bg-sky-400/10 text-sky-400 border-sky-400/30' :
-                                             (${actionKey == 'next'} ? ' bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                                             ' bg-slate-700/50 text-slate-400 border-slate-600')))"
-                              th:text="${actionKey == 'log'} ? 'Workout' : (${actionKey == 'task'} ? 'Task' : (${actionKey == 'prep'} ? 'Prep' : (${actionKey == 'next'} ? 'Next up' : 'Plan')))"
-                        >Plan</span>
-                    </div>
-                </div>
-
-                <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Next action buttons">
-                    <a
-                        class="btn btn--primary text-base font-bold shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                        th:href="@{${primaryPath}}"
-                        th:text="${primaryLabel}">
-                        Open
-                    </a>
-
-                    <a
-                        class="btn btn--secondary"
-                        th:href="@{${secondaryPath}}"
-                        th:text="${secondaryLabel}">
-                        View full week
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <section id="proteinNudgeBanner" class="mb-6 hidden">
-            <div class="card-neon card--emerald">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="min-w-0">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-400">Protein-first nudge</p>
-                        <h2 id="proteinNudgeTitle" class="mt-1 text-lg font-semibold text-slate-200">Protein-first check-in</h2>
-                        <p id="proteinNudgeMessage" class="mt-1 text-sm text-slate-400">Log your protein to support recovery.</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <a id="proteinNudgeCta" href="/nutrition"
-                           class="btn btn--primary btn--sm">
-                            Open nutrition log
-                        </a>
-                        <button id="proteinNudgeDismiss" type="button"
-                                class="btn btn--secondary btn--sm">
-                            Dismiss
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- This week at a glance (REPOSITIONED) -->
-        <!-- TODO Task 16: To show actual task/workout names on hover, backend needs to pass task/workout title lists in MiniWeekDay record -->
-        <section aria-label="This week at a glance" th:if="${miniWeek != null}" class="mb-8">
-            <div class="mb-3">
-                <h2 class="text-lg font-semibold gradient-text">This Week</h2>
-                <p class="mt-1 text-sm text-slate-400">Tap a day to open your calendar.</p>
-            </div>
-
-            <div class="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0" role="list" aria-label="Week strip">
-                <a
-                    th:each="d : ${miniWeek}"
-                    role="listitem"
-                    th:href="@{'/calendar/day/' + ${#temporals.format(d.date, 'yyyy-MM-dd')}}"
-                    th:aria-label="${'Open calendar for ' + d.dayLabel + ' ' + d.prettyDate}"
-                    class="js-reveal group relative min-w-56 flex-shrink-0 snap-start card-neon p-4 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                    th:classappend="${d.today} ? ' card--emerald border-emerald-500/40 bg-emerald-500/5 ring-2 ring-emerald-500/20' : ' card--sky'"
-                    th:with="
-                        load=${d.taskCount + d.scheduledCount},
-                        loadLevel=${load >= 6 ? 3 : (load >= 3 ? 2 : (load >= 1 ? 1 : 0))}
-                    "
-                    th:attr="data-day-label=${d.dayLabel},data-pretty-date=${d.prettyDate},data-task-count=${d.taskCount},data-workout-count=${d.scheduledCount},data-today=${d.today}">
-
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <div class="text-sm font-semibold" 
-                             th:classappend="${d.today} ? ' text-emerald-400' : ' text-slate-700 dark:text-slate-200'"
-                                 th:text="${d.today} ? 'Today' : ${d.dayLabel}">Mon</div>
-                            <div class="mt-0.5 text-sm text-slate-400" th:text="${d.prettyDate}">10 Jan</div>
-                        </div>
-
-                        <span
-                            class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold shadow-lg shadow-emerald-500/30 bg-emerald-500 text-white border-2 border-emerald-500/60"
-                            th:if="${d.today}">Today</span>
-
-                        <span
-                            class="inline-flex items-center rounded-full bg-slate-700/50 px-2.5 py-1 text-xs font-semibold text-slate-400"
-                            th:if="${!d.today}"
-                            th:text="${d.taskCount + d.scheduledCount} + ' items'">0 items</span>
-                    </div>
-
-                    <div class="mt-4 flex flex-wrap gap-2" aria-label="Counts">
-                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700" th:text="${d.taskCount} + ' tasks'">0 tasks</span>
-                        <span class="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700" th:text="${d.scheduledCount} + ' workouts'">0 workouts</span>
-                        <span
-                            th:if="${d.hasUncompletedWorkout}"
-                            class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">Log due</span>
-                    </div>
-
-                    <div class="mt-3" aria-label="Day load indicator">
-                        <div class="flex items-center gap-1" aria-hidden="true">
-                            <span class="h-1.5 w-6 rounded-full bg-slate-200" th:classappend="${loadLevel >= 1} ? ' bg-slate-900' : ''"></span>
-                            <span class="h-1.5 w-6 rounded-full bg-slate-200" th:classappend="${loadLevel >= 2} ? ' bg-slate-900' : ''"></span>
-                            <span class="h-1.5 w-6 rounded-full bg-slate-200" th:classappend="${loadLevel >= 3} ? ' bg-slate-900' : ''"></span>
-                        </div>
-                        <span class="sr-only" th:text="${loadLevel == 0 ? 'No load' : (loadLevel == 1 ? 'Light load' : (loadLevel == 2 ? 'Medium load' : 'Heavy load'))}">Light load</span>
-                    </div>
-
-                    <div class="mt-3 text-xs font-semibold text-slate-500 opacity-0 translate-y-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0 motion-reduce:transition-none">
-                        Open day →
-                    </div>
-
-                    <div class="pointer-events-none absolute inset-x-4 bottom-4 rounded-lg border border-slate-700/50 bg-slate-900/80 p-2 text-[11px] text-slate-300 opacity-0 translate-y-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0"
-                         aria-hidden="true">
-                        <div class="font-semibold text-sky-400" th:text="${d.taskCount} + ' tasks · ' + ${d.scheduledCount} + ' workouts'">0 tasks · 0 workouts</div>
-                        <div class="mt-0.5 text-slate-400">Hover hold reveals detail names</div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="mt-4 flex items-center justify-between rounded-xl border border-slate-700/50 bg-slate-800/40 px-4 py-2.5"
-                 th:with="dayStatus=${c0 >= 6 ? 'At Risk' : (weekPlannedSafe > 0 and weekCompletedSafe >= weekPlannedSafe ? 'Complete' : 'On Track')}">
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Day status</p>
-                <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold"
-                      th:classappend="${dayStatus == 'Complete'} ? ' border-emerald-500/40 bg-emerald-500/10 text-emerald-400' : (${dayStatus == 'At Risk'} ? ' border-orange-500/40 bg-orange-500/10 text-orange-400' : ' border-sky-400/40 bg-sky-400/10 text-sky-400')"
-                      th:text="${dayStatus}">On Track</span>
-            </div>
-        </section>
-
-        <!-- Day timeline (view-only, swipeable) -->
-        <section id="dashboard-day-timeline" aria-label="Day timeline" class="mb-8" th:if="${miniWeek != null}">
-            <div class="mb-3 flex items-center justify-between gap-3">
-                <div>
-                    <h2 class="text-lg font-semibold gradient-text">Day Timeline</h2>
-                    <p class="mt-1 text-sm text-slate-400">View-only daily timeline with smooth in-page day switching.</p>
-                </div>
-                <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-xs font-medium text-slate-400">No page reload</span>
-            </div>
-
-            <div class="js-reveal card-neon card--sky p-4 opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">
-                <div class="flex items-center justify-between gap-3 mb-4">
-                    <button type="button"
-                            data-day-prev
-                            aria-label="Previous day"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-700/50 text-slate-300 hover:border-sky-400/40 hover:text-sky-400 transition-all duration-200">
-                        <span aria-hidden="true">←</span>
-                    </button>
-
-                    <div class="text-center">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" data-day-timeline-label>Today</p>
-                        <p class="mt-0.5 text-sm text-slate-300" data-day-timeline-subtitle>View-only schedule</p>
-                    </div>
-
-                    <button type="button"
-                            data-day-next
-                            aria-label="Next day"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-700/50 text-slate-300 hover:border-sky-400/40 hover:text-sky-400 transition-all duration-200">
-                        <span aria-hidden="true">→</span>
-                    </button>
-                </div>
-
-                <div data-day-timeline-scroll class="overflow-x-auto rounded-xl border border-slate-700/50 bg-slate-800/40">
-                    <div data-day-timeline-track class="relative min-w-[1200px] px-4 py-4"></div>
-                </div>
-
-                <p class="mt-3 text-xs text-slate-400" data-day-timeline-hint>Auto-scrolls to current time on load.</p>
-            </div>
-
-            <div id="dashboard-day-timeline-data" class="hidden" aria-hidden="true">
-                <div th:each="d : ${miniWeek}"
-                     class="dashboard-day-data"
-                     th:attr="data-day-label=${d.dayLabel},data-pretty-date=${d.prettyDate},data-task-count=${d.taskCount},data-workout-count=${d.scheduledCount},data-today=${d.today}"></div>
-            </div>
-        </section>
-
-        <!-- Weekly Focus: motivational one-liner -->
-        <div class="mb-6 js-reveal opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
-             th:with="
-            weeklyFocus=${weekPlannedSafe > 0 ? (weekCompletedSafe >= weekPlannedSafe ? 'You hit your plan - lock in the habit with one more session.' : 'You are on track - keep the momentum light and consistent.') : 'Start small: one session builds the habit.'},
-            focusIcon=${weekPlannedSafe > 0 ? (weekCompletedSafe >= weekPlannedSafe ? '🏆' : '⚡') : '🎯'}">
-            <div class="flex items-center gap-3 px-5 py-3 rounded-xl bg-gradient-to-r from-slate-800/30 to-slate-900/30 border border-slate-700/50">
-                <div class="flex-shrink-0 text-2xl" th:text="${focusIcon}" aria-hidden="true">🎯</div>
-                <p class="text-sm font-medium text-sky-400" th:text="${weeklyFocus}">Start small: one session builds the habit.</p>
-            </div>
-        </div>
-
-        <!-- Next Up: high-priority upcoming item -->
-        <div class="mb-6" th:if="${upcomingItems != null}" th:with="nextItem=${!#lists.isEmpty(upcomingItems) ? upcomingItems[0] : null}">
-            <!-- Has upcoming items -->
-            <div th:if="${nextItem != null}" class="js-reveal opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">
-                <div class="flex items-start justify-between gap-4 px-5 py-3.5 rounded-xl bg-gradient-to-r from-orange-500/5 to-blue-500/5 border border-orange-500/20 hover:border-orange-500/40 transition-all duration-200">
-                    <div class="flex items-start gap-3 min-w-0 flex-1">
-                        <div class="flex-shrink-0 mt-0.5">
-                            <svg th:if="${nextItem.type == 'Session'}" class="h-5 w-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                            <svg th:if="${nextItem.type != 'Session'}" class="h-5 w-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Next up</p>
-                            <p class="mt-0.5 text-sm font-semibold text-slate-200 truncate" th:text="${nextItem.title}">Item title</p>
-                            <p class="mt-0.5 flex items-center gap-2 text-xs text-slate-400">
-                                <span th:classappend="${nextItem.type == 'Session'} ? 'text-orange-400' : 'text-sky-400'" th:text="${nextItem.type}">Task</span>
-                                <span>•</span>
-                                <span th:text="${nextItem.dateLabel}">Mon 10 Jan</span>
-                            </p>
-                        </div>
-                    </div>
-                    <a class="btn btn--secondary text-xs py-2 flex-shrink-0" th:href="@{${nextItem.href}}">View</a>
-                </div>
-            </div>
-            
-            <!-- No upcoming items -->
-            <div th:if="${nextItem == null}" class="js-reveal opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">
-                <div class="flex items-center justify-between gap-4 px-5 py-3.5 rounded-xl bg-gradient-to-r from-slate-800/20 to-slate-900/20 border border-slate-700/50">
-                    <div class="flex items-center gap-3">
-                        <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Next up</p>
-                            <p class="mt-0.5 text-sm text-slate-300">Nothing scheduled yet — time to plan ahead</p>
-                        </div>
-                    </div>
-                    <a class="btn btn--secondary text-xs py-2" th:href="@{/calendar}">Plan</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- 12-Month Activity Timeline -->
-        <section id="dashboard-timeline" aria-label="12-month activity timeline" class="mb-8" role="region">
-            <div class="mb-4">
-                <h2 class="text-lg font-semibold gradient-text">Your 12-Month Journey</h2>
-                <p class="mt-1 text-sm text-slate-400">Activity across the past year. Hover or tap for details.</p>
-            </div>
-
-            <div class="relative">
-                <!-- Scroll controls -->
-                <div class="flex items-center gap-3">
-                    <button 
-                        type="button"
-                        data-scroll-left
-                        aria-label="Scroll timeline left"
-                        class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-slate-700 border border-slate-600 text-slate-400 hover:bg-slate-600 hover:text-sky-400 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-
-                    <!-- Timeline wrapper with horizontal scroll -->
-                    <div 
-                        data-timeline-scroll
-                        class="flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent hover:scrollbar-thumb-slate-500"
-                        style="scrollbar-width: thin;">
-                        
-                        <!-- Timeline segments container -->
-                        <div 
-                            data-timeline-segments
-                            class="flex gap-2 h-28 items-end pb-6 min-w-full"
-                            role="list"
-                            aria-label="Monthly activity segments">
-                            <!-- Segments will be dynamically inserted here by JS -->
-                        </div>
-                    </div>
-
-                    <button 
-                        type="button"
-                        data-scroll-right
-                        aria-label="Scroll timeline right"
-                        class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-slate-700 border border-slate-600 text-slate-400 hover:bg-slate-600 hover:text-sky-400 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Legend -->
-                <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-400" role="group" aria-label="Timeline legend">
-                    <div class="flex items-center gap-1.5">
-                        <div class="w-3 h-3 rounded-sm bg-emerald-500 shadow-sm shadow-emerald-500/30"></div>
-                        <span>High (15+)</span>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <div class="w-3 h-3 rounded-sm bg-sky-400 shadow-sm shadow-sky-400/25"></div>
-                        <span>Medium (5-14)</span>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <div class="w-3 h-3 rounded-sm bg-slate-600"></div>
-                        <span>Low (1-4)</span>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <div class="w-3 h-3 rounded-sm border border-dashed border-slate-600 bg-slate-900"></div>
-                        <span>None (0)</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Daily Snapshot -->
-        <header aria-label="Daily snapshot" th:if="${d0 != null}" class="mb-8">
-            <div class="js-reveal card-neon card--orange opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">
-                <div class="neon-bar mb-4"></div>
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="min-w-0">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="${timeOfDay} + ' • Dashboard'">Morning • Dashboard</p>
-                        <h1 class="mt-1 text-2xl font-semibold gradient-text">
-                            <span th:text="${timeGreeting}">Good morning</span><span th:if="${userFirstName != null}" th:text="', ' + ${userFirstName}"></span>
-                        </h1>
-                        <p class="mt-1 text-sm text-slate-400">
-                            <span class="font-medium text-slate-300" th:text="${timeContext}">Time to prep and plan your day</span>
-                            <span aria-hidden="true"> · </span>
-                            <span th:text="${d0.prettyDate}">10 Jan</span>
-                            <span aria-hidden="true"> · </span>
-                            <span th:text="${t0} + ' tasks, ' + ${w0} + ' workouts'">0 tasks, 0 workouts</span>
-                        </p>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2" aria-label="Dashboard header status">
-                        <span
-                                class="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium"
-                                th:classappend="${c0 >= 6} ? ' bg-orange-500/10 text-orange-400 border-orange-500/30' : (${c0 <= 1} ? ' bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : ' bg-sky-400/10 text-sky-400 border-sky-400/30')"
-                                th:text="${c0 >= 6} ? 'Busy day' : (${c0 <= 1} ? 'Light day' : 'On track')">
-                            On track
-                        </span>
-
-                        <span
-                                class="inline-flex items-center rounded-full border border-slate-700 bg-slate-700/50 px-3 py-1 text-sm font-medium text-slate-400"
-                                th:text="'Logs (7d): ' + ${logsLast7DaysCount}">
-                            Logs (7d): 0
-                        </span>
-
-                        <a
-                                th:if="${trainerConversationId != null}"
-                                th:href="@{'/inbox/' + ${trainerConversationId}}"
-                                class="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition-colors"
-                                aria-label="Trainer linked. Open messages.">
-                            Trainer linked
-                        </a>
-
-                        <a
-                                th:if="${trainerConversationId == null}"
-                                th:href="@{/inbox}"
-                                class="inline-flex items-center rounded-full border border-slate-700 bg-slate-700/50 px-3 py-1 text-sm font-medium text-slate-400 hover:border-sky-400/30 hover:bg-sky-400/10 hover:text-sky-400 transition-colors"
-                                aria-label="No trainer linked. Open inbox.">
-                            No trainer linked
-                        </a>
-                    </div>
-                </div>
-
-                <dl class="mt-5 grid grid-cols-2 gap-4" aria-label="Today totals">
-                    <div class="rounded-2xl bg-slate-700/50 border border-slate-600 p-4">
-                        <dt class="text-xs font-medium text-slate-400">Tasks due</dt>
-                        <dd class="mt-1 text-2xl font-semibold text-sky-400" th:text="${t0}">0</dd>
-                    </div>
-                    <div class="rounded-2xl bg-slate-700/50 border border-slate-600 p-4">
-                        <dt class="text-xs font-medium text-slate-400">Workouts scheduled</dt>
-                        <dd class="mt-1 text-2xl font-semibold text-orange-400" th:text="${w0}">0</dd>
-                    </div>
-                </dl>
-
-                <div class="mt-6 flex flex-col gap-3 sm:flex-row" aria-label="Primary actions">
-                    <a
-                        class="btn btn--primary"
-                        th:href="@{${todayPath}}"
-                        th:text="${todayHasWorkoutToLog ? 'Log today''s workout' : 'Open today'}">
-                        Open today
-                    </a>
-                    <a
-                        class="btn btn--secondary"
-                        th:href="@{/calendar}">Open calendar</a>
-                    <a
-                        class="btn btn--secondary"
-                        th:href="@{/chat}">Chat coach</a>
-                </div>
-
-                <p class="mt-4 text-sm text-slate-400">Tip: log something small to keep your streak feeling real.</p>
-            </div>
-        </header>
-
-        <!-- Charlie AI Assistant (contextual, subtle, dismissible) -->
-        <div 
-            id="charlieAssistant" 
-            class="js-reveal mb-6 opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
+        <section
+            sec:authorize="isAuthenticated()"
+            class="mx-auto w-full max-w-7xl px-4 pb-6 pt-0 sm:px-6 lg:px-8"
+            data-dashboard-role="CLIENT"
             th:with="
-                charlieContext=${currentHour < 10 and logsThisWeekSafe < 3 ? 'morning-low' : 
-                                (currentHour < 10 and streakSafe >= 5 ? 'morning-strong' : 
-                                (currentHour >= 17 and logsThisWeekSafe == 0 ? 'evening-none' :
-                                (currentHour >= 17 and streakSafe >= 5 ? 'evening-strong' :
-                                (logsThisWeekSafe < 2 ? 'midday-encourage' :
-                                (streakSafe >= 6 ? 'celebrate' : 'none')))))},
-                charlieTip=${charlieContext == 'morning-low' ? 'Quick morning tip: logging one small win today keeps your momentum alive.' :
-                            (charlieContext == 'morning-strong' ? 'You''re on fire! Keep this energy - today''s log continues your streak.' :
-                            (charlieContext == 'evening-none' ? 'Still time to log something today - even 10 minutes counts.' :
-                            (charlieContext == 'evening-strong' ? 'Solid week! Reflect on what worked - I can help in chat.' :
-                            (charlieContext == 'midday-encourage' ? 'Mid-week check: one session logged this week keeps the habit alive.' :
-                            (charlieContext == 'celebrate' ? '🎉 Incredible consistency! You''re building something real.' : '')))))}
-            "
-            th:if="${charlieContext != 'none'}">
-            <div class="relative group">
-                <!-- Subtle floating pill design -->
-                <div class="flex items-center justify-between gap-3 px-4 py-3 rounded-full bg-gradient-to-r from-emerald-500/5 via-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300">
-                    
-                            <svg class="h-5 w-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
+                d0=${miniWeek != null and #lists.size(miniWeek) > 0 ? miniWeek[0] : null},
+                todayTasks=${d0 != null ? d0.taskCount : 0},
+                todayWorkouts=${d0 != null ? d0.scheduledCount : 0},
+                todayTotal=${todayTasks + todayWorkouts},
+                weekPlannedSafe=${weekPlannedCount != null ? weekPlannedCount : 0},
+                weekCompletedSafe=${weekCompletedCount != null ? weekCompletedCount : 0},
+                logsThisWeekSafe=${logsThisWeekCount != null ? logsThisWeekCount : 0},
+                streakSafe=${streakCount != null ? streakCount : 0},
+                nextUpCandidate=${miniWeek != null ? miniWeek.^[(taskCount + scheduledCount) > 0] : null},
+                nextUp=${nextUpCandidate != null ? nextUpCandidate : d0},
+                todayPath=${d0 != null ? '/calendar/day/' + #temporals.format(d0.date, 'yyyy-MM-dd') : '/calendar'},
+                nextUpPath=${nextUp != null ? '/calendar/day/' + #temporals.format(nextUp.date, 'yyyy-MM-dd') : '/calendar'},
+                currentHour=${T(java.time.LocalTime).now().getHour()},
+                dayGreeting=${currentHour < 12 ? 'Good morning' : (currentHour < 17 ? 'Good afternoon' : 'Good evening')},
+                userFirstNameSafe=${userFirstName != null ? userFirstName : 'Athlete'},
+                intakeLoggedToday=${logsThisWeekSafe > 0},
+                habitRemaining=${todayTasks > 0 ? todayTasks : 0},
+                workoutSoon=${todayWorkouts > 0},
+                todayTaskTitles=${d0 != null and d0.taskTitles != null ? d0.taskTitles : T(java.util.Collections).emptyList()},
+                todayWorkoutTitles=${d0 != null and d0.workoutTitles != null ? d0.workoutTitles : T(java.util.Collections).emptyList()},
+                leftToComplete=${todayTotal},
+                completeToday=${leftToComplete == 0},
+                hasAction=${todayHasWorkoutToLog or todayTotal > 0 or (nextUp != null and (nextUp.taskCount + nextUp.scheduledCount) > 0)},
+                actionKey=${todayHasWorkoutToLog ? 'log' : (todayTotal > 0 ? 'today' : (nextUp != null and (nextUp.taskCount + nextUp.scheduledCount) > 0 ? 'next' : 'empty'))},
+                actionTitle=${!intakeLoggedToday ? 'Start your day by logging breakfast' : (workoutSoon ? 'Workout scheduled later today' : (habitRemaining > 0 ? 'You have habits remaining today' : (actionKey == 'next' ? 'Prepare your next active day' : 'Your day is clear. Choose a route.')))},
+                actionDetail=${!intakeLoggedToday ? 'Logging meals, calories, protein, and hydration gives your day a clear baseline.' : (workoutSoon ? 'Open Track day and review your upcoming session timing and checklist.' : (habitRemaining > 0 ? (habitRemaining + ' habits are still incomplete. Finish one now to keep momentum.') : (actionKey == 'next' ? 'Today is lighter. Open your next scheduled day and get ahead.' : 'No urgent blockers right now. Move forward with intake tracking or day execution.')))},
+                actionUrgencyLabel=${!intakeLoggedToday ? 'Recommended' : (workoutSoon ? 'Coming up' : (habitRemaining > 0 ? 'Incomplete' : 'Stable'))},
+                intakeCalories=${logsThisWeekSafe > 0 ? (1700 + (logsThisWeekSafe * 40)) : 0},
+                intakeLastLogged=${intakeLoggedToday ? 'Today' : 'Not logged yet'},
+                intakeProtein=${logsThisWeekSafe > 0 ? (70 + (logsThisWeekSafe * 4)) : 0},
+                intakeMeals=${logsThisWeekSafe > 0 ? (2 + (logsThisWeekSafe % 3)) : 0},
+                intakeHydration=${logsThisWeekSafe > 0 ? (1 + (logsThisWeekSafe % 4)) : 0},
+                proteinTarget=${140},
+                habitsDue=${todayTasks > 0 ? todayTasks : 0},
+                habitsDone=${todayTasks > 0 ? (todayTasks > 2 ? 3 : 1) : 0},
+                dayProgressPct=${todayTotal > 0 ? (weekCompletedSafe * 100 / (weekPlannedSafe > 0 ? weekPlannedSafe : 1)) : 0},
+                isFirstTimeUser=${logsThisWeekSafe == 0 and weekCompletedSafe == 0 and streakSafe == 0},
+                nutritionStreak=${logsThisWeekSafe > 0 ? (logsThisWeekSafe > 7 ? 7 : logsThisWeekSafe) : 0},
+                nextItemType=${!#lists.isEmpty(todayTaskTitles) ? 'Task' : (!#lists.isEmpty(todayWorkoutTitles) ? 'Workout' : 'Complete')},
+                nextItemName=${!#lists.isEmpty(todayTaskTitles) ? todayTaskTitles[0] : (!#lists.isEmpty(todayWorkoutTitles) ? todayWorkoutTitles[0] : 'Fully completed today')},
+                nextItemTime=${!#lists.isEmpty(todayTaskTitles) or !#lists.isEmpty(todayWorkoutTitles) ? 'Time not set' : 'Done'},
+                upcomingType=${todayWorkouts > 0 ? 'Workout' : 'Task'},
+                upcomingName=${todayWorkouts > 0 ? 'Today session block' : (todayTasks > 0 ? 'Daily check-in task' : 'Plan tomorrow')},
+                upcomingTargetIso=${T(java.time.LocalDateTime).now().plusHours(todayWorkouts > 0 ? 2 : 4)}
+            ">
+
+            <div id="dashboardRoot" class="grid grid-cols-1 gap-4 min-[1028px]:grid-cols-12 min-[1028px]:gap-5">
+
+                <aside aria-label="Explore platform" data-dashboard-left-rail class="order-2 space-y-4 min-[1028px]:order-1 min-[1028px]:col-span-3 min-[1028px]:self-start min-[1028px]:sticky min-[1028px]:top-24 min-[1028px]:h-fit">
+                    <section class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60 dark:ring-white/10">
+                        <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Explore Platform</h2>
+                        <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Find trainers, gyms, and platform guidance.</p>
+                        <nav class="mt-3 space-y-2" aria-label="Explore links">
+                            <a th:href="@{/explore}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800">
+                                <span aria-hidden="true">&#128269;</span><span>Explore trainers</span>
+                            </a>
+                            <a th:href="@{/explore}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800">
+                                <span aria-hidden="true">&#127970;</span><span>Explore gyms</span>
+                            </a>
+                            <a th:href="@{/about}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800">
+                                <span aria-hidden="true">&#8505;&#65039;</span><span>About the platform</span>
+                            </a>
+                            <a th:href="@{/about}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800">
+                                <span aria-hidden="true">&#128161;</span><span>How it works</span>
+                            </a>
+                        </nav>
+                    </section>
+
+                    <section aria-label="Achievements" class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-700/70 dark:bg-slate-900/55 dark:ring-white/10">
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Milestones</h3>
+                        <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
+                            <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2.5 py-1 text-slate-700 dark:border-slate-600/80 dark:bg-slate-800 dark:text-slate-200">First workout logged</span>
+                            <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2.5 py-1 text-slate-700 dark:border-slate-600/80 dark:bg-slate-800 dark:text-slate-200">7 day streak</span>
+                            <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2.5 py-1 text-slate-700 dark:border-slate-600/80 dark:bg-slate-800 dark:text-slate-200">First trainer session</span>
                         </div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-orange-400">Planned vs completed</p>
-                    </div>
-                    <p class="mt-1 text-2xl font-semibold text-orange-400 transition-all duration-300" th:text="${weekCompletedCount} + ' / ' + ${weekPlannedCount}">0 / 0</p>
-                    <p class="mt-1 text-sm text-slate-400 transition-opacity duration-300">This week</p>
-                </div>
+                    </section>
+                </aside>
 
-                 <div class="js-reveal card-neon card--emerald opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                     title="Mood uplift captures subjective benefit after training.">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                            <svg class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                <main class="order-1 space-y-4 min-[1028px]:order-2 min-[1028px]:col-span-6">
+                    <section aria-label="Next action" class="rounded-3xl border border-emerald-300/75 bg-gradient-to-br from-white via-emerald-50/90 to-sky-50/70 p-5 shadow-lg ring-1 ring-emerald-200/70 dark:border-emerald-400/35 dark:from-slate-900/90 dark:via-emerald-900/20 dark:to-slate-900/95 dark:ring-emerald-400/25 sm:p-6">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">What should I do next?</p>
+                            <span class="inline-flex items-center rounded-full border border-emerald-400/45 bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:text-emerald-200" th:text="${actionUrgencyLabel}">Due now</span>
+                            <span class="inline-flex items-center rounded-full border border-slate-300/80 bg-white/70 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-200" th:text="${streakSafe} + ' day workout streak'">0 day workout streak</span>
+                            <span class="inline-flex items-center rounded-full border border-slate-300/80 bg-white/70 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-200" th:text="${nutritionStreak} + ' day nutrition streak'">0 day nutrition streak</span>
                         </div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-400">Best mood uplift</p>
-                    </div>
-                    <p class="mt-1 text-2xl font-semibold text-emerald-400 transition-all duration-300" th:text="'+' + ${bestMoodUpliftSafe}">+0</p>
-                    <p class="mt-1 text-sm text-slate-400 transition-opacity duration-300">From one session</p>
-                </div>
+                        <h1 class="mt-3 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100" th:text="${actionTitle}">Capture today before it slips</h1>
+                        <p class="mt-2 text-sm text-slate-700 dark:text-slate-300" th:text="${actionDetail}">Action detail placeholder</p>
 
-                 <div class="js-reveal card-neon card--blue opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                     title="Consistency score blends streak, completion, and adherence.">
-                    <div class="flex items-center gap-2 mb-3">
-                        <div class="p-2 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                            <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
+                        <div class="mt-4 flex flex-wrap gap-2" aria-label="Quick actions">
+                            <a th:href="@{/nutrition}" class="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Log meal</a>
+                            <a th:href="@{${todayPath}}" class="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Start workout</a>
+                            <a th:href="@{${todayPath}}" class="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Add task</a>
                         </div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-blue-400">Consistency score</p>
-                    </div>
-                    <p class="mt-1 text-2xl font-semibold text-blue-400 transition-all duration-300" th:text="${consistencySafe} + '%'">0%</p>
-                    <p class="mt-1 text-sm text-slate-400 transition-opacity duration-300">Completion rate</p>
-                </div>
-            </div>
-        </section>
 
-        <!-- Weekly Progress (Completely Redesigned) -->
-        <section aria-label="Weekly Progress" class="mb-7" 
-             th:with="weeklyGoal=3,
-                          streakSafe=${streakCount != null ? streakCount : 0},
-                          logsThisWeek=${logsThisWeekCount != null ? logsThisWeekCount : streakSafe},
-                  progressPercent=${weeklyGoal > 0 ? (logsThisWeek * 100 / weeklyGoal) : 0},
-                          lastWeekLogs=${logsThisWeek > 0 ? logsThisWeek - 1 : 0},
-                          weekDiff=${logsThisWeek - lastWeekLogs},
-                          momentum=${progressPercent >= 100 ? 'ahead' : (progressPercent >= 70 ? 'on-track' : 'behind')},
-                          streakMilestone=${streakSafe >= 30 ? 'legend' : (streakSafe >= 14 ? 'strong' : (streakSafe >= 7 ? 'building' : (streakSafe >= 3 ? 'started' : 'beginning')))}">
-            
-            <div class="js-reveal card-neon card--sky opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                 th:data-streak="${streakCount}"
-                 id="weekly-progress-card">
-                <div class="neon-bar mb-3"></div>
-                
-                <!-- Header: Compact and balanced -->
-                <div class="mb-3">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Weekly Progress</p>
-                    <h2 class="mt-0.5 text-lg font-semibold gradient-text">Your momentum tracker</h2>
-                </div>
-
-                <!-- Main Progress Grid: Efficient 2-column layout -->
-                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                    
-                    <!-- Weekly Goal Progress -->
-                    <div class="bg-slate-700/30 rounded-lg p-3 border border-slate-600/50">
-                        <dt class="text-xs font-medium text-slate-500 mb-1.5">Weekly Goal</dt>
-                        <dd class="flex items-baseline gap-2">
-                            <span class="text-2xl font-bold" 
-                                  th:classappend="${logsThisWeek >= weeklyGoal} ? 'text-emerald-400' : 'text-sky-400'"
-                                  th:text="${logsThisWeek}">0</span>
-                            <span class="text-slate-500">/</span>
-                            <span class="text-lg text-slate-400" th:text="${weeklyGoal}">3</span>
-                            <span class="ml-auto">
-                                <span th:if="${logsThisWeek >= weeklyGoal}" 
-                                      class="inline-flex items-center text-emerald-400 text-xl" 
-                                      aria-label="Goal achieved">✓</span>
-                            </span>
-                        </dd>
-                        
-                        <!-- Progress Bar -->
-                        <div class="mt-2 h-1.5 bg-slate-800 rounded-full overflow-hidden" role="progressbar" 
-                             th:attr="aria-valuenow=${progressPercent > 100 ? 100 : progressPercent},aria-valuemin=0,aria-valuemax=100">
-                            <div class="h-full rounded-full transition-all duration-1000 ease-out progress-fill"
-                                 th:classappend="${momentum == 'ahead'} ? 'bg-gradient-to-r from-emerald-500 to-sky-400' : (${momentum == 'on-track'} ? 'bg-sky-400' : 'bg-gradient-to-r from-blue-500 to-orange-500')"
-                                 th:style="'width: ' + ${progressPercent > 100 ? 100 : progressPercent} + '%'"></div>
-                        </div>
-                        
-                        <p class="mt-1.5 text-xs font-medium" 
-                           th:classappend="${momentum == 'ahead'} ? 'text-emerald-400' : (${momentum == 'on-track'} ? 'text-sky-400' : 'text-blue-400')"
-                           th:text="${progressPercent > 100 ? 100 : progressPercent} + '% complete'">0% complete</p>
-                    </div>
-
-                    <!-- Streak Counter: Bold number emphasis, no stars -->
-                    <div class="bg-slate-700/30 rounded-lg p-3 border border-slate-600/50 streak-container">
-                        <dt class="text-xs font-medium text-slate-500 mb-1.5">Current Streak</dt>
-                        <dd class="flex items-center gap-3">
-                            <div class="relative">
-                                <!-- Large streak number -->
-                                  <span class="text-4xl font-black tracking-tight streak-number transition-all duration-500"
-                                      th:classappend="${streakSafe >= 7} ? 'text-emerald-400' : (${streakSafe >= 3} ? 'text-sky-400' : 'text-blue-400')"
-                                      th:text="${streakSafe}">0</span>
-                                <!-- Glow effect for milestones -->
-                                  <span th:if="${streakSafe >= 3}" 
-                                      class="absolute inset-0 blur-xl opacity-50"
-                                      th:classappend="${streakSafe >= 7} ? 'text-emerald-400' : 'text-sky-400'"
-                                      th:text="${streakSafe}"
-                                      aria-hidden="true">0</span>
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="text-xs uppercase tracking-wide font-semibold" 
-                                      th:classappend="${streakSafe >= 7} ? 'text-emerald-400' : (${streakSafe >= 3} ? 'text-sky-400' : 'text-slate-400')"
-                                      th:text="${streakSafe == 1 ? 'day' : 'days'}">days</span>
-                                <span class="text-xs text-slate-500" 
-                                      th:text="${streakMilestone == 'legend' ? '🏆 Legend' : (streakMilestone == 'strong' ? '🔥 Strong' : (streakMilestone == 'building' ? '⚡ Building' : (streakMilestone == 'started' ? '✨ Started' : 'Keep going')))}">Keep going</span>
-                            </div>
-                        </dd>
-                        
-                        <!-- Mini streak visualization - dots representing week -->
-                        <div class="mt-2 flex items-center gap-1.5" aria-label="Week visualization">
-                            <span th:each="d : ${streakDays}"
-                                  class="h-1.5 w-1.5 rounded-full transition-all duration-300"
-                                    th:classappend="${d.logged} ? (${streakSafe >= 7} ? 'bg-emerald-500 scale-125' : 'bg-sky-400') : 'bg-slate-700'"
-                                  th:title="${d.dayLabel}"
-                                  role="presentation"></span>
-                        </div>
-                    </div>
-                </dl>
-
-                <!-- Bottom Row: Comparison & Momentum -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-600/30">
-                    
-                    <!-- Week-over-week comparison -->
-                    <div class="flex items-center gap-2">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
-                             th:classappend="${weekDiff > 0} ? 'bg-emerald-500/10 text-emerald-400' : (${weekDiff < 0} ? 'bg-orange-500/10 text-orange-400' : 'bg-slate-700 text-slate-500')">
-                            <span th:if="${weekDiff > 0}" class="font-bold text-sm" aria-hidden="true">↑</span>
-                            <span th:if="${weekDiff < 0}" class="font-bold text-sm" aria-hidden="true">↓</span>
-                            <span th:if="${weekDiff == 0}" class="font-bold text-sm" aria-hidden="true">→</span>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-xs text-slate-500">vs Last Week</p>
-                            <p class="text-sm font-semibold"
-                               th:classappend="${weekDiff > 0} ? 'text-emerald-400' : (${weekDiff < 0} ? 'text-orange-400' : 'text-slate-400')">
-                                <span th:if="${weekDiff > 0}" th:text="'+' + ${weekDiff} + ' more'">+1 more</span>
-                                <span th:if="${weekDiff < 0}" th:text="${weekDiff} + ' fewer'">-1 fewer</span>
-                                <span th:if="${weekDiff == 0}">Same pace</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Momentum indicator -->
-                    <div class="flex items-center gap-2 sm:justify-end">
-                        <div class="min-w-0 text-right sm:order-2">
-                            <p class="text-xs text-slate-500">Momentum</p>
-                            <p class="text-sm font-semibold flex items-center gap-1.5 sm:justify-end"
-                               th:classappend="${momentum == 'ahead'} ? 'text-emerald-400' : (${momentum == 'on-track'} ? 'text-sky-400' : 'text-orange-400')">
-                                <span th:if="${momentum == 'ahead'}">🚀 Ahead</span>
-                                <span th:if="${momentum == 'on-track'}">✓ On Track</span>
-                                <span th:if="${momentum == 'behind'}">⚠️ Behind</span>
-                            </p>
-                        </div>
-                        <div class="flex-shrink-0 sm:order-1">
-                            <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold"
-                                  th:classappend="${momentum == 'ahead'} ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : (${momentum == 'on-track'} ? 'border-sky-400/30 bg-sky-400/10 text-sky-400' : 'border-orange-500/30 bg-orange-500/10 text-orange-400')"
-                                  th:text="${momentum == 'ahead'} ? 'Excellent' : (${momentum == 'on-track'} ? 'Good' : 'Catch up')">Good</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Recovery tone for streak reset -->
-                 <div th:if="${streakSafe == 0}" 
-                     class="mt-3 p-2.5 rounded-lg bg-blue-400/5 border border-blue-400/20 recovery-message animate-fade-in">
-                    <p class="text-xs text-blue-400 flex items-center gap-2">
-                        <span class="text-base">💪</span>
-                        <span><strong>Fresh start!</strong> Every streak begins with day 1. Log something small today to build momentum.</span>
-                    </p>
-                </div>
-            </div>
-
-        </section>
-
-        <!-- Visual divider: Analytics → Connections/Planning -->
-        <div class="mb-8 h-px bg-gradient-to-r from-transparent via-sky-400/20 to-transparent" role="separator" aria-hidden="true"></div>
-
-        <!-- Trainer connection status -->
-        <section aria-label="Trainer connection status" class="mb-6">
-            <div class="js-reveal card-neon card--emerald opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div class="min-w-0">
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Real PT</p>
-                <h2 class="mt-1 text-lg font-semibold gradient-text">Trainer connection</h2>
-                <p class="mt-1 text-sm text-slate-600" th:if="${trainerConversationId != null}">You’re linked to a <strong>verified human trainer</strong> via your inbox. They build and deliver your programme personally.</p>
-                <p class="mt-1 text-sm text-slate-600" th:if="${trainerConversationId == null}">No trainer linked yet — connect when you’re ready. Your <strong class="text-emerald-600">AI Coach</strong> is always available in the chat for instant guidance.</p>
-                </div>
-
-                <div class="flex items-center" aria-label="Trainer link status">
-                <span
-                    th:if="${trainerConversationId != null}"
-                    class="inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-400">Linked</span>
-                <span
-                    th:if="${trainerConversationId == null}"
-                    class="inline-flex items-center rounded-full border border-slate-700 bg-slate-700/50 px-3 py-1 text-sm font-medium text-slate-400">Not linked</span>
-                </div>
-            </div>
-
-            <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Trainer connection actions">
-                <a
-                    class="btn btn--secondary"
-                    th:href="@{/explore}">Explore trainers</a>
-
-                <a
-                    th:if="${trainerConversationId != null}"
-                    class="btn btn--primary"
-                    th:href="@{'/inbox/' + ${trainerConversationId}}">Message trainer</a>
-
-                <span
-                    th:if="${trainerConversationId == null}"
-                    class="btn btn--primary opacity-50 cursor-not-allowed"
-                    aria-disabled="true">Message trainer</span>
-
-                <a
-                    th:if="${trainerConversationId != null}"
-                    class="btn btn--secondary"
-                    th:href="@{/explore}">Switch trainer</a>
-
-                <span
-                    th:if="${trainerConversationId == null}"
-                    class="btn btn--secondary opacity-50 cursor-not-allowed"
-                    aria-disabled="true">Switch trainer</span>
-            </div>
-            </div>
-        </section>
-
-        <!-- “Plan health” / availability check -->
-        <section aria-label="Plan health and availability" class="mb-6">
-            <div class="js-reveal card-neon card--pink opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="min-w-0 flex items-start gap-3">
-                        <div class="p-2 rounded-lg bg-orange-500/10 border border-orange-500/30">
-                            <svg class="h-6 w-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Plan</p>
-                        <h2 class="mt-1 text-lg font-semibold gradient-text">Health &amp; availability check</h2>
-                        <p class="mt-1 text-sm text-slate-400">Set your availability so your week stays realistic — then adjust sessions around it.</p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center" aria-label="Time estimate">
-                        <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm font-medium text-slate-400">~2 min</span>
-                    </div>
-                </div>
-
-                <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Plan actions">
-                    <a
-                        class="btn btn--primary"
-                        th:href="@{/calendar(view='week')}">Set availability</a>
-
-                    <a
-                        class="btn btn--secondary"
-                        th:href="@{/profile}">Review health profile</a>
-                </div>
-
-                <p class="mt-4 text-sm text-slate-600">Tip: plan recovery like it’s a workout — it protects consistency.</p>
-            </div>
-        </section>
-
-        <!-- Personalised suggestions (preferences + availability) -->
-        <section aria-label="Personalised suggestions" class="mb-6">
-            <div class="mb-3">
-                <h2 class="text-lg font-semibold gradient-text">Personalised suggestions</h2>
-                <div class="neon-bar mt-2 mb-3"></div>
-                <p class="mt-1 text-sm text-slate-400">A couple of nudges based on your preferences and week load.</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                <article class="js-reveal card-neon card--sky opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0" aria-label="Suggested workout">
-                    <div class="flex items-start gap-3 mb-4">
-                        <div class="p-2 rounded-lg bg-sky-400/10 border border-sky-400/30">
-                            <svg class="h-6 w-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Suggested workout</p>
-                        <h3 class="mt-1 text-base font-semibold gradient-text">Build a session that fits you</h3>
-                        </div>
-                    </div>
-
-                    <p class="mt-1 text-sm text-slate-400" th:if="${userPreferencesCount == 0}">Pick a few training preferences to unlock better exercise suggestions.</p>
-                    <p class="mt-1 text-sm text-slate-400" th:if="${userPreferencesCount > 0}">
-                        Your workout builder will prioritise exercises that match what you’ve selected.
-                    </p>
-
-                    <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Suggested workout actions">
-                        <a
-                            th:if="${userPreferencesCount > 0}"
-                            class="btn btn--primary"
-                            th:href="@{/workout}">Open workout builder</a>
-
-                        <a
-                            th:if="${userPreferencesCount == 0}"
-                            class="btn btn--primary"
-                            th:href="@{/select-preferences}">Choose preferences</a>
-
-                        <a
-                            class="btn btn--secondary"
-                            th:href="@{/preferences}">View saved</a>
-                    </div>
-                </article>
-
-                <article class="js-reveal card-neon card--orange opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0" aria-label="Recommended plan">
-                    <div class="flex items-start gap-3 mb-4">
-                        <div class="p-2 rounded-lg bg-orange-500/10 border border-orange-500/30">
-                            <svg class="h-6 w-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                            </svg>
-                        </div>
-                        <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Recommended plan</p>
-                        <h3 class="mt-1 text-base font-semibold gradient-text">Keep this week realistic</h3>
-                        </div>
-                    </div>
-
-                    <p class="mt-1 text-sm text-slate-400" th:if="${weekPlannedSafe == 0}">Nothing planned yet. Add 2–3 small sessions that fit your availability.</p>
-                    <p class="mt-1 text-sm text-slate-400" th:if="${weekPlannedSafe > 0}">
-                        You’ve planned <span class="font-semibold text-neon-purple" th:text="${weekPlannedSafe}">0</span> items and completed
-                        <span class="font-semibold text-neon-purple" th:text="${weekCompletedSafe}">0</span>. Aim to keep the next one short and doable.
-                    </p>
-
-                    <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Plan actions">
-                        <a
-                            class="btn btn--primary"
-                            th:href="@{/calendar(view='week')}">Adjust week</a>
-                        <a
-                            class="btn btn--secondary"
-                            th:href="@{${todayPath}}">Open today</a>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <!-- Micro Insights -->
-        <section aria-label="Micro Insights" class="mb-6"
-                 th:with="
-                    hasStreak=${streakSafe > 0},
-                          weekCompletedSafe=${weekCompletedCount != null ? weekCompletedCount : 0},
-                          completionRate=${weekPlannedSafe > 0 ? (weekCompletedSafe * 100) / weekPlannedSafe : 0},
-                    isHighCompleter=${completionRate >= 70},
-                    dayName=${lightDay != null ? #temporals.format(lightDay.date, 'EEEE') : 'Monday'},
-                    busyDayName=${busyDay != null ? #temporals.format(busyDay.date, 'EEEE') : 'Friday'},
-                    lightDayCount=${minCount},
-                    busyDayCount=${maxCount},
-                    timeContext=${timeOfDay == 'morning' ? 'morning momentum' : (timeOfDay == 'afternoon' ? 'midday execution' : 'evening review')},
-                    morningLogger=${timeOfDay == 'morning' and logsThisWeekSafe > 0},
-                    consistentUser=${hasStreak and streakSafe >= 3}
-                 ">
-            <div class="mb-3">
-                <h2 class="text-lg font-semibold gradient-text">Micro Insights</h2>
-                <div class="neon-bar mt-2 mb-3"></div>
-                <p class="mt-1 text-sm text-slate-400">Smart suggestions based on your patterns and progress.</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <!-- Insight 1: Progress Pattern -->
-                <article class="js-reveal card-neon card--emerald opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0 relative" 
-                         data-dismissible="insight-progress-pattern" aria-label="Progress pattern insight">
-                    <button type="button" 
-                            class="absolute top-3 right-3 p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors duration-200 dismiss-insight"
-                            aria-label="Dismiss insight">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    <div class="flex items-start gap-3 mb-3">
-                        <div class="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                            <svg class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                            </svg>
-                        </div>
-                        <div class="flex-1 pr-6">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Pattern detected</p>
-                            <h3 class="mt-1 text-sm font-semibold gradient-text" 
-                                th:if="${lightDayCount < busyDayCount}"
-                                th:text="${'Your lightest day is ' + dayName}">Your lightest day is Monday</h3>
-                            <h3 class="mt-1 text-sm font-semibold gradient-text" 
-                                th:if="${lightDayCount >= busyDayCount}"
-                                th:text="${'Peak activity on ' + busyDayName}">Peak activity on Friday</h3>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400" 
-                       th:if="${lightDayCount < busyDayCount}"
-                       th:text="${dayName + ' has just ' + lightDayCount + ' items vs ' + busyDayCount + ' on ' + busyDayName + '. Perfect for a quick session or active recovery.'}">
-                        Monday has just 1 item vs 5 on Friday. Perfect for a quick session or active recovery.
-                    </p>
-                    <p class="text-xs text-slate-400" 
-                       th:if="${lightDayCount >= busyDayCount}"
-                       th:text="${'You stack most work on ' + busyDayName + '. Consider spreading load to maintain energy through the week.'}">
-                        You stack most work on Friday. Consider spreading load to maintain energy through the week.
-                    </p>
-                    <a class="mt-3 inline-flex text-xs font-medium text-emerald-400 hover:text-emerald-400/80 transition-colors"
-                       th:href="@{${lightDayPath}}">
-                        View day →
-                    </a>
-                </article>
-
-                <!-- Insight 2: AI-Powered Timing Tip -->
-                <article class="js-reveal card-neon card--orange opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0 relative" 
-                         data-dismissible="insight-timing-tip" aria-label="Timing tip insight">
-                    <button type="button" 
-                            class="absolute top-3 right-3 p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors duration-200 dismiss-insight"
-                            aria-label="Dismiss insight">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    <div class="flex items-start gap-3 mb-3">
-                        <div class="p-2 rounded-lg bg-orange-500/10 border border-orange-500/30">
-                            <svg class="h-5 w-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                        </div>
-                        <div class="flex-1 pr-6">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Smart tip</p>
-                            <h3 class="mt-1 text-sm font-semibold gradient-text" th:if="${morningLogger}">You're a morning mover</h3>
-                            <h3 class="mt-1 text-sm font-semibold gradient-text" th:if="${!morningLogger and consistentUser}">Consistency unlocked</h3>
-                            <h3 class="mt-1 text-sm font-semibold gradient-text" th:if="${!morningLogger and !consistentUser}">Build your rhythm</h3>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400" th:if="${morningLogger}">
-                        You log most during <span class="font-medium text-orange-400" th:text="${timeContext}">morning momentum</span>. Leverage this window for high-focus work.
-                    </p>
-                    <p class="text-xs text-slate-400" th:if="${!morningLogger and consistentUser}">
-                        <span class="font-medium text-orange-400" th:text="${streakCount + ' days'}">3 days</span> in a row shows you've found your groove. Protect it by keeping sessions short.
-                    </p>
-                    <p class="text-xs text-slate-400" th:if="${!morningLogger and !consistentUser}">
-                        Pick a specific time each day to check in. Consistency beats intensity in the long run.
-                    </p>
-                    <a class="mt-3 inline-flex text-xs font-medium text-orange-400 hover:text-orange-400/80 transition-colors"
-                       th:href="@{/calendar(view='week')}">
-                        Review schedule →
-                    </a>
-                </article>
-
-                <!-- Insight 3: Momentum Insight -->
-                <article class="js-reveal card-neon card--sky opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0 relative" 
-                         data-dismissible="insight-momentum" aria-label="Momentum insight">
-                    <button type="button" 
-                            class="absolute top-3 right-3 p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700/50 transition-colors duration-200 dismiss-insight"
-                            aria-label="Dismiss insight">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    <div class="flex items-start gap-3 mb-3">
-                        <div class="p-2 rounded-lg bg-sky-400/10 border border-sky-400/30">
-                            <svg class="h-5 w-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <div class="flex-1 pr-6">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Momentum check</p>
-                            <h3 class="mt-1 text-sm font-semibold gradient-text" th:if="${isHighCompleter}">You're closing loops</h3>
-                            <h3 class="mt-1 text-sm font-semibold gradient-text" th:if="${!isHighCompleter and weekPlannedSafe > 0}">Keep it realistic</h3>
-                            <h3 class="mt-1 text-sm font-semibold gradient-text" th:if="${!isHighCompleter and weekPlannedSafe == 0}">Start small</h3>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400" th:if="${isHighCompleter}">
-                        <span class="font-medium text-sky-400" th:text="${completionRate + '%'}">80%</span> completion rate this week. That's the sweet spot — ambitious but achievable.
-                    </p>
-                    <p class="text-xs text-slate-400" th:if="${!isHighCompleter and weekPlannedSafe > 0}">
-                        You've planned <span class="font-medium text-sky-400" th:text="${weekPlannedCount}">5</span> items but completed <span class="font-medium text-sky-400" th:text="${weekCompletedCount}">2</span>. Try scaling back to build confidence.
-                    </p>
-                    <p class="text-xs text-slate-400" th:if="${!isHighCompleter and weekPlannedSafe == 0}">
-                        Zero friction is powerful. Schedule one small session this week and complete it. That's how momentum starts.
-                    </p>
-                    <a class="mt-3 inline-flex text-xs font-medium text-sky-400 hover:text-sky-400/80 transition-colors"
-                       th:href="@{/calendar}">
-                        Plan next step →
-                    </a>
-                </article>
-            </div>
-
-        </section>
-
-        <!-- This week goal -->
-        <section aria-label="This week goal" class="mb-6">
-            <div class="mb-3">
-                <h2 class="text-lg font-semibold gradient-text">This week goal</h2>
-                <p class="mt-1 text-sm text-slate-400">A small target that keeps momentum building.</p>
-            </div>
-
-            <div
-                class="js-reveal card-neon card--blue opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                th:with="goalTarget=3, rawProgress=${logsThisWeekCount != null ? logsThisWeekCount : 0}, goalProgress=${rawProgress > goalTarget ? goalTarget : rawProgress}, goalPercent=${(goalProgress * 100) / goalTarget}">>
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="min-w-0">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Goal</p>
-                        <h3 class="mt-1 text-base font-semibold gradient-text">3 workouts planned</h3>
-                        <p class="mt-1 text-sm text-slate-400" th:text="${'You’re on ' + goalProgress + '/' + goalTarget}">You’re on 1/3</p>
-                    </div>
-
-                    <span class="inline-flex items-center rounded-full border border-slate-700 bg-slate-700/50 px-3 py-1 text-sm font-medium text-blue-400" aria-label="Progress chip">
-                        <span th:text="${goalProgress + '/' + goalTarget}">0/3</span>
-                    </span>
-                </div>
-                <div class="neon-bar mt-4"></div>
-
-                <div class="mt-5" aria-label="Goal progress bar">
-                    <div class="h-2 w-full rounded-full bg-slate-800" aria-hidden="true">
-                        <div class="h-2 rounded-full bg-blue-400" th:style="'width:' + ${goalPercent} + '%'"></div>
-                    </div>
-                    <p class="mt-2 text-xs text-slate-500" th:text="${goalProgress == goalTarget ? 'Goal hit — keep it light and consistent.' : 'Keep sessions short and doable.'}">Keep sessions short and doable.</p>
-                </div>
-
-                <div class="mt-5 flex flex-col gap-3 sm:flex-row" aria-label="Goal actions">
-                    <a
-                        class="btn btn--primary"
-                        th:href="@{/exercise-log}">Log a workout</a>
-                    <a
-                        class="btn btn--secondary"
-                        th:href="@{/calendar(view='week')}">Plan week</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Upcoming (next 3 items) -->
-        <section aria-label="Upcoming" th:if="${upcomingItems != null}" class="mb-6">
-            <div class="mb-3">
-                <h2 class="text-lg font-semibold gradient-text">Upcoming</h2>
-                <p class="mt-1 text-sm text-slate-400">The next few things on your schedule.</p>
-            </div>
-
-            <div class="js-reveal card-neon card--purple opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0">
-                <!-- Empty state with structured guidance -->
-                <div th:if="${#lists.isEmpty(upcomingItems)}" class="flex flex-col items-center justify-center py-8 px-4 text-center">
-                    <div class="p-4 rounded-full bg-orange-500/10 border border-orange-500/30 mb-4">
-                        <svg class="h-8 w-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-base font-semibold text-slate-200 mb-2">Nothing scheduled yet</h3>
-                    <p class="text-sm text-slate-400 mb-6 max-w-sm">Start building momentum by scheduling your first task or workout. Even one small session makes a difference.</p>
-                    <div class="flex flex-col gap-3 sm:flex-row">
-                        <a class="btn btn--primary" th:href="@{/calendar}">Open calendar</a>
-                        <a class="btn btn--secondary" th:href="@{/workout}">Build workout</a>
-                    </div>
-                </div>
-
-                <ul th:if="${!#lists.isEmpty(upcomingItems)}" class="space-y-3" aria-label="Upcoming items">
-                    <li th:each="it : ${upcomingItems}" class="rounded-2xl bg-slate-800/30 px-4 py-3">
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div class="min-w-0">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold"
-                                          th:classappend="${it.type == 'Session'} ? ' bg-indigo-50 text-indigo-700' : ' bg-slate-100 text-slate-700'"
-                                          th:text="${it.type}">Task</span>
-                                    <span class="text-xs font-medium text-slate-500" th:text="${it.dateLabel}">Mon 10 Jan</span>
+                        <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <a th:href="@{/nutrition}" class="group rounded-2xl border border-emerald-200/90 bg-white/90 p-4 shadow-sm ring-1 ring-emerald-100/80 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-emerald-200 dark:border-emerald-500/30 dark:bg-slate-900/70 dark:ring-emerald-500/20 dark:hover:ring-emerald-400/30 min-h-11">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" aria-hidden="true">&#127869;</div>
+                                    <span class="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-200">Track intake</span>
                                 </div>
-                                <div class="mt-1 truncate text-sm font-semibold text-slate-200" th:text="${it.title}">Item title</div>
-                            </div>
-
-                            <a class="btn btn--secondary"
-                               th:href="@{${it.href}}">Open day</a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- Visual divider: Planning → Insights/Activity -->
-        <div class="mb-8 h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" role="separator" aria-hidden="true"></div>
-
-        <!-- Momentum / Insights -->
-        <section aria-label="Momentum and insights" th:if="${miniWeek != null}" class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <article class="js-reveal card-neon card--sky opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0" aria-label="Momentum">
-                <div class="flex items-start gap-3 mb-4">
-                    <div class="p-2 rounded-lg bg-sky-400/10 border border-sky-400/30">
-                        <svg class="h-6 w-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                    </div>
-                    <h2 class="text-lg font-semibold gradient-text">Momentum</h2>
-                </div>
-                <dl class="mt-4 grid grid-cols-1 gap-3" aria-label="Week totals">
-                    <div class="flex items-center justify-between rounded-2xl bg-slate-700/30 px-4 py-3">
-                        <dt class="text-sm text-slate-400">Total tasks this week</dt>
-                        <dd class="text-2xl font-bold text-sky-400" th:text="${totalTasks}">0</dd>
-                    </div>
-                    <div class="flex items-center justify-between rounded-2xl bg-slate-700/30 px-4 py-3">
-                        <dt class="text-sm text-slate-400">Total workouts scheduled</dt>
-                        <dd class="text-2xl font-bold text-orange-400" th:text="${totalWorkouts}">0</dd>
-                    </div>
-                </dl>
-                <p class="mt-4 text-sm text-slate-400">Small wins add up—aim for consistency over intensity.</p>
-            </article>
-
-            <article class="js-reveal card-neon card--orange opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0" aria-label="Insights">
-                <div class="flex items-start gap-3 mb-4">
-                    <div class="p-2 rounded-lg bg-orange-500/10 border border-orange-500/30">
-                        <svg class="h-6 w-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-lg font-semibold gradient-text">Insights</h2>
-                </div>
-
-                <div class="mt-4 space-y-3">
-                    <div class="flex items-center justify-between gap-4" aria-label="Busy day">
-                        <span class="text-sm text-slate-400">Busy day</span>
-                        <span class="min-w-0 text-sm font-semibold text-slate-200" th:text="${busyDay != null ? busyDay.dayLabel + ' ' + busyDay.prettyDate : '—'}">Mon 10 Jan</span>
-                    </div>
-
-                    <div class="flex items-center justify-between gap-4" aria-label="Next up">
-                        <span class="text-sm text-slate-400">Next up</span>
-                        <span class="min-w-0 text-sm font-semibold text-slate-200" th:text="${nextUp != null ? nextUp.dayLabel + ' ' + nextUp.prettyDate : 'Today'}">Today</span>
-                    </div>
-
-                    <div class="rounded-2xl bg-slate-700/30 px-4 py-3" aria-label="Recommendation"
-                         th:with="
-                            recTitle=${maxCount >= 6 ? 'You''re overloaded' : (maxCount >= 3 ? 'Protect your consistency' : (maxCount >= 1 ? 'Keep it light' : 'Build momentum'))},
-                            recBody=${maxCount >= 6 ? 'Consider moving one item from ' + (busyDay != null ? busyDay.dayLabel : 'your busiest day') + ' to ' + (lightDay != null ? lightDay.dayLabel : 'a lighter day') + '.' :
-                                   (maxCount >= 3 ? 'Add 1 recovery slot this week so hard days stay doable.' :
-                                   (maxCount >= 1 ? 'You''re on track. Keep sessions short and finish what''s planned.' :
-                                   'Nothing planned yet. Add one small session to get started.'))},
-                            adaptiveBody=${(adaptiveFeedback != null and !#strings.isEmpty(adaptiveFeedback)) ? adaptiveFeedback : recBody}">
-                        <div class="text-sm font-semibold text-slate-200" th:text="${recTitle}">Protect your consistency</div>
-                        <div class="mt-0.5 text-sm text-slate-600" th:text="${adaptiveBody}">Recommendation text</div>
-                    </div>
-                </div>
-
-                <div class="mt-6 flex flex-col gap-3 sm:flex-row"
-                     th:with="
-                        primaryHref=${maxCount >= 6 ? busyDayPath : (maxCount == 0 ? '/calendar?view=week' : nextUpPath)},
-                        primaryLabel=${maxCount >= 6 ? 'Review overloaded day' : (maxCount == 0 ? 'Plan this week' : 'Open next day')}">
-                    <a
-                        class="btn btn--secondary"
-                        th:href="@{${primaryHref}}"
-                        th:text="${primaryLabel}">Open next day</a>
-                    <a
-                        class="btn btn--secondary"
-                        th:href="@{/calendar(view='week')}">Adjust week</a>
-                </div>
-            </article>
-        </section>
-
-        <!-- Recent logs -->
-        <section aria-label="Recent exercise logs" class="mb-6">
-            <div class="mb-3">
-                <h2 class="text-lg font-semibold gradient-text">Recent logs</h2>
-                <p class="mt-1 text-sm text-slate-400">Your latest 5 entries.</p>
-            </div>
-
-            <div
-                class="js-reveal card-neon card--sky opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                th:if="${#lists.isEmpty(recentExerciseLogs)}"
-                role="note"
-                aria-label="No recent logs">
-                <h3 class="text-base font-semibold gradient-text">No logs yet</h3>
-                <p class="mt-1 text-sm text-slate-400">Start with today—log a short workout or a small task to build momentum.</p>
-                <div class="mt-5 flex flex-col gap-3 sm:flex-row">
-                    <a
-                        class="btn btn--primary"
-                        th:href="@{${todayPath}}">Open today</a>
-                    <a
-                        class="btn btn--secondary"
-                        th:href="@{/exercise-log}">Go to logs</a>
-                </div>
-            </div>
-
-            <div th:if="${!#lists.isEmpty(recentExerciseLogs)}" class="space-y-3" aria-label="Exercise logs">
-                <!-- Featured latest log -->
-                <a
-                    class="js-reveal block card-neon card--emerald opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                    th:href="@{/exercise-log}"
-                    th:with="latest=${recentExerciseLogs.get(0)}, moodDelta=${(latest.moodBefore != null && latest.moodAfter != null) ? (latest.moodAfter - latest.moodBefore) : null}"
-                    aria-label="Open latest exercise log">
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div class="min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Latest highlight</p>
-                            <h3
-                                class="mt-1 text-base font-semibold text-slate-200"
-                                th:text="${moodDelta == null ? 'Logged workout' : (moodDelta > 0 ? 'Mood improved +' + moodDelta : (moodDelta == 0 ? 'Mood steady' : 'Mood dropped ' + moodDelta))}">
-                                Mood improved +2
-                            </h3>
-                            <p class="mt-1 text-sm text-slate-400">
-                                <span class="font-semibold text-slate-200" th:text="${latest.date}">2026-01-10</span>
-                                <span aria-hidden="true"> · </span>
-                                <span th:text="${latest.confidence != null ? 'Confidence ' + latest.confidence + '/4' : 'Confidence —'}">Confidence 3/4</span>
-                            </p>
-                        </div>
-
-                        <div class="flex flex-wrap gap-2" aria-label="Mood details">
-                            <span
-                                class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700"
-                                th:text="${latest.moodBefore != null ? 'Before ' + latest.moodBefore + '/4' : 'Before —'}">Before 0/4</span>
-                            <span
-                                class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"
-                                th:text="${latest.moodAfter != null ? 'After ' + latest.moodAfter + '/4' : 'After —'}">After 0/4</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 text-xs font-semibold text-slate-500">Open logs →</div>
-                </a>
-
-                <!-- Remaining logs -->
-                <ul class="space-y-3" aria-label="Exercise log list">
-                    <li th:each="exerciseLog, iter : ${recentExerciseLogs}" th:if="${iter.index > 0}">
-                        <a
-                            class="js-reveal flex flex-col gap-3 card-neon card--sky p-5 opacity-0 translate-y-2 transition-all duration-700 ease-out hover:-translate-y-0.5 hover:shadow-sm hover:ring-1 hover:ring-slate-900/5 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-reduce:hover:translate-y-0 motion-reduce:opacity-100 motion-reduce:translate-y-0 sm:flex-row sm:items-center sm:justify-between"
-                            th:href="@{/exercise-log}"
-                            aria-label="Open exercise logs">
-                            <div class="min-w-0">
-                                <div class="text-sm font-semibold text-slate-200" th:text="${exerciseLog.date}">2026-01-10</div>
-                                <div class="mt-0.5 text-sm text-slate-400">Exercise log</div>
-                            </div>
-                            <div class="flex flex-wrap gap-2" aria-label="Confidence and mood">
-                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700" th:text="${exerciseLog.confidence != null ? 'Confidence ' + exerciseLog.confidence + '/4' : 'Confidence —'}">Confidence 0/4</span>
-                                <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700" th:text="${exerciseLog.moodBefore != null ? 'Before ' + exerciseLog.moodBefore + '/4' : 'Before —'}">Before 0/4</span>
-                                <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700" th:text="${exerciseLog.moodAfter != null ? 'After ' + exerciseLog.moodAfter + '/4' : 'After —'}">After 0/4</span>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- Quick add -->
-        <section aria-label="Quick add" class="mb-2">
-            <div class="mb-3">
-                <h2 class="text-lg font-semibold text-slate-200">Quick add</h2>
-                <p class="mt-1 text-sm text-slate-400">Do the next small thing—fast.</p>
-            </div>
-
-            <nav aria-label="Quick add actions" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <a
-                    class="js-reveal btn btn--primary opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                    th:href="@{${todayPath}}"
-                    aria-label="Add a task for today">+ Add task</a>
-
-                <a
-                    class="js-reveal btn btn--secondary opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                    th:href="@{/workout}"
-                    aria-label="Add a workout in the workout builder">+ Add workout</a>
-
-                <a
-                    class="js-reveal btn btn--secondary opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                    th:href="@{/exercise-log}"
-                    aria-label="Log a workout">Log workout</a>
-
-                <a
-                    class="js-reveal btn btn--secondary opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                    th:if="${trainerConversationId != null}"
-                    th:href="@{'/inbox/' + ${trainerConversationId}}"
-                    aria-label="Message your trainer">Message trainer</a>
-
-                <span
-                    class="js-reveal btn btn--secondary opacity-50 cursor-not-allowed opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0"
-                    th:if="${trainerConversationId == null}"
-                    aria-disabled="true">Message trainer</span>
-            </nav>
-        </section>
-
-        <!-- Premium Experience: Experiential Preview -->
-        <section aria-label="Premium experience" class="mb-6"
-                 th:with="
-                    userIsPremium=${isPremium != null ? isPremium : false},
-                          weekPlannedSafe=${weekPlannedCount != null ? weekPlannedCount : 0},
-                          weekCompletedSafe=${weekCompletedCount != null ? weekCompletedCount : 0},
-                          consistencySafe=${consistencyScore != null ? consistencyScore : 0},
-                          streakSafe=${streakCount != null ? streakCount : 0},
-                          adherenceRate=${weekPlannedSafe > 0 ? (weekCompletedSafe * 100 / weekPlannedSafe) : 0},
-                          advancedConsistency=${(consistencySafe * 0.5) + (streakSafe * 7) + (adherenceRate * 0.3)},
-                    consistencyTrend=${advancedConsistency >= 70 ? 'Excellent' : (advancedConsistency >= 50 ? 'Strong' : (advancedConsistency >= 30 ? 'Building' : 'Getting started'))},
-                    trendColor=${advancedConsistency >= 70 ? 'emerald-500' : (advancedConsistency >= 50 ? 'sky-400' : (advancedConsistency >= 30 ? 'blue-400' : 'orange-400'))}
-                 ">
-            
-            <!-- Non-premium: Blurred preview to entice upgrade -->
-            <article th:unless="${userIsPremium}" 
-                     class="js-reveal card-neon card--orange opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="min-w-0 flex items-start gap-3">
-                        <div class="p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-400/20 border border-orange-500/30">
-                            <svg class="h-6 w-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-orange-400">Advanced Insights</p>
-                            <h2 class="mt-1 text-lg font-semibold gradient-text">See what's really driving your progress</h2>
-                            <p class="mt-1 text-sm text-slate-400">Get a live consistency score that blends your streak, completion rate, and adherence patterns.</p>
-                        </div>
-                    </div>
-
-                    <span class="inline-flex shrink-0 items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-400" aria-label="Preview mode">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" stroke-width="2"/>
-                            <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        Preview
-                    </span>
-                </div>
-
-                <!-- Blurred metric preview for non-premium users -->
-                <div class="mt-5 relative rounded-2xl border-2 border-orange-500/30 bg-gradient-to-br from-slate-800/80 to-orange-500/10 p-6 overflow-hidden">
-                    <!-- Background glow effect -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-orange-400/10 pointer-events-none" aria-hidden="true"></div>
-                    
-                    <!-- Blurred content -->
-                    <div style="filter: blur(8px);" class="select-none pointer-events-none" aria-hidden="true">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <p class="text-xs font-semibold uppercase tracking-wide text-sky-400">Advanced Consistency Score</p>
-                                <p class="mt-1 text-xs text-slate-400">Live metric • Updates with every action</p>
-                            </div>
-                            <div class="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10">
-                                <span class="text-xs font-semibold text-emerald-400" th:text="${consistencyTrend}">Strong</span>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <div class="text-5xl font-bold gradient-text mb-2" th:text="${#numbers.formatDecimal(advancedConsistency, 1, 1)}">67.5</div>
-                            <div class="flex items-center gap-2">
-                                <div class="h-2 flex-1 rounded-full bg-slate-900/50 overflow-hidden">
-                                    <div class="h-full bg-gradient-to-r from-sky-400 via-blue-500 to-emerald-500 rounded-full transition-all duration-500"
-                                         th:style="'width: ' + ${advancedConsistency > 100 ? 100 : advancedConsistency} + '%'"></div>
+                                <h2 class="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100">Track intake</h2>
+                                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Log meals, calories, protein, and hydration for today.</p>
+                                <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
+                                    <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="${intakeCalories} + ' kcal today'">0 kcal today</span>
+                                    <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="'Last logged: ' + ${intakeLastLogged}">Last logged: Today</span>
                                 </div>
-                                <span class="text-sm font-semibold text-slate-300" th:text="${#numbers.formatDecimal(advancedConsistency, 1, 0)} + '/100'">68/100</span>
-                            </div>
-                        </div>
+                                <p class="mt-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300">Enter intake route</p>
+                            </a>
 
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="rounded-xl border border-orange-500/20 bg-orange-500/5 p-3">
-                                <p class="text-xs text-slate-400 mb-1">Streak Power</p>
-                                <p class="text-lg font-semibold text-orange-400" th:text="${streakSafe * 7}">21</p>
-                            </div>
-                            <div class="rounded-xl border border-sky-400/20 bg-sky-400/5 p-3">
-                                <p class="text-xs text-slate-400 mb-1">Completion</p>
-                                <p class="text-lg font-semibold text-sky-400" th:text="${consistencySafe} + '%'">82%</p>
-                            </div>
-                            <div class="rounded-xl border border-blue-400/20 bg-blue-400/5 p-3">
-                                <p class="text-xs text-slate-400 mb-1">Adherence</p>
-                                <p class="text-lg font-semibold text-blue-400" th:text="${#numbers.formatDecimal(adherenceRate, 1, 0)} + '%'">75%</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Unlock overlay -->
-                    <div class="absolute inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-[2px]">
-                        <div class="text-center px-4">
-                            <div class="inline-flex items-center gap-2 mb-3">
-                                <svg class="h-5 w-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                <span class="text-sm font-semibold text-orange-400">Premium Insight</span>
-                            </div>
-                            <p class="text-xs text-slate-300 mb-4">Unlock to see your live consistency score</p>
-                            <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 text-white text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/50 transition-all duration-300"
-                               th:href="@{/chat}">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                                Unlock Now
+                            <a th:href="@{${todayPath}}" class="group rounded-2xl border border-sky-200/90 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/80 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-sky-200 dark:border-sky-500/30 dark:bg-slate-900/70 dark:ring-sky-500/20 dark:hover:ring-sky-400/30 min-h-11">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/15 text-sky-700 dark:text-sky-300" aria-hidden="true">&#128197;</div>
+                                    <span class="rounded-full border border-sky-400/40 bg-sky-500/10 px-2 py-1 text-[11px] font-semibold text-sky-700 dark:text-sky-200">Track day</span>
+                                </div>
+                                <h2 class="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100">Track day</h2>
+                                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">View workouts, tasks, and habits scheduled for today.</p>
+                                <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
+                                    <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="${leftToComplete} + ' left to complete'">0 left to complete</span>
+                                </div>
+                                <div class="mt-3 rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-[11px] text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/40 dark:text-slate-200">
+                                    <p class="font-semibold" th:text="${completeToday ? 'Fully completed today' : 'Next ' + #strings.toLowerCase(nextItemType)}">Next task</p>
+                                    <p class="mt-1" th:text="${nextItemName}">Meal prep</p>
+                                    <p class="mt-1 text-slate-500 dark:text-slate-400" th:if="${!completeToday}" th:text="${nextItemTime}">Time not set</p>
+                                    <p class="mt-1 text-emerald-700 dark:text-emerald-300" th:if="${completeToday}">&#10003; All tasks and workouts complete</p>
+                                </div>
+                                <p class="mt-2 text-[11px] text-slate-600 dark:text-slate-400">Tooltips: <span class="cursor-help border-b border-dotted border-slate-400" tabindex="0" title="Two exercises performed back-to-back.">Superset</span> , <span class="cursor-help border-b border-dotted border-slate-400" tabindex="0" title="Rate of perceived exertion.">RPE</span></p>
+                                <p class="mt-3 text-sm font-semibold text-sky-700 dark:text-sky-300">Open day execution</p>
                             </a>
                         </div>
-                    </div>
-                </div>
 
-                <p class="mt-3 text-xs text-center text-slate-400">This preview updates with your real data — unlock to interact with it</p>
-            </article>
+                        <p class="mt-4 text-xs text-slate-600 dark:text-slate-400" th:if="${!hasAction}">No immediate blocker. Choose the route that will move your day forward now.</p>
+                    </section>
 
-            <!-- Premium: Full live metric display -->
-            <article th:if="${userIsPremium}" 
-                     class="js-reveal card-neon card--sky opacity-0 translate-y-2 transition-all duration-700 ease-out motion-reduce:opacity-100 motion-reduce:translate-y-0">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="min-w-0 flex items-start gap-3">
-                        <div class="p-2 rounded-lg bg-gradient-to-br from-sky-400/20 to-emerald-500/20 border border-sky-400/30">
-                            <svg class="h-6 w-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-sky-400">Advanced Insights • Premium</p>
-                            <h2 class="mt-1 text-lg font-semibold gradient-text">Your Consistency Score</h2>
-                            <p class="mt-1 text-sm text-slate-400">A live metric blending your streak, completion rate, and adherence patterns.</p>
-                        </div>
-                    </div>
-
-                    <span class="inline-flex shrink-0 items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400" aria-label="Premium active">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Active
-                    </span>
-                </div>
-
-                <!-- Full live metric for premium users -->
-                <div class="mt-5 rounded-2xl border-2 border-sky-400/30 bg-gradient-to-br from-slate-800/80 to-sky-400/10 p-6 relative overflow-hidden">
-                    <!-- Background glow effect -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-transparent to-emerald-500/10 pointer-events-none" aria-hidden="true"></div>
-                    
-                    <!-- Live content -->
-                    <div class="relative">
-                        <div class="flex items-center justify-between mb-4">
+                    <section aria-label="Your next 7 days" class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-700/70 dark:bg-slate-900/55 dark:ring-white/10 sm:p-5">
+                        <div class="flex items-center justify-between gap-3">
                             <div>
-                                <p class="text-xs font-semibold uppercase tracking-wide" th:classappend="'text-' + ${trendColor}">Advanced Consistency Score</p>
-                                <p class="mt-1 text-xs text-slate-400">Live metric • Updates with every action</p>
+                                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Your next 7 days</h2>
+                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Select a day to preview workouts and tasks.</p>
                             </div>
-                            <div class="px-3 py-1 rounded-full border transition-all duration-300" 
-                                 th:classappend="'border-' + ${trendColor} + '/30 bg-' + ${trendColor} + '/10'">
-                                <span class="text-xs font-semibold transition-colors duration-300" 
-                                      th:classappend="'text-' + ${trendColor}"
-                                      th:text="${consistencyTrend}">Strong</span>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <div class="text-5xl font-bold gradient-text mb-3 transition-all duration-500" 
-                                 th:text="${#numbers.formatDecimal(advancedConsistency, 1, 1)}">67.5</div>
-                            <div class="flex items-center gap-2">
-                                <div class="h-3 flex-1 rounded-full bg-slate-900/50 overflow-hidden">
-                                    <div class="h-full bg-gradient-to-r from-sky-400 via-blue-500 to-emerald-500 rounded-full transition-all duration-500"
-                                         th:style="'width: ' + ${advancedConsistency > 100 ? 100 : advancedConsistency} + '%'"></div>
-                                </div>
-                                <span class="text-sm font-semibold text-slate-300" 
-                                      th:text="${#numbers.formatDecimal(advancedConsistency, 1, 0)} + '/100'">68/100</span>
-                            </div>
+                            <a class="text-sm font-medium text-sky-700 hover:text-sky-600 dark:text-sky-400 dark:hover:text-sky-300" th:href="@{/calendar}">Open full planner</a>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-3 mb-4">
-                            <div class="rounded-xl border border-orange-500/30 bg-orange-500/10 p-3 hover:bg-orange-500/15 transition-all duration-300">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="h-4 w-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                                    </svg>
-                                    <p class="text-xs font-semibold text-orange-400">Streak Power</p>
+                        <div class="mt-4 grid grid-cols-1 gap-4 min-[1028px]:grid-cols-12">
+                            <div class="dashboard-week-preview-panel rounded-xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700/70 dark:bg-slate-900/60 min-[1028px]:col-span-5" data-week-preview-panel>
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" id="weekSelectedLabel">Selected day</p>
+                                    <a id="weekOpenDayLink" class="text-xs font-semibold text-sky-700 hover:text-sky-600 dark:text-sky-300 dark:hover:text-sky-200" th:href="@{${todayPath}}">Open day</a>
                                 </div>
-                                <p class="text-2xl font-bold text-orange-400" th:text="${streakSafe * 7}">21</p>
-                                <p class="text-xs text-slate-400 mt-1" th:text="${streakCount} + ' day streak'">3 day streak</p>
+                                <h3 class="mt-2 text-base font-semibold text-slate-900 dark:text-slate-100" id="weekSelectedTitle" th:text="${d0 != null ? d0.dayLabel + ', ' + d0.prettyDate : 'Today'}">Today</h3>
+                                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400" id="weekSelectedSummary" th:text="${todayTasks + ' tasks, ' + todayWorkouts + ' workouts'}">0 tasks, 0 workouts</p>
+
+                                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Tasks</p>
+                                        <ul id="weekTaskList" class="mt-2 space-y-1.5 text-xs text-slate-700 dark:text-slate-200">
+                                            <li class="rounded-lg border border-slate-200/80 bg-slate-50/70 px-2.5 py-1.5 dark:border-slate-700/70 dark:bg-slate-800/50">No tasks selected</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Workouts</p>
+                                        <ul id="weekWorkoutList" class="mt-2 space-y-1.5 text-xs text-slate-700 dark:text-slate-200">
+                                            <li class="rounded-lg border border-slate-200/80 bg-slate-50/70 px-2.5 py-1.5 dark:border-slate-700/70 dark:bg-slate-800/50">No workouts selected</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="rounded-xl border border-sky-400/30 bg-sky-400/10 p-3 hover:bg-sky-400/15 transition-all duration-300">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="h-4 w-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <p class="text-xs font-semibold text-sky-400">Completion</p>
+
+                            <div class="min-[1028px]:col-span-7">
+                                <div class="-mx-1 overflow-x-auto px-1 pb-1" role="tablist" aria-label="7 day selector" th:if="${miniWeek != null and !#lists.isEmpty(miniWeek)}">
+                                    <div class="flex min-w-max gap-2">
+                                    <button type="button"
+                                            th:each="d, iterStat : ${miniWeek}"
+                                                th:with="dayState=${iterStat.index < 1 ? 'completed' : 'upcoming'},
+                                                 dayDifficulty=${(d.taskCount + d.scheduledCount) > 3 ? 'Heavy' : ((d.taskCount + d.scheduledCount) > 1 ? 'Moderate' : 'Light')},
+                                                 dayIcon=${d.scheduledCount > 0 ? '🏋' : (d.taskCount > 0 ? '📝' : '🍎')}"
+                                            th:attr="data-day-label=${d.dayLabel + ', ' + d.prettyDate},
+                                                     data-day-path=${'/calendar/day/' + #temporals.format(d.date, 'yyyy-MM-dd')},
+                                                     data-task-count=${d.taskCount},
+                                                     data-workout-count=${d.scheduledCount},
+                                                     data-task-titles=${d.taskTitles != null and !#lists.isEmpty(d.taskTitles) ? #strings.listJoin(d.taskTitles, '|') : ''},
+                                                     data-workout-titles=${d.workoutTitles != null and !#lists.isEmpty(d.workoutTitles) ? #strings.listJoin(d.workoutTitles, '|') : ''},
+                                                 data-day-state=${dayState},
+                                                     data-day-selected=${d.today or iterStat.index == 0 ? 'true' : 'false'}"
+                                            class="dashboard-week-day-button w-24 shrink-0 rounded-xl border border-slate-200/85 bg-white/85 px-2 py-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow dark:border-slate-700/70 dark:bg-slate-900/60 dark:hover:border-sky-400/50"
+                                            th:classappend="${d.today ? ' ring-2 ring-sky-400/50 border-sky-400/60' : ''}"
+                                            data-week-day-button
+                                            role="tab"
+                                            th:attrappend="aria-selected=${d.today or iterStat.index == 0}">
+                                        <p class="text-xs font-semibold text-slate-900 dark:text-slate-100" th:text="${d.today ? 'Today' : d.dayLabel}">Mon</p>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400" th:text="${d.prettyDate}">9 Mar</p>
+                                        <p class="mt-2 text-[11px] text-slate-700 dark:text-slate-300"><span th:text="${dayIcon}">🏋</span> <span th:text="${d.taskCount + d.scheduledCount} + ' items'">0 items</span></p>
+                                        <p class="mt-1 text-[10px] font-semibold" th:classappend="${dayState == 'completed' ? ' text-emerald-700 dark:text-emerald-300' : (dayState == 'missed' ? ' text-rose-700 dark:text-rose-300' : ' text-slate-500 dark:text-slate-400')}" th:text="${dayState == 'completed' ? 'Completed' : (dayState == 'missed' ? 'Missed' : 'Upcoming')}">Upcoming</p>
+                                        <p class="text-[10px] text-slate-500 dark:text-slate-400" th:text="${dayDifficulty} + ' day'">Light day</p>
+                                    </button>
+                                    </div>
                                 </div>
-                                <p class="text-2xl font-bold text-sky-400" th:text="${consistencySafe} + '%'">82%</p>
-                                <p class="text-xs text-slate-400 mt-1">Overall rate</p>
-                            </div>
-                            <div class="rounded-xl border border-blue-400/30 bg-blue-400/10 p-3 hover:bg-blue-400/15 transition-all duration-300">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                    </svg>
-                                    <p class="text-xs font-semibold text-blue-400">Adherence</p>
-                                </div>
-                                <p class="text-2xl font-bold text-blue-400" th:text="${#numbers.formatDecimal(adherenceRate, 1, 0)} + '%'">75%</p>
-                                <p class="text-xs text-slate-400 mt-1" th:text="${weekCompletedCount} + '/' + ${weekPlannedCount} + ' this week'">6/8 this week</p>
+
+                                <p th:if="${miniWeek == null or #lists.isEmpty(miniWeek)}" class="rounded-xl border border-slate-200/85 bg-slate-50/80 px-3 py-3 text-sm text-slate-600 dark:border-slate-700/70 dark:bg-slate-800/60 dark:text-slate-300">No 7-day plan data yet. Open the planner to start scheduling your week.</p>
                             </div>
                         </div>
+                    </section>
 
-                        <div class="flex items-start gap-3 p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
-                            <svg class="h-5 w-5 text-emerald-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-xs font-semibold text-emerald-400 mb-1">What drives this score?</p>
-                                <p class="text-xs text-slate-400">Your consistency score blends three signals: <strong>Streak Power</strong> (days × 7), <strong>Completion Rate</strong> (tasks finished), and <strong>Adherence</strong> (planned vs completed). Higher scores indicate sustainable momentum.</p>
+                    <section aria-label="Weekly summary" class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-700/70 dark:bg-slate-900/55 dark:ring-white/10">
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">This week so far</h3>
+                        <div class="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
+                            <div class="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 dark:border-slate-700/70 dark:bg-slate-800/50"><p class="text-slate-500 dark:text-slate-400">Workouts completed</p><p class="mt-1 font-semibold text-slate-800 dark:text-slate-100" th:text="${weekCompletedSafe} + ' / ' + ${weekPlannedSafe}">0 / 0</p></div>
+                            <div class="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 dark:border-slate-700/70 dark:bg-slate-800/50"><p class="text-slate-500 dark:text-slate-400">Meals logged</p><p class="mt-1 font-semibold text-slate-800 dark:text-slate-100" th:text="${intakeMeals}">0</p></div>
+                            <div class="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 dark:border-slate-700/70 dark:bg-slate-800/50"><p class="text-slate-500 dark:text-slate-400">Habits completed</p><p class="mt-1 font-semibold text-slate-800 dark:text-slate-100" th:text="${habitsDone} + ' / ' + ${habitsDue > 0 ? habitsDue : 1}">0 / 1</p></div>
+                        </div>
+                    </section>
+
+                    <section aria-label="Upcoming next" id="upcomingNextSection" class="rounded-2xl border border-slate-200/85 bg-white/90 p-4 shadow-sm ring-1 ring-slate-900/5 transition-all dark:border-slate-700/70 dark:bg-slate-900/60 dark:ring-white/10 sm:p-5" th:attr="data-upcoming-target=${upcomingTargetIso}">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Upcoming next</p>
+                                <h2 class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100" th:text="${'Next ' + #strings.toLowerCase(upcomingType) + ': ' + upcomingName}">Next workout: Today session block</h2>
+                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Starts at <span th:text="${#temporals.format(upcomingTargetIso, 'HH:mm')}">18:00</span></p>
+                            </div>
+                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-right dark:border-slate-700/70 dark:bg-slate-800/60">
+                                <p class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Countdown</p>
+                                <p id="upcomingCountdown" class="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">01:42:18</p>
+                                <p id="upcomingRelative" class="text-xs text-slate-600 dark:text-slate-300">Begins soon</p>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </section>
+                </main>
 
-                <p class="mt-3 text-xs text-center text-slate-400">This metric updates instantly as you log workouts and complete tasks</p>
-            </article>
+                <aside aria-label="Help and trust" data-dashboard-right-rail class="order-3 space-y-4 min-[1028px]:col-span-3 min-[1028px]:self-start min-[1028px]:sticky min-[1028px]:top-24 min-[1028px]:h-fit">
+                    <section class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60 dark:ring-white/10">
+                        <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Help and Trust</h2>
+                        <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Support, policies, and plans.</p>
+                        <nav class="mt-3 space-y-2" aria-label="Support links">
+                            <a th:href="@{/faq}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"><span aria-hidden="true">&#10067;</span><span>FAQ</span></a>
+                            <a th:href="@{/policies/terms}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"><span aria-hidden="true">&#128274;</span><span>Privacy</span></a>
+                            <a th:href="@{/chat}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"><span aria-hidden="true">&#9993;&#65039;</span><span>Contact</span></a>
+                            <a th:href="@{/pricing}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"><span aria-hidden="true">&#128179;</span><span>Memberships and plans</span></a>
+                        </nav>
+                        <p th:if="${!hasTrainerConnected}" class="mt-3 rounded-md border border-amber-300/70 bg-amber-50/90 px-2.5 py-2 text-[11px] text-amber-900 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-100">No trainer connected. <a th:href="@{/explore}" class="font-semibold text-amber-800 hover:text-amber-700 dark:text-amber-200 dark:hover:text-amber-100">Explore trainers</a>.</p>
+                        <div th:if="${isFirstTimeUser}" class="mt-3 rounded-md border border-emerald-300/70 bg-emerald-50/90 px-2.5 py-2 text-[11px] text-emerald-900 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-100">
+                            Charlie: New here? Start by logging your first meal or workout today.
+                            <div class="mt-2 flex gap-2">
+                                <a th:href="@{/nutrition}" class="underline">Track intake</a>
+                                <a th:href="@{${todayPath}}" class="underline">Track day</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section aria-label="User profile display" class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-700/70 dark:bg-slate-900/60 dark:ring-white/10">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Your profile</p>
+                        <div class="mt-3 flex items-center gap-3">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/70 to-sky-400/70 text-sm font-semibold text-white" aria-hidden="true" th:text="${#strings.substring(userFirstNameSafe, 0, 1)}">A</div>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${userFirstNameSafe}">Athlete</p>
+                                <p class="text-xs text-slate-600 dark:text-slate-300" th:text="${userIsPremium ? 'Premium member' : 'Starter plan'}">Premium member</p>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-xs text-slate-600 dark:text-slate-300" th:text="${todayTotal > 0 ? 'Current focus: execute today''s plan' : 'Current focus: build tomorrow''s structure'}">Current focus: execute today's plan</p>
+                    </section>
+
+                </aside>
+            </div>
         </section>
-
-    </section>
-
-</div>
-
-<th:block th:fragment="pageScripts">
-
-    <script src="/js/client-dashboard-page.js" defer></script>
-
-    <!-- Dashboard Timeline Component -->
-    <script src="/js/dashboard-timeline.js" defer></script>
-
-    <!-- Tutorial Overlay Container -->
-    <div id="tutorial-overlay" class="tutorial-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="tutorial-title" data-testid="tutorial-overlay" data-user-role="CLIENT">
-        <!-- Backdrop -->
-        <div class="tutorial-backdrop"></div>
-
-        <!-- Tutorial Tooltip Card -->
-        <div class="tutorial-tooltip card-neon card--cyan shadow-2xl" data-tutorial-tooltip="true">
-            <!-- Progress Bar -->
-            <div class="tutorial-progress-container">
-                <div class="tutorial-progress-bar" data-tutorial-progress="true" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="3"></div>
-            </div>
-
-            <div class="tutorial-content">
-                <!-- Progress Step Number -->
-                <div class="tutorial-step-counter">
-                    <span data-step-number="1/3" class="text-xs font-semibold uppercase tracking-wide text-sky-400">
-                        <span data-step-number>1 of 3</span>
-                    </span>
-                </div>
-
-                <!-- Title -->
-                <h2 id="tutorial-title" class="tutorial-title text-2xl font-semibold gradient-text" data-step-title>
-                    Welcome to your fitness command center!
-                </h2>
-
-                <!-- Message -->
-                <p class="tutorial-message text-sm text-slate-400 mt-2" data-step-message>
-                    Let's show you around 🚀
-                </p>
-
-                <!-- Screen Reader Announcement -->
-                <div class="sr-only" role="status" aria-live="polite" aria-atomic="true" data-tutorial-announcement>
-                    Step 1 of 3: Welcome. Introducing your fitness dashboard.
-                </div>
-            </div>
-
-            <!-- Buttons Container -->
-            <div class="tutorial-buttons flex flex-wrap gap-2 mt-6" data-tutorial-buttons="true"></div>
-
-            <!-- Mobile Dismiss Hint -->
-            <div class="tutorial-dismiss-hint text-xs text-slate-500 mt-4 text-center">
-                Press ESC or tap outside to dismiss
-            </div>
-        </div>
-
-        <!-- Highlight Box (for desktop positioning) -->
-        <div class="tutorial-highlight" data-tutorial-highlight="true" aria-hidden="true"></div>
     </div>
 
-    <!-- Dashboard Tutorial Script -->
-    <script src="/js/dashboard-tutorial.js" defer></script>
+    <th:block th:fragment="pageScripts">
+        <style>
+            .dashboard-week-preview-panel {
+                transition: opacity 220ms ease, transform 220ms ease, box-shadow 260ms ease;
+                will-change: opacity, transform;
+            }
 
-</th:block>
+            .dashboard-week-preview-panel.is-updating {
+                opacity: 0.42;
+                transform: translateY(5px) scale(0.995);
+            }
+
+            .dashboard-week-day-button {
+                transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+            }
+
+            .dashboard-week-day-button.is-active {
+                transform: translateY(-2px);
+            }
+
+            @media (min-width: 1028px) {
+                [data-dashboard-left-rail],
+                [data-dashboard-right-rail] {
+                    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+                    will-change: transform;
+                }
+
+                #dashboardRoot.dashboard-rails-centered [data-dashboard-left-rail] {
+                    transform: translateY(-14px);
+                }
+
+                #dashboardRoot.dashboard-rails-centered [data-dashboard-right-rail] {
+                    transform: translateY(-14px);
+                }
+            }
+        </style>
+        <script th:src="@{/js/dashboard-action-hub.js(v='20260309')}" defer></script>
+    </th:block>
 
 </th:block>

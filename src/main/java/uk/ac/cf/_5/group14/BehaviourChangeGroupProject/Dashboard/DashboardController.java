@@ -1,19 +1,21 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.DashboardSummaryDto;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HomePage.MiniWeekDay;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.SecurityUtils;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.SecurityUtils;
-
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
 
 @Controller
 public class DashboardController {
@@ -24,13 +26,16 @@ public class DashboardController {
     private final AuthHelper authHelper;
     private final UserService userService;
     private final DashboardSummaryService dashboardSummaryService;
+    private final TrainerClientLinkRepository trainerClientLinkRepository;
 
     public DashboardController(AuthHelper authHelper,
                                UserService userService,
-                               DashboardSummaryService dashboardSummaryService) {
+                               DashboardSummaryService dashboardSummaryService,
+                               TrainerClientLinkRepository trainerClientLinkRepository) {
         this.authHelper = authHelper;
         this.userService = userService;
         this.dashboardSummaryService = dashboardSummaryService;
+        this.trainerClientLinkRepository = trainerClientLinkRepository;
     }
 
     private User currentUserOrThrow(Authentication authentication) {
@@ -61,6 +66,7 @@ public class DashboardController {
         }
         model.addAttribute("pageTitle", "Dashboard");
         model.addAttribute("disableChatHistory", true);
+        model.addAttribute("compactTopContent", true);
         User user = currentUserOrThrow(authentication);
         DashboardSummaryDto summary = dashboardSummaryService.getSummary(user);
         model.addAttribute("summary", summary);
@@ -98,6 +104,7 @@ public class DashboardController {
         // User identity and subscription
         model.addAttribute("userFirstName", user.getFirstName());
         model.addAttribute("userIsPremium", summary.isPremium());
+        model.addAttribute("hasTrainerConnected", trainerClientLinkRepository.findActiveByClientId(user.getId()).isPresent());
 
         return "dashboard/client-dashboard";
     }
@@ -108,7 +115,10 @@ public class DashboardController {
     }
 
     @GetMapping({"/dashboard/public", "/client/dashboard/public"})
-    public String clientDashboardPublic(Model model) {
+    public String clientDashboardPublic(Authentication authentication, Model model) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            return "redirect:/dashboard";
+        }
         model.addAttribute("pageTitle", "One to One");
         return "dashboard/client-dashboard-public";
     }

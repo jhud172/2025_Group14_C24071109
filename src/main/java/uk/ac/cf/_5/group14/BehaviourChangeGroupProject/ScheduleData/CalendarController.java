@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.ActivityType;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
@@ -60,6 +61,7 @@ public class CalendarController {
 
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final String TIMELINE_SLOT_SESSION_KEY = "calendarDayTimelineSlots";
     
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CalendarController.class);
 
@@ -151,6 +153,7 @@ public class CalendarController {
         UserSettings userSettings = userSettingsService.getOrCreate(user);
         CalendarTaskLayoutPreference layoutPreference = userSettings.getCalendarTaskLayout();
         logger.debug("calendarView: layoutPreference = {}", layoutPreference);
+        model.addAttribute("compactTopContent", true);
         
         // Determine view based on: explicit parameter, stored preference, or device-based default
         String targetView = view;
@@ -425,12 +428,14 @@ public class CalendarController {
             @PathVariable String dateStr,
             @RequestParam(name = "dailyFocus", required = false) String dailyFocus,
             @SessionAttribute("user") User user,
-            Model model
+            Model model,
+            HttpSession session
     ) {
         LocalDate date = LocalDate.parse(dateStr, DATE_FORMAT);
         LocalDate today = LocalDate.now();
 
         model.addAttribute("isToday", date.equals(today));
+        model.addAttribute("compactTopContent", true);
         model.addAttribute("todayDate", today.format(DATE_FORMAT));
 
         model.addAttribute("date", date);
@@ -527,6 +532,7 @@ public class CalendarController {
                 .toList();
         }
         model.addAttribute("workoutSessions", sessions);
+        model.addAttribute("timelineWorkoutSlots", getTimelineSlotsForDate(session, date));
 
         // Preferences-driven Daily Focus options.
         boolean hasAnyPreferences = true; // fail-open: keep existing UX if prefs subsystem not available
@@ -568,15 +574,15 @@ public class CalendarController {
             }
         }
         if (sessions != null) {
-            for (var session : sessions) {
-                if (session == null) {
+            for (var sessionItem : sessions) {
+                if (sessionItem == null) {
                     continue;
                 }
                 String workoutName = null;
-                if (session.getNameSnapshot() != null && !session.getNameSnapshot().isBlank()) {
-                    workoutName = session.getNameSnapshot();
-                } else if (session.getWorkout() != null && session.getWorkout().getName() != null && !session.getWorkout().getName().isBlank()) {
-                    workoutName = session.getWorkout().getName();
+                if (sessionItem.getNameSnapshot() != null && !sessionItem.getNameSnapshot().isBlank()) {
+                    workoutName = sessionItem.getNameSnapshot();
+                } else if (sessionItem.getWorkout() != null && sessionItem.getWorkout().getName() != null && !sessionItem.getWorkout().getName().isBlank()) {
+                    workoutName = sessionItem.getWorkout().getName();
                 }
                 if (workoutName != null && !workoutName.isBlank()) {
                     dailyFocusOptions.add(workoutName.trim());
@@ -998,10 +1004,11 @@ public class CalendarController {
     }
 
     @PostMapping("/day/{dateStr}/toggle-complete")
-    public String toggleComplete(
+        public Object toggleComplete(
             @PathVariable String dateStr,
             @SessionAttribute(name = "user") User user,
-            @RequestParam Long taskId
+            @RequestParam Long taskId,
+            HttpServletRequest request
     ) {
         taskService.toggleCompleted(taskId, user);
 
@@ -1037,7 +1044,103 @@ public class CalendarController {
             logger.warn("Failed to send SSE day completion update", e);
         }
 
+        boolean isAjax = request != null && "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        if (isAjax) {
+            CalendarTask task = taskService.getTaskById(taskId);
+            boolean completed = task != null && Boolean.TRUE.equals(task.getCompleted());
+            return ResponseEntity.ok(Map.of("success", true, "completed", completed));
+        }
+
         return "redirect:/calendar/day/" + dateStr;
+    }
+
+    @PostMapping("/day/{dateStr}/timeline-slot")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public ResponseEntity<Map<String, Object>> updateTimelineSlot(
+            @PathVariable String dateStr,
+            @SessionAttribute("user") User user,
+            @RequestParam String itemType,
+            @RequestParam Long itemId,
+            @RequestParam String time,
+            HttpSession session
+    ) {
+        try {
+            LocalDate date = LocalDate.parse(dateStr, DATE_FORMAT);
+            if (itemType == null || itemId == null || time == null || time.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Missing timeline payload"));
+            }
+
+            if ("task".equalsIgnoreCase(itemType)) {
+                CalendarTask task = taskService.getTaskById(itemId);
+                if (task == null || task.getUser() == null || !Objects.equals(task.getUser().getId(), user.getId())) {
+                    return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Task not found"));
+                }
+
+                taskService.updateTask(
+                    itemId,
+                    user,
+                    task.getTitle(),
+                    time,
+                    task.getNotes(),
+                    task.getExercise(),
+                    task.getActivityType()
+                );
+
+                return ResponseEntity.ok(Map.of("success", true, "itemType", "task", "time", time));
+            }
+
+            if ("workout".equalsIgnoreCase(itemType) || "occurrence".equalsIgnoreCase(itemType)) {
+                setTimelineSlot(session, date, itemType.toLowerCase(), itemId, time);
+                return ResponseEntity.ok(Map.of("success", true, "itemType", itemType.toLowerCase(), "time", time));
+            }
+
+            return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Unsupported timeline item type"));
+        } catch (Exception ex) {
+            logger.error("Failed to update timeline slot", ex);
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "error", "Unable to update timeline slot"));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, String> getTimelineSlotsForDate(HttpSession session, LocalDate date) {
+        if (session == null || date == null) {
+            return Map.of();
+        }
+        Object raw = session.getAttribute(TIMELINE_SLOT_SESSION_KEY);
+        if (!(raw instanceof Map<?, ?> rawMap)) {
+            return Map.of();
+        }
+        Object dateSlotsRaw = rawMap.get(date.toString());
+        if (!(dateSlotsRaw instanceof Map<?, ?> dateSlotsMap)) {
+            return Map.of();
+        }
+
+        Map<String, String> result = new HashMap<>();
+        for (Map.Entry<?, ?> entry : dateSlotsMap.entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null) {
+                result.put(entry.getKey().toString(), entry.getValue().toString());
+            }
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setTimelineSlot(HttpSession session, LocalDate date, String itemType, Long itemId, String time) {
+        if (session == null || date == null || itemType == null || itemId == null || time == null) {
+            return;
+        }
+
+        Object raw = session.getAttribute(TIMELINE_SLOT_SESSION_KEY);
+        Map<String, Map<String, String>> byDate;
+        if (raw instanceof Map<?, ?>) {
+            byDate = (Map<String, Map<String, String>>) raw;
+        } else {
+            byDate = new HashMap<>();
+        }
+
+        Map<String, String> slots = byDate.computeIfAbsent(date.toString(), k -> new HashMap<>());
+        slots.put(itemType + ":" + itemId, time);
+        session.setAttribute(TIMELINE_SLOT_SESSION_KEY, byDate);
     }
 
     @PostMapping("/task/{id}/edit-inline")

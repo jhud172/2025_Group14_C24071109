@@ -1,15 +1,18 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Profile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -45,9 +48,6 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
-import java.util.stream.Collectors;
-import java.math.BigDecimal;
-import java.util.Collections;
 
 @Controller
 public class ProfileController {
@@ -137,6 +137,7 @@ public class ProfileController {
         modelAndView.addObject("recentExportRequests", dataExportRequestService.getRecentRequests(user));
         modelAndView.addObject("today", LocalDate.now(clock));
         modelAndView.addObject("devProfilePreview", devProfilePreview);
+        modelAndView.addObject("compactTopContent", true);
 
         // Payment cards & orders
         List<SavedPaymentMethod> savedCards = cardService.getCardsForUser(user.getId());

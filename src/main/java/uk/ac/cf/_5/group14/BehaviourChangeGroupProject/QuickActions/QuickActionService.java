@@ -1,13 +1,14 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.QuickActions;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 @Service
 public class QuickActionService {
@@ -66,12 +67,15 @@ public class QuickActionService {
         if (!isPremium) {
             throw new IllegalStateException("Premium subscription required");
         }
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Name is required");
-        }
         if (prompt == null || prompt.isBlank()) {
             throw new IllegalArgumentException("Prompt is required");
         }
+
+        String resolvedPrompt = prompt.trim();
+        String resolvedName = (name == null || name.isBlank())
+                ? generateNameFromPrompt(resolvedPrompt)
+                : name.trim();
+
         long customCount = repository.countByUserAndType(user, QuickActionType.CUSTOM_AI);
         if (customCount >= MAX_CUSTOM) {
             throw new IllegalStateException("Maximum custom actions reached");
@@ -80,8 +84,8 @@ public class QuickActionService {
         QuickActionDefinition action = new QuickActionDefinition();
         action.setUser(user);
         action.setType(QuickActionType.CUSTOM_AI);
-        action.setName(name.trim());
-        action.setPrompt(prompt.trim());
+        action.setName(resolvedName);
+        action.setPrompt(resolvedPrompt);
         action.setActionKey(null);
         action.setSortOrder(nextSortOrder(user));
 
@@ -89,6 +93,21 @@ public class QuickActionService {
         action.setActive(activeCount < MAX_ACTIVE);
 
         return repository.save(action);
+    }
+
+    private String generateNameFromPrompt(String prompt) {
+        String[] words = prompt.replaceAll("[^a-zA-Z0-9\\s-]", " ").trim().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        int added = 0;
+        for (String w : words) {
+            if (w == null || w.isBlank()) continue;
+            if (added >= 5) break;
+            if (sb.length() > 0) sb.append(' ');
+            sb.append(Character.toUpperCase(w.charAt(0))).append(w.substring(1).toLowerCase());
+            added++;
+        }
+        String result = sb.length() == 0 ? "Quick AI Action" : sb.toString();
+        return result.length() > 120 ? result.substring(0, 120) : result;
     }
 
     @Transactional

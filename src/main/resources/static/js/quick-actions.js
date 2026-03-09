@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const messageEl = document.getElementById("quickActionsMessage");
     const searchInput = document.getElementById("quickActionsSearch");
     const customizeList = document.getElementById("quickActionsCustomizeList");
-    const customName = document.getElementById("quickActionsCustomName");
     const customPrompt = document.getElementById("quickActionsCustomPrompt");
     const customCreate = document.getElementById("quickActionsCustomCreate");
     const customLimit = document.getElementById("quickActionsCustomLimit");
@@ -130,14 +129,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const meta = getActionMeta(action);
             const button = document.createElement("button");
             button.type = "button";
-            button.className = "group flex flex-col items-start justify-between rounded-2xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800";
+            button.className = "group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-left text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800";
             button.dataset.actionId = action.id;
             button.dataset.actionType = action.type;
             button.dataset.actionKey = action.actionKey || "";
             button.dataset.prompt = action.prompt || "";
 
             const top = document.createElement("div");
-            top.className = "flex w-full items-start justify-between gap-2";
+            top.className = "flex items-center justify-center";
 
             const icon = document.createElement("span");
             icon.className = "grid h-8 w-8 place-items-center rounded-xl border border-slate-200 bg-white text-base shadow-sm dark:border-slate-800 dark:bg-slate-950";
@@ -149,19 +148,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? PREMIUM_BADGE_CLASS
                 : "text-[10px] text-slate-400";
             badge.textContent = action.type === "CUSTOM_AI" ? (isPremium ? "AI" : "🔒 Premium") : "";
-            top.appendChild(badge);
+
+            const content = document.createElement("div");
+            content.className = "min-w-0 flex-1";
 
             const label = document.createElement("div");
-            label.className = "mt-3 text-sm font-semibold text-slate-900 dark:text-slate-100";
+            label.className = "truncate text-sm font-semibold text-slate-900 dark:text-slate-100";
             label.textContent = action.name;
 
             const desc = document.createElement("div");
-            desc.className = "mt-1 text-xs text-slate-500";
+            desc.className = "mt-0.5 truncate text-xs text-slate-500";
             desc.textContent = meta.desc;
 
+            content.appendChild(label);
+            content.appendChild(desc);
+
             button.appendChild(top);
-            button.appendChild(label);
-            button.appendChild(desc);
+            button.appendChild(content);
+            button.appendChild(badge);
 
             button.addEventListener("click", () => handleActionClick(action));
             if (action.type === "CUSTOM_AI" && !isPremium) {
@@ -276,13 +280,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function createCustomAction() {
-        if (!customName || !customPrompt || !customCreate) return;
-        const name = customName.value.trim();
+        if (!customPrompt || !customCreate) return;
         const prompt = customPrompt.value.trim();
-        if (!name || !prompt) {
-            showMessage("Name and prompt are required.");
+        if (!prompt) {
+            showMessage("Prompt is required.");
             return;
         }
+
+        const name = await generateActionName(prompt);
 
         try {
             const res = await fetch("/api/quick-actions/custom", {
@@ -300,11 +305,47 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             const created = await res.json();
             actions.push(created);
-            customName.value = "";
             customPrompt.value = "";
             render();
         } catch {
             showMessage("Unable to create custom action.");
+        }
+    }
+
+    function fallbackActionName(prompt) {
+        const cleaned = (prompt || "")
+            .replace(/\s+/g, " ")
+            .replace(/[^\w\s-]/g, "")
+            .trim();
+        if (!cleaned) return "Quick AI action";
+
+        const firstChunk = cleaned.split(/[.!?]/)[0] || cleaned;
+        const words = firstChunk.split(" ").filter(Boolean).slice(0, 5);
+        const titled = words.map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+        const result = titled || "Quick AI action";
+        return result.length > 60 ? `${result.slice(0, 57)}...` : result;
+    }
+
+    async function generateActionName(prompt) {
+        const fallback = fallbackActionName(prompt);
+
+        try {
+            const res = await fetch("/chat/api", {
+                method: "POST",
+                headers: authHeaders(),
+                body: JSON.stringify({
+                    message: `Create a concise title (max 5 words) for this quick action prompt. Return ONLY the title text. Prompt: ${prompt}`,
+                    skipHistory: true
+                })
+            });
+
+            if (!res.ok) return fallback;
+            const data = await res.json();
+            const aiName = (data?.reply || "").replace(/[\n\r"']/g, " ").replace(/\s+/g, " ").trim();
+            if (!aiName) return fallback;
+            return aiName.length > 60 ? `${aiName.slice(0, 57)}...` : aiName;
+        } catch {
+            return fallback;
         }
     }
 

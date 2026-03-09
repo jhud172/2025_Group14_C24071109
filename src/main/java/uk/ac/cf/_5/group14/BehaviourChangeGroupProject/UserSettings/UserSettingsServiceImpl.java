@@ -2,6 +2,7 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 
@@ -22,37 +23,52 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         if (user == null || user.getId() == null) {
             return null;
         }
-        return userSettingsRepository.findById(user.getId())
+        UserSettings settings = userSettingsRepository.findById(user.getId())
                 .orElseGet(() -> {
-                    UserSettings settings = new UserSettings();
-                    settings.setUser(userRepository.getReferenceById(user.getId()));
-                    settings.setLanguage("en");
-                    settings.setTheme(ThemePreference.SYSTEM);
-                    settings.setEasyMode(false);
-                    settings.setColorBlindMode(false);
-                    settings.setDisabilityHearing(false);
-                    settings.setDisabilityMobility(false);
-                    settings.setDisabilityVision(false);
-                    settings.setShareRecoverySignals(false);
-                    settings.setShareNutritionSignals(false);
-                    settings.setShareSleepSignals(false);
-                    settings.setShareFatigueSignals(false);
-                    settings.setShareWeightTrend(false);
-                    settings.setDefaultSets(3);
-                    settings.setDefaultRepMin(8);
-                    settings.setDefaultRepMax(12);
-                    settings.setPreferredEquipmentBodyweight(false);
-                    settings.setPreferredEquipmentDumbbell(false);
-                    settings.setPreferredEquipmentBarbell(false);
-                    settings.setPreferredEquipmentMachine(false);
-                    settings.setPreferredEquipmentBands(false);
-                    settings.setPreferredEquipmentKettlebell(false);
-                    settings.setMacroTargetCalories(null);
-                    settings.setMacroTargetProtein(null);
-                    settings.setMacroTargetCarbs(null);
-                    settings.setMacroTargetFat(null);
-                    return userSettingsRepository.save(settings);
+                    UserSettings newSettings = new UserSettings();
+                    newSettings.setUser(userRepository.getReferenceById(user.getId()));
+                    newSettings.setLanguage("en");
+                    newSettings.setTheme(isDemoUser(user) ? ThemePreference.LIGHT : ThemePreference.SYSTEM);
+                    newSettings.setEasyMode(false);
+                    newSettings.setColorBlindMode(false);
+                    newSettings.setDisabilityHearing(false);
+                    newSettings.setDisabilityMobility(false);
+                    newSettings.setDisabilityVision(false);
+                    newSettings.setShareRecoverySignals(false);
+                    newSettings.setShareNutritionSignals(false);
+                    newSettings.setShareSleepSignals(false);
+                    newSettings.setShareFatigueSignals(false);
+                    newSettings.setShareWeightTrend(false);
+                    newSettings.setDefaultSets(3);
+                    newSettings.setDefaultRepMin(8);
+                    newSettings.setDefaultRepMax(12);
+                    newSettings.setPreferredEquipmentBodyweight(false);
+                    newSettings.setPreferredEquipmentDumbbell(false);
+                    newSettings.setPreferredEquipmentBarbell(false);
+                    newSettings.setPreferredEquipmentMachine(false);
+                    newSettings.setPreferredEquipmentBands(false);
+                    newSettings.setPreferredEquipmentKettlebell(false);
+                    newSettings.setMacroTargetCalories(null);
+                    newSettings.setMacroTargetProtein(null);
+                    newSettings.setMacroTargetCarbs(null);
+                    newSettings.setMacroTargetFat(null);
+                    return userSettingsRepository.save(newSettings);
                 });
+
+        // Keep demo accounts in light mode for consistent demos.
+        if (isDemoUser(user) && settings.getTheme() != ThemePreference.LIGHT) {
+            settings.setTheme(ThemePreference.LIGHT);
+            settings = userSettingsRepository.save(settings);
+        }
+
+        return settings;
+    }
+
+    private boolean isDemoUser(User user) {
+        if (user == null || user.getUsername() == null) {
+            return false;
+        }
+        return user.getUsername().toLowerCase().contains("demo");
     }
 
     @Override
@@ -183,6 +199,11 @@ public class UserSettingsServiceImpl implements UserSettingsService {
                                             boolean preferredEquipmentCable,
                                             boolean preferredEquipmentPullupBar,
                                             boolean preferredEquipmentJumpRope,
+                                            boolean preferredEquipmentMedicineBall,
+                                            boolean preferredEquipmentFoamRoller,
+                                            boolean preferredEquipmentTrx,
+                                            boolean preferredEquipmentOther,
+                                            String preferredEquipmentOtherSpecify,
                                             Integer macroTargetCalories,
                                             Integer macroTargetProtein,
                                             Integer macroTargetCarbs,
@@ -208,6 +229,11 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         settings.setPreferredEquipmentCable(preferredEquipmentCable);
         settings.setPreferredEquipmentPullupBar(preferredEquipmentPullupBar);
         settings.setPreferredEquipmentJumpRope(preferredEquipmentJumpRope);
+        settings.setPreferredEquipmentMedicineBall(preferredEquipmentMedicineBall);
+        settings.setPreferredEquipmentFoamRoller(preferredEquipmentFoamRoller);
+        settings.setPreferredEquipmentTrx(preferredEquipmentTrx);
+        settings.setPreferredEquipmentOther(preferredEquipmentOther);
+        settings.setPreferredEquipmentOtherSpecify(preferredEquipmentOther ? preferredEquipmentOtherSpecify : null);
         settings.setMacroTargetCalories(normalizeOptional(macroTargetCalories, 0, 20000));
         settings.setMacroTargetProtein(normalizeOptional(macroTargetProtein, 0, 1000));
         settings.setMacroTargetCarbs(normalizeOptional(macroTargetCarbs, 0, 1000));
@@ -236,6 +262,11 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         settings.setPreferredEquipmentCable(false);
         settings.setPreferredEquipmentPullupBar(false);
         settings.setPreferredEquipmentJumpRope(false);
+        settings.setPreferredEquipmentMedicineBall(false);
+        settings.setPreferredEquipmentFoamRoller(false);
+        settings.setPreferredEquipmentTrx(false);
+        settings.setPreferredEquipmentOther(false);
+        settings.setPreferredEquipmentOtherSpecify(null);
         settings.setMacroTargetCalories(null);
         settings.setMacroTargetProtein(null);
         settings.setMacroTargetCarbs(null);

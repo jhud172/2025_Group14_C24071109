@@ -1,3 +1,0 @@
-change the dashboard from a straight dashboard to a helpful selection as this will now change the website entirely, we now have a section for tracking diets, calories etc. we want a design of we have our next action at the top and below is the week view for the next 7 days (includign today) timeline then below will be 2 big buttons one for track intake and the other is track the day. tracking intake is completly different to the calendar view point since thats now part of track the day. also on the left and right will bne links to the non logged in pages such as, about, faq, etc all of those, but intergrate them in. 
-
-then work on how the logic will handle intake and tracking the day 

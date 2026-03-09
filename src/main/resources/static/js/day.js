@@ -117,6 +117,7 @@ function toggleEdit(id) {
         if (!content) return;
 
         drawerBody.innerHTML = content.innerHTML;
+        drawerBody.setAttribute('data-open-task-id', String(taskId));
         drawer.classList.remove('hidden');
         drawer.setAttribute('aria-hidden', 'false');
 
@@ -127,6 +128,7 @@ function toggleEdit(id) {
         if (!drawerBody) return;
         drawer.classList.add('hidden');
         drawer.setAttribute('aria-hidden', 'true');
+        drawerBody.removeAttribute('data-open-task-id');
         drawerBody.innerHTML = '<p class="text-sm text-slate-600 dark:text-slate-300">Select a task to view details.</p>';
     }
 
@@ -143,6 +145,153 @@ function toggleEdit(id) {
     if (closeBtn) closeBtn.addEventListener('click', close);
     if (backdrop) backdrop.addEventListener('click', close);
 
+    drawer.addEventListener('click', (e) => {
+        const toggleBtn = e.target && e.target.closest ? e.target.closest('[data-task-adjust-toggle]') : null;
+        if (toggleBtn) {
+            const wrap = drawerBody.querySelector('[data-task-time-wrap]');
+            const display = wrap ? wrap.querySelector('[data-task-time-display]') : null;
+            const form = wrap ? wrap.querySelector('[data-task-time-edit-form]') : null;
+            if (display && form) {
+                display.classList.add('hidden');
+                form.classList.remove('hidden');
+                const input = form.querySelector('input[name="time"]');
+                if (input) {
+                    input.dataset.originalTime = input.value || '';
+                    input.focus();
+                }
+            }
+            return;
+        }
+
+        const cancelBtn = e.target && e.target.closest ? e.target.closest('[data-task-adjust-cancel]') : null;
+        if (cancelBtn) {
+            const form = cancelBtn.closest('[data-task-time-edit-form]');
+            const wrap = cancelBtn.closest('[data-task-time-wrap]');
+            const display = wrap ? wrap.querySelector('[data-task-time-display]') : null;
+            if (form && display) {
+                const input = form.querySelector('input[name="time"]');
+                if (input && typeof input.dataset.originalTime === 'string') {
+                    input.value = input.dataset.originalTime;
+                }
+                form.classList.add('hidden');
+                display.classList.remove('hidden');
+            }
+        }
+    });
+
+    drawer.addEventListener('submit', (e) => {
+        const completeForm = e.target && e.target.closest ? e.target.closest('[data-testid="task-drawer-complete-form"]') : null;
+        if (completeForm) {
+            e.preventDefault();
+            const taskIdInput = completeForm.querySelector('input[name="taskId"]');
+            const taskId = taskIdInput ? taskIdInput.value : null;
+            if (!taskId) return;
+            const rowQuickButton = document.querySelector('[data-task-item][data-task-id="' + taskId + '"] [data-quick-complete]');
+            if (rowQuickButton) {
+                rowQuickButton.click();
+            }
+            return;
+        }
+
+        const form = e.target && e.target.closest ? e.target.closest('[data-task-time-edit-form]') : null;
+        if (!form) return;
+        e.preventDefault();
+
+        const taskId = form.getAttribute('data-task-id');
+        const timeInput = form.querySelector('input[name="time"]');
+        const nextTime = timeInput ? timeInput.value : '';
+        if (!taskId || !nextTime) return;
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+        const pageDate = document.getElementById('day-main-content')?.getAttribute('data-date') || '';
+
+        fetch('/calendar/task/' + taskId + '/update-time', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                ...(csrfToken && csrfHeader ? { [csrfHeader]: csrfToken } : {}),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({ date: pageDate, time: nextTime }).toString()
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error('Unable to save time');
+                const display = form.closest('[data-task-time-wrap]')?.querySelector('[data-task-time-display]');
+                const label = display ? display.querySelector('[data-testid="task-drawer-time"]') : null;
+                if (label) label.textContent = nextTime;
+
+                // Sync row and timeline data attributes.
+                const row = document.querySelector('[data-task-item][data-task-id="' + taskId + '"]');
+                if (row) {
+                    row.setAttribute('data-task-time', nextTime);
+                    const rowTime = row.querySelector('[data-testid="task-time"]');
+                    if (rowTime) rowTime.textContent = nextTime;
+                }
+
+                const model = document.getElementById('task-drawer-content-' + taskId);
+                if (model) {
+                    const modelTime = model.querySelector('[data-testid="task-drawer-time"]');
+                    if (modelTime) modelTime.textContent = nextTime;
+                }
+
+                form.classList.add('hidden');
+                if (display) display.classList.remove('hidden');
+            })
+            .catch(() => {
+                const status = document.createElement('p');
+                status.className = 'mt-2 text-xs font-semibold text-red-600 dark:text-red-300';
+                status.textContent = 'Could not save time. Please try again.';
+                form.appendChild(status);
+                window.setTimeout(() => status.remove(), 2000);
+            });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !drawer.classList.contains('hidden')) {
+            close();
+        }
+    });
+})();
+
+(function initWorkoutDrawer() {
+    const drawer = document.getElementById('workout-drawer');
+    if (!drawer) return;
+
+    const drawerBody = document.getElementById('workout-drawer-body');
+    const closeBtn = drawer.querySelector('[data-testid="workout-drawer-close"]');
+    const backdrop = drawer.querySelector('[data-testid="workout-drawer-backdrop"]');
+
+    function open(workoutId) {
+        if (!drawerBody) return;
+        const content = document.getElementById('workout-drawer-content-' + workoutId);
+        if (!content) return;
+
+        drawerBody.innerHTML = content.innerHTML;
+        drawer.classList.remove('hidden');
+        drawer.setAttribute('aria-hidden', 'false');
+        if (closeBtn) closeBtn.focus();
+    }
+
+    function close() {
+        drawer.classList.add('hidden');
+        drawer.setAttribute('aria-hidden', 'true');
+        if (drawerBody) {
+            drawerBody.innerHTML = '<p class="text-sm text-slate-600 dark:text-slate-300">Select a workout to view details.</p>';
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        const trigger = e.target && e.target.closest ? e.target.closest('[data-open-workout-drawer]') : null;
+        if (!trigger) return;
+        const workoutId = trigger.getAttribute('data-workout-id');
+        if (!workoutId) return;
+        e.preventDefault();
+        open(workoutId);
+    });
+
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    if (backdrop) backdrop.addEventListener('click', close);
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !drawer.classList.contains('hidden')) {
             close();
@@ -370,10 +519,10 @@ function toggleEdit(id) {
         if (!workoutsRoot) return;
 
         const ordering = form.querySelector('select[name="ordering"]')?.value || 'SCHEDULE_ORDER';
-        const items = Array.from(workoutsRoot.querySelectorAll('[data-workout-item]'));
+        const items = Array.from(workoutsRoot.querySelectorAll('[data-workout-card]'));
         if (!items.length) return;
 
-        captureOriginalOrder('#workouts-list-root [data-workout-item]', 'originalIndex');
+        captureOriginalOrder('#workouts-list-root [data-workout-card]', 'originalIndex');
 
         if (ordering === 'ALPHABETICAL') {
             items.sort((a, b) => {
@@ -397,7 +546,7 @@ function toggleEdit(id) {
     }
 
     // Capture initial order so we can restore schedule order.
-    captureOriginalOrder('#workouts-list-root [data-workout-item]', 'originalIndex');
+    captureOriginalOrder('#workouts-list-root [data-workout-card]', 'originalIndex');
 
     forms.forEach((form) => {
         form.addEventListener('submit', (e) => {

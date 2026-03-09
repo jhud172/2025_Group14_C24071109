@@ -1,8 +1,11 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,8 +13,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.ModelAndView;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Preference.Preference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Preference.PreferenceService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.PhysicalCondition.PhysicalCondition;
@@ -21,12 +28,6 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-
-import java.util.Locale;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 public class UserPreferenceController {
@@ -56,7 +57,7 @@ public class UserPreferenceController {
     public ModelAndView getPreferenceForm() {
         User user = authHelper.getAuthenticatedUser();
         if (userPreferenceService.hasCompletedPreferenceSetup(user)) {
-            return new ModelAndView("redirect:/preferences/edit");
+            return new ModelAndView("redirect:/preferences");
         }
         return buildPreferenceFormModelAndView(user, 1);
     }
@@ -95,6 +96,11 @@ public class UserPreferenceController {
             userPreferenceForm.setPreferredEquipmentCable(settings.isPreferredEquipmentCable());
             userPreferenceForm.setPreferredEquipmentPullupBar(settings.isPreferredEquipmentPullupBar());
             userPreferenceForm.setPreferredEquipmentJumpRope(settings.isPreferredEquipmentJumpRope());
+            userPreferenceForm.setPreferredEquipmentMedicineBall(settings.isPreferredEquipmentMedicineBall());
+            userPreferenceForm.setPreferredEquipmentFoamRoller(settings.isPreferredEquipmentFoamRoller());
+            userPreferenceForm.setPreferredEquipmentTrx(settings.isPreferredEquipmentTrx());
+            userPreferenceForm.setPreferredEquipmentOther(settings.isPreferredEquipmentOther());
+            userPreferenceForm.setPreferredEquipmentOtherSpecify(settings.getPreferredEquipmentOtherSpecify());
             userPreferenceForm.setMacroTargetCalories(settings.getMacroTargetCalories());
             userPreferenceForm.setMacroTargetProtein(settings.getMacroTargetProtein());
             userPreferenceForm.setMacroTargetCarbs(settings.getMacroTargetCarbs());
@@ -160,6 +166,11 @@ public class UserPreferenceController {
                     userPreferenceForm.isPreferredEquipmentCable(),
                     userPreferenceForm.isPreferredEquipmentPullupBar(),
                     userPreferenceForm.isPreferredEquipmentJumpRope(),
+                        userPreferenceForm.isPreferredEquipmentMedicineBall(),
+                        userPreferenceForm.isPreferredEquipmentFoamRoller(),
+                        userPreferenceForm.isPreferredEquipmentTrx(),
+                        userPreferenceForm.isPreferredEquipmentOther(),
+                        userPreferenceForm.getPreferredEquipmentOtherSpecify(),
                     userPreferenceForm.getMacroTargetCalories(),
                     userPreferenceForm.getMacroTargetProtein(),
                     userPreferenceForm.getMacroTargetCarbs(),

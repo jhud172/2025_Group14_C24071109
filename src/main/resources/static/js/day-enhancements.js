@@ -103,6 +103,11 @@
     }
 
     function applyTimeOfDayTheme() {
+        var wrapper = document.getElementById('day-main-content');
+        if (wrapper) {
+            wrapper.setAttribute('data-time-theme-enabled', isTimeThemeEnabled() ? 'true' : 'false');
+        }
+
         if (!isTimeThemeEnabled()) {
             // Remove any existing time theme
             document.documentElement.removeAttribute('data-time-theme');
@@ -140,39 +145,80 @@
             btn.setAttribute('aria-pressed', String(next));
             btn.querySelector('.ttt-label').textContent = next ? 'Time theme: on' : 'Time theme: off';
             applyTimeOfDayTheme();
+            updateTimeGreeting();
         });
     }
 
     // ==================== Smart Time Greetings ====================
-    function addTimeGreeting() {
-        const header = document.querySelector('[data-testid="day-hub-header"]');
-        if (!header) return;
-        
-        const timeTheme = document.documentElement.getAttribute('data-time-theme') || header.getAttribute('data-time-theme');
-        const greetings = {
-            morning: { emoji: '🌅', text: 'Good morning!', color: 'text-amber-600 dark:text-amber-400' },
-            afternoon: { emoji: '☀️', text: 'Good afternoon!', color: 'text-blue-600 dark:text-blue-400' },
-            midday: { emoji: '☀️', text: 'Good afternoon!', color: 'text-blue-600 dark:text-blue-400' },
-            evening: { emoji: '🌆', text: 'Good evening!', color: 'text-indigo-600 dark:text-indigo-400' },
-            night: { emoji: '🌙', text: 'Good night!', color: 'text-emerald-600 dark:text-emerald-400' }
+    function getGreetingContext() {
+        const wrapper = document.getElementById('day-main-content');
+        const selectedDateRaw = wrapper ? wrapper.getAttribute('data-date') : null;
+        const selectedDate = selectedDateRaw ? new Date(selectedDateRaw + 'T12:00:00') : new Date();
+        const now = new Date();
+        const hour = now.getHours();
+
+        let period = 'afternoon';
+        if (hour >= 5 && hour < 12) period = 'morning';
+        else if (hour >= 12 && hour < 17) period = 'afternoon';
+        else if (hour >= 17 && hour < 21) period = 'evening';
+        else period = 'night';
+
+        const month = selectedDate.getMonth() + 1;
+        const seasonal = (month <= 2 || month === 12) ? 'cloudy' : (month >= 6 && month <= 8) ? 'clear' : 'partly-cloudy';
+        const weather = window.__dayWeather || seasonal;
+
+        return { period, weather, themeEnabled: isTimeThemeEnabled() };
+    }
+
+    function buildGreetingModel(ctx) {
+        const weatherTone = {
+            clear: { icon: '☀️', accent: 'from-amber-300/30 to-orange-300/20', sub: 'Clear conditions. Great window for high-energy work.' },
+            sunny: { icon: '🌤️', accent: 'from-amber-300/30 to-orange-300/20', sub: 'Sunlight is on your side. Keep momentum steady.' },
+            rainy: { icon: '🌧️', accent: 'from-sky-300/25 to-slate-300/15', sub: 'Rainy conditions. Ideal for focused indoor sessions.' },
+            cloudy: { icon: '☁️', accent: 'from-slate-300/25 to-slate-400/15', sub: 'Cloud cover today. Keep your pace deliberate and calm.' },
+            'partly-cloudy': { icon: '⛅', accent: 'from-sky-300/25 to-amber-300/20', sub: 'Mixed skies. A good day for balanced effort.' }
         };
-        
-        const greeting = greetings[timeTheme] || greetings.afternoon;
-        
-        if (!document.getElementById('time-greeting')) {
-            const greetingDiv = document.createElement('div');
+
+        const periodTone = {
+            morning: 'Good morning',
+            afternoon: 'Good afternoon',
+            evening: 'Good evening',
+            night: 'Good night'
+        };
+
+        const weatherData = weatherTone[ctx.weather] || weatherTone['partly-cloudy'];
+        return {
+            title: periodTone[ctx.period] || periodTone.afternoon,
+            subtitle: weatherData.sub,
+            icon: weatherData.icon,
+            accent: weatherData.accent,
+            themeEnabled: ctx.themeEnabled
+        };
+    }
+
+    function updateTimeGreeting() {
+        const header = document.querySelector('[data-testid="day-hub-header"]');
+        const slot = document.getElementById('time-greeting-slot');
+        if (!header || !slot) return;
+
+        const model = buildGreetingModel(getGreetingContext());
+
+        let greetingDiv = document.getElementById('time-greeting');
+        if (!greetingDiv) {
+            greetingDiv = document.createElement('div');
             greetingDiv.id = 'time-greeting';
-            greetingDiv.className = `mb-4 flex items-center gap-3 animate-fade-in ${greeting.color}`;
-            greetingDiv.innerHTML = `
-                <span class="text-4xl animate-bounce-subtle" aria-hidden="true">${greeting.emoji}</span>
-                <span class="text-2xl font-bold tracking-tight">${greeting.text}</span>
-            `;
-            
-            const slot = document.getElementById('time-greeting-slot');
-            if (slot) {
-                slot.appendChild(greetingDiv);
-            }
+            slot.appendChild(greetingDiv);
         }
+
+        greetingDiv.className = 'mb-4 rounded-xl border border-white/50 dark:border-white/10 bg-gradient-to-r ' + model.accent + ' px-3 py-2 animate-fade-in';
+        greetingDiv.innerHTML =
+            '<div class="flex items-center gap-3">'
+            + '<span class="text-3xl ' + (model.themeEnabled ? 'animate-bounce-subtle' : '') + '" aria-hidden="true">' + model.icon + '</span>'
+            + '<div>'
+            + '<p class="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">' + model.title + '</p>'
+            + '<p class="text-xs font-medium text-slate-600 dark:text-slate-300">' + model.subtitle + '</p>'
+            + '</div>'
+            + '</div>';
     }
     
     // ==================== Motivational Messages ====================
@@ -203,6 +249,180 @@
             msgDiv.textContent = message.text;
             completionSection.appendChild(msgDiv);
         }
+    }
+
+    function collectDayItems() {
+        const taskItems = Array.from(document.querySelectorAll('[data-task-item]')).map((el) => {
+            const status = el.getAttribute('data-task-status') || 'todo';
+            return {
+                title: el.getAttribute('data-task-title') || 'Task',
+                time: el.getAttribute('data-task-time') || '',
+                completed: status === 'done',
+                type: 'task'
+            };
+        });
+
+        const workoutItems = Array.from(document.querySelectorAll('[data-workout-item], [data-occurrence-item]')).map((el) => {
+            const title = el.getAttribute('data-workout-name') || el.getAttribute('data-occurrence-title') || 'Workout';
+            const completed = (el.getAttribute('data-workout-completed') || el.getAttribute('data-completed') || 'false') === 'true';
+            const time = el.getAttribute('data-workout-time') || el.getAttribute('data-occurrence-time') || '';
+            return { title, completed, time, type: 'workout' };
+        });
+
+        return taskItems.concat(workoutItems);
+    }
+
+    function updateTimedFocusCard() {
+        const section = document.querySelector('[data-testid="timed-focus"]');
+        if (!section) return;
+
+        const valueEl = document.getElementById('timed-focus-value');
+        const chipEl = document.getElementById('timed-focus-chip');
+        const supportEl = document.getElementById('timed-focus-support');
+        if (!valueEl || !chipEl || !supportEl) return;
+
+        const wrapper = document.getElementById('day-main-content');
+        const selectedDate = wrapper ? (wrapper.getAttribute('data-date') || '') : '';
+        const todayDate = wrapper ? (wrapper.getAttribute('data-today') || '') : '';
+        const isToday = selectedDate === todayDate;
+        const now = new Date();
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+        const items = collectDayItems();
+        const hasAnyPlanned = items.length > 0;
+        const incompleteItems = items.filter((item) => !item.completed);
+
+        const timedCandidates = incompleteItems
+            .filter((item) => item.time)
+            .map((item) => {
+                const parts = item.time.split(':').map(Number);
+                const minutes = parts.length >= 2 ? parts[0] * 60 + parts[1] : -1;
+                return Object.assign({}, item, { minutes });
+            })
+            .filter((item) => item.minutes >= 0)
+            .filter((item) => !isToday || item.minutes >= nowMinutes)
+            .sort((a, b) => a.minutes - b.minutes);
+
+        const untimedCandidates = incompleteItems.filter((item) => !item.time);
+
+        if (timedCandidates.length > 0) {
+            const next = timedCandidates[0];
+            valueEl.textContent = next.title;
+            chipEl.textContent = 'Timed next';
+            supportEl.textContent = (next.type === 'workout' ? 'Workout' : 'Task') + ' at ' + next.time;
+            section.setAttribute('data-focus-state', 'timed-next');
+            return;
+        }
+
+        if (untimedCandidates.length > 0) {
+            const nextUntimed = untimedCandidates[0];
+            valueEl.textContent = nextUntimed.title;
+            chipEl.textContent = 'Next up';
+            supportEl.textContent = 'No timed items left, showing next incomplete ' + nextUntimed.type + '.';
+            section.setAttribute('data-focus-state', 'untimed-next');
+            return;
+        }
+
+        const selected = selectedDate ? new Date(selectedDate + 'T12:00:00') : new Date();
+        const today = todayDate ? new Date(todayDate + 'T12:00:00') : new Date();
+        const isPastDay = selected < today;
+        const allCompleted = hasAnyPlanned && incompleteItems.length === 0;
+        const shouldCelebrate = allCompleted && (isPastDay || isToday);
+
+        chipEl.textContent = 'Clock clear';
+        section.setAttribute('data-focus-state', shouldCelebrate ? 'all-complete' : 'empty');
+        if (shouldCelebrate) {
+            valueEl.textContent = 'All clear';
+            supportEl.textContent = 'Great work, everything planned for this day is complete.';
+        } else if (hasAnyPlanned) {
+            valueEl.textContent = 'No pending items';
+            supportEl.textContent = 'There are no incomplete items left to focus on right now.';
+        } else {
+            valueEl.textContent = 'Nothing scheduled';
+            supportEl.textContent = 'No tasks or workouts were planned for this day.';
+        }
+    }
+
+    function refreshMainCompletionProgress() {
+        const root = document.querySelector('[data-main-progress]');
+        const fill = document.getElementById('day-main-progress-fill');
+        if (!root || !fill) return;
+
+        const tasks = Array.from(document.querySelectorAll('[data-task-item]'));
+        const totalTasks = tasks.length;
+        const doneTasks = tasks.filter((task) => (task.getAttribute('data-task-status') || '') === 'done').length;
+
+        const workoutItems = Array.from(document.querySelectorAll('[data-workout-item], [data-occurrence-item]'));
+        const totalWorkouts = workoutItems.length;
+        const doneWorkouts = workoutItems.filter((item) => {
+            const val = item.getAttribute('data-workout-completed') || item.getAttribute('data-completed') || 'false';
+            return val === 'true';
+        }).length;
+
+        const total = totalTasks + totalWorkouts;
+        const done = doneTasks + doneWorkouts;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        const tasksLeft = Math.max(totalTasks - doneTasks, 0);
+        const workoutsLeft = Math.max(totalWorkouts - doneWorkouts, 0);
+        const remaining = tasksLeft + workoutsLeft;
+
+        root.setAttribute('data-progress-pct', String(pct));
+        root.setAttribute('data-progress-tasks-left', String(tasksLeft));
+        root.setAttribute('data-progress-workouts-left', String(workoutsLeft));
+        root.setAttribute('data-progress-remaining', String(remaining));
+        fill.style.width = pct + '%';
+
+        const track = root.querySelector('.day-main-progress-track');
+        if (track) {
+            track.setAttribute('aria-valuenow', String(pct));
+        }
+
+        const label = document.getElementById('day-main-progress-label');
+        if (label) {
+            label.textContent = done + '/' + total + ' completed (' + pct + '%)';
+        }
+
+        const summaryChip = document.querySelector('[data-testid="day-completion-summary"]');
+        if (summaryChip) {
+            summaryChip.textContent = done + '/' + total + ' completed (' + pct + '%)';
+        }
+
+        const tooltip = root.querySelector('.day-main-progress-tooltip');
+        if (tooltip) {
+            tooltip.innerHTML = '<p class="font-semibold">'
+                + (remaining > 0 ? remaining + ' items left to complete today' : 'Completion reached for this day')
+                + '</p><p class="text-xs mt-1">'
+                + tasksLeft + ' tasks left · ' + workoutsLeft + ' workouts left'
+                + '</p>';
+        }
+
+        const overviewProgress = document.getElementById('overview-progress-copy');
+        if (overviewProgress) {
+            overviewProgress.textContent = done + '/' + total + ' completed (' + pct + '%)';
+        }
+
+        const overviewRemainingTotal = document.getElementById('overview-remaining-total');
+        if (overviewRemainingTotal) {
+            overviewRemainingTotal.textContent = remaining + ' left';
+        }
+
+        const overviewRemainingBreakdown = document.getElementById('overview-remaining-breakdown');
+        if (overviewRemainingBreakdown) {
+            overviewRemainingBreakdown.textContent = tasksLeft + ' tasks · ' + workoutsLeft + ' workouts';
+        }
+
+        const overviewNext = document.getElementById('overview-next-priority');
+        if (overviewNext) {
+            if (tasksLeft > 0) {
+                overviewNext.textContent = 'Clear your next task block.';
+            } else if (workoutsLeft > 0) {
+                overviewNext.textContent = 'Complete your next workout block.';
+            } else {
+                overviewNext.textContent = 'Everything planned is complete.';
+            }
+        }
+
+        renderDayInsights();
     }
     
     // ==================== Smart Task Highlighting ====================
@@ -571,6 +791,50 @@
         });
     }
 
+    function initTaskRowInteractions() {
+        document.addEventListener('click', (e) => {
+            const row = e.target && e.target.closest ? e.target.closest('[data-task-item]') : null;
+            if (!row) return;
+
+            const interactive = e.target && e.target.closest
+                ? e.target.closest('button, a, input, select, textarea, [data-open-task-drawer], [data-quick-complete]')
+                : null;
+            if (interactive) return;
+
+            const taskId = row.getAttribute('data-task-id');
+            if (!taskId) return;
+
+            const opener = row.querySelector('[data-open-task-drawer][data-task-id]');
+            if (opener && typeof opener.click === 'function') {
+                opener.click();
+            }
+        });
+    }
+
+    function showTimelineSaveStatus(message, tone) {
+        const el = document.getElementById('timeline-save-status');
+        if (!el) return;
+
+        const toneMap = {
+            info: 'text-slate-500 dark:text-slate-400',
+            saving: 'text-blue-600 dark:text-blue-300',
+            success: 'text-emerald-600 dark:text-emerald-300',
+            error: 'text-red-600 dark:text-red-300'
+        };
+
+        el.className = 'mt-2 text-xs font-semibold ' + (toneMap[tone] || toneMap.info);
+        el.textContent = message;
+        el.classList.remove('hidden');
+
+        if (tone !== 'saving') {
+            window.clearTimeout(showTimelineSaveStatus._timer);
+            showTimelineSaveStatus._timer = window.setTimeout(() => {
+                el.classList.add('hidden');
+                el.textContent = '';
+            }, 1800);
+        }
+    }
+
     // ==================== Timeline View ====================
     function buildTimeline() {
         const container = document.getElementById('day-timeline');
@@ -581,41 +845,53 @@
         const dayMainContent = document.getElementById('day-main-content');
         const pageDate = dayMainContent ? (dayMainContent.getAttribute('data-date') || '') : '';
 
-        // Collect tasks with times
-        const taskItems = Array.from(document.querySelectorAll('[data-task-item]')).map(el => ({
+        // Collect tasks and workouts with timeline slot data.
+        const taskItems = Array.from(document.querySelectorAll('[data-task-item]')).map((el) => ({
             id: el.getAttribute('data-task-id') || '',
             title: el.getAttribute('data-task-title') || 'Task',
             time: el.getAttribute('data-task-time') || '',
             completed: el.getAttribute('data-task-status') === 'done',
             type: 'task'
-        })).filter(t => t.time);
+        }));
 
-        // Collect workout items
-        const workoutItems = Array.from(document.querySelectorAll('[data-workout-item]')).map(el => ({
+        const workoutItems = Array.from(document.querySelectorAll('#day-workout-source [data-workout-item]')).map((el) => ({
+            id: el.getAttribute('data-workout-id') || '',
             title: el.getAttribute('data-workout-name') || 'Workout',
-            time: '',
-            type: 'workout'
+            time: el.getAttribute('data-workout-time') || '',
+            completed: (el.getAttribute('data-workout-completed') || 'false') === 'true',
+            type: 'workout',
+            kind: el.getAttribute('data-workout-kind') || 'workout',
+            url: el.getAttribute('data-workout-url') || ''
         }));
 
-        const occurrenceItems = Array.from(document.querySelectorAll('[data-occurrence-item]')).map(el => ({
+        const occurrenceItems = Array.from(document.querySelectorAll('#day-workout-source [data-occurrence-item]')).map((el) => ({
+            id: el.getAttribute('data-occurrence-id') || '',
             title: el.getAttribute('data-occurrence-title') || 'Workout',
-            time: '',
+            time: el.getAttribute('data-occurrence-time') || '',
+            completed: (el.getAttribute('data-completed') || 'false') === 'true',
             type: 'workout',
-            completed: el.getAttribute('data-completed') === 'true'
+            kind: 'occurrence',
+            url: el.getAttribute('data-occurrence-url') || ''
         }));
+
+        const timelineWorkouts = workoutItems.concat(occurrenceItems);
+        const timedTasks = taskItems.filter((t) => !!t.time);
+        const untimedTasks = taskItems.filter((t) => !t.time);
+        const timedWorkouts = timelineWorkouts.filter((w) => !!w.time);
+        const untimedWorkouts = timelineWorkouts.filter((w) => !w.time);
 
         // Calculate timeline state message
         let stateMessage = '';
         let stateIcon = '';
         let stateClass = '';
         
-        if (isToday && taskItems.length > 0) {
+        if (isToday && timedTasks.length > 0) {
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
             const currentTimeInMinutes = currentHour * 60 + currentMinute;
             
             // Find next upcoming incomplete task
-            const upcomingTasks = taskItems.filter(t => !t.completed).map(t => {
+            const upcomingTasks = timedTasks.filter(t => !t.completed).map(t => {
                 const [h, m] = t.time.split(':').map(Number);
                 const taskTimeInMinutes = h * 60 + m;
                 return { ...t, taskTimeInMinutes };
@@ -662,18 +938,43 @@
                     stateClass = 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900/50 dark:border-slate-700 dark:text-slate-400';
                 }
             }
-        } else if (!isToday && taskItems.length > 0) {
-            stateMessage = `📅 ${taskItems.length} task${taskItems.length !== 1 ? 's' : ''} scheduled for this day`;
+        } else if (!isToday && timedTasks.length > 0) {
+            stateMessage = `📅 ${timedTasks.length} task${timedTasks.length !== 1 ? 's' : ''} scheduled for this day`;
             stateIcon = '📅';
             stateClass = 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950/30 dark:border-blue-900/40 dark:text-blue-200';
-        } else if (taskItems.length === 0) {
+        } else if (timedTasks.length === 0 && timedWorkouts.length === 0 && untimedTasks.length === 0 && untimedWorkouts.length === 0) {
             stateMessage = '🌟 No timed tasks scheduled for this day';
             stateIcon = '🌟';
             stateClass = 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-900/50 dark:border-slate-700 dark:text-slate-400';
         }
 
         // Build hour grid 6-23
-        let html = '<div class="timeline-grid" role="list" aria-label="Day timeline">';
+        let html = '';
+
+        if (untimedTasks.length > 0 || untimedWorkouts.length > 0) {
+            html += '<div class="timeline-untimed-lane" role="region" aria-label="Untimed items">';
+            html += '<div class="timeline-untimed-head">No fixed time</div>';
+            html += '<div class="timeline-untimed-items">';
+
+            untimedTasks.forEach((t) => {
+                const doneClass = t.completed ? ' is-done' : '';
+                const checkIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                const qcBtn = t.id ? `<button type="button" class="timeline-qc-btn${t.completed ? ' is-done' : ''}" data-quick-complete data-task-id="${escapeHtml(t.id)}" data-task-date="${escapeHtml(pageDate)}" aria-label="${t.completed ? 'Mark incomplete' : 'Mark complete'}" title="${t.completed ? 'Mark incomplete' : 'Mark complete'}">${checkIcon}</button>` : '';
+                html += `<div class="timeline-event timeline-event--task timeline-event--untimed${doneClass}" data-open-task-drawer data-task-id="${escapeHtml(t.id)}" draggable="true" data-draggable-task data-task-id="${escapeHtml(t.id)}" data-task-time="" role="listitem" data-item-type="task" title="Drag to schedule">`
+                    + `<span class="font-medium">${escapeHtml(t.title)}</span><span class="ml-auto text-[10px] opacity-70 mr-1">Untimed</span>${qcBtn}</div>`;
+            });
+
+            untimedWorkouts.forEach((w) => {
+                const doneClass = w.completed ? ' is-done' : '';
+                html += `<div class="timeline-event timeline-event--workout timeline-event--untimed${doneClass}" data-open-workout-drawer data-workout-id="${escapeHtml(w.id)}" draggable="true" data-draggable-item data-item-type="${escapeHtml(w.kind || 'workout')}" data-item-id="${escapeHtml(w.id)}" data-item-time="" role="listitem" title="Drag to schedule">`
+                    + `<svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`
+                    + `<span class="font-medium">${escapeHtml(w.title)}</span><span class="ml-auto text-[10px] opacity-70">Untimed</span></div>`;
+            });
+
+            html += '</div></div>';
+        }
+
+        html += '<div class="timeline-grid" role="list" aria-label="Day timeline">';
 
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
@@ -688,7 +989,7 @@
             html += `<div class="timeline-slot">`;
 
             // Tasks in this hour
-            taskItems.filter(t => {
+            timedTasks.filter(t => {
                 const [th] = t.time.split(':').map(Number);
                 return th === h;
             }).forEach(t => {
@@ -698,24 +999,27 @@
                 // Make task clickable to open drawer and draggable
                 const clickableAttr = t.id ? ` data-open-task-drawer data-task-id="${escapeHtml(t.id)}" style="cursor: grab;" title="Click to view details, drag to reschedule"` : '';
                 const draggableAttr = t.id ? ` draggable="true" data-draggable-task data-task-id="${escapeHtml(t.id)}" data-task-time="${escapeHtml(t.time)}"` : '';
-                html += `<div class="timeline-event timeline-event--task${doneClass}"${clickableAttr}${draggableAttr} role="listitem">
+                html += `<div class="timeline-event timeline-event--task${doneClass}"${clickableAttr}${draggableAttr} role="listitem" data-item-type="task">
                     <span class="font-medium">${escapeHtml(t.title)}</span>
                     <span class="ml-auto text-[10px] opacity-70 mr-1">${t.time}</span>
                     ${qcBtn}
                 </div>`;
             });
 
-            // Workouts in morning slot (7am) - only show scheduled occurrences
-            if (h === 7) {
-                occurrenceItems.forEach(o => {
-                    const doneClass = o.completed ? ' is-done' : '';
-                    html += `<div class="timeline-event timeline-event--workout${doneClass}" role="listitem">
-                        <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        <span class="font-medium">${escapeHtml(o.title)}</span>
-                        <span class="ml-auto text-[10px] opacity-70">Workout</span>
-                    </div>`;
-                });
-            }
+            // Workouts in assigned slot
+            timedWorkouts.filter((w) => {
+                const [wh] = (w.time || '').split(':').map(Number);
+                return wh === h;
+            }).forEach((w) => {
+                const doneClass = w.completed ? ' is-done' : '';
+                const clickable = ` data-open-workout-drawer data-workout-id="${escapeHtml(w.id)}" title="Open workout details"`;
+                const draggable = ` draggable="true" data-draggable-item data-item-type="${escapeHtml(w.kind || 'workout')}" data-item-id="${escapeHtml(w.id)}" data-item-time="${escapeHtml(w.time || '')}"`;
+                html += `<div class="timeline-event timeline-event--workout${doneClass}" role="listitem"${clickable}${draggable} style="cursor: grab;">
+                    <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <span class="font-medium">${escapeHtml(w.title)}</span>
+                    <span class="ml-auto text-[10px] opacity-70">${escapeHtml((w.time || '').slice(0, 5))}</span>
+                </div>`;
+            });
 
             html += `</div></div>`;
         }
@@ -750,6 +1054,9 @@
             }
         }
 
+        if (container.dataset.timelineBound !== 'true') {
+            container.dataset.timelineBound = 'true';
+
         // Click-to-add: clicking an empty slot prefills the add-task modal with the hour
         container.addEventListener('click', (e) => {
             // Only trigger if clicking on an empty slot (not on an event or button)
@@ -779,20 +1086,21 @@
 
         // ===== Drag and Drop Timeline Functionality =====
         let draggedElement = null;
-        let draggedTaskId = null;
-        let draggedTaskTime = null;
+        let draggedItemType = null;
+        let draggedItemId = null;
+        let draggedItemTime = null;
 
         // Dragstart - when user starts dragging a task
         container.addEventListener('dragstart', (e) => {
-            const draggable = e.target.closest('[data-draggable-task]');
+            const draggable = e.target.closest('[data-draggable-task], [data-draggable-item]');
             if (!draggable) return;
 
             draggedElement = draggable;
-            draggedTaskId = draggable.getAttribute('data-task-id');
-            draggedTaskTime = draggable.getAttribute('data-task-time');
+            draggedItemType = draggable.getAttribute('data-item-type') || 'task';
+            draggedItemId = draggable.getAttribute('data-task-id') || draggable.getAttribute('data-item-id');
+            draggedItemTime = draggable.getAttribute('data-task-time') || draggable.getAttribute('data-item-time');
 
-            draggable.style.opacity = '0.4';
-            draggable.style.cursor = 'grabbing';
+            draggable.classList.add('is-dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/html', draggable.innerHTML);
         });
@@ -800,16 +1108,16 @@
         // Dragend - cleanup after drag completes or is cancelled
         container.addEventListener('dragend', (e) => {
             if (draggedElement) {
-                draggedElement.style.opacity = '';
-                draggedElement.style.cursor = 'grab';
+                draggedElement.classList.remove('is-dragging');
             }
             // Remove all drop zone indicators
             container.querySelectorAll('.timeline-slot').forEach(slot => {
                 slot.classList.remove('timeline-drop-over');
             });
             draggedElement = null;
-            draggedTaskId = null;
-            draggedTaskTime = null;
+            draggedItemType = null;
+            draggedItemId = null;
+            draggedItemTime = null;
         });
 
         // Dragover - allow drop on timeline slots
@@ -838,7 +1146,7 @@
         // Drop - handle task drop on new time slot
         container.addEventListener('drop', (e) => {
             const slot = e.target.closest('.timeline-slot');
-            if (!slot || !draggedTaskId) return;
+            if (!slot || !draggedItemId) return;
 
             e.preventDefault();
             slot.classList.remove('timeline-drop-over');
@@ -848,47 +1156,110 @@
             if (!row) return;
             const label = row.querySelector('.timeline-hour-label');
             if (!label) return;
-            const newHour = label.textContent.split(':')[0];
-            const newTime = String(newHour).padStart(2, '0') + ':00';
+            const newHour = parseInt(label.textContent.split(':')[0], 10);
+            const slotRect = slot.getBoundingClientRect();
+            const yRatio = slotRect.height > 0 ? (e.clientY - slotRect.top) / slotRect.height : 0;
+            const quarter = Math.max(0, Math.min(3, Math.floor(yRatio * 4)));
+            const minutes = String(quarter * 15).padStart(2, '0');
+            const newTime = String(newHour).padStart(2, '0') + ':' + minutes;
 
             // Don't do anything if dropped on same time
-            if (draggedTaskTime && draggedTaskTime.startsWith(newHour + ':')) {
+            if (draggedItemTime && draggedItemTime === newTime) {
                 return;
             }
 
-            // Update task time via AJAX
-            updateTaskTime(draggedTaskId, pageDate, newTime);
+            // Update timeline slot via AJAX with optimistic sync.
+            updateTimelineSlot(draggedItemType, draggedItemId, pageDate, newTime, draggedElement);
         });
+        }
     }
 
-    // Function to update task time via AJAX
-    function updateTaskTime(taskId, date, newTime) {
+    // Function to update timeline slot via AJAX without reload.
+    function updateTimelineSlot(itemType, itemId, date, newTime, draggedEl) {
         const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
-        fetch(`/calendar/task/${taskId}/update-time`, {
+        showTimelineSaveStatus('Saving timeline change...', 'saving');
+
+        // Optimistic local model update.
+        if (itemType === 'task') {
+            const row = document.querySelector('[data-task-item][data-task-id="' + itemId + '"]');
+            if (row) {
+                row.setAttribute('data-task-time', newTime);
+                const timeEl = row.querySelector('[data-testid="task-time"]');
+                if (timeEl) timeEl.textContent = newTime;
+            }
+        } else {
+            const selector = itemType === 'occurrence'
+                ? '#day-workout-source [data-occurrence-item][data-occurrence-id="' + itemId + '"]'
+                : '#day-workout-source [data-workout-item][data-workout-id="' + itemId + '"]';
+            const source = document.querySelector(selector);
+            if (source) {
+                const attr = itemType === 'occurrence' ? 'data-occurrence-time' : 'data-workout-time';
+                source.setAttribute(attr, newTime);
+            }
+
+            const card = document.querySelector('[data-workout-card][data-workout-id="' + itemId + '"]');
+            if (card) {
+                const sub = card.querySelector('p.text-xs');
+                if (sub) sub.textContent = newTime;
+            }
+        }
+
+        buildTimeline();
+
+        fetch('/calendar/day/' + date + '/timeline-slot', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 ...(csrfHeader && csrfToken ? { [csrfHeader]: csrfToken } : {})
             },
             body: new URLSearchParams({
-                date: date,
+                itemType: itemType,
+                itemId: itemId,
                 time: newTime
             })
         })
         .then(response => {
             if (response.ok) {
-                // Reload the page to show updated timeline
-                window.location.reload();
+                showTimelineSaveStatus('Saved', 'success');
+                return;
             } else {
-                console.error('Failed to update task time');
-                alert('Failed to reschedule task. Please try again.');
+                throw new Error('Failed to reschedule item');
             }
         })
         .catch(error => {
-            console.error('Error updating task time:', error);
-            alert('An error occurred while rescheduling the task.');
+            console.error('Error updating timeline slot:', error);
+            const flash = document.createElement('div');
+            flash.className = 'mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200';
+            flash.textContent = 'Could not save timeline change. The item was returned to its previous slot.';
+            const host = document.getElementById('day-timeline');
+            if (host) {
+                host.prepend(flash);
+                window.setTimeout(() => flash.remove(), 2600);
+            }
+            showTimelineSaveStatus('Could not save, reverted', 'error');
+
+            // Revert to previous slot time when save fails.
+            const prevTime = draggedEl?.getAttribute('data-task-time') || draggedEl?.getAttribute('data-item-time') || '';
+            if (itemType === 'task') {
+                const row = document.querySelector('[data-task-item][data-task-id="' + itemId + '"]');
+                if (row) {
+                    row.setAttribute('data-task-time', prevTime);
+                    const timeEl = row.querySelector('[data-testid="task-time"]');
+                    if (timeEl) timeEl.textContent = prevTime;
+                }
+            } else {
+                const selector = itemType === 'occurrence'
+                    ? '#day-workout-source [data-occurrence-item][data-occurrence-id="' + itemId + '"]'
+                    : '#day-workout-source [data-workout-item][data-workout-id="' + itemId + '"]';
+                const source = document.querySelector(selector);
+                if (source) {
+                    const attr = itemType === 'occurrence' ? 'data-occurrence-time' : 'data-workout-time';
+                    source.setAttribute(attr, prevTime);
+                }
+            }
+            buildTimeline();
         });
     }
 
@@ -1139,6 +1510,7 @@
             btn.setAttribute('aria-pressed', newDone ? 'true' : 'false');
             if (taskItem) {
                 taskItem.setAttribute('data-task-status', newDone ? 'done' : originalStatus);
+                taskItem.setAttribute('data-task-completed', newDone ? 'true' : 'false');
                 taskItem.classList.toggle('bg-green-50', newDone);
                 taskItem.classList.toggle('dark:bg-green-950/20', newDone);
                 const chip = taskItem.querySelector('[data-testid="task-status-chip"]');
@@ -1157,6 +1529,14 @@
                 tlBtn.classList.toggle('is-done', newDone);
             });
 
+            const hiddenTaskModel = document.getElementById('task-drawer-content-' + taskId);
+            if (hiddenTaskModel) {
+                hiddenTaskModel.setAttribute('data-task-completed', newDone ? 'true' : 'false');
+            }
+
+            refreshMainCompletionProgress();
+            updateTimedFocusCard();
+
             const body = new URLSearchParams();
             body.append('taskId', taskId);
             body.append(getCsrfParam(), csrf);
@@ -1168,12 +1548,44 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: body.toString()
-            }).catch(() => {
+            })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error('Toggle failed');
+                }
+                return res.json();
+            })
+            .then((payload) => {
+                if (!payload || payload.success !== true) {
+                    throw new Error('Toggle failed');
+                }
+
+                const openTaskId = document.getElementById('task-drawer-body')?.getAttribute('data-open-task-id');
+                if (openTaskId && openTaskId === String(taskId)) {
+                    const drawerBody = document.getElementById('task-drawer-body');
+                    const completeBtn = drawerBody?.querySelector('[data-task-drawer-complete-btn]');
+                    const completeChip = drawerBody?.querySelector('[data-task-drawer-completed-chip]');
+                    const completionMessage = drawerBody?.querySelector('[data-task-drawer-completion-message]');
+                    if (completeBtn && completeChip) {
+                        if (payload.completed) {
+                            completeBtn.classList.add('hidden');
+                            completeChip.classList.remove('hidden');
+                            if (completionMessage) completionMessage.textContent = 'This task is completed. Nice work.';
+                        } else {
+                            completeBtn.classList.remove('hidden');
+                            completeChip.classList.add('hidden');
+                            if (completionMessage) completionMessage.textContent = 'Mark complete to advance day progress and unlock insights faster.';
+                        }
+                    }
+                }
+            })
+            .catch(() => {
                 // Revert on network/server error
                 btn.classList.toggle('is-done', isDone);
                 btn.setAttribute('aria-pressed', isDone ? 'true' : 'false');
                 if (taskItem) {
                     taskItem.setAttribute('data-task-status', originalStatus);
+                    taskItem.setAttribute('data-task-completed', isDone ? 'true' : 'false');
                     taskItem.classList.toggle('bg-green-50', isDone);
                     taskItem.classList.toggle('dark:bg-green-950/20', isDone);
                     const chip = taskItem.querySelector('[data-testid="task-status-chip"]');
@@ -1182,6 +1594,8 @@
                 document.querySelectorAll(`.timeline-qc-btn[data-task-id="${taskId}"]`).forEach(tlBtn => {
                     tlBtn.classList.toggle('is-done', isDone);
                 });
+                refreshMainCompletionProgress();
+                updateTimedFocusCard();
             });
         });
     }
@@ -1206,6 +1620,49 @@
         }
     }
 
+    function renderDayInsights() {
+        const host = document.getElementById('day-insights-output');
+        const root = document.querySelector('[data-main-progress]');
+        if (!host || !root) return;
+
+        const tasksLeft = parseInt(root.getAttribute('data-progress-tasks-left') || '0', 10);
+        const workoutsLeft = parseInt(root.getAttribute('data-progress-workouts-left') || '0', 10);
+        const remaining = parseInt(root.getAttribute('data-progress-remaining') || '0', 10);
+        const pct = parseInt(root.getAttribute('data-progress-pct') || '0', 10);
+        const nowHour = new Date().getHours();
+
+        let type = 'priority';
+        let title = 'Priority guidance';
+        let body = 'Start with one high-friction item in the next 30 minutes to unlock momentum for this day.';
+
+        if (remaining === 0 && pct > 0) {
+            type = 'positive';
+            title = 'Positive momentum';
+            body = 'Today is complete. Capture one reflection now to reinforce what worked today.';
+        } else if (remaining > 0 && nowHour >= 18 && tasksLeft > 0) {
+            type = 'caution';
+            title = 'Caution';
+            body = 'Late-day task load is building. Clear one short task now to prevent today from rolling over.';
+        } else if (workoutsLeft > 0 && nowHour >= 12 && nowHour <= 20) {
+            type = 'reminder';
+            title = 'Reminder';
+            body = 'You still have a workout pending today. Reserve a concrete time block before evening closes.';
+        }
+
+        const classes = {
+            positive: 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/40 dark:bg-emerald-950/30 dark:text-emerald-200',
+            caution: 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-200',
+            reminder: 'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800/40 dark:bg-blue-950/30 dark:text-blue-200',
+            priority: 'border-slate-200 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200'
+        };
+
+        host.innerHTML = '<article class="rounded-xl border p-3 ' + classes[type] + '">' +
+            '<p class="text-xs font-semibold uppercase tracking-wide">' + title + '</p>' +
+            '<p class="mt-1 text-sm font-medium">' + body + '</p>' +
+            '<p class="mt-1 text-xs opacity-80">Remaining: ' + tasksLeft + ' tasks · ' + workoutsLeft + ' workouts</p>' +
+            '</article>';
+    }
+
     // ==================== Initialize Everything ====================
     function init() {
         // Wait for DOM to be ready
@@ -1224,7 +1681,7 @@
         initTimeThemeToggle();
         animateCompletionDots();
         initQuickStats();
-        addTimeGreeting();
+        updateTimeGreeting();
         addMotivationalMessage();
         highlightUpcomingTasks();
         scrollToCurrentTime();
@@ -1232,14 +1689,17 @@
         initFocusMode();
         initTabs();
         initTaskFilter();
+        initTaskRowInteractions();
         buildTimeline();
         initTimedFocusCountdown();
         initLiveClock();
         initAiOptimiseModal();
         initQuickComplete();
-        initWorkoutPopup();
         applyServerDayTheme();
+        updateTimedFocusCard();
+        refreshMainCompletionProgress();
         initSseUpdates();
+        renderDayInsights();
         
         // Refresh upcoming task highlights every minute
         setInterval(highlightUpcomingTasks, 60000);
@@ -1304,74 +1764,6 @@
         setInterval(updateClock, 1000);
     }
 
-    // ==================== Workout Preview Popup ====================
-    function initWorkoutPopup() {
-        const popup = document.getElementById('workout-popup');
-        if (!popup) return;
-
-        const backdrop = document.getElementById('workout-popup-backdrop');
-        const closeBtn = document.getElementById('close-workout-popup');
-        const titleEl = popup.querySelector('[data-workout-popup-name]');
-        const scheduleEl = popup.querySelector('[data-workout-popup-schedule]');
-        const notesEl = popup.querySelector('[data-workout-popup-notes]');
-        const notesWrap = popup.querySelector('[data-workout-popup-notes-wrap]');
-        const completedBadge = popup.querySelector('[data-workout-popup-completed-badge]');
-        const completeLink = popup.querySelector('[data-workout-popup-complete-link]');
-
-        function openPopup(btn) {
-            const name = btn.getAttribute('data-workout-name') || '—';
-            const schedule = btn.getAttribute('data-workout-schedule') || '';
-            const notes = btn.getAttribute('data-workout-notes') || '';
-            const completed = btn.getAttribute('data-workout-completed') === 'true';
-            const completeUrl = btn.getAttribute('data-workout-complete-url') || '';
-            const completeMethod = btn.getAttribute('data-workout-complete-method') || 'post';
-
-            if (titleEl) titleEl.textContent = name;
-            if (scheduleEl) scheduleEl.textContent = schedule ? 'Schedule: ' + schedule : '';
-            if (notesEl) notesEl.textContent = notes || '—';
-            if (notesWrap) notesWrap.style.display = notes ? '' : 'none';
-
-            if (completed) {
-                if (completedBadge) { completedBadge.style.display = 'inline-flex'; completedBadge.classList.remove('hidden'); }
-                if (completeLink) { completeLink.style.display = 'none'; }
-            } else {
-                if (completedBadge) { completedBadge.style.display = 'none'; }
-                if (completeLink && completeUrl) {
-                    completeLink.href = completeUrl;
-                    completeLink.style.display = 'inline-flex';
-                    completeLink.classList.remove('hidden');
-                }
-            }
-
-            popup.classList.remove('hidden');
-            popup.setAttribute('aria-hidden', 'false');
-            if (closeBtn) closeBtn.focus();
-        }
-
-        function closePopup() {
-            popup.classList.add('hidden');
-            popup.setAttribute('aria-hidden', 'true');
-        }
-
-        // Open popup on workout item click
-        document.addEventListener('click', (e) => {
-            const btn = e.target && e.target.closest ? e.target.closest('[data-open-workout-popup]') : null;
-            if (btn) {
-                e.preventDefault();
-                openPopup(btn);
-            }
-        });
-
-        if (closeBtn) closeBtn.addEventListener('click', closePopup);
-        if (backdrop) backdrop.addEventListener('click', closePopup);
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !popup.classList.contains('hidden')) {
-                closePopup();
-            }
-        });
-    }
-    
     // ==================== Real-Time SSE Updates ====================
     function initSseUpdates() {
         let eventSource = null;
@@ -1456,6 +1848,16 @@
             if (progressBar) {
                 progressBar.style.width = `${data.percentage}%`;
             }
+
+            if (typeof data.percentage === 'number') {
+                const fill = document.getElementById('day-main-progress-fill');
+                if (fill) {
+                    fill.style.width = data.percentage + '%';
+                }
+            }
+
+            refreshMainCompletionProgress();
+            updateTimedFocusCard();
         }
         
         // Initialize connection

@@ -648,6 +648,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!notificationsView || !chatView) return;
         chatView.classList.add("hidden");
         notificationsView.classList.remove("hidden");
+        chatView.style.display = "none";
+        notificationsView.style.display = "flex";
         loadNotifications();
     }
 
@@ -655,6 +657,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!notificationsView || !chatView) return;
         notificationsView.classList.add("hidden");
         chatView.classList.remove("hidden");
+        notificationsView.style.display = "none";
+        chatView.style.display = "flex";
     }
 
     if (notificationsToggle && notificationsView && chatView) {

@@ -3,6 +3,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const dayContainer = document.querySelector('[data-testid="day-hub-header"]');
     if (!dayContainer) return;
 
+    const mainContent = document.getElementById('day-main-content');
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (mainContent) {
+        const enterDirection = sessionStorage.getItem('day-nav-enter-direction');
+        if (enterDirection) {
+            mainContent.classList.add(enterDirection === 'from-next' ? 'day-nav-enter-left' : 'day-nav-enter-right');
+            sessionStorage.removeItem('day-nav-enter-direction');
+            window.setTimeout(() => {
+                mainContent.classList.remove('day-nav-enter-left', 'day-nav-enter-right');
+            }, 260);
+        }
+    }
+
     let touchStartX = 0;
     let touchEndX = 0;
     let touchStartY = 0;
@@ -12,14 +26,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const maxVerticalDistance = 100; // Maximum vertical movement allowed
 
     /** Animate exit then navigate */
-    function navigateWithTransition(href) {
-        const mainContent = document.getElementById('day-main-content');
-        if (mainContent) {
-            mainContent.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
-            mainContent.style.opacity = '0';
-            mainContent.style.transform = 'translateY(-6px)';
+    function navigateWithTransition(href, direction) {
+        if (!mainContent || reduceMotion) {
+            if (direction) {
+                sessionStorage.setItem('day-nav-enter-direction', direction === 'next' ? 'from-next' : 'from-prev');
+            }
+            window.location.href = href;
+            return;
         }
-        setTimeout(() => { window.location.href = href; }, 150);
+
+        mainContent.classList.remove('day-nav-leave-left', 'day-nav-leave-right');
+        mainContent.classList.add(direction === 'next' ? 'day-nav-leave-left' : 'day-nav-leave-right');
+        sessionStorage.setItem('day-nav-enter-direction', direction === 'next' ? 'from-next' : 'from-prev');
+
+        setTimeout(() => { window.location.href = href; }, 180);
     }
 
     function handleSwipe() {
@@ -34,11 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (horizontalDistance > 0) {
             // Swiped right - go to previous day
             const prevLink = document.querySelector('a[aria-label="Previous day"]');
-            if (prevLink) navigateWithTransition(prevLink.href);
+            if (prevLink) navigateWithTransition(prevLink.href, 'prev');
         } else {
             // Swiped left - go to next day
             const nextLink = document.querySelector('a[aria-label="Next day"]');
-            if (nextLink) navigateWithTransition(nextLink.href);
+            if (nextLink) navigateWithTransition(nextLink.href, 'next');
         }
     }
 
@@ -64,11 +84,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === 'ArrowLeft') {
             e.preventDefault();
             const prevLink = document.querySelector('a[aria-label="Previous day"]');
-            if (prevLink) navigateWithTransition(prevLink.href);
+            if (prevLink) navigateWithTransition(prevLink.href, 'prev');
         } else if (e.key === 'ArrowRight') {
             e.preventDefault();
             const nextLink = document.querySelector('a[aria-label="Next day"]');
-            if (nextLink) navigateWithTransition(nextLink.href);
+            if (nextLink) navigateWithTransition(nextLink.href, 'next');
         }
     });
 
@@ -76,7 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('a[aria-label="Previous day"], a[aria-label="Next day"]').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            navigateWithTransition(link.href);
+            const direction = link.getAttribute('aria-label') === 'Next day' ? 'next' : 'prev';
+            navigateWithTransition(link.href, direction);
         });
     });
 });

@@ -1,14 +1,14 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -47,6 +47,11 @@ public class UserPreferenceForm {
     boolean preferredEquipmentCable = false;
     boolean preferredEquipmentPullupBar = false;
     boolean preferredEquipmentJumpRope = false;
+    boolean preferredEquipmentMedicineBall = false;
+    boolean preferredEquipmentFoamRoller = false;
+    boolean preferredEquipmentTrx = false;
+    boolean preferredEquipmentOther = false;
+    String preferredEquipmentOtherSpecify;
 
     @Min(value = 0, message = "Calories must be 0 or more.")
     @Max(value = 20000, message = "Calories must be 20000 or less.")
