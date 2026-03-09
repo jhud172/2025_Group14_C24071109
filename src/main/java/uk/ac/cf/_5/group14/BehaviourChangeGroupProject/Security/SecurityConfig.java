@@ -95,6 +95,7 @@ public class SecurityConfig {
                             request
                             // Static assets and public pages: always open
                             .requestMatchers(ENDPOINTS_WHITELIST).permitAll()
+                            .requestMatchers("/dashboard/public", "/client/dashboard/public").permitAll()
                             // Leaderboard: keep protected — not open in dev mode
                             .requestMatchers("/levels/**").authenticated()
                             // Trainers area: keep role requirements
@@ -119,6 +120,7 @@ public class SecurityConfig {
                             // Normal mode: keep existing security configuration unchanged.
                             request
                             .requestMatchers(ENDPOINTS_WHITELIST).permitAll()
+                            .requestMatchers("/dashboard/public", "/client/dashboard/public").permitAll()
                             .requestMatchers("/confirm-logout").authenticated()
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")

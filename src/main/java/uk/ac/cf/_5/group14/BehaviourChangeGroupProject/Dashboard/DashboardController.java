@@ -107,6 +107,12 @@ public class DashboardController {
         return "redirect:/dashboard";
     }
 
+    @GetMapping({"/dashboard/public", "/client/dashboard/public"})
+    public String clientDashboardPublic(Model model) {
+        model.addAttribute("pageTitle", "One to One");
+        return "dashboard/client-dashboard-public";
+    }
+
     @GetMapping("/trainer/dashboard")
     public String trainerDashboard(Authentication authentication, Model model) {
         model.addAttribute("pageTitle", "Dashboard");
