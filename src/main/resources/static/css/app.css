@@ -24952,6 +24952,70 @@ html.dark .action-tile:hover {
 html.dark .action-tile__title {
         color: #ffffff;
     }
+/* Weekly progress and streak milestone animations */
+.animate-fade-in {
+        animation: animate-fade-in 0.6s ease-out;
+    }
+.progress-fill {
+        animation: progress-grow 1.5s ease-out;
+    }
+.streak-number {
+        animation: subtle-pulse 3s ease-in-out infinite;
+    }
+.streak-milestone-glow {
+        animation: milestone-glow 2s ease-out;
+    }
+.streak-confetti-host {
+        position: relative;
+        overflow: hidden;
+    }
+.confetti-particle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: var(--confetti-color, #00f5ff);
+        top: 50%;
+        left: 50%;
+        opacity: 0;
+        border-radius: 50%;
+        animation: confetti-burst 1.5s ease-out forwards;
+        animation-delay: var(--confetti-delay, 0s);
+        transform: translate(-50%, -50%) rotate(var(--confetti-rot, 0deg));
+    }
+@keyframes milestone-glow {
+        0%, 100% { box-shadow: none; }
+        50% { box-shadow: 0 0 30px rgba(0, 245, 255, 0.4), 0 0 60px rgba(0, 245, 255, 0.2); }
+    }
+@keyframes confetti-burst {
+        0% {
+            opacity: 1;
+            transform: translate(-50%, -50%) translateY(0) translateX(0) scale(0) rotate(var(--confetti-rot, 0deg));
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+            transform: translate(-50%, -50%) translateY(var(--confetti-y, -100px)) translateX(var(--confetti-x, 0px)) scale(1) rotate(var(--confetti-rot, 0deg));
+        }
+    }
+@keyframes animate-fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+@keyframes progress-grow {
+        from { width: 0; }
+    }
+@keyframes subtle-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
 /* Enhanced Dashboard Styles - Clean, Personal, and Engaging */
 .dashboard-enhanced {
         animation: fadeIn 0.6s ease-out;
@@ -29078,9 +29142,6 @@ body[data-easy-mode="on"] .quick-actions-grid {
 .bg-emerald-500\/15 {
     background-color: rgb(16 185 129 / 0.15);
 }
-.bg-emerald-500\/20 {
-    background-color: rgb(16 185 129 / 0.2);
-}
 .bg-emerald-500\/25 {
     background-color: rgb(16 185 129 / 0.25);
 }
@@ -29675,10 +29736,6 @@ body[data-easy-mode="on"] .quick-actions-grid {
 .via-sky-500 {
     --tw-gradient-to: rgb(14 165 233 / 0)  var(--tw-gradient-to-position);
     --tw-gradient-stops: var(--tw-gradient-from), #0ea5e9 var(--tw-gradient-via-position), var(--tw-gradient-to);
-}
-.via-slate-700\/50 {
-    --tw-gradient-to: rgb(51 65 85 / 0)  var(--tw-gradient-to-position);
-    --tw-gradient-stops: var(--tw-gradient-from), rgb(51 65 85 / 0.5) var(--tw-gradient-via-position), var(--tw-gradient-to);
 }
 .via-transparent {
     --tw-gradient-to: rgb(0 0 0 / 0)  var(--tw-gradient-to-position);
@@ -30282,9 +30339,6 @@ body[data-easy-mode="on"] .quick-actions-grid {
 }
 .text-emerald-400\/60 {
     color: rgb(52 211 153 / 0.6);
-}
-.text-emerald-400\/75 {
-    color: rgb(52 211 153 / 0.75);
 }
 .text-emerald-500 {
     --tw-text-opacity: 1;
@@ -31575,9 +31629,6 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .hover\:bg-emerald-500:hover {
     --tw-bg-opacity: 1;
     background-color: rgb(16 185 129 / var(--tw-bg-opacity, 1));
-}
-.hover\:bg-emerald-500\/10:hover {
-    background-color: rgb(16 185 129 / 0.1);
 }
 .hover\:bg-emerald-500\/20:hover {
     background-color: rgb(16 185 129 / 0.2);
