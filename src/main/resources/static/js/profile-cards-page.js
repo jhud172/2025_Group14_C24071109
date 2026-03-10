@@ -8,7 +8,7 @@ function openEditCard(btn) {
 
     var modal = document.getElementById('edit-card-modal');
     var form  = document.getElementById('edit-card-form');
-    form.action = '/profile/settings/cards/' + cardId + '/edit';
+    form.action = '/profile/settings/cards/' + encodeURIComponent(cardId) + '/edit';
     document.getElementById('editCardHolder').value = holder;
     document.getElementById('editCardBrand').value  = brand;
     document.getElementById('editCardMonth').value  = month;

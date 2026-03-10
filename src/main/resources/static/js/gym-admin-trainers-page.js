@@ -5,7 +5,7 @@ function showUpdateNotesModal(button) {
     
     document.getElementById('modalTrainerName').textContent = trainerName;
     document.getElementById('modalNotes').value = currentNotes || '';
-    document.getElementById('updateNotesForm').action = '/gym/admin/trainers/' + requestId + '/update-notes';
+    document.getElementById('updateNotesForm').action = '/gym/admin/trainers/' + encodeURIComponent(requestId) + '/update-notes';
     
     document.getElementById('updateNotesModal').classList.remove('hidden');
     document.getElementById('updateNotesModal').classList.add('flex');
@@ -22,7 +22,7 @@ function hideUpdateNotesModal() {
     if (data.updateNotesRequestId !== null && data.updateNotesRequestId !== undefined) {
         document.getElementById('modalTrainerName').textContent = data.updateNotesTrainerName || '';
         document.getElementById('modalNotes').value = data.updateNotesNotes || '';
-        document.getElementById('updateNotesForm').action = '/gym/admin/trainers/' + data.updateNotesRequestId + '/update-notes';
+        document.getElementById('updateNotesForm').action = '/gym/admin/trainers/' + encodeURIComponent(data.updateNotesRequestId) + '/update-notes';
         document.getElementById('updateNotesModal').classList.remove('hidden');
         document.getElementById('updateNotesModal').classList.add('flex');
     }

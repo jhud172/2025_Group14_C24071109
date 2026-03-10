@@ -33,19 +33,19 @@ function selectRequest(row) {
 
 function approveRequest(button) {
     const requestId = button.getAttribute('data-request-id');
-    document.getElementById('approveForm').action = '/super-admin/verification/' + requestId + '/approve';
+    document.getElementById('approveForm').action = '/super-admin/verification/' + encodeURIComponent(requestId) + '/approve';
     showModal('approveModal');
 }
 
 function rejectRequest(button) {
     const requestId = button.getAttribute('data-request-id');
-    document.getElementById('rejectForm').action = '/super-admin/verification/' + requestId + '/reject';
+    document.getElementById('rejectForm').action = '/super-admin/verification/' + encodeURIComponent(requestId) + '/reject';
     showModal('rejectModal');
 }
 
 function requestMoreInfo(button) {
     const requestId = button.getAttribute('data-request-id');
-    document.getElementById('requestInfoForm').action = '/super-admin/verification/' + requestId + '/request-info';
+    document.getElementById('requestInfoForm').action = '/super-admin/verification/' + encodeURIComponent(requestId) + '/request-info';
     showModal('requestInfoModal');
 }
 

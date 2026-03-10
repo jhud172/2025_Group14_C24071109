@@ -2,7 +2,7 @@ function showReportModal(button) {
     const reviewId = button.getAttribute('data-review-id');
     const trainerId = button.getAttribute('data-trainer-id');
     const form = document.getElementById('reportForm');
-    form.action = '/reviews/' + reviewId + '/report';
+    form.action = '/reviews/' + encodeURIComponent(reviewId) + '/report';
     document.getElementById('reportTrainerId').value = trainerId;
     document.getElementById('reportModal').classList.remove('hidden');
 }

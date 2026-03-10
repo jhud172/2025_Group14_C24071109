@@ -64,20 +64,26 @@
             canvasComponents.forEach((comp, idx) => {
                 const div = document.createElement('div');
                 div.className = 'canvas-item';
-                div.innerHTML = '<span class="flex-1">' + escapeHtml(comp) + '</span>' +
-                    '<button type="button" class="remove-btn" aria-label="Remove ' + escapeHtml(comp) + '" data-index="' + idx + '">✕</button>';
-                div.querySelector('.remove-btn').addEventListener('click', function () {
+                const span = document.createElement('span');
+                span.className = 'flex-1';
+                span.textContent = comp;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'remove-btn';
+                btn.setAttribute('aria-label', 'Remove ' + comp);
+                btn.setAttribute('data-index', String(idx));
+                btn.textContent = '✕';
+                btn.addEventListener('click', function () {
                     canvasComponents.splice(parseInt(this.getAttribute('data-index')), 1);
                     renderCanvas();
                 });
+                div.appendChild(span);
+                div.appendChild(btn);
                 dropZone.appendChild(div);
             });
         }
     }
 
-    function escapeHtml(str) {
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
 
     function setSelectValue(id, value) {
         const el = document.getElementById(id);
