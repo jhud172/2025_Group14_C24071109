@@ -5,7 +5,7 @@
     <div th:fragment="content">
         <section
             sec:authorize="isAuthenticated()"
-            class="mx-auto w-full max-w-7xl px-4 pb-6 pt-0 sm:px-6 lg:px-8"
+            class="mx-auto w-full max-w-7xl px-4 pb-6 pt-0 sm:px-6 lg:px-8 2xl:max-w-full 2xl:px-8"
             data-dashboard-role="CLIENT"
             th:with="
                 d0=${miniWeek != null and #lists.size(miniWeek) > 0 ? miniWeek[0] : null},
@@ -20,6 +20,7 @@
                 nextUp=${nextUpCandidate != null ? nextUpCandidate : d0},
                 todayPath=${d0 != null ? '/calendar/day/' + #temporals.format(d0.date, 'yyyy-MM-dd') : '/calendar'},
                 nextUpPath=${nextUp != null ? '/calendar/day/' + #temporals.format(nextUp.date, 'yyyy-MM-dd') : '/calendar'},
+                hasTrackedUpcoming=${nextUp != null and (nextUp.taskCount + nextUp.scheduledCount) > 0},
                 currentHour=${T(java.time.LocalTime).now().getHour()},
                 dayGreeting=${currentHour < 12 ? 'Good morning' : (currentHour < 17 ? 'Good afternoon' : 'Good evening')},
                 userFirstNameSafe=${userFirstName != null ? userFirstName : 'Athlete'},
@@ -49,94 +50,240 @@
                 nextItemType=${!#lists.isEmpty(todayTaskTitles) ? 'Task' : (!#lists.isEmpty(todayWorkoutTitles) ? 'Workout' : 'Complete')},
                 nextItemName=${!#lists.isEmpty(todayTaskTitles) ? todayTaskTitles[0] : (!#lists.isEmpty(todayWorkoutTitles) ? todayWorkoutTitles[0] : 'Fully completed today')},
                 nextItemTime=${!#lists.isEmpty(todayTaskTitles) or !#lists.isEmpty(todayWorkoutTitles) ? 'Time not set' : 'Done'},
-                upcomingType=${todayWorkouts > 0 ? 'Workout' : 'Task'},
-                upcomingName=${todayWorkouts > 0 ? 'Today session block' : (todayTasks > 0 ? 'Daily check-in task' : 'Plan tomorrow')},
+                upcomingType=${nextUp != null and nextUp.scheduledCount > 0 ? 'Workout' : 'Task'},
+                upcomingName=${nextUp != null and nextUp.scheduledCount > 0 and nextUp.workoutTitles != null and !#lists.isEmpty(nextUp.workoutTitles) ? nextUp.workoutTitles[0] : (nextUp != null and nextUp.taskTitles != null and !#lists.isEmpty(nextUp.taskTitles) ? nextUp.taskTitles[0] : 'Planned activity')},
                 upcomingTargetIso=${T(java.time.LocalDateTime).now().plusHours(todayWorkouts > 0 ? 2 : 4)}
             ">
 
-            <div id="dashboardRoot" class="grid grid-cols-1 gap-4 min-[1028px]:grid-cols-12 min-[1028px]:gap-5">
+            <div id="dashboardRoot" class="grid grid-cols-1 gap-4 min-[1028px]:grid-cols-12 min-[1028px]:gap-5 2xl:gap-8">
 
                 <aside aria-label="Explore platform" data-dashboard-left-rail class="order-2 space-y-4 min-[1028px]:order-1 min-[1028px]:col-span-3 min-[1028px]:self-start min-[1028px]:sticky min-[1028px]:top-24 min-[1028px]:h-fit">
-                    <section class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60 dark:ring-white/10">
-                        <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Explore Platform</h2>
-                        <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Find trainers, gyms, and platform guidance.</p>
-                        <nav class="mt-3 space-y-2" aria-label="Explore links">
-                            <a th:href="@{/explore}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800">
-                                <span aria-hidden="true">&#128269;</span><span>Explore trainers</span>
+                    <section class="rounded-3xl border border-emerald-200/70 bg-gradient-to-br from-white via-emerald-50/60 to-sky-50/60 p-4 shadow-md ring-1 ring-emerald-100/80 backdrop-blur dark:border-emerald-500/30 dark:from-slate-900/80 dark:via-emerald-900/20 dark:to-slate-900/90 dark:ring-emerald-500/20 2xl:p-5 2xl:shadow-lg">
+                        <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">Explore Platform</h2>
+                        <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Discover coaches, spaces, and guidance built around your goals.</p>
+                        <nav class="mt-4 space-y-2.5" aria-label="Explore links">
+                            <a th:href="@{/explore}" class="group flex items-start gap-3 rounded-2xl border border-emerald-200/80 bg-white/85 px-3 py-3 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-sm dark:border-emerald-700/50 dark:bg-slate-800/65 dark:hover:border-emerald-500/60">
+                                <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-base" aria-hidden="true">🧭</span>
+                                <span class="flex-1">
+                                    <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Explore Trainers</span>
+                                    <span class="mt-0.5 block text-[11px] text-slate-500 dark:text-slate-300">Compare coaching styles and choose who fits your routine.</span>
+                                </span>
+                                <span class="text-slate-400 transition group-hover:text-emerald-600 dark:group-hover:text-emerald-300" aria-hidden="true">→</span>
                             </a>
-                            <a th:href="@{/explore}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800">
-                                <span aria-hidden="true">&#127970;</span><span>Explore gyms</span>
+                            <a th:href="@{/explore}" class="group flex items-start gap-3 rounded-2xl border border-sky-200/80 bg-white/85 px-3 py-3 transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-sm dark:border-sky-700/50 dark:bg-slate-800/65 dark:hover:border-sky-500/60">
+                                <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15 text-base" aria-hidden="true">🏢</span>
+                                <span class="flex-1">
+                                    <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Explore Gyms</span>
+                                    <span class="mt-0.5 block text-[11px] text-slate-500 dark:text-slate-300">Find the right environment, equipment, and vibe near you.</span>
+                                </span>
+                                <span class="text-slate-400 transition group-hover:text-sky-600 dark:group-hover:text-sky-300" aria-hidden="true">→</span>
                             </a>
-                            <a th:href="@{/about}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800">
-                                <span aria-hidden="true">&#8505;&#65039;</span><span>About the platform</span>
-                            </a>
-                            <a th:href="@{/about}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800">
-                                <span aria-hidden="true">&#128161;</span><span>How it works</span>
+                            <a th:href="@{/about}" class="group flex items-start gap-3 rounded-2xl border border-violet-200/80 bg-white/85 px-3 py-3 transition hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-sm dark:border-violet-700/50 dark:bg-slate-800/65 dark:hover:border-violet-500/60">
+                                <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/15 text-base" aria-hidden="true">💡</span>
+                                <span class="flex-1">
+                                    <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">How One to One Works</span>
+                                    <span class="mt-0.5 block text-[11px] text-slate-500 dark:text-slate-300">See how plans, habits, and coaching connect in one flow.</span>
+                                </span>
+                                <span class="text-slate-400 transition group-hover:text-violet-600 dark:group-hover:text-violet-300" aria-hidden="true">→</span>
                             </a>
                         </nav>
                     </section>
 
-                    <section aria-label="Achievements" class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-700/70 dark:bg-slate-900/55 dark:ring-white/10">
-                        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Milestones</h3>
-                        <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
-                            <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2.5 py-1 text-slate-700 dark:border-slate-600/80 dark:bg-slate-800 dark:text-slate-200">First workout logged</span>
-                            <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2.5 py-1 text-slate-700 dark:border-slate-600/80 dark:bg-slate-800 dark:text-slate-200">7 day streak</span>
-                            <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2.5 py-1 text-slate-700 dark:border-slate-600/80 dark:bg-slate-800 dark:text-slate-200">First trainer session</span>
-                        </div>
-                    </section>
                 </aside>
 
                 <main class="order-1 space-y-4 min-[1028px]:order-2 min-[1028px]:col-span-6">
-                    <section aria-label="Next action" class="rounded-3xl border border-emerald-300/75 bg-gradient-to-br from-white via-emerald-50/90 to-sky-50/70 p-5 shadow-lg ring-1 ring-emerald-200/70 dark:border-emerald-400/35 dark:from-slate-900/90 dark:via-emerald-900/20 dark:to-slate-900/95 dark:ring-emerald-400/25 sm:p-6">
+                    <!-- Track Your Body and Track Your Schedule Buttons -->
+                    <section aria-label="Quick tracking buttons" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <!-- Track Your Body Button -->
+                        <a th:href="@{/health-record/list}" class="group rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/90 via-white/90 to-emerald-50/60 p-6 shadow-md ring-1 ring-emerald-200/60 transition hover:ring-emerald-300 hover:shadow-lg dark:border-emerald-500/30 dark:from-emerald-900/20 dark:via-slate-900/80 dark:to-emerald-900/10 dark:ring-emerald-500/20 dark:hover:ring-emerald-400/40">
+                            <div class="flex items-start gap-4">
+                                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-2xl group-hover:bg-emerald-500/25 transition dark:bg-emerald-500/10" aria-hidden="true">⚖️</div>
+                                <div class="flex-1">
+                                    <h2 class="text-lg font-bold uppercase tracking-wide text-slate-900 dark:text-slate-100">Track Your Body</h2>
+                                    <div class="mt-3 space-y-2">
+                                        <!-- Calories Display -->
+                                        <div class="flex items-baseline gap-2">
+                                            <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-300" th:text="${intakeCalories}">0</p>
+                                            <p class="text-sm text-slate-600 dark:text-slate-400">kcal consumed</p>
+                                        </div>
+                                        <!-- Goal Display or Set Preferences Link -->
+                                        <div th:if="${intakeCalories == 0}" class="flex items-center gap-2">
+                                            <p class="text-xs text-amber-600 dark:text-amber-400">No daily goal set</p>
+                                            <a th:href="@{/preferences/edit}" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 underline">Set preferences</a>
+                                        </div>
+                                        <p th:if="${intakeCalories > 0}" class="text-xs text-slate-500 dark:text-slate-400" th:text="'Last logged: ' + ${intakeLastLogged}">Last logged: Today</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Track Your Schedule Button -->
+                        <a th:href="@{${todayPath}}" class="group rounded-2xl border border-sky-200/80 bg-gradient-to-br from-sky-50/90 via-white/90 to-sky-50/60 p-6 shadow-md ring-1 ring-sky-200/60 transition hover:ring-sky-300 hover:shadow-lg dark:border-sky-500/30 dark:from-sky-900/20 dark:via-slate-900/80 dark:to-sky-900/10 dark:ring-sky-500/20 dark:hover:ring-sky-400/40">
+                            <div class="flex items-start gap-4">
+                                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-sky-500/15 text-2xl group-hover:bg-sky-500/25 transition dark:bg-sky-500/10" aria-hidden="true">📅</div>
+                                <div class="flex-1">
+                                    <h2 class="text-lg font-bold uppercase tracking-wide text-slate-900 dark:text-slate-100">Track Your Schedule</h2>
+                                    <div class="mt-3 space-y-2">
+                                        <!-- Tasks and Workouts Count -->
+                                        <div class="flex items-baseline gap-3">
+                                            <div>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400">Tasks</p>
+                                                <p class="text-2xl font-bold text-sky-700 dark:text-sky-300" th:text="${todayTasks}">0</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-slate-500 dark:text-slate-400">Workouts</p>
+                                                <p class="text-2xl font-bold text-sky-700 dark:text-sky-300" th:text="${todayWorkouts}">0</p>
+                                            </div>
+                                        </div>
+                                        <!-- Completion Status -->
+                                        <p th:if="${leftToComplete > 0}" class="text-xs text-slate-600 dark:text-slate-400" th:text="${leftToComplete} + ' left to complete'">0 left to complete</p>
+                                        <p th:if="${leftToComplete == 0}" class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">✓ All complete</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </section>
+
+                    <section aria-label="Next action" class="rounded-3xl border border-emerald-300/75 bg-gradient-to-br from-white via-emerald-50/90 to-sky-50/70 p-5 shadow-lg ring-1 ring-emerald-200/70 dark:border-emerald-400/35 dark:from-slate-900/90 dark:via-emerald-900/20 dark:to-slate-900/95 dark:ring-emerald-400/25 sm:p-6"
+                            th:attr="data-has-tasks=${todayTasks > 0},data-has-workouts=${todayWorkouts > 0}">
                         <div class="flex flex-wrap items-center gap-2">
                             <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">What should I do next?</p>
                             <span class="inline-flex items-center rounded-full border border-emerald-400/45 bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:text-emerald-200" th:text="${actionUrgencyLabel}">Due now</span>
                             <span class="inline-flex items-center rounded-full border border-slate-300/80 bg-white/70 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-200" th:text="${streakSafe} + ' day workout streak'">0 day workout streak</span>
                             <span class="inline-flex items-center rounded-full border border-slate-300/80 bg-white/70 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-200" th:text="${nutritionStreak} + ' day nutrition streak'">0 day nutrition streak</span>
                         </div>
-                        <h1 class="mt-3 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100" th:text="${actionTitle}">Capture today before it slips</h1>
-                        <p class="mt-2 text-sm text-slate-700 dark:text-slate-300" th:text="${actionDetail}">Action detail placeholder</p>
 
-                        <div class="mt-4 flex flex-wrap gap-2" aria-label="Quick actions">
-                            <a th:href="@{/nutrition}" class="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Log meal</a>
-                            <a th:href="@{${todayPath}}" class="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Start workout</a>
-                            <a th:href="@{${todayPath}}" class="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Add task</a>
+                        <!-- Action Filter Tabs -->
+                        <div class="mt-4 flex gap-2 border-b border-slate-200/60 dark:border-slate-700/60" role="tablist">
+                            <button type="button" 
+                                    class="action-filter-tab active px-3 py-2 text-xs font-semibold uppercase tracking-wide transition border-b-2 border-emerald-500 text-emerald-700 dark:text-emerald-300"
+                                    data-filter="recommended"
+                                    role="tab"
+                                    aria-selected="true"
+                                    aria-controls="actionViewRecommended">
+                                Recommended
+                            </button>
+                            <button type="button"
+                                    class="action-filter-tab px-3 py-2 text-xs font-semibold uppercase tracking-wide transition border-b-2 border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                                    data-filter="all"
+                                    role="tab"
+                                    aria-selected="false"
+                                    aria-controls="actionViewAll">
+                                All
+                            </button>
                         </div>
 
-                        <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <a th:href="@{/nutrition}" class="group rounded-2xl border border-emerald-200/90 bg-white/90 p-4 shadow-sm ring-1 ring-emerald-100/80 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-emerald-200 dark:border-emerald-500/30 dark:bg-slate-900/70 dark:ring-emerald-500/20 dark:hover:ring-emerald-400/30 min-h-11">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" aria-hidden="true">&#127869;</div>
-                                    <span class="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-200">Track intake</span>
-                                </div>
-                                <h2 class="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100">Track intake</h2>
-                                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Log meals, calories, protein, and hydration for today.</p>
-                                <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
-                                    <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="${intakeCalories} + ' kcal today'">0 kcal today</span>
-                                    <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="'Last logged: ' + ${intakeLastLogged}">Last logged: Today</span>
-                                </div>
-                                <p class="mt-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300">Enter intake route</p>
-                            </a>
+                        <!-- Recommended View -->
+                        <div id="actionViewRecommended" class="action-view active" data-view="recommended">
+                            <h1 class="mt-4 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100" th:text="${actionTitle}">Capture today before it slips</h1>
+                            <p class="mt-2 text-sm text-slate-700 dark:text-slate-300" th:text="${actionDetail}">Action detail placeholder</p>
 
-                            <a th:href="@{${todayPath}}" class="group rounded-2xl border border-sky-200/90 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/80 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-sky-200 dark:border-sky-500/30 dark:bg-slate-900/70 dark:ring-sky-500/20 dark:hover:ring-sky-400/30 min-h-11">
+                            <div id="recommendedUpcomingCountdown"
+                                 th:if="${hasTrackedUpcoming}"
+                                 class="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2.5 text-xs text-slate-700 transition-all dark:border-slate-700/70 dark:bg-slate-800/50 dark:text-slate-200"
+                                 th:attr="data-upcoming-target=${upcomingTargetIso}">
                                 <div class="flex items-start justify-between gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/15 text-sky-700 dark:text-sky-300" aria-hidden="true">&#128197;</div>
-                                    <span class="rounded-full border border-sky-400/40 bg-sky-500/10 px-2 py-1 text-[11px] font-semibold text-sky-700 dark:text-sky-200">Track day</span>
+                                    <div>
+                                        <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Next <span th:text="${#strings.toLowerCase(upcomingType)}">workout</span></p>
+                                        <p class="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${upcomingName}">Next activity</p>
+                                        <p class="mt-0.5 text-[11px] text-slate-600 dark:text-slate-300">Open this day to view details and mark progress.</p>
+                                    </div>
+                                    <a th:href="@{${nextUpPath}}" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">Open</a>
                                 </div>
-                                <h2 class="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100">Track day</h2>
-                                <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">View workouts, tasks, and habits scheduled for today.</p>
-                                <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
-                                    <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="${leftToComplete} + ' left to complete'">0 left to complete</span>
+                                <div class="mt-2 flex items-center justify-between gap-2">
+                                    <p id="recommendedUpcomingRelative" class="text-[11px] text-slate-600 dark:text-slate-300">Begins soon</p>
+                                    <p id="recommendedUpcomingTimer" class="text-base font-semibold text-slate-900 dark:text-slate-100">00:00:00</p>
                                 </div>
-                                <div class="mt-3 rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-[11px] text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/40 dark:text-slate-200">
-                                    <p class="font-semibold" th:text="${completeToday ? 'Fully completed today' : 'Next ' + #strings.toLowerCase(nextItemType)}">Next task</p>
-                                    <p class="mt-1" th:text="${nextItemName}">Meal prep</p>
-                                    <p class="mt-1 text-slate-500 dark:text-slate-400" th:if="${!completeToday}" th:text="${nextItemTime}">Time not set</p>
-                                    <p class="mt-1 text-emerald-700 dark:text-emerald-300" th:if="${completeToday}">&#10003; All tasks and workouts complete</p>
-                                </div>
-                                <p class="mt-2 text-[11px] text-slate-600 dark:text-slate-400">Tooltips: <span class="cursor-help border-b border-dotted border-slate-400" tabindex="0" title="Two exercises performed back-to-back.">Superset</span> , <span class="cursor-help border-b border-dotted border-slate-400" tabindex="0" title="Rate of perceived exertion.">RPE</span></p>
-                                <p class="mt-3 text-sm font-semibold text-sky-700 dark:text-sky-300">Open day execution</p>
-                            </a>
+                            </div>
+
+                            <div class="mt-4 flex flex-wrap gap-2" aria-label="Quick actions - Recommended">
+                                <a id="recommendedLogMealBtn" th:href="@{/nutrition}" class="hidden inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Log meal</a>
+                                <a id="recommendedAddTaskBtn" th:href="@{${todayPath}}" class="hidden inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Add task</a>
+                                <a id="recommendedStartWorkoutBtn" th:href="@{${todayPath}}" class="hidden inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Start workout</a>
+                            </div>
+
+                            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <a id="recommendedTrackIntakeCard" th:href="@{/nutrition}" class="hidden group rounded-2xl border border-emerald-200/90 bg-white/90 p-4 shadow-sm ring-1 ring-emerald-100/80 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-emerald-200 dark:border-emerald-500/30 dark:bg-slate-900/70 dark:ring-emerald-500/20 dark:hover:ring-emerald-400/30 min-h-11">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" aria-hidden="true">&#127869;</div>
+                                        <span id="mealTypeLabel" class="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-200">Track intake</span>
+                                    </div>
+                                    <h2 class="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100">Log your meal</h2>
+                                    <p id="mealTimageLabel" class="mt-1 text-xs text-slate-600 dark:text-slate-400">Perfect time to log your breakfast</p>
+                                    <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
+                                        <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="${intakeCalories} + ' kcal today'">0 kcal today</span>
+                                        <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="'Last logged: ' + ${intakeLastLogged}">Last logged: Today</span>
+                                    </div>
+                                    <p class="mt-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300">Log meal</p>
+                                </a>
+
+                                <a id="recommendedTrackDayCard" th:href="@{${todayPath}}" class="hidden group rounded-2xl border border-sky-200/90 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/80 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-sky-200 dark:border-sky-500/30 dark:bg-slate-900/70 dark:ring-sky-500/20 dark:hover:ring-sky-400/30 min-h-11">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/15 text-sky-700 dark:text-sky-300" aria-hidden="true">&#128197;</div>
+                                        <span class="rounded-full border border-sky-400/40 bg-sky-500/10 px-2 py-1 text-[11px] font-semibold text-sky-700 dark:text-sky-200">Track day</span>
+                                    </div>
+                                    <h2 class="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100">Start your workout</h2>
+                                    <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Begin tracking your scheduled session now.</p>
+                                    <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
+                                        <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="${leftToComplete} + ' left to complete'">0 left to complete</span>
+                                    </div>
+                                    <div class="mt-3 rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-[11px] text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/40 dark:text-slate-200">
+                                        <p class="font-semibold" th:text="${completeToday ? 'Fully completed today' : 'Next ' + #strings.toLowerCase(nextItemType)}">Next task</p>
+                                        <p class="mt-1" th:text="${nextItemName}">Meal prep</p>
+                                        <p class="mt-1 text-slate-500 dark:text-slate-400" th:if="${!completeToday}" th:text="${nextItemTime}">Time not set</p>
+                                        <p class="mt-1 text-emerald-700 dark:text-emerald-300" th:if="${completeToday}">&#10003; All tasks and workouts complete</p>
+                                    </div>
+                                    <p class="mt-3 text-sm font-semibold text-sky-700 dark:text-sky-300">Start workout</p>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- All View -->
+                        <div id="actionViewAll" class="action-view hidden" data-view="all">
+                            <h2 class="mt-4 text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">All Available Actions</h2>
+                            <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">Choose any action to get started.</p>
+
+                            <div class="mt-4 flex flex-wrap gap-2" aria-label="Quick actions - All">
+                                <a th:href="@{${todayPath}}" class="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Add task</a>
+                                <a th:href="@{/nutrition}" class="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Log meal</a>
+                                <a th:href="@{${todayPath}}" class="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">+ Start workout</a>
+                            </div>
+
+                            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <a th:href="@{/nutrition}" class="group rounded-2xl border border-emerald-200/90 bg-white/90 p-4 shadow-sm ring-1 ring-emerald-100/80 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-emerald-200 dark:border-emerald-500/30 dark:bg-slate-900/70 dark:ring-emerald-500/20 dark:hover:ring-emerald-400/30 min-h-11">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" aria-hidden="true">&#127869;</div>
+                                        <span class="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-200">Track intake</span>
+                                    </div>
+                                    <h2 class="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100">Track intake</h2>
+                                    <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Log meals, calories, protein, and hydration for today.</p>
+                                    <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
+                                        <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="${intakeCalories} + ' kcal today'">0 kcal today</span>
+                                        <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="'Last logged: ' + ${intakeLastLogged}">Last logged: Today</span>
+                                    </div>
+                                    <p class="mt-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300">Enter intake route</p>
+                                </a>
+
+                                <a th:href="@{${todayPath}}" class="group rounded-2xl border border-sky-200/90 bg-white/90 p-4 shadow-sm ring-1 ring-sky-100/80 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-sky-200 dark:border-sky-500/30 dark:bg-slate-900/70 dark:ring-sky-500/20 dark:hover:ring-sky-400/30 min-h-11">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/15 text-sky-700 dark:text-sky-300" aria-hidden="true">&#128197;</div>
+                                        <span class="rounded-full border border-sky-400/40 bg-sky-500/10 px-2 py-1 text-[11px] font-semibold text-sky-700 dark:text-sky-200">Track day</span>
+                                    </div>
+                                    <h2 class="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100">Track day</h2>
+                                    <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">View workouts, tasks, and habits scheduled for today.</p>
+                                    <div class="mt-3 flex flex-wrap gap-2 text-[11px]">
+                                        <span class="rounded-full border border-slate-300/80 bg-slate-50 px-2 py-1 text-slate-700 dark:border-slate-600/60 dark:bg-slate-800/50 dark:text-slate-200" th:text="${leftToComplete} + ' left to complete'">0 left to complete</span>
+                                    </div>
+                                    <div class="mt-3 rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-[11px] text-slate-700 dark:border-slate-700/60 dark:bg-slate-800/40 dark:text-slate-200">
+                                        <p class="font-semibold" th:text="${completeToday ? 'Fully completed today' : 'Next ' + #strings.toLowerCase(nextItemType)}">Next task</p>
+                                        <p class="mt-1" th:text="${nextItemName}">Meal prep</p>
+                                        <p class="mt-1 text-slate-500 dark:text-slate-400" th:if="${!completeToday}" th:text="${nextItemTime}">Time not set</p>
+                                        <p class="mt-1 text-emerald-700 dark:text-emerald-300" th:if="${completeToday}">&#10003; All tasks and workouts complete</p>
+                                    </div>
+                                    <p class="mt-2 text-[11px] text-slate-600 dark:text-slate-400">Tooltips: <span class="cursor-help border-b border-dotted border-slate-400" tabindex="0" title="Two exercises performed back-to-back.">Superset</span> , <span class="cursor-help border-b border-dotted border-slate-400" tabindex="0" title="Rate of perceived exertion.">RPE</span></p>
+                                    <p class="mt-3 text-sm font-semibold text-sky-700 dark:text-sky-300">Open day execution</p>
+                                </a>
+                            </div>
                         </div>
 
                         <p class="mt-4 text-xs text-slate-600 dark:text-slate-400" th:if="${!hasAction}">No immediate blocker. Choose the route that will move your day forward now.</p>
@@ -148,7 +295,11 @@
                                 <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Your next 7 days</h2>
                                 <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Select a day to preview workouts and tasks.</p>
                             </div>
-                            <a class="text-sm font-medium text-sky-700 hover:text-sky-600 dark:text-sky-400 dark:hover:text-sky-300" th:href="@{/calendar}">Open full planner</a>
+                            <a class="inline-flex items-center gap-2 rounded-xl border border-sky-300/70 bg-sky-50/80 px-3 py-2 text-sm font-semibold text-sky-800 shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-100 dark:border-sky-500/40 dark:bg-sky-900/20 dark:text-sky-300 dark:hover:bg-sky-900/35"
+                               th:href="@{/calendar}">
+                                <span aria-hidden="true">🗓️</span>
+                                <span>Open full planner</span>
+                            </a>
                         </div>
 
                         <div class="mt-4 grid grid-cols-1 gap-4 min-[1028px]:grid-cols-12">
@@ -163,13 +314,13 @@
                                 <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     <div>
                                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Tasks</p>
-                                        <ul id="weekTaskList" class="mt-2 space-y-1.5 text-xs text-slate-700 dark:text-slate-200">
+                                        <ul id="weekTaskList" class="week-preview-list mt-2 space-y-1.5 text-xs text-slate-700 dark:text-slate-200">
                                             <li class="rounded-lg border border-slate-200/80 bg-slate-50/70 px-2.5 py-1.5 dark:border-slate-700/70 dark:bg-slate-800/50">No tasks selected</li>
                                         </ul>
                                     </div>
                                     <div>
                                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Workouts</p>
-                                        <ul id="weekWorkoutList" class="mt-2 space-y-1.5 text-xs text-slate-700 dark:text-slate-200">
+                                        <ul id="weekWorkoutList" class="week-preview-list mt-2 space-y-1.5 text-xs text-slate-700 dark:text-slate-200">
                                             <li class="rounded-lg border border-slate-200/80 bg-slate-50/70 px-2.5 py-1.5 dark:border-slate-700/70 dark:bg-slate-800/50">No workouts selected</li>
                                         </ul>
                                     </div>
@@ -177,11 +328,11 @@
                             </div>
 
                             <div class="min-[1028px]:col-span-7">
-                                <div class="-mx-1 overflow-x-auto px-1 pb-1" role="tablist" aria-label="7 day selector" th:if="${miniWeek != null and !#lists.isEmpty(miniWeek)}">
-                                    <div class="flex min-w-max gap-2">
+                                <div class="dashboard-week-strip -mx-1 overflow-x-auto px-1 pb-2" role="tablist" aria-label="7 day selector" th:if="${miniWeek != null and !#lists.isEmpty(miniWeek)}" data-week-strip>
+                                    <div class="flex min-w-max gap-3 min-[1028px]:justify-center min-[1028px]:mx-auto">
                                     <button type="button"
                                             th:each="d, iterStat : ${miniWeek}"
-                                                th:with="dayState=${iterStat.index < 1 ? 'completed' : 'upcoming'},
+                                                th:with="dayState=${d.dayStatus != null ? d.dayStatus : 'upcoming'},
                                                  dayDifficulty=${(d.taskCount + d.scheduledCount) > 3 ? 'Heavy' : ((d.taskCount + d.scheduledCount) > 1 ? 'Moderate' : 'Light')},
                                                  dayIcon=${d.scheduledCount > 0 ? '🏋' : (d.taskCount > 0 ? '📝' : '🍎')}"
                                             th:attr="data-day-label=${d.dayLabel + ', ' + d.prettyDate},
@@ -192,15 +343,22 @@
                                                      data-workout-titles=${d.workoutTitles != null and !#lists.isEmpty(d.workoutTitles) ? #strings.listJoin(d.workoutTitles, '|') : ''},
                                                  data-day-state=${dayState},
                                                      data-day-selected=${d.today or iterStat.index == 0 ? 'true' : 'false'}"
-                                            class="dashboard-week-day-button w-24 shrink-0 rounded-xl border border-slate-200/85 bg-white/85 px-2 py-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow dark:border-slate-700/70 dark:bg-slate-900/60 dark:hover:border-sky-400/50"
+                                            class="dashboard-week-day-button w-32 shrink-0 rounded-2xl border border-slate-200/85 bg-white/90 px-3 py-3 text-left shadow-sm transition hover:border-sky-300 hover:shadow-md dark:border-slate-700/70 dark:bg-slate-900/70 dark:hover:border-sky-400/50"
                                             th:classappend="${d.today ? ' ring-2 ring-sky-400/50 border-sky-400/60' : ''}"
                                             data-week-day-button
                                             role="tab"
                                             th:attrappend="aria-selected=${d.today or iterStat.index == 0}">
-                                        <p class="text-xs font-semibold text-slate-900 dark:text-slate-100" th:text="${d.today ? 'Today' : d.dayLabel}">Mon</p>
-                                        <p class="text-[11px] text-slate-500 dark:text-slate-400" th:text="${d.prettyDate}">9 Mar</p>
-                                        <p class="mt-2 text-[11px] text-slate-700 dark:text-slate-300"><span th:text="${dayIcon}">🏋</span> <span th:text="${d.taskCount + d.scheduledCount} + ' items'">0 items</span></p>
-                                        <p class="mt-1 text-[10px] font-semibold" th:classappend="${dayState == 'completed' ? ' text-emerald-700 dark:text-emerald-300' : (dayState == 'missed' ? ' text-rose-700 dark:text-rose-300' : ' text-slate-500 dark:text-slate-400')}" th:text="${dayState == 'completed' ? 'Completed' : (dayState == 'missed' ? 'Missed' : 'Upcoming')}">Upcoming</p>
+                                        <div class="flex items-start justify-between gap-2">
+                                            <p class="text-xs font-semibold text-slate-900 dark:text-slate-100" th:text="${d.dayLabel}">Mon</p>
+                                            <span th:if="${d.today}" class="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700 dark:bg-sky-900/40 dark:text-sky-200">Today</span>
+                                            <span th:if="${d.tomorrow}" class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">Tomorrow</span>
+                                        </div>
+                                        <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400" th:text="${d.prettyDate}">9 Mar</p>
+                                        <p class="mt-2 text-[11px] text-slate-700 dark:text-slate-300">
+                                            <span th:text="${dayIcon}">🏋</span>
+                                            <span th:text="${d.scheduledCount + ' workout' + (d.scheduledCount == 1 ? '' : 's') + ', ' + d.taskCount + ' task' + (d.taskCount == 1 ? '' : 's')}">1 workout, 2 tasks</span>
+                                        </p>
+                                        <p class="mt-1 text-[10px] font-semibold" th:classappend="${dayState == 'completed' ? ' text-emerald-700 dark:text-emerald-300' : (dayState == 'missed' ? ' text-rose-700 dark:text-rose-300' : (dayState == 'today' ? ' text-sky-700 dark:text-sky-300' : ' text-slate-500 dark:text-slate-400'))}" th:text="${dayState == 'completed' ? 'Completed' : (dayState == 'missed' ? 'Missed' : (dayState == 'today' ? 'In progress' : (dayState == 'clear' ? 'No plan' : 'Upcoming')))}">Upcoming</p>
                                         <p class="text-[10px] text-slate-500 dark:text-slate-400" th:text="${dayDifficulty} + ' day'">Light day</p>
                                     </button>
                                     </div>
@@ -212,60 +370,163 @@
                     </section>
 
                     <section aria-label="Weekly summary" class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-700/70 dark:bg-slate-900/55 dark:ring-white/10">
-                        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">This week so far</h3>
-                        <div class="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
-                            <div class="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 dark:border-slate-700/70 dark:bg-slate-800/50"><p class="text-slate-500 dark:text-slate-400">Workouts completed</p><p class="mt-1 font-semibold text-slate-800 dark:text-slate-100" th:text="${weekCompletedSafe} + ' / ' + ${weekPlannedSafe}">0 / 0</p></div>
-                            <div class="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 dark:border-slate-700/70 dark:bg-slate-800/50"><p class="text-slate-500 dark:text-slate-400">Meals logged</p><p class="mt-1 font-semibold text-slate-800 dark:text-slate-100" th:text="${intakeMeals}">0</p></div>
-                            <div class="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 dark:border-slate-700/70 dark:bg-slate-800/50"><p class="text-slate-500 dark:text-slate-400">Habits completed</p><p class="mt-1 font-semibold text-slate-800 dark:text-slate-100" th:text="${habitsDone} + ' / ' + ${habitsDue > 0 ? habitsDue : 1}">0 / 1</p></div>
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">This week so far</h3>
+                            <a th:href="@{/preferences/edit#weekly-summary-metrics}"
+                               class="group inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-300"
+                                         aria-label="You can customise these metrics in preferences"
+                                         title="Customise weekly summary metrics in Preferences">
+                                <span class="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300/80 text-[10px] dark:border-slate-600/80">i</span>
+                                <span>Customise</span>
+                            </a>
+                        </div>
+                        <div class="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 xl:grid-cols-3">
+                            <div th:each="card : ${weeklySummaryCards}" class="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 dark:border-slate-700/70 dark:bg-slate-800/50">
+                                <p class="text-slate-500 dark:text-slate-400" th:text="${card.title}">Metric</p>
+                                <p class="mt-1 font-semibold text-slate-800 dark:text-slate-100" th:text="${card.value}">0</p>
+                                <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400" th:text="${card.subtitle}">Details</p>
+                            </div>
                         </div>
                     </section>
 
-                    <section aria-label="Upcoming next" id="upcomingNextSection" class="rounded-2xl border border-slate-200/85 bg-white/90 p-4 shadow-sm ring-1 ring-slate-900/5 transition-all dark:border-slate-700/70 dark:bg-slate-900/60 dark:ring-white/10 sm:p-5" th:attr="data-upcoming-target=${upcomingTargetIso}">
-                        <div class="flex flex-wrap items-start justify-between gap-3">
-                            <div>
-                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Upcoming next</p>
-                                <h2 class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100" th:text="${'Next ' + #strings.toLowerCase(upcomingType) + ': ' + upcomingName}">Next workout: Today session block</h2>
-                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Starts at <span th:text="${#temporals.format(upcomingTargetIso, 'HH:mm')}">18:00</span></p>
-                            </div>
-                            <div class="rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-right dark:border-slate-700/70 dark:bg-slate-800/60">
-                                <p class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Countdown</p>
-                                <p id="upcomingCountdown" class="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">01:42:18</p>
-                                <p id="upcomingRelative" class="text-xs text-slate-600 dark:text-slate-300">Begins soon</p>
-                            </div>
-                        </div>
-                    </section>
                 </main>
 
                 <aside aria-label="Help and trust" data-dashboard-right-rail class="order-3 space-y-4 min-[1028px]:col-span-3 min-[1028px]:self-start min-[1028px]:sticky min-[1028px]:top-24 min-[1028px]:h-fit">
-                    <section class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 backdrop-blur dark:border-slate-700/70 dark:bg-slate-900/60 dark:ring-white/10">
-                        <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">Help and Trust</h2>
-                        <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Support, policies, and plans.</p>
-                        <nav class="mt-3 space-y-2" aria-label="Support links">
-                            <a th:href="@{/faq}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"><span aria-hidden="true">&#10067;</span><span>FAQ</span></a>
-                            <a th:href="@{/policies/terms}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"><span aria-hidden="true">&#128274;</span><span>Privacy</span></a>
-                            <a th:href="@{/chat}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"><span aria-hidden="true">&#9993;&#65039;</span><span>Contact</span></a>
-                            <a th:href="@{/pricing}" class="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/75 px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700/60 dark:bg-slate-800/50 dark:text-slate-200 dark:hover:bg-slate-800"><span aria-hidden="true">&#128179;</span><span>Memberships and plans</span></a>
+                    <section class="rounded-3xl border border-sky-200/70 bg-gradient-to-br from-white via-sky-50/60 to-cyan-50/60 p-4 shadow-md ring-1 ring-sky-100/80 backdrop-blur dark:border-sky-500/30 dark:from-slate-900/80 dark:via-sky-900/20 dark:to-slate-900/90 dark:ring-sky-500/20 2xl:p-5 2xl:shadow-lg">
+                        <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700 dark:text-sky-300">Help and Trust</h2>
+                        <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Get instant support, understand your privacy, and manage your plan confidently.</p>
+                        <nav class="mt-4 space-y-2.5" aria-label="Support links">
+                            <a th:href="@{/faq}" class="group flex items-start gap-3 rounded-2xl border border-sky-200/80 bg-white/85 px-3 py-3 transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-sm dark:border-sky-700/50 dark:bg-slate-800/65 dark:hover:border-sky-500/60">
+                                <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15 text-base" aria-hidden="true">❓</span>
+                                <span class="flex-1">
+                                    <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">FAQ</span>
+                                    <span class="mt-0.5 block text-[11px] text-slate-500 dark:text-slate-300">Fast answers to common questions and workflows.</span>
+                                </span>
+                                <span class="text-slate-400 transition group-hover:text-sky-600 dark:group-hover:text-sky-300" aria-hidden="true">→</span>
+                            </a>
+                            <a th:href="@{/policies/terms}" class="group flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white/85 px-3 py-3 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-700/50 dark:bg-slate-800/65 dark:hover:border-slate-500/60">
+                                <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-500/15 text-base" aria-hidden="true">🔐</span>
+                                <span class="flex-1">
+                                    <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Privacy and Terms</span>
+                                    <span class="mt-0.5 block text-[11px] text-slate-500 dark:text-slate-300">See how data is protected and how your account is governed.</span>
+                                </span>
+                                <span class="text-slate-400 transition group-hover:text-slate-700 dark:group-hover:text-slate-200" aria-hidden="true">→</span>
+                            </a>
+                            <a th:href="@{/chat}" class="group flex items-start gap-3 rounded-2xl border border-emerald-200/80 bg-white/85 px-3 py-3 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-sm dark:border-emerald-700/50 dark:bg-slate-800/65 dark:hover:border-emerald-500/60">
+                                <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-base" aria-hidden="true">💬</span>
+                                <span class="flex-1">
+                                    <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Contact Support</span>
+                                    <span class="mt-0.5 block text-[11px] text-slate-500 dark:text-slate-300">Talk to Charlie or support when you need guidance quickly.</span>
+                                </span>
+                                <span class="text-slate-400 transition group-hover:text-emerald-600 dark:group-hover:text-emerald-300" aria-hidden="true">→</span>
+                            </a>
+                            <a th:href="@{/pricing}" class="group flex items-start gap-3 rounded-2xl border border-amber-200/80 bg-white/85 px-3 py-3 transition hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-sm dark:border-amber-700/50 dark:bg-slate-800/65 dark:hover:border-amber-500/60">
+                                <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-base" aria-hidden="true">💳</span>
+                                <span class="flex-1">
+                                    <span class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Memberships and Plans</span>
+                                    <span class="mt-0.5 block text-[11px] text-slate-500 dark:text-slate-300">Upgrade paths, billing details, and premium perks.</span>
+                                </span>
+                                <span class="text-slate-400 transition group-hover:text-amber-600 dark:group-hover:text-amber-300" aria-hidden="true">→</span>
+                            </a>
                         </nav>
                         <p th:if="${!hasTrainerConnected}" class="mt-3 rounded-md border border-amber-300/70 bg-amber-50/90 px-2.5 py-2 text-[11px] text-amber-900 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-100">No trainer connected. <a th:href="@{/explore}" class="font-semibold text-amber-800 hover:text-amber-700 dark:text-amber-200 dark:hover:text-amber-100">Explore trainers</a>.</p>
-                        <div th:if="${isFirstTimeUser}" class="mt-3 rounded-md border border-emerald-300/70 bg-emerald-50/90 px-2.5 py-2 text-[11px] text-emerald-900 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-100">
-                            Charlie: New here? Start by logging your first meal or workout today.
-                            <div class="mt-2 flex gap-2">
-                                <a th:href="@{/nutrition}" class="underline">Track intake</a>
-                                <a th:href="@{${todayPath}}" class="underline">Track day</a>
-                            </div>
-                        </div>
+                        <div th:if="${isFirstTimeUser}"
+                             id="charlieDashboardPrompt"
+                             hidden
+                             th:attr="data-message=${'New here? Start by tracking your body or your schedule today.'}"></div>
                     </section>
 
-                    <section aria-label="User profile display" class="rounded-2xl border border-slate-200/85 bg-white/85 p-4 shadow-sm ring-1 ring-slate-900/5 dark:border-slate-700/70 dark:bg-slate-900/60 dark:ring-white/10">
+                    <section aria-label="User profile display" class="rounded-3xl border border-slate-200/85 bg-gradient-to-br from-white via-slate-50/80 to-emerald-50/50 p-4 shadow-md ring-1 ring-slate-900/5 dark:border-slate-700/70 dark:from-slate-900/70 dark:via-slate-900/70 dark:to-emerald-900/15 dark:ring-white/10 2xl:p-5"
+                             th:classappend="${profileCardBackStyle != null ? ' profile-card-back-theme--' + #strings.toLowerCase(profileCardBackStyle) : ''}">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Your profile</p>
                         <div class="mt-3 flex items-center gap-3">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/70 to-sky-400/70 text-sm font-semibold text-white" aria-hidden="true" th:text="${#strings.substring(userFirstNameSafe, 0, 1)}">A</div>
+                            <div class="profile-avatar-ring flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400/80 via-emerald-500/80 to-sky-500/80 text-base font-bold text-white shadow-sm"
+                                 th:classappend="${profileRingStyle != null ? ' profile-avatar-ring--' + #strings.toLowerCase(profileRingStyle) : ''}"
+                                 aria-hidden="true" th:text="${#strings.substring(userFirstNameSafe, 0, 1)}">A</div>
                             <div>
-                                <p class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${userFirstNameSafe}">Athlete</p>
-                                <p class="text-xs text-slate-600 dark:text-slate-300" th:text="${userIsPremium ? 'Premium member' : 'Starter plan'}">Premium member</p>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-base font-semibold text-slate-900 dark:text-slate-100">@<span sec:authentication="name">athlete</span></span>
+                                    <!-- Premium Badge -->
+                                    <div th:if="${userIsPremium}" class="relative group" aria-label="Premium member">
+                                        <button type="button"
+                                            class="premium-orb-badge inline-flex items-center justify-center h-5 w-5 rounded-full"
+                                                aria-label="Premium features enabled">
+                                            <svg class="h-3 w-3 text-yellow-950" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        </button>
+                                        <div class="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-slate-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap dark:bg-slate-700">
+                                            ✓ Premium Active
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-1 inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                                     th:classappend="${profileBannerTheme != null ? ' profile-banner-pill profile-banner-pill--' + #strings.toLowerCase(profileBannerTheme) : ' profile-banner-pill profile-banner-pill--aurora'}"
+                                     th:text="${(profileBannerTheme != null ? profileBannerTheme : 'AURORA') + ' banner'}">AURORA banner</div>
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-300">Plan owner and momentum tracker</p>
                             </div>
                         </div>
-                        <p class="mt-3 text-xs text-slate-600 dark:text-slate-300" th:text="${todayTotal > 0 ? 'Current focus: execute today''s plan' : 'Current focus: build tomorrow''s structure'}">Current focus: execute today's plan</p>
+                        <div class="mt-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-3 dark:border-emerald-700/50 dark:bg-emerald-900/20">
+                            <p class="text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Daily Focus</p>
+                            <p class="mt-1 text-sm font-medium text-slate-800 dark:text-slate-100" th:text="${todayTotal > 0 ? 'Execute today''s plan' : 'Build tomorrow''s structure'}">Execute today's plan</p>
+                            <p class="mt-1 text-[11px] text-slate-600 dark:text-slate-300">Keep this visible and your actions stay aligned with your goals.</p>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                            <div class="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 dark:border-slate-700/70 dark:bg-slate-800/60">
+                                <p class="text-slate-500 dark:text-slate-300">Workout streak</p>
+                                <p class="mt-0.5 font-semibold text-slate-900 dark:text-slate-100" th:text="${streakSafe} + ' days'">0 days</p>
+                            </div>
+                            <div class="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 dark:border-slate-700/70 dark:bg-slate-800/60">
+                                <p class="text-slate-500 dark:text-slate-300">Nutrition streak</p>
+                                <p class="mt-0.5 font-semibold text-slate-900 dark:text-slate-100" th:text="${nutritionStreak} + ' days'">0 days</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 rounded-2xl border border-slate-200/80 bg-white/85 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                            <div class="flex items-center justify-between gap-2">
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">Goals</p>
+                                <div class="relative group">
+                                    <a th:href="@{/goals}"
+                                       class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300/80 text-[10px] font-semibold text-slate-500 hover:border-emerald-400 hover:text-emerald-700 dark:border-slate-600 dark:text-slate-300 dark:hover:border-emerald-500 dark:hover:text-emerald-300"
+                                       aria-label="Set or change goals"
+                                       title="Set or change goals at /goals">i</a>
+                                    <div class="pointer-events-none absolute bottom-full right-0 mb-2 hidden w-56 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[10px] text-slate-700 shadow-md group-hover:block group-focus-within:block dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                        Goals can be set or changed at <span class="font-semibold">/goals</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="mt-1 text-[11px] text-slate-600 dark:text-slate-300">
+                                <span th:text="${activeGoalsCount != null ? activeGoalsCount : 0}">0</span>
+                                active,
+                                <span th:text="${completedGoalsCount != null ? completedGoalsCount : 0}">0</span>
+                                completed.
+                            </p>
+
+                            <div class="mt-2 space-y-2" th:if="${goalPreviewCards != null and !#lists.isEmpty(goalPreviewCards)}">
+                                <a th:each="goal : ${goalPreviewCards}"
+                                   th:href="@{'/goals/' + ${goal.id}}"
+                                   class="group flex items-start justify-between gap-2 rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 transition hover:border-emerald-300 hover:bg-emerald-50/70 dark:border-slate-700/70 dark:bg-slate-800/55 dark:hover:border-emerald-500/50 dark:hover:bg-emerald-900/20">
+                                    <span class="text-xs font-semibold text-slate-800 dark:text-slate-100" th:text="${goal.title}">Goal title</span>
+                                    <span class="rounded-full border border-slate-300/80 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300"
+                                          th:text="${goal.status}">ACTIVE</span>
+                                </a>
+                            </div>
+
+                            <p th:if="${goalPreviewCards == null or #lists.isEmpty(goalPreviewCards)}" class="mt-2 rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-2 text-[11px] text-slate-600 dark:border-slate-700/70 dark:bg-slate-800/55 dark:text-slate-300">
+                                No goals yet. Create your first goal at
+                                <a th:href="@{/goals}" class="font-semibold text-emerald-700 hover:text-emerald-600 dark:text-emerald-300 dark:hover:text-emerald-200">/goals</a>.
+                            </p>
+                        </div>
+
+                        <div class="mt-3" th:if="${selectedProfileMilestoneTitles != null and !#lists.isEmpty(selectedProfileMilestoneTitles)}">
+                            <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Showcased milestones</p>
+                            <div class="mt-2 flex flex-wrap gap-1.5">
+                                <span th:each="title : ${selectedProfileMilestoneTitles}"
+                                      class="inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:border-emerald-700/50 dark:bg-emerald-900/25 dark:text-emerald-300"
+                                      th:text="${title}">Milestone</span>
+                            </div>
+                        </div>
                     </section>
 
                 </aside>
@@ -290,7 +551,38 @@
             }
 
             .dashboard-week-day-button.is-active {
-                transform: translateY(-2px);
+                transform: none;
+            }
+
+            .dashboard-week-strip {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+                cursor: grab;
+            }
+
+            .dashboard-week-strip.dragging {
+                cursor: grabbing;
+                user-select: none;
+            }
+
+            .dashboard-week-strip::-webkit-scrollbar {
+                display: none;
+            }
+
+            .week-preview-list.week-preview-list--scroll {
+                max-height: 5.75rem;
+                overflow-y: auto;
+                padding-right: 0.2rem;
+                scrollbar-gutter: stable;
+            }
+
+            .week-preview-list.week-preview-list--scroll::-webkit-scrollbar {
+                width: 0.35rem;
+            }
+
+            .week-preview-list.week-preview-list--scroll::-webkit-scrollbar-thumb {
+                background: rgba(100, 116, 139, 0.45);
+                border-radius: 999px;
             }
 
             @media (min-width: 1028px) {
@@ -308,8 +600,26 @@
                     transform: translateY(-14px);
                 }
             }
+
+            /* Action filter tabs */
+            .action-filter-tab {
+                cursor: pointer;
+            }
+
+            .action-filter-tab:not(.active) {
+                border-bottom-color: transparent;
+            }
+
+            .action-view {
+                transition: opacity 200ms ease, visibility 200ms ease;
+            }
+
+            .action-view.hidden {
+                display: none;
+            }
         </style>
         <script th:src="@{/js/dashboard-action-hub.js(v='20260309')}" defer></script>
+        <script th:src="@{/js/dashboard-recommendations.js(v='20260310')}" defer></script>
     </th:block>
 
 </th:block>

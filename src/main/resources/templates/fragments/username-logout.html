@@ -3,6 +3,7 @@
      th:fragment="usernameLogout"
      th:with="authUser=${@authHelper.getAuthenticatedUser()},
               isPremium=${authUser != null ? @platformSubscriptionService.isPremium(authUser.id, @systemClock) : false},
+              navSettings=${authUser != null ? @userSettingsService.getOrCreate(authUser) : null},
               navSub=${authUser != null ? @platformSubscriptionService.findByUserId(authUser.id).orElse(null) : null},
               navDaysLeft=${authUser != null ? @platformSubscriptionService.getDaysUntilRenewal(authUser.id, @systemClock) : null},
               navExpired=${authUser != null ? @platformSubscriptionService.hasExpiredSubscription(authUser.id, @systemClock) : false},
@@ -17,11 +18,15 @@
                     class="nav-auth-username text-sm font-medium text-slate-700 hover:text-emerald-700 dark:text-slate-200 dark:hover:text-emerald-300 transition-colors"
                     sec:authentication="name"
                     aria-label="Open profile">user</a>
+
+                        <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                                    th:classappend="${' profile-banner-pill profile-banner-pill--' + (navSettings != null and navSettings.profileBannerTheme != null ? #strings.toLowerCase(navSettings.profileBannerTheme) : 'aurora')}"
+                                    th:text="${(navSettings != null and navSettings.profileBannerTheme != null ? navSettings.profileBannerTheme : 'AURORA') + ' banner'}">AURORA banner</span>
             
             <!-- Premium Crown Icon -->
             <div th:if="${isPremium}" class="nav-premium-badge-group" data-premium-badge-group data-open="false" aria-label="Premium member">
                 <button type="button"
-                        class="nav-premium-badge"
+                    class="nav-premium-badge premium-orb-badge"
                         data-premium-toggle
                         aria-label="Premium features enabled"
                         aria-expanded="false"

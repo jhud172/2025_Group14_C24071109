@@ -19,22 +19,22 @@
     </script>
     <link rel="stylesheet" th:href="@{/css/app.css(v='20260303')}">
 </head>
-<body class="min-h-screen bg-cyber-900 text-slate-100 antialiased">
+<body class="min-h-screen antialiased bg-gradient-to-br from-slate-50 via-emerald-50/40 to-sky-50/70 text-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20 dark:text-slate-100">
 
 <!--
   Tutorial overlay: full-screen, role-aware, step-based walkthrough.
   Steps are defined in JS below; role is injected from the server.
 -->
 <div id="tutorial-backdrop"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 backdrop-blur-sm dark:bg-black/70">
 
     <div id="tutorial-card"
-         class="relative w-full max-w-lg mx-4 rounded-2xl border border-emerald-400/30
-                bg-cyber-800 shadow-2xl overflow-hidden"
+          class="relative mx-4 w-full max-w-lg overflow-hidden rounded-2xl border border-emerald-200/75
+              bg-white/95 shadow-2xl ring-1 ring-slate-900/5 dark:border-emerald-500/30 dark:bg-slate-900/92 dark:ring-white/10"
          role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
 
         <!-- Progress bar -->
-        <div class="h-1 w-full bg-slate-700">
+        <div class="h-1 w-full bg-slate-200 dark:bg-slate-700/90">
             <div id="tutorial-progress-bar"
                  class="h-1 bg-emerald-400 transition-all duration-500"
                  style="width: 0%"></div>
@@ -43,12 +43,12 @@
         <!-- Step counter -->
         <div class="flex items-center justify-between px-6 pt-4 pb-0">
             <span id="tutorial-step-label"
-                  class="text-xs font-semibold uppercase tracking-widest text-emerald-400"></span>
+                class="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-300"></span>
             <!-- Skip button -->
             <form th:action="@{/tutorial/complete}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <button type="submit"
-                        class="text-xs text-slate-400 hover:text-slate-200 transition-colors underline underline-offset-2">
+                        class="text-xs text-slate-500 transition-colors underline underline-offset-2 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                     Skip tutorial
                 </button>
             </form>
@@ -57,30 +57,27 @@
         <!-- Icon area -->
         <div class="flex justify-center mt-6 mb-2">
             <div id="tutorial-icon"
-                 class="h-16 w-16 rounded-full bg-emerald-400/10 border border-emerald-400/30
-                        flex items-center justify-center text-4xl transition-all duration-300">
+                  class="flex h-16 w-16 items-center justify-center rounded-full border border-emerald-300/70 bg-emerald-50 text-4xl transition-all duration-300 dark:border-emerald-500/30 dark:bg-emerald-900/20">
             </div>
         </div>
 
         <!-- Text content -->
         <div class="px-8 pb-4 text-center">
-            <h2 id="tutorial-title" class="text-xl font-bold text-white mb-2 transition-all duration-300"></h2>
-            <p id="tutorial-body" class="text-slate-300 text-sm leading-relaxed transition-all duration-300"></p>
+            <h2 id="tutorial-title" class="mb-2 text-xl font-bold text-slate-900 transition-all duration-300 dark:text-slate-100"></h2>
+            <p id="tutorial-body" class="text-sm leading-relaxed text-slate-600 transition-all duration-300 dark:text-slate-300"></p>
         </div>
 
         <!-- Navigation buttons -->
         <div class="flex items-center justify-between px-8 pb-8 pt-4 gap-3">
             <button id="tutorial-back-btn"
                     onclick="tutorialBack()"
-                    class="px-5 py-2 rounded-lg text-sm font-semibold border border-slate-600
-                           text-slate-300 hover:border-slate-400 hover:text-white transition-colors hidden">
+                    class="hidden rounded-lg border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-800">
                 &larr; Back
             </button>
             <div id="tutorial-dots" class="flex gap-2 mx-auto"></div>
             <button id="tutorial-next-btn"
                     onclick="tutorialNext()"
-                    class="px-6 py-2 rounded-lg text-sm font-bold bg-emerald-500 hover:bg-emerald-400
-                           text-white transition-colors ml-auto">
+                    class="ml-auto rounded-lg bg-emerald-600 px-6 py-2 text-sm font-bold text-white transition-colors hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400">
                 Next &rarr;
             </button>
         </div>
@@ -222,7 +219,7 @@
         dot.type = 'button';
         dot.setAttribute('aria-label', 'Go to step ' + (i + 1));
         dot.className = 'h-2 w-2 rounded-full transition-all duration-300 ' +
-                        (i === 0 ? 'bg-emerald-400 w-4' : 'bg-slate-600');
+                        (i === 0 ? 'w-4 bg-emerald-500 dark:bg-emerald-400' : 'bg-slate-300 dark:bg-slate-600');
         dot.addEventListener('click', function () { goTo(i); });
         dotsEl.appendChild(dot);
     });
@@ -247,9 +244,9 @@
         var dots = dotsEl.querySelectorAll('button');
         dots.forEach(function (d, i) {
             if (i === current) {
-                d.className = 'h-2 w-4 rounded-full bg-emerald-400 transition-all duration-300';
+                d.className = 'h-2 w-4 rounded-full bg-emerald-500 dark:bg-emerald-400 transition-all duration-300';
             } else {
-                d.className = 'h-2 w-2 rounded-full bg-slate-600 transition-all duration-300';
+                d.className = 'h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-600 transition-all duration-300';
             }
         });
     }

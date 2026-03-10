@@ -10,6 +10,8 @@ public record MiniWeekDay(
         int taskCount,
         int scheduledCount,
         boolean today,
+        boolean tomorrow,
+        String dayStatus,
         boolean hasUncompletedWorkout,
         List<String> taskTitles,
         List<String> workoutTitles

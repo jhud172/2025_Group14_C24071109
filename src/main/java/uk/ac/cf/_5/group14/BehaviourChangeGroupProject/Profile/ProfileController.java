@@ -7,10 +7,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -113,6 +115,7 @@ public class ProfileController {
         }
         ModelAndView modelAndView = new ModelAndView("/profile/profile");
         PlatformSubscription platformSubscription = platformSubscriptionService.findByUserId(user.getId()).orElse(null);
+        boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
         UserSettings settings = userSettingsService.getOrCreate(user);
         LevelProgress levelProgress = levelService.getProgress(user);
 
@@ -138,6 +141,18 @@ public class ProfileController {
         modelAndView.addObject("today", LocalDate.now(clock));
         modelAndView.addObject("devProfilePreview", devProfilePreview);
         modelAndView.addObject("compactTopContent", true);
+        modelAndView.addObject("isPremium", isPremium);
+        modelAndView.addObject("profileBannerThemes", List.of("AURORA", "SUNSET", "OCEAN", "ROSE", "CARBON"));
+        modelAndView.addObject("profileRingStyles", List.of("NEON_DUAL", "SOLAR_FLARE", "CRYSTAL", "NONE"));
+        modelAndView.addObject("profileCardBackStyles", List.of("GLASS", "TOPO", "CARBON", "MATRIX"));
+
+        Set<String> selectedMilestones = parseCsvKeys(settings != null ? settings.getProfileMilestoneKeys() : null, 6);
+        List<MilestoneOption> availableMilestones = buildAvailableMilestones(user, platformSubscription, levelProgress, exerciseLogCount);
+        selectedMilestones = selectedMilestones.stream()
+            .filter(key -> availableMilestones.stream().anyMatch(option -> option.key().equals(key)))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        modelAndView.addObject("profileMilestoneOptions", availableMilestones);
+        modelAndView.addObject("selectedProfileMilestones", selectedMilestones);
 
         // Payment cards & orders
         List<SavedPaymentMethod> savedCards = cardService.getCardsForUser(user.getId());
@@ -146,6 +161,61 @@ public class ProfileController {
         modelAndView.addObject("allOrders", allOrders);
 
         return modelAndView;
+    }
+
+    @PostMapping("/profile/settings/customiser")
+    public String updateProfileCustomiser(@RequestParam(value = "bannerTheme", required = false) String bannerTheme,
+                                          @RequestParam(value = "ringStyle", required = false) String ringStyle,
+                                          @RequestParam(value = "cardBackStyle", required = false) String cardBackStyle,
+                                          @RequestParam(value = "milestoneKeys", required = false) List<String> milestoneKeys,
+                                          RedirectAttributes redirectAttributes) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if (!platformSubscriptionService.isPremium(user.getId(), clock)) {
+            redirectAttributes.addFlashAttribute("profileError", "Profile customiser is a Premium feature.");
+            return "redirect:/profile";
+        }
+
+        UserSettings settings = userSettingsService.getOrCreate(user);
+        LevelProgress levelProgress = levelService.getProgress(user);
+        int exerciseLogCount = exerciseLogService.getLogsByUser(user).size();
+        PlatformSubscription platformSubscription = platformSubscriptionService.findByUserId(user.getId()).orElse(null);
+
+        Set<String> unlockedMilestones = buildAvailableMilestones(user, platformSubscription, levelProgress, exerciseLogCount)
+                .stream()
+                .map(MilestoneOption::key)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        Set<String> selected = new LinkedHashSet<>();
+        if (milestoneKeys != null) {
+            for (String key : milestoneKeys) {
+                if (key == null || key.isBlank()) {
+                    continue;
+                }
+                String normalized = key.trim().toUpperCase(Locale.ROOT);
+                if (unlockedMilestones.contains(normalized)) {
+                    selected.add(normalized);
+                }
+                if (selected.size() >= 6) {
+                    break;
+                }
+            }
+        }
+
+        userSettingsService.updateProfileCustomizer(
+                user,
+                bannerTheme,
+                ringStyle,
+                cardBackStyle,
+                selected
+        );
+
+        redirectAttributes.addFlashAttribute("settingsUpdated", true);
+        redirectAttributes.addFlashAttribute("customiserUpdated", true);
+        return "redirect:/profile";
     }
 
     /**
@@ -499,5 +569,55 @@ public class ProfileController {
         }
         Pattern pattern = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
         return pattern.matcher(email).matches();
+    }
+
+    private Set<String> parseCsvKeys(String raw, int max) {
+        Set<String> keys = new LinkedHashSet<>();
+        if (raw == null || raw.isBlank()) {
+            return keys;
+        }
+        for (String part : raw.split(",")) {
+            if (part != null && !part.isBlank()) {
+                keys.add(part.trim().toUpperCase(Locale.ROOT));
+            }
+            if (keys.size() >= max) {
+                break;
+            }
+        }
+        return keys;
+    }
+
+    private List<MilestoneOption> buildAvailableMilestones(User user,
+                                                            PlatformSubscription platformSubscription,
+                                                            LevelProgress levelProgress,
+                                                            int exerciseLogCount) {
+        List<MilestoneOption> milestones = new java.util.ArrayList<>();
+
+        if (exerciseLogCount >= 1) {
+            milestones.add(new MilestoneOption("FIRST_WORKOUT", "First workout logged", "You recorded your first workout."));
+        }
+        if (exerciseLogCount >= 10) {
+            milestones.add(new MilestoneOption("TEN_WORKOUTS", "10 workouts", "You reached ten logged workouts."));
+        }
+        if (levelProgress != null && levelProgress.getLevel() >= 5) {
+            milestones.add(new MilestoneOption("LEVEL_5", "Reached Level 5", "You reached level 5 in progress."));
+        }
+        if (levelProgress != null && levelProgress.getLevel() >= 10) {
+            milestones.add(new MilestoneOption("LEVEL_10", "Reached Level 10", "You reached level 10 in progress."));
+        }
+        if (user != null && Boolean.TRUE.equals(user.getEmailVerified())) {
+            milestones.add(new MilestoneOption("VERIFIED_EMAIL", "Verified email", "Your email has been verified."));
+        }
+        if (user != null && user.getPhoneNumber() != null && Boolean.TRUE.equals(user.getPhoneVerified())) {
+            milestones.add(new MilestoneOption("VERIFIED_PHONE", "Verified phone", "Your phone has been verified."));
+        }
+        if (platformSubscription != null) {
+            milestones.add(new MilestoneOption("PREMIUM_MEMBER", "Premium member", "You unlocked premium access."));
+        }
+
+        return milestones;
+    }
+
+    public record MilestoneOption(String key, String title, String subtitle) {
     }
 }

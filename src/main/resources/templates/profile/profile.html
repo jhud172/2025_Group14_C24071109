@@ -14,8 +14,12 @@
             <div class="flex flex-col items-center text-center gap-4"
                  th:with="completionScore=${(user != null && user.profileImageUrl != null ? 1 : 0) + (user != null && user.bio != null && !#strings.isEmpty(user.bio) ? 1 : 0) + (user != null && user.emailVerified ? 1 : 0) + (user != null && user.phoneNumber != null && !#strings.isEmpty(user.phoneNumber) ? 1 : 0) + (platformSubscription != null ? 1 : 0)}, completionPercent=${T(java.lang.Math).round((completionScore * 100.0) / 5)}">
                 <!-- Avatar -->
-                <div class="relative">
-                <div class="profile-avatar profile-avatar--large" data-avatar-button>
+                 <div class="relative">
+                 <div class="profile-avatar profile-avatar--large"
+                     id="profile-sidebar-avatar-ring"
+                     data-avatar-button
+                     th:with="ring=${userSettings != null and userSettings.profileRingStyle != null ? #strings.toLowerCase(userSettings.profileRingStyle) : 'neon_dual'}"
+                     th:classappend="${' profile-avatar-ring profile-avatar-ring--' + ring}">
                     <img th:if="${user != null &amp;&amp; user.profileImageUrl != null}"
                          th:src="${user.profileImageUrl}" alt="Profile photo" class="h-full w-full object-cover" />
                     <span th:if="${user == null || user.profileImageUrl == null}"
@@ -42,6 +46,11 @@
                         th:text="${user != null ? user.fullName : 'Profile'}">Profile</h1>
                     <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400"
                        th:text="${user != null ? '@' + user.username : '@user'}">@user</p>
+                    <div class="mt-2 inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
+                        id="profile-sidebar-banner-pill"
+                         th:with="banner=${userSettings != null and userSettings.profileBannerTheme != null ? #strings.toLowerCase(userSettings.profileBannerTheme) : 'aurora'}"
+                         th:classappend="${' profile-banner-pill profile-banner-pill--' + banner}"
+                         th:text="${(userSettings != null and userSettings.profileBannerTheme != null ? userSettings.profileBannerTheme : 'AURORA') + ' banner'}">AURORA banner</div>
                 </div>
 
                 <!-- Subscription badge -->
@@ -86,6 +95,17 @@
                    th:text="${user.bio}">Bio</p>
                 <p th:if="${user == null || user.bio == null}"
                    class="text-xs text-slate-400 dark:text-slate-500 italic">No bio yet &mdash; add one in Edit Profile.</p>
+
+                 <div class="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 px-3 py-3 dark:border-slate-700/70 dark:bg-slate-900/35"
+                     th:if="${selectedProfileMilestones != null and selectedProfileMilestones.size() > 0}">
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">Visible milestones</p>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        <span th:each="ms : ${profileMilestoneOptions}"
+                              th:if="${selectedProfileMilestones.contains(ms.key)}"
+                              class="inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:border-emerald-700/50 dark:bg-emerald-900/25 dark:text-emerald-300"
+                              th:text="${ms.title}">Milestone</span>
+                    </div>
+                </div>
             </div>
 
             <div class="h-px bg-slate-200/70 dark:bg-slate-800/80"></div>
@@ -343,6 +363,98 @@
                     <p th:if="${profileImageError}" class="mt-2 text-xs text-rose-600" th:text="${profileImageError}">Image error.</p>
                     <button type="submit" class="mt-4 profile-btn-small">Upload photo</button>
                 </form>
+
+                <div class="mt-6 border-t border-slate-200/70 pt-6 dark:border-slate-800">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-semibold text-slate-900 dark:text-white">Profile customiser</h3>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Premium feature: customise your profile banner, avatar ring, card back, and visible milestones.</p>
+                        </div>
+                        <a th:if="${!isPremium}" th:href="@{/pricing}" class="profile-btn-small">Unlock Premium</a>
+                    </div>
+
+                    <div th:if="${!isPremium}" class="mt-3 rounded-xl border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300">
+                        Upgrade to Premium to enable full profile customisation and milestone showcase.
+                    </div>
+
+                    <form th:if="${isPremium}" th:action="@{/profile/settings/customiser}" method="post" id="profile-customiser-form" class="mt-4 space-y-4">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                        <div class="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-700/70 dark:bg-slate-900/30">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">Live preview</p>
+                            <div id="profile-customiser-preview"
+                                 class="mt-3 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70"
+                                 th:attr="data-initial-banner=${userSettings != null and userSettings.profileBannerTheme != null ? userSettings.profileBannerTheme : 'AURORA'},
+                                          data-initial-ring=${userSettings != null and userSettings.profileRingStyle != null ? userSettings.profileRingStyle : 'NEON_DUAL'},
+                                          data-initial-back=${userSettings != null and userSettings.profileCardBackStyle != null ? userSettings.profileCardBackStyle : 'GLASS'}">
+                                <div id="profile-preview-banner" class="profile-preview-banner">AURORA</div>
+                                <div class="mt-3 flex items-center gap-3">
+                                    <div id="profile-preview-ring" class="profile-preview-ring">
+                                        <span class="text-sm font-bold text-slate-700 dark:text-slate-100"
+                                              th:text="${(user != null and user.firstName != null ? user.firstName.substring(0,1) : 'U')}">U</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${user != null ? user.fullName : 'User'}">User</p>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400" th:text="${user != null ? '@' + user.username : '@user'}">@user</p>
+                                    </div>
+                                </div>
+                                <div id="profile-preview-card-back" class="profile-preview-card-back mt-3">
+                                    <p class="text-xs font-semibold uppercase tracking-wide">Card Back</p>
+                                    <p class="mt-1 text-[11px]">This is how the back style appears.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-3">
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                                Banner theme
+                                <select id="customiser-banner" name="bannerTheme" class="profile-input mt-1">
+                                    <option th:each="theme : ${profileBannerThemes}"
+                                            th:value="${theme}"
+                                            th:text="${theme}"
+                                            th:selected="${userSettings != null and userSettings.profileBannerTheme == theme}">AURORA</option>
+                                </select>
+                            </label>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                                Ring style
+                                <select id="customiser-ring" name="ringStyle" class="profile-input mt-1">
+                                    <option th:each="ring : ${profileRingStyles}"
+                                            th:value="${ring}"
+                                            th:text="${ring}"
+                                            th:selected="${userSettings != null and userSettings.profileRingStyle == ring}">NEON_DUAL</option>
+                                </select>
+                            </label>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                                Card back style
+                                <select id="customiser-back" name="cardBackStyle" class="profile-input mt-1">
+                                    <option th:each="back : ${profileCardBackStyles}"
+                                            th:value="${back}"
+                                            th:text="${back}"
+                                            th:selected="${userSettings != null and userSettings.profileCardBackStyle == back}">GLASS</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">Visible milestones (up to 6)</p>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Only unlocked milestones can be pinned to your profile.</p>
+                            <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                <label th:each="ms : ${profileMilestoneOptions}" class="flex items-start gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 text-xs dark:border-slate-700/70 dark:bg-slate-900/40">
+                                    <input type="checkbox" name="milestoneKeys" th:value="${ms.key}" th:checked="${selectedProfileMilestones != null and selectedProfileMilestones.contains(ms.key)}" class="customiser-milestone mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600" />
+                                    <span>
+                                        <span class="block font-semibold text-slate-800 dark:text-slate-100" th:text="${ms.title}">Milestone</span>
+                                        <span class="block text-[11px] text-slate-500 dark:text-slate-400" th:text="${ms.subtitle}">Description</span>
+                                    </span>
+                                </label>
+                            </div>
+                            <p id="customiser-milestone-msg" class="mt-2 hidden text-xs text-amber-700 dark:text-amber-300">You can select up to 6 milestones.</p>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="profile-btn-primary">Save profile customiser</button>
+                        </div>
+                    </form>
+                </div>
             </section>
 
             <!-- HEALTH CONDITIONS SECTION -->
@@ -1351,6 +1463,96 @@
             }
         });
     }
+
+    /* Premium profile customiser live preview */
+    (function () {
+        const customiserForm = document.getElementById('profile-customiser-form');
+        if (!customiserForm) return;
+
+        const bannerSelect = document.getElementById('customiser-banner');
+        const ringSelect = document.getElementById('customiser-ring');
+        const backSelect = document.getElementById('customiser-back');
+        const previewBanner = document.getElementById('profile-preview-banner');
+        const previewRing = document.getElementById('profile-preview-ring');
+        const previewBack = document.getElementById('profile-preview-card-back');
+        const sidebarBanner = document.getElementById('profile-sidebar-banner-pill');
+        const sidebarRing = document.getElementById('profile-sidebar-avatar-ring');
+        const milestoneChecks = Array.from(customiserForm.querySelectorAll('.customiser-milestone'));
+        const milestoneMsg = document.getElementById('customiser-milestone-msg');
+
+        function replaceTokenClass(el, prefix, value) {
+            if (!el) return;
+            Array.from(el.classList)
+                .filter((cls) => cls.indexOf(prefix) === 0)
+                .forEach((cls) => el.classList.remove(cls));
+            if (value) {
+                el.classList.add(prefix + value);
+            }
+        }
+
+        function currentBannerKey() {
+            return (bannerSelect && bannerSelect.value ? bannerSelect.value : 'AURORA').toLowerCase();
+        }
+
+        function currentRingKey() {
+            return (ringSelect && ringSelect.value ? ringSelect.value : 'NEON_DUAL').toLowerCase();
+        }
+
+        function currentBackKey() {
+            return (backSelect && backSelect.value ? backSelect.value : 'GLASS').toLowerCase();
+        }
+
+        function applyPreview() {
+            const bannerKey = currentBannerKey();
+            const ringKey = currentRingKey();
+            const backKey = currentBackKey();
+
+            replaceTokenClass(previewBanner, 'profile-banner-pill--', bannerKey);
+            previewBanner.classList.add('profile-banner-pill');
+            if (bannerSelect && previewBanner) {
+                previewBanner.textContent = bannerSelect.value + ' banner';
+            }
+
+            replaceTokenClass(previewRing, 'profile-avatar-ring--', ringKey);
+            previewRing.classList.add('profile-avatar-ring');
+
+            replaceTokenClass(previewBack, 'profile-preview-card-back--', backKey);
+
+            replaceTokenClass(sidebarBanner, 'profile-banner-pill--', bannerKey);
+            if (sidebarBanner && bannerSelect) {
+                sidebarBanner.classList.add('profile-banner-pill');
+                sidebarBanner.textContent = bannerSelect.value + ' banner';
+            }
+
+            replaceTokenClass(sidebarRing, 'profile-avatar-ring--', ringKey);
+            if (sidebarRing) {
+                sidebarRing.classList.add('profile-avatar-ring');
+            }
+        }
+
+        function enforceMilestoneCap(changedInput) {
+            const checked = milestoneChecks.filter((input) => input.checked);
+            if (checked.length <= 6) {
+                if (milestoneMsg) milestoneMsg.classList.add('hidden');
+                return;
+            }
+            if (changedInput) {
+                changedInput.checked = false;
+            }
+            if (milestoneMsg) milestoneMsg.classList.remove('hidden');
+        }
+
+        [bannerSelect, ringSelect, backSelect].forEach((el) => {
+            if (!el) return;
+            el.addEventListener('change', applyPreview);
+        });
+
+        milestoneChecks.forEach((input) => {
+            input.addEventListener('change', () => enforceMilestoneCap(input));
+        });
+
+        applyPreview();
+    })();
 
     /* Settings Drawer */
     const settingsDrawerRoot = document.getElementById('settings-drawer-root');

@@ -84,21 +84,44 @@ public class DashboardSummaryDto {
         private final String dayNumber;
         private final int tasksCount;
         private final int workoutsCount;
+        private final int tasksCompletedCount;
+        private final int workoutsCompletedCount;
         private final boolean today;
+        private final boolean tomorrow;
+        private final String dayStatus;
         private final List<String> taskTitles;
         private final List<String> workoutTitles;
 
         public WeekDaySummary(LocalDate date, String label, String dayNumber, int tasksCount, int workoutsCount, boolean today) {
-            this(date, label, dayNumber, tasksCount, workoutsCount, today, List.of(), List.of());
+            this(date, label, dayNumber, tasksCount, workoutsCount, 0, 0, today, false, "upcoming", List.of(), List.of());
         }
 
         public WeekDaySummary(LocalDate date, String label, String dayNumber, int tasksCount, int workoutsCount, boolean today, List<String> taskTitles, List<String> workoutTitles) {
+            this(date, label, dayNumber, tasksCount, workoutsCount, 0, 0, today, false, "upcoming", taskTitles, workoutTitles);
+        }
+
+        public WeekDaySummary(LocalDate date,
+                              String label,
+                              String dayNumber,
+                              int tasksCount,
+                              int workoutsCount,
+                              int tasksCompletedCount,
+                              int workoutsCompletedCount,
+                              boolean today,
+                              boolean tomorrow,
+                              String dayStatus,
+                              List<String> taskTitles,
+                              List<String> workoutTitles) {
             this.date = date;
             this.label = label;
             this.dayNumber = dayNumber;
             this.tasksCount = tasksCount;
             this.workoutsCount = workoutsCount;
+            this.tasksCompletedCount = tasksCompletedCount;
+            this.workoutsCompletedCount = workoutsCompletedCount;
             this.today = today;
+            this.tomorrow = tomorrow;
+            this.dayStatus = dayStatus;
             this.taskTitles = taskTitles;
             this.workoutTitles = workoutTitles;
         }
@@ -123,8 +146,24 @@ public class DashboardSummaryDto {
             return workoutsCount;
         }
 
+        public int getTasksCompletedCount() {
+            return tasksCompletedCount;
+        }
+
+        public int getWorkoutsCompletedCount() {
+            return workoutsCompletedCount;
+        }
+
         public boolean isToday() {
             return today;
+        }
+
+        public boolean isTomorrow() {
+            return tomorrow;
+        }
+
+        public String getDayStatus() {
+            return dayStatus;
         }
 
         public List<String> getTaskTitles() {

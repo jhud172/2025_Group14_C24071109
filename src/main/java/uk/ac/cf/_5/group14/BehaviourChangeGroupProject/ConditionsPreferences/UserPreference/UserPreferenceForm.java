@@ -68,4 +68,6 @@ public class UserPreferenceForm {
     @Min(value = 0, message = "Fat must be 0 or more.")
     @Max(value = 1000, message = "Fat must be 1000 g or less.")
     Integer macroTargetFat;
+
+    Set<String> weeklySummaryMetrics = new HashSet<>();
 }

@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function fillList(target, items, emptyText, type, dayPath) {
         if (!target) return;
         target.innerHTML = "";
+        target.classList.remove("week-preview-list--scroll");
         if (items.length === 0) {
             const empty = document.createElement("li");
             empty.className =
@@ -73,6 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         items.forEach((item, idx) => target.appendChild(buildItem(item, idx, type, dayPath)));
+
+        // Keep each column independent: once a list exceeds 2 entries, that list alone scrolls.
+        if (items.length > 2) {
+            target.classList.add("week-preview-list--scroll");
+        }
     }
 
     function setActiveDay(button) {
@@ -132,9 +138,46 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const upcomingSection = document.getElementById("upcomingNextSection");
-    const upcomingCountdown = document.getElementById("upcomingCountdown");
-    const upcomingRelative = document.getElementById("upcomingRelative");
+    const weekStrip = document.querySelector("[data-week-strip]");
+    if (weekStrip) {
+        let isDragging = false;
+        let dragStartX = 0;
+        let startScrollLeft = 0;
+
+        const beginDrag = (clientX) => {
+            isDragging = true;
+            dragStartX = clientX;
+            startScrollLeft = weekStrip.scrollLeft;
+            weekStrip.classList.add("dragging");
+        };
+
+        const moveDrag = (clientX) => {
+            if (!isDragging) return;
+            const delta = clientX - dragStartX;
+            weekStrip.scrollLeft = startScrollLeft - delta;
+        };
+
+        const endDrag = () => {
+            isDragging = false;
+            weekStrip.classList.remove("dragging");
+        };
+
+        weekStrip.addEventListener("pointerdown", (event) => {
+            beginDrag(event.clientX);
+        });
+
+        weekStrip.addEventListener("pointermove", (event) => {
+            moveDrag(event.clientX);
+        });
+
+        weekStrip.addEventListener("pointerup", endDrag);
+        weekStrip.addEventListener("pointerleave", endDrag);
+        weekStrip.addEventListener("pointercancel", endDrag);
+    }
+
+    const upcomingSection = document.getElementById("recommendedUpcomingCountdown");
+    const upcomingCountdown = document.getElementById("recommendedUpcomingTimer");
+    const upcomingRelative = document.getElementById("recommendedUpcomingRelative");
 
     if (upcomingSection && upcomingCountdown && upcomingRelative) {
         const targetValue = upcomingSection.dataset.upcomingTarget;

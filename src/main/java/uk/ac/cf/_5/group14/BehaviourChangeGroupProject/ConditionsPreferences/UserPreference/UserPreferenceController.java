@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Us
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -105,6 +106,7 @@ public class UserPreferenceController {
             userPreferenceForm.setMacroTargetProtein(settings.getMacroTargetProtein());
             userPreferenceForm.setMacroTargetCarbs(settings.getMacroTargetCarbs());
             userPreferenceForm.setMacroTargetFat(settings.getMacroTargetFat());
+            userPreferenceForm.setWeeklySummaryMetrics(parseWeeklySummaryMetrics(settings.getWeeklySummaryMetrics()));
         }
         Map<String, List<Preference>> preferencesByCategory = preferenceService.getPreferencesByCategory();
         Set<Long> lockedConditions = userPreferenceService.getLockedConditions(user);
@@ -174,7 +176,8 @@ public class UserPreferenceController {
                     userPreferenceForm.getMacroTargetCalories(),
                     userPreferenceForm.getMacroTargetProtein(),
                     userPreferenceForm.getMacroTargetCarbs(),
-                    userPreferenceForm.getMacroTargetFat()
+                        userPreferenceForm.getMacroTargetFat(),
+                        userPreferenceForm.getWeeklySummaryMetrics()
             );
 
             String language = updated.getLanguage() != null ? updated.getLanguage() : "en";
@@ -182,6 +185,27 @@ public class UserPreferenceController {
         }
 
         return new ModelAndView("redirect:/preferences");
+    }
+
+    private Set<String> parseWeeklySummaryMetrics(String raw) {
+        Set<String> selected = new LinkedHashSet<>();
+        if (raw == null || raw.isBlank()) {
+            selected.add("WORKOUTS_COMPLETED");
+            selected.add("MEALS_LOGGED");
+            selected.add("HABITS_COMPLETED");
+            return selected;
+        }
+        for (String value : raw.split(",")) {
+            if (value != null && !value.isBlank()) {
+                selected.add(value.trim().toUpperCase(Locale.ROOT));
+            }
+        }
+        if (selected.isEmpty()) {
+            selected.add("WORKOUTS_COMPLETED");
+            selected.add("MEALS_LOGGED");
+            selected.add("HABITS_COMPLETED");
+        }
+        return selected;
     }
 
     @PostMapping("/select-preferences/reset")

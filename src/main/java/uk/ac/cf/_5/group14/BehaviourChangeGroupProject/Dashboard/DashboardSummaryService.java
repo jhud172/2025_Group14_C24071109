@@ -1,14 +1,5 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.DashboardSummaryDto;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrence;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -20,6 +11,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.DashboardSummaryDto;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrence;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 @Service
 public class DashboardSummaryService {
@@ -70,6 +71,28 @@ public class DashboardSummaryService {
         for (int i = 0; i < 7; i++) {
             List<CalendarTask> dayTasks = tasksByDate.getOrDefault(cursor, List.of());
             List<ScheduleOccurrence> dayWorkouts = workoutsByDate.getOrDefault(cursor, List.of());
+
+            int tasksCompletedCount = (int) dayTasks.stream()
+                    .filter(task -> Boolean.TRUE.equals(task.getCompleted()))
+                    .count();
+            int workoutsCompletedCount = (int) dayWorkouts.stream()
+                    .filter(ScheduleOccurrence::isCompleted)
+                    .count();
+            int totalCount = dayTasks.size() + dayWorkouts.size();
+            int completedCount = tasksCompletedCount + workoutsCompletedCount;
+
+            String dayStatus;
+            if (cursor.equals(today)) {
+                dayStatus = "today";
+            } else if (cursor.isAfter(today)) {
+                dayStatus = "upcoming";
+            } else if (totalCount == 0) {
+                dayStatus = "clear";
+            } else if (totalCount > 0 && completedCount == totalCount) {
+                dayStatus = "completed";
+            } else {
+                dayStatus = "missed";
+            }
             
             List<String> taskTitles = dayTasks.stream()
                 .map(CalendarTask::getTitle)
@@ -85,7 +108,11 @@ public class DashboardSummaryService {
                 DAY_NUMBER.format(cursor),
                 dayTasks.size(),
                 dayWorkouts.size(),
+                tasksCompletedCount,
+                workoutsCompletedCount,
                 cursor.equals(today),
+                cursor.equals(today.plusDays(1)),
+                dayStatus,
                 taskTitles,
                 workoutTitles
             ));

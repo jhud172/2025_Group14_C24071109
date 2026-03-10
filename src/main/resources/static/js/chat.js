@@ -96,6 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
         fab.setAttribute("aria-expanded", "true");
+        hideNotificationsPanel();
         dot?.classList.remove("active");
         if (!input.disabled) {
             setTimeout(() => input.focus(), 50);
@@ -661,6 +662,19 @@ document.addEventListener("DOMContentLoaded", () => {
         chatView.style.display = "flex";
     }
 
+    function showCharlieOutput(message) {
+        if (!message || typeof message !== "string") return;
+        open();
+        hideNotificationsPanel();
+        addMsg(message.trim(), "ai");
+        saveHistory();
+    }
+
+    // Public helper so any page can hand off Charlie text to chat panel.
+    window.openCharlieChatWithMessage = function(message) {
+        showCharlieOutput(message);
+    };
+
     if (notificationsToggle && notificationsView && chatView) {
         notificationsToggle.addEventListener("click", async () => {
             const showingNotifications = !notificationsView.classList.contains("hidden");
@@ -729,6 +743,13 @@ document.addEventListener("DOMContentLoaded", () => {
             await loadNotifications();
             await refreshUnreadCount();
         });
+    }
+
+    const dashboardPrompt = document.getElementById("charlieDashboardPrompt");
+    if (dashboardPrompt && dashboardPrompt.dataset.message) {
+        setTimeout(() => {
+            showCharlieOutput(dashboardPrompt.dataset.message);
+        }, 140);
     }
 
     if (proChatBtn) {

@@ -169,6 +169,21 @@ public class UserSettings {
     @Column(name = "monthly_workout_target", nullable = false)
     private int monthlyWorkoutTarget = 12;
 
+    @Column(name = "weekly_summary_metrics", length = 500)
+    private String weeklySummaryMetrics;
+
+    @Column(name = "profile_banner_theme", length = 40)
+    private String profileBannerTheme;
+
+    @Column(name = "profile_ring_style", length = 40)
+    private String profileRingStyle;
+
+    @Column(name = "profile_card_back_style", length = 40)
+    private String profileCardBackStyle;
+
+    @Column(name = "profile_milestone_keys", length = 500)
+    private String profileMilestoneKeys;
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 

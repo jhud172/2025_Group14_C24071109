@@ -61,7 +61,8 @@ public interface UserSettingsService {
                 Integer macroTargetCalories,
                 Integer macroTargetProtein,
                 Integer macroTargetCarbs,
-                Integer macroTargetFat
+                Integer macroTargetFat,
+                java.util.Set<String> weeklySummaryMetrics
             );
 
             UserSettings resetSmartDefaults(User user);
@@ -71,4 +72,12 @@ public interface UserSettingsService {
     UserSettings updateStickerPreferences(User user, StickerPackPreference stickerPack, int monthlyWorkoutTarget);
 
     UserSettings updatePreferredWorkoutTemplate(User user, Long templateId);
+
+    UserSettings updateProfileCustomizer(
+            User user,
+            String bannerTheme,
+            String ringStyle,
+            String cardBackStyle,
+            java.util.Set<String> milestoneKeys
+    );
 }

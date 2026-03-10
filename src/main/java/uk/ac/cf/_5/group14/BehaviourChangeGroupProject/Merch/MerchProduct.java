@@ -1,11 +1,18 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Merch;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.math.BigDecimal;
 import java.time.Instant;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "merch_products")
@@ -28,6 +35,9 @@ public class MerchProduct {
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
+
+    @Column(name = "secondary_image_url", length = 500)
+    private String secondaryImageUrl;
 
     @Column(name = "stock_quantity", nullable = false)
     private int stockQuantity = 0;

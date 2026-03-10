@@ -1,5 +1,11 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,6 +14,51 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 
 @Service
 public class UserSettingsServiceImpl implements UserSettingsService {
+
+    private static final List<String> ALLOWED_WEEKLY_METRICS = List.of(
+        "WORKOUTS_COMPLETED",
+        "WORKOUTS_REMAINING",
+        "TASKS_COMPLETED",
+        "TASKS_NOT_COMPLETED",
+        "MEALS_LOGGED",
+        "HABITS_COMPLETED",
+        "HABITS_NOT_COMPLETED",
+        "WEIGHT_TREND",
+        "WORKOUT_STREAK",
+        "NUTRITION_STREAK"
+    );
+
+    private static final List<String> DEFAULT_WEEKLY_METRICS = List.of(
+        "WORKOUTS_COMPLETED",
+        "MEALS_LOGGED",
+        "HABITS_COMPLETED"
+    );
+
+    private static final List<String> ALLOWED_PROFILE_BANNER_THEMES = List.of(
+        "AURORA",
+        "SUNSET",
+        "OCEAN",
+        "ROSE",
+        "CARBON"
+    );
+
+    private static final List<String> ALLOWED_PROFILE_RING_STYLES = List.of(
+        "NONE",
+        "NEON_DUAL",
+        "SOLAR_FLARE",
+        "CRYSTAL"
+    );
+
+    private static final List<String> ALLOWED_PROFILE_CARD_BACK_STYLES = List.of(
+        "GLASS",
+        "TOPO",
+        "CARBON",
+        "MATRIX"
+    );
+
+    private static final String DEFAULT_PROFILE_BANNER_THEME = "AURORA";
+    private static final String DEFAULT_PROFILE_RING_STYLE = "NEON_DUAL";
+    private static final String DEFAULT_PROFILE_CARD_BACK_STYLE = "GLASS";
 
     private final UserSettingsRepository userSettingsRepository;
     private final UserRepository userRepository;
@@ -52,12 +103,40 @@ public class UserSettingsServiceImpl implements UserSettingsService {
                     newSettings.setMacroTargetProtein(null);
                     newSettings.setMacroTargetCarbs(null);
                     newSettings.setMacroTargetFat(null);
+                    newSettings.setWeeklySummaryMetrics(String.join(",", DEFAULT_WEEKLY_METRICS));
+                    newSettings.setProfileBannerTheme(DEFAULT_PROFILE_BANNER_THEME);
+                    newSettings.setProfileRingStyle(DEFAULT_PROFILE_RING_STYLE);
+                    newSettings.setProfileCardBackStyle(DEFAULT_PROFILE_CARD_BACK_STYLE);
+                    newSettings.setProfileMilestoneKeys("");
                     return userSettingsRepository.save(newSettings);
                 });
 
         // Keep demo accounts in light mode for consistent demos.
         if (isDemoUser(user) && settings.getTheme() != ThemePreference.LIGHT) {
             settings.setTheme(ThemePreference.LIGHT);
+            settings = userSettingsRepository.save(settings);
+        }
+
+        // Backfill weekly summary defaults for existing rows created before this field existed.
+        if (settings.getWeeklySummaryMetrics() == null || settings.getWeeklySummaryMetrics().isBlank()) {
+            settings.setWeeklySummaryMetrics(String.join(",", DEFAULT_WEEKLY_METRICS));
+            settings = userSettingsRepository.save(settings);
+        }
+
+        if (settings.getProfileBannerTheme() == null || settings.getProfileBannerTheme().isBlank()) {
+            settings.setProfileBannerTheme(DEFAULT_PROFILE_BANNER_THEME);
+            settings = userSettingsRepository.save(settings);
+        }
+        if (settings.getProfileRingStyle() == null || settings.getProfileRingStyle().isBlank()) {
+            settings.setProfileRingStyle(DEFAULT_PROFILE_RING_STYLE);
+            settings = userSettingsRepository.save(settings);
+        }
+        if (settings.getProfileCardBackStyle() == null || settings.getProfileCardBackStyle().isBlank()) {
+            settings.setProfileCardBackStyle(DEFAULT_PROFILE_CARD_BACK_STYLE);
+            settings = userSettingsRepository.save(settings);
+        }
+        if (settings.getProfileMilestoneKeys() == null) {
+            settings.setProfileMilestoneKeys("");
             settings = userSettingsRepository.save(settings);
         }
 
@@ -207,7 +286,8 @@ public class UserSettingsServiceImpl implements UserSettingsService {
                                             Integer macroTargetCalories,
                                             Integer macroTargetProtein,
                                             Integer macroTargetCarbs,
-                                            Integer macroTargetFat) {
+                                            Integer macroTargetFat,
+                                            Set<String> weeklySummaryMetrics) {
         UserSettings settings = getOrCreate(user);
         if (settings == null) {
             return null;
@@ -238,6 +318,7 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         settings.setMacroTargetProtein(normalizeOptional(macroTargetProtein, 0, 1000));
         settings.setMacroTargetCarbs(normalizeOptional(macroTargetCarbs, 0, 1000));
         settings.setMacroTargetFat(normalizeOptional(macroTargetFat, 0, 1000));
+        settings.setWeeklySummaryMetrics(String.join(",", normalizeWeeklyMetricKeys(weeklySummaryMetrics)));
 
         return userSettingsRepository.save(settings);
     }
@@ -271,8 +352,26 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         settings.setMacroTargetProtein(null);
         settings.setMacroTargetCarbs(null);
         settings.setMacroTargetFat(null);
+        settings.setWeeklySummaryMetrics(String.join(",", DEFAULT_WEEKLY_METRICS));
 
         return userSettingsRepository.save(settings);
+    }
+
+    private List<String> normalizeWeeklyMetricKeys(Set<String> selected) {
+        Set<String> cleaned = new LinkedHashSet<>();
+        if (selected != null) {
+            selected.stream()
+                    .filter(key -> key != null && !key.isBlank())
+                    .map(String::trim)
+                    .map(String::toUpperCase)
+                    .filter(ALLOWED_WEEKLY_METRICS::contains)
+                    .limit(6)
+                    .forEach(cleaned::add);
+        }
+        if (cleaned.isEmpty()) {
+            cleaned.addAll(DEFAULT_WEEKLY_METRICS);
+        }
+        return cleaned.stream().collect(Collectors.toList());
     }
 
     @Override
@@ -330,5 +429,46 @@ public class UserSettingsServiceImpl implements UserSettingsService {
             return max;
         }
         return value;
+    }
+
+    @Override
+    @Transactional
+    public UserSettings updateProfileCustomizer(User user,
+                                                String bannerTheme,
+                                                String ringStyle,
+                                                String cardBackStyle,
+                                                Set<String> milestoneKeys) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+
+        settings.setProfileBannerTheme(normalizeKey(bannerTheme, ALLOWED_PROFILE_BANNER_THEMES, DEFAULT_PROFILE_BANNER_THEME));
+        settings.setProfileRingStyle(normalizeKey(ringStyle, ALLOWED_PROFILE_RING_STYLES, DEFAULT_PROFILE_RING_STYLE));
+        settings.setProfileCardBackStyle(normalizeKey(cardBackStyle, ALLOWED_PROFILE_CARD_BACK_STYLES, DEFAULT_PROFILE_CARD_BACK_STYLE));
+        settings.setProfileMilestoneKeys(String.join(",", normalizeMilestoneKeys(milestoneKeys)));
+
+        return userSettingsRepository.save(settings);
+    }
+
+    private String normalizeKey(String value, List<String> allowed, String fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        String normalized = value.trim().toUpperCase(Locale.ROOT);
+        return allowed.contains(normalized) ? normalized : fallback;
+    }
+
+    private List<String> normalizeMilestoneKeys(Set<String> selected) {
+        Set<String> cleaned = new LinkedHashSet<>();
+        if (selected != null) {
+            selected.stream()
+                    .filter(key -> key != null && !key.isBlank())
+                    .map(String::trim)
+                    .map(key -> key.toUpperCase(Locale.ROOT))
+                    .limit(6)
+                    .forEach(cleaned::add);
+        }
+        return cleaned.stream().collect(Collectors.toList());
     }
 }

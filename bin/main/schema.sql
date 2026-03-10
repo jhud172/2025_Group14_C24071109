@@ -2459,6 +2459,39 @@ CREATE TABLE IF NOT EXISTS waitlist_emails
 );
 
 -- =========================
+-- SUPPORT FEEDBACK REQUESTS
+-- =========================
+CREATE TABLE IF NOT EXISTS support_requests
+(
+    id                   BIGSERIAL PRIMARY KEY,
+    user_id              BIGINT       NULL,
+    request_type         VARCHAR(30)  NOT NULL,
+    status               VARCHAR(20)  NOT NULL DEFAULT 'NEW',
+    submitter_name       VARCHAR(120) NULL,
+    submitter_email      VARCHAR(255) NULL,
+    subject              VARCHAR(180) NOT NULL,
+    message              VARCHAR(5000) NOT NULL,
+    allow_email_reply    BOOLEAN      NOT NULL DEFAULT FALSE,
+    viewed               BOOLEAN      NOT NULL DEFAULT FALSE,
+    admin_response       VARCHAR(5000) NULL,
+    responded_by_user_id BIGINT       NULL,
+    responded_at         TIMESTAMP    NULL,
+    submitted_at         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_support_requests_user
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT fk_support_requests_responder
+        FOREIGN KEY (responded_by_user_id) REFERENCES users (id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_support_requests_submitted_at
+    ON support_requests (submitted_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_support_requests_status
+    ON support_requests (status, viewed);
+
+-- =========================
 -- MERCH PRODUCTS
 -- =========================
 CREATE TABLE IF NOT EXISTS merch_products
