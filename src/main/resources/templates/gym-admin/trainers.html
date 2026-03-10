@@ -291,49 +291,13 @@
 
     <th:block th:fragment="pageScripts">
         <script th:inline="javascript">
-            function showUpdateNotesModal(button) {
-                const requestId = button.getAttribute('data-request-id');
-                const trainerName = button.getAttribute('data-trainer-name');
-                const currentNotes = button.getAttribute('data-current-notes');
-                
-                document.getElementById('modalTrainerName').textContent = trainerName;
-                document.getElementById('modalNotes').value = currentNotes || '';
-                document.getElementById('updateNotesForm').action = '/gym/admin/trainers/' + requestId + '/update-notes';
-                
-                document.getElementById('updateNotesModal').classList.remove('hidden');
-                document.getElementById('updateNotesModal').classList.add('flex');
-            }
-
-            const updateNotesRequestId = /*[[${updateNotesRequestId}]]*/ null;
-            const updateNotesTrainerName = /*[[${updateNotesTrainerName}]]*/ '';
-            const updateNotesNotes = /*[[${updateNotesNotes}]]*/ '';
-            if (updateNotesRequestId !== null) {
-                document.getElementById('modalTrainerName').textContent = updateNotesTrainerName;
-                document.getElementById('modalNotes').value = updateNotesNotes || '';
-                document.getElementById('updateNotesForm').action = '/gym/admin/trainers/' + updateNotesRequestId + '/update-notes';
-                document.getElementById('updateNotesModal').classList.remove('hidden');
-                document.getElementById('updateNotesModal').classList.add('flex');
-            }
-
-            function hideUpdateNotesModal() {
-                document.getElementById('updateNotesModal').classList.add('hidden');
-                document.getElementById('updateNotesModal').classList.remove('flex');
-            }
-
-            // Close modal on background click
-            document.getElementById('updateNotesModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    hideUpdateNotesModal();
-                }
-            });
-
-            // Close modal on Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    hideUpdateNotesModal();
-                }
-            });
+var gymTrainersData = {
+    updateNotesRequestId: /*[[${updateNotesRequestId}]]*/ null,
+    updateNotesTrainerName: /*[[${updateNotesTrainerName}]]*/ '',
+    updateNotesNotes: /*[[${updateNotesNotes}]]*/ ''
+};
         </script>
+        <script th:src="@{/js/gym-admin-trainers-page.js}"></script>
     </th:block>
 
 </th:block>

@@ -1,0 +1,1 @@
+new SlimSelect({select: '#selectElement'});
