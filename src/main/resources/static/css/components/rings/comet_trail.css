@@ -1,0 +1,26 @@
+@layer components {
+    .profile-avatar-ring--comet_trail {
+        --ring-core: rgba(56, 189, 248, 0.94);
+        --ring-glow: rgba(14, 165, 233, 0.5);
+        --ring-spark-a: rgba(224, 242, 254, 0.88);
+        --ring-spark-b: rgba(125, 211, 252, 0.78);
+        --ring-spin-dur: 3.6s;
+        --ring-pulse-dur: 2.4s;
+        --ring-sparkle-dur: 2.2s;
+    }
+
+    .profile-avatar-ring--comet_trail::before {
+        border-width: 2px;
+        border-right-color: transparent;
+        border-bottom-color: transparent;
+        filter: drop-shadow(0 0 0.7rem rgba(56, 189, 248, 0.58));
+    }
+
+    .profile-avatar-ring--comet_trail::after {
+        inset: -0.56rem;
+        background:
+            radial-gradient(ellipse at 86% 30%, rgba(224, 242, 254, 0.86) 0 10%, rgba(125, 211, 252, 0.45) 18%, transparent 30%),
+            radial-gradient(circle at 24% 78%, rgba(224, 242, 254, 0.74) 0 1.6px, transparent 2px);
+        animation: ring-sparkle 1.9s ease-in-out infinite;
+    }
+}

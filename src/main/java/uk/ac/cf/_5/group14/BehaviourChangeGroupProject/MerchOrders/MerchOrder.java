@@ -8,6 +8,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,22 @@ public class MerchOrder {
     @JoinColumn(name = "payment_method_id")
     private SavedPaymentMethod paymentMethod;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "shipping_status", nullable = false, length = 30)
+    private ShippingStatus shippingStatus = ShippingStatus.PENDING;
+
+    @Column(name = "tracking_number", length = 200)
+    private String trackingNumber;
+
+    @Column(name = "shipped_at")
+    private Instant shippedAt;
+
+    @Column(name = "delivered_at")
+    private Instant deliveredAt;
+
+    @Column(name = "estimated_delivery_date")
+    private LocalDate estimatedDeliveryDate;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -64,3 +81,4 @@ public class MerchOrder {
         updatedAt = Instant.now();
     }
 }
+

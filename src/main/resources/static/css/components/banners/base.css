@@ -1,0 +1,209 @@
+@layer components {
+    .profile-identity-banner {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.36);
+        padding: 0.85rem;
+        background: linear-gradient(135deg, #0f766e 0%, #0f766e 30%, #0284c7 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 12px 24px -18px rgba(15, 23, 42, 0.7);
+        --profile-identity-name-color: #f8fafc;
+        --profile-identity-handle-color: rgba(241, 245, 249, 0.88);
+    }
+
+    .profile-identity-banner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.38) 100%);
+        pointer-events: none;
+    }
+
+    .profile-identity-banner__row {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-height: 5.5rem;
+    }
+
+    .profile-identity-banner__avatar {
+        height: 3.9rem;
+        width: 3.9rem;
+        border-radius: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.72);
+        background: rgba(15, 23, 42, 0.26);
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
+        box-shadow: 0 8px 18px -14px rgba(2, 6, 23, 0.85);
+        flex-shrink: 0;
+    }
+
+    .profile-identity-banner__text {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.2rem;
+    }
+
+    .profile-identity-banner__name-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.42rem;
+        min-width: 0;
+    }
+
+    .profile-identity-banner__name {
+        margin: 0;
+        color: var(--profile-identity-name-color);
+        font-size: 1.04rem;
+        font-weight: 700;
+        line-height: 1.25;
+        text-shadow: 0 1px 2px rgba(2, 6, 23, 0.65);
+    }
+
+    .profile-identity-banner__handle {
+        margin: 0;
+        color: var(--profile-identity-handle-color);
+        font-size: 0.78rem;
+        font-weight: 500;
+        line-height: 1.2;
+    }
+
+    .profile-identity-premium-chip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.16rem;
+        padding: 0.16rem 0.34rem;
+        border-radius: 999px;
+        border: 1px solid rgba(250, 204, 21, 0.5);
+        background: radial-gradient(circle at 35% 30%, rgba(254, 240, 138, 0.92) 0%, rgba(245, 158, 11, 0.85) 70%, rgba(180, 83, 9, 0.9) 100%);
+        color: rgba(120, 53, 15, 0.98);
+        cursor: pointer;
+        outline: none;
+    }
+
+    .profile-identity-premium-chip__icon {
+        width: 0.68rem;
+        height: 0.68rem;
+        flex-shrink: 0;
+    }
+
+    .profile-identity-premium-chip__label {
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        line-height: 1;
+    }
+
+    .profile-premium-verified-tick {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 0.8rem;
+        height: 0.8rem;
+        border-radius: 999px;
+        border: 1px solid rgba(16, 185, 129, 0.55);
+        background: rgba(236, 253, 245, 0.95);
+        color: rgb(5, 150, 105);
+        font-size: 0.56rem;
+        font-weight: 800;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+
+    .profile-identity-premium-chip__tooltip {
+        position: absolute;
+        left: 50%;
+        top: calc(100% + 0.34rem);
+        transform: translate(-50%, 0.18rem);
+        opacity: 0;
+        pointer-events: none;
+        white-space: nowrap;
+        border-radius: 0.55rem;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        background: rgba(15, 23, 42, 0.95);
+        color: rgba(241, 245, 249, 0.98);
+        padding: 0.28rem 0.44rem;
+        font-size: 0.62rem;
+        font-weight: 600;
+        box-shadow: 0 12px 20px -14px rgba(2, 6, 23, 0.9);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        z-index: 6;
+    }
+
+    .profile-identity-premium-chip:hover .profile-identity-premium-chip__tooltip,
+    .profile-identity-premium-chip:focus .profile-identity-premium-chip__tooltip,
+    .profile-identity-premium-chip:focus-within .profile-identity-premium-chip__tooltip,
+    .profile-identity-premium-chip:active .profile-identity-premium-chip__tooltip {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    .profile-identity-banner__theme {
+        margin: 0;
+        color: rgba(236, 253, 245, 0.96);
+        font-size: 0.64rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .profile-identity-banner--compact {
+        padding: 0.48rem 0.62rem;
+        border-radius: 0.75rem;
+        min-width: 10.5rem;
+    }
+
+    .profile-identity-banner--compact .profile-identity-banner__row,
+    .profile-identity-banner--compact {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 0;
+    }
+
+    .profile-identity-banner__avatar--compact {
+        height: 2rem;
+        width: 2rem;
+        border-radius: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid rgba(255, 255, 255, 0.64);
+        color: #f8fafc;
+        font-size: 0.8rem;
+        font-weight: 800;
+        background: rgba(15, 23, 42, 0.28);
+        box-shadow: none;
+    }
+
+    .profile-identity-banner--compact .profile-identity-banner__name {
+        font-size: 0.8rem;
+        font-weight: 650;
+        line-height: 1.1;
+    }
+
+    .profile-identity-banner--compact .profile-identity-banner__theme {
+        font-size: 0.55rem;
+        letter-spacing: 0.06em;
+    }
+
+    .profile-banner-pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        padding: 0.2rem 0.5rem;
+        font-size: 0.64rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: #f8fafc;
+        text-shadow: 0 1px 2px rgba(2, 6, 23, 0.6);
+    }
+}

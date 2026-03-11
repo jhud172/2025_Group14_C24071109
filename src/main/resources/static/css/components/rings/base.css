@@ -1,0 +1,113 @@
+@layer components {
+    .profile-avatar-ring {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        overflow: visible;
+        isolation: isolate;
+        --ring-core: rgba(148, 163, 184, 0.68);
+        --ring-glow: rgba(59, 130, 246, 0.22);
+        --ring-spark-a: rgba(148, 163, 184, 0.24);
+        --ring-spark-b: rgba(248, 250, 252, 0.42);
+        --ring-spin-dur: 8s;
+        --ring-pulse-dur: 2.8s;
+        --ring-sparkle-dur: 4.6s;
+        border-color: var(--ring-core);
+        box-shadow:
+            0 0 0 1px color-mix(in srgb, var(--ring-core) 58%, transparent),
+            0 8px 18px -14px rgba(15, 23, 42, 0.72);
+        transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+    }
+
+    .profile-avatar-ring > img,
+    .profile-avatar-ring > span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .profile-avatar-ring::before,
+    .profile-avatar-ring::after {
+        content: "";
+        position: absolute;
+        border-radius: inherit;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .profile-avatar-ring::before {
+        inset: -0.18rem;
+        border: 2px solid transparent;
+        border-top-color: color-mix(in srgb, var(--ring-core) 82%, white);
+        border-right-color: color-mix(in srgb, var(--ring-core) 72%, transparent);
+        border-left-color: color-mix(in srgb, var(--ring-core) 62%, transparent);
+        filter: drop-shadow(0 0 0.42rem var(--ring-glow));
+        animation: ring-spin var(--ring-spin-dur) linear infinite;
+    }
+
+    .profile-avatar-ring::after {
+        inset: -0.36rem;
+        background:
+            radial-gradient(circle at 12% 18%, var(--ring-spark-b) 0 2px, transparent 2.4px),
+            radial-gradient(circle at 84% 26%, var(--ring-spark-a) 0 1.7px, transparent 2.1px),
+            radial-gradient(circle at 76% 82%, var(--ring-spark-b) 0 1.9px, transparent 2.3px),
+            radial-gradient(circle at 18% 78%, var(--ring-spark-a) 0 1.8px, transparent 2.2px);
+        animation: ring-sparkle var(--ring-sparkle-dur) ease-in-out infinite;
+        opacity: 0.88;
+    }
+
+    .profile-preview-ring {
+        height: 2.65rem;
+        width: 2.65rem;
+        border-radius: 0.75rem;
+        border: 2px solid var(--ring-core);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.9);
+        animation: ring-breathe var(--ring-pulse-dur) ease-in-out infinite;
+    }
+
+    @keyframes ring-spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes ring-breathe {
+        0%,
+        100% {
+            box-shadow:
+                0 0 0 1px color-mix(in srgb, var(--ring-core) 52%, transparent),
+                0 0 0.4rem color-mix(in srgb, var(--ring-glow) 72%, transparent);
+        }
+        50% {
+            box-shadow:
+                0 0 0 2px color-mix(in srgb, var(--ring-core) 62%, transparent),
+                0 0 0.76rem color-mix(in srgb, var(--ring-glow) 86%, transparent);
+        }
+    }
+
+    @keyframes ring-sparkle {
+        0%,
+        100% {
+            opacity: 0.46;
+            transform: scale(0.98);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.04);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .profile-avatar-ring::before,
+        .profile-avatar-ring::after,
+        .profile-preview-ring {
+            animation: none;
+        }
+    }
+}

@@ -12,9 +12,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${pageTitle} ?: 'One To One'">One To One</title>
     <link rel="shortcut icon" th:href="@{/favicon.ico}">
-    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/img/tab_logo.png}">
-    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/img/tab_logo.png}">
-    <link rel="apple-touch-icon" th:href="@{/img/tab_logo.png}">
+    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/img/brand/tab_logo.png}">
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/img/brand/tab_logo.png}">
+    <link rel="apple-touch-icon" th:href="@{/img/brand/tab_logo.png}">
 
     <!-- No-flash theme script: must run before CSS to prevent flash of wrong theme.
          When theme preference is SYSTEM (the server cannot know OS dark mode),
@@ -72,9 +72,10 @@
 <div th:replace="~{fragments/quick-actions :: quickActionsShelf}"></div>
 
 <!-- Core scripts -->
-<script th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false'}" th:src="@{/js/chat.js(v='20260303')}" defer></script>
-<script th:src="@{/js/quick-actions.js(v='20260303')}" defer></script>
-<script th:src="@{/js/navbar-premium.js(v='20260303')}" defer></script>
+<script th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false'}" th:src="@{/js/chat/chat.js(v='20260303')}" defer></script>
+<script th:src="@{/js/core/quick-actions.js(v='20260303')}" defer></script>
+<script th:src="@{/js/core/navbar-premium.js(v='20260303')}" defer></script>
+<script th:src="@{/js/core/floating-profile-card.js(v='20260303')}" defer></script>
 
 <!-- Page-specific scripts -->
 <th:block th:if="${pageScripts != null}">
@@ -82,7 +83,7 @@
 </th:block>
 
 <!-- Global AI button loading handler -->
-<script src="/js/ai-loading.js" defer></script>
+<script src="/js/core/ai-loading.js" defer></script>
 
 </body>
 </html>

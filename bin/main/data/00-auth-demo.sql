@@ -147,6 +147,13 @@ SET subscription_status = true
 WHERE username = 'demo';
 
 UPDATE users
+SET email = 'jhudson172@icloud.com',
+    phone_number = '07858256917',
+    bio = 'Focused on consistency, form, and building long-term strength one session at a time.',
+    profile_image_url = '/img/logo.png'
+WHERE username = 'demo';
+
+UPDATE users
 SET subscription_status = false
 WHERE username = 'demo2';
 

@@ -1,5 +1,5 @@
-/* Component styles entrypoint (organized imports live in components/index.css) */
-@import "./components/index.css";
+/* Component styles entrypoint (organized imports live in components/core/index.css) */
+@import "./components/core/index.css";
 
 /* Page-specific styles - loaded separately when needed */
 /* calendar-heatmap.css - loaded in calendar/month.html and calendar/week.html */
@@ -22,22 +22,34 @@
     background-attachment: fixed;
   }
 
-  /* Custom scrollbar styling */
+  /* Custom scrollbar styling - Emerald green mix */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
 
+  /* Light mode scrollbar */
   ::-webkit-scrollbar-track {
-    @apply bg-cyber-800;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gradient-to-b from-neon-cyan to-neon-purple rounded-full;
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+    border-radius: 5px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply opacity-80;
+    background: linear-gradient(180deg, #059669 0%, #047857 100%);
+  }
+
+  /* Dark mode scrollbar */
+  html.dark ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #10b981 0%, #065f46 100%);
+    border-radius: 5px;
+  }
+
+  html.dark ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #059669 0%, #064e3b 100%);
   }
 
   /* Selection styling */
@@ -56,6 +68,16 @@
   .text-neon {
     color: #00f3ff;
     text-shadow: 0 0 10px rgba(0, 243, 255, 0.8), 0 0 20px rgba(0, 243, 255, 0.5);
+  }
+
+  /* Hide scrollbars while maintaining scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
   }
 
   .text-neon-purple {
@@ -259,6 +281,467 @@ html.dark [class~="text-gray-600"] {
 html.dark [class~="border-slate-200"],
 html.dark [class~="border-gray-200"] {
   border-color: rgb(51, 65, 85); /* slate-700 */
+}
+
+/* Profile customiser runtime classes (kept outside @layer so JIT purge never strips them) */
+.profile-banner-pill--none {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-color: rgba(148, 163, 184, 0.72);
+}
+
+html.dark .profile-banner-pill--none {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-color: rgba(100, 116, 139, 0.72);
+}
+
+.profile-banner-pill--aurora {
+  background: linear-gradient(135deg, #0f766e 0%, #4c1d95 48%, #2563eb 100%);
+}
+
+.profile-banner-pill--sunset {
+  background: linear-gradient(135deg, #bfdbfe 0%, #fde68a 36%, #fb923c 72%, #f97316 100%);
+}
+
+.profile-banner-pill--sunset::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(251, 146, 60, 0.2) 100%);
+}
+
+.profile-banner-pill--ocean {
+  background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 42%, #3b82f6 100%);
+}
+
+.profile-banner-pill--ocean::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(30, 64, 175, 0.2) 100%);
+}
+
+.profile-banner-pill--rose {
+  background: linear-gradient(135deg, #fbcfe8 0%, #f9a8d4 45%, #f472b6 100%);
+}
+
+.profile-banner-pill--rose::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(190, 24, 93, 0.18) 100%);
+}
+
+.profile-banner-pill--carbon {
+  background: linear-gradient(135deg, #020617 0%, #1e293b 52%, #334155 100%);
+}
+
+.profile-banner-pill--lagoon {
+  background: linear-gradient(135deg, #99f6e4 0%, #67e8f9 45%, #0ea5e9 100%);
+}
+
+.profile-banner-pill--lagoon::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(14, 116, 144, 0.18) 100%);
+}
+
+.profile-banner-pill--meadow {
+  background: linear-gradient(135deg, #dcfce7 0%, #86efac 46%, #22c55e 100%);
+}
+
+.profile-banner-pill--meadow::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(22, 101, 52, 0.16) 100%);
+}
+
+.profile-banner-pill--midnight {
+  background: linear-gradient(135deg, #111827 0%, #312e81 42%, #1d4ed8 100%);
+}
+
+.profile-avatar-ring--none {
+  --ring-core: transparent;
+  --ring-glow: transparent;
+  --ring-spark-a: transparent;
+  --ring-spark-b: transparent;
+  border-color: inherit;
+  box-shadow: none;
+  animation: none;
+}
+
+.profile-avatar-ring--none::before,
+.profile-avatar-ring--none::after {
+  display: none;
+  animation: none;
+}
+
+.profile-avatar-ring--neon_dual {
+  --ring-core: rgba(45, 212, 191, 0.92);
+  --ring-glow: rgba(59, 130, 246, 0.42);
+  --ring-spark-a: rgba(45, 212, 191, 0.62);
+  --ring-spark-b: rgba(34, 211, 238, 0.74);
+  --ring-spin-dur: 5.8s;
+  --ring-pulse-dur: 2.2s;
+  --ring-sparkle-dur: 3.4s;
+}
+
+.profile-avatar-ring--solar_flare {
+  --ring-core: rgba(251, 191, 36, 0.95);
+  --ring-glow: rgba(249, 115, 22, 0.46);
+  --ring-spark-a: rgba(252, 211, 77, 0.72);
+  --ring-spark-b: rgba(254, 215, 170, 0.76);
+  --ring-spin-dur: 6.6s;
+  --ring-pulse-dur: 2.1s;
+  --ring-sparkle-dur: 3.2s;
+}
+
+.profile-avatar-ring--crystal {
+  --ring-core: rgba(186, 230, 253, 0.98);
+  --ring-glow: rgba(125, 211, 252, 0.42);
+  --ring-spark-a: rgba(224, 242, 254, 0.82);
+  --ring-spark-b: rgba(191, 219, 254, 0.72);
+  --ring-spin-dur: 9.4s;
+  --ring-pulse-dur: 2.9s;
+  --ring-sparkle-dur: 3.9s;
+}
+
+.profile-avatar-ring--starry_spark {
+  --ring-core: rgba(167, 139, 250, 0.9);
+  --ring-glow: rgba(129, 140, 248, 0.38);
+  --ring-spark-a: rgba(199, 210, 254, 0.8);
+  --ring-spark-b: rgba(233, 213, 255, 0.8);
+  --ring-spin-dur: 10.8s;
+  --ring-pulse-dur: 2.5s;
+  --ring-sparkle-dur: 1.65s;
+}
+
+.profile-avatar-ring--starry_spark::after {
+  animation: ring-sparkle 1.2s steps(2, end) infinite;
+}
+
+.profile-avatar-ring--aurora_pulse {
+  --ring-core: rgba(52, 211, 153, 0.92);
+  --ring-glow: rgba(34, 197, 94, 0.36);
+  --ring-spark-a: rgba(16, 185, 129, 0.68);
+  --ring-spark-b: rgba(110, 231, 183, 0.82);
+  --ring-spin-dur: 7.8s;
+  --ring-pulse-dur: 1.85s;
+  --ring-sparkle-dur: 3.1s;
+}
+
+.profile-avatar-ring--aurora_pulse::before {
+  border-top-color: rgba(167, 243, 208, 0.92);
+  border-right-color: rgba(52, 211, 153, 0.72);
+  border-left-color: rgba(20, 184, 166, 0.62);
+}
+
+.profile-avatar-ring--aurora_pulse::after {
+  inset: -0.52rem;
+  background:
+    radial-gradient(ellipse at 22% 24%, rgba(167, 243, 208, 0.74) 0 16%, transparent 34%),
+    radial-gradient(ellipse at 78% 72%, rgba(94, 234, 212, 0.7) 0 14%, transparent 32%);
+  animation: ring-sparkle 2.6s ease-in-out infinite;
+}
+
+.profile-avatar-ring--comet_trail {
+  --ring-core: rgba(56, 189, 248, 0.94);
+  --ring-glow: rgba(14, 165, 233, 0.44);
+  --ring-spark-a: rgba(125, 211, 252, 0.68);
+  --ring-spark-b: rgba(186, 230, 253, 0.84);
+  --ring-spin-dur: 3.6s;
+  --ring-pulse-dur: 2.4s;
+  --ring-sparkle-dur: 2.2s;
+}
+
+.profile-avatar-ring--comet_trail::before {
+  border-top-color: rgba(186, 230, 253, 0.95);
+  border-right-color: rgba(56, 189, 248, 0.72);
+  border-bottom-color: rgba(14, 165, 233, 0.42);
+}
+
+.profile-avatar-ring--comet_trail::after {
+  background:
+    radial-gradient(circle at 6% 20%, rgba(224, 242, 254, 0.95) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 28% 36%, rgba(186, 230, 253, 0.75) 0 1.8px, transparent 2.3px),
+    radial-gradient(circle at 58% 55%, rgba(125, 211, 252, 0.62) 0 1.6px, transparent 2.1px),
+    radial-gradient(circle at 84% 78%, rgba(56, 189, 248, 0.52) 0 1.4px, transparent 2px);
+  animation: ring-sparkle 1.9s ease-in-out infinite;
+}
+
+.profile-avatar-ring--ember_crown {
+  --ring-core: rgba(251, 146, 60, 0.95);
+  --ring-glow: rgba(249, 115, 22, 0.48);
+  --ring-spark-a: rgba(251, 191, 36, 0.74);
+  --ring-spark-b: rgba(254, 215, 170, 0.82);
+  --ring-spin-dur: 5.2s;
+  --ring-pulse-dur: 1.9s;
+  --ring-sparkle-dur: 2.5s;
+}
+
+.profile-avatar-ring--ember_crown::before {
+  border-top-color: rgba(254, 215, 170, 0.95);
+  border-right-color: rgba(251, 146, 60, 0.76);
+  border-left-color: rgba(245, 158, 11, 0.64);
+}
+
+.profile-avatar-ring--ember_crown::after {
+  background:
+    radial-gradient(circle at 20% 14%, rgba(254, 243, 199, 0.9) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 80% 18%, rgba(253, 186, 116, 0.8) 0 1.9px, transparent 2.4px),
+    radial-gradient(circle at 52% 86%, rgba(251, 146, 60, 0.64) 0 2px, transparent 2.5px);
+}
+
+.profile-avatar-ring--king_crown {
+  --ring-core: rgba(250, 204, 21, 0.95);
+  --ring-glow: rgba(217, 119, 6, 0.52);
+  --ring-spark-a: rgba(254, 240, 138, 0.74);
+  --ring-spark-b: rgba(253, 224, 71, 0.84);
+  --ring-spin-dur: 8.2s;
+  --ring-pulse-dur: 1.9s;
+  --ring-sparkle-dur: 2.9s;
+}
+
+.profile-avatar-ring--king_crown::before {
+  inset: -0.48rem;
+  border: 0;
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, transparent 0 16%, rgba(250, 204, 21, 0.95) 16% 22%, transparent 22% 100%),
+    radial-gradient(circle at 10% 22%, rgba(250, 204, 21, 0.95) 0 11%, transparent 12%),
+    radial-gradient(circle at 28% 5%, rgba(254, 240, 138, 0.92) 0 11%, transparent 12%),
+    radial-gradient(circle at 50% -1%, rgba(253, 224, 71, 0.96) 0 12%, transparent 13%),
+    radial-gradient(circle at 72% 5%, rgba(254, 240, 138, 0.92) 0 11%, transparent 12%),
+    radial-gradient(circle at 90% 22%, rgba(250, 204, 21, 0.95) 0 11%, transparent 12%);
+  filter: drop-shadow(0 0 0.48rem rgba(217, 119, 6, 0.45));
+  animation: crown-bob 2.1s ease-in-out infinite;
+}
+
+.profile-avatar-ring--king_crown::after {
+  inset: -0.54rem;
+  background:
+    radial-gradient(circle at 14% 34%, rgba(254, 243, 199, 0.88) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 86% 36%, rgba(254, 240, 138, 0.78) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 0.92) 0 1.8px, transparent 2.4px);
+  animation: ring-sparkle 1.7s ease-in-out infinite;
+}
+
+.profile-avatar-ring--cyber_arms {
+  --ring-core: rgba(56, 189, 248, 0.94);
+  --ring-glow: rgba(59, 130, 246, 0.48);
+  --ring-spark-a: rgba(125, 211, 252, 0.8);
+  --ring-spark-b: rgba(165, 243, 252, 0.84);
+  --ring-spin-dur: 5.5s;
+  --ring-pulse-dur: 1.8s;
+  --ring-sparkle-dur: 2.2s;
+}
+
+.profile-avatar-ring--cyber_arms::before {
+  inset: -0.7rem;
+  border: 0;
+  border-radius: 1.2rem;
+  background:
+    linear-gradient(90deg, transparent 0 3%, rgba(34, 211, 238, 0.92) 3% 14%, transparent 14% 86%, rgba(34, 211, 238, 0.92) 86% 97%, transparent 97% 100%),
+    linear-gradient(180deg, transparent 0 44%, rgba(96, 165, 250, 0.86) 44% 56%, transparent 56% 100%);
+  filter: drop-shadow(0 0 0.5rem rgba(56, 189, 248, 0.45));
+  animation: arms-pump 1.25s ease-in-out infinite;
+}
+
+.profile-avatar-ring--cyber_arms::after {
+  inset: -0.44rem;
+  background:
+    radial-gradient(circle at 8% 50%, rgba(34, 211, 238, 0.88) 0 2.2px, transparent 2.8px),
+    radial-gradient(circle at 92% 50%, rgba(34, 211, 238, 0.88) 0 2.2px, transparent 2.8px);
+  animation: ring-sparkle 1.4s ease-in-out infinite;
+}
+
+.profile-avatar-ring--ufo_beam {
+  --ring-core: rgba(110, 231, 183, 0.94);
+  --ring-glow: rgba(45, 212, 191, 0.44);
+  --ring-spark-a: rgba(167, 243, 208, 0.74);
+  --ring-spark-b: rgba(209, 250, 229, 0.86);
+  --ring-spin-dur: 7.2s;
+  --ring-pulse-dur: 2s;
+  --ring-sparkle-dur: 2.6s;
+}
+
+.profile-avatar-ring--ufo_beam::before {
+  inset: -0.62rem;
+  border: 0;
+  border-radius: 1rem;
+  background:
+    radial-gradient(ellipse at 50% 8%, rgba(187, 247, 208, 0.95) 0 19%, transparent 22%),
+    linear-gradient(180deg, rgba(110, 231, 183, 0.62) 10%, rgba(16, 185, 129, 0.04) 55%, transparent 80%);
+  animation: beam-scan 2.35s ease-in-out infinite;
+}
+
+.profile-avatar-ring--ufo_beam::after {
+  inset: -0.5rem;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(236, 253, 245, 0.96) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 34% 24%, rgba(167, 243, 208, 0.8) 0 1.7px, transparent 2.3px),
+    radial-gradient(circle at 66% 24%, rgba(167, 243, 208, 0.8) 0 1.7px, transparent 2.3px);
+  animation: ring-sparkle 2s ease-in-out infinite;
+}
+
+.profile-card-back-theme--none,
+.profile-preview-card-back--none {
+  background: rgba(248, 250, 252, 0.7);
+  border-color: rgba(148, 163, 184, 0.42);
+}
+
+html.dark .profile-card-back-theme--none,
+html.dark .profile-preview-card-back--none {
+  background: rgba(15, 23, 42, 0.56);
+  border-color: rgba(100, 116, 139, 0.46);
+  color: #e2e8f0;
+}
+
+.profile-card-back-theme--glass,
+.profile-preview-card-back--glass {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 240, 0.72) 100%);
+  border-color: rgba(148, 163, 184, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html.dark .profile-card-back-theme--glass,
+html.dark .profile-preview-card-back--glass {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.86) 0%, rgba(51, 65, 85, 0.62) 100%);
+  border-color: rgba(100, 116, 139, 0.52);
+  color: #e2e8f0;
+}
+
+.profile-card-back-theme--topo,
+.profile-preview-card-back--topo {
+  background:
+    radial-gradient(circle at 18% 24%, rgba(16, 185, 129, 0.25) 0%, transparent 38%),
+    radial-gradient(circle at 82% 82%, rgba(14, 165, 233, 0.22) 0%, transparent 42%),
+    linear-gradient(145deg, rgba(240, 253, 250, 0.96) 0%, rgba(236, 252, 203, 0.72) 100%);
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+html.dark .profile-card-back-theme--topo,
+html.dark .profile-preview-card-back--topo {
+  background:
+    radial-gradient(circle at 20% 24%, rgba(45, 212, 191, 0.26) 0%, transparent 42%),
+    radial-gradient(circle at 82% 84%, rgba(56, 189, 248, 0.22) 0%, transparent 44%),
+    linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(22, 78, 99, 0.74) 100%);
+  border-color: rgba(45, 212, 191, 0.45);
+  color: #e2e8f0;
+}
+
+.profile-card-back-theme--carbon,
+.profile-preview-card-back--carbon {
+  background: linear-gradient(135deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.88) 46%, rgba(30, 41, 59, 0.92) 100%);
+  border-color: rgba(71, 85, 105, 0.62);
+}
+
+.profile-card-back-theme--carbon .profile-identity-banner__name,
+.profile-card-back-theme--carbon .profile-identity-banner__handle,
+.profile-card-back-theme--carbon .profile-identity-banner__theme,
+.profile-preview-card-back--carbon {
+  color: #e2e8f0;
+}
+
+.profile-card-back-theme--matrix,
+.profile-preview-card-back--matrix {
+  background:
+    linear-gradient(180deg, rgba(20, 83, 45, 0.18) 0%, rgba(20, 83, 45, 0.08) 100%),
+    repeating-linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0 1px, transparent 1px 8px),
+    linear-gradient(145deg, rgba(6, 78, 59, 0.95) 0%, rgba(17, 94, 89, 0.9) 100%);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.profile-card-back-theme--matrix .profile-identity-banner__name,
+.profile-card-back-theme--matrix .profile-identity-banner__handle,
+.profile-card-back-theme--matrix .profile-identity-banner__theme,
+.profile-preview-card-back--matrix {
+  color: #d1fae5;
+}
+
+.profile-card-back-theme--nebula,
+.profile-preview-card-back--nebula {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(217, 70, 239, 0.3) 0%, transparent 38%),
+    radial-gradient(circle at 82% 26%, rgba(56, 189, 248, 0.28) 0%, transparent 36%),
+    radial-gradient(circle at 62% 84%, rgba(99, 102, 241, 0.3) 0%, transparent 40%),
+    linear-gradient(145deg, rgba(17, 24, 39, 0.96) 0%, rgba(30, 41, 59, 0.9) 100%);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.profile-card-back-theme--nebula .profile-identity-banner__name,
+.profile-card-back-theme--nebula .profile-identity-banner__handle,
+.profile-card-back-theme--nebula .profile-identity-banner__theme,
+.profile-preview-card-back--nebula {
+  color: #e9d5ff;
+}
+
+.profile-card-back-theme--circuit,
+.profile-preview-card-back--circuit {
+  background:
+    repeating-linear-gradient(0deg, rgba(34, 197, 94, 0.08) 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(90deg, rgba(34, 197, 94, 0.08) 0 1px, transparent 1px 18px),
+    linear-gradient(145deg, rgba(6, 78, 59, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%);
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.profile-card-back-theme--circuit .profile-identity-banner__name,
+.profile-card-back-theme--circuit .profile-identity-banner__handle,
+.profile-card-back-theme--circuit .profile-identity-banner__theme,
+.profile-preview-card-back--circuit {
+  color: #dcfce7;
+}
+
+.profile-card-back-theme--sunburst,
+.profile-preview-card-back--sunburst {
+  background:
+    conic-gradient(from 210deg at 50% 50%, rgba(251, 146, 60, 0.82), rgba(250, 204, 21, 0.78), rgba(249, 115, 22, 0.8), rgba(251, 146, 60, 0.82)),
+    linear-gradient(145deg, rgba(255, 247, 237, 0.92) 0%, rgba(254, 215, 170, 0.72) 100%);
+  border-color: rgba(251, 146, 60, 0.52);
+}
+
+.profile-card-back-theme--sunburst .profile-identity-banner__name,
+.profile-card-back-theme--sunburst .profile-identity-banner__handle,
+.profile-card-back-theme--sunburst .profile-identity-banner__theme,
+.profile-preview-card-back--sunburst {
+  color: #7c2d12;
+}
+
+.profile-card-back-theme--retro_grid,
+.profile-preview-card-back--retro_grid {
+  background:
+    linear-gradient(180deg, rgba(236, 72, 153, 0.14) 0%, rgba(139, 92, 246, 0.12) 48%, rgba(59, 130, 246, 0.14) 100%),
+    repeating-linear-gradient(90deg, rgba(14, 165, 233, 0.16) 0 1px, transparent 1px 20px),
+    repeating-linear-gradient(0deg, rgba(14, 165, 233, 0.14) 0 1px, transparent 1px 20px),
+    linear-gradient(145deg, rgba(30, 27, 75, 0.94) 0%, rgba(17, 24, 39, 0.9) 100%);
+  border-color: rgba(56, 189, 248, 0.45);
+}
+
+.profile-card-back-theme--retro_grid .profile-identity-banner__name,
+.profile-card-back-theme--retro_grid .profile-identity-banner__handle,
+.profile-card-back-theme--retro_grid .profile-identity-banner__theme,
+.profile-preview-card-back--retro_grid {
+  color: #dbeafe;
+}
+
+@keyframes crown-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes arms-pump {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.92;
+  }
+  50% {
+    transform: scaleX(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes beam-scan {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(2px);
+    opacity: 1;
+  }
 }
 
 html.dark [class~="border-slate-300"],

@@ -2,6 +2,7 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -55,6 +56,9 @@ public class User {
     @Column(name = "phone_number", length = 30)
     private String phoneNumber;
 
+    @Column(name = "phone_country", length = 2)
+    private String phoneCountry = "GB";
+
     @Column(name = "phone_verified", nullable = false)
     private boolean phoneVerified = false;
 
@@ -79,6 +83,9 @@ public class User {
 
     @Column(name = "profile_image_url", length = 300)
     private String profileImageUrl;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
     @NotBlank(message = "Please enter a password.")
     @Size(min = 8, message = "Your password must be at least 8 characters long")

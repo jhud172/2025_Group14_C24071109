@@ -130,7 +130,9 @@ CREATE TABLE IF NOT EXISTS users
     username_changed_at TIMESTAMP    NULL,
     bio                 VARCHAR(800) NULL,
     profile_image_url   VARCHAR(300) NULL,
+    date_of_birth       DATE         NULL,
     phone_number        VARCHAR(30)  NULL,
+    phone_country       VARCHAR(2)   NOT NULL DEFAULT 'GB',
     phone_verified      BOOLEAN      NOT NULL DEFAULT FALSE,
     phone_verified_at   TIMESTAMP    NULL,
     password            VARCHAR(500) NOT NULL,
@@ -406,6 +408,8 @@ CREATE TABLE IF NOT EXISTS user_settings
     hide_ai_one_shot_warning BOOLEAN NOT NULL DEFAULT FALSE,
     sticker_pack VARCHAR(20) NOT NULL DEFAULT 'STARS',
     monthly_workout_target INT NOT NULL DEFAULT 12,
+    profile_text_color VARCHAR(7) NULL,
+    profile_bio_text_color VARCHAR(7) NULL,
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_settings_user
@@ -2427,6 +2431,11 @@ CREATE TABLE IF NOT EXISTS merch_orders
     status          VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
     total_cents     INT          NOT NULL DEFAULT 0,
     payment_method_id BIGINT     NULL,
+    shipping_status VARCHAR(30)  NOT NULL DEFAULT 'PENDING',
+    tracking_number VARCHAR(200) NULL,
+    shipped_at      TIMESTAMP    NULL,
+    delivered_at    TIMESTAMP    NULL,
+    estimated_delivery_date DATE NULL,
     created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

@@ -150,7 +150,18 @@ public class VerificationController {
             );
             return "redirect:/profile";
         }
-        phoneVerificationService.sendCode(user);
+        try {
+            phoneVerificationService.sendCode(user);
+        } catch (Exception ex) {
+            String detail = ex.getMessage() != null && !ex.getMessage().isBlank()
+                    ? ex.getMessage()
+                    : messageSource.getMessage("verify.phone.error.generic", null, locale);
+            redirectAttributes.addFlashAttribute(
+                "verifyError",
+                messageSource.getMessage("verify.phone.error.send.detail", new Object[]{detail}, locale)
+            );
+            return "redirect:/profile";
+        }
         redirectAttributes.addFlashAttribute(
                 "verifySuccess",
                 messageSource.getMessage("verify.phone.sent", null, locale)

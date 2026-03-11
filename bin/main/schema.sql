@@ -352,6 +352,11 @@ CREATE TABLE IF NOT EXISTS user_settings
     hide_ai_one_shot_warning BOOLEAN NOT NULL DEFAULT FALSE,
     sticker_pack VARCHAR(20) NOT NULL DEFAULT 'STARS',
     monthly_workout_target INT NOT NULL DEFAULT 12,
+    weekly_summary_metrics VARCHAR(500) NULL,
+    profile_banner_theme VARCHAR(40) NULL,
+    profile_ring_style VARCHAR(40) NULL,
+    profile_card_back_style VARCHAR(40) NULL,
+    profile_milestone_keys VARCHAR(500) NULL,
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_settings_user
@@ -2496,12 +2501,13 @@ CREATE INDEX IF NOT EXISTS idx_support_requests_status
 -- =========================
 CREATE TABLE IF NOT EXISTS merch_products
 (
-    id             BIGSERIAL PRIMARY KEY,
-    name           VARCHAR(200)   NOT NULL,
-    description    TEXT           NULL,
-    price          NUMERIC(10, 2) NOT NULL,
-    image_url      VARCHAR(500)   NULL,
-    stock_quantity INT            NOT NULL DEFAULT 0,
+    id                  BIGSERIAL PRIMARY KEY,
+    name                VARCHAR(200)   NOT NULL,
+    description         TEXT           NULL,
+    price               NUMERIC(10, 2) NOT NULL,
+    image_url           VARCHAR(500)   NULL,
+    secondary_image_url VARCHAR(500)   NULL,
+    stock_quantity      INT            NOT NULL DEFAULT 0,
     category       VARCHAR(100)   NULL,
     active         BOOLEAN        NOT NULL DEFAULT TRUE,
     created_at     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,

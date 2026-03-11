@@ -5,10 +5,9 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -18,12 +17,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -124,9 +125,6 @@ public class ProfileController {
 
         int exerciseLogCount = exerciseLogService.getLogsByUser(user).size();
 
-        boolean canChangeUsername = canChangeUsername(user);
-        Instant nextUsernameChangeAt = getNextUsernameChangeAt(user);
-
         modelAndView.addObject("user", user);
         modelAndView.addObject("platformSubscription", platformSubscription);
         modelAndView.addObject("subscriptionDaysLeft", platformSubscriptionService.getDaysUntilRenewal(user.getId(), clock));
@@ -135,16 +133,36 @@ public class ProfileController {
         modelAndView.addObject("exerciseLogCount", exerciseLogCount);
         modelAndView.addObject("permanentConditions", permanentConditions);
         modelAndView.addObject("timedConditions", timedConditions);
-        modelAndView.addObject("canChangeUsername", canChangeUsername);
-        modelAndView.addObject("nextUsernameChangeAt", nextUsernameChangeAt);
         modelAndView.addObject("recentExportRequests", dataExportRequestService.getRecentRequests(user));
         modelAndView.addObject("today", LocalDate.now(clock));
         modelAndView.addObject("devProfilePreview", devProfilePreview);
         modelAndView.addObject("compactTopContent", true);
         modelAndView.addObject("isPremium", isPremium);
-        modelAndView.addObject("profileBannerThemes", List.of("AURORA", "SUNSET", "OCEAN", "ROSE", "CARBON"));
-        modelAndView.addObject("profileRingStyles", List.of("NEON_DUAL", "SOLAR_FLARE", "CRYSTAL", "NONE"));
-        modelAndView.addObject("profileCardBackStyles", List.of("GLASS", "TOPO", "CARBON", "MATRIX"));
+        modelAndView.addObject("profileBannerThemes", List.of("NONE", "AURORA", "SUNSET", "OCEAN", "ROSE", "CARBON", "LAGOON", "MEADOW", "MIDNIGHT"));
+        modelAndView.addObject("profileRingStyles", List.of(
+            "NONE",
+            "NEON_DUAL",
+            "SOLAR_FLARE",
+            "CRYSTAL",
+            "STARRY_SPARK",
+            "AURORA_PULSE",
+            "COMET_TRAIL",
+            "EMBER_CROWN",
+            "KING_CROWN",
+            "CYBER_ARMS",
+            "UFO_BEAM"
+        ));
+        modelAndView.addObject("profileCardBackStyles", List.of(
+            "NONE",
+            "GLASS",
+            "TOPO",
+            "CARBON",
+            "MATRIX",
+            "NEBULA",
+            "CIRCUIT",
+            "SUNBURST",
+            "RETRO_GRID"
+        ));
 
         Set<String> selectedMilestones = parseCsvKeys(settings != null ? settings.getProfileMilestoneKeys() : null, 6);
         List<MilestoneOption> availableMilestones = buildAvailableMilestones(user, platformSubscription, levelProgress, exerciseLogCount);
@@ -167,6 +185,8 @@ public class ProfileController {
     public String updateProfileCustomiser(@RequestParam(value = "bannerTheme", required = false) String bannerTheme,
                                           @RequestParam(value = "ringStyle", required = false) String ringStyle,
                                           @RequestParam(value = "cardBackStyle", required = false) String cardBackStyle,
+                                          @RequestParam(value = "textColor", required = false) String textColor,
+                                          @RequestParam(value = "generalTextColor", required = false) String generalTextColor,
                                           @RequestParam(value = "milestoneKeys", required = false) List<String> milestoneKeys,
                                           RedirectAttributes redirectAttributes) {
         User user = authHelper.getAuthenticatedUser();
@@ -210,6 +230,8 @@ public class ProfileController {
                 bannerTheme,
                 ringStyle,
                 cardBackStyle,
+                textColor,
+                generalTextColor,
                 selected
         );
 
@@ -283,15 +305,53 @@ public class ProfileController {
 
     @PostMapping("/profile/update")
     public String updateProfile(@ModelAttribute ProfileUpdateRequest request,
+                                @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+                                @RequestParam(value = "bannerTheme", required = false) String bannerTheme,
+                                @RequestParam(value = "ringStyle", required = false) String ringStyle,
+                                @RequestParam(value = "cardBackStyle", required = false) String cardBackStyle,
+                                @RequestParam(value = "textColor", required = false) String textColor,
+                                @RequestParam(value = "generalTextColor", required = false) String generalTextColor,
+                                @RequestParam(value = "milestoneKeys", required = false) List<String> milestoneKeys,
                                 RedirectAttributes redirectAttributes) {
         User user = authHelper.getAuthenticatedUser();
+        if (user == null) {
+            return "redirect:/login";
+        }
         boolean changed = false;
         Map<String, String> fieldErrors = new LinkedHashMap<>();
 
+        String firstName = request != null ? request.getFirstName() : null;
+        String lastName = request != null ? request.getLastName() : null;
         String username = request != null ? request.getUsername() : null;
         String email = request != null ? request.getEmail() : null;
         String phoneNumber = request != null ? request.getPhoneNumber() : null;
+        String phoneCountry = request != null ? request.getPhoneCountry() : "GB";
         String bio = request != null ? request.getBio() : null;
+        String dateOfBirth = request != null ? request.getDateOfBirth() : null;
+
+        if (firstName != null) {
+            String trimmedFirstName = firstName.trim();
+            if (trimmedFirstName.isBlank()) {
+                fieldErrors.put("firstName", "First name cannot be empty.");
+            } else if (trimmedFirstName.length() > 100) {
+                fieldErrors.put("firstName", "First name must be 100 characters or fewer.");
+            } else if (!trimmedFirstName.equals(user.getFirstName())) {
+                user.setFirstName(trimmedFirstName);
+                changed = true;
+            }
+        }
+
+        if (lastName != null) {
+            String trimmedLastName = lastName.trim();
+            if (trimmedLastName.isBlank()) {
+                fieldErrors.put("lastName", "Last name cannot be empty.");
+            } else if (trimmedLastName.length() > 100) {
+                fieldErrors.put("lastName", "Last name must be 100 characters or fewer.");
+            } else if (!trimmedLastName.equals(user.getLastName())) {
+                user.setLastName(trimmedLastName);
+                changed = true;
+            }
+        }
 
         if (bio != null) {
             String trimmedBio = bio.trim();
@@ -303,12 +363,31 @@ public class ProfileController {
             }
         }
 
+        if (dateOfBirth != null && !dateOfBirth.isBlank()) {
+            if (user.getDateOfBirth() != null) {
+                fieldErrors.put("dateOfBirth", "Date of birth can only be set once.");
+            } else {
+                try {
+                    LocalDate parsedDate = LocalDate.parse(dateOfBirth.trim());
+                    LocalDate today = LocalDate.now(clock);
+                    if (parsedDate.isAfter(today)) {
+                        fieldErrors.put("dateOfBirth", "Date of birth cannot be in the future.");
+                    } else if (parsedDate.isBefore(today.minusYears(120))) {
+                        fieldErrors.put("dateOfBirth", "Enter a valid date of birth.");
+                    } else {
+                        user.setDateOfBirth(parsedDate);
+                        changed = true;
+                    }
+                } catch (RuntimeException ex) {
+                    fieldErrors.put("dateOfBirth", "Enter a valid date of birth.");
+                }
+            }
+        }
+
         if (username != null && !username.isBlank()) {
             String normalized = username.trim().toLowerCase(Locale.ROOT);
             if (!normalized.equalsIgnoreCase(user.getUsername())) {
-                if (!canChangeUsername(user)) {
-                    fieldErrors.put("username", "Username can only be changed every 7 days.");
-                } else if (normalized.length() < 3 || normalized.length() > 100) {
+                if (normalized.length() < 3 || normalized.length() > 100) {
                     fieldErrors.put("username", "Username must be between 3 and 100 characters.");
                 } else if (userService.usernameExists(normalized)) {
                     fieldErrors.put("username", "That username is already taken.");
@@ -338,20 +417,72 @@ public class ProfileController {
 
         if (phoneNumber != null) {
             String normalizedPhone = phoneNumber.trim();
+            String normalizedCountry = phoneCountry != null ? phoneCountry.trim().toUpperCase(Locale.ROOT) : "GB";
+            if (normalizedCountry.length() != 2) {
+                normalizedCountry = "GB";
+            }
+
+            String localDigits = extractLocalPhoneDigits(normalizedPhone);
+
             if (normalizedPhone.isBlank()) {
                 if (user.getPhoneNumber() != null && !user.getPhoneNumber().isBlank()) {
                     user.setPhoneNumber(null);
+                    user.setPhoneCountry("GB");
                     user.setPhoneVerified(false);
                     user.setPhoneVerifiedAt(null);
                     changed = true;
                 }
+            } else if (!isValidPhone(normalizedPhone)) {
+                fieldErrors.put("phoneNumber", "Please enter a valid phone number (numbers and +- only).");
+            } else if (localDigits.startsWith("0")) {
+                fieldErrors.put("phoneNumber", "Phone digits should not start with 0 after the country code.");
+            } else if (localDigits.length() > 10) {
+                fieldErrors.put("phoneNumber", "Phone number can include up to 10 digits after the country code.");
             } else if (normalizedPhone.length() > 30) {
                 fieldErrors.put("phoneNumber", "Phone number must be 30 characters or fewer.");
             } else if (!normalizedPhone.equals(user.getPhoneNumber())) {
                 user.setPhoneNumber(normalizedPhone);
+                user.setPhoneCountry(normalizedCountry);
                 user.setPhoneVerified(false);
                 user.setPhoneVerifiedAt(null);
                 changed = true;
+            }
+        }
+
+        boolean removeProfileImage = request != null && request.isRemoveProfileImage();
+        if (removeProfileImage && user.getProfileImageUrl() != null && !user.getProfileImageUrl().isBlank()) {
+            try {
+                profileImageStorageService.deleteProfileImage(user.getProfileImageUrl());
+            } catch (IOException ignored) {
+                // If file is already missing or storage cleanup fails, still clear DB reference.
+            }
+            user.setProfileImageUrl(null);
+            changed = true;
+        }
+
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String imageType = profileImage.getContentType();
+            long imageSize = profileImage.getSize();
+            boolean allowedType = "image/png".equals(imageType)
+                    || "image/jpeg".equals(imageType)
+                    || "image/webp".equals(imageType);
+
+            if (!allowedType || imageSize > (2L * 1024L * 1024L)) {
+                fieldErrors.put("profileImage", "Please choose a PNG, JPG, or WebP file under 2MB.");
+            } else {
+                try {
+                    String previousImageUrl = user.getProfileImageUrl();
+                    String imageUrl = profileImageStorageService.storeProfileImage(user.getId(), profileImage);
+                    if (imageUrl != null) {
+                        user.setProfileImageUrl(imageUrl);
+                        if (previousImageUrl != null && !previousImageUrl.equals(imageUrl)) {
+                            profileImageStorageService.deleteProfileImage(previousImageUrl);
+                        }
+                        changed = true;
+                    }
+                } catch (IllegalArgumentException | IOException ex) {
+                    fieldErrors.put("profileImage", ex.getMessage());
+                }
             }
         }
 
@@ -366,22 +497,90 @@ public class ProfileController {
             redirectAttributes.addFlashAttribute("profileUpdated", true);
         }
 
+        if (platformSubscriptionService.isPremium(user.getId(), clock)) {
+            Set<String> selectedMilestones = new LinkedHashSet<>();
+            if (milestoneKeys != null) {
+                for (String key : milestoneKeys) {
+                    if (key == null || key.isBlank()) {
+                        continue;
+                    }
+                    selectedMilestones.add(key.trim().toUpperCase(Locale.ROOT));
+                    if (selectedMilestones.size() >= 6) {
+                        break;
+                    }
+                }
+            }
+
+            userSettingsService.updateProfileCustomizer(
+                    user,
+                    bannerTheme,
+                    ringStyle,
+                    cardBackStyle,
+                    textColor,
+                        generalTextColor,
+                    selectedMilestones
+            );
+            redirectAttributes.addFlashAttribute("customiserUpdated", true);
+        }
+
         return "redirect:/profile";
+    }
+
+    @GetMapping(value = "/profile/username-availability", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Map<String, Object> usernameAvailability(@RequestParam("username") String username) {
+        User user = authHelper.getAuthenticatedUser();
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        if (user == null) {
+            result.put("available", false);
+            result.put("message", "Sign in to check usernames.");
+            return result;
+        }
+
+        String normalized = username != null ? username.trim().toLowerCase(Locale.ROOT) : "";
+        if (normalized.isBlank()) {
+            result.put("available", false);
+            result.put("message", "Username is required.");
+            return result;
+        }
+        if (normalized.length() < 3 || normalized.length() > 100) {
+            result.put("available", false);
+            result.put("message", "Username must be between 3 and 100 characters.");
+            return result;
+        }
+        if (normalized.equalsIgnoreCase(user.getUsername())) {
+            result.put("available", true);
+            result.put("message", "This is your current username.");
+            return result;
+        }
+
+        boolean taken = userService.usernameExists(normalized);
+        result.put("available", !taken);
+        result.put("message", taken ? "That username is already taken." : "Username is available.");
+        return result;
     }
 
     @PostMapping("/profile/image")
     public String updateProfileImage(@RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
                                      RedirectAttributes redirectAttributes) {
         User user = authHelper.getAuthenticatedUser();
+        if (user == null) {
+            return "redirect:/login";
+        }
         if (profileImage == null || profileImage.isEmpty()) {
             redirectAttributes.addFlashAttribute("profileImageError", "Choose an image to upload.");
             return "redirect:/profile";
         }
 
         try {
+            String previousImageUrl = user.getProfileImageUrl();
             String imageUrl = profileImageStorageService.storeProfileImage(user.getId(), profileImage);
             if (imageUrl != null) {
                 user.setProfileImageUrl(imageUrl);
+                if (previousImageUrl != null && !previousImageUrl.equals(imageUrl)) {
+                    profileImageStorageService.deleteProfileImage(previousImageUrl);
+                }
                 userRepository.save(user);
                 redirectAttributes.addFlashAttribute("profileUpdated", true);
             }
@@ -544,31 +743,35 @@ public class ProfileController {
         return "redirect:/logout?deleted=1";
     }
 
-    private boolean canChangeUsername(User user) {
-        if (user == null) {
-            return false;
-        }
-        Instant lastChanged = user.getUsernameChangedAt();
-        if (lastChanged == null) {
-            return true;
-        }
-        Instant now = Instant.now(clock);
-        return lastChanged.plus(7, ChronoUnit.DAYS).isBefore(now) || lastChanged.plus(7, ChronoUnit.DAYS).equals(now);
-    }
-
-    private Instant getNextUsernameChangeAt(User user) {
-        if (user == null || user.getUsernameChangedAt() == null) {
-            return null;
-        }
-        return user.getUsernameChangedAt().plus(7, ChronoUnit.DAYS);
-    }
-
     private boolean isValidEmail(String email) {
         if (email == null || email.isBlank()) {
             return false;
         }
         Pattern pattern = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
         return pattern.matcher(email).matches();
+    }
+
+    private boolean isValidPhone(String phone) {
+        if (phone == null || phone.isBlank()) {
+            return false;
+        }
+        // Allow numbers, spaces, hyphens, plus, and parentheses
+        // Require at least 5 digits
+        Pattern pattern = Pattern.compile("^[+]?[\\d\\s\\-()]+$");
+        if (!pattern.matcher(phone).matches()) {
+            return false;
+        }
+        // Count digits (must have at least 5)
+        long digitCount = phone.replaceAll("\\D", "").length();
+        return digitCount >= 5;
+    }
+
+    private String extractLocalPhoneDigits(String phone) {
+        if (phone == null || phone.isBlank()) {
+            return "";
+        }
+        String strippedCountry = phone.trim().replaceFirst("^\\+\\d+\\s*", "");
+        return strippedCountry.replaceAll("\\D", "");
     }
 
     private Set<String> parseCsvKeys(String raw, int max) {
@@ -605,10 +808,10 @@ public class ProfileController {
         if (levelProgress != null && levelProgress.getLevel() >= 10) {
             milestones.add(new MilestoneOption("LEVEL_10", "Reached Level 10", "You reached level 10 in progress."));
         }
-        if (user != null && Boolean.TRUE.equals(user.getEmailVerified())) {
+        if (user != null && user.isEmailVerified()) {
             milestones.add(new MilestoneOption("VERIFIED_EMAIL", "Verified email", "Your email has been verified."));
         }
-        if (user != null && user.getPhoneNumber() != null && Boolean.TRUE.equals(user.getPhoneVerified())) {
+        if (user != null && user.getPhoneNumber() != null && user.isPhoneVerified()) {
             milestones.add(new MilestoneOption("VERIFIED_PHONE", "Verified phone", "Your phone has been verified."));
         }
         if (platformSubscription != null) {

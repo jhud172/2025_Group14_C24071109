@@ -181,6 +181,12 @@ public class UserSettings {
     @Column(name = "profile_card_back_style", length = 40)
     private String profileCardBackStyle;
 
+    @Column(name = "profile_text_color", length = 7)
+    private String profileTextColor;
+
+    @Column(name = "profile_bio_text_color", length = 7)
+    private String profileBioTextColor;
+
     @Column(name = "profile_milestone_keys", length = 500)
     private String profileMilestoneKeys;
 

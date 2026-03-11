@@ -78,6 +78,8 @@ public interface UserSettingsService {
             String bannerTheme,
             String ringStyle,
             String cardBackStyle,
+            String textColor,
+            String generalTextColor,
             java.util.Set<String> milestoneKeys
     );
 }

@@ -6,6 +6,20 @@ module.exports = {
     './src/main/java/**/*.java',
     './src/main/resources/static/js/**/*.js',
   ],
+  safelist: [
+    {
+      pattern: /profile-banner-pill--(none|aurora|sunset|ocean|rose|carbon|lagoon|meadow|midnight)/,
+    },
+    {
+      pattern: /profile-avatar-ring--(none|neon_dual|solar_flare|crystal|starry_spark|aurora_pulse|comet_trail|ember_crown|king_crown|cyber_arms|ufo_beam)/,
+    },
+    {
+      pattern: /profile-card-back-theme--(none|glass|topo|carbon|matrix|nebula|circuit|sunburst|retro_grid)/,
+    },
+    {
+      pattern: /profile-preview-card-back--(none|glass|topo|carbon|matrix|nebula|circuit|sunburst|retro_grid)/,
+    },
+  ],
   theme: {
     extend: {
       screens: {

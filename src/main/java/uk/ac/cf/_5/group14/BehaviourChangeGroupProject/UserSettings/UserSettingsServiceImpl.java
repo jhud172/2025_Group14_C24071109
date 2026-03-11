@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 
-@Service
+@Service("userSettingsService")
 public class UserSettingsServiceImpl implements UserSettingsService {
 
     private static final List<String> ALLOWED_WEEKLY_METRICS = List.of(
@@ -35,30 +36,49 @@ public class UserSettingsServiceImpl implements UserSettingsService {
     );
 
     private static final List<String> ALLOWED_PROFILE_BANNER_THEMES = List.of(
+        "NONE",
         "AURORA",
         "SUNSET",
         "OCEAN",
         "ROSE",
-        "CARBON"
+        "CARBON",
+        "LAGOON",
+        "MEADOW",
+        "MIDNIGHT"
     );
 
     private static final List<String> ALLOWED_PROFILE_RING_STYLES = List.of(
         "NONE",
         "NEON_DUAL",
         "SOLAR_FLARE",
-        "CRYSTAL"
+        "CRYSTAL",
+        "STARRY_SPARK",
+        "AURORA_PULSE",
+        "COMET_TRAIL",
+        "EMBER_CROWN",
+        "KING_CROWN",
+        "CYBER_ARMS",
+        "UFO_BEAM"
     );
 
     private static final List<String> ALLOWED_PROFILE_CARD_BACK_STYLES = List.of(
+        "NONE",
         "GLASS",
         "TOPO",
         "CARBON",
-        "MATRIX"
+        "MATRIX",
+        "NEBULA",
+        "CIRCUIT",
+        "SUNBURST",
+        "RETRO_GRID"
     );
 
     private static final String DEFAULT_PROFILE_BANNER_THEME = "AURORA";
     private static final String DEFAULT_PROFILE_RING_STYLE = "NEON_DUAL";
     private static final String DEFAULT_PROFILE_CARD_BACK_STYLE = "GLASS";
+    private static final String DEFAULT_PROFILE_TEXT_COLOR = "#F8FAFC";
+    private static final String DEFAULT_PROFILE_BIO_TEXT_COLOR = "#CBD5E1";
+    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("^#[0-9A-Fa-f]{6}$");
 
     private final UserSettingsRepository userSettingsRepository;
     private final UserRepository userRepository;
@@ -107,6 +127,8 @@ public class UserSettingsServiceImpl implements UserSettingsService {
                     newSettings.setProfileBannerTheme(DEFAULT_PROFILE_BANNER_THEME);
                     newSettings.setProfileRingStyle(DEFAULT_PROFILE_RING_STYLE);
                     newSettings.setProfileCardBackStyle(DEFAULT_PROFILE_CARD_BACK_STYLE);
+                    newSettings.setProfileTextColor(DEFAULT_PROFILE_TEXT_COLOR);
+                    newSettings.setProfileBioTextColor(DEFAULT_PROFILE_BIO_TEXT_COLOR);
                     newSettings.setProfileMilestoneKeys("");
                     return userSettingsRepository.save(newSettings);
                 });
@@ -133,6 +155,14 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         }
         if (settings.getProfileCardBackStyle() == null || settings.getProfileCardBackStyle().isBlank()) {
             settings.setProfileCardBackStyle(DEFAULT_PROFILE_CARD_BACK_STYLE);
+            settings = userSettingsRepository.save(settings);
+        }
+        if (settings.getProfileTextColor() == null || settings.getProfileTextColor().isBlank()) {
+            settings.setProfileTextColor(DEFAULT_PROFILE_TEXT_COLOR);
+            settings = userSettingsRepository.save(settings);
+        }
+        if (settings.getProfileBioTextColor() == null || settings.getProfileBioTextColor().isBlank()) {
+            settings.setProfileBioTextColor(DEFAULT_PROFILE_BIO_TEXT_COLOR);
             settings = userSettingsRepository.save(settings);
         }
         if (settings.getProfileMilestoneKeys() == null) {
@@ -437,6 +467,8 @@ public class UserSettingsServiceImpl implements UserSettingsService {
                                                 String bannerTheme,
                                                 String ringStyle,
                                                 String cardBackStyle,
+                                                String textColor,
+                                                String generalTextColor,
                                                 Set<String> milestoneKeys) {
         UserSettings settings = getOrCreate(user);
         if (settings == null) {
@@ -446,6 +478,8 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         settings.setProfileBannerTheme(normalizeKey(bannerTheme, ALLOWED_PROFILE_BANNER_THEMES, DEFAULT_PROFILE_BANNER_THEME));
         settings.setProfileRingStyle(normalizeKey(ringStyle, ALLOWED_PROFILE_RING_STYLES, DEFAULT_PROFILE_RING_STYLE));
         settings.setProfileCardBackStyle(normalizeKey(cardBackStyle, ALLOWED_PROFILE_CARD_BACK_STYLES, DEFAULT_PROFILE_CARD_BACK_STYLE));
+        settings.setProfileTextColor(normalizeHexColor(textColor, DEFAULT_PROFILE_TEXT_COLOR));
+        settings.setProfileBioTextColor(normalizeHexColor(generalTextColor, DEFAULT_PROFILE_BIO_TEXT_COLOR));
         settings.setProfileMilestoneKeys(String.join(",", normalizeMilestoneKeys(milestoneKeys)));
 
         return userSettingsRepository.save(settings);
@@ -457,6 +491,17 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         }
         String normalized = value.trim().toUpperCase(Locale.ROOT);
         return allowed.contains(normalized) ? normalized : fallback;
+    }
+
+    private String normalizeHexColor(String value, String fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        String normalized = value.trim();
+        if (!HEX_COLOR_PATTERN.matcher(normalized).matches()) {
+            return fallback;
+        }
+        return normalized.toUpperCase(Locale.ROOT);
     }
 
     private List<String> normalizeMilestoneKeys(Set<String> selected) {

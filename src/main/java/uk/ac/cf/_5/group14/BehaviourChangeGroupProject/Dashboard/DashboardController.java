@@ -176,6 +176,8 @@ public class DashboardController {
 
         // User identity and subscription
         model.addAttribute("userFirstName", user.getFirstName());
+        model.addAttribute("dashboardUsername", user.getUsername());
+        model.addAttribute("dashboardUserImageUrl", user.getProfileImageUrl());
         model.addAttribute("userIsPremium", summary.isPremium());
         model.addAttribute("hasTrainerConnected", trainerClientLinkRepository.findActiveByClientId(user.getId()).isPresent());
 

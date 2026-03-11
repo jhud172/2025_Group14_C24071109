@@ -439,7 +439,7 @@
             <div class="flex shrink-0 items-center">
                 <a th:href="@{/}"
                    class="nav-brand-link focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30">
-                    <img alt="One To One Logo" th:src="@{/img/logo.png}" class="nav-brand-logo"/>
+                    <img alt="One To One Logo" th:src="@{/img/brand/logo.png}" class="nav-brand-logo"/>
                     <span class="nav-brand-name hidden sm:inline">One To One</span>
                 </a>
             </div>
@@ -628,9 +628,23 @@
                             </button>
                         </div>
                         <div class="pt-2 mt-2 border-t border-slate-200 dark:border-slate-800">
-                            <div class="authsurface w-full justify-center">
-                                <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
+                            <div sec:authorize="isAuthenticated()" class="flex items-center justify-between gap-3 rounded-xl bg-slate-100/80 px-3 py-2 dark:bg-slate-800/70">
+                                <a th:href="@{/profile}" class="text-sm font-semibold text-slate-700 hover:text-emerald-700 dark:text-slate-200 dark:hover:text-emerald-400" sec:authentication="name">user</a>
+                                <form th:action="@{/logout}" method="post" class="m-0">
+                                    <input type="hidden" th:if="${_csrf != null}"
+                                           th:name="${_csrf.parameterName}"
+                                           th:value="${_csrf.token}"/>
+                                    <button type="submit"
+                                            class="inline-flex h-8 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                                        Logout
+                                    </button>
+                                </form>
                             </div>
+                            <a sec:authorize="!isAuthenticated()"
+                               th:href="@{/login}"
+                               class="inline-flex w-full items-center justify-center rounded-xl border border-emerald-500 bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                                Login
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -639,6 +653,6 @@
     </nav>
 
     <!-- Toggle behaviour -->
-    <script th:src="@{/js/navbar-page.js}"></script>
+    <script th:src="@{/js/core/navbar-page.js}"></script>
     <style>@keyframes navDevPulse{0%,100%{opacity:1}50%{opacity:.35}}</style>
 </header>

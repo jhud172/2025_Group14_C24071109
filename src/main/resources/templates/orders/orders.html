@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Orders - My Orders</title>
+    <link th:href="@{/css/app.css}" rel="stylesheet">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950">
+
+<!-- Main container -->
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Your Orders</h1>
+        <p class="mt-2 text-slate-600 dark:text-slate-400">View and track all your orders</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-8">
+        <form th:action="@{/orders}" method="get" class="flex gap-3 flex-wrap">
+            <div class="flex-1 min-w-64">
+                <input type="text" name="search" th:value="${search}"
+                       placeholder="Search by order ID or product name..."
+                       class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder-slate-500 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-400" />
+            </div>
+            <select name="status" th:value="${statusFilter}"
+                    class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+                <option value="">All statuses</option>
+                <option value="PENDING" th:selected="${statusFilter == 'PENDING'}">Pending</option>
+                <option value="PROCESSING" th:selected="${statusFilter == 'PROCESSING'}">Processing</option>
+                <option value="SHIPPED" th:selected="${statusFilter == 'SHIPPED'}">In Transit</option>
+                <option value="OUT_FOR_DELIVERY" th:selected="${statusFilter == 'OUT_FOR_DELIVERY'}">Out for Delivery</option>
+                <option value="DELIVERED" th:selected="${statusFilter == 'DELIVERED'}">Delivered</option>
+                <option value="CANCELLED" th:selected="${statusFilter == 'CANCELLED'}">Cancelled</option>
+            </select>
+            <button type="submit" class="rounded-lg bg-emerald-600 px-6 py-2.5 font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors dark:bg-emerald-600 dark:hover:bg-emerald-700">
+                Search
+            </button>
+        </form>
+    </div>
+
+    <!-- Active Orders -->
+    <div class="mb-12" th:if="${!activeOrders.isEmpty()}">
+        <h2 class="mb-4 text-xl font-bold text-slate-900 dark:text-white">Active Orders</h2>
+        <div class="space-y-4">
+            <div th:each="order : ${activeOrders}" class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <!-- Order Header -->
+                <div class="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Order</p>
+                        <p class="text-2xl font-bold text-slate-900 dark:text-white" th:text="'#' + ${order.id}">12345</p>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400" th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy')}">01 Jan 2026</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-400">Status</p>
+                        <span th:classappend="${order.shippingStatus.name() == 'SHIPPED' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : order.shippingStatus.name() == 'OUT_FOR_DELIVERY' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' : order.shippingStatus.name() == 'PENDING' ? 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'}"
+                              class="inline-block rounded-full px-4 py-1.5 text-sm font-semibold"
+                              th:text="${order.shippingStatus.displayName}">
+                            Status
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="mb-4 border-t border-slate-200 pt-4 dark:border-slate-800">
+                    <p class="mb-3 font-semibold text-slate-900 dark:text-white">Items</p>
+                    <ul class="space-y-2">
+                        <li th:each="item : ${order.items}" class="flex justify-between text-sm text-slate-700 dark:text-slate-300">
+                            <span th:text="${item.productNameSnapshot} + ' x' + ${item.quantity}">Product x1</span>
+                            <span class="font-semibold" th:text="'£' + ${#numbers.formatDecimal(item.priceSnapshot, 1, 2)}">£0.00</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Shipping Info -->
+                <div class="mb-4 border-t border-slate-200 pt-4 dark:border-slate-800">
+                    <p class="mb-3 font-semibold text-slate-900 dark:text-white">Shipping</p>
+                    <div class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                        <p th:if="${order.trackingNumber}" class="flex justify-between">
+                            <span>Tracking number:</span>
+                            <span class="font-mono font-semibold" th:text="${order.trackingNumber}">ABC123456</span>
+                        </p>
+                        <p th:if="${order.shippedAt}" class="flex justify-between">
+                            <span>Shipped:</span>
+                            <span th:text="${#temporals.format(order.shippedAt, 'dd MMM yyyy')}">01 Jan 2026</span>
+                        </p>
+                        <p th:if="${order.estimatedDeliveryDate}" class="flex justify-between">
+                            <span>Est. delivery:</span>
+                            <span th:text="${#temporals.format(order.estimatedDeliveryDate, 'dd MMM yyyy')}">01 Jan 2026</span>
+                        </p>
+                        <p th:if="${!order.trackingNumber && order.shippingStatus.name() != 'PENDING'}" class="text-slate-500 italic">
+                            Tracking info will be available once item ships
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Order Total -->
+                <div class="border-t border-slate-200 pt-4 dark:border-slate-800">
+                    <div class="flex justify-between text-lg font-bold text-slate-900 dark:text-white">
+                        <span>Total:</span>
+                        <span th:text="'£' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">£0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completed Orders -->
+    <div class="mb-12" th:if="${!completedOrders.isEmpty()}">
+        <h2 class="mb-4 text-xl font-bold text-slate-900 dark:text-white">Completed Orders</h2>
+        <div class="space-y-4">
+            <div th:each="order : ${completedOrders}" class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm opacity-75 dark:border-slate-800 dark:bg-slate-900">
+                <!-- Order Header -->
+                <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Order</p>
+                        <p class="text-2xl font-bold text-slate-900 dark:text-white" th:text="'#' + ${order.id}">12345</p>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400" th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy')}">01 Jan 2026</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-400">Status</p>
+                        <span class="inline-block rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+                            ✓ Delivered <span th:if="${order.deliveredAt}" th:text="${#temporals.format(order.deliveredAt, 'dd MMM')}">01 Jan</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancelled Orders -->
+    <div th:if="${!cancelledOrders.isEmpty()}">
+        <h2 class="mb-4 text-xl font-bold text-slate-900 dark:text-white">Cancelled Orders</h2>
+        <div class="space-y-4">
+            <div th:each="order : ${cancelledOrders}" class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm opacity-60 dark:border-slate-800 dark:bg-slate-900">
+                <!-- Order Header -->
+                <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Order</p>
+                        <p class="text-2xl font-bold text-slate-900 dark:text-white" th:text="'#' + ${order.id}">12345</p>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400" th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy')}">01 Jan 2026</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="mb-2 text-sm font-semibold text-slate-600 dark:text-slate-400">Status</p>
+                        <span class="inline-block rounded-full bg-red-100 px-4 py-1.5 text-sm font-semibold text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                            <span th:switch="${order.shippingStatus.name()}">
+                                <span th:case="'CANCELLED'">Cancelled</span>
+                                <span th:case="'RETURNED'">Returned</span>
+                                <span th:case="'FAILED_DELIVERY'">Delivery Failed</span>
+                                <span th:default="">Cancelled</span>
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${activeOrders.isEmpty() && completedOrders.isEmpty() && cancelledOrders.isEmpty()}"
+         class="rounded-lg border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-slate-600 dark:text-slate-400">No orders found</p>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-500">Try adjusting your search filters</p>
+    </div>
+</div>
+
+</body>
+</html>

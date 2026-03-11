@@ -747,9 +747,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const dashboardPrompt = document.getElementById("charlieDashboardPrompt");
     if (dashboardPrompt && dashboardPrompt.dataset.message) {
-        setTimeout(() => {
-            showCharlieOutput(dashboardPrompt.dataset.message);
-        }, 140);
+        const accountKey = (dashboardPrompt.dataset.account || "anonymous").trim().toLowerCase();
+        const promptSeenKey = `charlieDashboardPromptSeen:${accountKey}`;
+        let promptAlreadySeen = false;
+        try {
+            promptAlreadySeen = window.localStorage.getItem(promptSeenKey) === "1";
+        } catch (_) {
+            promptAlreadySeen = false;
+        }
+
+        if (!promptAlreadySeen) {
+            setTimeout(() => {
+                showCharlieOutput(dashboardPrompt.dataset.message);
+                try {
+                    window.localStorage.setItem(promptSeenKey, "1");
+                } catch (_) {
+                    // Ignore storage failures (private mode, quota, blocked storage).
+                }
+            }, 140);
+        }
     }
 
     if (proChatBtn) {

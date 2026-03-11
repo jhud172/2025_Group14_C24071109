@@ -29,7 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/access-denied").setViewName("error/403");
         registry.addViewController("/confirm-logout").setViewName("auth/confirm-logout");
-        registry.addViewController("/favicon.ico").setViewName("redirect:/img/logo.png");
+        registry.addViewController("/favicon.ico").setViewName("redirect:/img/brand/logo.png");
 
     }
 
