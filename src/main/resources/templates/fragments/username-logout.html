@@ -51,7 +51,6 @@
                                     <svg class="nav-premium-badge__icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                     </svg>
-                                    <span th:if="${isPremiumVerified}" class="nav-premium-verified-tick" aria-label="Profile verified" title="Profile verified">✓</span>
                                 </button>
                                 <div id="premium-tooltip-floating" class="nav-premium-tooltip" role="status">
                                     <th:block th:if="${navSub != null and navSub.plan.name() == 'INFINITE'}">∞ Lifetime Premium</th:block>
@@ -111,9 +110,10 @@
                                 <p class="floating-profile-card__section-title"
                                     th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';font-weight:800;' : ''}">Milestones</p>
                         <div class="floating-profile-card__milestones" th:if="${selectedMilestones != null and #arrays.length(selectedMilestones) > 0}">
-                                <span class="floating-profile-card__milestone"
+                                                                <span class="floating-profile-card__milestone"
                                     th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';' : ''}"
-                                  th:each="mk,iter : ${selectedMilestones}" th:if="${iter.index < 3}" th:text="${#strings.replace(mk, '_', ' ')}">MILESTONE</span>
+                                                                    th:each="mk,iter : ${selectedMilestones}" th:if="${iter.index < 3}"
+                                                                    th:text="${mk == 'FIRST_WORKOUT' ? 'First workout logged' : (mk == 'TEN_WORKOUTS' ? '10 workouts' : (mk == 'LEVEL_5' ? 'Reached Level 5' : (mk == 'LEVEL_10' ? 'Reached Level 10' : (mk == 'VERIFIED_EMAIL' ? 'Verified email' : (mk == 'VERIFIED_PHONE' ? 'Verified phone' : (mk == 'PREMIUM_MEMBER' ? 'Premium member' : #strings.replace(mk, '_', ' ')))))))}">MILESTONE</span>
                         </div>
                         <p class="floating-profile-card__bio"
                                th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';font-weight:400;' : ''}"

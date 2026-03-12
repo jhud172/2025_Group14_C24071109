@@ -159,6 +159,8 @@ public class DashboardController {
         model.addAttribute("profileBannerTheme", profileBannerTheme);
         model.addAttribute("profileRingStyle", profileRingStyle);
         model.addAttribute("profileCardBackStyle", profileCardBackStyle);
+        model.addAttribute("profileNameColor", settings != null ? settings.getProfileTextColor() : null);
+        model.addAttribute("profileGeneralTextColor", settings != null ? settings.getProfileBioTextColor() : null);
         model.addAttribute("selectedProfileMilestoneTitles", selectedMilestoneTitles);
         model.addAttribute("weeklySummaryCards",
             buildWeeklySummaryCards(
@@ -176,7 +178,9 @@ public class DashboardController {
 
         // User identity and subscription
         model.addAttribute("userFirstName", user.getFirstName());
+        model.addAttribute("dashboardDisplayName", user.getFullName());
         model.addAttribute("dashboardUsername", user.getUsername());
+        model.addAttribute("dashboardUserBio", user.getBio());
         model.addAttribute("dashboardUserImageUrl", user.getProfileImageUrl());
         model.addAttribute("userIsPremium", summary.isPremium());
         model.addAttribute("hasTrainerConnected", trainerClientLinkRepository.findActiveByClientId(user.getId()).isPresent());

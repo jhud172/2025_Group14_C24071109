@@ -213,10 +213,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function renderCountdown() {
             if (!targetDate || Number.isNaN(targetDate.getTime())) {
-                upcomingCountdown.textContent = "--:--:--";
-                upcomingRelative.textContent = "Time unavailable";
+                upcomingCountdown.textContent = "";
+                upcomingCountdown.classList.add("hidden");
+                upcomingRelative.textContent = "This is recommended.";
                 return;
             }
+
+            upcomingCountdown.classList.remove("hidden");
 
             const now = new Date();
             const diffMs = targetDate.getTime() - now.getTime();

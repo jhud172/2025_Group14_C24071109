@@ -45,14 +45,13 @@
                                     id="profile-identity-banner__name"
                                     th:text="${user != null ? user.fullName : 'Profile'}">Profile</h1>
                                   <span th:if="${isInfinite or isPremiumActive}"
-                                      class="profile-identity-premium-chip group profile-preview-lock"
+                                      class="nav-premium-badge premium-orb-badge group profile-preview-lock"
                                       tabindex="0"
                                       role="button"
                                       aria-label="Premium membership details">
-                                    <svg class="profile-identity-premium-chip__icon" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                    <svg class="nav-premium-badge__icon" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                     </svg>
-                                    <span th:if="${isPremiumVerified}" class="profile-premium-verified-tick" aria-label="Profile verified" title="Profile verified">✓</span>
                                     <span class="profile-identity-premium-chip__tooltip"
                                           th:text="${isInfinite ? 'Lifetime Premium active' : 'Premium membership active'}">Premium membership active</span>
                                 </span>
@@ -66,7 +65,7 @@
                 </div>
 
                 <!-- Profile completion -->
-                <div id="profile-completion-widget"
+                 <div id="profile-completion-widget"
                      class="profile-completion-widget w-full"
                      aria-label="Profile completion guidance"
                      tabindex="0"
@@ -81,55 +80,15 @@
                             <div id="profile-completion-progress-bar" class="profile-completion-widget__fill" th:style="'width:' + ${completionPercent} + '%'" style="width:80%"></div>
                             <span class="profile-completion-widget__glow" aria-hidden="true"></span>
                         </div>
+                        <div id="profile-completion-complete-bar" class="profile-completion-widget__complete hidden">Profile completed</div>
                     </div>
                     <div id="profile-completion-tooltip"
                          class="profile-completion-tooltip"
                          aria-hidden="true">
-                        <p class="profile-completion-tooltip__eyebrow">Next profile step</p>
+                        <p class="profile-completion-tooltip__eyebrow">Profile radar checklist</p>
                         <p id="profile-completion-title" class="profile-completion-tooltip__title">Complete your profile</p>
                         <p id="profile-completion-message" class="profile-completion-tooltip__message">Add the next missing item to improve your profile.</p>
                         <a id="profile-completion-action" href="#" class="profile-completion-tooltip__action">Open item</a>
-                    </div>
-                </div>
-
-                <!-- Subscription badge -->
-                <div th:with="sub=${platformSubscription},
-                              isInfinite=${sub != null and sub.plan.name() == 'INFINITE'},
-                              isActive=${sub != null and (sub.status.name() == 'ACTIVE' or sub.status.name() == 'EXPIRES')},
-                              isExpired=${sub != null and sub.status.name() == 'CANCELLED'},
-                              isPremiumVerified=${user != null and user.emailVerified and user.phoneVerified and user.profileImageUrl != null and user.bio != null and !#strings.isEmpty(user.bio) and user.username != null and !#strings.isEmpty(user.username) and user.firstName != null and !#strings.isEmpty(user.firstName) and user.lastName != null and !#strings.isEmpty(user.lastName) and user.dateOfBirth != null}">
-                    <!-- Infinite -->
-                    <div th:if="${isInfinite}"
-                        id="profile-sidebar-premium-active"
-                        class="profile-preview-lock inline-flex items-center gap-1.5 rounded-full border border-violet-400/50 bg-violet-50 px-3 py-1 text-xs font-bold text-violet-700 dark:border-violet-800/50 dark:bg-violet-900/20 dark:text-violet-300">
-                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636C16.948 4.22 15.026 3.25 13 3.25s-3.948.97-5.364 2.386L5.636 7.636m12.728 0 2 2m-2-2-2 2M5.636 7.636l-2 2m2-2 2 2M7.636 18.364C9.052 19.78 10.974 20.75 13 20.75s3.948-.97 5.364-2.386l2-2m-14.728 0-2-2m2 2 2-2"/>
-                        </svg>
-                        <span>∞ Lifetime</span>
-                        <span th:if="${isPremiumVerified}" class="profile-premium-verified-tick" aria-label="Profile verified" title="Profile verified">✓</span>
-                    </div>
-                    <!-- Active premium -->
-                    <div th:if="${!isInfinite and isActive}"
-                        id="profile-sidebar-premium-active"
-                        class="profile-preview-lock inline-flex items-center gap-1.5 rounded-full border border-emerald-400/70 bg-gradient-to-r from-emerald-100 via-lime-100 to-emerald-100 px-3.5 py-1.5 text-xs font-bold text-emerald-800 shadow-md ring-1 ring-emerald-300/70 dark:border-emerald-500/60 dark:from-emerald-900/50 dark:via-emerald-800/40 dark:to-emerald-900/50 dark:text-emerald-300 dark:ring-emerald-500/50">
-                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span th:text="${sub.plan.name() == 'MONTHLY' ? 'Premium Monthly' : 'Premium Yearly'}">Premium</span>
-                        <span th:if="${isPremiumVerified}" class="profile-premium-verified-tick" aria-label="Profile verified" title="Profile verified">✓</span>
-                    </div>
-                    <!-- Inactive / expired -->
-                    <div th:if="${isExpired}"
-                         class="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">
-                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                        <span>Inactive</span>
-                    </div>
-                    <!-- Free -->
-                    <div th:if="${sub == null}"
-                         class="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-400">
-                        <span>Free</span>
                     </div>
                 </div>
 
@@ -139,10 +98,11 @@
                          th:style="${userSettings != null and userSettings.profileBioTextColor != null and !#strings.isEmpty(userSettings.profileBioTextColor) ? 'color:' + userSettings.profileBioTextColor + ';' : ''}"
                          th:text="${user != null &amp;&amp; user.bio != null ? user.bio : 'No bio yet — add one in Edit Profile.'}">Bio</p>
 
-                 <div class="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 px-3 py-3 dark:border-slate-700/70 dark:bg-slate-900/35"
-                     th:if="${selectedProfileMilestones != null and selectedProfileMilestones.size() > 0}">
+                 <div id="profile-sidebar-milestones-panel"
+                     class="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 px-3 py-3 dark:border-slate-700/70 dark:bg-slate-900/35"
+                     th:classappend="${selectedProfileMilestones == null or selectedProfileMilestones.size() == 0} ? ' hidden' : ''">
                     <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">Visible milestones</p>
-                    <div class="mt-2 flex flex-wrap gap-1.5">
+                    <div id="profile-sidebar-milestones-list" class="mt-2 flex flex-wrap justify-center gap-1.5">
                         <span th:each="ms : ${profileMilestoneOptions}"
                               th:if="${selectedProfileMilestones.contains(ms.key)}"
                               class="inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:border-emerald-700/50 dark:bg-emerald-900/25 dark:text-emerald-300"
@@ -184,9 +144,7 @@
                     </svg>
                     <span>Customise Profile</span>
                 </button>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 text-center">Open this mode to edit banners, ring style, card back, milestones, and profile details, then use the save button in the details panel.</p>
-
-                <div class="rounded-2xl bg-slate-50/80 px-3 py-3 dark:bg-slate-900/40">
+                <div class="mt-3 rounded-2xl bg-slate-50/80 px-3 py-3 dark:bg-slate-900/40">
                     <p class="mb-2 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account actions</p>
                     <div class="flex flex-col gap-2.5 profile-sidebar-actions">
                         <a href="/goals"
@@ -232,7 +190,7 @@
         <div class="profile-main-content">
 
             <!-- PROFILE DETAILS SECTION -->
-            <section class="profile-section">
+            <section class="profile-section relative">
                 <div class="profile-section-header">
                     <div>
                         <h2 class="profile-section-title">Profile Details</h2>
@@ -255,10 +213,10 @@
                     <div th:if="${deleteError}" class="profile-alert-error" th:text="${deleteError}">Delete error.</div>
                 </div>
 
-                    <div id="profile-unsaved-modal" class="hidden fixed inset-0 z-[70]" aria-hidden="true">
-                        <div class="absolute inset-0 bg-slate-900/55"></div>
-                        <div class="absolute inset-0 flex items-center justify-center p-4">
-                            <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                    <div id="profile-unsaved-modal" class="hidden absolute inset-0 z-[70] overflow-hidden rounded-3xl" aria-hidden="true">
+                        <div class="absolute inset-0 rounded-3xl bg-slate-900/18 backdrop-blur-sm dark:bg-slate-950/36"></div>
+                        <div class="absolute inset-0 flex items-center justify-center p-4 sm:p-6">
+                            <div class="w-full max-w-md rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white to-slate-50 p-5 shadow-2xl ring-1 ring-emerald-200/70 dark:border-slate-700 dark:from-slate-900 dark:to-slate-950 dark:ring-emerald-500/30">
                                 <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Unsaved changes</h3>
                                 <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">You have unsaved changes. Would you like to save them before finishing customising?</p>
                                 <div class="mt-4 flex flex-wrap justify-end gap-2">
@@ -316,9 +274,10 @@
                         <div class="min-w-0">
                             <p class="profile-field-heading" th:text="#{profile.phone}">Phone</p>
                             <div class="profile-inline-field profile-phone-field mt-1">
-                                <div class="profile-inline-view flex flex-wrap items-center gap-2">
+                                                                <div class="profile-inline-view flex flex-wrap items-center gap-2"
+                                                                         th:with="dialCode=${user != null and user.phoneCountry != null ? (user.phoneCountry == 'US' ? '+1' : (user.phoneCountry == 'CA' ? '+1' : (user.phoneCountry == 'AU' ? '+61' : (user.phoneCountry == 'NZ' ? '+64' : (user.phoneCountry == 'IE' ? '+353' : (user.phoneCountry == 'DE' ? '+49' : (user.phoneCountry == 'FR' ? '+33' : (user.phoneCountry == 'NL' ? '+31' : (user.phoneCountry == 'BE' ? '+32' : (user.phoneCountry == 'ES' ? '+34' : (user.phoneCountry == 'IT' ? '+39' : (user.phoneCountry == 'JP' ? '+81' : (user.phoneCountry == 'IN' ? '+91' : (user.phoneCountry == 'BR' ? '+55' : (user.phoneCountry == 'MX' ? '+52' : (user.phoneCountry == 'SG' ? '+65' : (user.phoneCountry == 'HK' ? '+852' : (user.phoneCountry == 'ZA' ? '+27' : '+44')))))))))))))))))) : '+44'}">
                                     <p class="text-sm font-semibold text-slate-800 dark:text-slate-100"
-                                   th:text="${user != null &amp;&amp; user.phoneNumber != null ? user.phoneNumber : #messages.msg('profile.phone.notAdded')}">Not added</p>
+                                                                     th:text="${user != null &amp;&amp; user.phoneNumber != null ? (#strings.startsWith(user.phoneNumber, '+') ? user.phoneNumber : dialCode + ' ' + user.phoneNumber) : #messages.msg('profile.phone.notAdded')}">Not added</p>
                                     <span th:if="${user != null &amp;&amp; user.phoneNumber != null &amp;&amp; user.phoneVerified}" id="profile-phone-verified-badge"
                                         class="profile-badge-verified"
                                         th:text="#{profile.verified}">Verified</span>
@@ -386,7 +345,18 @@
 
                     <div class="grid gap-x-8 gap-y-4 py-4 sm:grid-cols-2">
                         <div class="min-w-0">
-                            <p class="profile-field-heading">Date of birth</p>
+                            <div class="profile-field-heading-with-info">
+                                <p class="profile-field-heading">Date of birth</p>
+                                <button type="button"
+                                        class="profile-warning-hint"
+                                        aria-label="Date of birth can only be set once and cannot be changed"
+                                        tabindex="0">
+                                    <svg class="profile-warning-hint__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-7.4 12.8A2 2 0 004.62 20h14.76a2 2 0 001.73-3.34l-7.4-12.8a2 2 0 00-3.46 0z"/>
+                                    </svg>
+                                    <span class="profile-warning-hint__tooltip" role="tooltip">One-time input: once saved, date of birth cannot be changed.</span>
+                                </button>
+                            </div>
                             <div class="profile-inline-field mt-1">
                                 <div class="profile-inline-view flex flex-wrap items-center gap-2">
                                     <p class="text-sm font-semibold text-slate-800 dark:text-slate-100"
@@ -480,8 +450,57 @@
                         <a th:if="${!isPremium}" th:href="@{/pricing}" class="profile-btn-small">Unlock Premium</a>
                     </div>
 
-                    <div th:if="${!isPremium}" class="mt-3 rounded-xl border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/20 dark:text-amber-300">
-                        Upgrade to Premium to enable full profile customisation and milestone showcase.
+                    <div class="profile-inline-view mt-4" th:if="${!isPremium}">
+                        <div class="rounded-2xl border border-emerald-300/70 bg-gradient-to-br from-emerald-50 via-amber-50/60 to-emerald-50/70 p-4 shadow-sm dark:border-emerald-700/50 dark:from-emerald-900/20 dark:via-amber-900/10 dark:to-emerald-900/15">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Premium customiser</p>
+                            <p class="mt-1 text-sm text-slate-700 dark:text-slate-200">Upgrade to unlock full profile styling controls and showcase your personal brand.</p>
+                            <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200">Banner theme styles</div>
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200">Avatar ring effects</div>
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200">Card back design</div>
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200">Username + general text colours</div>
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200 sm:col-span-2">Visible milestone showcase (up to 6)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-inline-view mt-4" th:if="${isPremium}"
+                         th:with="bannerChoice=${userSettings != null and userSettings.profileBannerTheme != null and !#strings.isEmpty(userSettings.profileBannerTheme) ? userSettings.profileBannerTheme : 'AURORA'},
+                                  ringChoice=${userSettings != null and userSettings.profileRingStyle != null and !#strings.isEmpty(userSettings.profileRingStyle) ? userSettings.profileRingStyle : 'NEON_DUAL'},
+                                  backChoice=${userSettings != null and userSettings.profileCardBackStyle != null and !#strings.isEmpty(userSettings.profileCardBackStyle) ? userSettings.profileCardBackStyle : 'GLASS'}">
+                        <div class="rounded-2xl border border-emerald-300/70 bg-gradient-to-br from-emerald-50/90 via-amber-50/55 to-emerald-100/80 p-4 shadow-sm dark:border-emerald-700/50 dark:from-emerald-900/20 dark:via-amber-900/10 dark:to-emerald-900/20">
+                            <div class="flex items-start justify-between gap-2">
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Premium customiser active</p>
+                                    <p class="mt-1 text-sm text-slate-700 dark:text-slate-200">Your selected profile customisation settings are active.</p>
+                                </div>
+                                <span class="inline-flex items-center rounded-full border border-amber-300/80 bg-amber-100/80 px-2.5 py-1 text-[11px] font-semibold text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/25 dark:text-amber-300">Premium</span>
+                            </div>
+
+                            <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                                <div class="rounded-xl border border-emerald-200/80 bg-white/75 px-3 py-2 text-xs dark:border-emerald-800/50 dark:bg-slate-900/45">
+                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Banner</p>
+                                    <p class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100" th:text="${#strings.replace(bannerChoice, '_', ' ')}">Aurora</p>
+                                </div>
+                                <div class="rounded-xl border border-emerald-200/80 bg-white/75 px-3 py-2 text-xs dark:border-emerald-800/50 dark:bg-slate-900/45">
+                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Ring</p>
+                                    <p class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100" th:text="${#strings.replace(ringChoice, '_', ' ')}">Neon Dual</p>
+                                </div>
+                                <div class="rounded-xl border border-emerald-200/80 bg-white/75 px-3 py-2 text-xs dark:border-emerald-800/50 dark:bg-slate-900/45">
+                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Card back</p>
+                                    <p class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100" th:text="${#strings.replace(backChoice, '_', ' ')}">Glass</p>
+                                </div>
+                                <div class="rounded-xl border border-emerald-200/80 bg-white/75 px-3 py-2 text-xs dark:border-emerald-800/50 dark:bg-slate-900/45">
+                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Milestones</p>
+                                    <div class="mt-1 flex flex-wrap gap-1" th:if="${selectedProfileMilestones != null and selectedProfileMilestones.size() > 0}">
+                                        <span th:each="ms : ${profileMilestoneOptions}" th:if="${selectedProfileMilestones.contains(ms.key)}"
+                                              class="inline-flex items-center rounded-full border border-amber-300/70 bg-amber-100/70 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/25 dark:text-amber-300"
+                                              th:text="${ms.title}">Milestone</span>
+                                    </div>
+                                    <p class="mt-0.5 font-semibold text-slate-700 dark:text-slate-200" th:if="${selectedProfileMilestones == null or selectedProfileMilestones.size() == 0}">No milestones selected</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <form th:action="@{/profile/settings/customiser}" method="post" id="profile-customiser-form" class="profile-edit hidden mt-4 space-y-4">
@@ -541,7 +560,7 @@
                             <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Only unlocked milestones can be pinned to your profile.</p>
                             <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 <label th:each="ms : ${profileMilestoneOptions}" class="customiser-milestone-option">
-                                    <input type="checkbox" name="milestoneKeys" th:value="${ms.key}" th:checked="${selectedProfileMilestones != null and selectedProfileMilestones.contains(ms.key)}" th:disabled="${!isPremium}" class="customiser-milestone customiser-milestone-input sr-only peer" />
+                                    <input type="checkbox" name="milestoneKeys" th:value="${ms.key}" th:checked="${selectedProfileMilestones != null and selectedProfileMilestones.contains(ms.key)}" th:disabled="${!isPremium}" th:attr="data-milestone-title=${ms.title}" class="customiser-milestone customiser-milestone-input sr-only peer" />
                                     <span class="customiser-milestone-box" aria-hidden="true"></span>
                                     <span>
                                         <span class="block font-semibold text-slate-800 dark:text-slate-100" th:text="${ms.title}">Milestone</span>
@@ -651,7 +670,7 @@
                                 </label>
                                 <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
                                     Start date
-                                    <input type="date" name="startDate" th:value="${today}" class="condition-input" />
+                                    <input type="date" name="startDate" th:value="${today}" class="condition-input custom-date-input" data-picker-label="Select start date" />
                                 </label>
                                 <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
                                     Duration (days)
@@ -660,76 +679,6 @@
                             </div>
                             <button type="submit" class="profile-btn-small justify-self-start">Add timed condition</button>
                         </form>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ACTIVITY SECTION -->
-            <section class="profile-section pb-6 sm:pb-8"
-                     th:with="hasOrder=${allOrders != null and !#lists.isEmpty(allOrders)},
-                              hasExport=${recentExportRequests != null and !#lists.isEmpty(recentExportRequests)},
-                              hasEmailNotice=${user != null and !user.emailVerified},
-                              hasSubscriptionNotice=${platformSubscription != null and platformSubscription.status != null and platformSubscription.status.name() == 'EXPIRES'},
-                              hasActivity=${hasOrder or hasExport or hasEmailNotice or hasSubscriptionNotice}">
-                <div class="profile-section-header">
-                    <div>
-                        <h2 class="profile-section-title">Recent Activity</h2>
-                        <p class="profile-section-subtitle">Orders, account notifications, and profile updates in one place.</p>
-                    </div>
-                    <span class="inline-flex items-center rounded-full border border-slate-200/80 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
-                        Activity feed
-                    </span>
-                </div>
-
-                <div th:if="${hasActivity}" class="profile-activity-card">
-                    <ul class="space-y-3">
-                        <li th:if="${hasOrder}" class="profile-activity-item">
-                            <span class="profile-activity-icon profile-activity-icon--order">O</span>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Order activity</p>
-                                <p class="text-sm text-slate-600 dark:text-slate-300">
-                                    Latest order <span class="font-semibold" th:text="${'#' + allOrders[0].id}">#123</span>
-                                    on <span th:text="${#temporals.format(allOrders[0].createdAt, 'dd MMM yyyy')}">01 Jan 2026</span>
-                                </p>
-                            </div>
-                        </li>
-
-                        <li th:if="${hasExport}" class="profile-activity-item">
-                            <span class="profile-activity-icon profile-activity-icon--export">E</span>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Data export requested</p>
-                                <p class="text-sm text-slate-600 dark:text-slate-300">
-                                    Last request submitted on
-                                    <span th:text="${#temporals.format(recentExportRequests[0].requestedAt, 'dd MMM yyyy')}">01 Jan 2026</span>.
-                                </p>
-                            </div>
-                        </li>
-
-                        <li th:if="${hasEmailNotice}" class="profile-activity-item">
-                            <span class="profile-activity-icon profile-activity-icon--notice">!</span>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Account notification</p>
-                                <p class="text-sm text-slate-600 dark:text-slate-300">Your email is not verified yet. Verify it to secure your account.</p>
-                            </div>
-                        </li>
-
-                        <li th:if="${hasSubscriptionNotice}" class="profile-activity-item">
-                            <span class="profile-activity-icon profile-activity-icon--subscription">S</span>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Subscription update</p>
-                                <p class="text-sm text-slate-600 dark:text-slate-300">Your premium plan is set to expire. Review it in Purchases &amp; Subscriptions.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-
-                <div th:if="${!hasActivity}" class="rounded-2xl border border-slate-200/70 bg-slate-50/70 p-6 text-center dark:border-slate-800 dark:bg-slate-900/30">
-                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">No activity yet</p>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Place your first order, update profile settings, or request a data export to start your activity feed.</p>
-                    <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
-                        <a th:href="@{/merch}" class="profile-btn-secondary">Browse shop</a>
-                        <button type="button" id="open-purchases-drawer-from-activity" class="profile-btn-secondary">Open purchases</button>
-                        <button type="button" id="open-settings-drawer-from-activity" class="profile-btn-secondary">Open settings</button>
                     </div>
                 </div>
             </section>
@@ -1448,6 +1397,83 @@
                 <p class="dob-awareness-modal__footer-note">
                     This action is permanent
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-image-editor-modal" class="profile-image-editor-modal" aria-hidden="true">
+        <div class="profile-image-editor-modal__backdrop" data-image-editor-close></div>
+        <div class="profile-image-editor-modal__dialog" role="dialog" aria-modal="true" aria-label="Edit profile photo">
+            <div class="profile-image-editor-modal__header">
+                <div>
+                    <h2 class="profile-image-editor-modal__title">Edit profile photo</h2>
+                    <p class="profile-image-editor-modal__subtitle">Drag to reposition and use zoom to fit your avatar frame.</p>
+                </div>
+                <button type="button" class="profile-image-editor-modal__close" id="profile-image-editor-close" aria-label="Close image editor">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="profile-image-editor-modal__stage-wrap">
+                <div id="profile-image-editor-stage" class="profile-image-editor-modal__stage">
+                    <img id="profile-image-editor-image" class="profile-image-editor-modal__image" alt="Image crop preview" />
+                    <div id="profile-image-editor-crop-frame" class="profile-image-editor-modal__crop-frame" aria-hidden="true"></div>
+                </div>
+            </div>
+
+            <div class="profile-image-editor-modal__controls">
+                <label class="profile-image-editor-modal__zoom-wrap" for="profile-image-editor-zoom">
+                    <span class="profile-image-editor-modal__zoom-label">Zoom</span>
+                    <input id="profile-image-editor-zoom" type="range" min="100" max="300" step="1" value="100" class="profile-image-editor-modal__zoom" />
+                </label>
+                <button type="button" id="profile-image-editor-reset" class="profile-btn-secondary">Reset</button>
+            </div>
+
+            <div class="profile-image-editor-modal__actions">
+                <button type="button" id="profile-image-editor-cancel" class="profile-btn-secondary">Cancel</button>
+                <button type="button" id="profile-image-editor-apply" class="profile-btn-primary">Use cropped photo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM DATE PICKER (Universal) -->
+    <div id="custom-date-picker" class="custom-date-picker" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="custom-date-picker__backdrop"></div>
+        <div class="custom-date-picker__panel">
+            <div class="custom-date-picker__header">
+                <h2 class="custom-date-picker__title" id="date-picker-title">Select date</h2>
+                <button type="button" class="custom-date-picker__close" id="date-picker-close" aria-label="Close date picker">
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Close
+                </button>
+            </div>
+
+            <div class="custom-date-picker__nav">
+                <button type="button" class="custom-date-picker__btn-nav" id="date-picker-prev-month" aria-label="Previous month">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h3 class="custom-date-picker__month" id="date-picker-month-label">December 2024</h3>
+                <button type="button" class="custom-date-picker__btn-nav" id="date-picker-next-month" aria-label="Next month">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="custom-date-picker__calendar" id="date-picker-calendar">
+                <!-- Day headers will be inserted here -->
+                <!-- Days will be inserted here -->
+            </div>
+
+            <div class="custom-date-picker__actions">
+                <button type="button" class="custom-date-picker__btn" id="date-picker-today">Today</button>
+                <button type="button" class="custom-date-picker__btn custom-date-picker__btn--primary" id="date-picker-apply">Apply</button>
             </div>
         </div>
     </div>

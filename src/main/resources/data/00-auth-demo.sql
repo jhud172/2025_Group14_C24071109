@@ -148,7 +148,12 @@ WHERE username = 'demo';
 
 UPDATE users
 SET email = 'jhudson172@icloud.com',
-    phone_number = '07858256917',
+    phone_number = '7858256917',
+    date_of_birth = DATE '2006-05-26',
+    email_verified = TRUE,
+    email_verified_at = CURRENT_TIMESTAMP,
+    phone_verified = TRUE,
+    phone_verified_at = CURRENT_TIMESTAMP,
     bio = 'Focused on consistency, form, and building long-term strength one session at a time.',
     profile_image_url = '/img/logo.png'
 WHERE username = 'demo';

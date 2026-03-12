@@ -1,19 +1,25 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.Role;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/goals")
@@ -82,6 +88,11 @@ public class GoalController {
         }
 
         return "goals/index";
+    }
+
+    @GetMapping("/milestones")
+    public String milestonesView() {
+        return "redirect:/achievements";
     }
 
     @GetMapping("/create")

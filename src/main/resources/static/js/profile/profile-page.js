@@ -19,6 +19,15 @@ const profileUploadPreviewImage = document.getElementById('profile-upload-previe
 const profileUploadPreviewFallback = document.getElementById('profile-upload-preview-fallback');
 const profileSidebarAvatarImage = document.getElementById('profile-sidebar-avatar-image');
 const profileSidebarAvatarFallback = document.getElementById('profile-sidebar-avatar-fallback');
+const profileImageEditorModal = document.getElementById('profile-image-editor-modal');
+const profileImageEditorStage = document.getElementById('profile-image-editor-stage');
+const profileImageEditorImage = document.getElementById('profile-image-editor-image');
+const profileImageEditorCropFrame = document.getElementById('profile-image-editor-crop-frame');
+const profileImageEditorZoom = document.getElementById('profile-image-editor-zoom');
+const profileImageEditorReset = document.getElementById('profile-image-editor-reset');
+const profileImageEditorCancel = document.getElementById('profile-image-editor-cancel');
+const profileImageEditorApply = document.getElementById('profile-image-editor-apply');
+const profileImageEditorClose = document.getElementById('profile-image-editor-close');
 const profileFirstNameInput = document.getElementById('profile-first-name-input');
 const profileLastNameInput = document.getElementById('profile-last-name-input');
 const profileDateOfBirthInput = document.getElementById('profile-date-of-birth-input');
@@ -60,8 +69,7 @@ function syncCustomiserIntoProfileForm(customiserForm, profileForm) {
         'ringStyle',
         'cardBackStyle',
         'textColor',
-        'generalTextColor',
-        'milestoneKeys'
+        'generalTextColor'
     ]);
 
     profileForm
@@ -80,6 +88,17 @@ function syncCustomiserIntoProfileForm(customiserForm, profileForm) {
         hidden.setAttribute('data-customiser-shadow', 'true');
         profileForm.appendChild(hidden);
     });
+
+    customiserForm
+        .querySelectorAll('input[name="milestoneKeys"]:checked:not(:disabled)')
+        .forEach((input) => {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'milestoneKeys';
+            hidden.value = String(input.value || '').trim();
+            hidden.setAttribute('data-customiser-shadow', 'true');
+            profileForm.appendChild(hidden);
+        });
 }
 
 function ensureCsrfTokenOnForm(form) {
@@ -331,13 +350,46 @@ if (profileImageInput && profileImageError) {
         (profileUploadPreviewImage && profileUploadPreviewImage.getAttribute('data-original-src'))
         || (profileSidebarAvatarImage && profileSidebarAvatarImage.getAttribute('data-original-src'))
         || null;
+
+    const imageEditorAvailable = Boolean(
+        profileImageEditorModal
+        && profileImageEditorStage
+        && profileImageEditorImage
+        && profileImageEditorCropFrame
+        && profileImageEditorZoom
+        && profileImageEditorCancel
+        && profileImageEditorApply
+    );
+
     let currentPreviewSrc = originalImageSrc;
     let objectPreviewUrl = null;
+    let editorSourceFile = null;
+    let editorSourceObjectUrl = null;
+    let editorNaturalWidth = 0;
+    let editorNaturalHeight = 0;
+    let editorScale = 1;
+    let editorMinScale = 1;
+    let editorMaxScale = 3;
+    let editorOffsetX = 0;
+    let editorOffsetY = 0;
+    let editorDragActive = false;
+    let editorDragPointerId = null;
+    let editorDragStartX = 0;
+    let editorDragStartY = 0;
+    let skipEditorOnce = false;
+    let previousBodyOverflow = '';
 
     const releaseObjectPreview = () => {
         if (objectPreviewUrl) {
             URL.revokeObjectURL(objectPreviewUrl);
             objectPreviewUrl = null;
+        }
+    };
+
+    const releaseEditorObjectUrl = () => {
+        if (editorSourceObjectUrl) {
+            URL.revokeObjectURL(editorSourceObjectUrl);
+            editorSourceObjectUrl = null;
         }
     };
 
@@ -444,6 +496,283 @@ if (profileImageInput && profileImageError) {
         return true;
     };
 
+    const getEditorMetrics = () => {
+        if (!profileImageEditorStage || !profileImageEditorCropFrame) return null;
+        const stageRect = profileImageEditorStage.getBoundingClientRect();
+        const cropRect = profileImageEditorCropFrame.getBoundingClientRect();
+        if (!stageRect.width || !stageRect.height || !cropRect.width || !cropRect.height) {
+            return null;
+        }
+
+        return {
+            stageWidth: stageRect.width,
+            stageHeight: stageRect.height,
+            stageCenterX: stageRect.width / 2,
+            stageCenterY: stageRect.height / 2,
+            cropLeft: cropRect.left - stageRect.left,
+            cropTop: cropRect.top - stageRect.top,
+            cropWidth: cropRect.width,
+            cropHeight: cropRect.height
+        };
+    };
+
+    const clampEditorOffsets = () => {
+        const metrics = getEditorMetrics();
+        if (!metrics || !editorNaturalWidth || !editorNaturalHeight) return;
+
+        const displayWidth = editorNaturalWidth * editorScale;
+        const displayHeight = editorNaturalHeight * editorScale;
+
+        const minX = metrics.cropLeft + metrics.cropWidth - metrics.stageCenterX - displayWidth / 2;
+        const maxX = metrics.cropLeft - metrics.stageCenterX + displayWidth / 2;
+        const minY = metrics.cropTop + metrics.cropHeight - metrics.stageCenterY - displayHeight / 2;
+        const maxY = metrics.cropTop - metrics.stageCenterY + displayHeight / 2;
+
+        editorOffsetX = Math.min(maxX, Math.max(minX, editorOffsetX));
+        editorOffsetY = Math.min(maxY, Math.max(minY, editorOffsetY));
+    };
+
+    const updateEditorTransform = () => {
+        if (!profileImageEditorImage) return;
+        clampEditorOffsets();
+        profileImageEditorImage.style.transform = `translate(-50%, -50%) translate(${editorOffsetX}px, ${editorOffsetY}px) scale(${editorScale})`;
+    };
+
+    const initialiseEditorTransform = () => {
+        const metrics = getEditorMetrics();
+        if (!metrics || !editorNaturalWidth || !editorNaturalHeight) return;
+
+        const scaleX = metrics.cropWidth / editorNaturalWidth;
+        const scaleY = metrics.cropHeight / editorNaturalHeight;
+        editorMinScale = Math.max(scaleX, scaleY);
+        editorMaxScale = Math.max(editorMinScale * 3, editorMinScale + 0.5);
+        editorScale = editorMinScale;
+        editorOffsetX = 0;
+        editorOffsetY = 0;
+
+        if (profileImageEditorZoom) {
+            profileImageEditorZoom.value = '100';
+        }
+
+        updateEditorTransform();
+    };
+
+    const applyEditorZoomPercent = (percent) => {
+        const safePercent = Math.max(100, Math.min(300, percent));
+        const ratio = safePercent / 100;
+        editorScale = editorMinScale * ratio;
+        editorScale = Math.max(editorMinScale, Math.min(editorMaxScale, editorScale));
+        updateEditorTransform();
+    };
+
+    const closeImageEditor = (clearSelection) => {
+        if (!imageEditorAvailable) return;
+
+        profileImageEditorModal.classList.remove('is-open');
+        profileImageEditorModal.setAttribute('aria-hidden', 'true');
+        profileImageEditorStage.classList.remove('is-dragging');
+        document.body.style.overflow = previousBodyOverflow;
+        editorDragActive = false;
+        editorDragPointerId = null;
+
+        if (clearSelection) {
+            profileImageInput.value = '';
+            editorSourceFile = null;
+        }
+
+        releaseEditorObjectUrl();
+    };
+
+    const openImageEditor = (file) => {
+        if (!imageEditorAvailable || !file) {
+            return false;
+        }
+
+        if (!validateImageFile(file)) {
+            return false;
+        }
+
+        editorSourceFile = file;
+        releaseEditorObjectUrl();
+        editorSourceObjectUrl = URL.createObjectURL(file);
+        previousBodyOverflow = document.body.style.overflow || '';
+
+        profileImageEditorModal.classList.add('is-open');
+        profileImageEditorModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        profileImageEditorImage.onload = () => {
+            editorNaturalWidth = profileImageEditorImage.naturalWidth || 0;
+            editorNaturalHeight = profileImageEditorImage.naturalHeight || 0;
+            initialiseEditorTransform();
+        };
+        profileImageEditorImage.src = editorSourceObjectUrl;
+        return true;
+    };
+
+    const applySelectedImageFile = (file) => {
+        if (removeProfileImageInput) {
+            removeProfileImageInput.value = 'false';
+        }
+        releaseObjectPreview();
+        objectPreviewUrl = URL.createObjectURL(file);
+        syncFileName(file);
+        applyPreviewSource(objectPreviewUrl);
+        profileImageError.classList.add('hidden');
+        isDirty = true;
+    };
+
+    const canvasToBlob = (canvas, type, quality) => new Promise((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), type, quality);
+    });
+
+    const createCroppedFile = async () => {
+        if (!editorSourceFile || !editorNaturalWidth || !editorNaturalHeight) {
+            return null;
+        }
+
+        const metrics = getEditorMetrics();
+        if (!metrics) return null;
+
+        const displayWidth = editorNaturalWidth * editorScale;
+        const displayHeight = editorNaturalHeight * editorScale;
+        const imageLeft = metrics.stageCenterX + editorOffsetX - displayWidth / 2;
+        const imageTop = metrics.stageCenterY + editorOffsetY - displayHeight / 2;
+
+        const sx = Math.max(0, (metrics.cropLeft - imageLeft) / editorScale);
+        const sy = Math.max(0, (metrics.cropTop - imageTop) / editorScale);
+        const sw = Math.min(editorNaturalWidth - sx, metrics.cropWidth / editorScale);
+        const sh = Math.min(editorNaturalHeight - sy, metrics.cropHeight / editorScale);
+
+        const outputSize = 640;
+        const canvas = document.createElement('canvas');
+        canvas.width = outputSize;
+        canvas.height = outputSize;
+        const context = canvas.getContext('2d');
+        if (!context) return null;
+
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
+        context.drawImage(profileImageEditorImage, sx, sy, sw, sh, 0, 0, outputSize, outputSize);
+
+        let blob = await canvasToBlob(canvas, 'image/webp', 0.92);
+        if (!blob) {
+            blob = await canvasToBlob(canvas, 'image/png', 1);
+        }
+        if (!blob) return null;
+
+        if (blob.size > 2 * 1024 * 1024) {
+            const compressed = await canvasToBlob(canvas, 'image/jpeg', 0.84);
+            if (compressed) {
+                blob = compressed;
+            }
+        }
+
+        const baseName = (editorSourceFile.name || 'profile-photo').replace(/\.[^.]+$/, '');
+        const extension = blob.type === 'image/jpeg' ? 'jpg' : blob.type === 'image/png' ? 'png' : 'webp';
+        return new File([blob], `${baseName}-cropped.${extension}`, { type: blob.type });
+    };
+
+    if (imageEditorAvailable) {
+        const closeEditorAndClearSelection = () => closeImageEditor(true);
+
+        profileImageEditorCancel.addEventListener('click', closeEditorAndClearSelection);
+        if (profileImageEditorClose) {
+            profileImageEditorClose.addEventListener('click', closeEditorAndClearSelection);
+        }
+
+        profileImageEditorModal.addEventListener('click', (event) => {
+            if (event.target && event.target.hasAttribute('data-image-editor-close')) {
+                closeEditorAndClearSelection();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (!profileImageEditorModal.classList.contains('is-open')) return;
+            if (event.key === 'Escape') {
+                closeEditorAndClearSelection();
+            }
+        });
+
+        profileImageEditorZoom.addEventListener('input', () => {
+            applyEditorZoomPercent(parseInt(profileImageEditorZoom.value, 10) || 100);
+        });
+
+        if (profileImageEditorReset) {
+            profileImageEditorReset.addEventListener('click', () => {
+                initialiseEditorTransform();
+            });
+        }
+
+        profileImageEditorStage.addEventListener('pointerdown', (event) => {
+            if (!profileImageEditorModal.classList.contains('is-open')) return;
+            editorDragActive = true;
+            editorDragPointerId = event.pointerId;
+            editorDragStartX = event.clientX;
+            editorDragStartY = event.clientY;
+            profileImageEditorStage.classList.add('is-dragging');
+            profileImageEditorStage.setPointerCapture(event.pointerId);
+        });
+
+        profileImageEditorStage.addEventListener('pointermove', (event) => {
+            if (!editorDragActive || event.pointerId !== editorDragPointerId) return;
+            const deltaX = event.clientX - editorDragStartX;
+            const deltaY = event.clientY - editorDragStartY;
+            editorDragStartX = event.clientX;
+            editorDragStartY = event.clientY;
+            editorOffsetX += deltaX;
+            editorOffsetY += deltaY;
+            updateEditorTransform();
+        });
+
+        const finishEditorDrag = (event) => {
+            if (event && editorDragPointerId !== null && event.pointerId !== editorDragPointerId) return;
+            editorDragActive = false;
+            editorDragPointerId = null;
+            profileImageEditorStage.classList.remove('is-dragging');
+            if (event) {
+                try {
+                    profileImageEditorStage.releasePointerCapture(event.pointerId);
+                } catch (_error) {
+                    // no-op
+                }
+            }
+        };
+
+        profileImageEditorStage.addEventListener('pointerup', finishEditorDrag);
+        profileImageEditorStage.addEventListener('pointercancel', finishEditorDrag);
+
+        profileImageEditorStage.addEventListener('wheel', (event) => {
+            if (!profileImageEditorModal.classList.contains('is-open')) return;
+            event.preventDefault();
+            const current = parseInt(profileImageEditorZoom.value, 10) || 100;
+            const next = current + (event.deltaY > 0 ? -4 : 4);
+            profileImageEditorZoom.value = String(Math.max(100, Math.min(300, next)));
+            applyEditorZoomPercent(parseInt(profileImageEditorZoom.value, 10) || 100);
+        }, { passive: false });
+
+        window.addEventListener('resize', () => {
+            if (!profileImageEditorModal.classList.contains('is-open')) return;
+            initialiseEditorTransform();
+        });
+
+        profileImageEditorApply.addEventListener('click', async () => {
+            const croppedFile = await createCroppedFile();
+            if (!croppedFile || !validateImageFile(croppedFile)) {
+                profileImageError.textContent = 'Could not crop image. Please try a different image.';
+                profileImageError.classList.remove('hidden');
+                return;
+            }
+
+            const transfer = new DataTransfer();
+            transfer.items.add(croppedFile);
+            skipEditorOnce = true;
+            profileImageInput.files = transfer.files;
+            closeImageEditor(false);
+            profileImageInput.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    }
+
     profileImageInput.addEventListener('change', () => {
         profileImageError.classList.add('hidden');
         const file = profileImageInput.files && profileImageInput.files[0];
@@ -463,14 +792,21 @@ if (profileImageInput && profileImageError) {
             applyPreviewSource(originalImageSrc);
             return;
         }
+
+        if (skipEditorOnce) {
+            skipEditorOnce = false;
+            applySelectedImageFile(file);
+            return;
+        }
+
+        if (openImageEditor(file)) {
+            return;
+        }
+
         if (removeProfileImageInput) {
             removeProfileImageInput.value = 'false';
         }
-        releaseObjectPreview();
-        objectPreviewUrl = URL.createObjectURL(file);
-        syncFileName(file);
-        applyPreviewSource(objectPreviewUrl);
-        isDirty = true;
+        applySelectedImageFile(file);
     });
 
     if (profileImageDropzone) {
@@ -532,13 +868,13 @@ if (accessibilityForm && accessibilityFeedback) {
     const completionTooltip = document.getElementById('profile-completion-tooltip');
     const completionPercent = document.getElementById('profile-completion-percent');
     const completionBar = document.getElementById('profile-completion-progress-bar');
+    const completionCompleteBar = document.getElementById('profile-completion-complete-bar');
     const completionTitle = document.getElementById('profile-completion-title');
     const completionMessage = document.getElementById('profile-completion-message');
     const completionAction = document.getElementById('profile-completion-action');
     if (!completionWidget || !completionTooltip || !completionTitle || !completionMessage || !completionAction) return;
 
     let activeCompletionItem = null;
-    let completionPinned = false;
     let hoveringWidget = false;
     let hoveringTooltip = false;
     let hideTimer = null;
@@ -630,7 +966,7 @@ if (accessibilityForm && accessibilityFeedback) {
         },
         {
             key: 'premium',
-            isMissing: () => !document.getElementById('profile-sidebar-premium-active'),
+            isMissing: () => !document.querySelector('.profile-identity-banner__name-row .nav-premium-badge.premium-orb-badge'),
             message: 'Upgrade to premium to unlock profile customisation and more.',
             actionLabel: 'View premium plans',
             target: '/pricing'
@@ -699,39 +1035,20 @@ if (accessibilityForm && accessibilityFeedback) {
     function scheduleHide() {
         clearHideTimer();
         hideTimer = setTimeout(() => {
-            if (completionPinned || hoveringWidget || hoveringTooltip) {
+            if (hoveringWidget || hoveringTooltip) {
                 return;
             }
             completionTooltip.classList.remove('is-visible');
             completionTooltip.setAttribute('aria-hidden', 'true');
             completionWidget.setAttribute('aria-expanded', 'false');
-        }, 70);
+        }, 90);
     }
 
-    function positionTooltip(clientX, clientY) {
-        const width = completionTooltip.offsetWidth || 280;
-        const height = completionTooltip.offsetHeight || 150;
-        const margin = 14;
-        let left = clientX + 18;
-        let top = clientY + 18;
-
-        if (left + width > window.innerWidth - margin) {
-            left = clientX - width - 18;
-        }
-        if (top + height > window.innerHeight - margin) {
-            top = clientY - height - 18;
-        }
-
-        completionTooltip.style.left = `${Math.max(margin, left)}px`;
-        completionTooltip.style.top = `${Math.max(margin, top)}px`;
-    }
-
-    function showTooltip(clientX, clientY) {
+    function showTooltip() {
         clearHideTimer();
         completionTooltip.classList.add('is-visible');
         completionTooltip.setAttribute('aria-hidden', 'false');
         completionWidget.setAttribute('aria-expanded', 'true');
-        positionTooltip(clientX, clientY);
     }
 
     function bindActiveAction(item) {
@@ -767,9 +1084,15 @@ if (accessibilityForm && accessibilityFeedback) {
         if (completionBar) {
             completionBar.style.width = `${percent}%`;
         }
+        if (completionBar && completionBar.parentElement) {
+            completionBar.parentElement.classList.toggle('hidden', percent >= 100);
+        }
+        if (completionCompleteBar) {
+            completionCompleteBar.classList.toggle('hidden', percent < 100);
+        }
 
         completionWidget.style.setProperty('--profile-completion-progress', `${percent}%`);
-        bindActiveAction(checklist.find((item) => item.missing) || null);
+        bindActiveAction(percent >= 100 ? null : (checklist.find((item) => item.missing) || null));
     }
 
     const watchSelectors = [
@@ -793,36 +1116,21 @@ if (accessibilityForm && accessibilityFeedback) {
     completionWidget.addEventListener('mouseenter', (event) => {
         hoveringWidget = true;
         updateCompletionPrompt();
-        // Position tooltip once at mouse position, don't follow mouse
-        if (!completionPinned) {
-            showTooltip(event.clientX, event.clientY);
-        }
+        showTooltip();
     });
 
     completionWidget.addEventListener('mouseleave', () => {
         hoveringWidget = false;
-        if (!completionPinned) {
-            scheduleHide();
-        }
+        scheduleHide();
     });
 
     completionWidget.addEventListener('focusin', () => {
         updateCompletionPrompt();
-        const rect = completionWidget.getBoundingClientRect();
-        showTooltip(rect.right, rect.top + 12);
+        showTooltip();
     });
 
-    completionWidget.addEventListener('click', (event) => {
-        if (event.target === completionAction) {
-            return;
-        }
-        completionPinned = !completionPinned;
-        if (completionPinned) {
-            const rect = completionWidget.getBoundingClientRect();
-            showTooltip(rect.right, rect.top + 12);
-        } else {
-            scheduleHide();
-        }
+    completionWidget.addEventListener('focusout', () => {
+        scheduleHide();
     });
 
     completionTooltip.addEventListener('mouseenter', () => {
@@ -841,7 +1149,6 @@ if (accessibilityForm && accessibilityFeedback) {
             return;
         }
         event.preventDefault();
-        completionPinned = false;
         completionTooltip.classList.remove('is-visible');
         completionTooltip.setAttribute('aria-hidden', 'true');
         completionWidget.setAttribute('aria-expanded', 'false');
@@ -850,7 +1157,6 @@ if (accessibilityForm && accessibilityFeedback) {
 
     document.addEventListener('click', (event) => {
         if (!completionWidget.contains(event.target) && !completionTooltip.contains(event.target)) {
-            completionPinned = false;
             hoveringWidget = false;
             hoveringTooltip = false;
             scheduleHide();
@@ -905,6 +1211,8 @@ if (accessibilityForm && accessibilityFeedback) {
     const sidebarName = document.getElementById('profile-identity-banner__name');
     const sidebarHandle = document.getElementById('profile-identity-banner__handle');
     const sidebarBio = document.getElementById('profile-sidebar-bio-text');
+    const sidebarMilestonesPanel = document.getElementById('profile-sidebar-milestones-panel');
+    const sidebarMilestonesList = document.getElementById('profile-sidebar-milestones-list');
     const usernameInputLive = document.getElementById('profile-username-input');
     const bioInputLive = document.getElementById('profile-bio-input');
     const milestoneChecks = Array.from(customiserForm.querySelectorAll('.customiser-milestone'));
@@ -1116,6 +1424,35 @@ if (accessibilityForm && accessibilityFeedback) {
         }
     }
 
+    function renderMilestonePreview() {
+        if (!sidebarMilestonesPanel || !sidebarMilestonesList) return;
+
+        const selected = milestoneChecks
+            .filter((input) => input.checked)
+            .slice(0, 6)
+            .map((input) => ({
+                key: String(input.value || '').trim(),
+                title: String(input.dataset.milestoneTitle || '').trim()
+            }))
+            .filter((item) => item.key && item.title);
+
+        sidebarMilestonesList.innerHTML = '';
+
+        if (!selected.length) {
+            sidebarMilestonesPanel.classList.add('hidden');
+            return;
+        }
+
+        selected.forEach((item) => {
+            const chip = document.createElement('span');
+            chip.className = 'profile-milestone-chip-enter inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:border-emerald-700/50 dark:bg-emerald-900/25 dark:text-emerald-300';
+            chip.textContent = item.title;
+            sidebarMilestonesList.appendChild(chip);
+        });
+
+        sidebarMilestonesPanel.classList.remove('hidden');
+    }
+
     function applyPreview() {
         const bannerKey = currentBannerKey();
         const ringKey = currentRingKey();
@@ -1144,6 +1481,7 @@ if (accessibilityForm && accessibilityFeedback) {
         // Update text colours in sidebar live preview only
         applyTextColorPreview(textColor, currentGeneralTextColor());
         applyTextPreview();
+        renderMilestonePreview();
     }
 
     function enforceMilestoneCap(changedInput) {
@@ -1182,7 +1520,11 @@ if (accessibilityForm && accessibilityFeedback) {
     }
 
     milestoneChecks.forEach((input) => {
-        input.addEventListener('change', () => enforceMilestoneCap(input));
+        input.addEventListener('change', () => {
+            enforceMilestoneCap(input);
+            isDirty = true;
+            applyPreview();
+        });
     });
 
     applyPreview();
@@ -1260,7 +1602,6 @@ if (optionsOverlay)  optionsOverlay.addEventListener('click', closeOptionsDrawer
 const settingsDrawerRoot = document.getElementById('settings-drawer-root');
 const settingsOverlay    = document.getElementById('settings-overlay');
 const openSettingsBtn    = document.getElementById('open-settings-drawer');
-const openSettingsFromActivityBtn = document.getElementById('open-settings-drawer-from-activity');
 const closeSettingsBtn   = document.getElementById('close-settings-drawer');
 
 function openSettingsDrawer() {
@@ -1281,7 +1622,6 @@ function closeSettingsDrawer() {
 }
 
 if (openSettingsBtn)  openSettingsBtn.addEventListener('click', openSettingsDrawer);
-if (openSettingsFromActivityBtn) openSettingsFromActivityBtn.addEventListener('click', openSettingsDrawer);
 if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettingsDrawer);
 if (settingsOverlay)  settingsOverlay.addEventListener('click', closeSettingsDrawer);
 
@@ -1289,7 +1629,6 @@ if (settingsOverlay)  settingsOverlay.addEventListener('click', closeSettingsDra
 const purchasesDrawerRoot = document.getElementById('purchases-drawer-root');
 const purchasesOverlay    = document.getElementById('purchases-overlay');
 const openPurchasesBtn    = document.getElementById('open-purchases-drawer');
-const openPurchasesFromActivityBtn = document.getElementById('open-purchases-drawer-from-activity');
 const closePurchasesBtn   = document.getElementById('close-purchases-drawer');
 
 function openPurchasesDrawer() {
@@ -1309,7 +1648,6 @@ function closePurchasesDrawer() {
 }
 
 if (openPurchasesBtn)  openPurchasesBtn.addEventListener('click', openPurchasesDrawer);
-if (openPurchasesFromActivityBtn) openPurchasesFromActivityBtn.addEventListener('click', openPurchasesDrawer);
 if (closePurchasesBtn) closePurchasesBtn.addEventListener('click', closePurchasesDrawer);
 if (purchasesOverlay)  purchasesOverlay.addEventListener('click', closePurchasesDrawer);
 
@@ -1569,3 +1907,211 @@ function showDOBAwarenessModal() {
         setTimeout(() => confirmBtn.focus(), 100);
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+/* UNIVERSAL CUSTOM DATE PICKER */
+/* ═════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+(function initCustomDatePicker() {
+    const datePickerElement = document.getElementById('custom-date-picker');
+    const datePickerBackdrop = datePickerElement.querySelector('.custom-date-picker__backdrop');
+    const datePickerClose = document.getElementById('date-picker-close');
+    const datePickerCalendar = document.getElementById('date-picker-calendar');
+    const datePickerMonthLabel = document.getElementById('date-picker-month-label');
+    const datePickerPrevMonth = document.getElementById('date-picker-prev-month');
+    const datePickerNextMonth = document.getElementById('date-picker-next-month');
+    const datePickerApply = document.getElementById('date-picker-apply');
+    const datePickerToday = document.getElementById('date-picker-today');
+    const datePickerTitle = document.getElementById('date-picker-title');
+
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    let selectedDate = null;
+    let activeInput = null;
+
+    function getDaysInMonth(year, month) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getFirstDayOfMonth(year, month) {
+        return new Date(year, month, 1).getDay();
+    }
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function parseDate(dateString) {
+        if (!dateString) return null;
+        return new Date(dateString + 'T00:00:00');
+    }
+
+    function renderCalendar() {
+        datePickerCalendar.innerHTML = '';
+        
+        // Month/Year
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        datePickerMonthLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+        // Day headers
+        const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        dayHeaders.forEach(day => {
+            const header = document.createElement('div');
+            header.className = 'custom-date-picker__day-header';
+            header.textContent = day;
+            datePickerCalendar.appendChild(header);
+        });
+
+        const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+        const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+        const today = new Date();
+        const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear;
+        const todayDate = today.getDate();
+
+        // Empty cells before first day
+        for (let i = 0; i < firstDay; i++) {
+            const empty = document.createElement('div');
+            datePickerCalendar.appendChild(empty);
+        }
+
+        // Days of month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'custom-date-picker__day-btn';
+            button.textContent = day;
+
+            const currentDate = new Date(currentYear, currentMonth, day);
+            const dateString = formatDate(currentDate);
+
+            if (isCurrentMonth && day === todayDate) {
+                button.classList.add('is-today');
+            }
+
+            if (selectedDate && selectedDate === dateString) {
+                button.classList.add('is-selected');
+            }
+
+            // Disable past dates (optional - remove if not wanted)
+            // if (currentDate < today.setHours(0, 0, 0, 0)) {
+            //     button.disabled = true;
+            // }
+
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedDate = dateString;
+                renderCalendar();
+            });
+
+            datePickerCalendar.appendChild(button);
+        }
+    }
+
+    function openDatePicker(input) {
+        activeInput = input;
+        const existingValue = input.value ? parseDate(input.value) : new Date();
+        currentMonth = existingValue.getMonth();
+        currentYear = existingValue.getFullYear();
+        selectedDate = input.value || null;
+
+        const pickerLabel = input.getAttribute('data-picker-label') || 'Select date';
+        datePickerTitle.textContent = pickerLabel;
+
+        renderCalendar();
+        datePickerElement.classList.add('is-open');
+        datePickerElement.setAttribute('aria-hidden', 'false');
+
+        // Focus the apply button
+        setTimeout(() => datePickerApply.focus(), 100);
+    }
+
+    function closeDatePicker() {
+        datePickerElement.classList.remove('is-open');
+        datePickerElement.setAttribute('aria-hidden', 'true');
+        activeInput = null;
+        selectedDate = null;
+
+        // Refocus the input
+        const inputs = document.querySelectorAll('.custom-date-input');
+        inputs.forEach(input => {
+            if (input === activeInput) {
+                input.focus();
+            }
+        });
+    }
+
+    function applyDate() {
+        if (selectedDate && activeInput) {
+            activeInput.value = selectedDate;
+            activeInput.dispatchEvent(new Event('change', { bubbles: true }));
+            closeDatePicker();
+        }
+    }
+
+    // Event listeners
+    datePickerBackdrop.addEventListener('click', closeDatePicker);
+    datePickerClose.addEventListener('click', closeDatePicker);
+    datePickerPrevMonth.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        renderCalendar();
+    });
+    datePickerNextMonth.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        renderCalendar();
+    });
+    datePickerApply.addEventListener('click', (e) => {
+        e.preventDefault();
+        applyDate();
+    });
+    datePickerToday.addEventListener('click', (e) => {
+        e.preventDefault();
+        const today = new Date();
+        selectedDate = formatDate(today);
+        currentMonth = today.getMonth();
+        currentYear = today.getFullYear();
+        renderCalendar();
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && datePickerElement.classList.contains('is-open')) {
+            closeDatePicker();
+        }
+    });
+
+    // Attach to all custom date inputs
+    const dateInputs = document.querySelectorAll('.custom-date-input');
+    dateInputs.forEach(input => {
+        input.addEventListener('click', (e) => {
+            e.preventDefault();
+            openDatePicker(input);
+        });
+        input.addEventListener('focus', (e) => {
+            if (!datePickerElement.classList.contains('is-open')) {
+                openDatePicker(input);
+            }
+        });
+        // Prevent native date picker
+        input.style.pointerEvents = 'none';
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openDatePicker(input);
+            }
+        });
+    });
+})();

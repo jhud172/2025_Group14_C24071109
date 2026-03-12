@@ -49,7 +49,13 @@ SET theme = 'DARK',
     preferred_equipment_kettlebell = TRUE,
     macro_target_calories = 2400, macro_target_protein = 180,
     macro_target_carbs = 220, macro_target_fat = 70,
-    quiet_hours_start = TIME '22:00:00', quiet_hours_end = TIME '07:00:00'
+    quiet_hours_start = TIME '22:00:00', quiet_hours_end = TIME '07:00:00',
+    profile_banner_theme = 'SUNSET',
+    profile_ring_style = 'KING_CROWN',
+    profile_card_back_style = 'SUNBURST',
+    profile_text_color = '#15BC7C',
+    profile_bio_text_color = '#0F59B3',
+    profile_milestone_keys = 'LEVEL_5'
 WHERE user_id = (SELECT id FROM users WHERE username = 'demo');
 
 -- demo2 (non-premium, CLIENT) - beginner, bodyweight focus

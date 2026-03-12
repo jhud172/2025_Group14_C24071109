@@ -53,8 +53,8 @@
             }
         }
 
-        // If past all meals, next is breakfast tomorrow
-        return "Breakfast";
+        // If past all meal windows, keep label generic for late evening/night.
+        return "Meal";
     }
 
     /**
@@ -63,6 +63,7 @@
     function updateRecommendedActions() {
         const currentMeal = getCurrentMealType();
         const nextMeal = getNextMealLabel();
+        const currentHour = new Date().getHours();
 
         // Get section with data attributes
         const section = document.querySelector('[data-has-tasks][data-has-workouts]');
@@ -133,7 +134,9 @@
                     mealTypeLabel.textContent = `Log ${item.mealLabel}`;
                 }
                 if (mealTimeLabel) {
-                    if (item.isCurrent) {
+                    if (currentHour >= 22) {
+                        mealTimeLabel.textContent = "Wrap up your day: log any meal you've had.";
+                    } else if (item.isCurrent) {
                         mealTimeLabel.textContent = `It's ${item.mealLabel.toLowerCase()} time! Log your meal to stay on track.`;
                     } else {
                         mealTimeLabel.textContent = `Prepare ahead: plan your ${item.mealLabel.toLowerCase()} now.`;
