@@ -1,0 +1,680 @@
+@layer components {
+    .cd-panel,
+    .cd-rail-card {
+        @apply rounded-[28px] border border-slate-200 bg-white shadow-sm;
+        box-shadow: 0 18px 38px rgba(15, 23, 42, 0.06);
+    }
+
+    .cd-panel {
+        @apply px-5 py-5 sm:px-6 sm:py-6;
+    }
+
+    .cd-rail-card {
+        @apply px-4 py-4 sm:px-5 sm:py-5;
+    }
+
+    .cd-panel__header,
+    .cd-rail-card__header {
+        @apply flex items-start justify-between gap-3;
+    }
+
+    .cd-panel__header--split,
+    .cd-rail-card__header {
+        @apply flex-wrap;
+    }
+
+    .cd-kicker {
+        @apply mb-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-emerald-700;
+    }
+
+    .cd-panel__title,
+    .cd-rail-card__title {
+        @apply text-[1.6rem] font-black leading-tight text-slate-950;
+    }
+
+    .cd-panel__copy,
+    .cd-rail-card__copy {
+        @apply mt-2 text-sm leading-6 text-slate-700;
+    }
+
+    .cd-inline-link {
+        @apply text-sm font-bold text-emerald-700 transition-colors duration-200;
+    }
+
+    .cd-inline-link:hover,
+    .cd-inline-link:focus-visible {
+        @apply text-emerald-600;
+    }
+
+    .cd-status-pill,
+    .cd-meta-pill {
+        @apply inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em];
+        border-color: rgba(15, 23, 42, 0.08);
+        color: rgb(15 23 42);
+        background: rgba(255, 255, 255, 0.85);
+    }
+
+    .cd-status-pill.is-emerald {
+        border-color: rgba(16, 185, 129, 0.28);
+        color: rgb(4 120 87);
+        background: rgba(236, 253, 245, 0.95);
+    }
+
+    .cd-status-pill.is-outline,
+    .cd-status-pill.is-slate {
+        border-color: rgba(15, 23, 42, 0.12);
+        color: rgb(51 65 85);
+    }
+
+    .cd-button-chip {
+        @apply inline-flex items-center justify-center rounded-full border px-4 py-2 text-sm font-bold text-slate-900 transition-all duration-200;
+        border-color: rgba(16, 185, 129, 0.35);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .cd-button-chip:hover,
+    .cd-button-chip:focus-visible {
+        border-color: rgba(5, 150, 105, 0.65);
+        color: rgb(5 150 105);
+        transform: translateY(-1px);
+        box-shadow: 0 16px 28px rgba(16, 185, 129, 0.12);
+    }
+
+    .cd-button-chip--solid {
+        @apply text-white;
+        background: linear-gradient(135deg, rgb(5 150 105), rgb(16 185 129));
+        border-color: transparent;
+    }
+
+    .cd-button-chip--solid:hover,
+    .cd-button-chip--solid:focus-visible {
+        @apply text-white;
+        background: linear-gradient(135deg, rgb(4 120 87), rgb(5 150 105));
+    }
+
+    .cd-link-tile {
+        @apply flex items-center gap-3 rounded-[22px] border px-4 py-3 transition-all duration-200;
+        border-color: rgba(16, 185, 129, 0.16);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+    }
+
+    .cd-link-tile:hover,
+    .cd-link-tile:focus-visible {
+        transform: translateY(-2px);
+        border-color: rgba(5, 150, 105, 0.4);
+        box-shadow: 0 16px 28px rgba(16, 185, 129, 0.1);
+    }
+
+    .cd-link-tile__icon {
+        @apply inline-flex h-11 w-11 items-center justify-center rounded-2xl text-xs font-black text-emerald-700;
+        background: rgba(236, 253, 245, 0.95);
+    }
+
+    .cd-link-tile__body {
+        @apply min-w-0 flex-1;
+    }
+
+    .cd-link-tile__title {
+        @apply block text-sm font-black text-slate-950;
+    }
+
+    .cd-link-tile__text {
+        @apply mt-1 block text-xs leading-5 text-slate-600;
+    }
+
+    .cd-link-tile__arrow {
+        @apply text-lg font-bold text-emerald-700;
+    }
+
+    .cd-primary-cta {
+        @apply relative flex min-h-[260px] flex-col justify-between rounded-[30px] border p-5 text-left transition-all duration-300;
+        border-color: rgba(16, 185, 129, 0.18);
+        background:
+                radial-gradient(circle at top right, rgba(16, 185, 129, 0.16), transparent 36%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+        box-shadow: 0 22px 42px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .cd-primary-cta::after {
+        content: "";
+        position: absolute;
+        inset: auto -18% -35% auto;
+        width: 220px;
+        height: 220px;
+        border-radius: 999px;
+        background: rgba(16, 185, 129, 0.08);
+        filter: blur(10px);
+    }
+
+    .cd-primary-cta:hover,
+    .cd-primary-cta:focus-visible {
+        transform: translateY(-3px);
+        border-color: rgba(5, 150, 105, 0.42);
+        box-shadow: 0 30px 55px rgba(16, 185, 129, 0.16);
+    }
+
+    .cd-primary-cta__top,
+    .cd-action-card__visual,
+    .cd-upcoming-card__top,
+    .cd-goal-card__header,
+    .cd-week-preview__top,
+    .cd-week-day-button__top,
+    .cd-summary-card__header {
+        @apply flex items-start justify-between gap-3;
+    }
+
+    .cd-primary-cta__icon,
+    .cd-action-card__icon {
+        @apply inline-flex h-12 min-w-[3rem] items-center justify-center rounded-2xl px-3 text-xs font-black tracking-[0.14em] text-emerald-800;
+        background: rgba(236, 253, 245, 0.95);
+    }
+
+    .cd-primary-cta__title {
+        @apply text-[1.85rem] font-black leading-tight text-slate-950;
+    }
+
+    .cd-primary-cta__content {
+        @apply relative z-[1] mt-6 space-y-2;
+    }
+
+    .cd-primary-cta__headline {
+        @apply text-[1.7rem] font-black leading-none text-slate-950;
+    }
+
+    .cd-primary-cta__subhead {
+        @apply text-sm font-bold text-slate-700;
+    }
+
+    .cd-primary-cta__copy {
+        @apply pt-2 text-sm leading-6 text-slate-700;
+    }
+
+    .cd-chip-grid,
+    .cd-chip-row {
+        @apply mt-3 flex flex-wrap gap-2;
+    }
+
+    .cd-chip-grid--center {
+        @apply justify-center;
+    }
+
+    .cd-stat-chip {
+        @apply inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold text-slate-700;
+        border-color: rgba(15, 23, 42, 0.08);
+        background: rgba(248, 250, 252, 0.95);
+    }
+
+    .cd-action-hub {
+        @apply overflow-hidden;
+    }
+
+    .cd-segmented {
+        @apply inline-flex items-center rounded-full border p-1;
+        border-color: rgba(16, 185, 129, 0.22);
+        background: rgba(248, 250, 252, 0.95);
+    }
+
+    .cd-segmented__button {
+        @apply rounded-full px-4 py-2 text-sm font-black text-slate-600 transition-all duration-200;
+    }
+
+    .cd-segmented__button.is-active {
+        @apply text-white;
+        background: linear-gradient(135deg, rgb(5 150 105), rgb(16 185 129));
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.28);
+    }
+
+    .cd-action-view {
+        @apply mt-5 hidden opacity-0;
+        transform: translateY(10px);
+    }
+
+    .cd-action-view.is-active {
+        @apply block opacity-100;
+        transform: translateY(0);
+        transition: opacity 220ms ease, transform 220ms ease;
+    }
+
+    .cd-action-layout {
+        @apply grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.9fr)];
+    }
+
+    .cd-action-side,
+    .cd-action-stack {
+        @apply flex flex-col gap-4;
+    }
+
+    .cd-action-grid {
+        @apply grid gap-4 sm:grid-cols-2 xl:grid-cols-3;
+    }
+
+    .cd-action-card {
+        @apply flex flex-col rounded-[28px] border p-4 transition-all duration-200;
+        border-color: rgba(15, 23, 42, 0.08);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+        box-shadow: 0 18px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    .cd-action-card:hover,
+    .cd-action-card:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 24px 38px rgba(16, 185, 129, 0.12);
+    }
+
+    .cd-action-card--primary {
+        @apply min-h-[320px] justify-between p-5;
+    }
+
+    .cd-action-card--compact {
+        @apply min-h-[180px];
+    }
+
+    .cd-action-card--emerald {
+        border-color: rgba(16, 185, 129, 0.2);
+        background:
+                radial-gradient(circle at top right, rgba(16, 185, 129, 0.14), transparent 38%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(236, 253, 245, 0.85));
+    }
+
+    .cd-action-card--soft {
+        border-color: rgba(16, 185, 129, 0.12);
+    }
+
+    .cd-action-card__metrics {
+        @apply mt-6 flex items-end gap-3;
+    }
+
+    .cd-action-card__eyebrow,
+    .cd-upcoming-card__eyebrow,
+    .cd-context-panel__label,
+    .cd-summary-card__label,
+    .cd-goal-card__meta,
+    .cd-week-day-button__state {
+        @apply text-[11px] font-extrabold uppercase tracking-[0.16em] text-emerald-700;
+    }
+
+    .cd-action-card__title,
+    .cd-upcoming-card__title,
+    .cd-context-panel__title,
+    .cd-week-preview__title,
+    .cd-goal-card__title {
+        @apply text-xl font-black text-slate-950;
+    }
+
+    .cd-action-card__highlight {
+        @apply text-[2.4rem] font-black leading-none text-slate-950;
+    }
+
+    .cd-action-card__highlight-label,
+    .cd-upcoming-card__status,
+    .cd-goal-card__timeline,
+    .cd-summary-card__meta,
+    .cd-identity-stat__label,
+    .cd-streak-card__label,
+    .cd-week-preview__summary,
+    .cd-week-day-button__date,
+    .cd-week-day-button__stats {
+        @apply text-xs font-bold text-slate-600;
+    }
+
+    .cd-action-card__text,
+    .cd-context-panel__body,
+    .cd-reveal-panel__copy,
+    .cd-profile-card__bio,
+    .cd-empty-state__copy,
+    .cd-week-preview-item,
+    .cd-summary-card__copy {
+        @apply mt-3 text-sm leading-6 text-slate-700;
+    }
+
+    .cd-action-card__support {
+        @apply mt-4 rounded-[22px] border border-slate-200 bg-white/70 p-3;
+    }
+
+    .cd-action-card__support-title {
+        @apply text-xs font-black uppercase tracking-[0.15em] text-slate-600;
+    }
+
+    .cd-action-card__support-text {
+        @apply mt-1 text-sm leading-6 text-slate-700;
+    }
+
+    .cd-action-card__footer,
+    .cd-upcoming-card__footer,
+    .cd-cta-row,
+    .cd-trainer-meta-row {
+        @apply mt-4 flex flex-wrap items-center justify-between gap-3;
+    }
+
+    .cd-action-card__badge {
+        @apply inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em] text-emerald-700;
+    }
+
+    .cd-action-card__cta {
+        @apply text-sm font-black text-slate-950;
+    }
+
+    .cd-upcoming-card,
+    .cd-context-panel,
+    .cd-week-preview,
+    .cd-summary-card,
+    .cd-goal-card,
+    .cd-streak-card {
+        @apply rounded-[26px] border p-4;
+        border-color: rgba(15, 23, 42, 0.08);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
+    }
+
+    .cd-upcoming-card {
+        @apply min-h-[220px];
+        border-color: rgba(16, 185, 129, 0.2);
+        background:
+                radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 34%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(236, 253, 245, 0.8));
+    }
+
+    .cd-upcoming-card__timer {
+        @apply text-lg font-black text-slate-950;
+    }
+
+    .cd-upcoming-card__meta {
+        @apply text-xs font-bold text-slate-600;
+    }
+
+    .cd-empty-state {
+        @apply rounded-[24px] border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center;
+    }
+
+    .cd-empty-state--panel {
+        @apply mt-4;
+    }
+
+    .cd-empty-state__title {
+        @apply text-lg font-black text-slate-950;
+    }
+
+    .cd-empty-note {
+        @apply text-sm leading-6 text-slate-600;
+    }
+
+    .cd-reveal-card {
+        @apply mt-4;
+    }
+
+    .cd-trainer-banner-shell {
+        @apply relative rounded-[28px] border border-slate-200 bg-slate-50/80 p-2;
+    }
+
+    .cd-identity-banner {
+        @apply rounded-[24px];
+    }
+
+    .cd-reveal-toggle {
+        @apply absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/90 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-slate-900;
+        box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .cd-reveal-panel {
+        @apply mt-3 hidden rounded-[22px] border border-slate-200 bg-white/90 p-4;
+        box-shadow: 0 18px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .cd-reveal-card:hover .cd-reveal-panel,
+    .cd-reveal-card.is-open .cd-reveal-panel {
+        @apply block;
+    }
+
+    .cd-identity-stats {
+        @apply mt-4 grid grid-cols-2 gap-3;
+    }
+
+    .cd-identity-stats--wide {
+        @apply justify-center;
+    }
+
+    .cd-identity-stat {
+        @apply flex flex-col items-center justify-center rounded-[20px] border border-slate-200 bg-white/90 px-3 py-4 text-center;
+    }
+
+    .cd-identity-stat__value,
+    .cd-streak-card__value {
+        @apply text-[1.7rem] font-black leading-none text-slate-950;
+    }
+
+    .cd-goal-card {
+        @apply block;
+    }
+
+    .cd-goal-card__status {
+        @apply inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-slate-700;
+    }
+
+    .cd-progress-bar {
+        @apply mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200;
+    }
+
+    .cd-progress-bar__fill {
+        @apply block h-full rounded-full;
+        width: 0;
+        background: linear-gradient(135deg, rgb(15 23 42), rgb(71 85 105));
+        transition: width 600ms ease;
+    }
+
+    .cd-progress-bar__fill.is-emerald {
+        background: linear-gradient(135deg, rgb(5 150 105), rgb(16 185 129));
+    }
+
+    .cd-week-layout {
+        @apply mt-5 grid gap-4 min-[1028px]:grid-cols-[minmax(0,1.05fr)_minmax(0,1.35fr)];
+    }
+
+    .cd-week-preview {
+        @apply transition-opacity duration-200;
+    }
+
+    .cd-week-preview.is-updating {
+        opacity: 0.6;
+    }
+
+    .cd-week-preview__lists {
+        @apply mt-5 grid gap-4 sm:grid-cols-2;
+    }
+
+    .cd-week-preview-list {
+        @apply space-y-2;
+    }
+
+    .cd-week-preview-item {
+        @apply rounded-[18px] border border-slate-200 bg-white/80 px-3 py-2;
+    }
+
+    .cd-week-strip-wrap {
+        @apply min-w-0;
+    }
+
+    .cd-week-strip {
+        @apply -mx-1 flex gap-3 overflow-x-auto px-1 pb-2;
+        cursor: grab;
+    }
+
+    .cd-week-strip.dragging {
+        cursor: grabbing;
+    }
+
+    .cd-week-day-button {
+        @apply min-w-[152px] rounded-[24px] border p-4 text-left transition-all duration-200;
+        border-color: rgba(15, 23, 42, 0.08);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
+    }
+
+    .cd-week-day-button:hover,
+    .cd-week-day-button:focus-visible,
+    .cd-week-day-button.is-active,
+    .cd-week-day-button[aria-selected="true"] {
+        transform: translateY(-2px);
+        border-color: rgba(5, 150, 105, 0.42);
+        box-shadow: 0 22px 34px rgba(16, 185, 129, 0.12);
+    }
+
+    .cd-week-day-button__label {
+        @apply text-base font-black text-slate-950;
+    }
+
+    .cd-week-day-button__stats {
+        @apply mt-3 flex flex-col gap-1;
+    }
+
+    .cd-mini-badge {
+        @apply inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-700;
+    }
+
+    .cd-mini-badge--emerald {
+        @apply border-emerald-200 bg-emerald-50 text-emerald-700;
+    }
+
+    .cd-summary-grid {
+        @apply mt-5 grid gap-4 sm:grid-cols-2;
+    }
+
+    .cd-summary-card {
+        @apply min-h-[170px];
+    }
+
+    .cd-profile-card__body,
+    .cd-profile-card__section {
+        @apply mt-4;
+    }
+
+    .cd-profile-card__section {
+        @apply text-center;
+    }
+
+    .cd-context-panel--profile {
+        @apply text-center;
+    }
+
+    .cd-streak-card {
+        @apply inline-flex min-w-[140px] items-center justify-center gap-2;
+    }
+
+    .dashboard-rails-centered .cd-rail-card {
+        box-shadow: 0 24px 42px rgba(15, 23, 42, 0.08);
+    }
+
+    html.dark .cd-panel,
+    html.dark .cd-rail-card,
+    html.dark .cd-action-card,
+    html.dark .cd-upcoming-card,
+    html.dark .cd-context-panel,
+    html.dark .cd-week-preview,
+    html.dark .cd-summary-card,
+    html.dark .cd-goal-card,
+    html.dark .cd-streak-card,
+    html.dark .cd-link-tile,
+    html.dark .cd-primary-cta,
+    html.dark .cd-trainer-banner-shell,
+    html.dark .cd-reveal-panel,
+    html.dark .cd-empty-state,
+    html.dark .cd-week-day-button,
+    html.dark .cd-identity-stat {
+        @apply border-slate-800 text-slate-100;
+        background:
+                linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.92));
+        box-shadow: 0 20px 34px rgba(2, 6, 23, 0.45);
+    }
+
+    html.dark .cd-panel__title,
+    html.dark .cd-rail-card__title,
+    html.dark .cd-primary-cta__title,
+    html.dark .cd-primary-cta__headline,
+    html.dark .cd-action-card__title,
+    html.dark .cd-action-card__highlight,
+    html.dark .cd-upcoming-card__title,
+    html.dark .cd-context-panel__title,
+    html.dark .cd-week-preview__title,
+    html.dark .cd-goal-card__title,
+    html.dark .cd-identity-stat__value,
+    html.dark .cd-streak-card__value,
+    html.dark .cd-empty-state__title,
+    html.dark .cd-link-tile__title,
+    html.dark .cd-week-day-button__label {
+        @apply text-white;
+    }
+
+    html.dark .cd-panel__copy,
+    html.dark .cd-rail-card__copy,
+    html.dark .cd-primary-cta__copy,
+    html.dark .cd-primary-cta__subhead,
+    html.dark .cd-action-card__text,
+    html.dark .cd-context-panel__body,
+    html.dark .cd-summary-card__copy,
+    html.dark .cd-profile-card__bio,
+    html.dark .cd-empty-state__copy,
+    html.dark .cd-link-tile__text,
+    html.dark .cd-week-preview-item,
+    html.dark .cd-upcoming-card__text {
+        @apply text-slate-300;
+    }
+
+    html.dark .cd-kicker,
+    html.dark .cd-action-card__eyebrow,
+    html.dark .cd-upcoming-card__eyebrow,
+    html.dark .cd-context-panel__label,
+    html.dark .cd-summary-card__label,
+    html.dark .cd-goal-card__meta,
+    html.dark .cd-week-day-button__state {
+        @apply text-emerald-300;
+    }
+
+    html.dark .cd-stat-chip,
+    html.dark .cd-button-chip,
+    html.dark .cd-status-pill,
+    html.dark .cd-meta-pill,
+    html.dark .cd-mini-badge,
+    html.dark .cd-goal-card__status {
+        @apply border-slate-700 bg-slate-900/80 text-slate-100;
+    }
+
+    html.dark .cd-button-chip:hover,
+    html.dark .cd-button-chip:focus-visible {
+        @apply text-emerald-300;
+    }
+
+    html.dark .cd-button-chip--solid {
+        @apply text-white;
+    }
+
+    html.dark .cd-primary-cta__icon,
+    html.dark .cd-action-card__icon,
+    html.dark .cd-link-tile__icon {
+        @apply bg-emerald-900/50 text-emerald-200;
+    }
+
+    html.dark .cd-progress-bar {
+        @apply bg-slate-800;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cd-panel,
+        .cd-rail-card,
+        .cd-link-tile,
+        .cd-button-chip,
+        .cd-primary-cta,
+        .cd-action-card,
+        .cd-week-day-button,
+        .cd-progress-bar__fill,
+        .cd-action-view {
+            transition: none !important;
+        }
+
+        .cd-link-tile:hover,
+        .cd-button-chip:hover,
+        .cd-primary-cta:hover,
+        .cd-action-card:hover,
+        .cd-week-day-button:hover {
+            transform: none !important;
+        }
+    }
+}

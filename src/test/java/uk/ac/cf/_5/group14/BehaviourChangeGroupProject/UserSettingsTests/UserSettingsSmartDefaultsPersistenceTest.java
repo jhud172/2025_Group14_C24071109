@@ -12,6 +12,8 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -43,10 +45,19 @@ class UserSettingsSmartDefaultsPersistenceTest {
                 false,
                 false,
                 true,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                null,
                 2200,
                 160,
                 200,
-                70
+                70,
+                Set.of()
         );
 
         UserSettings reloaded = userSettingsRepository.findById(user.getId()).orElseThrow();

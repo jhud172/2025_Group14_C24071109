@@ -1,0 +1,483 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+    <th:block th:fragment="leftRail">
+        <section class="cd-rail-card cd-rail-card--explore" data-testid="explore-rail-card">
+            <div class="cd-rail-card__header">
+                <div>
+                    <p class="cd-kicker">Explore Platform</p>
+                    <h2 class="cd-rail-card__title">Discover what supports your goals</h2>
+                </div>
+            </div>
+            <p class="cd-rail-card__copy">Use the left rail to reach coaching, spaces, and long-term targets without losing your place in the day.</p>
+            <nav class="mt-4 space-y-3" aria-label="Explore links">
+                <a th:href="@{/explore}" class="cd-link-tile">
+                    <span class="cd-link-tile__icon" aria-hidden="true">TR</span>
+                    <span class="cd-link-tile__body">
+                        <span class="cd-link-tile__title">Explore trainers</span>
+                        <span class="cd-link-tile__text">Compare coaching styles and find the right support for your routine.</span>
+                    </span>
+                    <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
+                </a>
+                <a th:href="@{/explore}" class="cd-link-tile">
+                    <span class="cd-link-tile__icon" aria-hidden="true">GY</span>
+                    <span class="cd-link-tile__body">
+                        <span class="cd-link-tile__title">Explore gyms</span>
+                        <span class="cd-link-tile__text">Find an environment, setup, and vibe that suits the week ahead.</span>
+                    </span>
+                    <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
+                </a>
+                <a th:href="@{/about}" class="cd-link-tile">
+                    <span class="cd-link-tile__icon" aria-hidden="true">OT</span>
+                    <span class="cd-link-tile__body">
+                        <span class="cd-link-tile__title">How One to One works</span>
+                        <span class="cd-link-tile__text">See how plans, habits, logging, and coaching connect in one flow.</span>
+                    </span>
+                    <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
+                </a>
+            </nav>
+        </section>
+
+        <section class="cd-rail-card cd-rail-card--trainer" data-testid="trainer-rail-card">
+            <div class="cd-rail-card__header">
+                <div>
+                    <p class="cd-kicker">Trainer Overview</p>
+                    <h2 class="cd-rail-card__title">Your coaching relationship</h2>
+                </div>
+                <span class="cd-status-pill"
+                      th:classappend="${trainerRail.active} ? ' is-emerald' : (${trainerRail.requested} ? ' is-outline' : ' is-slate')"
+                      th:text="${trainerRail.statusLabel}">Active coach</span>
+            </div>
+
+            <div th:if="${trainerRail.identity != null}" class="cd-reveal-card" data-reveal-card>
+                <div class="cd-trainer-banner-shell"
+                     th:classappend="${trainerRail.identity.cardBackStyle != null ? ' profile-card-back-theme--' + #strings.toLowerCase(trainerRail.identity.cardBackStyle) : ''}">
+                    <th:block th:replace="~{dashboard/fragments/client-dashboard-identity :: banner(${trainerRail.identity}, 'trainer-premium-tooltip')}"></th:block>
+                    <button type="button"
+                            class="cd-reveal-toggle"
+                            data-reveal-toggle
+                            aria-expanded="false"
+                            aria-controls="trainerRevealPanel">
+                        <span>Coach details</span>
+                        <span aria-hidden="true">&#x25BE;</span>
+                    </button>
+                </div>
+                <div id="trainerRevealPanel" class="cd-reveal-panel" data-reveal-panel>
+                    <p class="cd-reveal-panel__copy"
+                       th:text="${trainerRail.bio != null ? trainerRail.bio : 'No coach bio added yet.'}">Coach bio</p>
+                    <div class="cd-identity-stats">
+                        <div class="cd-identity-stat">
+                            <span class="cd-identity-stat__value" th:text="${trainerRail.points}">0</span>
+                            <span class="cd-identity-stat__label">points</span>
+                        </div>
+                        <div class="cd-identity-stat">
+                            <span class="cd-identity-stat__value" th:text="${trainerRail.level}">1</span>
+                            <span class="cd-identity-stat__label">level</span>
+                        </div>
+                    </div>
+                    <div class="cd-chip-grid cd-chip-grid--center" th:if="${trainerRail.milestones != null and !#lists.isEmpty(trainerRail.milestones)}">
+                        <span th:each="milestone : ${trainerRail.milestones}" class="cd-stat-chip" th:text="${milestone}">Milestone</span>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${trainerRail.identity == null}" class="cd-empty-state">
+                <p class="cd-empty-state__title">Coaching is optional</p>
+                <p class="cd-empty-state__copy">You can use the full dashboard on your own, and connect with a trainer later if you want guided support.</p>
+            </div>
+
+            <div class="cd-trainer-meta-row">
+                <span class="cd-meta-pill" th:text="${trainerRail.phaseLabel}">Coaching active</span>
+                <span class="cd-meta-pill" th:text="${trainerRail.relationshipLabel}">Connected</span>
+            </div>
+
+            <p class="cd-rail-card__copy" th:text="${trainerRail.summaryLine}">Trainer summary</p>
+
+            <div class="cd-context-panel">
+                <p class="cd-context-panel__label" th:text="${trainerRail.context.label}">Coach context</p>
+                <h3 class="cd-context-panel__title" th:text="${trainerRail.context.title}">Latest coach note</h3>
+                <p class="cd-context-panel__body" th:text="${trainerRail.context.body}">Context body</p>
+                <p class="cd-context-panel__meta" th:text="${trainerRail.context.meta}">Meta</p>
+            </div>
+
+            <div class="cd-cta-row">
+                <a th:if="${trainerRail.messageHref != null}" th:href="@{${trainerRail.messageHref}}" class="cd-button-chip cd-button-chip--solid">Message trainer</a>
+                <a th:href="@{${trainerRail.planHref}}" class="cd-button-chip" th:text="${trainerRail.planCtaLabel}">Open trainer plan</a>
+                <a th:href="@{${trainerRail.manageHref}}" class="cd-button-chip">Manage</a>
+            </div>
+        </section>
+
+        <section class="cd-rail-card" aria-label="Goals summary">
+            <div class="cd-rail-card__header">
+                <div>
+                    <p class="cd-kicker">Goals</p>
+                    <h2 class="cd-rail-card__title">Keep long-term progress visible</h2>
+                </div>
+                <a th:href="@{/goals}" class="cd-inline-link">Open</a>
+            </div>
+            <p class="cd-rail-card__copy">
+                <span th:text="${activeGoalsCount}">0</span> active and
+                <span th:text="${completedGoalsCount}">0</span> completed.
+            </p>
+            <div class="mt-4 space-y-3" th:if="${goalPreviewCards != null and !#lists.isEmpty(goalPreviewCards)}">
+                <a th:each="goal : ${goalPreviewCards}"
+                   th:href="@{'/goals/' + ${goal.id}}"
+                   class="cd-goal-card"
+                   th:attr="data-progress=${goal.progressPercent}">
+                    <div class="cd-goal-card__header">
+                        <div>
+                            <h3 class="cd-goal-card__title" th:text="${goal.title}">Goal title</h3>
+                            <p class="cd-goal-card__meta" th:text="${goal.metricLabel}">Goal metric</p>
+                        </div>
+                        <span class="cd-goal-card__status" th:text="${goal.statusLabel}">Active</span>
+                    </div>
+                    <p class="cd-goal-card__timeline" th:text="${goal.timelineLabel}">Due in 21 days</p>
+                    <div class="cd-progress-bar" aria-hidden="true">
+                        <span class="cd-progress-bar__fill"></span>
+                    </div>
+                </a>
+            </div>
+            <p th:if="${goalPreviewCards == null or #lists.isEmpty(goalPreviewCards)}"
+               class="cd-empty-note">No goals yet. Add one to keep longer-term progress visible beside the daily plan.</p>
+        </section>
+    </th:block>
+
+    <th:block th:fragment="mainColumn">
+        <section aria-label="Primary dashboard actions" class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <a th:href="@{${bodyActionCard.href}}" class="cd-primary-cta cd-primary-cta--body">
+                <div class="cd-primary-cta__top">
+                    <span class="cd-primary-cta__icon" aria-hidden="true" th:text="${bodyActionCard.icon}">BODY</span>
+                    <div>
+                        <p class="cd-kicker" th:text="${bodyActionCard.kicker}">Daily tracking</p>
+                        <h2 class="cd-primary-cta__title" th:text="${bodyActionCard.title}">Track Body</h2>
+                    </div>
+                </div>
+                <div class="cd-primary-cta__content">
+                    <p class="cd-primary-cta__headline" th:text="${bodyActionCard.headline}">Ready to log</p>
+                    <p class="cd-primary-cta__subhead" th:text="${bodyActionCard.subhead}">Set a calorie target</p>
+                    <p class="cd-primary-cta__copy" th:text="${bodyActionCard.body}">Body context</p>
+                    <div class="cd-chip-grid">
+                        <span th:each="chip : ${bodyActionCard.chips}" class="cd-stat-chip" th:text="${chip}">Chip</span>
+                    </div>
+                </div>
+            </a>
+
+            <a th:href="@{${scheduleActionCard.href}}" class="cd-primary-cta cd-primary-cta--schedule">
+                <div class="cd-primary-cta__top">
+                    <span class="cd-primary-cta__icon" aria-hidden="true" th:text="${scheduleActionCard.icon}">PLAN</span>
+                    <div>
+                        <p class="cd-kicker" th:text="${scheduleActionCard.kicker}">Planner</p>
+                        <h2 class="cd-primary-cta__title" th:text="${scheduleActionCard.title}">Track Schedule</h2>
+                    </div>
+                </div>
+                <div class="cd-primary-cta__content">
+                    <p class="cd-primary-cta__headline" th:text="${scheduleActionCard.headline}">0 items live today</p>
+                    <p class="cd-primary-cta__subhead" th:text="${scheduleActionCard.subhead}">0 tasks | 0 workouts</p>
+                    <p class="cd-primary-cta__copy" th:text="${scheduleActionCard.body}">Planner context</p>
+                    <div class="cd-chip-grid">
+                        <span th:each="chip : ${scheduleActionCard.chips}" class="cd-stat-chip" th:text="${chip}">Chip</span>
+                    </div>
+                </div>
+            </a>
+        </section>
+
+        <section aria-label="Action hub" class="cd-panel cd-action-hub" data-action-hub>
+            <div class="cd-panel__header cd-panel__header--split">
+                <div>
+                    <p class="cd-kicker">Action hub</p>
+                    <h2 class="cd-panel__title" th:text="${actionHub.title}">What should I do next?</h2>
+                    <p class="cd-panel__copy" th:text="${actionHub.detail}">Action overview</p>
+                </div>
+                <div class="cd-segmented" role="tablist" aria-label="Action hub views">
+                    <button type="button" class="cd-segmented__button is-active" data-action-tab="recommended" role="tab" aria-selected="true">Recommended</button>
+                    <button type="button" class="cd-segmented__button" data-action-tab="all" role="tab" aria-selected="false">All</button>
+                </div>
+            </div>
+
+            <div class="cd-action-view is-active" data-action-view="recommended">
+                <div th:if="${actionHub.primaryCard != null}" class="cd-action-layout">
+                    <a th:with="card=${actionHub.primaryCard}"
+                       th:href="@{${card.href}}"
+                       class="cd-action-card cd-action-card--primary"
+                       th:classappend="${' cd-action-card--' + card.tone}">
+                        <div class="cd-action-card__visual">
+                            <span class="cd-action-card__icon" th:text="${card.icon}">TASK</span>
+                            <div>
+                                <p class="cd-action-card__eyebrow" th:text="${card.eyebrow}">Task</p>
+                                <h3 class="cd-action-card__title" th:text="${card.title}">Open today</h3>
+                            </div>
+                        </div>
+                        <div class="cd-action-card__metrics">
+                            <span class="cd-action-card__highlight" th:text="${card.highlightValue}">08:00</span>
+                            <span class="cd-action-card__highlight-label" th:text="${card.highlightLabel}">scheduled</span>
+                        </div>
+                        <p class="cd-action-card__text" th:text="${card.description}">Action description</p>
+                        <div class="cd-chip-grid">
+                            <span th:each="stat : ${card.stats}" class="cd-stat-chip" th:text="${stat}">Stat</span>
+                        </div>
+                        <div class="cd-action-card__support">
+                            <p class="cd-action-card__support-title" th:text="${card.supportTitle}">Route</p>
+                            <p class="cd-action-card__support-text" th:text="${card.supportText}">Support text</p>
+                        </div>
+                        <div class="cd-action-card__footer">
+                            <span class="cd-action-card__badge" th:text="${card.badgeLabel}">Soon</span>
+                            <span class="cd-action-card__cta" th:text="${card.ctaLabel}">Open day</span>
+                        </div>
+                    </a>
+
+                    <aside class="cd-action-side">
+                        <div th:if="${actionHub.upcoming.visible}"
+                             id="recommendedUpcomingCountdown"
+                             class="cd-upcoming-card"
+                             th:attr="data-upcoming-target=${actionHub.upcoming.targetIso},data-countdown-enabled=${actionHub.upcoming.countdownEnabled}">
+                            <div class="cd-upcoming-card__top">
+                                <div>
+                                    <p class="cd-upcoming-card__eyebrow" th:text="${actionHub.upcoming.typeLabel}">Timed next</p>
+                                    <h3 class="cd-upcoming-card__title" th:text="${actionHub.upcoming.title}">Upcoming</h3>
+                                </div>
+                                <span class="cd-upcoming-card__status" th:text="${actionHub.upcoming.statusLabel}">Today</span>
+                            </div>
+                            <p class="cd-upcoming-card__text" th:text="${actionHub.upcoming.helperText}">Upcoming helper text</p>
+                            <div class="cd-upcoming-card__footer">
+                                <a th:href="@{${actionHub.upcoming.href}}" class="cd-button-chip">Open</a>
+                                <div class="text-right">
+                                    <p id="recommendedUpcomingRelative" class="cd-upcoming-card__meta" th:text="${actionHub.upcoming.statusLabel}">Today</p>
+                                    <p id="recommendedUpcomingTimer" class="cd-upcoming-card__timer">00:00:00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cd-action-stack" th:if="${actionHub.secondaryCards != null and !#lists.isEmpty(actionHub.secondaryCards)}">
+                            <a th:each="card : ${actionHub.secondaryCards}"
+                               th:href="@{${card.href}}"
+                               class="cd-action-card cd-action-card--compact"
+                               th:classappend="${' cd-action-card--' + card.tone}">
+                                <div class="cd-action-card__visual">
+                                    <span class="cd-action-card__icon" th:text="${card.icon}">MEAL</span>
+                                    <div>
+                                        <p class="cd-action-card__eyebrow" th:text="${card.eyebrow}">Nutrition</p>
+                                        <h3 class="cd-action-card__title" th:text="${card.title}">Log meal</h3>
+                                    </div>
+                                </div>
+                                <p class="cd-action-card__text" th:text="${card.description}">Action description</p>
+                                <div class="cd-action-card__footer">
+                                    <span class="cd-action-card__badge" th:text="${card.badgeLabel}">Now</span>
+                                    <span class="cd-action-card__cta" th:text="${card.ctaLabel}">Log meal</span>
+                                </div>
+                            </a>
+                        </div>
+                    </aside>
+                </div>
+
+                <div th:if="${actionHub.primaryCard == null}" class="cd-empty-state cd-empty-state--panel">
+                    <p class="cd-empty-state__title" th:text="${actionHub.emptyTitle}">Nothing urgent right now</p>
+                    <p class="cd-empty-state__copy" th:text="${actionHub.emptyBody}">Empty state</p>
+                </div>
+            </div>
+
+            <div class="cd-action-view" data-action-view="all">
+                <div class="cd-action-grid">
+                    <a th:each="card : ${actionHub.allCards}"
+                       th:href="@{${card.href}}"
+                       class="cd-action-card cd-action-card--compact"
+                       th:classappend="${' cd-action-card--' + card.tone}">
+                        <div class="cd-action-card__visual">
+                            <span class="cd-action-card__icon" th:text="${card.icon}">TASK</span>
+                            <div>
+                                <p class="cd-action-card__eyebrow" th:text="${card.eyebrow}">Task</p>
+                                <h3 class="cd-action-card__title" th:text="${card.title}">Open today</h3>
+                            </div>
+                        </div>
+                        <p class="cd-action-card__text" th:text="${card.description}">Action description</p>
+                        <div class="cd-chip-grid">
+                            <span th:each="stat : ${card.stats}" class="cd-stat-chip" th:text="${stat}">Stat</span>
+                        </div>
+                        <div class="cd-action-card__footer">
+                            <span class="cd-action-card__badge" th:text="${card.badgeLabel}">Soon</span>
+                            <span class="cd-action-card__cta" th:text="${card.ctaLabel}">Open</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section aria-label="Your next 7 days" class="cd-panel cd-week-panel">
+            <div class="cd-panel__header cd-panel__header--split">
+                <div>
+                    <p class="cd-kicker">Planner</p>
+                    <h2 class="cd-panel__title">Your next 7 days</h2>
+                    <p class="cd-panel__copy">Pick a day to preview the useful detail, then jump straight into that date.</p>
+                </div>
+                <a th:href="@{/calendar}" class="cd-button-chip">Open full planner</a>
+            </div>
+            <div class="cd-week-layout">
+                <div class="cd-week-preview" data-week-preview-panel>
+                    <div class="cd-week-preview__top">
+                        <p class="cd-kicker mb-0" id="weekSelectedLabel">Selected day</p>
+                        <a id="weekOpenDayLink" class="cd-inline-link" th:href="@{${todayPath}}">Open day</a>
+                    </div>
+                    <h3 id="weekSelectedTitle" class="cd-week-preview__title">Today</h3>
+                    <p id="weekSelectedSummary" class="cd-week-preview__summary">0 tasks, 0 workouts</p>
+                    <div class="cd-week-preview__lists">
+                        <div>
+                            <p class="cd-kicker mb-2">Tasks</p>
+                            <ul id="weekTaskList" class="cd-week-preview-list">
+                                <li class="cd-week-preview-item">No tasks selected</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="cd-kicker mb-2">Workouts</p>
+                            <ul id="weekWorkoutList" class="cd-week-preview-list">
+                                <li class="cd-week-preview-item">No workouts selected</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cd-week-strip-wrap">
+                    <div class="dashboard-week-strip cd-week-strip" role="tablist" aria-label="7 day selector" data-week-strip>
+                        <button type="button"
+                                th:each="d, iterStat : ${miniWeek}"
+                                class="dashboard-week-day-button cd-week-day-button"
+                                data-week-day-button
+                                th:classappend="${d.today ? ' is-current' : ''}"
+                                th:attr="data-day-label=${d.dayLabel + ', ' + d.prettyDate},
+                                         data-day-path=${'/calendar/day/' + #temporals.format(d.date, 'yyyy-MM-dd')},
+                                         data-task-count=${d.taskCount},
+                                         data-workout-count=${d.scheduledCount},
+                                         data-task-titles=${d.taskTitles != null and !#lists.isEmpty(d.taskTitles) ? #strings.listJoin(d.taskTitles, '|') : ''},
+                                         data-workout-titles=${d.workoutTitles != null and !#lists.isEmpty(d.workoutTitles) ? #strings.listJoin(d.workoutTitles, '|') : ''},
+                                         data-day-selected=${d.today or iterStat.index == 0 ? 'true' : 'false'}"
+                                role="tab"
+                                th:attrappend="aria-selected=${d.today or iterStat.index == 0}">
+                            <div class="cd-week-day-button__top">
+                                <span class="cd-week-day-button__label" th:text="${d.dayLabel}">Mon</span>
+                                <span th:if="${d.today}" class="cd-mini-badge">Today</span>
+                                <span th:if="${d.tomorrow}" class="cd-mini-badge cd-mini-badge--emerald">Tomorrow</span>
+                            </div>
+                            <p class="cd-week-day-button__date" th:text="${d.prettyDate}">13 Mar</p>
+                            <div class="cd-week-day-button__stats">
+                                <span th:text="${d.taskCount} + ' tasks'">0 tasks</span>
+                                <span th:text="${d.scheduledCount} + ' workouts'">0 workouts</span>
+                            </div>
+                            <p class="cd-week-day-button__state"
+                               th:text="${d.dayStatus == 'completed' ? 'Completed' : (d.dayStatus == 'missed' ? 'Missed' : (d.dayStatus == 'today' ? 'In progress' : 'Upcoming'))}">Upcoming</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section aria-label="Weekly summary" class="cd-panel">
+            <div class="cd-panel__header cd-panel__header--split">
+                <div>
+                    <p class="cd-kicker">Weekly summary</p>
+                    <h2 class="cd-panel__title">This week so far</h2>
+                </div>
+                <a th:href="@{/preferences/edit#weekly-summary-metrics}" class="cd-inline-link">Customise</a>
+            </div>
+            <div class="cd-summary-grid">
+                <article th:each="card : ${weeklySummaryCards}" class="cd-summary-card" th:attr="data-progress=${card.progressPercent}">
+                    <p class="cd-summary-card__label" th:text="${card.title}">Metric</p>
+                    <p class="cd-summary-card__value" th:text="${card.value}">0</p>
+                    <p class="cd-summary-card__copy" th:text="${card.subtitle}">Details</p>
+                    <div class="cd-progress-bar cd-progress-bar--summary" aria-hidden="true">
+                        <span class="cd-progress-bar__fill"
+                              th:classappend="${card.tone == 'emerald' ? ' is-emerald' : ''}"></span>
+                    </div>
+                    <p class="cd-summary-card__meta" th:text="${card.progressLabel}">Progress detail</p>
+                </article>
+            </div>
+        </section>
+    </th:block>
+
+    <th:block th:fragment="rightRail">
+        <section class="cd-rail-card cd-rail-card--support">
+            <div class="cd-rail-card__header">
+                <div>
+                    <p class="cd-kicker">Help and trust</p>
+                    <h2 class="cd-rail-card__title">Support without leaving the dashboard</h2>
+                </div>
+            </div>
+            <p class="cd-rail-card__copy">Open support, privacy, and plan information without leaving the dashboard flow.</p>
+            <nav class="mt-4 space-y-3" aria-label="Support links">
+                <a th:href="@{/faq}" class="cd-link-tile">
+                    <span class="cd-link-tile__icon" aria-hidden="true">FAQ</span>
+                    <span class="cd-link-tile__body">
+                        <span class="cd-link-tile__title">FAQ</span>
+                        <span class="cd-link-tile__text">Fast answers to common questions and workflows.</span>
+                    </span>
+                    <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
+                </a>
+                <a th:href="@{/policies/terms}" class="cd-link-tile">
+                    <span class="cd-link-tile__icon" aria-hidden="true">PR</span>
+                    <span class="cd-link-tile__body">
+                        <span class="cd-link-tile__title">Privacy and terms</span>
+                        <span class="cd-link-tile__text">See how your data and account rules are handled.</span>
+                    </span>
+                    <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
+                </a>
+                <a th:href="@{/pricing}" class="cd-link-tile">
+                    <span class="cd-link-tile__icon" aria-hidden="true">PL</span>
+                    <span class="cd-link-tile__body">
+                        <span class="cd-link-tile__title">Memberships and plans</span>
+                        <span class="cd-link-tile__text">Review upgrade paths, billing details, and membership options.</span>
+                    </span>
+                    <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
+                </a>
+            </nav>
+        </section>
+
+        <section class="cd-rail-card cd-profile-card"
+                 data-testid="profile-rail-card"
+                 th:classappend="${profileRail.identity != null and profileRail.identity.cardBackStyle != null ? ' profile-card-back-theme--' + #strings.toLowerCase(profileRail.identity.cardBackStyle) : ''}">
+            <div class="cd-rail-card__header">
+                <div>
+                    <p class="cd-kicker">Your profile</p>
+                </div>
+            </div>
+
+            <th:block th:replace="~{dashboard/fragments/client-dashboard-identity :: banner(${profileRail.identity}, 'profile-premium-tooltip')}"></th:block>
+
+            <div class="cd-profile-card__body">
+                <p class="cd-profile-card__bio" th:text="${profileRail.bio}">Profile bio</p>
+
+                <section class="cd-profile-card__section">
+                    <p class="cd-kicker">Points and level</p>
+                    <div class="cd-identity-stats cd-identity-stats--wide">
+                        <div class="cd-identity-stat">
+                            <span class="cd-identity-stat__value" th:text="${profileRail.points}">0</span>
+                            <span class="cd-identity-stat__label">points</span>
+                        </div>
+                        <div class="cd-identity-stat">
+                            <span class="cd-identity-stat__value" th:text="${profileRail.level}">1</span>
+                            <span class="cd-identity-stat__label">level</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="cd-profile-card__section" th:if="${profileRail.milestones != null and !#lists.isEmpty(profileRail.milestones)}">
+                    <p class="cd-kicker">Milestones</p>
+                    <div class="cd-chip-grid cd-chip-grid--center">
+                        <span th:each="milestone : ${profileRail.milestones}" class="cd-stat-chip" th:text="${milestone}">Milestone</span>
+                    </div>
+                </section>
+
+                <section class="cd-profile-card__section">
+                    <p class="cd-kicker">Daily focus</p>
+                    <div class="cd-context-panel cd-context-panel--profile">
+                        <h3 class="cd-context-panel__title" th:text="${profileRail.focusTitle}">Daily focus</h3>
+                        <p class="cd-context-panel__body" th:text="${profileRail.focusBody}">Focus body</p>
+                    </div>
+                </section>
+
+                <section class="cd-profile-card__section">
+                    <p class="cd-kicker">Workout streak</p>
+                    <div class="cd-streak-card">
+                        <span class="cd-streak-card__value" th:text="${profileRail.workoutStreak}">0</span>
+                        <span class="cd-streak-card__label">days</span>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </th:block>
+</th:block>
