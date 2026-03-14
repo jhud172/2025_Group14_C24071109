@@ -120,6 +120,9 @@ public class GoalService {
         if (form.getGoalType() != null) {
             goal.setGoalType(form.getGoalType());
         }
+        if (form.getTimeframe() != null) {
+            goal.setTimeframe(form.getTimeframe());
+        }
         if (canEditTargets) {
             goal.setTargetMetricName(form.getTargetMetricName());
             goal.setTargetMetricValue(form.getTargetMetricValue());
@@ -138,6 +141,9 @@ public class GoalService {
         }
         if (goal.getGoalType() == null) {
             goal.setGoalType(GoalType.CUSTOM);
+        }
+        if (goal.getTimeframe() == null) {
+            goal.setTimeframe(GoalTimeframe.TARGET);
         }
         if (goal.getStatus() == null) {
             goal.setStatus(GoalStatus.DRAFT);

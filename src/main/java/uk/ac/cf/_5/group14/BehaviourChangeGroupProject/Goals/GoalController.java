@@ -82,6 +82,7 @@ public class GoalController {
         model.addAttribute("clientId", clientId);
         model.addAttribute("goalStatuses", GoalStatus.values());
         model.addAttribute("goalTypes", GoalType.values());
+        model.addAttribute("goalTimeframes", GoalTimeframe.values());
 
         if (clientId != null && user.getRole() == Role.TRAINER) {
             userRepository.findById(clientId).ifPresent(client -> model.addAttribute("client", client));
@@ -104,9 +105,12 @@ public class GoalController {
         if (clientId != null && user.getRole() == Role.TRAINER) {
             userRepository.findById(clientId).ifPresent(client -> model.addAttribute("client", client));
         }
-        model.addAttribute("form", new GoalForm());
+        GoalForm form = new GoalForm();
+        form.setTimeframe(GoalTimeframe.TARGET);
+        model.addAttribute("form", form);
         model.addAttribute("goalStatuses", GoalStatus.values());
         model.addAttribute("goalTypes", GoalType.values());
+        model.addAttribute("goalTimeframes", GoalTimeframe.values());
         model.addAttribute("clientId", clientId);
         return "goals/create";
     }
@@ -163,6 +167,7 @@ public class GoalController {
         model.addAttribute("form", form);
         model.addAttribute("goalStatuses", GoalStatus.values());
         model.addAttribute("goalTypes", GoalType.values());
+        model.addAttribute("goalTimeframes", GoalTimeframe.values());
         model.addAttribute("canEditTargets", goalService.canEditTargetMetrics(user, goal));
         return "goals/edit";
     }
@@ -232,6 +237,7 @@ public class GoalController {
         form.setTitle(goal.getTitle());
         form.setDescription(goal.getDescription());
         form.setGoalType(goal.getGoalType());
+        form.setTimeframe(goal.getTimeframe());
         form.setTargetMetricName(goal.getTargetMetricName());
         form.setTargetMetricValue(goal.getTargetMetricValue());
         form.setTargetMetricUnit(goal.getTargetMetricUnit());

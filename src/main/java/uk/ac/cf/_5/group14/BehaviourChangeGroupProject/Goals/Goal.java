@@ -40,6 +40,10 @@ public class Goal {
     @Column(name = "goal_type", nullable = false, length = 30)
     private GoalType goalType = GoalType.CUSTOM;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "timeframe", nullable = false, length = 20)
+    private GoalTimeframe timeframe = GoalTimeframe.TARGET;
+
     @Column(name = "target_metric_name", length = 120)
     private String targetMetricName;
 

@@ -12,13 +12,16 @@
         <!-- SIDEBAR: PROFILE CARD -->
          <aside id="profile-sidebar-card-back"
              class="profile-sidebar-card"
+             data-profile-theme-scope
+             th:attr="data-profile-name-color=${userSettings != null ? userSettings.profileTextColor : null},
+                      data-profile-copy-color=${userSettings != null ? userSettings.profileBioTextColor : null}"
              th:classappend="${userSettings != null and userSettings.profileCardBackStyle != null ? ' profile-card-back-theme--' + #strings.toLowerCase(userSettings.profileCardBackStyle) : ' profile-card-back-theme--glass'}">
             <div class="flex flex-col items-center text-center gap-4"
                  th:with="completionScore=${(user != null && user.profileImageUrl != null ? 1 : 0) + (user != null && user.bio != null && !#strings.isEmpty(user.bio) ? 1 : 0) + (user != null && user.emailVerified ? 1 : 0) + (user != null && user.phoneNumber != null && !#strings.isEmpty(user.phoneNumber) ? 1 : 0) + (platformSubscription != null ? 1 : 0)}, completionPercent=${T(java.lang.Math).round((completionScore * 100.0) / 5)}">
                 <div id="profile-sidebar-banner-pill"
                      class="profile-identity-banner w-full"
+                     data-profile-theme-banner
                      th:with="banner=${userSettings != null and userSettings.profileBannerTheme != null ? #strings.toLowerCase(userSettings.profileBannerTheme) : 'aurora'}"
-                     th:style="${userSettings != null and userSettings.profileTextColor != null and !#strings.isEmpty(userSettings.profileTextColor) ? '--profile-identity-name-color:' + userSettings.profileTextColor + ';' : ''}"
                      th:classappend="${' profile-banner-pill--' + banner}">
                     <div class="profile-identity-banner__row">
                         <div class="profile-avatar profile-identity-banner__avatar"
@@ -58,7 +61,6 @@
                             </div>
                                                  <p class="profile-identity-banner__handle profile-preview-lock"
                                                      id="profile-identity-banner__handle"
-                                                     th:style="${userSettings != null and userSettings.profileBioTextColor != null and !#strings.isEmpty(userSettings.profileBioTextColor) ? 'color:' + userSettings.profileBioTextColor + ';' : ''}"
                                                      th:text="${user != null ? '@' + user.username : '@user'}">@user</p>
                         </div>
                     </div>
@@ -77,7 +79,7 @@
                             <span id="profile-completion-percent" class="profile-completion-widget__percent profile-preview-lock" th:text="${completionPercent + '%'}">80%</span>
                         </div>
                         <div class="profile-completion-widget__track">
-                            <div id="profile-completion-progress-bar" class="profile-completion-widget__fill" th:style="'width:' + ${completionPercent} + '%'" style="width:80%"></div>
+                            <div id="profile-completion-progress-bar" class="profile-completion-widget__fill"></div>
                             <span class="profile-completion-widget__glow" aria-hidden="true"></span>
                         </div>
                         <div id="profile-completion-complete-bar" class="profile-completion-widget__complete hidden">Profile completed</div>
@@ -92,21 +94,36 @@
                     </div>
                 </div>
 
-                <!-- Bio -->
-                     <p id="profile-sidebar-bio-text"
-                         class="text-sm text-slate-600 dark:text-slate-300 text-center leading-relaxed"
-                         th:style="${userSettings != null and userSettings.profileBioTextColor != null and !#strings.isEmpty(userSettings.profileBioTextColor) ? 'color:' + userSettings.profileBioTextColor + ';' : ''}"
-                         th:text="${user != null &amp;&amp; user.bio != null ? user.bio : 'No bio yet — add one in Edit Profile.'}">Bio</p>
+                <div class="profile-preview-bio-block"
+                     data-profile-bio-block
+                     data-bio-scroll-height="220">
+                    <p id="profile-sidebar-bio-text"
+                       class="profile-sidebar-bio profile-preview-copy"
+                       data-profile-bio
+                       th:text="${user != null &amp;&amp; user.bio != null ? user.bio : 'No bio yet - add one in Edit Profile.'}">Bio</p>
+                    <button type="button"
+                            class="profile-preview-bio__toggle"
+                            data-profile-bio-toggle
+                            hidden
+                            aria-hidden="true"
+                            aria-expanded="false">Read more</button>
+                </div>
 
                  <div id="profile-sidebar-milestones-panel"
-                     class="w-full rounded-2xl border border-slate-200/80 bg-slate-50/70 px-3 py-3 dark:border-slate-700/70 dark:bg-slate-900/35"
-                     th:classappend="${selectedProfileMilestones == null or selectedProfileMilestones.size() == 0} ? ' hidden' : ''">
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">Visible milestones</p>
-                    <div id="profile-sidebar-milestones-list" class="mt-2 flex flex-wrap justify-center gap-1.5">
-                        <span th:each="ms : ${profileMilestoneOptions}"
-                              th:if="${selectedProfileMilestones.contains(ms.key)}"
-                              class="inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:border-emerald-700/50 dark:bg-emerald-900/25 dark:text-emerald-300"
-                              th:text="${ms.title}">Milestone</span>
+                     class="profile-sidebar-milestones-panel">
+                    <p class="profile-sidebar-milestones-title profile-preview-copy">Visible milestones</p>
+                    <div id="profile-sidebar-milestones-list" class="profile-preview-milestone-grid">
+                        <span class="profile-preview-milestone is-achieved"
+                              th:each="ms, iter : ${profileMilestoneOptions}"
+                              th:if="${selectedProfileMilestones != null and selectedProfileMilestones.contains(ms.key) and iter.index < 4}">
+                            <span class="profile-preview-milestone__status">Achieved</span>
+                            <span class="profile-preview-milestone__title" th:text="${ms.title}">Milestone</span>
+                        </span>
+                        <span class="profile-preview-milestone profile-preview-milestone--empty"
+                              th:if="${selectedProfileMilestones == null or selectedProfileMilestones.size() == 0}">
+                            <span class="profile-preview-milestone__status">Milestones</span>
+                            <span class="profile-preview-milestone__title">No Milestones Displayed</span>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -837,11 +854,11 @@
                                                      data-month=${card.expiryMonth},
                                                      data-year=${card.expiryYear},
                                                      data-default=${card.default}"
-                                            onclick="openEditCard(this)"
+                                            data-open-edit-card
                                             class="btn btn--secondary text-xs px-3 py-1">Edit</button>
                                     <form th:action="@{/profile/settings/cards/{id}/delete(id=${card.id})}"
                                           method="post"
-                                          onsubmit="return confirm('Remove this card?');">
+                                          data-confirm-submit="Remove this card?">
                                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                         <button type="submit"
                                                 class="btn text-xs px-3 py-1 bg-red-900/40 border border-red-700/50 text-red-400 hover:bg-red-800/60">Remove</button>
@@ -878,7 +895,7 @@
                                         <input type="text" id="addCardNumberDisplaySettings" required maxlength="19"
                                                class="input-field w-full pl-9" placeholder="•••• •••• •••• ••••"
                                                autocomplete="cc-number" inputmode="numeric"
-                                               oninput="this.value=this.value.replace(/[^\d\s]/g,'')"/>
+                                               />
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -1342,7 +1359,7 @@
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button type="submit" class="btn btn--primary text-sm">Save Changes</button>
-                    <button type="button" onclick="closeEditCard()" class="btn btn--secondary text-sm">Cancel</button>
+                    <button type="button" data-close-edit-card class="btn btn--secondary text-sm">Cancel</button>
                 </div>
             </form>
         </div>
@@ -1478,26 +1495,16 @@
         </div>
     </div>
 
+    <div id="profile-page-state"
+         th:attr="data-settings-updated=${settingsUpdated},
+                  data-export-requested=${exportRequested},
+                  data-delete-error=${deleteError != null}"
+         hidden></div>
+
 </div><!-- end content fragment -->
 
 <th:block th:fragment="pageScripts">
 <script th:src="@{/js/profile/profile-page.js}"></script>
 <script th:src="@{/js/profile/phone-country-input.js}"></script>
-<script th:inline="javascript">
-(function () {
-    var settingsUpdated = /*[[${settingsUpdated}]]*/ false;
-    var exportRequested = /*[[${exportRequested}]]*/ false;
-    var deleteError     = /*[[${deleteError != null}]]*/ false;
-    if (settingsUpdated) {
-        if (typeof openOptionsDrawer === 'function') {
-            openOptionsDrawer();
-        } else if (typeof openSettingsDrawer === 'function') {
-            openSettingsDrawer();
-        }
-    } else if (exportRequested || deleteError) {
-        if (typeof openSettingsDrawer === 'function') openSettingsDrawer();
-    }
-})();
-</script>
 </th:block>
 </th:block>

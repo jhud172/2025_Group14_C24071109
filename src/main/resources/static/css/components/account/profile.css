@@ -1410,6 +1410,8 @@
             gap: 0.55rem;
             padding: 0.42rem 0.62rem;
             border-bottom: 1px solid rgba(2, 6, 23, 0.35);
+            cursor: pointer;
+            transition: border-radius 0.22s ease, box-shadow 0.22s ease;
         }
 
         .floating-profile-card__avatar-wrap {
@@ -1440,7 +1442,7 @@
             font-size: 1.02rem;
             line-height: 1.2;
             font-weight: 700;
-            color: #0f172a;
+            color: var(--profile-preview-name-color, #0f172a);
             text-decoration: none;
             white-space: nowrap;
             overflow: hidden;
@@ -1492,16 +1494,22 @@
             opacity: 0;
             overflow: hidden;
             pointer-events: none;
-            transition: max-height 0.24s ease, opacity 0.2s ease, padding 0.24s ease;
+            transform: translateY(-0.45rem);
+            transition: max-height 0.28s ease, opacity 0.22s ease, padding 0.28s ease, transform 0.28s ease;
         }
 
-        .floating-profile-card__top:hover + .floating-profile-card__bottom,
-        .floating-profile-card__bottom:hover,
-        .floating-profile-card__shell:focus-within .floating-profile-card__bottom {
-            max-height: 17rem;
+        .floating-profile-card.is-open .floating-profile-card__top {
+            border-bottom-left-radius: 0.8rem;
+            border-bottom-right-radius: 0.8rem;
+            box-shadow: inset 0 -1px 0 rgba(2, 6, 23, 0.08);
+        }
+
+        .floating-profile-card.is-open .floating-profile-card__bottom {
+            max-height: 24rem;
             opacity: 1;
-            padding: 0.16rem 0.62rem 0.62rem;
+            padding: 0.12rem 0.62rem 0.62rem;
             pointer-events: auto;
+            transform: translateY(0);
         }
 
         .floating-profile-card__section {
@@ -1519,7 +1527,7 @@
             font-size: 0.72rem;
             line-height: 1;
             font-weight: 800;
-            color: #e2e8f0;
+            color: var(--profile-preview-copy-color, #e2e8f0);
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
@@ -1530,36 +1538,176 @@
             max-width: 100%;
             text-align: center;
             font-size: 0.74rem;
-            color: rgba(226, 232, 240, 0.95);
+            color: var(--profile-preview-copy-color, rgba(226, 232, 240, 0.95));
             white-space: normal;
-            line-height: 1.35;
-        }
-
-        .floating-profile-card__milestones {
-            margin-top: 0.38rem;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 0.32rem;
-        }
-
-        .floating-profile-card__milestone {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.6);
-            background: rgba(15, 23, 42, 0.35);
-            padding: 0.12rem 0.42rem;
-            font-size: 0.55rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: rgba(241, 245, 249, 0.96);
+            line-height: 1.45;
         }
     }
 
+    .profile-preview-name {
+        color: var(--profile-preview-name-color, inherit);
+    }
+
+    .profile-preview-copy {
+        color: var(--profile-preview-copy-color, inherit);
+    }
+
+    .profile-preview-bio-block {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.55rem;
+    }
+
+    .profile-preview-bio-block.is-collapsed [data-profile-bio] {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+    }
+
+    .profile-preview-bio-block.is-expanded.is-scrollable [data-profile-bio] {
+        max-height: 14rem;
+        overflow-y: auto;
+        padding-right: 0.3rem;
+        scrollbar-width: none;
+    }
+
+    .profile-preview-bio-block.is-expanded.is-scrollable [data-profile-bio]::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .profile-preview-bio-block--compact.is-expanded.is-scrollable [data-profile-bio] {
+        max-height: 10rem;
+    }
+
+    .profile-preview-bio__toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(255, 255, 255, 0.78);
+        color: rgb(15 23 42);
+        border-radius: 999px;
+        padding: 0.35rem 0.78rem;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .profile-preview-bio__toggle:hover,
+    .profile-preview-bio__toggle:focus-visible {
+        transform: translateY(-1px);
+        border-color: rgba(16, 185, 129, 0.35);
+        box-shadow: 0 10px 18px -14px rgba(15, 23, 42, 0.72);
+        outline: none;
+    }
+
+    .profile-preview-milestone-grid {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.6rem;
+        margin-top: 0.55rem;
+    }
+
+    .profile-preview-milestone-grid--compact {
+        gap: 0.4rem;
+    }
+
+    .profile-preview-milestone {
+        min-width: 8.2rem;
+        max-width: 10.8rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.22rem;
+        text-align: center;
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        padding: 0.65rem 0.8rem;
+        background: rgba(248, 250, 252, 0.92);
+    }
+
+    .profile-preview-milestone.is-achieved {
+        border-color: rgba(16, 185, 129, 0.24);
+        background: linear-gradient(180deg, rgba(236, 253, 245, 0.98), rgba(255, 255, 255, 0.96));
+    }
+
+    .profile-preview-milestone.is-pending {
+        border-style: dashed;
+        background: rgba(241, 245, 249, 0.76);
+    }
+
+    .profile-preview-milestone--empty {
+        min-width: min(100%, 14rem);
+        max-width: 100%;
+        border-style: dashed;
+        background: rgba(241, 245, 249, 0.82);
+    }
+
+    .profile-preview-milestone--empty .profile-preview-milestone__status {
+        color: rgb(71 85 105);
+    }
+
+    .profile-preview-milestone__status {
+        font-size: 0.63rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgb(71 85 105);
+    }
+
+    .profile-preview-milestone.is-achieved .profile-preview-milestone__status {
+        color: rgb(5 150 105);
+    }
+
+    .profile-preview-milestone__title {
+        font-size: 0.76rem;
+        line-height: 1.35;
+        font-weight: 700;
+        color: rgb(15 23 42);
+    }
+
+    .profile-sidebar-bio {
+        margin: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 0.92rem;
+        line-height: 1.7;
+    }
+
+    .profile-sidebar-milestones-panel {
+        width: 100%;
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(248, 250, 252, 0.72);
+        padding: 0.9rem;
+    }
+
+    .profile-sidebar-milestones-title {
+        margin: 0;
+        text-align: center;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .nav-premium-badge--expired {
+        background: radial-gradient(circle at 35% 30%, rgba(254, 205, 205, 0.95) 0%, rgba(239, 68, 68, 0.85) 62%, rgba(185, 28, 28, 0.9) 100%);
+        border-color: rgba(239, 68, 68, 0.5);
+        color: rgb(127 29 29);
+    }
+
     html.dark .floating-profile-card__handle {
-        color: #f8fafc;
+        color: var(--profile-preview-name-color, #f8fafc);
         text-shadow: 0 1px 2px rgba(2, 6, 23, 0.6);
     }
 
@@ -1567,6 +1715,44 @@
         background: rgba(15, 23, 42, 0.82);
         color: #e2e8f0;
         border-color: rgba(100, 116, 139, 0.7);
+    }
+
+    html.dark .profile-preview-bio__toggle {
+        background: rgba(15, 23, 42, 0.82);
+        color: rgb(226 232 240);
+        border-color: rgba(100, 116, 139, 0.45);
+    }
+
+    html.dark .profile-preview-milestone {
+        background: rgba(15, 23, 42, 0.72);
+        border-color: rgba(100, 116, 139, 0.4);
+    }
+
+    html.dark .profile-preview-milestone.is-achieved {
+        background: linear-gradient(180deg, rgba(6, 95, 70, 0.44), rgba(15, 23, 42, 0.82));
+        border-color: rgba(16, 185, 129, 0.34);
+    }
+
+    html.dark .profile-preview-milestone--empty {
+        background: rgba(15, 23, 42, 0.68);
+        border-color: rgba(100, 116, 139, 0.44);
+    }
+
+    html.dark .profile-preview-milestone__status {
+        color: rgb(148 163 184);
+    }
+
+    html.dark .profile-preview-milestone.is-achieved .profile-preview-milestone__status {
+        color: rgb(110 231 183);
+    }
+
+    html.dark .profile-preview-milestone__title {
+        color: rgb(241 245 249);
+    }
+
+    html.dark .profile-sidebar-milestones-panel {
+        border-color: rgba(100, 116, 139, 0.32);
+        background: rgba(15, 23, 42, 0.48);
     }
 
     .profile-completion-widget {

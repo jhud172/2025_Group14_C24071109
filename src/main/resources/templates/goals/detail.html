@@ -1,150 +1,114 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Goal Detail', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Goal Detail', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="content" class="detail-container">
-        <!-- Header with key metadata at top -->
-        <div class="detail-header">
-            <div class="detail-header-content">
-                <div class="detail-header-meta">
-                    <p class="detail-label">Goal</p>
-                    <h1 class="detail-title" th:text="${goal.title}">Goal</h1>
-                    <p class="detail-subtitle" th:text="${goal.description}"></p>
+    <th:block th:fragment="pageStyles">
+        <link rel="stylesheet" th:href="@{/css/components/goals/goal-pages.css(v='20260313')}">
+    </th:block>
+
+    <div th:fragment="content" class="goal-page">
+        <section class="goal-detail-shell">
+            <div class="goal-head">
+                <div>
+                    <p class="goal-kicker">Goal</p>
+                    <h1 class="goal-title" th:text="${goal.title}">Goal</h1>
+                    <p class="goal-copy" th:text="${goal.description}"></p>
+                    <div class="goal-detail-badges">
+                        <span class="goal-chip" th:text="${goal.goalType}">TYPE</span>
+                        <span class="goal-chip" th:text="${goal.timeframe != null ? goal.timeframe : 'TARGET'}">TARGET</span>
+                        <span class="goal-state" th:attr="data-state=${goal.status}" th:text="${goal.status}">ACTIVE</span>
+                    </div>
                 </div>
-                <!-- Primary actions - sticky on larger screens -->
-                <div class="detail-actions-sticky">
-                    <a th:href="@{/goals/{id}/edit(id=${goal.id})}" class="detail-btn-secondary">Edit</a>
-                    <a th:href="@{/goals/{id}/checkins(id=${goal.id})}" class="detail-btn-primary">Check-ins</a>
+                <div style="display:flex;flex-wrap:wrap;gap:.75rem;">
+                    <a th:href="@{/goals/{id}/edit(id=${goal.id})}" class="goal-secondary-btn">Edit</a>
+                    <a th:href="@{/goals/{id}/checkins(id=${goal.id})}" class="goal-primary-btn">Check-ins</a>
                 </div>
             </div>
-        </div>
 
-        <!-- Structured content sections -->
-        <div class="detail-sections">
-            <!-- Main content in grid layout -->
-            <div class="detail-grid-sidebar">
-                <!-- Goal Summary Section -->
-                <section class="detail-section">
-                    <h2 class="detail-section-title">Goal summary</h2>
-                    <div class="detail-section-content">
-                        <div class="detail-metadata">
-                            <div class="detail-metadata-item">
-                                <p class="detail-metadata-label">Type</p>
-                                <p class="detail-metadata-value" th:text="${goal.goalType}"></p>
-                            </div>
-                            <div class="detail-metadata-item">
-                                <p class="detail-metadata-label">Status</p>
-                                <p class="detail-metadata-value" th:text="${goal.status}"></p>
-                            </div>
-                            <div class="detail-metadata-item">
-                                <p class="detail-metadata-label">Target</p>
-                                <p class="detail-metadata-value"
-                                   th:text="${goal.targetMetricName != null ? goal.targetMetricName : 'Target'}"></p>
-                                <p class="detail-metadata-value">
-                                    <span th:text="${goal.targetMetricValue != null ? goal.targetMetricValue : '—'}"></span>
-                                    <span th:text="${goal.targetMetricUnit != null ? goal.targetMetricUnit : ''}"></span>
-                                </p>
-                            </div>
-                            <div class="detail-metadata-item">
-                                <p class="detail-metadata-label">Dates</p>
-                                <p class="detail-metadata-value" th:text="${goal.startDate != null ? goal.startDate : '—'}"></p>
-                                <p class="detail-metadata-value" th:text="${goal.targetDate != null ? goal.targetDate : '—'}"></p>
-                            </div>
-                        </div>
-                    </div>
+            <div class="goal-detail-grid">
+                <section class="goal-detail-card">
+                    <h2 class="goal-detail-card__title">Goal summary</h2>
+                    <p class="goal-detail-card__copy">
+                        <span th:text="${goal.targetMetricName != null ? goal.targetMetricName : 'Target'}">Target</span>:
+                        <span th:text="${goal.targetMetricValue != null ? goal.targetMetricValue : '—'}">—</span>
+                        <span th:text="${goal.targetMetricUnit != null ? goal.targetMetricUnit : ''}"></span>
+                    </p>
+                    <p class="goal-detail-card__copy">Start: <span th:text="${goal.startDate != null ? goal.startDate : '—'}">—</span></p>
+                    <p class="goal-detail-card__copy">Target date: <span th:text="${goal.targetDate != null ? goal.targetDate : '—'}">—</span></p>
                 </section>
 
-                <!-- Weekly Adherence Section -->
-                <section class="detail-section">
-                    <h2 class="detail-section-title">Weekly adherence</h2>
-                    <div class="detail-section-content">
-                        <div class="space-y-2">
-                            <div th:each="week : ${adherenceWeeks}" class="detail-progress-bar">
-                                <div class="detail-progress-label" th:text="${week.weekStart}">2025-01-01</div>
-                                <div class="detail-progress-track">
-                                    <div class="detail-progress-fill" th:style="${'width:' + week.percent + '%'}"></div>
-                                </div>
-                                <div class="detail-progress-value" th:text="${week.completedCount + '/' + week.plannedCount}">0/0</div>
-                            </div>
+                <section class="goal-detail-card">
+                    <h2 class="goal-detail-card__title">Weekly adherence</h2>
+                    <div th:each="week : ${adherenceWeeks}" style="margin-top:.85rem;">
+                        <p class="goal-copy" style="margin-top:0;" th:text="${week.weekStart + ' • ' + week.completedCount + '/' + week.plannedCount}"></p>
+                        <div class="goal-progress" th:attr="data-progress=${week.percent}">
+                            <span></span>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <!-- Linked Items Sections -->
-            <div class="detail-grid-3">
-                <section class="detail-section">
-                    <h2 class="detail-section-title">Linked tasks</h2>
-                    <div class="detail-section-content">
-                        <div th:if="${#lists.isEmpty(linkedItems.tasks)}" class="detail-empty">No tasks linked.</div>
-                        <ul th:if="${!#lists.isEmpty(linkedItems.tasks)}" class="detail-list">
-                            <li th:each="task : ${linkedItems.tasks}" class="detail-list-item">
-                                <span class="detail-list-item-title" th:text="${task.title}">Task</span>
-                                <span class="detail-list-item-meta" th:text="${task.date}"></span>
-                            </li>
-                        </ul>
+            <div class="goal-detail-grid">
+                <section class="goal-detail-card">
+                    <h2 class="goal-detail-card__title">Linked tasks</h2>
+                    <div th:if="${#lists.isEmpty(linkedItems.tasks)}" class="goal-empty">No tasks linked.</div>
+                    <div th:if="${!#lists.isEmpty(linkedItems.tasks)}" class="goal-card-grid">
+                        <a th:each="task : ${linkedItems.tasks}"
+                           th:href="@{'/calendar/day/' + ${#temporals.format(task.date, 'yyyy-MM-dd')}}"
+                           class="goal-card-pro">
+                            <h3 class="goal-card-pro__title" th:text="${task.title}">Task</h3>
+                            <p class="goal-card-pro__desc" th:text="${task.date}">Date</p>
+                        </a>
                     </div>
                 </section>
 
-                <section class="detail-section">
-                    <h2 class="detail-section-title">Linked occurrences</h2>
-                    <div class="detail-section-content">
-                        <div th:if="${#lists.isEmpty(linkedItems.occurrences)}" class="detail-empty">No occurrences linked.</div>
-                        <ul th:if="${!#lists.isEmpty(linkedItems.occurrences)}" class="detail-list">
-                            <li th:each="occ : ${linkedItems.occurrences}" class="detail-list-item">
-                                <span class="detail-list-item-title" th:text="${occ.scheduleName}">Occurrence</span>
-                                <span class="detail-list-item-meta" th:text="${occ.date}"></span>
-                            </li>
-                        </ul>
-                    </div>
-                </section>
-
-                <section class="detail-section">
-                    <h2 class="detail-section-title">Linked sessions</h2>
-                    <div class="detail-section-content">
-                        <div th:if="${#lists.isEmpty(linkedItems.sessions)}" class="detail-empty">No sessions linked.</div>
-                        <ul th:if="${!#lists.isEmpty(linkedItems.sessions)}" class="detail-list">
-                            <li th:each="session : ${linkedItems.sessions}" class="detail-list-item">
-                                <span class="detail-list-item-title" th:text="${session.nameSnapshot}">Session</span>
-                                <span class="detail-list-item-meta" th:text="${session.startedAt != null ? #temporals.format(session.startedAt, 'dd MMM yyyy') : ''}"></span>
-                            </li>
-                        </ul>
+                <section class="goal-detail-card">
+                    <h2 class="goal-detail-card__title">Linked occurrences</h2>
+                    <div th:if="${#lists.isEmpty(linkedItems.occurrences)}" class="goal-empty">No occurrences linked.</div>
+                    <div th:if="${!#lists.isEmpty(linkedItems.occurrences)}" class="goal-card-grid">
+                        <a th:each="occ : ${linkedItems.occurrences}"
+                           th:href="@{'/calendar/day/' + ${#temporals.format(occ.date, 'yyyy-MM-dd')}}"
+                           class="goal-card-pro">
+                            <h3 class="goal-card-pro__title" th:text="${occ.scheduleName}">Occurrence</h3>
+                            <p class="goal-card-pro__desc" th:text="${occ.date}">Date</p>
+                        </a>
                     </div>
                 </section>
             </div>
 
-            <!-- Link Items Action Section -->
-            <section class="detail-section">
-                <h2 class="detail-section-title">Link items</h2>
-                <div class="detail-section-content">
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <form method="post" th:action="@{/goals/{id}/links(id=${goal.id})}" class="space-y-2">
-                            <input type="hidden" th:if="${_csrf != null}"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}"/>
-                            <input type="hidden" name="linkType" value="CALENDAR_TASK" />
-                            <label class="detail-metadata-label">Add task link</label>
-                            <select name="targetId" class="w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-700 dark:text-slate-200">
+            <section class="goal-detail-card" style="margin-top:1rem;">
+                <h2 class="goal-detail-card__title">Link items</h2>
+                <div class="goal-detail-grid">
+                    <form method="post" th:action="@{/goals/{id}/links(id=${goal.id})}">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="hidden" name="linkType" value="CALENDAR_TASK" />
+                        <div class="goal-field">
+                            <label>Add task link</label>
+                            <select name="targetId">
                                 <option value="" th:if="${#lists.isEmpty(linkableTasks)}">No tasks in range</option>
                                 <option th:each="task : ${linkableTasks}" th:value="${task.id}" th:text="${task.title + ' · ' + task.date}"></option>
                             </select>
-                            <button type="submit" class="detail-btn-secondary">Link task</button>
-                        </form>
+                        </div>
+                        <button type="submit" class="goal-secondary-btn" style="margin-top:1rem;">Link task</button>
+                    </form>
 
-                        <form method="post" th:action="@{/goals/{id}/links(id=${goal.id})}" class="space-y-2">
-                            <input type="hidden" th:if="${_csrf != null}"
-                                   th:name="${_csrf.parameterName}"
-                                   th:value="${_csrf.token}"/>
-                            <input type="hidden" name="linkType" value="SCHEDULE_OCCURRENCE" />
-                            <label class="detail-metadata-label">Add occurrence link</label>
-                            <select name="targetId" class="w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-700 dark:text-slate-200">
+                    <form method="post" th:action="@{/goals/{id}/links(id=${goal.id})}">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="hidden" name="linkType" value="SCHEDULE_OCCURRENCE" />
+                        <div class="goal-field">
+                            <label>Add occurrence link</label>
+                            <select name="targetId">
                                 <option value="" th:if="${#lists.isEmpty(linkableOccurrences)}">No occurrences in range</option>
                                 <option th:each="occ : ${linkableOccurrences}" th:value="${occ.id}" th:text="${occ.scheduleName + ' · ' + occ.date}"></option>
                             </select>
-                            <button type="submit" class="detail-btn-secondary">Link occurrence</button>
-                        </form>
-                    </div>
+                        </div>
+                        <button type="submit" class="goal-secondary-btn" style="margin-top:1rem;">Link occurrence</button>
+                    </form>
                 </div>
             </section>
-        </div>
+        </section>
     </div>
+
+    <th:block th:fragment="pageScripts">
+        <script th:src="@{/js/goals/goal-pages.js(v='20260313')}" defer></script>
+    </th:block>
 </th:block>

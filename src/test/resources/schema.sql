@@ -408,8 +408,18 @@ CREATE TABLE IF NOT EXISTS user_settings
     hide_ai_one_shot_warning BOOLEAN NOT NULL DEFAULT FALSE,
     sticker_pack VARCHAR(20) NOT NULL DEFAULT 'STARS',
     monthly_workout_target INT NOT NULL DEFAULT 12,
+    weekly_summary_metrics VARCHAR(500) NULL,
+    profile_banner_theme VARCHAR(40) NULL,
+    profile_ring_style VARCHAR(40) NULL,
+    profile_card_back_style VARCHAR(40) NULL,
+    weather_temperature_unit VARCHAR(12) NOT NULL DEFAULT 'CELSIUS',
+    weather_display_mode VARCHAR(12) NOT NULL DEFAULT 'VISUAL',
+    time_display_format VARCHAR(18) NOT NULL DEFAULT 'TWELVE_HOUR',
     profile_text_color VARCHAR(7) NULL,
     profile_bio_text_color VARCHAR(7) NULL,
+    profile_milestone_keys VARCHAR(500) NULL,
+    dashboard_immersion_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    dashboard_weather_preset VARCHAR(20) NULL DEFAULT 'auto',
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_settings_user

@@ -47,6 +47,8 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.HealthRec
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageThread;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageThreadRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessagingService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.ThreadMessageRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrence;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceRepository;
@@ -113,7 +115,13 @@ class ClientDashboardMvcTest {
     private MessageThreadRepository messageThreadRepository;
 
     @MockitoBean
+    private ThreadMessageRepository threadMessageRepository;
+
+    @MockitoBean
     private MessagingService messagingService;
+
+    @MockitoBean
+    private NotificationService notificationService;
 
     @MockitoBean
     private CalendarTaskRepository calendarTaskRepository;
@@ -152,6 +160,7 @@ class ClientDashboardMvcTest {
         given(weeklyCheckInRepository.findByClientIdOrderBySubmittedAtDesc(1L)).willReturn(List.of());
         given(trainerClientLinkRepository.findByClientUserIdAndStatusOrderByUpdatedAtDesc(1L, TrainerClientLinkStatus.REQUESTED)).willReturn(List.of());
         given(trainerClientLinkRepository.findActiveByClientId(1L)).willReturn(Optional.empty());
+        given(threadMessageRepository.findTop30ByThread_IdOrderByIdDesc(any())).willReturn(List.of());
         given(dayModeService.determine(any(User.class), any(LocalDate.class))).willReturn(DayMode.REST_DAY);
         given(platformSubscriptionService.isPremium(any(), any(Clock.class))).willReturn(false);
         given(platformSubscriptionService.findByUserId(any())).willReturn(Optional.empty());
@@ -187,18 +196,29 @@ class ClientDashboardMvcTest {
         MvcResult result = mvc.perform(get("/dashboard").with(user("ava").roles("CLIENT")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-testid=\"trainer-rail-card\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-dashboard-temperature-unit=\"CELSIUS\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-dashboard-weather-display-mode=\"VISUAL\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-dashboard-time-display-format=\"TWELVE_HOUR\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Keep protein consistent")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/messages/55")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-action-hub")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Live Dashboard Ambience")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Using Your Local Area")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-ambience-permission-message")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-ambience-graph-toggle")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-selected-mode=\"temperature\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Weather timeline for the next 24 hours")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("No Milestones Displayed")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("First coaching win ahead"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Track Body")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Track Schedule")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-reveal-toggle")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-profile-preview-trigger")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("premium-module-card"))))
                 .andReturn();
 
         String html = result.getResponse().getContentAsString();
         assertThat(html.indexOf("Explore Platform")).isLessThan(html.indexOf("Trainer Overview"));
-        assertThat(html.indexOf("Trainer Overview")).isLessThan(html.indexOf("Keep long-term progress visible"));
+        assertThat(html.indexOf("Trainer Overview")).isLessThan(html.indexOf("Keep Long-Term Progress Visible"));
     }
 
     @Test

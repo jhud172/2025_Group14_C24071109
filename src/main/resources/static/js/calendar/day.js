@@ -102,6 +102,54 @@ function toggleEdit(id) {
     });
 })();
 
+(function initDashboardDeepLinks() {
+    const params = new URLSearchParams(window.location.search);
+    const focusTask = params.get('focusTask');
+    const focusWorkout = params.get('focusWorkout');
+    const focusTab = params.get('focusTab');
+
+    if (!focusTask && !focusWorkout && !focusTab) return;
+
+    function activateTab(tabKey) {
+        const btn = document.querySelector(`[data-tab-target="${tabKey}"]`);
+        if (btn) btn.click();
+    }
+
+    function smoothReveal(selector, triggerSelector) {
+        const row = document.querySelector(selector);
+        if (!row) return;
+        row.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        row.classList.add('ring-2', 'ring-emerald-400', 'ring-offset-2');
+        window.setTimeout(() => {
+            row.classList.remove('ring-2', 'ring-emerald-400', 'ring-offset-2');
+        }, 1800);
+        const trigger = row.querySelector(triggerSelector) || row.closest(triggerSelector);
+        if (trigger && typeof trigger.click === 'function') {
+            window.setTimeout(() => trigger.click(), 240);
+        }
+    }
+
+    window.addEventListener('load', () => {
+        if (focusTab) {
+            activateTab(focusTab);
+        }
+
+        if (focusTask) {
+            activateTab('tasks');
+            window.setTimeout(() => {
+                smoothReveal(`[data-task-item][data-task-id="${focusTask}"]`, `[data-open-task-drawer][data-task-id="${focusTask}"]`);
+            }, 280);
+        }
+
+        if (focusWorkout) {
+            activateTab('workouts');
+            window.setTimeout(() => {
+                smoothReveal(`[data-workout-card][data-workout-id="${focusWorkout}"], [data-open-workout-drawer][data-workout-id="${focusWorkout}"]`, `[data-open-workout-drawer][data-workout-id="${focusWorkout}"]`);
+            }, 280);
+        }
+    });
+})();
+
 (function initTaskDrawer() {
     const drawer = document.getElementById('task-drawer');
     if (!drawer) return;

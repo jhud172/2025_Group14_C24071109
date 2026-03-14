@@ -25,6 +25,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Pre
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.PhysicalCondition.PhysicalCondition;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.PhysicalCondition.PhysicalConditionService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.ThemePreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.TimeDisplayFormatPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.WeatherDisplayModePreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.WeatherTemperatureUnitPreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
@@ -83,6 +86,15 @@ public class UserPreferenceController {
         if (settings != null) {
             userPreferenceForm.setLanguage(settings.getLanguage());
             userPreferenceForm.setTheme(settings.getTheme() != null ? settings.getTheme().name() : "SYSTEM");
+            userPreferenceForm.setWeatherTemperatureUnit(settings.getWeatherTemperatureUnit() != null
+                    ? settings.getWeatherTemperatureUnit().name()
+                    : "CELSIUS");
+            userPreferenceForm.setWeatherDisplayMode(settings.getWeatherDisplayMode() != null
+                    ? settings.getWeatherDisplayMode().name()
+                    : "VISUAL");
+            userPreferenceForm.setTimeDisplayFormat(settings.getTimeDisplayFormat() != null
+                    ? settings.getTimeDisplayFormat().name()
+                    : "TWELVE_HOUR");
             userPreferenceForm.setEasyMode(settings.isEasyMode());
             userPreferenceForm.setColorBlindMode(settings.isColorBlindMode());
             userPreferenceForm.setDefaultSets(settings.getDefaultSets());
@@ -148,8 +160,34 @@ public class UserPreferenceController {
         } catch (IllegalArgumentException ignored) {
             theme = ThemePreference.SYSTEM;
         }
+        WeatherTemperatureUnitPreference temperatureUnit = WeatherTemperatureUnitPreference.CELSIUS;
+        try {
+            if (userPreferenceForm.getWeatherTemperatureUnit() != null) {
+                temperatureUnit = WeatherTemperatureUnitPreference.valueOf(userPreferenceForm.getWeatherTemperatureUnit());
+            }
+        } catch (IllegalArgumentException ignored) {
+            temperatureUnit = WeatherTemperatureUnitPreference.CELSIUS;
+        }
+        WeatherDisplayModePreference displayMode = WeatherDisplayModePreference.VISUAL;
+        try {
+            if (userPreferenceForm.getWeatherDisplayMode() != null) {
+                displayMode = WeatherDisplayModePreference.valueOf(userPreferenceForm.getWeatherDisplayMode());
+            }
+        } catch (IllegalArgumentException ignored) {
+            displayMode = WeatherDisplayModePreference.VISUAL;
+        }
+        TimeDisplayFormatPreference timeDisplayFormat = TimeDisplayFormatPreference.TWELVE_HOUR;
+        try {
+            if (userPreferenceForm.getTimeDisplayFormat() != null) {
+                timeDisplayFormat = TimeDisplayFormatPreference.valueOf(userPreferenceForm.getTimeDisplayFormat());
+            }
+        } catch (IllegalArgumentException ignored) {
+            timeDisplayFormat = TimeDisplayFormatPreference.TWELVE_HOUR;
+        }
         UserSettings updated = userSettingsService.update(user, userPreferenceForm.getLanguage(), theme, userPreferenceForm.isEasyMode());
         if (updated != null) {
+            userSettingsService.updateWeatherPreferences(user, temperatureUnit, displayMode);
+            userSettingsService.updateTimeDisplayPreference(user, timeDisplayFormat);
             boolean hearing = updated.isDisabilityHearing();
             boolean mobility = updated.isDisabilityMobility();
             boolean vision = updated.isDisabilityVision();

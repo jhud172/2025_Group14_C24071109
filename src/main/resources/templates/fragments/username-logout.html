@@ -5,25 +5,38 @@
               isPremium=${authUser != null ? @platformSubscriptionService.isPremium(authUser.id, @systemClock) : false},
               isPremiumVerified=${authUser != null and authUser.emailVerified and authUser.phoneVerified and authUser.profileImageUrl != null and authUser.bio != null and !#strings.isEmpty(authUser.bio) and authUser.username != null and !#strings.isEmpty(authUser.username) and authUser.firstName != null and !#strings.isEmpty(authUser.firstName) and authUser.lastName != null and !#strings.isEmpty(authUser.lastName) and authUser.dateOfBirth != null},
               navSettings=${userSettings},
-                            navProgress=${authUser != null ? authUser.levelProgress : null},
+              navProgress=${authUser != null ? authUser.levelProgress : null},
               navSub=${authUser != null ? @platformSubscriptionService.findByUserId(authUser.id).orElse(null) : null},
               navDaysLeft=${authUser != null ? @platformSubscriptionService.getDaysUntilRenewal(authUser.id, @systemClock) : null},
               navExpired=${authUser != null ? @platformSubscriptionService.hasExpiredSubscription(authUser.id, @systemClock) : false},
               navDaysUnit=${navDaysLeft != null and navDaysLeft == 1 ? 'day' : 'days'}"
      class="flex items-center gap-3">
 
-    <!-- Authenticated: Floating Profile Card (Desktop) -->
     <div sec:authorize="isAuthenticated()" class="nav-auth-container">
         <section id="floating-profile-card"
                  class="floating-profile-card"
                  data-floating-profile
-                  th:with="bannerTheme=${navSettings != null and navSettings.profileBannerTheme != null ? #strings.toLowerCase(navSettings.profileBannerTheme) : 'aurora'}, ringTheme=${navSettings != null and navSettings.profileRingStyle != null ? #strings.toLowerCase(navSettings.profileRingStyle) : 'neon_dual'}, cardBackTheme=${navSettings != null and navSettings.profileCardBackStyle != null ? #strings.toLowerCase(navSettings.profileCardBackStyle) : 'glass'}, selectedMilestones=${navSettings != null and navSettings.profileMilestoneKeys != null and !#strings.isEmpty(navSettings.profileMilestoneKeys) ? #strings.arraySplit(navSettings.profileMilestoneKeys, ',') : null}"
+                 data-profile-preview
+                 data-profile-preview-hover="true"
+                 data-profile-theme-scope
+                 th:with="bannerTheme=${navSettings != null and navSettings.profileBannerTheme != null ? #strings.toLowerCase(navSettings.profileBannerTheme) : 'aurora'},
+                          ringTheme=${navSettings != null and navSettings.profileRingStyle != null ? #strings.toLowerCase(navSettings.profileRingStyle) : 'neon_dual'},
+                          cardBackTheme=${navSettings != null and navSettings.profileCardBackStyle != null ? #strings.toLowerCase(navSettings.profileCardBackStyle) : 'glass'},
+                          selectedMilestones=${navSettings != null and navSettings.profileMilestoneKeys != null and !#strings.isEmpty(navSettings.profileMilestoneKeys) ? #strings.arraySplit(navSettings.profileMilestoneKeys, ',') : null}"
+                 th:attr="data-profile-name-color=${navSettings != null ? navSettings.profileTextColor : null},
+                          data-profile-copy-color=${navSettings != null ? navSettings.profileBioTextColor : null}"
                  aria-label="User profile card">
-              <div class="floating-profile-card__shell"
-                  th:classappend="${' profile-card-back-theme--' + cardBackTheme}">
-                <header class="floating-profile-card__top" th:classappend="${' profile-banner-pill--' + bannerTheme}">
+            <div class="floating-profile-card__shell"
+                 th:classappend="${' profile-card-back-theme--' + cardBackTheme}">
+                <header class="floating-profile-card__top"
+                        data-profile-preview-trigger
+                        tabindex="0"
+                        aria-expanded="false"
+                        aria-controls="floating-profile-card-panel"
+                        th:classappend="${' profile-banner-pill--' + bannerTheme}">
                     <a th:href="@{/profile}" class="floating-profile-card__avatar-wrap" aria-label="Open profile">
-                        <span class="floating-profile-card__avatar profile-avatar-ring" th:classappend="${' profile-avatar-ring--' + ringTheme}">
+                        <span class="floating-profile-card__avatar profile-avatar-ring"
+                              th:classappend="${' profile-avatar-ring--' + ringTheme}">
                             <img th:if="${authUser != null and authUser.profileImageUrl != null and !#strings.isEmpty(authUser.profileImageUrl)}"
                                  th:src="${authUser.profileImageUrl}"
                                  alt="Profile photo"
@@ -34,14 +47,17 @@
                     </a>
 
                     <div class="floating-profile-card__identity">
-                                <a th:href="@{/profile}"
-                                    id="floating-profile-card-handle"
-                                    class="floating-profile-card__handle"
-                                    th:style="${navSettings != null and navSettings.profileTextColor != null and !#strings.isEmpty(navSettings.profileTextColor) ? 'color:' + navSettings.profileTextColor + ';' : ''}"
-                                    th:text="${authUser != null and authUser.firstName != null ? authUser.firstName : 'Profile'}">Profile</a>
+                        <a th:href="@{/profile}"
+                           id="floating-profile-card-handle"
+                           class="floating-profile-card__handle profile-preview-name"
+                           th:text="${authUser != null and authUser.firstName != null ? authUser.firstName : 'Profile'}">Profile</a>
 
                         <div class="floating-profile-card__premium">
-                            <div th:if="${isPremium}" class="nav-premium-badge-group" data-premium-badge-group data-open="false" aria-label="Premium member">
+                            <div th:if="${isPremium}"
+                                 class="nav-premium-badge-group"
+                                 data-premium-badge-group
+                                 data-open="false"
+                                 aria-label="Premium member">
                                 <button type="button"
                                         class="nav-premium-badge premium-orb-badge"
                                         data-premium-toggle
@@ -53,7 +69,7 @@
                                     </svg>
                                 </button>
                                 <div id="premium-tooltip-floating" class="nav-premium-tooltip" role="status">
-                                    <th:block th:if="${navSub != null and navSub.plan.name() == 'INFINITE'}">∞ Lifetime Premium</th:block>
+                                    <th:block th:if="${navSub != null and navSub.plan.name() == 'INFINITE'}">Lifetime Premium</th:block>
                                     <th:block th:if="${navSub != null and navSub.plan.name() != 'INFINITE' and navDaysLeft != null and navDaysLeft >= 0 and navDaysLeft <= 5}">
                                         <span th:if="${navSub.status.name() == 'EXPIRES'}">Access ends in <span th:text="${navDaysLeft}">0</span> <span th:text="${navDaysUnit}">days</span></span>
                                         <span th:if="${navSub.status.name() != 'EXPIRES'}">Renews in <span th:text="${navDaysLeft}">0</span> <span th:text="${navDaysUnit}">days</span></span>
@@ -62,10 +78,13 @@
                                 </div>
                             </div>
 
-                            <div th:if="${!isPremium and navExpired}" class="nav-premium-badge-group" data-premium-badge-group data-open="false" aria-label="Subscription ended">
+                            <div th:if="${!isPremium and navExpired}"
+                                 class="nav-premium-badge-group"
+                                 data-premium-badge-group
+                                 data-open="false"
+                                 aria-label="Subscription ended">
                                 <button type="button"
-                                        class="nav-premium-badge"
-                                        style="background: radial-gradient(circle at 35% 30%, rgba(254,205,205,0.95) 0%, rgba(239,68,68,0.85) 62%, rgba(185,28,28,0.9) 100%); border-color: rgba(239,68,68,0.5); color: rgb(127,29,29);"
+                                        class="nav-premium-badge nav-premium-badge--expired"
                                         data-premium-toggle
                                         aria-label="Subscription ended"
                                         aria-expanded="false"
@@ -89,43 +108,58 @@
                     </form>
                 </header>
 
-                <div class="floating-profile-card__bottom" data-floating-content>
+                <div id="floating-profile-card-panel"
+                     class="floating-profile-card__bottom"
+                     data-floating-content
+                     data-profile-preview-panel
+                     aria-hidden="true">
                     <section class="floating-profile-card__section">
-                                <p class="floating-profile-card__section-title"
-                                    th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';font-weight:800;' : ''}">Bio</p>
-                                <p id="floating-profile-card-bio"
-                                    class="floating-profile-card__bio"
-                                    th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';font-weight:400;' : ''}"
-                                    th:text="${authUser != null and authUser.bio != null and !#strings.isEmpty(authUser.bio) ? authUser.bio : 'No bio yet.'}">No bio yet.</p>
-                    </section>
-
-                    <section class="floating-profile-card__section floating-profile-card__stats" th:with="pointsVal=${navProgress != null ? navProgress.points : 0}, levelVal=${navProgress != null ? navProgress.level : 1}">
-                                <p class="floating-profile-card__section-title"
-                                    th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';font-weight:800;' : ''}">Points + Level</p>
-                                <p class="floating-profile-card__stats-value"
-                                    th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';font-weight:400;' : ''}"><span th:text="${pointsVal}">0</span> points · Level <span th:text="${levelVal}">1</span></p>
-                    </section>
-
-                    <section class="floating-profile-card__section">
-                                <p class="floating-profile-card__section-title"
-                                    th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';font-weight:800;' : ''}">Milestones</p>
-                        <div class="floating-profile-card__milestones" th:if="${selectedMilestones != null and #arrays.length(selectedMilestones) > 0}">
-                                                                <span class="floating-profile-card__milestone"
-                                    th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';' : ''}"
-                                                                    th:each="mk,iter : ${selectedMilestones}" th:if="${iter.index < 3}"
-                                                                    th:text="${mk == 'FIRST_WORKOUT' ? 'First workout logged' : (mk == 'TEN_WORKOUTS' ? '10 workouts' : (mk == 'LEVEL_5' ? 'Reached Level 5' : (mk == 'LEVEL_10' ? 'Reached Level 10' : (mk == 'VERIFIED_EMAIL' ? 'Verified email' : (mk == 'VERIFIED_PHONE' ? 'Verified phone' : (mk == 'PREMIUM_MEMBER' ? 'Premium member' : #strings.replace(mk, '_', ' ')))))))}">MILESTONE</span>
+                        <p class="floating-profile-card__section-title profile-preview-copy">Bio</p>
+                        <div class="profile-preview-bio-block profile-preview-bio-block--compact"
+                             data-profile-bio-block
+                             data-bio-scroll-height="160">
+                            <p id="floating-profile-card-bio"
+                               class="floating-profile-card__bio profile-preview-copy"
+                               data-profile-bio
+                               th:text="${authUser != null and authUser.bio != null and !#strings.isEmpty(authUser.bio) ? authUser.bio : 'No bio yet.'}">No bio yet.</p>
+                            <button type="button"
+                                    class="profile-preview-bio__toggle"
+                                    data-profile-bio-toggle
+                                    hidden
+                                    aria-hidden="true"
+                                    aria-expanded="false">Read more</button>
                         </div>
-                        <p class="floating-profile-card__bio"
-                               th:style="${navSettings != null and navSettings.profileBioTextColor != null and !#strings.isEmpty(navSettings.profileBioTextColor) ? 'color:' + navSettings.profileBioTextColor + ';font-weight:400;' : ''}"
-                           th:if="${selectedMilestones == null or #arrays.length(selectedMilestones) == 0}">No milestones pinned yet.</p>
+                    </section>
+
+                    <section class="floating-profile-card__section floating-profile-card__stats"
+                             th:with="pointsVal=${navProgress != null ? navProgress.points : 0}, levelVal=${navProgress != null ? navProgress.level : 1}">
+                        <p class="floating-profile-card__section-title profile-preview-copy">Points + Level</p>
+                        <p class="floating-profile-card__stats-value profile-preview-copy"><span th:text="${pointsVal}">0</span> points | Level <span th:text="${levelVal}">1</span></p>
+                    </section>
+
+                    <section class="floating-profile-card__section">
+                        <p class="floating-profile-card__section-title profile-preview-copy">Milestones</p>
+                        <div class="profile-preview-milestone-grid profile-preview-milestone-grid--compact">
+                            <span class="profile-preview-milestone is-achieved"
+                                  th:each="mk,iter : ${selectedMilestones}"
+                                  th:if="${iter.index < 3}">
+                                <span class="profile-preview-milestone__status">Achieved</span>
+                                <span class="profile-preview-milestone__title"
+                                      th:text="${mk == 'FIRST_WORKOUT' ? 'First workout logged' : (mk == 'TEN_WORKOUTS' ? '10 workouts' : (mk == 'LEVEL_5' ? 'Reached Level 5' : (mk == 'LEVEL_10' ? 'Reached Level 10' : (mk == 'VERIFIED_EMAIL' ? 'Verified email' : (mk == 'VERIFIED_PHONE' ? 'Verified phone' : (mk == 'PREMIUM_MEMBER' ? 'Premium member' : #strings.replace(mk, '_', ' ')))))))}">Milestone</span>
+                            </span>
+                            <span class="profile-preview-milestone profile-preview-milestone--empty"
+                                  th:if="${selectedMilestones == null or #arrays.length(selectedMilestones) == 0}">
+                                <span class="profile-preview-milestone__status">Milestones</span>
+                                <span class="profile-preview-milestone__title">No Milestones Displayed</span>
+                            </span>
+                        </div>
                     </section>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- Not Authenticated: Login Button -->
-    <a sec:authorize="!isAuthenticated()" 
+    <a sec:authorize="!isAuthenticated()"
        th:href="@{/login}"
        class="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 transition-colors duration-200 shadow-sm">
         Login

@@ -1402,15 +1402,10 @@ if (accessibilityForm && accessibilityFeedback) {
     }
 
     function applyTextColorPreview(nameTextColor, generalTextColor) {
-        [sidebarName].forEach((element) => {
-            if (!element) return;
-            element.style.color = nameTextColor;
-        });
-
-        [sidebarHandle, sidebarBio].forEach((element) => {
-            if (!element) return;
-            element.style.color = generalTextColor;
-        });
+        if (sidebarCard) {
+            sidebarCard.dataset.profileNameColor = nameTextColor;
+            sidebarCard.dataset.profileCopyColor = generalTextColor;
+        }
     }
 
     function applyTextPreview() {
@@ -1438,19 +1433,37 @@ if (accessibilityForm && accessibilityFeedback) {
 
         sidebarMilestonesList.innerHTML = '';
 
-        if (!selected.length) {
-            sidebarMilestonesPanel.classList.add('hidden');
-            return;
-        }
-
         selected.forEach((item) => {
-            const chip = document.createElement('span');
-            chip.className = 'profile-milestone-chip-enter inline-flex items-center rounded-full border border-emerald-200/80 bg-emerald-50/90 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:border-emerald-700/50 dark:bg-emerald-900/25 dark:text-emerald-300';
-            chip.textContent = item.title;
-            sidebarMilestonesList.appendChild(chip);
+            const card = document.createElement('span');
+            card.className = 'profile-milestone-chip-enter profile-preview-milestone is-achieved';
+
+            const status = document.createElement('span');
+            status.className = 'profile-preview-milestone__status';
+            status.textContent = 'Achieved';
+
+            const title = document.createElement('span');
+            title.className = 'profile-preview-milestone__title';
+            title.textContent = item.title;
+
+            card.append(status, title);
+            sidebarMilestonesList.appendChild(card);
         });
 
-        sidebarMilestonesPanel.classList.remove('hidden');
+        if (!selected.length) {
+            const card = document.createElement('span');
+            card.className = 'profile-preview-milestone profile-preview-milestone--empty';
+
+            const status = document.createElement('span');
+            status.className = 'profile-preview-milestone__status';
+            status.textContent = 'Milestones';
+
+            const title = document.createElement('span');
+            title.className = 'profile-preview-milestone__title';
+            title.textContent = 'No Milestones Displayed';
+
+            card.append(status, title);
+            sidebarMilestonesList.appendChild(card);
+        }
     }
 
     function applyPreview() {
@@ -1461,10 +1474,6 @@ if (accessibilityForm && accessibilityFeedback) {
 
         // Update sidebar banner (live preview)
         replaceTokenClass(sidebarBanner, 'profile-banner-pill--', bannerKey);
-        if (sidebarBanner) {
-            sidebarBanner.style.setProperty('--profile-identity-name-color', textColor);
-            sidebarBanner.style.setProperty('--profile-identity-handle-color', currentGeneralTextColor());
-        }
         if (sidebarBannerLabel && bannerSelect) {
             sidebarBannerLabel.textContent = bannerSelect.value + ' banner';
         }
@@ -1482,6 +1491,7 @@ if (accessibilityForm && accessibilityFeedback) {
         applyTextColorPreview(textColor, currentGeneralTextColor());
         applyTextPreview();
         renderMilestonePreview();
+        window.OneToOneProfilePreview?.refreshAll(sidebarCard || document);
     }
 
     function enforceMilestoneCap(changedInput) {
@@ -1624,6 +1634,23 @@ function closeSettingsDrawer() {
 if (openSettingsBtn)  openSettingsBtn.addEventListener('click', openSettingsDrawer);
 if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettingsDrawer);
 if (settingsOverlay)  settingsOverlay.addEventListener('click', closeSettingsDrawer);
+
+const profilePageState = document.getElementById('profile-page-state');
+if (profilePageState) {
+    const settingsUpdated = profilePageState.dataset.settingsUpdated === 'true';
+    const exportRequested = profilePageState.dataset.exportRequested === 'true';
+    const deleteError = profilePageState.dataset.deleteError === 'true';
+
+    if (settingsUpdated) {
+        if (typeof openOptionsDrawer === 'function') {
+            openOptionsDrawer();
+        } else {
+            openSettingsDrawer();
+        }
+    } else if (exportRequested || deleteError) {
+        openSettingsDrawer();
+    }
+}
 
 /* Purchases Drawer */
 const purchasesDrawerRoot = document.getElementById('purchases-drawer-root');

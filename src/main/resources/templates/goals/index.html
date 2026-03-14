@@ -1,97 +1,175 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Goals', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Goals', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Goals</p>
-                <h1 class="mt-1 text-2xl font-semibold text-slate-900">Goal tracker</h1>
-                <p class="mt-1 text-sm text-slate-600" th:if="${client != null}" th:text="${'Viewing goals for ' + client.fullName}"></p>
-            </div>
-            <a th:href="@{/goals/create(clientId=${clientId})}"
-               class="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-                Create goal
-            </a>
-        </div>
+    <th:block th:fragment="pageStyles">
+        <link rel="stylesheet" th:href="@{/css/components/goals/goal-pages.css(v='20260313')}">
+    </th:block>
 
-        <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
-            <div class="flex flex-wrap items-start justify-between gap-3">
+    <div th:fragment="content" class="goal-page">
+        <section class="goal-shell">
+            <div class="goal-head">
                 <div>
-                    <div class="flex items-center gap-2">
-                        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700">Milestones to obtain</h2>
-                        <div class="group relative inline-flex">
-                            <button type="button"
-                                    class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-slate-500 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
-                                    aria-label="Milestones information">
-                                <svg viewBox="0 0 20 20" class="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
-                                    <path fill-rule="evenodd" d="M18 10A8 8 0 112 10a8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm-1 4a1 1 0 000 2v2a1 1 0 102 0v-2a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                            <div class="pointer-events-none absolute left-0 top-7 z-20 hidden w-72 rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600 shadow-lg group-hover:block group-focus-within:block">
-                                Milestones can be viewed from your goals area. Open the milestones view to see unlocked and undiscovered achievements.
-                                <a href="/achievements" class="mt-2 inline-flex font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-800">Open milestones view</a>
-                            </div>
+                    <p class="goal-kicker">Goals</p>
+                    <h1 class="goal-title">Goal tracker</h1>
+                    <p class="goal-copy" th:if="${client != null}" th:text="${'Viewing goals for ' + client.fullName}"></p>
+                    <p class="goal-copy">Keep weekly wins, monthly momentum, and longer targets visible in one place.</p>
+                </div>
+                <a th:href="@{/goals/create(clientId=${clientId})}" class="goal-primary-btn">Create goal</a>
+            </div>
+
+            <div class="goal-top-grid">
+                <section class="goal-panel">
+                    <div class="goal-head">
+                        <div>
+                            <p class="goal-kicker">Milestones</p>
+                            <h2 class="goal-card-pro__title">Milestones to obtain</h2>
+                            <p class="goal-copy">Unlock milestone progress from the same goals area and keep bigger progress visible.</p>
+                        </div>
+                        <a href="/achievements" class="goal-secondary-btn">View milestones</a>
+                    </div>
+                </section>
+
+                <form class="goal-panel" method="get" action="/goals">
+                    <input type="hidden" name="clientId" th:if="${clientId != null}" th:value="${clientId}" />
+                    <div class="goal-form-split">
+                        <div class="goal-field">
+                            <label for="goal-status">Status</label>
+                            <select id="goal-status" name="status">
+                                <option value="">All</option>
+                                <option th:each="s : ${goalStatuses}" th:value="${s}" th:text="${s}" th:selected="${statusFilter == s}"></option>
+                            </select>
+                        </div>
+                        <div class="goal-field">
+                            <label for="goal-type">Type</label>
+                            <select id="goal-type" name="type">
+                                <option value="">All</option>
+                                <option th:each="t : ${goalTypes}" th:value="${t}" th:text="${t}" th:selected="${typeFilter == t}"></option>
+                            </select>
                         </div>
                     </div>
-                    <p class="mt-1 text-sm text-slate-600">See all milestones with achieved dates and locked status in one view.</p>
-                </div>
-                <a href="/achievements"
-                   class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                    View milestones
-                </a>
-            </div>
-        </div>
-
-        <form class="mt-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-[1fr_1fr_auto_auto]"
-              method="get" action="/goals">
-            <input type="hidden" name="clientId" th:if="${clientId != null}" th:value="${clientId}" />
-            <div>
-                <label class="block text-xs font-semibold text-slate-500" for="goal-status">Status</label>
-                <select id="goal-status" name="status" class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-                    <option value="">All</option>
-                    <option th:each="s : ${goalStatuses}" th:value="${s}" th:text="${s}" th:selected="${statusFilter == s}"></option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-slate-500" for="goal-type">Type</label>
-                <select id="goal-type" name="type" class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-                    <option value="">All</option>
-                    <option th:each="t : ${goalTypes}" th:value="${t}" th:text="${t}" th:selected="${typeFilter == t}"></option>
-                </select>
-            </div>
-            <label class="mt-5 inline-flex items-center gap-2 text-sm text-slate-600">
-                <input type="checkbox" name="archived" value="true" th:checked="${archived != null && archived}" class="h-4 w-4 rounded border-slate-300" />
-                Show archived only
-            </label>
-            <button type="submit" class="mt-4 inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Filter</button>
-        </form>
-
-        <div th:if="${#lists.isEmpty(goals)}" class="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-600">
-            No goals found.
-        </div>
-
-        <div th:if="${!#lists.isEmpty(goals)}" class="mt-6 grid gap-4 md:grid-cols-2">
-            <div th:each="goal : ${goals}" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <a th:href="@{/goals/{id}(id=${goal.id})}" class="text-lg font-semibold text-slate-900" th:text="${goal.title}">Goal</a>
-                        <p class="mt-1 text-xs text-slate-500" th:text="${goal.goalType}">TYPE</p>
+                    <div class="goal-form-split" style="margin-top:1rem">
+                        <label class="goal-field" style="display:flex;align-items:center;gap:.65rem;font-weight:600;color:#475569;">
+                            <input type="checkbox" name="archived" value="true" th:checked="${archived != null && archived}" style="width:auto;margin-top:0;" />
+                            Show archived only
+                        </label>
+                        <div style="display:flex;justify-content:flex-end;align-items:end;">
+                            <button type="submit" class="goal-secondary-btn">Apply filters</button>
+                        </div>
                     </div>
-                    <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700" th:text="${goal.status}">ACTIVE</span>
-                </div>
-                <p class="mt-2 text-sm text-slate-600" th:text="${goal.description}"></p>
-                <div class="mt-3 text-xs text-slate-500">
-                    <span th:text="${goal.targetMetricName != null ? goal.targetMetricName : 'Target'}"></span>
-                    <span th:text="${goal.targetMetricValue != null ? goal.targetMetricValue : '—'}"></span>
-                    <span th:text="${goal.targetMetricUnit != null ? goal.targetMetricUnit : ''}"></span>
-                </div>
-                <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600"
-                     th:with="adh=${adherenceByGoalId != null ? adherenceByGoalId.get(goal.id) : null}">
-                    <span th:text="${adh != null ? (adh.completedCount + '/' + adh.plannedCount) : '0/0'}">0/0</span>
-                    <span class="ml-2" th:text="${adh != null ? (adh.percent + '%') : '0%'}">0%</span>
-                </div>
+                </form>
             </div>
-        </div>
+
+            <section class="goal-panel" style="margin-top:1rem" data-goal-tabs>
+                <div class="goal-head">
+                    <div>
+                        <p class="goal-kicker">Structured view</p>
+                        <h2 class="goal-card-pro__title">Week goals, month goals, and targets</h2>
+                    </div>
+                    <div class="goal-segmented" role="tablist" aria-label="Goal timeframe views">
+                        <button type="button" class="goal-segmented__btn is-active" data-goal-tab="week" aria-selected="true">Week goals</button>
+                        <button type="button" class="goal-segmented__btn" data-goal-tab="month" aria-selected="false">Month goals</button>
+                        <button type="button" class="goal-segmented__btn" data-goal-tab="target" aria-selected="false">Targets</button>
+                    </div>
+                </div>
+
+                <div class="goal-view is-active" data-goal-view="week">
+                    <div class="goal-card-grid" th:if="${!#lists.isEmpty(goals)}">
+                        <a th:each="goal : ${goals}"
+                           th:if="${goal.timeframe != null and goal.timeframe.name() == 'WEEK'}"
+                           th:href="@{/goals/{id}(id=${goal.id})}"
+                           class="goal-card-pro">
+                            <div class="goal-card-pro__head">
+                                <div>
+                                    <h3 class="goal-card-pro__title" th:text="${goal.title}">Goal</h3>
+                                    <div class="goal-card-pro__meta">
+                                        <span class="goal-chip" th:text="${goal.goalType}">TYPE</span>
+                                        <span class="goal-state" th:attr="data-state=${goal.status}" th:text="${goal.status}">ACTIVE</span>
+                                    </div>
+                                </div>
+                                <span class="goal-chip" th:text="${goal.targetDate != null ? goal.targetDate : 'No date'}">Date</span>
+                            </div>
+                            <p class="goal-card-pro__desc" th:text="${goal.description}"></p>
+                            <div class="goal-card-pro__meta">
+                                <span class="goal-chip" th:text="${goal.targetMetricName != null ? goal.targetMetricName : 'Target'}"></span>
+                                <span class="goal-chip" th:text="${goal.targetMetricValue != null ? goal.targetMetricValue : '—'}"></span>
+                                <span class="goal-chip" th:text="${goal.targetMetricUnit != null ? goal.targetMetricUnit : ''}"></span>
+                            </div>
+                            <div class="goal-progress" th:with="adh=${adherenceByGoalId != null ? adherenceByGoalId.get(goal.id) : null}"
+                                 th:attr="data-progress=${adh != null ? adh.percent : 0}">
+                                <span></span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="goal-empty" th:if="${#lists.isEmpty(goals) or #lists.isEmpty(goals.?[timeframe != null and timeframe.name() == 'WEEK'])}">
+                        No week goals yet. Add one for short-horizon accountability.
+                    </div>
+                </div>
+
+                <div class="goal-view" data-goal-view="month">
+                    <div class="goal-card-grid" th:if="${!#lists.isEmpty(goals)}">
+                        <a th:each="goal : ${goals}"
+                           th:if="${goal.timeframe != null and goal.timeframe.name() == 'MONTH'}"
+                           th:href="@{/goals/{id}(id=${goal.id})}"
+                           class="goal-card-pro">
+                            <div class="goal-card-pro__head">
+                                <div>
+                                    <h3 class="goal-card-pro__title" th:text="${goal.title}">Goal</h3>
+                                    <div class="goal-card-pro__meta">
+                                        <span class="goal-chip" th:text="${goal.goalType}">TYPE</span>
+                                        <span class="goal-state" th:attr="data-state=${goal.status}" th:text="${goal.status}">ACTIVE</span>
+                                    </div>
+                                </div>
+                                <span class="goal-chip" th:text="${goal.targetDate != null ? goal.targetDate : 'No date'}">Date</span>
+                            </div>
+                            <p class="goal-card-pro__desc" th:text="${goal.description}"></p>
+                            <div class="goal-progress" th:with="adh=${adherenceByGoalId != null ? adherenceByGoalId.get(goal.id) : null}"
+                                 th:attr="data-progress=${adh != null ? adh.percent : 0}">
+                                <span></span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="goal-empty" th:if="${#lists.isEmpty(goals) or #lists.isEmpty(goals.?[timeframe != null and timeframe.name() == 'MONTH'])}">
+                        No month goals yet. Add one to keep the wider arc visible.
+                    </div>
+                </div>
+
+                <div class="goal-view" data-goal-view="target">
+                    <div class="goal-card-grid" th:if="${!#lists.isEmpty(goals)}">
+                        <a th:each="goal : ${goals}"
+                           th:if="${goal.timeframe == null or goal.timeframe.name() == 'TARGET'}"
+                           th:href="@{/goals/{id}(id=${goal.id})}"
+                           class="goal-card-pro">
+                            <div class="goal-card-pro__head">
+                                <div>
+                                    <h3 class="goal-card-pro__title" th:text="${goal.title}">Goal</h3>
+                                    <div class="goal-card-pro__meta">
+                                        <span class="goal-chip" th:text="${goal.goalType}">TYPE</span>
+                                        <span class="goal-state" th:attr="data-state=${goal.status}" th:text="${goal.status}">ACTIVE</span>
+                                    </div>
+                                </div>
+                                <span class="goal-chip" th:text="${goal.targetDate != null ? goal.targetDate : 'No date'}">Date</span>
+                            </div>
+                            <p class="goal-card-pro__desc" th:text="${goal.description}"></p>
+                            <div class="goal-card-pro__meta">
+                                <span class="goal-chip" th:text="${goal.targetMetricName != null ? goal.targetMetricName : 'Target'}"></span>
+                                <span class="goal-chip" th:text="${goal.targetMetricValue != null ? goal.targetMetricValue : '—'}"></span>
+                                <span class="goal-chip" th:text="${goal.targetMetricUnit != null ? goal.targetMetricUnit : ''}"></span>
+                            </div>
+                            <div class="goal-progress" th:with="adh=${adherenceByGoalId != null ? adherenceByGoalId.get(goal.id) : null}"
+                                 th:attr="data-progress=${adh != null ? adh.percent : 0}">
+                                <span></span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="goal-empty" th:if="${#lists.isEmpty(goals) or #lists.isEmpty(goals.?[timeframe == null or timeframe.name() == 'TARGET'])}">
+                        No targets yet. Add a target for a longer-term finish line.
+                    </div>
+                </div>
+            </section>
+        </section>
     </div>
 
+    <th:block th:fragment="pageScripts">
+        <script th:src="@{/js/goals/goal-pages.js(v='20260313')}" defer></script>
+    </th:block>
 </th:block>

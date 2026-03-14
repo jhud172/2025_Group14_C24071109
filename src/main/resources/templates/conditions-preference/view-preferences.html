@@ -40,6 +40,21 @@
                             <p class="detail-metadata-label">Easy mode</p>
                             <p class="detail-metadata-value" th:text="${userSettings != null && userSettings.easyMode ? 'On' : 'Off'}"></p>
                         </div>
+                        <div class="detail-metadata-item">
+                            <p class="detail-metadata-label">Weather unit</p>
+                            <p class="detail-metadata-value"
+                               th:text="${userSettings != null && userSettings.weatherTemperatureUnit != null && userSettings.weatherTemperatureUnit.name() == 'FAHRENHEIT' ? 'Fahrenheit (°F)' : 'Celsius (°C)'}">Celsius (°C)</p>
+                        </div>
+                        <div class="detail-metadata-item">
+                            <p class="detail-metadata-label">Weather view</p>
+                            <p class="detail-metadata-value"
+                               th:text="${userSettings != null && userSettings.weatherDisplayMode != null && userSettings.weatherDisplayMode.name() == 'GRAPH' ? 'Graph view' : 'Visual weather view'}">Visual weather view</p>
+                        </div>
+                        <div class="detail-metadata-item">
+                            <p class="detail-metadata-label">Time format</p>
+                            <p class="detail-metadata-value"
+                               th:text="${userSettings != null && userSettings.timeDisplayFormat != null && userSettings.timeDisplayFormat.name() == 'TWENTY_FOUR_HOUR' ? '24 hour' : '12 hour'}">12 hour</p>
+                        </div>
                     </div>
                 </div>
             </section>

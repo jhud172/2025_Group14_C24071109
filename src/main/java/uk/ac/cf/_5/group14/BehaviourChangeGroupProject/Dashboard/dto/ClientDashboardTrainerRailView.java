@@ -13,12 +13,15 @@ public class ClientDashboardTrainerRailView {
     private final List<String> milestones;
     private final String phaseLabel;
     private final String relationshipLabel;
-    private final String summaryLine;
+    private final String trainerDisplayName;
+    private final Long trainerThreadId;
     private final String messageHref;
     private final String planHref;
     private final String manageHref;
     private final String planCtaLabel;
     private final ClientDashboardTrainerContextView context;
+    private final List<ClientDashboardTrainerActivityItemView> activityItems;
+    private final ClientDashboardTrainerMessagePanelView messagePanel;
 
     public ClientDashboardTrainerRailView(String state,
                                           String statusLabel,
@@ -29,12 +32,15 @@ public class ClientDashboardTrainerRailView {
                                           List<String> milestones,
                                           String phaseLabel,
                                           String relationshipLabel,
-                                          String summaryLine,
+                                          String trainerDisplayName,
+                                          Long trainerThreadId,
                                           String messageHref,
                                           String planHref,
                                           String manageHref,
                                           String planCtaLabel,
-                                          ClientDashboardTrainerContextView context) {
+                                          ClientDashboardTrainerContextView context,
+                                          List<ClientDashboardTrainerActivityItemView> activityItems,
+                                          ClientDashboardTrainerMessagePanelView messagePanel) {
         this.state = state;
         this.statusLabel = statusLabel;
         this.identity = identity;
@@ -44,12 +50,15 @@ public class ClientDashboardTrainerRailView {
         this.milestones = milestones;
         this.phaseLabel = phaseLabel;
         this.relationshipLabel = relationshipLabel;
-        this.summaryLine = summaryLine;
+        this.trainerDisplayName = trainerDisplayName;
+        this.trainerThreadId = trainerThreadId;
         this.messageHref = messageHref;
         this.planHref = planHref;
         this.manageHref = manageHref;
         this.planCtaLabel = planCtaLabel;
         this.context = context;
+        this.activityItems = activityItems;
+        this.messagePanel = messagePanel;
     }
 
     public String getState() {
@@ -88,8 +97,12 @@ public class ClientDashboardTrainerRailView {
         return relationshipLabel;
     }
 
-    public String getSummaryLine() {
-        return summaryLine;
+    public String getTrainerDisplayName() {
+        return trainerDisplayName;
+    }
+
+    public Long getTrainerThreadId() {
+        return trainerThreadId;
     }
 
     public String getMessageHref() {
@@ -110,6 +123,14 @@ public class ClientDashboardTrainerRailView {
 
     public ClientDashboardTrainerContextView getContext() {
         return context;
+    }
+
+    public List<ClientDashboardTrainerActivityItemView> getActivityItems() {
+        return activityItems;
+    }
+
+    public ClientDashboardTrainerMessagePanelView getMessagePanel() {
+        return messagePanel;
     }
 
     public boolean isActive() {

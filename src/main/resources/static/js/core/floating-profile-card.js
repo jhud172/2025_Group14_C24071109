@@ -17,7 +17,7 @@ class FloatingProfileCard {
     init() {
         window.addEventListener('scroll', this.onScroll, { passive: true });
         window.addEventListener('resize', this.onResize);
-        this.profileCard.addEventListener('mouseenter', () => this.unfold());
+        this.profileCard.addEventListener('click', () => this.unfold());
         this.profileCard.addEventListener('focusin', () => this.unfold());
         this.onResize();
     }

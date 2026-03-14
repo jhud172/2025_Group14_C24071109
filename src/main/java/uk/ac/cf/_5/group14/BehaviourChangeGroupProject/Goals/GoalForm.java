@@ -9,6 +9,7 @@ public class GoalForm {
     private String title;
     private String description;
     private GoalType goalType;
+    private GoalTimeframe timeframe;
     private String targetMetricName;
     private Double targetMetricValue;
     private String targetMetricUnit;
@@ -45,6 +46,14 @@ public class GoalForm {
 
     public void setGoalType(GoalType goalType) {
         this.goalType = goalType;
+    }
+
+    public GoalTimeframe getTimeframe() {
+        return timeframe;
+    }
+
+    public void setTimeframe(GoalTimeframe timeframe) {
+        this.timeframe = timeframe;
     }
 
     public String getTargetMetricName() {

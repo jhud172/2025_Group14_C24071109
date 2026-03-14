@@ -78,6 +78,9 @@ public class UserSettingsServiceImpl implements UserSettingsService {
     private static final String DEFAULT_PROFILE_CARD_BACK_STYLE = "GLASS";
     private static final String DEFAULT_PROFILE_TEXT_COLOR = "#F8FAFC";
     private static final String DEFAULT_PROFILE_BIO_TEXT_COLOR = "#CBD5E1";
+    private static final WeatherTemperatureUnitPreference DEFAULT_WEATHER_TEMPERATURE_UNIT = WeatherTemperatureUnitPreference.CELSIUS;
+    private static final WeatherDisplayModePreference DEFAULT_WEATHER_DISPLAY_MODE = WeatherDisplayModePreference.VISUAL;
+    private static final TimeDisplayFormatPreference DEFAULT_TIME_DISPLAY_FORMAT = TimeDisplayFormatPreference.TWELVE_HOUR;
     private static final Pattern HEX_COLOR_PATTERN = Pattern.compile("^#[0-9A-Fa-f]{6}$");
 
     private final UserSettingsRepository userSettingsRepository;
@@ -130,6 +133,9 @@ public class UserSettingsServiceImpl implements UserSettingsService {
                     newSettings.setProfileTextColor(DEFAULT_PROFILE_TEXT_COLOR);
                     newSettings.setProfileBioTextColor(DEFAULT_PROFILE_BIO_TEXT_COLOR);
                     newSettings.setProfileMilestoneKeys("");
+                    newSettings.setWeatherTemperatureUnit(DEFAULT_WEATHER_TEMPERATURE_UNIT);
+                    newSettings.setWeatherDisplayMode(DEFAULT_WEATHER_DISPLAY_MODE);
+                    newSettings.setTimeDisplayFormat(DEFAULT_TIME_DISPLAY_FORMAT);
                     return userSettingsRepository.save(newSettings);
                 });
 
@@ -169,6 +175,18 @@ public class UserSettingsServiceImpl implements UserSettingsService {
             settings.setProfileMilestoneKeys("");
             settings = userSettingsRepository.save(settings);
         }
+        if (settings.getWeatherTemperatureUnit() == null) {
+            settings.setWeatherTemperatureUnit(DEFAULT_WEATHER_TEMPERATURE_UNIT);
+            settings = userSettingsRepository.save(settings);
+        }
+        if (settings.getWeatherDisplayMode() == null) {
+            settings.setWeatherDisplayMode(DEFAULT_WEATHER_DISPLAY_MODE);
+            settings = userSettingsRepository.save(settings);
+        }
+        if (settings.getTimeDisplayFormat() == null) {
+            settings.setTimeDisplayFormat(DEFAULT_TIME_DISPLAY_FORMAT);
+            settings = userSettingsRepository.save(settings);
+        }
 
         return settings;
     }
@@ -196,6 +214,33 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         }
         settings.setEasyMode(easyMode);
 
+        return userSettingsRepository.save(settings);
+    }
+
+    @Override
+    @Transactional
+    public UserSettings updateWeatherPreferences(User user,
+                                                 WeatherTemperatureUnitPreference weatherTemperatureUnit,
+                                                 WeatherDisplayModePreference weatherDisplayMode) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+
+        settings.setWeatherTemperatureUnit(weatherTemperatureUnit != null ? weatherTemperatureUnit : DEFAULT_WEATHER_TEMPERATURE_UNIT);
+        settings.setWeatherDisplayMode(weatherDisplayMode != null ? weatherDisplayMode : DEFAULT_WEATHER_DISPLAY_MODE);
+        return userSettingsRepository.save(settings);
+    }
+
+    @Override
+    @Transactional
+    public UserSettings updateTimeDisplayPreference(User user, TimeDisplayFormatPreference timeDisplayFormat) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+
+        settings.setTimeDisplayFormat(timeDisplayFormat != null ? timeDisplayFormat : DEFAULT_TIME_DISPLAY_FORMAT);
         return userSettingsRepository.save(settings);
     }
 

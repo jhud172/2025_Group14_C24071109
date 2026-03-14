@@ -19,6 +19,10 @@ public class ClientDashboardActionCardView {
     private final int priority;
     private final String highlightValue;
     private final String highlightLabel;
+    private final String targetIso;
+    private final boolean timed;
+    private final boolean missed;
+    private final String stateLabel;
 
     public ClientDashboardActionCardView(String key,
                                          String eyebrow,
@@ -34,7 +38,11 @@ public class ClientDashboardActionCardView {
                                          String supportText,
                                          int priority,
                                          String highlightValue,
-                                         String highlightLabel) {
+                                         String highlightLabel,
+                                         String targetIso,
+                                         boolean timed,
+                                         boolean missed,
+                                         String stateLabel) {
         this.key = key;
         this.eyebrow = eyebrow;
         this.title = title;
@@ -50,6 +58,10 @@ public class ClientDashboardActionCardView {
         this.priority = priority;
         this.highlightValue = highlightValue;
         this.highlightLabel = highlightLabel;
+        this.targetIso = targetIso;
+        this.timed = timed;
+        this.missed = missed;
+        this.stateLabel = stateLabel;
     }
 
     public String getKey() {
@@ -110,5 +122,21 @@ public class ClientDashboardActionCardView {
 
     public String getHighlightLabel() {
         return highlightLabel;
+    }
+
+    public String getTargetIso() {
+        return targetIso;
+    }
+
+    public boolean isTimed() {
+        return timed;
+    }
+
+    public boolean isMissed() {
+        return missed;
+    }
+
+    public String getStateLabel() {
+        return stateLabel;
     }
 }

@@ -91,6 +91,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let eventSource = null;
     let sseRetryCount = 0;
     const MAX_SSE_RETRIES = 5;
+    const notificationSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel("one-to-one-notifications") : null;
+
+    function broadcastNotificationSync(detail) {
+        const payload = detail || {};
+        window.dispatchEvent(new CustomEvent("one-to-one:notifications-updated", { detail: payload }));
+        try {
+            notificationSyncChannel?.postMessage(payload);
+        } catch (_) {
+            // ignore
+        }
+    }
 
     function open() {
         panel.classList.add("open");
@@ -397,6 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await dismissNotification(notification.id);
             await loadNotifications();
             await refreshUnreadCount();
+            broadcastNotificationSync({ source: "chat-widget", notificationId: notification.id, action: "dismiss" });
         });
 
         header.appendChild(title);
@@ -425,6 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (csrfToken) headers[csrfHeader] = csrfToken;
                     await fetch(`/api/notifications/${notification.id}/read`, { method: "POST", headers });
                     await refreshUnreadCount();
+                    broadcastNotificationSync({ source: "chat-widget", notificationId: notification.id, action: "read" });
                 }
             });
             row.appendChild(cta);
@@ -438,7 +451,8 @@ document.addEventListener("DOMContentLoaded", () => {
                  await fetch(`/api/notifications/${notification.id}/read`, { method: "POST", headers });
                  await loadNotifications();
                  await refreshUnreadCount();
-            });
+                 broadcastNotificationSync({ source: "chat-widget", notificationId: notification.id, action: "read" });
+             });
             row.style.cursor = "pointer";
         }
         
@@ -474,6 +488,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const headers = {};
         if (csrfToken) headers[csrfHeader] = csrfToken;
         await fetch(`/api/notifications/${id}/dismiss`, { method: "POST", headers });
+        broadcastNotificationSync({ source: "chat-widget", notificationId: id, action: "dismiss" });
     }
 
     function showToast(notification) {
@@ -561,6 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     loadNotifications();
                 }
                 refreshUnreadCount();
+                broadcastNotificationSync({ source: "chat-widget", notificationId: data?.id, action: "create" });
             } catch {
                 // ignore
             }
@@ -590,6 +606,19 @@ document.addEventListener("DOMContentLoaded", () => {
         // Also verify immediate sync
         refreshUnreadCount();
     }
+
+    window.addEventListener("one-to-one:notifications-updated", async () => {
+        await refreshUnreadCount();
+        if (notificationsView && !notificationsView.classList.contains("hidden")) {
+            await loadNotifications();
+        }
+    });
+    notificationSyncChannel?.addEventListener("message", async () => {
+        await refreshUnreadCount();
+        if (notificationsView && !notificationsView.classList.contains("hidden")) {
+            await loadNotifications();
+        }
+    });
 
     // Events
     fab.addEventListener("click", (e) => {
@@ -742,6 +771,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await fetch("/api/notifications/read-all", { method: "POST", headers });
             await loadNotifications();
             await refreshUnreadCount();
+            broadcastNotificationSync({ source: "chat-widget", action: "read-all" });
         });
     }
 

@@ -5,7 +5,12 @@
     <div th:fragment="content">
         <section sec:authorize="isAuthenticated()"
                  class="mx-auto w-full max-w-7xl px-4 pb-6 pt-0 sm:px-6 lg:px-8 2xl:max-w-full 2xl:px-8"
-                 data-dashboard-role="CLIENT">
+                 data-dashboard-role="CLIENT"
+                 th:attrappend="data-dashboard-immersive=${dashboardAmbience != null and dashboardAmbience.enabled ? 'true' : 'false'},
+                                data-dashboard-weather=${dashboardAmbience != null ? dashboardAmbience.weather : 'auto'},
+                                data-dashboard-temperature-unit=${dashboardAmbience != null ? dashboardAmbience.temperatureUnit : 'CELSIUS'},
+                                data-dashboard-weather-display-mode=${dashboardAmbience != null ? dashboardAmbience.displayMode : 'VISUAL'},
+                                data-dashboard-time-display-format=${dashboardTimeDisplayFormat != null ? dashboardTimeDisplayFormat : 'TWELVE_HOUR'}">
 
             <div id="dashboardRoot" class="grid grid-cols-1 gap-4 min-[1028px]:grid-cols-12 min-[1028px]:gap-5 2xl:gap-8">
                 <aside aria-label="Explore platform"
@@ -28,6 +33,6 @@
     </div>
 
     <th:block th:fragment="pageScripts">
-        <script th:src="@{/js/dashboard/client-dashboard-page.js(v='20260313')}" defer></script>
+        <script th:src="@{/js/dashboard/client-dashboard-page.js(v='20260314b')}" defer></script>
     </th:block>
 </th:block>

@@ -16,21 +16,11 @@
     <link rel="icon" type="image/png" sizes="16x16" th:href="@{/img/brand/tab_logo.png}">
     <link rel="apple-touch-icon" th:href="@{/img/brand/tab_logo.png}">
 
-    <!-- No-flash theme script: must run before CSS to prevent flash of wrong theme.
-         When theme preference is SYSTEM (the server cannot know OS dark mode),
-         this script checks prefers-color-scheme immediately and adds the 'dark'
-         class before the browser paints anything. -->
-    <script>
-    (function () {
-        var t = document.documentElement.getAttribute('data-theme');
-        if (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
-    }());
-    </script>
+    <!-- No-flash theme script: must run before CSS to prevent flash of wrong theme. -->
+    <script th:src="@{/js/core/theme-preload.js(v='20260314')}"></script>
 
     <!-- Core styles (compiled Tailwind + all component styles) -->
-    <link rel="stylesheet" th:href="@{/css/app.css(v='20260303')}">
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260314b')}">
 
     <!-- Page-specific styles -->
     <th:block th:if="${pageStyles != null}">
@@ -76,6 +66,7 @@
 <script th:src="@{/js/core/quick-actions.js(v='20260303')}" defer></script>
 <script th:src="@{/js/core/navbar-premium.js(v='20260303')}" defer></script>
 <script th:src="@{/js/core/floating-profile-card.js(v='20260303')}" defer></script>
+<script th:src="@{/js/core/profile-preview.js(v='20260314')}" defer></script>
 
 <!-- Page-specific scripts -->
 <th:block th:if="${pageScripts != null}">

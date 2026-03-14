@@ -9,17 +9,26 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskRepository;
@@ -30,19 +39,28 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.ClientDashb
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.ClientDashboardActionUpcomingView;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.ClientDashboardIdentityView;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.ClientDashboardProfileRailView;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.ClientDashboardTrainerActivityItemView;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.ClientDashboardTrainerContextView;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.ClientDashboardTrainerMessagePanelView;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.ClientDashboardTrainerMessageView;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.ClientDashboardTrainerRailView;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Dashboard.dto.DashboardSummaryDto;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.Goal;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalStatus;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Goals.GoalTimeframe;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.HealthRecord;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.HealthRecordRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HomePage.MiniWeekDay;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Level.LevelProgress;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.Message;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageType;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageThread;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessageThreadRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.MessagingService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Messaging.ThreadMessageRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.Notification;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Notifications.NotificationService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformPlan;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscription;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
@@ -62,6 +80,9 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerLibrary.TrainerLib
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.TimeDisplayFormatPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.WeatherDisplayModePreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.WeatherTemperatureUnitPreference;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.Role;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
@@ -75,8 +96,6 @@ public class DashboardController {
             DateTimeFormatter.ofPattern("d MMM", Locale.UK);
     private static final DateTimeFormatter FULL_DATE_FMT =
             DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK);
-    private static final DateTimeFormatter SHORT_TIME_FMT =
-            DateTimeFormatter.ofPattern("HH:mm", Locale.UK);
 
     private final AuthHelper authHelper;
     private final UserService userService;
@@ -91,7 +110,9 @@ public class DashboardController {
     private final TrainerLibraryService trainerLibraryService;
     private final WeeklyCheckInRepository weeklyCheckInRepository;
     private final MessageThreadRepository messageThreadRepository;
+    private final ThreadMessageRepository threadMessageRepository;
     private final MessagingService messagingService;
+    private final NotificationService notificationService;
     private final PlatformSubscriptionService platformSubscriptionService;
     private final CalendarTaskRepository calendarTaskRepository;
     private final ScheduleOccurrenceRepository scheduleOccurrenceRepository;
@@ -110,7 +131,9 @@ public class DashboardController {
                                TrainerLibraryService trainerLibraryService,
                                WeeklyCheckInRepository weeklyCheckInRepository,
                                MessageThreadRepository messageThreadRepository,
+                               ThreadMessageRepository threadMessageRepository,
                                MessagingService messagingService,
+                               NotificationService notificationService,
                                PlatformSubscriptionService platformSubscriptionService,
                                CalendarTaskRepository calendarTaskRepository,
                                ScheduleOccurrenceRepository scheduleOccurrenceRepository,
@@ -128,7 +151,9 @@ public class DashboardController {
         this.trainerLibraryService = trainerLibraryService;
         this.weeklyCheckInRepository = weeklyCheckInRepository;
         this.messageThreadRepository = messageThreadRepository;
+        this.threadMessageRepository = threadMessageRepository;
         this.messagingService = messagingService;
+        this.notificationService = notificationService;
         this.platformSubscriptionService = platformSubscriptionService;
         this.calendarTaskRepository = calendarTaskRepository;
         this.scheduleOccurrenceRepository = scheduleOccurrenceRepository;
@@ -190,6 +215,7 @@ public class DashboardController {
                 ? miniWeek.get(0)
                 : new MiniWeekDay(today, "Today", today.format(PRETTY_DATE_FMT), summary.getTasksDueToday(),
                 summary.getWorkoutsDueToday(), true, false, "today", summary.getWorkoutsDueToday() > 0, List.of(), List.of());
+        List<WeekPreviewDay> weekDays = buildWeekPreviewDays(user, summary);
 
         int todayTasks = todayDay.taskCount();
         int todayWorkouts = todayDay.scheduledCount();
@@ -212,6 +238,7 @@ public class DashboardController {
         int weekWorkoutsRemaining = Math.max(weekWorkoutsTotal - weekWorkoutsCompleted, 0);
 
         UserSettings settings = userSettingsService.getOrCreate(user);
+        TimeDisplayFormatPreference timeDisplayFormat = resolveTimeDisplayFormat(settings);
         boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
         int intakeCalories = summary.getLogsThisWeekCount() > 0 ? (1700 + (summary.getLogsThisWeekCount() * 40)) : 0;
         boolean intakeLoggedToday = summary.getLogsThisWeekCount() > 0;
@@ -230,22 +257,109 @@ public class DashboardController {
         model.addAttribute("leftToComplete", todayTotal);
         model.addAttribute("activeGoalsCount", activeGoalsCount);
         model.addAttribute("completedGoalsCount", completedGoalsCount);
-        model.addAttribute("goalPreviewCards", buildGoalPreviewCards(userGoals, today));
+        model.addAttribute("goalSections", buildGoalSections(userGoals, today));
         model.addAttribute("weeklySummaryCards",
                 buildWeeklySummaryCards(user, settings, summary, weekWorkoutsCompleted, weekWorkoutsRemaining,
                         weekTasksCompleted, weekTasksRemaining, weekTasksTotal));
+        model.addAttribute("dashboardAmbience",
+                new DashboardAmbienceView(
+                        settings == null || settings.isDashboardImmersionEnabled(),
+                        trimToNull(settings != null ? settings.getDashboardWeatherPreset() : null) != null
+                                ? settings.getDashboardWeatherPreset().trim().toLowerCase(Locale.ROOT)
+                                : "auto",
+                        settings != null && settings.getWeatherTemperatureUnit() != null
+                                ? settings.getWeatherTemperatureUnit().name()
+                                : WeatherTemperatureUnitPreference.CELSIUS.name(),
+                        settings != null && settings.getWeatherDisplayMode() != null
+                                ? settings.getWeatherDisplayMode().name()
+                                : WeatherDisplayModePreference.VISUAL.name()));
+        model.addAttribute("dashboardTimeDisplayFormat", timeDisplayFormat.name());
         model.addAttribute("profileRail",
                 buildProfileRailView(user, settings, isPremium, buildPremiumTooltip(user.getId()), summary, todayTotal));
-        model.addAttribute("trainerRail", buildTrainerRailView(user));
+        model.addAttribute("trainerRail", buildTrainerRailView(user, timeDisplayFormat));
         model.addAttribute("bodyActionCard",
                 buildBodyActionCard(settings, intakeCalories, intakeLoggedToday, intakeLastLogged, summary.getLogsThisWeekCount()));
         model.addAttribute("scheduleActionCard",
                 buildScheduleActionCard(todayTasks, todayWorkouts, todayTotal, todayPath, todayDay));
         model.addAttribute("actionHub",
                 buildActionHubView(today, todayPath, miniWeek, openTasks, openWorkouts, intakeCalories,
-                        intakeLastLogged, mealWindow, now));
+                        intakeLastLogged, intakeLoggedToday, mealWindow, now, timeDisplayFormat));
+        model.addAttribute("weekDays", weekDays);
 
         return "dashboard/client-dashboard";
+    }
+
+    @GetMapping("/dashboard/trainer-thread/{threadId}/messages")
+    @ResponseBody
+    public DashboardMessageResponse trainerThreadMessages(@PathVariable Long threadId,
+                                                          @RequestParam(required = false) Long beforeId,
+                                                          Authentication authentication) {
+        User user = currentUserOrThrow(authentication);
+        TimeDisplayFormatPreference timeDisplayFormat = resolveTimeDisplayFormat(userSettingsService.getOrCreate(user));
+        MessageThread thread = messagingService.getThreadForUser(threadId, user.getId());
+        List<Message> batch = beforeId != null
+                ? threadMessageRepository.findTop30ByThread_IdAndIdLessThanOrderByIdDesc(thread.getId(), beforeId)
+                : threadMessageRepository.findTop30ByThread_IdOrderByIdDesc(thread.getId());
+        boolean hasMore = batch.size() == 30;
+        Collections.reverse(batch);
+        return new DashboardMessageResponse(toTrainerMessages(batch, user.getId(), timeDisplayFormat), hasMore);
+    }
+
+    @PostMapping("/dashboard/trainer-thread/{threadId}/messages")
+    @ResponseBody
+    public DashboardSendMessageResponse sendTrainerThreadMessage(@PathVariable Long threadId,
+                                                                 @RequestParam("body") String body,
+                                                                 Authentication authentication) {
+        User user = currentUserOrThrow(authentication);
+        String clean = trimToNull(body);
+        if (clean == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
+        }
+        try {
+            messagingService.sendMessage(threadId, user.getId(), MessageType.TEXT, clean);
+            Message saved = threadMessageRepository.findTop1ByThread_IdOrderByCreatedAtDesc(threadId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Message not saved"));
+            TimeDisplayFormatPreference timeDisplayFormat = resolveTimeDisplayFormat(userSettingsService.getOrCreate(user));
+            return new DashboardSendMessageResponse(toTrainerMessage(saved, user.getId(), timeDisplayFormat));
+        } catch (IllegalStateException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Messaging is unavailable");
+        }
+    }
+
+    @PostMapping("/dashboard/ambience-preference")
+    @ResponseBody
+    public DashboardAmbienceView saveDashboardAmbiencePreference(@RequestParam("enabled") boolean enabled,
+                                                                 @RequestParam("weather") String weather,
+                                                                 Authentication authentication) {
+        User user = currentUserOrThrow(authentication);
+        UserSettings settings = userSettingsService.getOrCreate(user);
+        settings.setDashboardImmersionEnabled(enabled);
+        settings.setDashboardWeatherPreset(trimToNull(weather) != null ? weather.trim().toLowerCase(Locale.ROOT) : "auto");
+        userSettingsRepository.save(settings);
+        return new DashboardAmbienceView(
+                settings.isDashboardImmersionEnabled(),
+                settings.getDashboardWeatherPreset(),
+                settings.getWeatherTemperatureUnit() != null
+                        ? settings.getWeatherTemperatureUnit().name()
+                        : WeatherTemperatureUnitPreference.CELSIUS.name(),
+                settings.getWeatherDisplayMode() != null
+                        ? settings.getWeatherDisplayMode().name()
+                        : WeatherDisplayModePreference.VISUAL.name());
+    }
+
+    @GetMapping("/dashboard/trainer-activity")
+    @ResponseBody
+    public List<ClientDashboardTrainerActivityItemView> trainerActivity(Authentication authentication) {
+        User client = currentUserOrThrow(authentication);
+        TimeDisplayFormatPreference timeDisplayFormat = resolveTimeDisplayFormat(userSettingsService.getOrCreate(client));
+        TrainerClientLink activeLink = trainerClientLinkRepository.findActiveByClientId(client.getId()).orElse(null);
+        if (activeLink == null) {
+            return List.of();
+        }
+
+        User trainer = userRepository.findById(activeLink.getTrainerUserId()).orElse(null);
+        MessageThread thread = resolveTrainerThread(activeLink);
+        return buildTrainerActivityItems(client, trainer, thread, timeDisplayFormat);
     }
 
     @GetMapping("/client/dashboard")
@@ -343,28 +457,38 @@ public class DashboardController {
                                                             List<ScheduleOccurrence> openWorkouts,
                                                             int intakeCalories,
                                                             String intakeLastLogged,
+                                                            boolean intakeLoggedToday,
                                                             MealWindow mealWindow,
-                                                            LocalDateTime now) {
+                                                            LocalDateTime now,
+                                                            TimeDisplayFormatPreference timeDisplayFormat) {
         List<ClientDashboardActionCardView> cards = new ArrayList<>();
 
         if (!openTasks.isEmpty()) {
             CalendarTask firstTask = openTasks.get(0);
+            boolean missed = firstTask.getTime() != null && firstTask.getTime().isBefore(now.toLocalTime());
+            String targetIso = firstTask.getTime() != null
+                    ? LocalDateTime.of(today, firstTask.getTime()).atZone(clock.getZone()).toInstant().toString()
+                    : null;
             cards.add(new ClientDashboardActionCardView(
                     "task",
                     "Task",
                     trimToNull(firstTask.getTitle()) != null ? firstTask.getTitle() : "Open today",
-                    buildTaskDescription(firstTask, openTasks.size(), now.toLocalTime()),
+                    buildTaskDescription(firstTask, openTasks.size(), now.toLocalTime(), timeDisplayFormat),
                     todayPath,
-                    "Open day",
+                    "Open Day",
                     "outline",
                     "TASK",
                     resolveTaskBadge(firstTask, now.toLocalTime()),
-                    buildTaskStats(openTasks),
+                    buildTaskStats(openTasks, timeDisplayFormat),
                     "Route",
                     "Clear the most time-sensitive task before the rest of the board fans out.",
                     resolveTaskPriority(firstTask, now.toLocalTime()),
-                    firstTask.getTime() != null ? firstTask.getTime().format(SHORT_TIME_FMT) : String.valueOf(openTasks.size()),
-                    firstTask.getTime() != null ? "scheduled" : "tasks open"));
+                    firstTask.getTime() != null ? formatLocalTime(firstTask.getTime(), timeDisplayFormat) : String.valueOf(openTasks.size()),
+                    firstTask.getTime() != null ? "scheduled" : "tasks open",
+                    targetIso,
+                    firstTask.getTime() != null,
+                    missed,
+                    missed ? "Missed" : (firstTask.getTime() != null ? "Timed task" : "Open task")));
         }
 
         if (!openWorkouts.isEmpty()) {
@@ -377,7 +501,7 @@ public class DashboardController {
                             ? openWorkouts.size() + " workouts are sitting in today's plan. Start the first session and the rest of the day becomes clearer."
                             : "Your workout is already scheduled. Open the day, review the session, and start when ready.",
                     todayPath,
-                    "Start workout",
+                    "Start Workout",
                     "emerald",
                     "WORK",
                     "Today",
@@ -386,32 +510,43 @@ public class DashboardController {
                     "Training stays highest-value when it remains visible before lower-friction admin tasks.",
                     !openTasks.isEmpty() ? 360 : 620,
                     String.valueOf(openWorkouts.size()),
-                    "workouts waiting"));
+                    "workouts waiting",
+                    null,
+                    false,
+                    false,
+                    "Queued"));
         }
 
+        boolean mealMissed = mealWindow.missed() && !intakeLoggedToday;
         cards.add(new ClientDashboardActionCardView(
                 "meal",
                 "Nutrition",
-                mealWindow.active() ? "Log " + mealWindow.label() : "Log your meals",
-                mealWindow.active()
+                mealWindow.active() ? "Log " + mealWindow.label() : (mealMissed ? "Missed " + mealWindow.label() : "Log your meals"),
+                mealMissed
+                        ? "The " + mealWindow.label().toLowerCase(Locale.UK) + " window has passed without a log. Add it now so the day stays accurate."
+                        : (mealWindow.active()
                         ? "You are in the " + mealWindow.label().toLowerCase(Locale.UK) + " window. Logging now keeps the day grounded."
-                        : "Meal logging is your clean fallback when nothing timed is about to hit. Keep intake current and easy to review.",
+                        : "Meal logging is your clean fallback when nothing timed is about to hit. Keep intake current and easy to review."),
                 "/nutrition",
-                "Log meal",
-                "soft",
+                "Log Meal",
+                mealMissed ? "outline" : "soft",
                 "MEAL",
-                mealWindow.active() ? "Now" : "Keep ready",
+                mealMissed ? "Missed" : (mealWindow.active() ? "Now" : "Keep ready"),
                 List.of(intakeCalories + " kcal logged", "Last entry " + intakeLastLogged),
                 "Baseline",
                 "Nutrition context makes the rest of the dashboard easier to interpret.",
-                mealWindow.active() ? 520 : 180,
-                mealWindow.active() ? mealWindow.label() : "Meal",
-                mealWindow.active() ? "best logging window" : "fallback action"));
+                mealWindow.active() ? 520 : (mealMissed ? 480 : 180),
+                mealWindow.active() ? mealWindow.label() : mealWindow.nextLabel(),
+                mealWindow.active() ? "best logging window" : (mealMissed ? "window passed" : "fallback action"),
+                mealWindow.targetIso(),
+                mealWindow.active(),
+                mealMissed,
+                mealMissed ? "Missed meal log" : (mealWindow.active() ? "Meal window live" : "Fallback")));
 
         cards.sort(Comparator.comparingInt(ClientDashboardActionCardView::getPriority).reversed());
         ClientDashboardActionCardView primaryCard = cards.isEmpty() ? null : cards.get(0);
         List<ClientDashboardActionCardView> secondaryCards = cards.size() > 1 ? cards.subList(1, cards.size()) : List.of();
-        ClientDashboardActionUpcomingView upcoming = buildActionUpcomingView(today, todayPath, miniWeek, openTasks, openWorkouts, now);
+        ClientDashboardActionUpcomingView upcoming = buildActionUpcomingView(today, todayPath, miniWeek, openTasks, openWorkouts, now, timeDisplayFormat);
 
         return new ClientDashboardActionHubView(
                 "What should I do next?",
@@ -432,7 +567,8 @@ public class DashboardController {
                                                                      List<MiniWeekDay> miniWeek,
                                                                      List<CalendarTask> openTasks,
                                                                      List<ScheduleOccurrence> openWorkouts,
-                                                                     LocalDateTime now) {
+                                                                     LocalDateTime now,
+                                                                     TimeDisplayFormatPreference timeDisplayFormat) {
         LocalTime currentTime = now.toLocalTime();
         CalendarTask nextTimedTask = openTasks.stream()
                 .filter(task -> task.getTime() != null && task.getTime().isAfter(currentTime))
@@ -444,7 +580,7 @@ public class DashboardController {
                     true,
                     "Timed next",
                     trimToNull(nextTimedTask.getTitle()) != null ? nextTimedTask.getTitle() : "Upcoming task",
-                    "Due today at " + nextTimedTask.getTime().format(SHORT_TIME_FMT) + ".",
+                    "Due today at " + formatLocalTime(nextTimedTask.getTime(), timeDisplayFormat) + ".",
                     todayPath,
                     target.atZone(clock.getZone()).toInstant().toString(),
                     "Live countdown",
@@ -512,7 +648,7 @@ public class DashboardController {
                 summary.getWorkoutStreak());
     }
 
-    private ClientDashboardTrainerRailView buildTrainerRailView(User client) {
+    private ClientDashboardTrainerRailView buildTrainerRailView(User client, TimeDisplayFormatPreference timeDisplayFormat) {
         TrainerClientLink activeLink = trainerClientLinkRepository.findActiveByClientId(client.getId()).orElse(null);
         TrainerClientLink pendingLink = trainerClientLinkRepository
                 .findByClientUserIdAndStatusOrderByUpdatedAtDesc(client.getId(), TrainerClientLinkStatus.REQUESTED)
@@ -528,14 +664,12 @@ public class DashboardController {
             List<TrainerLibraryAssignedWorkoutView> sharedWorkouts = trainerLibraryService.getAssignedWorkoutsForClient(client.getId());
             List<TrainerLibraryAssignedProgrammeView> sharedProgrammes = trainerLibraryService.getAssignedProgrammesForClient(client.getId());
             LevelProgress trainerProgress = trainer != null ? trainer.getLevelProgress() : null;
+            MessageThread thread = resolveTrainerThread(activeLink);
 
             String planHref = resolveTrainerPlanHref(sharedWorkouts.size(), sharedProgrammes.size(), assignedWorkouts.size(), assignedSchedules.size());
             String planCtaLabel = sharedWorkouts.size() + sharedProgrammes.size() > 0 ? "View assigned plan" : "Open trainer plan";
-            String summaryLine = joinNonBlank(List.of(
-                    buildCountLabel(sharedProgrammes.size(), "shared programme"),
-                    buildCountLabel(sharedWorkouts.size(), "shared workout"),
-                    buildCountLabel(assignedWorkouts.size(), "assigned workout"),
-                    buildCountLabel(assignedSchedules.size(), "assigned schedule")));
+            ClientDashboardTrainerContextView context = buildTrainerContext(activeLink, assignedWorkouts, assignedSchedules,
+                    sharedWorkouts.size(), sharedProgrammes.size(), trainer);
 
             return new ClientDashboardTrainerRailView(
                     "ACTIVE",
@@ -555,13 +689,15 @@ public class DashboardController {
                             .toList(),
                     resolveCoachingPhase(activeLink, "Coaching active"),
                     buildRelationshipLabel(activeLink, "Connected"),
-                    summaryLine.isBlank() ? "Your trainer link is active and ready to support today's plan." : summaryLine,
-                    resolveTrainerMessageHref(activeLink),
+                    trainer != null ? trainer.getFullName() : null,
+                    thread != null ? thread.getId() : null,
+                    thread != null ? "/messages/" + thread.getId() : null,
                     planHref,
                     "/client/trainers",
                     planCtaLabel,
-                    buildTrainerContext(activeLink, assignedWorkouts, assignedSchedules,
-                            sharedWorkouts.size(), sharedProgrammes.size(), trainer));
+                    context,
+                    buildTrainerActivityItems(client, trainer, thread, timeDisplayFormat),
+                    buildTrainerMessagePanel(thread, client.getId(), timeDisplayFormat));
         }
 
         if (pendingLink != null) {
@@ -586,7 +722,8 @@ public class DashboardController {
                             .toList(),
                     "Awaiting trainer approval",
                     buildRelationshipLabel(pendingLink, "Requested"),
-                    "You can keep using the dashboard while this coach request is waiting for approval.",
+                    trainer != null ? trainer.getFullName() : null,
+                    null,
                     null,
                     "/client/trainers",
                     "/client/trainers",
@@ -595,7 +732,15 @@ public class DashboardController {
                             "Next step",
                             "Waiting for confirmation",
                             "Once the request is accepted, coach notes, shared plans, and messaging can appear here.",
-                            "You can still browse trainers at any time."));
+                            "You can still browse trainers at any time."),
+                    List.of(),
+                    new ClientDashboardTrainerMessagePanelView(
+                            null,
+                            false,
+                            false,
+                            "Messaging opens after approval",
+                            "You will be able to message this trainer here once the coaching request is accepted.",
+                            List.of()));
         }
 
         return new ClientDashboardTrainerRailView(
@@ -608,7 +753,8 @@ public class DashboardController {
                 List.of(),
                 "Independent mode",
                 "Optional coaching",
-                "You can use the full dashboard without a trainer, and connect later if you want guided planning.",
+                null,
+                null,
                 null,
                 "/client/trainers",
                 "/client/trainers",
@@ -617,7 +763,15 @@ public class DashboardController {
                         "Why it helps",
                         "Bring coaching into the same dashboard",
                         "A trainer can add notes, share plans, and keep your next steps visible without adding clutter.",
-                        "Explore trainers if you want more hands-on guidance."));
+                        "Explore trainers if you want more hands-on guidance."),
+                List.of(),
+                new ClientDashboardTrainerMessagePanelView(
+                        null,
+                        false,
+                        false,
+                        "No trainer conversation yet",
+                        "Connect with a trainer if you want planning, notes, and messaging inside the dashboard.",
+                        List.of()));
     }
 
     private ClientDashboardTrainerContextView buildTrainerContext(TrainerClientLink activeLink,
@@ -666,6 +820,155 @@ public class DashboardController {
                         ? trainerBio
                         : "Use the trainer card to keep your coach relationship visible while you manage your day-to-day plan.",
                 "Message your trainer or open the plan when you need direction.");
+    }
+
+    private MessageThread resolveTrainerThread(TrainerClientLink link) {
+        if (link == null || link.getStatus() != TrainerClientLinkStatus.ACTIVE) {
+            return null;
+        }
+        return messageThreadRepository.findByLinkId(link.getId())
+                .orElseGet(() -> messagingService.ensureThreadForLink(link));
+    }
+
+    private List<ClientDashboardTrainerActivityItemView> buildTrainerActivityItems(User client,
+                                                                                   User trainer,
+                                                                                   MessageThread thread,
+                                                                                   TimeDisplayFormatPreference timeDisplayFormat) {
+        if (client == null || trainer == null) {
+            return List.of();
+        }
+
+        return notificationService.list(client, 20).stream()
+                .filter(notification -> notification.getDismissedAt() == null)
+                .filter(notification -> isTrainerNotification(notification, trainer, thread))
+                .limit(6)
+                .map(notification -> new ClientDashboardTrainerActivityItemView(
+                        resolveTrainerNotificationIcon(notification),
+                        trimToNull(notification.getTitle()) != null ? notification.getTitle().trim() : "Trainer update",
+                        trimToNull(notification.getMessage()) != null ? notification.getMessage().trim() : "Your trainer sent a new update.",
+                        buildNotificationMeta(notification, timeDisplayFormat),
+                        trimToNull(notification.getCtaUrl()),
+                        notification.getId(),
+                        notification.getReadAt() == null,
+                        notification.getReadAt() == null,
+                        true))
+                .toList();
+    }
+
+    private boolean isTrainerNotification(Notification notification, User trainer, MessageThread thread) {
+        if (notification == null || trainer == null) {
+            return false;
+        }
+
+        String title = lower(trimToNull(notification.getTitle()));
+        String message = lower(trimToNull(notification.getMessage()));
+        String ctaUrl = lower(trimToNull(notification.getCtaUrl()));
+        List<String> trainerTokens = new ArrayList<>();
+        if (trimToNull(trainer.getFullName()) != null) {
+            trainerTokens.add(lower(trainer.getFullName()));
+        }
+        if (trimToNull(trainer.getFirstName()) != null) {
+            trainerTokens.add(lower(trainer.getFirstName()));
+        }
+        if (trimToNull(trainer.getLastName()) != null) {
+            trainerTokens.add(lower(trainer.getLastName()));
+        }
+        if (trimToNull(trainer.getUsername()) != null) {
+            trainerTokens.add(lower(trainer.getUsername()));
+            trainerTokens.add("@" + lower(trainer.getUsername()));
+        }
+
+        boolean mentionsTrainer = trainerTokens.stream()
+                .filter(token -> token != null && !token.isBlank())
+                .anyMatch(token -> (title != null && title.contains(token))
+                        || (message != null && message.contains(token))
+                        || (ctaUrl != null && ctaUrl.contains(token)));
+
+        boolean threadMatch = thread != null
+                && ctaUrl != null
+                && ctaUrl.contains("/messages/" + thread.getId());
+        boolean requestState = title != null && (
+                title.contains("request accepted")
+                        || title.contains("coaching ended")
+                        || title.contains("coach"));
+        boolean messageState = title != null && title.contains("new message");
+
+        return threadMatch || (messageState && mentionsTrainer) || (requestState && mentionsTrainer);
+    }
+
+    private String resolveTrainerNotificationIcon(Notification notification) {
+        String title = lower(trimToNull(notification != null ? notification.getTitle() : null));
+        String ctaUrl = lower(trimToNull(notification != null ? notification.getCtaUrl() : null));
+        if (title != null && title.contains("message")) {
+            return "message";
+        }
+        if (ctaUrl != null && ctaUrl.contains("/assigned-plan")) {
+            return "plan";
+        }
+        if (ctaUrl != null && ctaUrl.contains("/client/plan")) {
+            return "task";
+        }
+        return "coach";
+    }
+
+    private String buildNotificationMeta(Notification notification, TimeDisplayFormatPreference timeDisplayFormat) {
+        StringBuilder meta = new StringBuilder();
+        if (notification.getReadAt() == null) {
+            meta.append("Unread");
+        } else {
+            meta.append("Seen");
+        }
+        if (notification.getCreatedAt() != null) {
+            if (!meta.isEmpty()) {
+                meta.append(" | ");
+            }
+            meta.append(formatInstantWithDate(notification.getCreatedAt(), timeDisplayFormat));
+        }
+        return meta.toString();
+    }
+
+    private ClientDashboardTrainerMessagePanelView buildTrainerMessagePanel(MessageThread thread,
+                                                                            Long currentUserId,
+                                                                            TimeDisplayFormatPreference timeDisplayFormat) {
+        if (thread == null || currentUserId == null) {
+            return new ClientDashboardTrainerMessagePanelView(
+                    null,
+                    false,
+                    false,
+                    "No messages yet",
+                    "When your coach messages you, the latest conversation will appear here.",
+                    List.of());
+        }
+        List<Message> latest = threadMessageRepository.findTop30ByThread_IdOrderByIdDesc(thread.getId());
+        boolean hasMore = latest.size() == 30;
+        Collections.reverse(latest);
+        return new ClientDashboardTrainerMessagePanelView(
+                thread.getId(),
+                true,
+                hasMore,
+                "Start the conversation",
+                "Send a message when you need direction, clarification, or a plan adjustment.",
+                toTrainerMessages(latest, currentUserId, timeDisplayFormat));
+    }
+
+    private List<ClientDashboardTrainerMessageView> toTrainerMessages(List<Message> messages,
+                                                                      Long currentUserId,
+                                                                      TimeDisplayFormatPreference timeDisplayFormat) {
+        return messages.stream()
+                .map(message -> toTrainerMessage(message, currentUserId, timeDisplayFormat))
+                .toList();
+    }
+
+    private ClientDashboardTrainerMessageView toTrainerMessage(Message message,
+                                                               Long currentUserId,
+                                                               TimeDisplayFormatPreference timeDisplayFormat) {
+        return new ClientDashboardTrainerMessageView(
+                message.getId(),
+                currentUserId != null && currentUserId.equals(message.getSenderUserId()),
+                message.getBodyText(),
+                message.getCreatedAt() != null
+                        ? formatInstantWithDate(message.getCreatedAt(), timeDisplayFormat)
+                        : "");
     }
 
     private LatestTrainerNote findLatestTrainerNote(List<AssignedWorkout> assignedWorkouts, List<AssignedSchedule> assignedSchedules) {
@@ -955,17 +1258,107 @@ public class DashboardController {
                 delta <= 0 ? "emerald" : "outline");
     }
 
-    private List<GoalPreviewCard> buildGoalPreviewCards(List<Goal> goals, LocalDate today) {
+    private List<WeekPreviewDay> buildWeekPreviewDays(User user, DashboardSummaryDto summary) {
+        List<DashboardSummaryDto.WeekDaySummary> summaryDays = summary != null && summary.getWeek() != null
+                ? summary.getWeek()
+                : List.of();
+        if (user == null || summaryDays.isEmpty()) {
+            return List.of();
+        }
+        LocalDate start = summaryDays.get(0).getDate();
+        LocalDate end = summaryDays.get(summaryDays.size() - 1).getDate();
+
+        Map<LocalDate, List<CalendarTask>> tasksByDate = new HashMap<>();
+        for (CalendarTask task : calendarTaskRepository.findByUserAndDateBetween(user, start, end)) {
+            tasksByDate.computeIfAbsent(task.getDate(), ignored -> new ArrayList<>()).add(task);
+        }
+
+        Map<LocalDate, List<ScheduleOccurrence>> workoutsByDate = new HashMap<>();
+        for (ScheduleOccurrence occurrence : scheduleOccurrenceRepository.findByUserAndDateBetween(user, start, end)) {
+            workoutsByDate.computeIfAbsent(occurrence.getDate(), ignored -> new ArrayList<>()).add(occurrence);
+        }
+
+        return summaryDays.stream()
+                .map(day -> new WeekPreviewDay(
+                        day.getDate(),
+                        day.getLabel(),
+                        day.getDate().format(PRETTY_DATE_FMT),
+                        day.getTasksCount(),
+                        day.getWorkoutsCount(),
+                        day.isToday(),
+                        day.isTomorrow(),
+                        day.getDayStatus(),
+                        pathForDate(day.getDate()),
+                        buildWeekPreviewItems(tasksByDate.getOrDefault(day.getDate(), List.of()), day.getDate(), "task"),
+                        buildWeekPreviewItems(workoutsByDate.getOrDefault(day.getDate(), List.of()), day.getDate(), "workout")))
+                .toList();
+    }
+
+    private List<WeekPreviewItem> buildWeekPreviewItems(List<?> items, LocalDate date, String kind) {
+        List<WeekPreviewItem> previewItems = new ArrayList<>();
+        for (Object item : items) {
+            if (item instanceof CalendarTask task) {
+                previewItems.add(new WeekPreviewItem(
+                        task.getId(),
+                        trimToNull(task.getTitle()) != null ? task.getTitle() : "Task",
+                        pathForDate(date) + "?focusTab=tasks&focusTask=" + task.getId(),
+                        "task"));
+            } else if (item instanceof ScheduleOccurrence occurrence) {
+                previewItems.add(new WeekPreviewItem(
+                        occurrence.getId(),
+                        resolveWorkoutTitle(occurrence),
+                        pathForDate(date) + "?focusTab=workouts&focusWorkout=" + occurrence.getId(),
+                        "workout"));
+            }
+        }
+        return previewItems;
+    }
+
+    private List<GoalSectionView> buildGoalSections(List<Goal> goals, LocalDate today) {
+        return List.of(
+                new GoalSectionView("week", "Week goals",
+                        "Short weekly wins show up here once you add them on the goals page.",
+                        buildGoalCardsForTimeframe(goals, today, GoalTimeframe.WEEK, 3)),
+                new GoalSectionView("month", "Month goals",
+                        "Monthly goals give the dashboard a clear longer rhythm without crowding today.",
+                        buildGoalCardsForTimeframe(goals, today, GoalTimeframe.MONTH, 3)),
+                new GoalSectionView("target", "Targets",
+                        "Targets are ideal for weight, performance, or milestone outcomes with a specific finish line.",
+                        buildGoalCardsForTimeframe(goals, today, GoalTimeframe.TARGET, 3)));
+    }
+
+    private List<GoalPreviewCard> buildGoalCardsForTimeframe(List<Goal> goals,
+                                                             LocalDate today,
+                                                             GoalTimeframe timeframe,
+                                                             int limit) {
         return goals.stream()
-                .limit(3)
+                .filter(goal -> (goal.getTimeframe() != null ? goal.getTimeframe() : GoalTimeframe.TARGET) == timeframe)
+                .sorted(Comparator
+                        .comparing((Goal goal) -> goal.getTargetDate() != null ? goal.getTargetDate() : LocalDate.MAX)
+                        .thenComparing(goal -> goal.getPriority() != null ? goal.getPriority() : Integer.MAX_VALUE))
+                .limit(limit)
                 .map(goal -> new GoalPreviewCard(
                         goal.getId(),
                         goal.getTitle(),
                         goal.getStatus() != null ? humanize(goal.getStatus().name()) : "Draft",
                         buildGoalMetric(goal),
                         buildGoalTimeline(goal, today),
-                        estimateGoalProgress(goal, today)))
+                        estimateGoalProgress(goal, today),
+                        resolveGoalTone(goal),
+                        goal.getTimeframe() != null ? goal.getTimeframe().name() : GoalTimeframe.TARGET.name()))
                 .toList();
+    }
+
+    private String resolveGoalTone(Goal goal) {
+        if (goal == null || goal.getStatus() == null) {
+            return "draft";
+        }
+        return switch (goal.getStatus()) {
+            case COMPLETED -> "complete";
+            case ACTIVE -> "active";
+            case PAUSED -> "paused";
+            default -> "draft";
+        };
     }
 
     private int estimateGoalProgress(Goal goal, LocalDate today) {
@@ -1014,13 +1407,16 @@ public class DashboardController {
         return "No end date set";
     }
 
-    private String buildTaskDescription(CalendarTask task, int totalOpen, LocalTime now) {
+    private String buildTaskDescription(CalendarTask task,
+                                        int totalOpen,
+                                        LocalTime now,
+                                        TimeDisplayFormatPreference timeDisplayFormat) {
         String title = trimToNull(task.getTitle()) != null ? task.getTitle() : "Open task";
         if (task.getTime() != null && task.getTime().isBefore(now)) {
             return title + " is already past its scheduled time. Clear it first to reduce drag across the rest of the day.";
         }
         if (task.getTime() != null) {
-            return title + " is scheduled for " + task.getTime().format(SHORT_TIME_FMT)
+            return title + " is scheduled for " + formatLocalTime(task.getTime(), timeDisplayFormat)
                     + ". Handling it next keeps the rest of today's list cleaner.";
         }
         return totalOpen > 1
@@ -1054,12 +1450,12 @@ public class DashboardController {
         return 760;
     }
 
-    private List<String> buildTaskStats(List<CalendarTask> openTasks) {
+    private List<String> buildTaskStats(List<CalendarTask> openTasks, TimeDisplayFormatPreference timeDisplayFormat) {
         CalendarTask firstTask = openTasks.get(0);
         List<String> stats = new ArrayList<>();
         stats.add(openTasks.size() + " task" + (openTasks.size() == 1 ? "" : "s") + " open");
         stats.add(firstTask.getTime() != null
-                ? "Next at " + firstTask.getTime().format(SHORT_TIME_FMT)
+                ? "Next at " + formatLocalTime(firstTask.getTime(), timeDisplayFormat)
                 : "No set time on first task");
         return stats;
     }
@@ -1078,20 +1474,32 @@ public class DashboardController {
     }
 
     private MealWindow resolveMealWindow(LocalTime now) {
-        if (!now.isBefore(LocalTime.of(7, 0)) && now.isBefore(LocalTime.of(10, 0))) {
-            return new MealWindow(true, "Breakfast");
+        if (!now.isBefore(LocalTime.of(6, 30)) && now.isBefore(LocalTime.of(10, 30))) {
+            return new MealWindow(true, false, "Breakfast", "Breakfast", LocalDateTime.of(LocalDate.now(clock), LocalTime.of(10, 30))
+                    .atZone(clock.getZone()).toInstant().toString());
         }
         if (!now.isBefore(LocalTime.of(11, 30)) && now.isBefore(LocalTime.of(14, 30))) {
-            return new MealWindow(true, "Lunch");
+            return new MealWindow(true, false, "Lunch", "Lunch", LocalDateTime.of(LocalDate.now(clock), LocalTime.of(14, 30))
+                    .atZone(clock.getZone()).toInstant().toString());
         }
         if (!now.isBefore(LocalTime.of(17, 30)) && now.isBefore(LocalTime.of(21, 0))) {
-            return new MealWindow(true, "Dinner");
+            return new MealWindow(true, false, "Dinner", "Dinner", LocalDateTime.of(LocalDate.now(clock), LocalTime.of(21, 0))
+                    .atZone(clock.getZone()).toInstant().toString());
         }
-        return new MealWindow(false, nextMealLabel(now));
+        String nextLabel = nextMealLabel(now);
+        boolean missed = now.isAfter(LocalTime.of(10, 30)) && now.isBefore(LocalTime.of(11, 30))
+                || now.isAfter(LocalTime.of(14, 30)) && now.isBefore(LocalTime.of(17, 30))
+                || now.isAfter(LocalTime.of(21, 0));
+        LocalTime nextStart = resolveNextMealStart(now);
+        String targetIso = nextStart != null
+                ? LocalDateTime.of(LocalDate.now(clock).plusDays(nextStart.isBefore(now) ? 1 : 0), nextStart)
+                .atZone(clock.getZone()).toInstant().toString()
+                : null;
+        return new MealWindow(false, missed, missed ? nextLabel : "Next " + nextLabel, nextLabel, targetIso);
     }
 
     private String nextMealLabel(LocalTime now) {
-        if (now.isBefore(LocalTime.of(10, 0))) {
+        if (now.isBefore(LocalTime.of(10, 30))) {
             return "Breakfast";
         }
         if (now.isBefore(LocalTime.of(14, 30))) {
@@ -1100,7 +1508,20 @@ public class DashboardController {
         if (now.isBefore(LocalTime.of(21, 0))) {
             return "Dinner";
         }
-        return "Tomorrow";
+        return "Breakfast";
+    }
+
+    private LocalTime resolveNextMealStart(LocalTime now) {
+        if (now.isBefore(LocalTime.of(6, 30))) {
+            return LocalTime.of(6, 30);
+        }
+        if (now.isBefore(LocalTime.of(11, 30))) {
+            return LocalTime.of(11, 30);
+        }
+        if (now.isBefore(LocalTime.of(17, 30))) {
+            return LocalTime.of(17, 30);
+        }
+        return LocalTime.of(6, 30);
     }
 
     private List<String> parseWeeklyMetricKeys(String raw) {
@@ -1152,12 +1573,47 @@ public class DashboardController {
         };
     }
 
+    private TimeDisplayFormatPreference resolveTimeDisplayFormat(UserSettings settings) {
+        if (settings == null || settings.getTimeDisplayFormat() == null) {
+            return TimeDisplayFormatPreference.TWELVE_HOUR;
+        }
+        return settings.getTimeDisplayFormat();
+    }
+
+    private String formatLocalTime(LocalTime time, TimeDisplayFormatPreference timeDisplayFormat) {
+        if (time == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = timeDisplayFormat == TimeDisplayFormatPreference.TWENTY_FOUR_HOUR
+                ? DateTimeFormatter.ofPattern("HH:mm", Locale.UK)
+                : DateTimeFormatter.ofPattern("h:mm a", Locale.UK);
+        String formatted = time.format(formatter);
+        return timeDisplayFormat == TimeDisplayFormatPreference.TWENTY_FOUR_HOUR
+                ? formatted
+                : formatted.toUpperCase(Locale.UK);
+    }
+
+    private String formatInstantWithDate(Instant instant, TimeDisplayFormatPreference timeDisplayFormat) {
+        if (instant == null) {
+            return "";
+        }
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, clock.getZone());
+        return localDateTime.toLocalDate().format(DateTimeFormatter.ofPattern("dd MMM", Locale.UK))
+                + " "
+                + formatLocalTime(localDateTime.toLocalTime(), timeDisplayFormat);
+    }
+
     private String trimToNull(String value) {
         if (value == null) {
             return null;
         }
         String trimmed = value.trim();
         return trimmed.isBlank() ? null : trimmed;
+    }
+
+    private String lower(String value) {
+        String trimmed = trimToNull(value);
+        return trimmed != null ? trimmed.toLowerCase(Locale.ROOT) : null;
     }
 
     private String humanize(String raw) {
@@ -1185,7 +1641,11 @@ public class DashboardController {
     private record LatestTrainerNote(String sourceTitle, String noteBody, String meta) {
     }
 
-    private record MealWindow(boolean active, String label) {
+    private record MealWindow(boolean active,
+                              boolean missed,
+                              String label,
+                              String nextLabel,
+                              String targetIso) {
     }
 
     public record TopActionCard(String kicker,
@@ -1211,6 +1671,46 @@ public class DashboardController {
                                   String statusLabel,
                                   String metricLabel,
                                   String timelineLabel,
-                                  int progressPercent) {
+                                  int progressPercent,
+                                  String tone,
+                                  String timeframeKey) {
+    }
+
+    public record GoalSectionView(String key,
+                                  String title,
+                                  String emptyMessage,
+                                  List<GoalPreviewCard> cards) {
+    }
+
+    public record WeekPreviewItem(Long id,
+                                  String title,
+                                  String href,
+                                  String kind) {
+    }
+
+    public record WeekPreviewDay(LocalDate date,
+                                 String dayLabel,
+                                 String prettyDate,
+                                 int taskCount,
+                                 int workoutCount,
+                                 boolean today,
+                                 boolean tomorrow,
+                                 String dayStatus,
+                                 String path,
+                                 List<WeekPreviewItem> tasks,
+                                 List<WeekPreviewItem> workouts) {
+    }
+
+    public record DashboardMessageResponse(List<ClientDashboardTrainerMessageView> messages,
+                                           boolean hasMore) {
+    }
+
+    public record DashboardSendMessageResponse(ClientDashboardTrainerMessageView message) {
+    }
+
+    public record DashboardAmbienceView(boolean enabled,
+                                        String weather,
+                                        String temperatureUnit,
+                                        String displayMode) {
     }
 }

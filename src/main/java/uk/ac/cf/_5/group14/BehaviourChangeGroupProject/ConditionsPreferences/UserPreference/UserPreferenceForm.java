@@ -23,6 +23,15 @@ public class UserPreferenceForm {
     @Pattern(regexp = "^(SYSTEM|LIGHT|DARK)$", message = "Please select a valid theme.")
     String theme = "SYSTEM";
 
+    @Pattern(regexp = "^(CELSIUS|FAHRENHEIT)$", message = "Please select a valid weather unit.")
+    String weatherTemperatureUnit = "CELSIUS";
+
+    @Pattern(regexp = "^(GRAPH|VISUAL)$", message = "Please select a valid weather display mode.")
+    String weatherDisplayMode = "VISUAL";
+
+    @Pattern(regexp = "^(TWELVE_HOUR|TWENTY_FOUR_HOUR)$", message = "Please select a valid time format.")
+    String timeDisplayFormat = "TWELVE_HOUR";
+
     boolean easyMode = false;
     boolean colorBlindMode = false;
 

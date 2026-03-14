@@ -190,6 +190,24 @@ public class UserSettings {
     @Column(name = "profile_milestone_keys", length = 500)
     private String profileMilestoneKeys;
 
+    @Column(name = "dashboard_immersion_enabled", nullable = false)
+    private boolean dashboardImmersionEnabled = true;
+
+    @Column(name = "dashboard_weather_preset", length = 20)
+    private String dashboardWeatherPreset = "auto";
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "weather_temperature_unit", nullable = false, length = 12)
+    private WeatherTemperatureUnitPreference weatherTemperatureUnit = WeatherTemperatureUnitPreference.CELSIUS;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "weather_display_mode", nullable = false, length = 12)
+    private WeatherDisplayModePreference weatherDisplayMode = WeatherDisplayModePreference.VISUAL;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "time_display_format", nullable = false, length = 18)
+    private TimeDisplayFormatPreference timeDisplayFormat = TimeDisplayFormatPreference.TWELVE_HOUR;
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 

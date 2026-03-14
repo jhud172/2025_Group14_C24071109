@@ -2,6 +2,7 @@
    PREFERENCES WIZARD
    ================================================================ */
 var TOTAL_STEPS = 4;
+var CURRENT_STEP = parseInt(document.getElementById('pref-form')?.dataset.initialStep || '1', 10) || 1;
 
 /* ── Step navigation ────────────────────────────────────────── */
 function showStep(n) {
@@ -172,6 +173,16 @@ function updatePillStyle(checkbox) {
 document.querySelectorAll('.pref-pill-checkbox').forEach(function(cb) {
     updatePillStyle(cb);
     cb.addEventListener('change', function() { updatePillStyle(this); });
+});
+
+document.querySelectorAll('.pref-info-icon').forEach(function(icon) {
+    icon.addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof icon.focus === 'function') {
+            icon.focus();
+        }
+    });
 });
 
 /* ── Weekly summary metric cap (max 6) ───────────────────────── */

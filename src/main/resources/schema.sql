@@ -361,12 +361,26 @@ CREATE TABLE IF NOT EXISTS user_settings
     profile_text_color VARCHAR(7) NULL,
     profile_bio_text_color VARCHAR(7) NULL,
     profile_milestone_keys VARCHAR(500) NULL,
+    dashboard_immersion_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    dashboard_weather_preset VARCHAR(20) NULL DEFAULT 'auto',
+    weather_temperature_unit VARCHAR(12) NOT NULL DEFAULT 'CELSIUS',
+    weather_display_mode VARCHAR(12) NOT NULL DEFAULT 'VISUAL',
+    time_display_format VARCHAR(18) NOT NULL DEFAULT 'TWELVE_HOUR',
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_settings_user
         FOREIGN KEY (user_id) REFERENCES users (id)
             ON DELETE CASCADE
 );
+
+ALTER TABLE user_settings
+    ADD COLUMN IF NOT EXISTS weather_temperature_unit VARCHAR(12) NOT NULL DEFAULT 'CELSIUS';
+
+ALTER TABLE user_settings
+    ADD COLUMN IF NOT EXISTS weather_display_mode VARCHAR(12) NOT NULL DEFAULT 'VISUAL';
+
+ALTER TABLE user_settings
+    ADD COLUMN IF NOT EXISTS time_display_format VARCHAR(18) NOT NULL DEFAULT 'TWELVE_HOUR';
 
 -- =========================
 -- HEALTH CONDITIONS (PERMANENT + TIMED)
@@ -671,6 +685,7 @@ CREATE TABLE IF NOT EXISTS goals
     title VARCHAR(200) NOT NULL,
     description TEXT,
     goal_type VARCHAR(30) NOT NULL,
+    timeframe VARCHAR(20) NOT NULL DEFAULT 'TARGET',
     target_metric_name VARCHAR(120),
     target_metric_value DOUBLE PRECISION,
     target_metric_unit VARCHAR(30),

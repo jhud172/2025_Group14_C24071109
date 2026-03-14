@@ -6,6 +6,17 @@ public interface UserSettingsService {
     UserSettings getOrCreate(User user);
     UserSettings update(User user, String language, ThemePreference theme, boolean easyMode);
 
+    UserSettings updateWeatherPreferences(
+            User user,
+            WeatherTemperatureUnitPreference weatherTemperatureUnit,
+            WeatherDisplayModePreference weatherDisplayMode
+    );
+
+    UserSettings updateTimeDisplayPreference(
+            User user,
+            TimeDisplayFormatPreference timeDisplayFormat
+    );
+
     UserSettings updateCalendarPreferences(
             User user,
             CalendarTaskOrderingPreference calendarTaskOrdering,

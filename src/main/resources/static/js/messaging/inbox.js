@@ -11,6 +11,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const headers = { "Content-Type": "application/json" };
     if (csrfToken) headers[csrfHeader] = csrfToken;
+    const notificationSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel("one-to-one-notifications") : null;
+
+    function broadcastNotificationSync(detail) {
+        const payload = detail || {};
+        window.dispatchEvent(new CustomEvent("one-to-one:notifications-updated", { detail: payload }));
+        try {
+            notificationSyncChannel?.postMessage(payload);
+        } catch (_) {
+            // ignore
+        }
+    }
 
     function formatDate(value) {
         if (!value) return "";
@@ -299,6 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!id) return;
         try {
             await fetch(`/api/notifications/${id}/read`, { method: "POST", headers });
+            broadcastNotificationSync({ source: "inbox", notificationId: id, action: "read" });
         } catch {
             // ignore
         }
@@ -332,8 +344,16 @@ document.addEventListener("DOMContentLoaded", () => {
         notificationReadAll.addEventListener("click", async () => {
             await fetch("/api/notifications/read-all", { method: "POST", headers });
             await fetchNotifications();
+            broadcastNotificationSync({ source: "inbox", action: "read-all" });
         });
     }
+
+    window.addEventListener("one-to-one:notifications-updated", async () => {
+        if (notificationList) await fetchNotifications();
+    });
+    notificationSyncChannel?.addEventListener("message", async () => {
+        if (notificationList) await fetchNotifications();
+    });
 
     if (threadRoot) {
         const threadId = threadRoot.dataset.threadId;

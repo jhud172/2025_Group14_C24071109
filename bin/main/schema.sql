@@ -361,6 +361,8 @@ CREATE TABLE IF NOT EXISTS user_settings
     profile_text_color VARCHAR(7) NULL,
     profile_bio_text_color VARCHAR(7) NULL,
     profile_milestone_keys VARCHAR(500) NULL,
+    dashboard_immersion_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    dashboard_weather_preset VARCHAR(20) NULL DEFAULT 'auto',
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_settings_user
@@ -671,6 +673,7 @@ CREATE TABLE IF NOT EXISTS goals
     title VARCHAR(200) NOT NULL,
     description TEXT,
     goal_type VARCHAR(30) NOT NULL,
+    timeframe VARCHAR(20) NOT NULL DEFAULT 'TARGET',
     target_metric_name VARCHAR(120),
     target_metric_value DOUBLE PRECISION,
     target_metric_unit VARCHAR(30),
