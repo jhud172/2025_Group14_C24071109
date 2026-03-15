@@ -39,8 +39,14 @@ public class VerificationController {
     }
 
     @PostMapping("/verify/email/send")
-    public String sendEmailVerification(RedirectAttributes redirectAttributes, Locale locale) {
-        User user = authHelper.getAuthenticatedUser();
+    public String sendEmailVerification(@RequestParam(name = "email", required = false) String email,
+                                        RedirectAttributes redirectAttributes,
+                                        Locale locale) {
+        User sessionUser = authHelper.getAuthenticatedUser();
+        User user = sessionUser;
+        if (user == null && email != null && !email.isBlank()) {
+            user = userService.findByEmail(email);
+        }
         if (user == null) {
             return "redirect:/login";
         }
@@ -50,7 +56,16 @@ public class VerificationController {
                     "verifySuccess",
                     messageSource.getMessage("verify.email.already", null, locale)
             );
-            return "redirect:/profile";
+            return sessionUser != null ? "redirect:/profile" : "redirect:/login";
+        }
+
+        long cooldownRemaining = emailVerificationService.getResendCooldownRemainingSeconds(user);
+        if (cooldownRemaining > 0) {
+            redirectAttributes.addFlashAttribute(
+                    "verifyError",
+                    messageSource.getMessage("verify.email.code.cooldown", new Object[]{cooldownRemaining}, locale)
+            );
+            return buildEmailCodeRedirect(user.getEmail());
         }
 
         emailVerificationService.sendVerification(user);
@@ -58,11 +73,12 @@ public class VerificationController {
                 "verifySuccess",
                 messageSource.getMessage("verify.email.sent", null, locale)
         );
-        return "redirect:/verify/email/code";
+        return buildEmailCodeRedirect(user.getEmail());
     }
 
     @GetMapping("/verify/email")
     public String verifyEmail(@RequestParam("token") String token, Model model, Locale locale) {
+        applyAuthLayout(model);
         Optional<String> error = emailVerificationService.verifyToken(token);
         if (error.isPresent()) {
             String key = mapEmailErrorKey(error.get());
@@ -79,9 +95,37 @@ public class VerificationController {
     }
 
     @GetMapping("/verify/email/code")
-    public String showEmailCodePage(@RequestParam(required = false) String email, Model model) {
-        if (email != null && !email.isBlank()) {
+    public String showEmailCodePage(@RequestParam(required = false) String email,
+                                    @RequestParam(name = "resent", required = false) String resent,
+                                    @RequestParam(name = "cooldown", required = false) String cooldown,
+                                    @RequestParam(name = "resendError", required = false) String resendError,
+                                    Model model,
+                                    Locale locale) {
+        applyAuthLayout(model);
+        User sessionUser = authHelper.getAuthenticatedUser();
+        User user = sessionUser;
+        if (user == null && email != null && !email.isBlank()) {
+            user = userService.findByEmail(email);
+        }
+
+        if (user != null && user.getEmail() != null) {
+            model.addAttribute("verifyEmail", user.getEmail());
+            model.addAttribute("resendCooldownSeconds", emailVerificationService.getResendCooldownRemainingSeconds(user));
+        } else if (email != null && !email.isBlank()) {
             model.addAttribute("verifyEmail", email);
+            model.addAttribute("resendCooldownSeconds", 0L);
+        }
+
+        if (resent != null) {
+            model.addAttribute("verifySuccess", messageSource.getMessage("verify.email.sent", null, locale));
+        } else if (cooldown != null && user != null) {
+            long cooldownRemaining = emailVerificationService.getResendCooldownRemainingSeconds(user);
+            model.addAttribute(
+                    "verifyError",
+                    messageSource.getMessage("verify.email.code.cooldown", new Object[]{cooldownRemaining}, locale)
+            );
+        } else if (resendError != null) {
+            model.addAttribute("verifyError", messageSource.getMessage("verify.email.error.generic", null, locale));
         }
         return "verify/email-code";
     }
@@ -128,6 +172,14 @@ public class VerificationController {
         return redirectBase;
     }
 
+    private String buildEmailCodeRedirect(String email) {
+        String redirect = "redirect:/verify/email/code";
+        if (email != null && !email.isBlank()) {
+            redirect += "?email=" + java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8);
+        }
+        return redirect;
+    }
+
     @PostMapping("/verify/phone/send")
     public String sendPhoneVerification(RedirectAttributes redirectAttributes, Locale locale) {
         User user = authHelper.getAuthenticatedUser();
@@ -171,6 +223,7 @@ public class VerificationController {
 
     @GetMapping("/verify/phone/code")
     public String showPhoneCodePage(Model model) {
+        applyAuthLayout(model);
         return "verify/phone-code";
     }
 
@@ -200,6 +253,11 @@ public class VerificationController {
             );
         }
         return "redirect:/profile";
+    }
+
+    private void applyAuthLayout(Model model) {
+        model.addAttribute("authPageLayout", true);
+        model.addAttribute("compactTopContent", true);
     }
 
     private String mapEmailErrorKey(String message) {

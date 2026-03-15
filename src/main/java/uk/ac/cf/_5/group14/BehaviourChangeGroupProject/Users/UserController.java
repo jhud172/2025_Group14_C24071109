@@ -41,11 +41,13 @@ public class UserController {
     // signup choice
     @GetMapping("/signup")
     public String showSignupForm(Model model) {
+        applyAuthLayout(model);
         return "User/signup-choice";
     }
 
     @GetMapping("/signup/client")
     public String showClientSignup(Model model) {
+        applyAuthLayout(model);
         model.addAttribute("signupForm", new ClientSignupForm());
         return "User/signup-client";
     }
@@ -55,6 +57,7 @@ public class UserController {
                                BindingResult result,
                                Model model,
                                RedirectAttributes redirectAttributes) {
+        applyAuthLayout(model);
 
         // check for validation errors
         if (result.hasErrors()) {
@@ -100,12 +103,14 @@ public class UserController {
 
     @GetMapping("/signup/trainer")
     public String showTrainerSignup(Model model) {
+        applyAuthLayout(model);
         model.addAttribute("signupForm", new TrainerSignupForm());
         return "User/signup-trainer";
     }
 
     @GetMapping("/signup/trainer/success")
     public String showTrainerSignupSuccess(Model model) {
+        applyAuthLayout(model);
         // trainerCode and verifyEmail are flash attributes added after successful signup
         return "User/signup-trainer-success";
     }
@@ -115,6 +120,7 @@ public class UserController {
                                 BindingResult result,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
+        applyAuthLayout(model);
 
         if (result.hasErrors()) {
             return "User/signup-trainer";
@@ -166,12 +172,13 @@ public class UserController {
             String formatted = trainerCode.substring(0, 4) + "-" + trainerCode.substring(4, 8) + "-" + trainerCode.substring(8, 12);
             redirectAttributes.addFlashAttribute("trainerCode", formatted);
         }
-        redirectAttributes.addFlashAttribute("verifyEmail", savedUser.getEmail());
-        return "redirect:/signup/trainer/success";
+        redirectAttributes.addFlashAttribute("verifyRegistered", true);
+        return "redirect:/verify/email/code?email=" + encodeEmail(savedUser.getEmail());
     }
 
     @GetMapping("/signup/gym")
     public String showGymSignup(Model model) {
+        applyAuthLayout(model);
         model.addAttribute("signupForm", new GymSignupForm());
         return "User/signup-gym";
     }
@@ -181,6 +188,7 @@ public class UserController {
                             BindingResult result,
                             Model model,
                             RedirectAttributes redirectAttributes) {
+        applyAuthLayout(model);
 
         if (result.hasErrors()) {
             return "User/signup-gym";
@@ -233,6 +241,7 @@ public class UserController {
                                 @RequestParam(value = "devLogin", required = false) Boolean devLogin,
                                 @RequestParam(value = "role", required = false) String role,
                                 Model model) {
+        applyAuthLayout(model);
         if (expired != null) {
             return "redirect:/?expired=1";
         }
@@ -244,6 +253,7 @@ public class UserController {
         
         // Check if dev mode is enabled
         if (devModeProperties.isDevMode()) {
+            model.addAttribute("compactTopContent", true);
             if (Boolean.TRUE.equals(devLogin)) {
                 model.addAttribute("isDevMode", true);
                 return "User/login";
@@ -259,6 +269,11 @@ public class UserController {
     public String loginUser() {
         // Handled by Spring Security
         return "redirect:/";
+    }
+
+    private void applyAuthLayout(Model model) {
+        model.addAttribute("authPageLayout", true);
+        model.addAttribute("compactTopContent", true);
     }
 
     private String normalizeUsername(String username) {

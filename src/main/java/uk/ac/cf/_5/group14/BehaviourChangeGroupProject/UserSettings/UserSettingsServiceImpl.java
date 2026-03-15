@@ -187,7 +187,6 @@ public class UserSettingsServiceImpl implements UserSettingsService {
             settings.setTimeDisplayFormat(DEFAULT_TIME_DISPLAY_FORMAT);
             settings = userSettingsRepository.save(settings);
         }
-
         return settings;
     }
 
@@ -241,6 +240,25 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         }
 
         settings.setTimeDisplayFormat(timeDisplayFormat != null ? timeDisplayFormat : DEFAULT_TIME_DISPLAY_FORMAT);
+        return userSettingsRepository.save(settings);
+    }
+
+    @Override
+    @Transactional
+    public boolean isQuickPreferencesCompleted(User user) {
+        UserSettings settings = getOrCreate(user);
+        return settings != null && settings.isQuickPreferencesCompleted();
+    }
+
+    @Override
+    @Transactional
+    public UserSettings updateQuickPreferencesCompleted(User user, boolean completed) {
+        UserSettings settings = getOrCreate(user);
+        if (settings == null) {
+            return null;
+        }
+
+        settings.setQuickPreferencesCompleted(completed);
         return userSettingsRepository.save(settings);
     }
 

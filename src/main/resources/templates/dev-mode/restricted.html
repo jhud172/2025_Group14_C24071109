@@ -1,0 +1,44 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Restricted Feature', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+
+    <th:block th:fragment="pageStyles">
+        <link rel="stylesheet" th:href="@{/css/components/dev/dev-mode-pages.css(v='20260315a')}">
+    </th:block>
+
+    <div th:fragment="content" class="devnotice">
+        <div class="devnotice-shell">
+            <article class="devnotice-card">
+                <div class="devnotice-card__inner">
+                    <div class="devnotice-card__header">
+                        <div class="devnotice-card__icon" aria-hidden="true">
+                            <th:block th:replace="~{fragments/dev-page-display :: icon(${restrictedNotice.iconKey})}"></th:block>
+                        </div>
+                        <div class="devnotice-card__copy">
+                            <p class="devnotice-eyebrow">Restricted During Development</p>
+                            <h1 class="devnotice-title" th:text="${restrictedNotice.title}">Restricted Feature</h1>
+                            <p class="devnotice-card__path" th:text="${restrictedNotice.path}">/path</p>
+                        </div>
+                    </div>
+
+                    <div class="devnotice-card__body">
+                        <th:block th:replace="~{fragments/dev-page-display :: statusBadge('restricted', 'Restricted')}"></th:block>
+                        <p class="devnotice-copy" th:text="${restrictedNotice.primaryMessage}">
+                            This feature is temporarily unavailable during development. Please check back later.
+                        </p>
+                        <p class="devnotice-copy" th:text="${restrictedNotice.secondaryMessage}">
+                            The requested route is not available in the current development configuration.
+                        </p>
+                    </div>
+
+                    <div class="devnotice-card__actions">
+                        <a th:href="@{/dev-mode}" class="devnotice-button devnotice-button--primary">Back to Dev Hub</a>
+                        <a th:href="@{/}" class="devnotice-button devnotice-button--secondary">Return Home</a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <th:block th:fragment="pageScripts"></th:block>
+
+</th:block>

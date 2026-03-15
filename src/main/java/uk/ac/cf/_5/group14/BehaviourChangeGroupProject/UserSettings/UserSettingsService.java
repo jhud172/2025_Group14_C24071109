@@ -17,6 +17,10 @@ public interface UserSettingsService {
             TimeDisplayFormatPreference timeDisplayFormat
     );
 
+    boolean isQuickPreferencesCompleted(User user);
+
+    UserSettings updateQuickPreferencesCompleted(User user, boolean completed);
+
     UserSettings updateCalendarPreferences(
             User user,
             CalendarTaskOrderingPreference calendarTaskOrdering,

@@ -19,6 +19,7 @@ public class PasswordResetController {
     @GetMapping("/forgot-password")
     public String showForgotPassword(Model model,
                                      @RequestParam(value = "sent", required = false) String sent) {
+        applyAuthLayout(model);
         model.addAttribute("forgotPasswordForm", new ForgotPasswordForm());
         model.addAttribute("sent", sent != null);
         return "User/forgot-password";
@@ -28,6 +29,7 @@ public class PasswordResetController {
     public String submitForgotPassword(@Valid @ModelAttribute("forgotPasswordForm") ForgotPasswordForm form,
                                        BindingResult result,
                                        Model model) {
+        applyAuthLayout(model);
         if (result.hasErrors()) {
             model.addAttribute("sent", false);
             return "User/forgot-password";
@@ -39,6 +41,7 @@ public class PasswordResetController {
 
     @GetMapping("/reset-password")
     public String showResetPassword(@RequestParam("token") String token, Model model) {
+        applyAuthLayout(model);
         model.addAttribute("resetPasswordForm", new ResetPasswordForm());
         model.addAttribute("token", token);
         model.addAttribute("tokenValid", passwordResetService.getValidToken(token).isPresent());
@@ -50,6 +53,7 @@ public class PasswordResetController {
                                       @Valid @ModelAttribute("resetPasswordForm") ResetPasswordForm form,
                                       BindingResult result,
                                       Model model) {
+        applyAuthLayout(model);
         if (result.hasErrors()) {
             model.addAttribute("token", token);
             model.addAttribute("tokenValid", passwordResetService.getValidToken(token).isPresent());
@@ -64,5 +68,10 @@ public class PasswordResetController {
         }
 
         return "redirect:/login?reset=1";
+    }
+
+    private void applyAuthLayout(Model model) {
+        model.addAttribute("authPageLayout", true);
+        model.addAttribute("compactTopContent", true);
     }
 }

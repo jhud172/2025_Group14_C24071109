@@ -2,475 +2,292 @@
           th:replace="~{base :: layout('Development Mode', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <th:block th:fragment="pageStyles">
-        <style>
-            /* ── Page layout ── */
-            .devlogin-page {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 32px 16px 64px;
-                min-height: calc(100vh - 5rem);
-                background:
-                    radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 80%, rgba(52, 211, 153, 0.03) 0%, transparent 50%);
-            }
-
-            .devlogin-wrap {
-                width: 100%;
-                max-width: 460px;
-                animation: dlSlideUp 0.45s ease-out;
-            }
-
-            @keyframes dlSlideUp {
-                from { opacity: 0; transform: translateY(18px); }
-                to   { opacity: 1; transform: translateY(0); }
-            }
-
-            /* ── Persistent DEV MODE badge (top-right) ── */
-            .devlogin-env-badge {
-                position: fixed;
-                top: 72px;
-                right: 16px;
-                z-index: 50;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                background: #fff;
-                border: 1.5px solid #10b981;
-                color: #065f46;
-                padding: 4px 11px;
-                border-radius: 999px;
-                font-size: 10px;
-                font-weight: 700;
-                letter-spacing: .7px;
-                text-transform: uppercase;
-                box-shadow: 0 2px 8px rgba(16,185,129,.15);
-            }
-            .devlogin-env-badge-dot {
-                width: 6px; height: 6px;
-                border-radius: 50%;
-                background: #10b981;
-                animation: dlPulse 2s ease-in-out infinite;
-                flex-shrink: 0;
-            }
-            @keyframes dlPulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-
-            /* ── Logo / header area ── */
-            .devlogin-top {
-                text-align: center;
-                margin-bottom: 24px;
-            }
-            .devlogin-logo {
-                width: 56px;
-                height: 56px;
-                border-radius: 16px;
-                background: linear-gradient(135deg, #10b981, #059669);
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 28px;
-                margin-bottom: 14px;
-                box-shadow: 0 8px 24px rgba(16,185,129,.3);
-            }
-            .devlogin-title {
-                font-size: 26px;
-                font-weight: 800;
-                color: #111827;
-                margin: 0 0 8px;
-                letter-spacing: -.4px;
-            }
-            .devlogin-subtitle {
-                font-size: 14px;
-                color: #6b7280;
-                margin: 0;
-                line-height: 1.55;
-            }
-
-            /* ── Dev environment context banner ── */
-            .devlogin-env-banner {
-                display: flex;
-                align-items: flex-start;
-                gap: 10px;
-                background: #ecfdf5;
-                border: 1px solid #6ee7b7;
-                border-radius: 10px;
-                padding: 12px 14px;
-                margin-bottom: 20px;
-                font-size: 13px;
-                color: #065f46;
-                line-height: 1.5;
-            }
-            .devlogin-env-banner svg { flex-shrink: 0; margin-top: 1px; }
-            .devlogin-env-banner strong { display: block; font-weight: 700; margin-bottom: 2px; }
-
-            /* ── Card ── */
-            .devlogin-card {
-                background: #ffffff;
-                border: 1px solid #e5e7eb;
-                border-radius: 24px;
-                padding: 28px;
-                box-shadow:
-                    0 20px 25px -5px rgba(0,0,0,.05),
-                    0 10px 10px -5px rgba(0,0,0,.02),
-                    0 0 0 1px rgba(16,185,129,.05);
-                position: relative;
-                overflow: hidden;
-            }
-            /* Emerald accent bar at top of card */
-            .devlogin-card::before {
-                content: '';
-                position: absolute;
-                top: 0; left: 0; right: 0;
-                height: 4px;
-                border-radius: 24px 24px 0 0;
-                background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #10b981 100%);
-                background-size: 200% 100%;
-                animation: dlShimmer 3s linear infinite;
-            }
-            @keyframes dlShimmer {
-                0%   { background-position: -200% 0; }
-                100% { background-position:  200% 0; }
-            }
-
-            /* ── Action options ── */
-            .devlogin-options {
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                margin-bottom: 24px;
-                margin-top: 8px;
-            }
-            .devlogin-option {
-                display: flex;
-                align-items: center;
-                gap: 14px;
-                padding: 16px 18px;
-                border-radius: 14px;
-                text-decoration: none;
-                transition: transform .18s, box-shadow .18s, border-color .18s;
-                cursor: pointer;
-                border: 1.5px solid transparent;
-                background: #f9fafb;
-            }
-            .devlogin-option:hover {
-                transform: translateY(-2px);
-                text-decoration: none;
-            }
-            /* Primary: Sign In — emerald accent */
-            .devlogin-option--primary {
-                background: #f0fdf4;
-                border-color: #6ee7b7;
-            }
-            .devlogin-option--primary:hover {
-                box-shadow: 0 6px 20px rgba(16,185,129,.18);
-                border-color: #10b981;
-            }
-            /* Secondary: Browse Dev Hub */
-            .devlogin-option--secondary {
-                background: #f8fafc;
-                border-color: #e2e8f0;
-            }
-            .devlogin-option--secondary:hover {
-                box-shadow: 0 6px 16px rgba(0,0,0,.07);
-                border-color: #cbd5e1;
-            }
-            /* Tertiary: Return to Home */
-            .devlogin-option--tertiary {
-                background: #f8fafc;
-                border-color: #e2e8f0;
-                opacity: .85;
-            }
-            .devlogin-option--tertiary:hover {
-                opacity: 1;
-                border-color: #cbd5e1;
-            }
-            .devlogin-option-icon {
-                width: 42px;
-                height: 42px;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-            }
-            .devlogin-option--primary  .devlogin-option-icon { background: #d1fae5; }
-            .devlogin-option--secondary .devlogin-option-icon { background: #e0f2fe; }
-            .devlogin-option--tertiary  .devlogin-option-icon { background: #f1f5f9; }
-            .devlogin-option-text { flex: 1; min-width: 0; }
-            .devlogin-option-label {
-                font-size: 14px;
-                font-weight: 700;
-                margin: 0 0 2px;
-                color: #111827;
-            }
-            .devlogin-option-hint {
-                font-size: 12px;
-                color: #6b7280;
-                margin: 0;
-            }
-            .devlogin-option-arrow { flex-shrink: 0; color: #9ca3af; }
-
-            /* ── Environment info section ── */
-            .devlogin-env-info {
-                margin-top: 8px;
-                background: #f9fafb;
-                border: 1px solid #e5e7eb;
-                border-radius: 12px;
-                padding: 14px 16px;
-                margin-bottom: 20px;
-            }
-            .devlogin-env-info-title {
-                font-size: 11px;
-                font-weight: 700;
-                color: #6b7280;
-                text-transform: uppercase;
-                letter-spacing: .6px;
-                margin: 0 0 10px;
-            }
-            .devlogin-env-info-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 8px 16px;
-            }
-            .devlogin-env-item { }
-            .devlogin-env-key {
-                font-size: 10px;
-                color: #9ca3af;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: .4px;
-                margin: 0;
-            }
-            .devlogin-env-val {
-                font-size: 12px;
-                color: #374151;
-                font-weight: 600;
-                margin: 1px 0 0;
-            }
-            .devlogin-env-val--green { color: #059669; }
-            .devlogin-env-val--amber { color: #d97706; }
-
-            /* ── Waitlist (reduced visual weight) ── */
-            .devlogin-waitlist-wrap {
-                border-top: 1px solid #f3f4f6;
-                padding-top: 16px;
-                margin-top: 4px;
-            }
-            .devlogin-waitlist-label {
-                font-size: 12px;
-                color: #9ca3af;
-                margin: 0 0 8px;
-                text-align: center;
-            }
-            .devlogin-waitlist-form {
-                display: flex;
-                gap: 8px;
-            }
-            .devlogin-waitlist-input {
-                flex: 1;
-                padding: 8px 12px;
-                background: #f9fafb;
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-                font-size: 12px;
-                color: #374151;
-                outline: none;
-                transition: border-color .2s;
-            }
-            .devlogin-waitlist-input::placeholder { color: #9ca3af; }
-            .devlogin-waitlist-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.1); }
-            .devlogin-waitlist-btn {
-                padding: 8px 14px;
-                background: #10b981;
-                color: #fff;
-                font-weight: 600;
-                font-size: 12px;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                white-space: nowrap;
-                transition: background .2s;
-            }
-            .devlogin-waitlist-btn:hover { background: #059669; }
-            .devlogin-waitlist-note {
-                font-size: 10px;
-                color: #9ca3af;
-                margin: 6px 0 0;
-                text-align: center;
-            }
-            .devlogin-flash-ok {
-                padding: 8px 12px;
-                background: #ecfdf5;
-                border: 1px solid #6ee7b7;
-                border-radius: 8px;
-                color: #065f46;
-                font-size: 13px;
-                margin-bottom: 10px;
-            }
-            .devlogin-flash-err {
-                padding: 8px 12px;
-                background: #fef2f2;
-                border: 1px solid #fca5a5;
-                border-radius: 8px;
-                color: #991b1b;
-                font-size: 13px;
-                margin-bottom: 10px;
-            }
-
-            /* dark mode keeps it readable */
-            html.dark .devlogin-page { background: none; }
-            html.dark .devlogin-title { color: #e2e8f0; }
-            html.dark .devlogin-subtitle { color: #94a3b8; }
-            html.dark .devlogin-card {
-                background: #1e293b;
-                border-color: #334155;
-                box-shadow: 0 20px 60px rgba(0,0,0,.35);
-            }
-            html.dark .devlogin-option { background: #0f172a; }
-            html.dark .devlogin-option--primary  { background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.3); }
-            html.dark .devlogin-option--secondary { background: #0f172a; border-color: #334155; }
-            html.dark .devlogin-option--tertiary  { background: #0f172a; border-color: #1e293b; }
-            html.dark .devlogin-option-label { color: #e2e8f0; }
-            html.dark .devlogin-option-hint  { color: #64748b; }
-            html.dark .devlogin-option--primary  .devlogin-option-icon { background: rgba(16,185,129,.15); }
-            html.dark .devlogin-option--secondary .devlogin-option-icon { background: rgba(14,165,233,.1); }
-            html.dark .devlogin-option--tertiary  .devlogin-option-icon { background: rgba(100,116,139,.12); }
-            html.dark .devlogin-env-banner { background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.25); color: #6ee7b7; }
-            html.dark .devlogin-env-info { background: #0f172a; border-color: #1e293b; }
-            html.dark .devlogin-env-info-title { color: #64748b; }
-            html.dark .devlogin-env-key  { color: #475569; }
-            html.dark .devlogin-env-val  { color: #cbd5e1; }
-            html.dark .devlogin-waitlist-wrap { border-color: #1e293b; }
-            html.dark .devlogin-waitlist-input { background: #0f172a; border-color: #334155; color: #e2e8f0; }
-            html.dark .devlogin-waitlist-label { color: #64748b; }
-            html.dark .devlogin-env-badge { background: #1e293b; color: #6ee7b7; border-color: rgba(16,185,129,.4); }
-
-            @media (max-width: 480px) {
-                .devlogin-page { padding: 20px 12px; align-items: flex-start; padding-top: 48px; }
-                .devlogin-card { padding: 22px 18px; }
-                .devlogin-title { font-size: 22px; }
-                .devlogin-waitlist-form { flex-direction: column; }
-                .devlogin-waitlist-btn { width: 100%; text-align: center; }
-                .devlogin-env-info-grid { grid-template-columns: 1fr; }
-                .devlogin-env-badge { top: 64px; }
-            }
-        </style>
+        <link rel="stylesheet" th:href="@{/css/components/account/login-demo.css(v='20260315a')}">
     </th:block>
 
     <div th:fragment="content" class="devlogin-page">
-
-        <!-- Persistent DEV MODE badge -->
-        <div class="devlogin-env-badge" aria-label="Development environment">
-            <span class="devlogin-env-badge-dot"></span>
-            DEV MODE
-        </div>
-
-        <div class="devlogin-wrap">
-
-            <!-- Top branding -->
-            <div class="devlogin-top">
-                <div class="devlogin-logo">🛠️</div>
-                <h1 class="devlogin-title">Dev Mode Active</h1>
-                <p class="devlogin-subtitle">Development Environment — sign in or browse available pages.</p>
-            </div>
-
-            <!-- Dev environment banner -->
-            <div class="devlogin-env-banner" role="status">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <div>
-                    <strong>Development Environment</strong>
-                    This is a non-production environment. Some features may be restricted or behave differently from the live platform.
-                </div>
-            </div>
-
-            <!-- Card -->
-            <div class="devlogin-card">
-
-                <div class="devlogin-options">
-                    <!-- Primary: Sign In -->
-                    <a href="/login?devLogin=1" class="devlogin-option devlogin-option--primary">
-                        <div class="devlogin-option-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                        </div>
-                        <div class="devlogin-option-text">
-                            <div class="devlogin-option-label">Sign In</div>
-                            <div class="devlogin-option-hint">Access dashboard, calendar, goals, workouts &amp; profile</div>
-                        </div>
-                        <svg class="devlogin-option-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-                    </a>
-
-                    <!-- Secondary: Browse Dev Hub -->
-                    <a href="/dev-mode" class="devlogin-option devlogin-option--secondary">
-                        <div class="devlogin-option-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#0ea5e9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                        </div>
-                        <div class="devlogin-option-text">
-                            <div class="devlogin-option-label">Browse Dev Hub</div>
-                            <div class="devlogin-option-hint">Explore public pages without logging in</div>
-                        </div>
-                        <svg class="devlogin-option-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-                    </a>
-
-                    <!-- Tertiary: Return to Home -->
-                    <a href="/" class="devlogin-option devlogin-option--tertiary">
-                        <div class="devlogin-option-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                        </div>
-                        <div class="devlogin-option-text">
-                            <div class="devlogin-option-label">Return to Home</div>
-                            <div class="devlogin-option-hint">Go back to the landing page</div>
-                        </div>
-                        <svg class="devlogin-option-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-                    </a>
+        <div class="devlogin-shell">
+            <section class="devlogin-hero" aria-labelledby="devlogin-title">
+                <div class="devlogin-hero__badge">
+                    <th:block th:replace="~{fragments/dev-mode :: pill('', 'DEV MODE')}"></th:block>
                 </div>
 
-                <!-- Dev environment information -->
-                <div class="devlogin-env-info">
-                    <p class="devlogin-env-info-title">Environment Information</p>
-                    <div class="devlogin-env-info-grid">
-                        <div class="devlogin-env-item">
-                            <p class="devlogin-env-key">Environment</p>
-                            <p class="devlogin-env-val devlogin-env-val--amber">Development</p>
+                <div class="devlogin-hero__panel">
+                    <div class="devlogin-hero__content">
+                        <div class="devlogin-hero__topline">
+                            <div class="devlogin-hero__icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14.7 6.3a1 1 0 0 1 1.4 0l1.6 1.6a1 1 0 0 1 0 1.4l-8.6 8.6-3.3.7.7-3.3 8.2-8.2z"/>
+                                    <path d="M12 3v3"/>
+                                    <path d="M5 12H2"/>
+                                    <path d="M21 12h-3"/>
+                                    <path d="M12 21v-3"/>
+                                </svg>
+                            </div>
+
+                            <div class="devlogin-hero__copy">
+                                <p class="devlogin-hero__eyebrow">Development Access</p>
+                                <h1 id="devlogin-title" class="devlogin-title">Explore the platform while Dev Mode is active.</h1>
+                                <p class="devlogin-subtitle">
+                                    Development Mode lets you explore platform pages, create test accounts, experiment with available features,
+                                    and experience the site while new work is still being built and refined.
+                                </p>
+                            </div>
                         </div>
-                        <div class="devlogin-env-item">
-                            <p class="devlogin-env-key">Access Mode</p>
-                            <p class="devlogin-env-val devlogin-env-val--green">Dev Mode Enabled</p>
-                        </div>
-                        <div class="devlogin-env-item">
-                            <p class="devlogin-env-key">Restricted Features</p>
-                            <p class="devlogin-env-val">Leaderboard, Trainers, Training Vault</p>
-                        </div>
-                        <div class="devlogin-env-item">
-                            <p class="devlogin-env-key">Authentication</p>
-                            <p class="devlogin-env-val">Optional</p>
+
+                        <div class="devlogin-summary" aria-label="Development mode summary">
+                            <article class="devlogin-summary__item">
+                                <p class="devlogin-summary__label">Explore</p>
+                                <p class="devlogin-summary__value">Browse public pages and see the current product direction.</p>
+                            </article>
+                            <article class="devlogin-summary__item">
+                                <p class="devlogin-summary__label">Create</p>
+                                <p class="devlogin-summary__value">Sign up test accounts and try onboarding and verification flows.</p>
+                            </article>
+                            <article class="devlogin-summary__item">
+                                <p class="devlogin-summary__label">Experiment</p>
+                                <p class="devlogin-summary__value">Try available planner, profile, and dashboard experiences as they evolve.</p>
+                            </article>
+                            <article class="devlogin-summary__item">
+                                <p class="devlogin-summary__label">Expect Change</p>
+                                <p class="devlogin-summary__value">Data, layouts, and feature behavior may reset or change during testing.</p>
+                            </article>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <!-- Waitlist (bottom, reduced visual weight) -->
-                <div class="devlogin-waitlist-wrap">
-                    <!-- Flash messages -->
-                    <div th:if="${waitlistSuccess}" class="devlogin-flash-ok" th:text="${waitlistSuccess}"></div>
-                    <div th:if="${waitlistError}"   class="devlogin-flash-err" th:text="${waitlistError}"></div>
+            <section class="devlogin-grid" aria-label="Development mode actions and guidance">
+                <div class="devlogin-column">
+                    <article class="devlogin-surface devlogin-surface--primary">
+                        <div class="devlogin-surface__inner">
+                            <p class="devlogin-section-label">Get Started</p>
+                            <h2 class="devlogin-section-title">Choose how you want to test the platform</h2>
+                            <p class="devlogin-section-copy">
+                                Sign in to reach protected areas, create a fresh account for testing, or stay in guest mode and browse the current
+                                public experience.
+                            </p>
 
-                    <p class="devlogin-waitlist-label">Get notified when the site goes live</p>
-                    <form action="/dev-mode/waitlist" method="post">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <div class="devlogin-waitlist-form">
-                            <input type="email" name="email" placeholder="your@email.com" required
-                                   class="devlogin-waitlist-input" />
-                            <button type="submit" class="devlogin-waitlist-btn">Notify Me</button>
+                            <div class="devlogin-cta-grid">
+                                <a th:href="@{/login(devLogin=1)}" class="devlogin-option devlogin-option--primary">
+                                    <div class="devlogin-option-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                            <path d="M10 17l5-5-5-5"/>
+                                            <path d="M15 12H3"/>
+                                        </svg>
+                                    </div>
+                                    <div class="devlogin-option-text">
+                                        <p class="devlogin-option-label">Sign In</p>
+                                        <p class="devlogin-option-hint">Access dashboard, calendar, goals, workouts, and your profile with an existing account.</p>
+                                    </div>
+                                    <span class="devlogin-option-arrow" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 12h14"/>
+                                            <path d="M12 5l7 7-7 7"/>
+                                        </svg>
+                                    </span>
+                                </a>
+
+                                <a th:href="@{/signup}" class="devlogin-option devlogin-option--secondary">
+                                    <div class="devlogin-option-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 5v14"/>
+                                            <path d="M5 12h14"/>
+                                            <rect x="3" y="3" width="18" height="18" rx="4"/>
+                                        </svg>
+                                    </div>
+                                    <div class="devlogin-option-text">
+                                        <p class="devlogin-option-label">Create Test Account</p>
+                                        <p class="devlogin-option-hint">Run through signup, email verification, and first-time setup with fresh test data.</p>
+                                    </div>
+                                    <span class="devlogin-option-arrow" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 12h14"/>
+                                            <path d="M12 5l7 7-7 7"/>
+                                        </svg>
+                                    </span>
+                                </a>
+
+                                <a th:href="@{/dev-mode}" class="devlogin-option devlogin-option--secondary">
+                                    <div class="devlogin-option-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                            <path d="M3 9h18"/>
+                                            <path d="M9 21V9"/>
+                                        </svg>
+                                    </div>
+                                    <div class="devlogin-option-text">
+                                        <p class="devlogin-option-label">Open Dev Hub</p>
+                                        <p class="devlogin-option-hint">Browse the public dev navigation hub and jump through pages without signing in first.</p>
+                                    </div>
+                                    <span class="devlogin-option-arrow" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 12h14"/>
+                                            <path d="M12 5l7 7-7 7"/>
+                                        </svg>
+                                    </span>
+                                </a>
+
+                                <a th:href="@{/}" class="devlogin-option devlogin-option--tertiary">
+                                    <div class="devlogin-option-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M3 10.5 12 3l9 7.5"/>
+                                            <path d="M5 9.5V21h14V9.5"/>
+                                        </svg>
+                                    </div>
+                                    <div class="devlogin-option-text">
+                                        <p class="devlogin-option-label">Return Home</p>
+                                        <p class="devlogin-option-hint">Go back to the main landing page and continue browsing the public-facing site.</p>
+                                    </div>
+                                    <span class="devlogin-option-arrow" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 12h14"/>
+                                            <path d="M12 5l7 7-7 7"/>
+                                        </svg>
+                                    </span>
+                                </a>
+                            </div>
                         </div>
-                    </form>
-                    <p class="devlogin-waitlist-note">One email only. No spam, ever.</p>
+                    </article>
+
+                    <article class="devlogin-surface">
+                        <div class="devlogin-surface__inner">
+                            <p class="devlogin-section-label">Testing Guidance</p>
+                            <h2 class="devlogin-section-title">Useful things to try during development</h2>
+                            <p class="devlogin-section-copy">
+                                If you are exploring the platform for testing, these are good starting points for checking the current experience.
+                            </p>
+
+                            <div class="devlogin-testing-list">
+                                <article class="devlogin-testing-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="7"/>
+                                        <path d="m21 21-4.3-4.3"/>
+                                    </svg>
+                                    <div>
+                                        <strong>Browse public pages</strong>
+                                        <span>Check homepage flows, navigation, and public presentation without needing an account.</span>
+                                    </div>
+                                </article>
+
+                                <article class="devlogin-testing-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 5v14"/>
+                                        <path d="M5 12h14"/>
+                                        <rect x="3" y="3" width="18" height="18" rx="4"/>
+                                    </svg>
+                                    <div>
+                                        <strong>Test account signup</strong>
+                                        <span>Create fresh client, trainer, or gym accounts and verify the onboarding path.</span>
+                                    </div>
+                                </article>
+
+                                <article class="devlogin-testing-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 18V5l12-2v13"/>
+                                        <path d="M9 9 21 7"/>
+                                        <circle cx="6" cy="18" r="3"/>
+                                        <circle cx="18" cy="16" r="3"/>
+                                    </svg>
+                                    <div>
+                                        <strong>Explore trainer profiles</strong>
+                                        <span>Review public trainer surfaces, profile content, and discovery journeys while designs evolve.</span>
+                                    </div>
+                                </article>
+
+                                <article class="devlogin-testing-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                        <path d="M16 2v4"/>
+                                        <path d="M8 2v4"/>
+                                        <path d="M3 10h18"/>
+                                        <path d="M8 14h3"/>
+                                        <path d="M8 18h8"/>
+                                    </svg>
+                                    <div>
+                                        <strong>Test planning features</strong>
+                                        <span>Sign in with a test account to try planner, tasks, workouts, and related scheduling flows.</span>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </article>
                 </div>
 
-            </div><!-- /.devlogin-card -->
-        </div><!-- /.devlogin-wrap -->
-    </div><!-- /.devlogin-page -->
+                <div class="devlogin-column">
+                    <article class="devlogin-surface devlogin-email-card">
+                        <div class="devlogin-surface__inner">
+                            <div class="devlogin-email-header">
+                                <div class="devlogin-email-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                        <path d="m4 7 8 6 8-6"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="devlogin-section-label">Email Updates</p>
+                                    <h2 class="devlogin-section-title">Stay visible for go-live updates</h2>
+                                    <p class="devlogin-section-copy">
+                                        Leave your email here if you want a launch notification while Dev Mode is active. This form is intentionally easy
+                                        to find so testers can register interest without hunting for it.
+                                    </p>
+                                </div>
+                            </div>
 
-    <th:block th:fragment="pageScripts">
-    </th:block>
+                            <div th:if="${waitlistSuccess}" class="devlogin-flash-ok" th:text="${waitlistSuccess}"></div>
+                            <div th:if="${waitlistError}" class="devlogin-flash-err" th:text="${waitlistError}"></div>
+
+                            <form th:action="@{/dev-mode/waitlist}" method="post" class="devlogin-waitlist-form">
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <p class="devlogin-waitlist-caption">One email when the live platform is ready. No spam.</p>
+                                <div class="devlogin-waitlist-row">
+                                    <input type="email"
+                                           name="email"
+                                           required
+                                           autocomplete="email"
+                                           placeholder="Enter your email address"
+                                           class="devlogin-waitlist-input" />
+                                    <button type="submit" class="devlogin-waitlist-btn">Notify Me</button>
+                                </div>
+                                <p class="devlogin-waitlist-note">You can use any test or real inbox you want to keep updated on launch progress.</p>
+                            </form>
+                        </div>
+                    </article>
+
+                    <article class="devlogin-surface">
+                        <div class="devlogin-surface__inner">
+                            <p class="devlogin-section-label">Environment Details</p>
+                            <h2 class="devlogin-section-title">What this session is optimized for</h2>
+                            <p class="devlogin-section-copy">
+                                This environment is built for development feedback and hands-on checking, so some content or rules may differ from the live platform.
+                            </p>
+
+                            <div class="devlogin-env-info-grid">
+                                <article class="devlogin-env-item">
+                                    <p class="devlogin-env-key">Environment</p>
+                                    <p class="devlogin-env-val devlogin-env-val--amber">Development</p>
+                                </article>
+                                <article class="devlogin-env-item">
+                                    <p class="devlogin-env-key">Access Mode</p>
+                                    <p class="devlogin-env-val devlogin-env-val--green">Dev Mode Enabled</p>
+                                </article>
+                                <article class="devlogin-env-item">
+                                    <p class="devlogin-env-key">Good For</p>
+                                    <p class="devlogin-env-val">Testing flows, previewing UI changes, and trying temporary data.</p>
+                                </article>
+                                <article class="devlogin-env-item">
+                                    <p class="devlogin-env-key">Authentication</p>
+                                    <p class="devlogin-env-val">Optional until you need protected features.</p>
+                                </article>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <th:block th:fragment="pageScripts"></th:block>
 
 </th:block>
-

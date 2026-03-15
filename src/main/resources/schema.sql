@@ -24,6 +24,7 @@ DROP TABLE IF EXISTS message CASCADE;
 DROP TABLE IF EXISTS conversation_participant CASCADE;
 DROP TABLE IF EXISTS conversation CASCADE;
 DROP TABLE IF EXISTS dashboard_layout CASCADE;
+DROP TABLE IF EXISTS dev_mode_page_settings CASCADE;
 DROP TABLE IF EXISTS user_settings CASCADE;
 DROP TABLE IF EXISTS data_export_requests CASCADE;
 DROP TABLE IF EXISTS user_health_conditions CASCADE;
@@ -366,6 +367,7 @@ CREATE TABLE IF NOT EXISTS user_settings
     weather_temperature_unit VARCHAR(12) NOT NULL DEFAULT 'CELSIUS',
     weather_display_mode VARCHAR(12) NOT NULL DEFAULT 'VISUAL',
     time_display_format VARCHAR(18) NOT NULL DEFAULT 'TWELVE_HOUR',
+    quick_preferences_completed BOOLEAN NOT NULL DEFAULT FALSE,
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_settings_user
@@ -381,6 +383,20 @@ ALTER TABLE user_settings
 
 ALTER TABLE user_settings
     ADD COLUMN IF NOT EXISTS time_display_format VARCHAR(18) NOT NULL DEFAULT 'TWELVE_HOUR';
+
+ALTER TABLE user_settings
+    ADD COLUMN IF NOT EXISTS quick_preferences_completed BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- =========================
+-- DEV MODE PAGE ACCESS
+-- =========================
+CREATE TABLE IF NOT EXISTS dev_mode_page_settings
+(
+    id BIGSERIAL PRIMARY KEY,
+    page_key VARCHAR(80) NOT NULL UNIQUE,
+    access_mode VARCHAR(20) NOT NULL DEFAULT 'ENABLED',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 -- =========================
 -- HEALTH CONDITIONS (PERMANENT + TIMED)

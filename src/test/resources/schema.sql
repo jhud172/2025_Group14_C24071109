@@ -43,6 +43,7 @@ DROP TABLE IF EXISTS message CASCADE;
 DROP TABLE IF EXISTS conversation_participant CASCADE;
 DROP TABLE IF EXISTS conversation CASCADE;
 DROP TABLE IF EXISTS dashboard_layout CASCADE;
+DROP TABLE IF EXISTS dev_mode_page_settings CASCADE;
 DROP TABLE IF EXISTS user_settings CASCADE;
 
 DROP TABLE IF EXISTS selected_preferences CASCADE;
@@ -415,6 +416,7 @@ CREATE TABLE IF NOT EXISTS user_settings
     weather_temperature_unit VARCHAR(12) NOT NULL DEFAULT 'CELSIUS',
     weather_display_mode VARCHAR(12) NOT NULL DEFAULT 'VISUAL',
     time_display_format VARCHAR(18) NOT NULL DEFAULT 'TWELVE_HOUR',
+    quick_preferences_completed BOOLEAN NOT NULL DEFAULT FALSE,
     profile_text_color VARCHAR(7) NULL,
     profile_bio_text_color VARCHAR(7) NULL,
     profile_milestone_keys VARCHAR(500) NULL,
@@ -425,6 +427,17 @@ CREATE TABLE IF NOT EXISTS user_settings
     CONSTRAINT fk_user_settings_user
         FOREIGN KEY (user_id) REFERENCES users (id)
             ON DELETE CASCADE
+);
+
+-- =========================
+-- DEV MODE PAGE ACCESS
+-- =========================
+CREATE TABLE IF NOT EXISTS dev_mode_page_settings
+(
+    id BIGSERIAL PRIMARY KEY,
+    page_key VARCHAR(80) NOT NULL UNIQUE,
+    access_mode VARCHAR(20) NOT NULL DEFAULT 'ENABLED',
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- =========================

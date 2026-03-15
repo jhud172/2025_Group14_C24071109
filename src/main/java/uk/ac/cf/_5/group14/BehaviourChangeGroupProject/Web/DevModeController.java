@@ -1,6 +1,8 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Web;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DevMode.DevModePageAccessService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Waitlist.WaitlistEmail;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Waitlist.WaitlistEmailRepository;
 
@@ -26,18 +29,26 @@ public class DevModeController {
 
     @Autowired
     private WaitlistEmailRepository waitlistEmailRepository;
+
+    @Autowired
+    private DevModePageAccessService devModePageAccessService;
     
     /**
      * Development mode navigation hub
      * Shows available pages users can browse in dev mode
      */
     @GetMapping
-    public String devModeHub(Model model) {
+    public String devModeHub(Authentication authentication, Model model) {
         if (!devModeProperties.isDevMode()) {
             return "redirect:/";
         }
-        
+
+        model.addAttribute("compactTopContent", true);
         model.addAttribute("isDevMode", true);
+        model.addAttribute("devHubView",
+                devModePageAccessService.buildHubView(authentication != null
+                        && authentication.isAuthenticated()
+                        && !(authentication instanceof AnonymousAuthenticationToken)));
         return "dev-mode/hub";
     }
     
@@ -51,9 +62,23 @@ public class DevModeController {
         if (!devModeProperties.isDevMode()) {
             return "redirect:/";
         }
-        
+
+        model.addAttribute("compactTopContent", true);
         model.addAttribute("isDevMode", true);
         return "dev-mode/unauthorized";
+    }
+
+    @GetMapping("/restricted")
+    public String devRestricted(@RequestParam(value = "pageKey", required = false) String pageKey,
+                                Model model) {
+        if (!devModeProperties.isDevMode()) {
+            return "redirect:/";
+        }
+
+        model.addAttribute("compactTopContent", true);
+        model.addAttribute("isDevMode", true);
+        model.addAttribute("restrictedNotice", devModePageAccessService.resolveRestrictedNotice(pageKey));
+        return "dev-mode/restricted";
     }
 
     /**

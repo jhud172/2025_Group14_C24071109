@@ -5,6 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DevMode.DevModePageAccessMode;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DevMode.DevModePageAccessService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Membership.EmailService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.SecurityUtils;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
@@ -27,17 +29,20 @@ public class AdminSupportController {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final AuthHelper authHelper;
+    private final DevModePageAccessService devModePageAccessService;
 
     public AdminSupportController(SupportRequestRepository supportRequestRepository,
                                   WaitlistEmailRepository waitlistEmailRepository,
                                   UserRepository userRepository,
                                   EmailService emailService,
-                                  AuthHelper authHelper) {
+                                  AuthHelper authHelper,
+                                  DevModePageAccessService devModePageAccessService) {
         this.supportRequestRepository = supportRequestRepository;
         this.waitlistEmailRepository = waitlistEmailRepository;
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.authHelper = authHelper;
+        this.devModePageAccessService = devModePageAccessService;
     }
 
     @GetMapping("/admin/dashboard")
@@ -57,7 +62,35 @@ public class AdminSupportController {
         model.addAttribute("waitlistCount", waitlist.size());
         model.addAttribute("waitlistEntries", waitlist.stream().sorted((a, b) -> b.getSignedUpAt().compareTo(a.getSignedUpAt())).limit(25).toList());
         model.addAttribute("userCount", userRepository.count());
+        model.addAttribute("devPageSummary", devModePageAccessService.buildAdminSummary());
+        model.addAttribute("devPageRows", devModePageAccessService.buildAdminRows());
+        model.addAttribute("devPageModes", DevModePageAccessMode.values());
         return "dashboard/admin-dashboard";
+    }
+
+    @PostMapping("/admin/dev-pages/{pageKey}")
+    public String updateDevPageAccess(@PathVariable("pageKey") String pageKey,
+                                      @RequestParam("mode") String mode,
+                                      RedirectAttributes redirectAttributes,
+                                      Authentication authentication) {
+        if (!isAdmin(authentication)) {
+            return "redirect:/access-denied";
+        }
+
+        if (!devModePageAccessService.hasPage(pageKey)) {
+            redirectAttributes.addFlashAttribute("devPageAccessError", "Unknown Dev Hub page.");
+            return "redirect:/admin/dashboard";
+        }
+
+        try {
+            DevModePageAccessMode accessMode = DevModePageAccessMode.valueOf(mode);
+            devModePageAccessService.updateMode(pageKey, accessMode);
+            redirectAttributes.addFlashAttribute("devPageAccessSuccess", "Updated " + pageKey + " to " + accessMode.name().toLowerCase() + ".");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("devPageAccessError", "Invalid access mode selected.");
+        }
+
+        return "redirect:/admin/dashboard";
     }
 
     @GetMapping("/admin/feedback")

@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.session.InvalidSessionStrategy;
 
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Config.DevModeProperties;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DevMode.DevModePageRestrictionFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -30,10 +31,10 @@ public class SecurityConfig {
     private static final String[] ENDPOINTS_WHITELIST = {
             "/img/**",
             "/css/**",
-        "/js/**",
-        "/webjars/**",
-        "/favicon.ico",
-        "/static/**",
+            "/js/**",
+            "/webjars/**",
+            "/favicon.ico",
+            "/static/**",
             "/uploads/**",
             "/",
             "/home-public",
@@ -55,6 +56,7 @@ public class SecurityConfig {
                     "/policies/**",
                     "/verify/email",
                     "/verify/email/code",
+                    "/verify/email/send",
                     "/verify/email/confirm",
                     "/verify/phone/code"
     };
@@ -81,6 +83,7 @@ public class SecurityConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    LoginThrottleFilter loginThrottleFilter,
+                                                   DevModePageRestrictionFilter devModePageRestrictionFilter,
                                                    CustomAuthenticationFailureHandler failureHandler,
                                                    CustomAuthenticationSuccessHandler successHandler,
                                                    LogoutHandler logoutHandler,
@@ -101,18 +104,19 @@ public class SecurityConfig {
                             // Trainers area: keep role requirements
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
-                            .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**")
+                            .requestMatchers("/client/trainers", "/client/trainers/**").hasAnyRole("CLIENT", "USER")
+                            .requestMatchers("/client/messages", "/client/messages/**").authenticated()
+                            .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**", "/admin/dev-pages/**")
                             .hasAnyRole("GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
                             // Training Vault: keep protected
                             .requestMatchers("/vault/**").authenticated()
                             // Core authenticated pages: require login in dev mode
-                            .requestMatchers("/dashboard", "/client/dashboard").authenticated()
-                            .requestMatchers("/calendar/**").authenticated()
-                            .requestMatchers("/workouts/**").authenticated()
-                            .requestMatchers("/goals/**").authenticated()
-                            .requestMatchers(HttpMethod.GET, "/profile").permitAll()
-                            .requestMatchers("/profile/**").authenticated()
+                            .requestMatchers("/dashboard", "/dashboard/**", "/client/dashboard", "/client/dashboard/**").authenticated()
+                            .requestMatchers("/calendar", "/calendar/**").authenticated()
+                            .requestMatchers("/workouts", "/workouts/**").authenticated()
+                            .requestMatchers("/goals", "/goals/**").authenticated()
+                            .requestMatchers("/profile", "/profile/**").authenticated()
                             .requestMatchers("/merch/**").authenticated()
                             // All other routes: open for dev browsing
                             .anyRequest().permitAll();
@@ -126,11 +130,15 @@ public class SecurityConfig {
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
                             .requestMatchers("/client/**").hasAnyRole("CLIENT", "USER")
                             .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
-                            .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**")
+                            .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**", "/admin/dev-pages/**")
                             .hasAnyRole("GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/merch/**").authenticated()
-                            .requestMatchers("/dashboard").authenticated()
+                            .requestMatchers("/dashboard", "/dashboard/**", "/client/dashboard", "/client/dashboard/**").authenticated()
+                            .requestMatchers("/calendar", "/calendar/**").authenticated()
+                            .requestMatchers("/workouts", "/workouts/**").authenticated()
+                            .requestMatchers("/goals", "/goals/**").authenticated()
+                            .requestMatchers("/profile", "/profile/**").authenticated()
                             .anyRequest().authenticated();
                         }
                 })
@@ -160,7 +168,7 @@ public class SecurityConfig {
                                         && (HttpMethod.GET.matches(request.getMethod())
                                         || HttpMethod.POST.matches(request.getMethod()))
                     ));
-
+            http.addFilterBefore(devModePageRestrictionFilter, UsernamePasswordAuthenticationFilter.class);
             http.addFilterBefore(loginThrottleFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

@@ -106,6 +106,86 @@
             </div>
         </section>
 
-        <script th:src="@{/js/admin/admin-dashboard-page.js}"></script>
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Dev Hub Page Controls</h2>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                        Control which Dev Hub routes stay enabled, which are disabled, and which are shown as restricted during development.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Enabled</p>
+                        <p class="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-200" th:text="${devPageSummary.enabledCount}">0</p>
+                    </div>
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900/40 dark:bg-amber-950/20">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">Disabled</p>
+                        <p class="mt-1 text-2xl font-bold text-amber-700 dark:text-amber-200" th:text="${devPageSummary.disabledCount}">0</p>
+                    </div>
+                    <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 dark:border-rose-900/40 dark:bg-rose-950/20">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">Restricted</p>
+                        <p class="mt-1 text-2xl font-bold text-rose-700 dark:text-rose-200" th:text="${devPageSummary.restrictedCount}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${devPageAccessSuccess}" class="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200" th:text="${devPageAccessSuccess}">Saved.</div>
+            <div th:if="${devPageAccessError}" class="mt-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200" th:text="${devPageAccessError}">Error.</div>
+
+            <div class="mt-5 overflow-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-left dark:border-slate-700">
+                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Page</th>
+                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Default status</th>
+                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Hub status</th>
+                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Access mode</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="page : ${devPageRows}" class="border-b border-slate-100 align-top dark:border-slate-800">
+                            <td class="py-4 pr-4">
+                                <p class="font-semibold text-slate-900 dark:text-slate-100" th:text="${page.title}">Page</p>
+                                <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300" th:text="${page.path}">/route</p>
+                                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400" th:text="${page.description}">Description</p>
+                            </td>
+                            <td class="py-4 pr-4">
+                                <th:block th:replace="~{fragments/dev-page-display :: statusBadge(${page.defaultStatusLabel == 'Public' ? 'public' : 'login'}, ${page.defaultStatusLabel})}"></th:block>
+                            </td>
+                            <td class="py-4 pr-4">
+                                <th:block th:replace="~{fragments/dev-page-display :: statusBadge(${page.effectiveStatusTone}, ${page.effectiveStatusLabel})}"></th:block>
+                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" th:text="${page.modeSummary}">Summary</p>
+                            </td>
+                            <td class="py-4 pr-0">
+                                <form th:action="@{/admin/dev-pages/{pageKey}(pageKey=${page.key})}"
+                                      method="post"
+                                      class="flex flex-col gap-3 sm:flex-row sm:items-center"
+                                      data-dev-page-form>
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <select name="mode"
+                                            class="min-w-[11rem] rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                                            data-dev-page-select
+                                            th:attr="data-initial=${page.currentMode}">
+                                        <option th:each="mode : ${devPageModes}"
+                                                th:value="${mode.name()}"
+                                                th:text="${#strings.capitalize(#strings.toLowerCase(mode.name()))}"
+                                                th:selected="${mode.name() == page.currentMode}">Enabled</option>
+                                    </select>
+                                    <button type="submit"
+                                            class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                                            data-dev-page-submit
+                                            disabled>
+                                        Save
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <script th:src="@{/js/admin/admin-dashboard-page.js(v='20260315a')}"></script>
     </div>
 </th:block>

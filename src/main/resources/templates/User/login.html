@@ -1,47 +1,11 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout('Login', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
-    <th:block th:fragment="pageStyles">
-        <!-- auth.css is now included in app.css via tailwind.css -->
-        <style th:if="${isDevMode}">
-            .devlogin-env-badge {
-                position: fixed;
-                top: 72px;
-                right: 16px;
-                z-index: 50;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                background: #fff;
-                border: 1.5px solid #10b981;
-                color: #065f46;
-                padding: 4px 11px;
-                border-radius: 999px;
-                font-size: 10px;
-                font-weight: 700;
-                letter-spacing: .7px;
-                text-transform: uppercase;
-                box-shadow: 0 2px 8px rgba(16,185,129,.15);
-            }
-            .devlogin-env-badge-dot {
-                width: 6px; height: 6px;
-                border-radius: 50%;
-                background: #10b981;
-                animation: dlBadgePulse 2s ease-in-out infinite;
-                flex-shrink: 0;
-            }
-            @keyframes dlBadgePulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-            html.dark .devlogin-env-badge { background: #1e293b; color: #6ee7b7; border-color: rgba(16,185,129,.4); }
-        </style>
-    </th:block>
+    <th:block th:fragment="pageStyles"></th:block>
 
-    <div th:fragment="content" class="auth-container animate-fade-in">
-
-        <!-- Persistent DEV MODE badge (only in dev mode) -->
-        <div th:if="${isDevMode}" class="devlogin-env-badge" aria-label="Development environment">
-            <span class="devlogin-env-badge-dot"></span>
-            DEV MODE
-        </div>
+    <div th:fragment="content"
+         class="auth-container animate-fade-in"
+         th:attr="data-login-server-role=${preselectedRole},data-client-hint=#{auth.login.clientHint},data-trainer-hint=#{auth.login.trainerHint},data-gym-hint=#{auth.login.gymHint}">
 
         <div class="auth-card">
             <div class="auth-accent-bar"></div>
@@ -51,19 +15,21 @@
                 <p class="auth-subheading" th:text="#{auth.login.subtitle}">Log in to continue.</p>
             </div>
 
-            <div th:if="${isDevMode}" class="auth-alert" role="alert"
-                 style="background:#ecfdf5;border-left:4px solid #10b981;color:#065f46;display:flex;flex-direction:column;gap:6px;">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <strong style="font-weight:700;">Development Mode Active</strong>
+            <div th:if="${isDevMode}" class="auth-alert auth-alert--dev auth-alert--stacked" role="alert">
+                <div class="auth-dev-alert__row">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="auth-dev-alert__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <strong class="auth-dev-alert__title">Development Mode Active</strong>
                 </div>
-                <p style="margin:0;font-size:12.5px;color:#047857;line-height:1.5;">Some platform features may be restricted or behave differently. This environment allows testing of authentication and user features without affecting production data.</p>
-                <div style="margin-top:4px;padding:8px 10px;background:#d1fae5;border-radius:7px;font-size:12px;color:#065f46;">
-                    <strong>Demo account available</strong> — Username: <code style="font-family:monospace;background:#a7f3d0;padding:1px 4px;border-radius:3px;">demo</code> / Password: <code style="font-family:monospace;background:#a7f3d0;padding:1px 4px;border-radius:3px;">demo</code>
+                <p class="auth-dev-alert__copy">Some platform features may be restricted or behave differently. This environment allows testing of authentication and user features without affecting production data.</p>
+                <div class="auth-dev-alert__demo">
+                    <strong>Demo account available</strong> - Username: <code class="auth-dev-alert__code">demo</code> / Password: <code class="auth-dev-alert__code">demo</code>
                 </div>
             </div>
 
-            <!-- Role Slider -->
             <div class="mb-6">
                 <div class="role-slider" id="roleSlider">
                     <span class="role-slider__option active" data-role="client" th:text="#{auth.role.client}">Client</span>
@@ -73,7 +39,6 @@
                 <p class="mt-3 text-xs text-gray-500 text-center" id="roleHint" th:text="#{auth.login.clientHint}">Login with your email and password.</p>
             </div>
 
-            <!-- Success/Error Messages -->
             <div th:if="${success}" class="auth-alert auth-alert--success" role="alert">
                 <span th:text="${success}"></span>
             </div>
@@ -108,7 +73,6 @@
                 <input type="hidden" name="next" th:if="${param.next}" th:value="${param.next}" />
                 <input type="hidden" name="loginType" id="loginType" value="client" />
 
-                <!-- Client/Trainer Login Fields -->
                 <div id="emailFields" class="auth-fields-block">
                     <div>
                         <label for="username" class="auth-field__label" th:text="#{auth.login.username}">Email or username</label>
@@ -121,7 +85,6 @@
                             class="auth-field__input" />
                     </div>
 
-                    <!-- Trainer Code Field (hidden by default) -->
                     <div id="trainerCodeField" class="hidden mt-4">
                         <label for="trainerCode" class="auth-field__label">Trainer Code</label>
                         <div class="code-input-group">
@@ -176,7 +139,6 @@
                     </div>
                 </div>
 
-                <!-- Gym Login Fields (hidden by default) -->
                 <div id="gymFields" class="auth-fields-block hidden space-y-4">
                     <div>
                         <label for="gymCode" class="auth-field__label">Gym Code</label>
@@ -228,8 +190,7 @@
     </div>
 
     <th:block th:fragment="pageScripts">
-    <script th:inline="javascript">var loginServerRole = /*[[${preselectedRole}]]*/ null;</script>
-    <script th:src="@{/js/auth/login-page.js}"></script>
+        <script th:src="@{/js/auth/login-page.js}"></script>
     </th:block>
 
 </th:block>

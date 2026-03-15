@@ -13,3 +13,23 @@
         sync();
     }
 }());
+
+(function () {
+    const forms = document.querySelectorAll('[data-dev-page-form]');
+    forms.forEach((form) => {
+        const select = form.querySelector('[data-dev-page-select]');
+        const submit = form.querySelector('[data-dev-page-submit]');
+        if (!select || !submit) {
+            return;
+        }
+
+        const initial = select.dataset.initial || select.value;
+        const sync = function () {
+            const dirty = select.value !== initial;
+            submit.disabled = !dirty;
+        };
+
+        select.addEventListener('change', sync);
+        sync();
+    });
+}());

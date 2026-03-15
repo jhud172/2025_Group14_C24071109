@@ -4,7 +4,6 @@
     const OPEN_CLASS = "is-open";
     const BIO_COLLAPSED_CLASS = "is-collapsed";
     const BIO_EXPANDED_CLASS = "is-expanded";
-    const BIO_SCROLLABLE_CLASS = "is-scrollable";
     const INTERACTIVE_SELECTOR = [
         "a",
         "button",
@@ -132,14 +131,6 @@
         });
     }
 
-    function computeBioThreshold(block) {
-        const compact = block.classList.contains("profile-preview-bio-block--compact");
-        const width = Math.max(block.clientWidth || 0, compact ? 180 : 240);
-        const perLineEstimate = Math.max(28, Math.round(width / (compact ? 7.1 : 7.8)));
-        const lineCount = compact ? 3 : 4;
-        return perLineEstimate * lineCount;
-    }
-
     function refreshBioBlock(block) {
         if (!(block instanceof HTMLElement)) {
             return;
@@ -152,16 +143,14 @@
         }
 
         const wasExpanded = block.classList.contains(BIO_EXPANDED_CLASS);
-        const expandedMax = Number(block.dataset.bioScrollHeight || "224");
+        const collapsedLines = Math.max(1, Number(block.dataset.bioCollapsedLines || "3"));
         const lineHeight = parseFloat(window.getComputedStyle(copy).lineHeight || "22");
 
-        block.classList.remove(BIO_COLLAPSED_CLASS, BIO_EXPANDED_CLASS, BIO_SCROLLABLE_CLASS);
+        block.classList.remove(BIO_COLLAPSED_CLASS, BIO_EXPANDED_CLASS);
 
-        const collapsedHeight = Math.max(lineHeight * 3, 66);
-        const fullHeight = copy.scrollHeight;
-        const charCount = (copy.textContent || "").trim().length;
-        const needsToggle = charCount > computeBioThreshold(block) && fullHeight > collapsedHeight + 8;
-        const canScroll = fullHeight > expandedMax + 8;
+        const collapsedHeight = Math.ceil(Math.max(lineHeight * collapsedLines, 66));
+        const fullHeight = Math.ceil(copy.scrollHeight);
+        const needsToggle = fullHeight > collapsedHeight + 4;
 
         toggle.hidden = !needsToggle;
         toggle.setAttribute("aria-hidden", needsToggle ? "false" : "true");
@@ -173,10 +162,6 @@
         }
 
         block.classList.add(wasExpanded ? BIO_EXPANDED_CLASS : BIO_COLLAPSED_CLASS);
-        if (wasExpanded && canScroll) {
-            block.classList.add(BIO_SCROLLABLE_CLASS);
-        }
-
         toggle.textContent = wasExpanded ? "Read less" : "Read more";
         toggle.setAttribute("aria-expanded", wasExpanded ? "true" : "false");
     }
@@ -199,9 +184,6 @@
             const expand = !block.classList.contains(BIO_EXPANDED_CLASS);
             block.classList.toggle(BIO_EXPANDED_CLASS, expand);
             block.classList.toggle(BIO_COLLAPSED_CLASS, !expand);
-            if (!expand) {
-                block.classList.remove(BIO_SCROLLABLE_CLASS);
-            }
             refreshBioBlock(block);
         });
 

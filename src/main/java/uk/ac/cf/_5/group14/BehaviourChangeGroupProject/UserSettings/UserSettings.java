@@ -208,6 +208,9 @@ public class UserSettings {
     @Column(name = "time_display_format", nullable = false, length = 18)
     private TimeDisplayFormatPreference timeDisplayFormat = TimeDisplayFormatPreference.TWELVE_HOUR;
 
+    @Column(name = "quick_preferences_completed", nullable = false)
+    private boolean quickPreferencesCompleted = false;
+
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 

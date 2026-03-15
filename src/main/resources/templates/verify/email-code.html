@@ -1,53 +1,58 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout('Email Verification', ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="styles"></div>
+    <div th:fragment="styles">
+        <link rel="stylesheet" th:href="@{/css/components/account/verification.css(v='20260315b')}">
+    </div>
 
     <div th:fragment="content">
-        <div class="mx-auto max-w-md px-4 py-12 sm:px-6 lg:px-8">
-            <div class="rounded-3xl border border-slate-200/70 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
-
-                <!-- Icon -->
-                <div class="mb-6 flex items-center justify-center">
-                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        <div class="verify-shell">
+            <div class="verify-card">
+                <div class="verify-hero">
+                    <div class="verify-icon-wrap" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="verify-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
+                    </div>
+                    <div>
+                        <h1 class="verify-title" th:text="#{verify.email.code.title}">Enter verification code</h1>
+                        <p class="verify-copy" th:text="#{verify.email.code.subtitle}">We sent a 6-digit code to your email address. Enter it below to verify your account.</p>
                     </div>
                 </div>
 
-                <h1 class="text-center text-2xl font-semibold text-slate-900 dark:text-white" th:text="#{verify.email.code.title}">Enter verification code</h1>
-                <p class="mt-2 text-center text-sm text-slate-600 dark:text-slate-300" th:text="#{verify.email.code.subtitle}">We sent a 6-digit code to your email address.</p>
-
-                <!-- Registration success banner -->
-                <div th:if="${verifyRegistered}" class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-100"
-                     th:text="#{verify.email.code.registered}">
+                <div th:if="${verifyRegistered}" class="verify-alert verify-alert--success" th:text="#{verify.email.code.registered}">
                     Your account has been created. Check your email for a verification code.
                 </div>
-
-                <!-- Success messages -->
-                <div th:if="${verifySuccess}" class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-100" th:text="${verifySuccess}">
+                <div th:if="${verifySuccess}" class="verify-alert verify-alert--success" th:text="${verifySuccess}">
                     Verification email sent.
                 </div>
-                <div th:if="${verificationSuccess}" class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-100" th:text="${verificationSuccess}">
+                <div th:if="${verificationSuccess}" class="verify-alert verify-alert--success" th:text="${verificationSuccess}">
                     Email verified successfully.
                 </div>
-
-                <!-- Error message -->
-                <div th:if="${verificationError}" class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-100" th:text="${verificationError}">
+                <div th:if="${verifyError}" class="verify-alert verify-alert--error" th:text="${verifyError}">
+                    Verification email could not be sent.
+                </div>
+                <div th:if="${verificationError}" class="verify-alert verify-alert--error" th:text="${verificationError}">
                     Verification failed.
                 </div>
 
-                <!-- Code input form (only show if not yet verified) -->
+                <div class="verify-card-stack" th:if="${trainerCode != null}">
+                    <div class="verify-info-card">
+                        <p class="verify-info-card__eyebrow" th:text="#{verify.email.code.trainerCode}">Your trainer code</p>
+                        <p class="verify-info-card__value" th:text="${trainerCode}">ABCD-EFGH-IJKL</p>
+                    </div>
+                </div>
+
                 <div th:if="${verificationSuccess == null}">
-                    <form th:action="@{/verify/email/confirm}" method="post" class="mt-6" autocomplete="off">
+                    <form th:action="@{/verify/email/confirm}" method="post" class="verify-form" autocomplete="off">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input th:if="${verifyEmail != null}" type="hidden" name="email" th:value="${verifyEmail}" />
 
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{verify.email.code.label}">
+                        <label class="verify-label" th:text="#{verify.email.code.label}" for="emailVerificationCode">
                             Verification code
                         </label>
-                        <input type="text"
+                        <input id="emailVerificationCode"
+                               type="text"
                                name="code"
                                inputmode="numeric"
                                pattern="[0-9]{6}"
@@ -55,39 +60,53 @@
                                autocomplete="one-time-code"
                                required
                                aria-label="6-digit verification code"
-                               class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-2xl font-mono tracking-[0.5em] text-slate-900 shadow-sm placeholder-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                               class="verify-code-input"
                                th:placeholder="#{verify.email.code.placeholder}"
                                placeholder="______" />
+                        <p class="verify-help" th:text="#{verify.email.code.spam}">
+                            Check your spam or junk folder if the verification email has not arrived.
+                        </p>
 
-                        <button type="submit"
-                                class="mt-4 w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-                                th:text="#{verify.email.code.submit}">
+                        <button type="submit" class="verify-primary" th:text="#{verify.email.code.submit}">
                             Verify email
                         </button>
                     </form>
 
-                    <!-- Resend code (only for logged-in users) -->
-                    <div class="mt-4 text-center" th:if="${#authorization.expression('isAuthenticated()')}">
-                        <form th:action="@{/verify/email/send}" method="post" class="inline">
+                    <div class="verify-resend" th:if="${verifyEmail != null}">
+                        <form th:action="@{/verify/email/send}"
+                              method="post"
+                              class="verify-resend__form"
+                              data-verification-resend-form
+                              th:attr="data-cooldown-seconds=${resendCooldownSeconds},data-base-label=#{verify.email.code.resend}">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <button type="submit" class="text-sm text-emerald-600 underline hover:text-emerald-500 dark:text-emerald-400" th:text="#{verify.email.code.resend}">
-                                Resend code
+                            <input type="hidden" name="email" th:value="${verifyEmail}" />
+                            <button type="submit"
+                                    class="verify-resend__button"
+                                    data-verification-resend-button
+                                    th:disabled="${resendCooldownSeconds != null and resendCooldownSeconds > 0}">
+                                <span data-verification-resend-label th:text="#{verify.email.code.resend}">Resend code</span>
+                                <span class="verify-resend__countdown"
+                                      data-verification-resend-countdown
+                                      th:hidden="${resendCooldownSeconds == null or resendCooldownSeconds <= 0}"
+                                      th:text="${resendCooldownSeconds != null and resendCooldownSeconds > 0 ? resendCooldownSeconds + 's' : ''}">30s</span>
                             </button>
                         </form>
                     </div>
                 </div>
 
-                <!-- Nav links -->
-                <div class="mt-6 flex flex-wrap gap-3">
-                    <a href="/profile"
-                       class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900"
-                       th:text="#{verify.email.profile}">
-                        Back to profile
+                <div class="verify-actions">
+                    <a th:href="@{/signup}" class="verify-btn-ghost" th:text="#{verify.email.signup}">
+                        Back to sign up
+                    </a>
+                    <a th:href="@{/login}" class="verify-btn-secondary" th:text="#{verify.email.login}">
+                        Go to login
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <div th:fragment="pageScripts"></div>
+    <div th:fragment="pageScripts">
+        <script th:src="@{/js/core/verification-resend.js(v='20260315a')}"></script>
+    </div>
 </th:block>

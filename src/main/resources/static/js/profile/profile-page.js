@@ -869,15 +869,18 @@ if (accessibilityForm && accessibilityFeedback) {
     const completionPercent = document.getElementById('profile-completion-percent');
     const completionBar = document.getElementById('profile-completion-progress-bar');
     const completionCompleteBar = document.getElementById('profile-completion-complete-bar');
+    const completionDismiss = document.getElementById('profile-completion-dismiss');
     const completionTitle = document.getElementById('profile-completion-title');
     const completionMessage = document.getElementById('profile-completion-message');
     const completionAction = document.getElementById('profile-completion-action');
-    if (!completionWidget || !completionTooltip || !completionTitle || !completionMessage || !completionAction) return;
+    if (!completionWidget || !completionTooltip || !completionDismiss || !completionTitle || !completionMessage || !completionAction) return;
 
     let activeCompletionItem = null;
+    let currentCompletionPercent = 0;
     let hoveringWidget = false;
     let hoveringTooltip = false;
     let hideTimer = null;
+    const completionDismissKey = String(completionWidget.dataset.completionKey || 'profile-radar:dismissed').trim();
 
     const completionRules = [
         {
@@ -1032,19 +1035,68 @@ if (accessibilityForm && accessibilityFeedback) {
         }
     }
 
+    function hideTooltip() {
+        clearHideTimer();
+        completionTooltip.classList.remove('is-visible');
+        completionTooltip.setAttribute('aria-hidden', 'true');
+        completionWidget.setAttribute('aria-expanded', 'false');
+    }
+
+    function readCompletionDismissed() {
+        if (!completionDismissKey) return false;
+        try {
+            return window.localStorage.getItem(completionDismissKey) === 'dismissed';
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function writeCompletionDismissed(value) {
+        if (!completionDismissKey) return;
+        try {
+            if (value) {
+                window.localStorage.setItem(completionDismissKey, 'dismissed');
+                return;
+            }
+            window.localStorage.removeItem(completionDismissKey);
+        } catch (_) {
+            // Ignore storage access issues.
+        }
+    }
+
+    function applyCompletionVisibility(percent) {
+        const isComplete = percent >= 100;
+        const isDismissed = isComplete && readCompletionDismissed();
+
+        completionWidget.hidden = isDismissed;
+        completionWidget.setAttribute('aria-hidden', isDismissed ? 'true' : 'false');
+        completionWidget.tabIndex = isComplete ? -1 : 0;
+        completionWidget.setAttribute('role', isComplete ? 'group' : 'button');
+
+        completionDismiss.classList.toggle('hidden', !isComplete || isDismissed);
+        completionDismiss.setAttribute('aria-hidden', (!isComplete || isDismissed) ? 'true' : 'false');
+
+        if (isComplete || isDismissed) {
+            hoveringWidget = false;
+            hoveringTooltip = false;
+            hideTooltip();
+        }
+    }
+
     function scheduleHide() {
         clearHideTimer();
         hideTimer = setTimeout(() => {
             if (hoveringWidget || hoveringTooltip) {
                 return;
             }
-            completionTooltip.classList.remove('is-visible');
-            completionTooltip.setAttribute('aria-hidden', 'true');
-            completionWidget.setAttribute('aria-expanded', 'false');
+            hideTooltip();
         }, 90);
     }
 
     function showTooltip() {
+        if (currentCompletionPercent >= 100 || completionWidget.hidden) {
+            return;
+        }
         clearHideTimer();
         completionTooltip.classList.add('is-visible');
         completionTooltip.setAttribute('aria-hidden', 'false');
@@ -1077,6 +1129,7 @@ if (accessibilityForm && accessibilityFeedback) {
         const total = checklist.length;
         const completed = total - missingCount;
         const percent = Math.round((completed * 100) / total);
+        currentCompletionPercent = percent;
 
         if (completionPercent) {
             completionPercent.textContent = `${percent}%`;
@@ -1091,7 +1144,12 @@ if (accessibilityForm && accessibilityFeedback) {
             completionCompleteBar.classList.toggle('hidden', percent < 100);
         }
 
+        if (percent < 100) {
+            writeCompletionDismissed(false);
+        }
+
         completionWidget.style.setProperty('--profile-completion-progress', `${percent}%`);
+        applyCompletionVisibility(percent);
         bindActiveAction(percent >= 100 ? null : (checklist.find((item) => item.missing) || null));
     }
 
@@ -1114,6 +1172,9 @@ if (accessibilityForm && accessibilityFeedback) {
     });
 
     completionWidget.addEventListener('mouseenter', (event) => {
+        if (currentCompletionPercent >= 100 || completionWidget.hidden) {
+            return;
+        }
         hoveringWidget = true;
         updateCompletionPrompt();
         showTooltip();
@@ -1125,6 +1186,9 @@ if (accessibilityForm && accessibilityFeedback) {
     });
 
     completionWidget.addEventListener('focusin', () => {
+        if (currentCompletionPercent >= 100 || completionWidget.hidden) {
+            return;
+        }
         updateCompletionPrompt();
         showTooltip();
     });
@@ -1143,15 +1207,23 @@ if (accessibilityForm && accessibilityFeedback) {
         scheduleHide();
     });
 
+    completionDismiss.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (currentCompletionPercent < 100) {
+            return;
+        }
+        writeCompletionDismissed(true);
+        applyCompletionVisibility(currentCompletionPercent);
+    });
+
     completionAction.addEventListener('click', (event) => {
         if (!activeCompletionItem) {
             event.preventDefault();
             return;
         }
         event.preventDefault();
-        completionTooltip.classList.remove('is-visible');
-        completionTooltip.setAttribute('aria-hidden', 'true');
-        completionWidget.setAttribute('aria-expanded', 'false');
+        hideTooltip();
         scrollToTarget(activeCompletionItem.target, activeCompletionItem.mode);
     });
 

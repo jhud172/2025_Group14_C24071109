@@ -1,0 +1,38 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="devModeFragments">
+
+    <a th:fragment="pill(variantClass, labelText)"
+       th:if="${@devModeProperties.devMode}"
+       th:with="resolvedVariant=${variantClass != null ? variantClass : ''},
+                resolvedLabel=${labelText != null ? labelText : 'DEV'}"
+       th:href="@{/dev-mode}"
+       class="dev-mode-pill"
+       th:classappend="${resolvedVariant}"
+       title="Development Mode - open Dev Hub">
+        <span class="dev-mode-pill__dot" aria-hidden="true"></span>
+        <span th:text="${resolvedLabel}">DEV</span>
+    </a>
+
+    <div th:fragment="homeGuestNotice"
+         th:if="${@devModeProperties.devMode}"
+         class="dev-mode-immersive">
+        <div class="dev-mode-immersive-card dev-mode-immersive-card--action-hub">
+            <div class="dev-mode-aurora"></div>
+            <div class="dev-mode-grid">
+                <div class="dev-mode-stack">
+                    <span class="dev-badge"><span class="dev-dot"></span>DEV MODE</span>
+                    <h2 class="dev-mode-title">Development Mode Active</h2>
+                    <p class="dev-mode-copy">Development Mode Active &mdash; Any data entered may be reset or changed during testing.</p>
+                </div>
+                <div class="dev-mode-actions">
+                    <a th:href="@{/dev-mode}" class="dev-mode-hub-link">
+                        <span>Open Dev Hub</span>
+                        <svg class="dev-mode-hub-link__icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>

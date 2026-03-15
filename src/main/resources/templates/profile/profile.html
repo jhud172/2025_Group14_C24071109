@@ -69,6 +69,7 @@
                 <!-- Profile completion -->
                  <div id="profile-completion-widget"
                      class="profile-completion-widget w-full"
+                     th:attrappend="data-completion-key=${'profile-radar:' + (user != null && user.id != null ? user.id : (user != null && user.username != null ? user.username : 'guest'))}"
                      aria-label="Profile completion guidance"
                      tabindex="0"
                      role="button"
@@ -83,6 +84,11 @@
                             <span class="profile-completion-widget__glow" aria-hidden="true"></span>
                         </div>
                         <div id="profile-completion-complete-bar" class="profile-completion-widget__complete hidden">Profile completed</div>
+                        <button type="button"
+                                id="profile-completion-dismiss"
+                                class="profile-completion-widget__dismiss hidden">
+                            Dismiss
+                        </button>
                     </div>
                     <div id="profile-completion-tooltip"
                          class="profile-completion-tooltip"
@@ -1504,7 +1510,7 @@
 </div><!-- end content fragment -->
 
 <th:block th:fragment="pageScripts">
-<script th:src="@{/js/profile/profile-page.js}"></script>
+<script th:src="@{/js/profile/profile-page.js(v='20260315a')}"></script>
 <script th:src="@{/js/profile/phone-country-input.js}"></script>
 </th:block>
 </th:block>

@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Verification;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -24,6 +25,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 public class EmailVerificationService {
 
     private static final int MAX_ATTEMPTS = 5;
+    private static final long RESEND_COOLDOWN_SECONDS = 30;
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private final EmailVerificationTokenRepository tokenRepository;
@@ -138,6 +140,27 @@ public class EmailVerificationService {
             userRepository.save(managedUser);
         }
         return Optional.empty();
+    }
+
+    @Transactional(readOnly = true)
+    public long getResendCooldownRemainingSeconds(User user) {
+        if (user == null || user.getId() == null || user.isEmailVerified()) {
+            return 0;
+        }
+
+        EmailVerificationToken latest = tokenRepository.findTopByUserOrderByCreatedAtDesc(user).orElse(null);
+        if (latest == null || latest.getCreatedAt() == null) {
+            return 0;
+        }
+
+        Instant now = Instant.now(clock);
+        Instant availableAt = latest.getCreatedAt().plusSeconds(RESEND_COOLDOWN_SECONDS);
+        if (!availableAt.isAfter(now)) {
+            return 0;
+        }
+
+        long remainingMillis = Duration.between(now, availableAt).toMillis();
+        return Math.max(1, (remainingMillis + 999) / 1000);
     }
 
     private String hashCode(String code) {

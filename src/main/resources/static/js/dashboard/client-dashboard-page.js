@@ -225,9 +225,6 @@
         const taskList = document.getElementById("weekTaskList");
         const workoutList = document.getElementById("weekWorkoutList");
         let dragged = false;
-        let pointerId = null;
-        let startX = 0;
-        let scrollStart = 0;
 
         const setList = (container, items, emptyLabel) => {
             if (!container) return;
@@ -298,42 +295,11 @@
         });
 
         panel.addEventListener("dragstart", (event) => event.preventDefault());
-        strip.addEventListener("dragstart", (event) => event.preventDefault());
-
-        strip.addEventListener("pointerdown", (event) => {
-            pointerId = event.pointerId;
-            startX = event.clientX;
-            scrollStart = strip.scrollLeft;
-            dragged = false;
-            strip.classList.add("dragging");
-            strip.setPointerCapture(pointerId);
-        });
-
-        strip.addEventListener("pointermove", (event) => {
-            if (pointerId !== event.pointerId) return;
-            const delta = event.clientX - startX;
-            if (Math.abs(delta) > 6) dragged = true;
-            if (!dragged) return;
-            strip.scrollLeft = scrollStart - delta;
-        });
-
-        const releasePointer = (event) => {
-            if (pointerId !== event.pointerId) return;
-            strip.classList.remove("dragging");
-            try {
-                strip.releasePointerCapture(pointerId);
-            } catch (_) {
-                // ignore
+        attachDragScroll(strip, {
+            onDragStateChange(value) {
+                dragged = value;
             }
-            window.setTimeout(() => {
-                dragged = false;
-            }, 0);
-            pointerId = null;
-        };
-
-        strip.addEventListener("pointerup", releasePointer);
-        strip.addEventListener("pointercancel", releasePointer);
-        strip.addEventListener("pointerleave", releasePointer);
+        });
 
         activate(buttons.find((button) => button.getAttribute("aria-selected") === "true") || buttons[0], true);
     }
@@ -863,13 +829,23 @@
         });
     }
 
-    function attachDragScroll(strip) {
+    function attachDragScroll(strip, options = {}) {
         if (!strip || strip.dataset.dragBound === "true") return;
         strip.dataset.dragBound = "true";
         let dragged = false;
         let pointerId = null;
         let startX = 0;
         let scrollStart = 0;
+        const onDragStateChange = typeof options.onDragStateChange === "function"
+            ? options.onDragStateChange
+            : null;
+
+        const setDragged = (value) => {
+            dragged = value;
+            if (onDragStateChange) {
+                onDragStateChange(value);
+            }
+        };
 
         strip.addEventListener("dragstart", (event) => event.preventDefault());
 
@@ -877,7 +853,7 @@
             pointerId = event.pointerId;
             startX = event.clientX;
             scrollStart = strip.scrollLeft;
-            dragged = false;
+            setDragged(false);
             strip.classList.add("dragging");
             strip.setPointerCapture(pointerId);
         });
@@ -885,7 +861,7 @@
         strip.addEventListener("pointermove", (event) => {
             if (pointerId !== event.pointerId) return;
             const delta = event.clientX - startX;
-            if (Math.abs(delta) > 6) dragged = true;
+            if (Math.abs(delta) > 6) setDragged(true);
             if (!dragged) return;
             strip.scrollLeft = scrollStart - delta;
         });
@@ -899,7 +875,7 @@
                 // ignore capture issues
             }
             window.setTimeout(() => {
-                dragged = false;
+                setDragged(false);
             }, 0);
             pointerId = null;
         };

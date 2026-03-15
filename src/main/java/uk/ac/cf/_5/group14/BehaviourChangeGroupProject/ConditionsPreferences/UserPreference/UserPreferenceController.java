@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 @Controller
 public class UserPreferenceController {
+    private static final Map<String, QuickPreset> QUICK_PRESETS = createQuickPresets();
 
     private final UserPreferenceService userPreferenceService;
     private final PreferenceService preferenceService;
@@ -60,23 +63,26 @@ public class UserPreferenceController {
     @GetMapping("/select-preferences")
     public ModelAndView getPreferenceForm() {
         User user = authHelper.getAuthenticatedUser();
-        if (userPreferenceService.hasCompletedPreferenceSetup(user)) {
-            return new ModelAndView("redirect:/preferences");
+        if (!userSettingsService.isQuickPreferencesCompleted(user)) {
+            return buildQuickPreferencesModelAndView(user);
         }
-        return buildPreferenceFormModelAndView(user, 1);
+        return buildPreferenceEditorModelAndView(user);
     }
 
     @GetMapping("/preferences/edit")
     public ModelAndView editPreferencesForm() {
-        User user = authHelper.getAuthenticatedUser();
-        if (!userPreferenceService.hasCompletedPreferenceSetup(user)) {
-            return new ModelAndView("redirect:/select-preferences");
-        }
-        return buildPreferenceFormModelAndView(user, 2);
+        return new ModelAndView("redirect:/select-preferences");
     }
 
-    private ModelAndView buildPreferenceFormModelAndView(User user, int initialStep) {
-        ModelAndView modelAndView = new ModelAndView("conditions-preference/preference-form");
+    private ModelAndView buildQuickPreferencesModelAndView(User user) {
+        ModelAndView modelAndView = new ModelAndView("conditions-preference/quick-preferences");
+        modelAndView.addObject("userPreferenceForm", new UserPreferenceForm());
+        modelAndView.addObject("quickPresets", QUICK_PRESETS);
+        return modelAndView;
+    }
+
+    private ModelAndView buildPreferenceEditorModelAndView(User user) {
+        ModelAndView modelAndView = new ModelAndView("conditions-preference/select-preferences");
 
         List<PhysicalCondition> allPhysicalConditions = physicalConditionService.getAllPhysicalConditions();
         List<PhysicalCondition> userPhysicalConditions = userPreferenceService.getUsersPhysicalConditions(user);
@@ -128,9 +134,31 @@ public class UserPreferenceController {
         modelAndView.addObject("allPhysicalConditions", allPhysicalConditions);
         modelAndView.addObject("userPreferenceForm", userPreferenceForm);
         modelAndView.addObject("physicalConditions", userPhysicalConditions);
-        modelAndView.addObject("initialStep", initialStep);
 
         return modelAndView;
+    }
+
+    @PostMapping("/select-preferences/quick")
+    public ModelAndView completeQuickPreferences(@ModelAttribute("userPreferenceForm") UserPreferenceForm userPreferenceForm,
+                                                 HttpServletRequest request,
+                                                 HttpServletResponse response) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) {
+            return new ModelAndView("redirect:/login");
+        }
+
+        if (!userSettingsService.isQuickPreferencesCompleted(user)) {
+            applyQuickPreset(user, userPreferenceForm != null ? userPreferenceForm.getQuickPreset() : null);
+            userSettingsService.updateQuickPreferencesCompleted(user, true);
+        }
+
+        UserSettings settings = userSettingsService.getOrCreate(user);
+        if (settings != null) {
+            String language = settings.getLanguage() != null ? settings.getLanguage() : "en";
+            localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+        }
+
+        return new ModelAndView("redirect:/select-preferences?quickSetup=1");
     }
 
     @PostMapping("/select-preferences")
@@ -146,7 +174,7 @@ public class UserPreferenceController {
             model.addAttribute("allPhysicalConditions", physicalConditionService.getAllPhysicalConditions());
             model.addAttribute("preferencesByCategory", preferenceService.getPreferencesByCategory());
 
-            return new ModelAndView("conditions-preference/preference-form", model.asMap());
+            return new ModelAndView("conditions-preference/select-preferences", model.asMap());
         }
 
         userPreferenceService.selectPreferences(user, userPreferenceForm);
@@ -222,7 +250,8 @@ public class UserPreferenceController {
             localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
         }
 
-        return new ModelAndView("redirect:/preferences");
+        userSettingsService.updateQuickPreferencesCompleted(user, true);
+        return new ModelAndView("redirect:/select-preferences?saved=1");
     }
 
     private Set<String> parseWeeklySummaryMetrics(String raw) {
@@ -259,23 +288,167 @@ public class UserPreferenceController {
 
     @GetMapping("/preferences")
     public ModelAndView viewPreferences() {
-        ModelAndView modelAndView = new ModelAndView("conditions-preference/view-preferences");
-        User user = authHelper.getAuthenticatedUser();
-        List<Preference> preferences = userPreferenceService.getUserPreferences(user);
-        List<PhysicalCondition> physicalConditions = userPreferenceService.getUsersPhysicalConditions(user);
-
-        Map<String, List<Preference>> preferencesByCategory = preferences.stream()
-            .collect(Collectors.groupingBy(Preference::getCategory));
-
-        UserSettings settings = userSettingsService.getOrCreate(user);
-
-        modelAndView.addObject("preferences", preferences);
-        modelAndView.addObject("preferencesByCategory", preferencesByCategory);
-        modelAndView.addObject("physicalConditions", physicalConditions);
-        modelAndView.addObject("userSettings", settings);
-
-        return modelAndView;
+        return new ModelAndView("redirect:/select-preferences");
     }
 
+    private void applyQuickPreset(User user, String presetKey) {
+        QuickPreset preset = QUICK_PRESETS.get(presetKey);
+        if (user == null || preset == null) {
+            return;
+        }
+
+        Map<String, Long> preferenceIdsByDescription = preferenceService.getAllPreferences().stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        preference -> normalizePreferenceDescription(preference.getDescription()),
+                        Preference::getId,
+                        (left, right) -> left,
+                        LinkedHashMap::new
+                ));
+
+        Set<Long> selectedPreferenceIds = preset.preferenceDescriptions.stream()
+                .map(UserPreferenceController::normalizePreferenceDescription)
+                .map(preferenceIdsByDescription::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        UserPreferenceForm form = userPreferenceService.getUserPreferenceForm(user);
+        form.setSelectedPreferenceIds(selectedPreferenceIds);
+        form.setDefaultSets(preset.defaultSets);
+        form.setDefaultRepMin(preset.defaultRepMin);
+        form.setDefaultRepMax(preset.defaultRepMax);
+        form.setPreferredEquipmentBodyweight(preset.equipmentKeys.contains("bodyweight"));
+        form.setPreferredEquipmentDumbbell(preset.equipmentKeys.contains("dumbbell"));
+        form.setPreferredEquipmentBarbell(preset.equipmentKeys.contains("barbell"));
+        form.setPreferredEquipmentMachine(preset.equipmentKeys.contains("machine"));
+        form.setPreferredEquipmentBands(preset.equipmentKeys.contains("bands"));
+        form.setPreferredEquipmentKettlebell(preset.equipmentKeys.contains("kettlebell"));
+        form.setPreferredEquipmentCable(preset.equipmentKeys.contains("cable"));
+        form.setPreferredEquipmentPullupBar(preset.equipmentKeys.contains("pullupBar"));
+        form.setPreferredEquipmentJumpRope(preset.equipmentKeys.contains("jumpRope"));
+        form.setPreferredEquipmentMedicineBall(preset.equipmentKeys.contains("medicineBall"));
+        form.setPreferredEquipmentFoamRoller(preset.equipmentKeys.contains("foamRoller"));
+        form.setPreferredEquipmentTrx(preset.equipmentKeys.contains("trx"));
+        form.setPreferredEquipmentOther(false);
+        form.setPreferredEquipmentOtherSpecify(null);
+        form.setMacroTargetCalories(preset.macroTargetCalories);
+        form.setMacroTargetProtein(preset.macroTargetProtein);
+        form.setMacroTargetCarbs(preset.macroTargetCarbs);
+        form.setMacroTargetFat(preset.macroTargetFat);
+
+        userPreferenceService.selectPreferences(user, form);
+        userSettingsService.updateSmartDefaults(
+                user,
+                form.getDefaultSets(),
+                form.getDefaultRepMin(),
+                form.getDefaultRepMax(),
+                form.isPreferredEquipmentBodyweight(),
+                form.isPreferredEquipmentDumbbell(),
+                form.isPreferredEquipmentBarbell(),
+                form.isPreferredEquipmentMachine(),
+                form.isPreferredEquipmentBands(),
+                form.isPreferredEquipmentKettlebell(),
+                form.isPreferredEquipmentCable(),
+                form.isPreferredEquipmentPullupBar(),
+                form.isPreferredEquipmentJumpRope(),
+                form.isPreferredEquipmentMedicineBall(),
+                form.isPreferredEquipmentFoamRoller(),
+                form.isPreferredEquipmentTrx(),
+                form.isPreferredEquipmentOther(),
+                form.getPreferredEquipmentOtherSpecify(),
+                form.getMacroTargetCalories(),
+                form.getMacroTargetProtein(),
+                form.getMacroTargetCarbs(),
+                form.getMacroTargetFat(),
+                form.getWeeklySummaryMetrics()
+        );
+    }
+
+    private static String normalizePreferenceDescription(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+                .trim()
+                .replace('\u2013', '-')
+                .replace('\u2014', '-')
+                .replace('\u2212', '-')
+                .toLowerCase(Locale.ROOT);
+    }
+
+    private static Map<String, QuickPreset> createQuickPresets() {
+        Map<String, QuickPreset> presets = new LinkedHashMap<>();
+        presets.put("weight-loss-beginner", new QuickPreset(
+                "Weight Loss - Beginner",
+                List.of("Weight Loss", "Beginner (New to exercise)", "3-4 times per week",
+                        "Home Workouts", "Low Impact", "Calorie Deficit (Cutting)", "High Protein", "Prioritise Recovery Days"),
+                Set.of("bodyweight"),
+                3, 12, 20, 1800, 140, 160, 60
+        ));
+        presets.put("weight-loss-intermediate", new QuickPreset(
+                "Weight Loss - Intermediate",
+                List.of("Weight Loss", "Intermediate (Exercising regularly)", "3-4 times per week",
+                        "Gym Workouts", "HIIT / High Intensity", "Calorie Deficit (Cutting)", "High Protein"),
+                Set.of("dumbbell", "machine"),
+                4, 10, 15, 2000, 160, 180, 65
+        ));
+        presets.put("muscle-building", new QuickPreset(
+                "Muscle Building",
+                List.of("Muscle Gain / Hypertrophy", "Intermediate (Exercising regularly)",
+                        "3-4 times per week", "Gym Workouts", "Solo Training", "Calorie Surplus (Bulking)", "High Protein"),
+                Set.of("barbell", "dumbbell", "machine"),
+                4, 8, 12, 3000, 180, 300, 90
+        ));
+        presets.put("strength", new QuickPreset(
+                "Strength Training",
+                List.of("Increase Strength", "Intermediate (Exercising regularly)",
+                        "3-4 times per week", "Gym Workouts", "Solo Training", "High Protein"),
+                Set.of("barbell", "dumbbell"),
+                5, 3, 6, 2800, 175, 280, 85
+        ));
+        presets.put("endurance", new QuickPreset(
+                "Endurance / Cardio",
+                List.of("Improve Endurance", "Intermediate (Exercising regularly)",
+                        "5+ times per week", "Outdoor Activities", "Solo Training", "Active Recovery (light movement)"),
+                Set.of("bodyweight"),
+                3, 15, 25, 2600, 130, 320, 70
+        ));
+        presets.put("flexibility", new QuickPreset(
+                "Flexibility & Mobility",
+                List.of("Improve Flexibility & Mobility", "Beginner (New to exercise)",
+                        "3-4 times per week", "Home Workouts", "Low Impact", "Regular Stretching / Yoga", "Active Recovery (light movement)"),
+                Set.of("bodyweight"),
+                3, 10, 20, null, null, null, null
+        ));
+        presets.put("general-fitness", new QuickPreset(
+                "General Health & Fitness",
+                List.of("General Health & Fitness", "Beginner (New to exercise)",
+                        "3-4 times per week", "Gym Workouts", "Solo Training", "Prioritise Recovery Days"),
+                Set.of("bodyweight", "dumbbell"),
+                3, 10, 15, 2200, 130, 230, 70
+        ));
+        presets.put("home-beginner", new QuickPreset(
+                "Home Workout - Beginner",
+                List.of("General Health & Fitness", "Beginner (New to exercise)",
+                        "1-2 times per week", "Home Workouts", "Low Impact", "Prioritise Recovery Days"),
+                Set.of("bodyweight"),
+                3, 10, 15, null, null, null, null
+        ));
+        return presets;
+    }
+
+    private record QuickPreset(
+            String label,
+            List<String> preferenceDescriptions,
+            Set<String> equipmentKeys,
+            Integer defaultSets,
+            Integer defaultRepMin,
+            Integer defaultRepMax,
+            Integer macroTargetCalories,
+            Integer macroTargetProtein,
+            Integer macroTargetCarbs,
+            Integer macroTargetFat
+    ) {
+    }
 
 }

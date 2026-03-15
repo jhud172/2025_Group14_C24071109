@@ -20,7 +20,7 @@
     <script th:src="@{/js/core/theme-preload.js(v='20260314')}"></script>
 
     <!-- Core styles (compiled Tailwind + all component styles) -->
-    <link rel="stylesheet" th:href="@{/css/app.css(v='20260314b')}">
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260315f')}">
 
     <!-- Page-specific styles -->
     <th:block th:if="${pageStyles != null}">
@@ -46,8 +46,7 @@
     th:insert="~{fragments/navbar :: navbar}"></th:block>
 
 <!-- MAIN CONTENT -->
-<main class="min-h-[calc(100vh-5rem)]"
-      th:classappend="${compactTopContent == true ? ' pt-2 sm:pt-3' : ' pt-16'}">
+<main th:class="${authPageLayout == true ? 'auth-page-main pt-2 sm:pt-3' : 'min-h-[calc(100vh-5rem)] ' + (compactTopContent == true ? 'pt-2 sm:pt-3' : 'pt-16')}">
     <th:block th:replace="${content}"></th:block>
 </main>
 
@@ -66,7 +65,7 @@
 <script th:src="@{/js/core/quick-actions.js(v='20260303')}" defer></script>
 <script th:src="@{/js/core/navbar-premium.js(v='20260303')}" defer></script>
 <script th:src="@{/js/core/floating-profile-card.js(v='20260303')}" defer></script>
-<script th:src="@{/js/core/profile-preview.js(v='20260314')}" defer></script>
+<script th:src="@{/js/core/profile-preview.js(v='20260315a')}" defer></script>
 
 <!-- Page-specific scripts -->
 <th:block th:if="${pageScripts != null}">

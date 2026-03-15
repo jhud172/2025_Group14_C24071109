@@ -1,0 +1,68 @@
+@layer components {
+    .dev-mode-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 999px;
+        border: 1px solid rgba(251, 191, 36, 0.45);
+        background: rgba(251, 191, 36, 0.12);
+        color: #b45309;
+        padding: 0.35rem 0.72rem;
+        font-size: 0.64rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 2px 8px rgba(180, 83, 9, 0.08);
+    }
+
+    .dev-mode-pill:hover {
+        background: rgba(251, 191, 36, 0.2);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(180, 83, 9, 0.14);
+    }
+
+    .dev-mode-pill__dot {
+        width: 0.34rem;
+        height: 0.34rem;
+        border-radius: 999px;
+        background: #f59e0b;
+        flex-shrink: 0;
+        animation: navDevPulse 2s ease-in-out infinite;
+    }
+
+    .dev-mode-pill--navbar {
+        margin-right: 0.15rem;
+    }
+
+    .dev-mode-pill--profile {
+        align-self: stretch;
+        padding-inline: 0.8rem;
+        font-size: 0.68rem;
+    }
+
+    .dev-mode-pill--profile span:last-child {
+        white-space: nowrap;
+    }
+
+    @keyframes navDevPulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.35;
+        }
+    }
+
+    html.dark .dev-mode-pill {
+        border-color: rgba(251, 191, 36, 0.35);
+        background: rgba(120, 53, 15, 0.28);
+        color: #fde68a;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+    }
+
+    html.dark .dev-mode-pill:hover {
+        background: rgba(146, 64, 14, 0.38);
+    }
+}
