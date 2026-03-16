@@ -9,9 +9,11 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface SetLogRepository extends JpaRepository<SetLog, Long> {
     List<SetLog> findByExerciseSessionOrderBySetNumberAsc(ExerciseSession session);
+    Optional<SetLog> findByIdAndExerciseSession_WorkoutSession_Id(Long id, Long workoutSessionId);
 
     @Query("""
         SELECT ws.date AS date, COUNT(sl) AS total

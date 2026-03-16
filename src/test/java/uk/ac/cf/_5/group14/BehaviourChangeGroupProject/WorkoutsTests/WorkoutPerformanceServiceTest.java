@@ -51,7 +51,7 @@ class WorkoutPerformanceServiceTest {
 
         service.maybeNotifyPr(user, session, log, true);
 
-        verify(notificationService).create(eq(user), eq(NotificationType.PR_HIT), eq("Personal best"), contains("Bench Press"), eq("/workouts/session/42"));
+        verify(notificationService).create(eq(user), eq(NotificationType.PR_HIT), eq("Personal best"), contains("Bench Press"), eq("/workouts/studio/42"));
     }
 
     @Test

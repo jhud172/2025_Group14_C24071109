@@ -7,6 +7,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScheduleOccurrenceRepository extends JpaRepository<ScheduleOccurrence, Long> {
@@ -19,10 +20,25 @@ public interface ScheduleOccurrenceRepository extends JpaRepository<ScheduleOccu
 
     boolean existsByUserAndDateAndTrainerTemplateEntryId(User user, LocalDate date, Long trainerTemplateEntryId);
 
+    Optional<ScheduleOccurrence> findByIdAndUserId(Long id, Long userId);
+
     @Query("""
         SELECT o FROM ScheduleOccurrence o
         LEFT JOIN FETCH o.exercise
         LEFT JOIN FETCH o.customExercise
+        LEFT JOIN FETCH o.schedule
+        WHERE o.user = :user
+        AND o.date = :date
+        AND o.schedule.id = :scheduleId
+        ORDER BY o.id
+    """)
+    List<ScheduleOccurrence> findByUserAndDateAndScheduleId(User user, LocalDate date, Long scheduleId);
+
+    @Query("""
+        SELECT o FROM ScheduleOccurrence o
+        LEFT JOIN FETCH o.exercise
+        LEFT JOIN FETCH o.customExercise
+        LEFT JOIN FETCH o.schedule
         JOIN FETCH o.user
         WHERE o.user = :user
         AND o.date = :date
@@ -33,6 +49,7 @@ public interface ScheduleOccurrenceRepository extends JpaRepository<ScheduleOccu
         SELECT o FROM ScheduleOccurrence o
         LEFT JOIN FETCH o.exercise
         LEFT JOIN FETCH o.customExercise
+        LEFT JOIN FETCH o.schedule
         JOIN FETCH o.user
         WHERE o.user = :user
         AND o.date BETWEEN :from AND :to

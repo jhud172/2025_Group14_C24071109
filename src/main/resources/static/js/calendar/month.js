@@ -113,7 +113,7 @@
                 `;
             }
         } else if (type === 'occurrence') {
-            const actionLabel = isCompleted ? 'Review workout log' : 'Complete workout';
+            const actionLabel = isCompleted ? 'Review session' : 'Complete workout';
             const actionType = isCompleted ? 'workout-review' : 'workout-log';
             html += `
                 <div class="calendar-preview-actions">
@@ -210,7 +210,7 @@
 
         if (logWorkoutLink) {
             const occId = item.dataset.id;
-            logWorkoutLink.href = occId ? `/exercise-log/add-occurrence?occId=${occId}` : '#';
+            logWorkoutLink.href = occId ? `/workout-session/launch/occurrence/${occId}` : '#';
         }
 
         setLogStatus('');
@@ -347,10 +347,11 @@
         }
         if (action === 'workout-log') {
             const occId = activeItem.dataset.id;
-            window.location.href = occId ? `/exercise-log/add-occurrence?occId=${occId}` : '/exercise-log';
+            window.location.href = occId ? `/workout-session/launch/occurrence/${occId}` : '/workout-management';
         }
         if (action === 'workout-review') {
-            window.location.href = '/exercise-log/list';
+            const occId = activeItem.dataset.id;
+            window.location.href = occId ? `/workout-session/launch/occurrence/${occId}` : '/workout-management';
         }
     }
 

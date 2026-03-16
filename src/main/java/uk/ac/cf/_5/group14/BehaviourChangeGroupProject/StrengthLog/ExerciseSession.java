@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExercise;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Exercise;
 
 import java.util.ArrayList;
@@ -22,8 +23,12 @@ public class ExerciseSession {
     private WorkoutSession workoutSession;
 
     @ManyToOne
-    @JoinColumn(name = "exercise_id", nullable = false)
+    @JoinColumn(name = "exercise_id")
     private Exercise exercise;
+
+    @ManyToOne
+    @JoinColumn(name = "custom_exercise_id")
+    private CustomExercise customExercise;
 
     private int orderIndex = 0;
 

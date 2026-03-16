@@ -500,7 +500,7 @@ public class DashboardController {
                     openWorkouts.size() > 1
                             ? openWorkouts.size() + " workouts are sitting in today's plan. Start the first session and the rest of the day becomes clearer."
                             : "Your workout is already scheduled. Open the day, review the session, and start when ready.",
-                    todayPath,
+                    workoutLaunchPath(openWorkouts.get(0)),
                     "Start Workout",
                     "emerald",
                     "WORK",
@@ -592,7 +592,7 @@ public class DashboardController {
                     "Workout queue",
                     resolveWorkoutTitle(openWorkouts.get(0)),
                     "This session is already in today's plan and ready when you are.",
-                    todayPath,
+                    workoutLaunchPath(openWorkouts.get(0)),
                     null,
                     "Today",
                     false);
@@ -1307,11 +1307,18 @@ public class DashboardController {
                 previewItems.add(new WeekPreviewItem(
                         occurrence.getId(),
                         resolveWorkoutTitle(occurrence),
-                        pathForDate(date) + "?focusTab=workouts&focusWorkout=" + occurrence.getId(),
+                        workoutLaunchPath(occurrence),
                         "workout"));
             }
         }
         return previewItems;
+    }
+
+    private String workoutLaunchPath(ScheduleOccurrence occurrence) {
+        if (occurrence == null || occurrence.getId() == null) {
+            return "/workout-management";
+        }
+        return "/workout-session/launch/occurrence/" + occurrence.getId();
     }
 
     private List<GoalSectionView> buildGoalSections(List<Goal> goals, LocalDate today) {

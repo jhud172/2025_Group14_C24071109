@@ -31,19 +31,38 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
     @Override
     public void saveLog(ExerciseLogForm form, User user) {
         ExerciseLog log = new ExerciseLog();
+        populateLog(log, form, user);
+        ExerciseLog saved = repo.save(log);
+        linkSavedLog(saved, form);
+    }
+
+    @Override
+    public void updateLog(Long id, ExerciseLogForm form, User user) {
+        ExerciseLog log = repo.findByIdAndUser(id, user).orElse(null);
+        if (log == null) {
+            return;
+        }
+        populateLog(log, form, user);
+        ExerciseLog saved = repo.save(log);
+        linkSavedLog(saved, form);
+    }
+
+    private void populateLog(ExerciseLog log, ExerciseLogForm form, User user) {
         log.setUser(user);
         log.setDate(form.getDate());
-        log.setUser(user);
         log.setMoodBefore(form.getMoodBefore());
         log.setMoodAfter(form.getMoodAfter());
         log.setConfidence(form.getConfidence());
         log.setComments(form.getComments());
         log.setDurationMinutes(form.getDurationMinutes());
-        ExerciseLog saved = repo.save(log);
+    }
+
+    private void linkSavedLog(ExerciseLog saved, ExerciseLogForm form) {
         if (form.getOccurrenceId() != null) {
             ScheduleOccurrence occ = occurrenceRepo.findById(form.getOccurrenceId()).orElse(null);
             if (occ != null) {
                 occ.setExerciseLog(saved);
+                occ.setCompleted(true);
                 occurrenceRepo.save(occ);
             }
         }
@@ -65,6 +84,11 @@ public class ExerciseLogServiceImpl implements ExerciseLogService {
     @Override
     public ExerciseLog getLogById(Long id) {
         return repo.findById(id).orElse(null);
+    }
+
+    @Override
+    public ExerciseLog getLogByIdForUser(Long id, User user) {
+        return repo.findByIdAndUser(id, user).orElse(null);
     }
 
     public List<ExerciseLog> getLogsForUser(User user) {

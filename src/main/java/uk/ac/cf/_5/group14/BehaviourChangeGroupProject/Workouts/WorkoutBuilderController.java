@@ -136,7 +136,7 @@ public class WorkoutBuilderController {
         return "workouts/start";
     }
 
-    @GetMapping("/session/{sessionId}")
+    @GetMapping("/studio/{sessionId}")
     public String viewSession(@PathVariable Long sessionId, Model model) {
         User user = authHelper.getAuthenticatedUser();
         if (user == null) {
@@ -150,7 +150,7 @@ public class WorkoutBuilderController {
         return "workouts/start";
     }
 
-    @PostMapping("/session/{sessionId}/goal")
+    @PostMapping("/studio/{sessionId}/goal")
     public String updateSessionGoal(@PathVariable Long sessionId,
                                     @RequestParam(required = false) Long goalId) {
         User user = authHelper.getAuthenticatedUser();
@@ -159,10 +159,10 @@ public class WorkoutBuilderController {
         }
         workoutBuilderService.getSession(user, sessionId);
         goalLinkService.replaceWorkoutSessionLink(user, goalId, sessionId, GoalLinkSource.SELF);
-        return "redirect:/workouts/session/" + sessionId;
+        return "redirect:/workouts/studio/" + sessionId;
     }
 
-    @PostMapping("/session/{sessionId}/sets/{setId}")
+    @PostMapping("/studio/{sessionId}/sets/{setId}")
     @ResponseBody
     public ResponseEntity<?> updateSet(@PathVariable Long sessionId,
                                        @PathVariable Long setId,

@@ -115,6 +115,8 @@ public class SecurityConfig {
                             .requestMatchers("/dashboard", "/dashboard/**", "/client/dashboard", "/client/dashboard/**").authenticated()
                             .requestMatchers("/calendar", "/calendar/**").authenticated()
                             .requestMatchers("/workouts", "/workouts/**").authenticated()
+                            .requestMatchers("/workout-session", "/workout-session/**").authenticated()
+                            .requestMatchers("/workout-management", "/workout-management/**").authenticated()
                             .requestMatchers("/goals", "/goals/**").authenticated()
                             .requestMatchers("/profile", "/profile/**").authenticated()
                             .requestMatchers("/merch/**").authenticated()
@@ -137,6 +139,8 @@ public class SecurityConfig {
                             .requestMatchers("/dashboard", "/dashboard/**", "/client/dashboard", "/client/dashboard/**").authenticated()
                             .requestMatchers("/calendar", "/calendar/**").authenticated()
                             .requestMatchers("/workouts", "/workouts/**").authenticated()
+                            .requestMatchers("/workout-session", "/workout-session/**").authenticated()
+                            .requestMatchers("/workout-management", "/workout-management/**").authenticated()
                             .requestMatchers("/goals", "/goals/**").authenticated()
                             .requestMatchers("/profile", "/profile/**").authenticated()
                             .anyRequest().authenticated();

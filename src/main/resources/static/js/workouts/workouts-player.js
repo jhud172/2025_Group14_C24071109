@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const pollFeedback = async () => {
             try {
-                const res = await fetch(`/workouts/session/${sessionId}/sets/${setId}/video/latest`);
+                const res = await fetch(`/workouts/studio/${sessionId}/sets/${setId}/video/latest`);
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data.status) {
@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             setStatus("Uploading...");
             try {
-                const res = await fetch(`/workouts/session/${sessionId}/sets/${setId}/video`, {
+                const res = await fetch(`/workouts/studio/${sessionId}/sets/${setId}/video`, {
                     method: "POST",
                     headers,
                     body: formData
@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const onChange = async () => {
             try {
-                const data = await request(`/workouts/session/${sessionId}/sets/${setId}`, readPayload(row));
+                const data = await request(`/workouts/studio/${sessionId}/sets/${setId}`, readPayload(row));
                 applySummary(data);
             } catch (err) {
                 // swallow to avoid breaking the flow

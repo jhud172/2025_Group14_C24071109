@@ -21,7 +21,7 @@ public class WorkoutFormFeedbackController {
         this.authHelper = authHelper;
     }
 
-    @PostMapping("/session/{sessionId}/sets/{setId}/video")
+    @PostMapping("/studio/{sessionId}/sets/{setId}/video")
     public ResponseEntity<?> upload(@PathVariable Long sessionId,
                                     @PathVariable Long setId,
                                     @RequestParam("video") MultipartFile video) {
@@ -39,7 +39,7 @@ public class WorkoutFormFeedbackController {
         }
     }
 
-    @GetMapping("/session/{sessionId}/sets/{setId}/video/latest")
+    @GetMapping("/studio/{sessionId}/sets/{setId}/video/latest")
     public ResponseEntity<?> latest(@PathVariable Long sessionId,
                                     @PathVariable Long setId) {
         User user = authHelper.getAuthenticatedUser();

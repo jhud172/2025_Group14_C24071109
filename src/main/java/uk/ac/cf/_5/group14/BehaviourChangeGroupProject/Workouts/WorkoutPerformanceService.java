@@ -109,7 +109,7 @@ public class WorkoutPerformanceService {
         }
 
         String title = "Personal best";
-        String ctaUrl = "/workouts/session/" + session.getId();
+        String ctaUrl = "/workouts/studio/" + session.getId();
         notificationService.create(user, NotificationType.PR_HIT, title, message, ctaUrl);
     }
 

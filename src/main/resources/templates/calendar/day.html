@@ -604,7 +604,7 @@
                                  class="day-workout-row rounded-2xl border border-slate-200/90 bg-white/90 p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-950/80"
                                  data-workout-card
                                  data-fade-in
-                                 th:attr="data-workout-id=${ws.id},data-workout-name=${ws.nameSnapshot != null ? ws.nameSnapshot : (ws.workout != null ? ws.workout.name : 'Workout')},data-workout-completed=${ws.completed ? 'true' : 'false'},data-workout-time=${timelineWorkoutSlots != null ? timelineWorkoutSlots['workout:' + ws.id] : ''},data-workout-kind='session',data-workout-url=${'/workouts/session/' + ws.id}">
+                                 th:attr="data-workout-id=${ws.id},data-workout-name=${ws.nameSnapshot != null ? ws.nameSnapshot : (ws.workout != null ? ws.workout.name : 'Workout')},data-workout-completed=${ws.completed ? 'true' : 'false'},data-workout-time=${timelineWorkoutSlots != null ? timelineWorkoutSlots['workout:' + ws.id] : ''},data-workout-kind='session',data-workout-url=${'/workout-session/launch/session/' + ws.id}">
                             <button type="button"
                                     class="flex w-full items-start justify-between gap-3 text-left"
                                     data-open-workout-drawer
@@ -621,7 +621,7 @@
                             </button>
 
                             <div class="hidden"
-                                 th:attr="id=${'workout-drawer-content-' + ws.id},data-workout-id=${ws.id},data-workout-completed=${ws.completed ? 'true' : 'false'},data-workout-url=${'/workouts/session/' + ws.id}">
+                                 th:attr="id=${'workout-drawer-content-' + ws.id},data-workout-id=${ws.id},data-workout-completed=${ws.completed ? 'true' : 'false'},data-workout-url=${'/workout-session/launch/session/' + ws.id}">
                                 <div class="space-y-5">
                                     <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Workout session</p>
                                     <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100"
@@ -633,8 +633,8 @@
                                     </div>
                                     <div class="flex flex-wrap gap-2">
                                         <a class="day-action-btn day-action-btn--primary"
-                                           th:href="@{'/workouts/session/' + ${ws.id}}"
-                                           th:text="${ws.completed ? 'Review workout log' : 'Start or continue'}">Start or continue</a>
+                                           th:href="@{'/workout-session/launch/session/' + ${ws.id}}"
+                                           th:text="${ws.completed ? 'Review session' : 'Open workout'}">Open workout</a>
                                     </div>
                                 </div>
                             </div>
@@ -645,7 +645,7 @@
                                  class="day-workout-row rounded-2xl border border-slate-200/90 bg-white/90 p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-950/80"
                                  data-workout-card
                                  data-fade-in
-                                 th:attr="data-workout-id=${occId},data-workout-name=${occTitle},data-workout-completed=${occ.completed ? 'true' : 'false'},data-workout-time=${timelineWorkoutSlots != null ? timelineWorkoutSlots['occurrence:' + occId] : ''},data-workout-kind='occurrence',data-workout-url=${occ.exerciseLog != null ? '/exercise-log/view/' + occ.exerciseLog.id : '/exercise-log/add-calendar?occurrenceId=' + occ.id}">
+                                 th:attr="data-workout-id=${occId},data-workout-name=${occTitle},data-workout-completed=${occ.completed ? 'true' : 'false'},data-workout-time=${timelineWorkoutSlots != null ? timelineWorkoutSlots['occurrence:' + occId] : ''},data-workout-kind='occurrence',data-workout-url=${'/workout-session/launch/occurrence/' + occ.id}">
                             <button type="button"
                                     class="flex w-full items-start justify-between gap-3 text-left"
                                     data-open-workout-drawer
@@ -661,7 +661,7 @@
                             </button>
 
                             <div class="hidden"
-                                 th:attr="id=${'workout-drawer-content-' + occId},data-workout-id=${occId},data-workout-completed=${occ.completed ? 'true' : 'false'},data-workout-url=${occ.exerciseLog != null ? '/exercise-log/view/' + occ.exerciseLog.id : '/exercise-log/add-calendar?occurrenceId=' + occ.id}">
+                                 th:attr="id=${'workout-drawer-content-' + occId},data-workout-id=${occId},data-workout-completed=${occ.completed ? 'true' : 'false'},data-workout-url=${'/workout-session/launch/occurrence/' + occ.id}">
                                 <div class="space-y-5">
                                     <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Workout occurrence</p>
                                     <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="${occTitle}">Workout occurrence</h3>
@@ -672,8 +672,8 @@
                                     </div>
                                     <div class="flex flex-wrap gap-2">
                                         <a class="day-action-btn day-action-btn--primary"
-                                           th:href="@{${occ.exerciseLog != null ? '/exercise-log/view/' + occ.exerciseLog.id : '/exercise-log/add-calendar?occurrenceId=' + occ.id}}"
-                                           th:text="${occ.completed ? 'Review log' : 'Log workout'}">Log workout</a>
+                                           th:href="@{'/workout-session/launch/occurrence/' + ${occ.id}}"
+                                           th:text="${occ.completed ? 'Review session' : 'Complete workout'}">Complete workout</a>
                                     </div>
                                 </div>
                             </div>
@@ -686,12 +686,12 @@
         <div id="day-workout-source" class="hidden" aria-hidden="true">
             <th:block th:each="ws : ${workoutSessions}">
                 <span data-workout-item
-                      th:attr="data-workout-id=${ws.id},data-workout-kind='workout',data-workout-name=${ws.nameSnapshot != null ? ws.nameSnapshot : (ws.workout != null ? ws.workout.name : '')},data-workout-completed=${ws.completed},data-workout-time=${timelineWorkoutSlots != null ? timelineWorkoutSlots['workout:' + ws.id] : ''},data-workout-url=${'/workouts/session/' + ws.id}"></span>
+                      th:attr="data-workout-id=${ws.id},data-workout-kind='workout',data-workout-name=${ws.nameSnapshot != null ? ws.nameSnapshot : (ws.workout != null ? ws.workout.name : '')},data-workout-completed=${ws.completed},data-workout-time=${timelineWorkoutSlots != null ? timelineWorkoutSlots['workout:' + ws.id] : ''},data-workout-url=${'/workout-session/launch/session/' + ws.id}"></span>
             </th:block>
             <th:block th:each="occ : ${occurrences}"
                       th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown Exercise')},occId=${occ.id}">
                 <span data-occurrence-item
-                      th:attr="data-occurrence-id=${occId},data-occurrence-title=${occTitle},data-completed=${occ.completed},data-occurrence-time=${timelineWorkoutSlots != null ? timelineWorkoutSlots['occurrence:' + occId] : ''},data-occurrence-url=${occ.exerciseLog != null ? '/exercise-log/view/' + occ.exerciseLog.id : '/exercise-log/add-calendar?occurrenceId=' + occ.id}"></span>
+                      th:attr="data-occurrence-id=${occId},data-occurrence-title=${occTitle},data-completed=${occ.completed},data-occurrence-time=${timelineWorkoutSlots != null ? timelineWorkoutSlots['occurrence:' + occId] : ''},data-occurrence-url=${'/workout-session/launch/occurrence/' + occ.id}"></span>
             </th:block>
         </div>
 

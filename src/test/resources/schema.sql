@@ -1920,13 +1920,15 @@ CREATE INDEX IF NOT EXISTS idx_workout_schedule_user_dow
 
 CREATE TABLE IF NOT EXISTS workout_sessions
 (
-    id            BIGSERIAL PRIMARY KEY,
-    user_id       BIGINT       NOT NULL,
-    date          DATE         NOT NULL,
-    workout_id    BIGINT       NOT NULL,
-    name_snapshot VARCHAR(200) NULL,
-    completed     BOOLEAN      NOT NULL DEFAULT FALSE,
-    created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                   BIGSERIAL PRIMARY KEY,
+    user_id              BIGINT       NOT NULL,
+    date                 DATE         NOT NULL,
+    workout_id           BIGINT       NULL,
+    schedule_id          BIGINT       NULL,
+    source_occurrence_id BIGINT       NULL,
+    name_snapshot        VARCHAR(200) NULL,
+    completed            BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_workout_sessions_user
         FOREIGN KEY (user_id) REFERENCES users (id)
@@ -1934,6 +1936,10 @@ CREATE TABLE IF NOT EXISTS workout_sessions
 
     CONSTRAINT fk_workout_sessions_workout
         FOREIGN KEY (workout_id) REFERENCES workouts (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_workout_sessions_schedule
+        FOREIGN KEY (schedule_id) REFERENCES schedules (id)
             ON DELETE CASCADE
 );
 
@@ -1978,13 +1984,14 @@ CREATE INDEX IF NOT EXISTS idx_vault_notes_user_type
 
 CREATE TABLE IF NOT EXISTS exercise_sessions
 (
-    id                BIGSERIAL PRIMARY KEY,
-    workout_session_id BIGINT  NOT NULL,
-    exercise_id        BIGINT  NOT NULL,
-    order_index        INT     NOT NULL DEFAULT 0,
-    mode               VARCHAR(20) NOT NULL DEFAULT 'NORMAL',
+    id                 BIGSERIAL PRIMARY KEY,
+    workout_session_id BIGINT       NOT NULL,
+    exercise_id        BIGINT       NULL,
+    custom_exercise_id BIGINT       NULL,
+    order_index        INT          NOT NULL DEFAULT 0,
+    mode               VARCHAR(20)  NOT NULL DEFAULT 'NORMAL',
     group_key          VARCHAR(100),
-    completed          BOOLEAN NOT NULL DEFAULT FALSE,
+    completed          BOOLEAN      NOT NULL DEFAULT FALSE,
 
     CONSTRAINT fk_exercise_sessions_workout_session
         FOREIGN KEY (workout_session_id) REFERENCES workout_sessions (id)
@@ -1992,6 +1999,10 @@ CREATE TABLE IF NOT EXISTS exercise_sessions
 
     CONSTRAINT fk_exercise_sessions_exercise
         FOREIGN KEY (exercise_id) REFERENCES exercises (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_exercise_sessions_custom_exercise
+        FOREIGN KEY (custom_exercise_id) REFERENCES custom_exercises (id)
             ON DELETE CASCADE
 );
 

@@ -9,6 +9,7 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 
 public interface ExerciseLogRepository extends JpaRepository<ExerciseLog, Long> {
@@ -30,6 +31,7 @@ public interface ExerciseLogRepository extends JpaRepository<ExerciseLog, Long> 
     List<AverageConfidenceTrackerDto> getAverageConfidence(@Param("user") User user, @Param("dateBefore") LocalDate dateBefore);
 
     List<ExerciseLog> findByUser(User user);
+    Optional<ExerciseLog> findByIdAndUser(Long id, User user);
 
     List<ExerciseLog> findByUserOrderByDateDesc(User user);
 

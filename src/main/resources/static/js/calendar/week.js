@@ -49,10 +49,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (action === 'workout-log') {
             const occId = activeItem.dataset.id;
-            window.location.href = occId ? `/exercise-log/add-occurrence?occId=${occId}` : '/exercise-log';
+            window.location.href = occId ? `/workout-session/launch/occurrence/${occId}` : '/workout-management';
         }
         if (action === 'workout-review') {
-            window.location.href = '/exercise-log/list';
+            const occId = activeItem.dataset.id;
+            window.location.href = occId ? `/workout-session/launch/occurrence/${occId}` : '/workout-management';
         }
     }
 
@@ -139,7 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
             html += `<a href="${dayLink}" class="mt-3 block text-center text-xs text-slate-400 underline hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">View full day →</a>`;
         } else if (type === "workout" || type === "occurrence") {
             const dayLink = date ? `/calendar/day/${date}#workouts` : '/calendar';
-            const actionLabel = completed ? 'Review workout log' : 'Complete workout';
+            const actionLabel = completed ? 'Review session' : 'Complete workout';
             const actionType = completed ? 'workout-review' : 'workout-log';
             html += `
                 <div class="calendar-preview-actions">
@@ -272,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (logWorkoutLink) {
             const occId = item.dataset.id;
-            logWorkoutLink.href = occId ? `/exercise-log/add-occurrence?occId=${occId}` : '#';
+            logWorkoutLink.href = occId ? `/workout-session/launch/occurrence/${occId}` : '#';
         }
 
         setLogStatus('');

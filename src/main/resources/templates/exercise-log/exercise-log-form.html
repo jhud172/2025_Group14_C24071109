@@ -4,17 +4,28 @@
 
     <div th:fragment="content">
         <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-
-
             <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Exercise Log</h1>
-                    <p class="mt-1 text-sm text-slate-600">Record how you felt before and after exercising.</p>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <h1 class="text-2xl font-bold tracking-tight text-slate-900"
+                                th:text="${editing} ? 'Edit Exercise Log' : 'Exercise Log'">Exercise Log</h1>
+                            <p class="mt-1 text-sm text-slate-600">Record how you felt before and after exercising.</p>
+                        </div>
+                        <a th:href="@{/exercise-log/list}"
+                           class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50">View history</a>
+                    </div>
 
-                    <form th:action="@{/exercise-log}" th:object="${exerciseLog}" method="post" class="mt-6 space-y-6">
+                    <div th:if="${exerciseLog.exerciseType != null && !#strings.isEmpty(exerciseLog.exerciseType)}"
+                         class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                        Logging for <span class="font-semibold" th:text="${exerciseLog.exerciseType}">Workout</span>.
+                    </div>
+
+                    <form th:action="${formAction}" th:object="${exerciseLog}" method="post" class="mt-6 space-y-6" data-exercise-log-form>
                         <input th:if="${_csrf != null}" th:type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" th:field="*{occurrenceId}">
                         <input type="hidden" th:field="*{calendarTaskId}">
+                        <input type="hidden" th:field="*{exerciseType}">
 
                         <div>
                             <label class="block text-sm font-medium text-slate-700">Date</label>
@@ -25,24 +36,26 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-700">How did you feel before exercising?</label>
                             <div class="mt-2 flex flex-col items-center gap-3">
-                                <div id="moodBeforeEmoji" class="text-4xl transition-all duration-300">😐</div>
-                                <input type="range" min="1" max="4" step="1" th:field="*{moodBefore}" class="w-full cursor-pointer accent-slate-900" oninput="updateMoodSlider('before', this.value)">
+                                <div id="moodBeforeEmoji" class="text-4xl transition-all duration-300">-</div>
+                                <input type="range" min="1" max="4" step="1" th:field="*{moodBefore}" class="w-full cursor-pointer accent-slate-900" data-slider-kind="mood-before">
                             </div>
+                            <p class="mt-1 text-sm text-red-600" th:errors="*{moodBefore}" th:if="${#fields.hasErrors('moodBefore')}"></p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-slate-700">How did you feel after exercising?</label>
                             <div class="mt-2 flex flex-col items-center gap-3">
-                                <div id="moodAfterEmoji" class="text-4xl transition-all duration-300">😐</div>
-                                <input type="range" min="1" max="4" step="1" th:field="*{moodAfter}" class="w-full cursor-pointer accent-slate-900" oninput="updateMoodSlider('after', this.value)">
+                                <div id="moodAfterEmoji" class="text-4xl transition-all duration-300">-</div>
+                                <input type="range" min="1" max="4" step="1" th:field="*{moodAfter}" class="w-full cursor-pointer accent-slate-900" data-slider-kind="mood-after">
                             </div>
+                            <p class="mt-1 text-sm text-red-600" th:errors="*{moodAfter}" th:if="${#fields.hasErrors('moodAfter')}"></p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-slate-700">Confidence Level</label>
                             <div class="mt-2 flex flex-col items-center gap-3">
-                                <div id="confidenceEmoji" class="text-4xl transition-all duration-300">😐</div>
-                                <input type="range" min="1" max="4" step="1" th:field="*{confidence}" class="w-full cursor-pointer accent-slate-900" oninput="updateConfidenceSlider(this.value)">
+                                <div id="confidenceEmoji" class="text-4xl transition-all duration-300">-</div>
+                                <input type="range" min="1" max="4" step="1" th:field="*{confidence}" class="w-full cursor-pointer accent-slate-900" data-slider-kind="confidence">
                             </div>
                             <p class="mt-1 text-sm text-red-600" th:errors="*{confidence}" th:if="${#fields.hasErrors('confidence')}"></p>
                         </div>
@@ -55,13 +68,16 @@
 
                         <div>
                             <label class="block text-sm font-medium text-slate-700">Comments</label>
-                            <textarea th:field="*{comments}" rows="4" oninput="updatePreview()" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" placeholder="Anything to note about your session?"></textarea>
+                            <textarea th:field="*{comments}" rows="4" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" placeholder="Anything to note about your session?"></textarea>
                             <p class="mt-1 text-sm text-red-600" th:errors="*{comments}" th:if="${#fields.hasErrors('comments')}"></p>
                         </div>
 
-                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
-                            Save Log
-                        </button>
+                        <div class="flex flex-wrap gap-3">
+                            <button type="submit" class="inline-flex flex-1 items-center justify-center rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                                    th:text="${editing} ? 'Update Log' : 'Save Log'">Save Log</button>
+                            <a th:href="@{/exercise-log/list}"
+                               class="inline-flex flex-1 items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">Cancel</a>
+                        </div>
                     </form>
                 </section>
 
@@ -72,27 +88,27 @@
                     <dl class="mt-6 space-y-3 text-sm">
                         <div class="flex items-center justify-between gap-3">
                             <dt class="font-medium text-slate-700">Date</dt>
-                            <dd id="previewDate" class="text-slate-900">—</dd>
+                            <dd id="previewDate" class="text-slate-900">-</dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
                             <dt class="font-medium text-slate-700">Mood Before</dt>
-                            <dd id="previewMoodBefore" class="text-slate-900">🙂</dd>
+                            <dd id="previewMoodBefore" class="text-slate-900">-</dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
                             <dt class="font-medium text-slate-700">Mood After</dt>
-                            <dd id="previewMoodAfter" class="text-slate-900">🙂</dd>
+                            <dd id="previewMoodAfter" class="text-slate-900">-</dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
                             <dt class="font-medium text-slate-700">Confidence</dt>
-                            <dd id="previewConfidence" class="text-slate-900">😎</dd>
+                            <dd id="previewConfidence" class="text-slate-900">-</dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
                             <dt class="font-medium text-slate-700">Duration</dt>
-                            <dd id="previewDuration" class="text-slate-900">—</dd>
+                            <dd id="previewDuration" class="text-slate-900">-</dd>
                         </div>
                         <div class="pt-2">
                             <dt class="font-medium text-slate-700">Comments</dt>
-                            <dd id="previewComments" class="mt-1 text-slate-600">No comments yet…</dd>
+                            <dd id="previewComments" class="mt-1 text-slate-600">No comments yet.</dd>
                         </div>
                     </dl>
                 </aside>

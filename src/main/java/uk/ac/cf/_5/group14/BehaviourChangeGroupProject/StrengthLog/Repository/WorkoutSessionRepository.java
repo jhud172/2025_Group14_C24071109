@@ -12,7 +12,10 @@ import java.util.Optional;
 import java.util.List;
 
 public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, Long> {
+    Optional<WorkoutSession> findByIdAndUserId(Long id, Long userId);
     Optional<WorkoutSession> findByUserAndDateAndWorkout(User user, LocalDate date, Workout workout);
+    Optional<WorkoutSession> findByUserAndDateAndScheduleId(User user, LocalDate date, Long scheduleId);
+    Optional<WorkoutSession> findByUserAndDateAndSourceOccurrenceId(User user, LocalDate date, Long sourceOccurrenceId);
     List<WorkoutSession> findByUserAndDate(User user, LocalDate date);
 
     List<WorkoutSession> findTop3ByUserOrderByDateDesc(User user);
@@ -20,6 +23,7 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
     List<WorkoutSession> findTop20ByUserOrderByDateDesc(User user);
 
     List<WorkoutSession> findByUserAndDateBetweenOrderByDateDesc(User user, LocalDate from, LocalDate to);
+    List<WorkoutSession> findByUserAndDateBetweenOrderByDateAsc(User user, LocalDate from, LocalDate to);
 
     List<WorkoutSession> findByUserAndDateBetweenAndCompletedTrue(User user, LocalDate from, LocalDate to);
 

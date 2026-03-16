@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.Schedule;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Workout.Workout;
 
@@ -28,8 +29,15 @@ public class WorkoutSession {
     private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name = "workout_id", nullable = false)
+    @JoinColumn(name = "workout_id")
     private Workout workout;
+
+    @ManyToOne
+    @JoinColumn(name = "schedule_id")
+    private Schedule schedule;
+
+    @Column(name = "source_occurrence_id")
+    private Long sourceOccurrenceId;
 
     private String nameSnapshot;
 
