@@ -1,6 +1,6 @@
 <th:block xmlns:th="http://www.thymeleaf.org">
 
-    <th:block th:fragment="leftRail">
+    <th:block th:fragment="leftRailExplore">
         <section class="cd-rail-card cd-rail-card--explore" data-testid="explore-rail-card">
             <div class="cd-rail-card__header">
                 <div class="cd-section-head">
@@ -8,7 +8,7 @@
                     <h2 class="cd-rail-card__title">Discover What Supports Your Goals</h2>
                 </div>
             </div>
-            <p class="cd-rail-card__copy">Use the left rail to reach coaching, spaces, and long-term targets without losing your place in the day.</p>
+            <p class="cd-rail-card__copy">Jump into the most useful support spaces without losing your place in today&apos;s flow.</p>
             <nav class="cd-link-tile-stack" aria-label="Explore links">
                 <a th:href="@{/explore}" class="cd-link-tile">
                     <span class="cd-link-tile__icon" aria-hidden="true">
@@ -31,27 +31,15 @@
                     </span>
                     <span class="cd-link-tile__body">
                         <span class="cd-link-tile__title">Explore gyms</span>
-                        <span class="cd-link-tile__text">Find an environment, setup, and vibe that suits the week ahead.</span>
-                    </span>
-                    <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
-                </a>
-                <a th:href="@{/about}" class="cd-link-tile">
-                    <span class="cd-link-tile__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <circle cx="12" cy="12" r="9"/>
-                            <path d="M12 8v4"/>
-                            <path d="M12 16h.01"/>
-                        </svg>
-                    </span>
-                    <span class="cd-link-tile__body">
-                        <span class="cd-link-tile__title">How One to One works</span>
-                        <span class="cd-link-tile__text">See how plans, habits, logging, and coaching connect in one flow.</span>
+                        <span class="cd-link-tile__text">Find a setup and environment that suits the week ahead.</span>
                     </span>
                     <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
                 </a>
             </nav>
         </section>
+    </th:block>
 
+    <th:block th:fragment="leftRailTrainer(tooltipId)">
         <section class="cd-rail-card cd-rail-card--trainer" data-testid="trainer-rail-card">
             <div class="cd-rail-card__header">
                 <div class="cd-section-head">
@@ -69,12 +57,11 @@
                      tabindex="0"
                      role="button"
                      aria-expanded="false"
-                     aria-controls="trainerRevealPanel"
                      th:classappend="${trainerRail.identity.cardBackStyle != null ? ' profile-card-back-theme--' + #strings.toLowerCase(trainerRail.identity.cardBackStyle) : ''}">
-                    <th:block th:replace="~{dashboard/fragments/client-dashboard-identity :: banner(${trainerRail.identity}, 'trainer-premium-tooltip')}"></th:block>
+                    <th:block th:replace="~{dashboard/fragments/client-dashboard-identity :: banner(${trainerRail.identity}, ${tooltipId})}"></th:block>
                 </div>
                 <div class="cd-reveal-panel-wrap">
-                    <div id="trainerRevealPanel" class="cd-reveal-panel" data-profile-preview-panel aria-hidden="true">
+                    <div class="cd-reveal-panel" data-profile-preview-panel aria-hidden="true">
                         <div class="profile-preview-bio-block profile-preview-bio-block--dashboard"
                              data-profile-bio-block
                              data-bio-scroll-height="190">
@@ -97,22 +84,6 @@
                                 <span class="cd-identity-stat__label">level</span>
                             </div>
                         </div>
-                        <section class="cd-profile-card__section cd-profile-card__section--milestones">
-                            <p class="cd-kicker">Milestones</p>
-                            <div class="profile-preview-milestone-grid">
-                                <span class="profile-preview-milestone is-achieved"
-                                      th:each="milestone, iter : ${trainerRail.milestones}"
-                                      th:if="${iter.index < 3}">
-                                    <span class="profile-preview-milestone__status">Achieved</span>
-                                    <span class="profile-preview-milestone__title" th:text="${milestone}">Milestone</span>
-                                </span>
-                                <span class="profile-preview-milestone profile-preview-milestone--empty"
-                                      th:if="${trainerRail.milestones == null or #lists.isEmpty(trainerRail.milestones)}">
-                                    <span class="profile-preview-milestone__status">Milestones</span>
-                                    <span class="profile-preview-milestone__title">No Milestones Displayed</span>
-                                </span>
-                            </div>
-                        </section>
                     </div>
                 </div>
             </div>
@@ -128,111 +99,63 @@
             </div>
 
             <div class="cd-trainer-stage" th:if="${trainerRail.identity != null}">
-                <div class="cd-segmented cd-segmented--compact" role="tablist" aria-label="Trainer card panels">
-                    <button type="button" class="cd-segmented__button is-active" data-trainer-tab="activity" aria-selected="true">Recent activity</button>
-                    <button type="button" class="cd-segmented__button" data-trainer-tab="message" aria-selected="false">Message</button>
+                <div class="cd-context-panel cd-context-panel--trainer">
+                    <p class="cd-context-panel__label" th:text="${trainerRail.context.label}">Coach context</p>
+                    <h3 class="cd-context-panel__title" th:text="${trainerRail.context.title}">Latest coach note</h3>
+                    <p class="cd-context-panel__body" th:text="${trainerRail.context.body}">Context body</p>
+                    <p class="cd-context-panel__meta" th:text="${trainerRail.context.meta}">Meta</p>
                 </div>
-
-                <div class="cd-trainer-panel-stack">
-                    <div class="cd-trainer-panel is-active" data-trainer-view="activity">
-                        <div class="cd-context-panel cd-context-panel--trainer">
-                            <p class="cd-context-panel__label" th:text="${trainerRail.context.label}">Coach context</p>
-                            <h3 class="cd-context-panel__title" th:text="${trainerRail.context.title}">Latest coach note</h3>
-                            <p class="cd-context-panel__body" th:text="${trainerRail.context.body}">Context body</p>
-                            <p class="cd-context-panel__meta" th:text="${trainerRail.context.meta}">Meta</p>
-                        </div>
-                        <div class="cd-activity-feed"
-                             data-trainer-activity-feed
-                             th:attr="data-trainer-name=${trainerRail.trainerDisplayName},data-thread-id=${trainerRail.trainerThreadId}">
-                            <div th:if="${trainerRail.activityItems == null or #lists.isEmpty(trainerRail.activityItems)}"
-                                 class="cd-empty-state cd-empty-state--subtle">
-                                <p class="cd-empty-state__title">No trainer notifications yet</p>
-                                <p class="cd-empty-state__copy">When your coach sends messages or coaching updates, they will appear here with quick actions.</p>
-                            </div>
-                            <article th:each="item : ${trainerRail.activityItems}"
-                                     class="cd-activity-item"
-                                     th:classappend="${item.unread ? ' is-unread' : ''}"
-                                     th:attr="data-notification-id=${item.notificationId},data-notification-href=${item.href}">
-                                <a th:if="${item.href != null}"
-                                   th:href="@{${item.href}}"
-                                   class="cd-activity-item__main">
-                                    <span class="cd-activity-item__icon" th:attr="data-kind=${item.icon}"></span>
-                                    <span class="cd-activity-item__body">
-                                        <span class="cd-activity-item__title" th:text="${item.title}">Recent item</span>
-                                        <span class="cd-activity-item__copy" th:text="${item.body}">Activity copy</span>
-                                        <span class="cd-activity-item__meta" th:text="${item.meta}">Meta</span>
-                                    </span>
-                                </a>
-                                <div th:if="${item.href == null}" class="cd-activity-item__main">
-                                    <span class="cd-activity-item__icon" th:attr="data-kind=${item.icon}"></span>
-                                    <span class="cd-activity-item__body">
-                                        <span class="cd-activity-item__title" th:text="${item.title}">Recent item</span>
-                                        <span class="cd-activity-item__copy" th:text="${item.body}">Activity copy</span>
-                                        <span class="cd-activity-item__meta" th:text="${item.meta}">Meta</span>
-                                    </span>
-                                </div>
-                                <div class="cd-activity-item__actions" th:if="${item.canMarkRead or item.canDismiss}">
-                                    <button type="button"
-                                            class="cd-activity-item__action cd-activity-item__action--check"
-                                            data-activity-read
-                                            th:if="${item.canMarkRead}"
-                                            aria-label="Mark trainer notification as read">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                            <path d="M6 12.5 10 16 18 8"/>
-                                        </svg>
-                                    </button>
-                                    <button type="button"
-                                            class="cd-activity-item__action"
-                                            data-activity-dismiss
-                                            th:if="${item.canDismiss}"
-                                            aria-label="Dismiss trainer notification">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                            <path d="M8 8 16 16M16 8l-8 8"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </article>
-                        </div>
+                <div class="cd-activity-feed cd-activity-feed--compact"
+                     data-trainer-activity-feed
+                     th:attr="data-trainer-name=${trainerRail.trainerDisplayName},data-thread-id=${trainerRail.trainerThreadId}">
+                    <div th:if="${trainerRail.activityItems == null or #lists.isEmpty(trainerRail.activityItems)}"
+                         class="cd-empty-state cd-empty-state--subtle">
+                        <p class="cd-empty-state__title">No trainer notifications yet</p>
+                        <p class="cd-empty-state__copy">Coach updates and progress checks will appear here when they are live.</p>
                     </div>
-
-                    <div class="cd-trainer-panel" data-trainer-view="message">
-                        <div class="cd-trainer-message-box"
-                             th:attr="data-thread-id=${trainerRail.messagePanel.threadId}">
-                            <div class="cd-trainer-message-list" data-trainer-message-list>
-                                <button type="button"
-                                        class="cd-button-chip cd-button-chip--ghost cd-message-load"
-                                        data-trainer-load-more
-                                        th:if="${trainerRail.messagePanel.hasMore}">Load older messages</button>
-                                <div th:if="${trainerRail.messagePanel.messages == null or #lists.isEmpty(trainerRail.messagePanel.messages)}"
-                                     class="cd-empty-state cd-empty-state--subtle">
-                                    <p class="cd-empty-state__title" th:text="${trainerRail.messagePanel.emptyTitle}">No messages yet</p>
-                                    <p class="cd-empty-state__copy" th:text="${trainerRail.messagePanel.emptyBody}">Message empty state</p>
-                                </div>
-                                <div th:each="message : ${trainerRail.messagePanel.messages}"
-                                     class="cd-trainer-message"
-                                     th:classappend="${message.mine} ? ' is-mine' : ''"
-                                     th:attr="data-message-id=${message.id}">
-                                    <p class="cd-trainer-message__body" th:text="${message.body}">Message body</p>
-                                    <p class="cd-trainer-message__meta" th:text="${message.createdLabel}">13 Mar 08:30</p>
-                                </div>
-                            </div>
-
-                            <form th:if="${trainerRail.messagePanel.canSend}"
-                                  class="cd-trainer-message-form"
-                                  data-trainer-message-form>
-                                <textarea rows="2"
-                                          class="cd-trainer-message-form__input"
-                                          data-trainer-message-input
-                                          placeholder="Send a message to your trainer"></textarea>
-                                <div class="cd-trainer-message-form__actions">
-                                    <a th:if="${trainerRail.messageHref != null}"
-                                       th:href="@{${trainerRail.messageHref}}"
-                                       class="cd-inline-link">Open full thread</a>
-                                    <button type="submit" class="cd-button-chip cd-button-chip--solid">Send</button>
-                                </div>
-                            </form>
+                    <article th:each="item : ${trainerRail.activityItems}"
+                             class="cd-activity-item"
+                             th:classappend="${item.unread ? ' is-unread' : ''}"
+                             th:attr="data-notification-id=${item.notificationId},data-notification-href=${item.href}">
+                        <a th:if="${item.href != null}"
+                           th:href="@{${item.href}}"
+                           class="cd-activity-item__main">
+                            <span class="cd-activity-item__icon" th:attr="data-kind=${item.icon}"></span>
+                            <span class="cd-activity-item__body">
+                                <span class="cd-activity-item__title" th:text="${item.title}">Recent item</span>
+                                <span class="cd-activity-item__copy" th:text="${item.body}">Activity copy</span>
+                                <span class="cd-activity-item__meta" th:text="${item.meta}">Meta</span>
+                            </span>
+                        </a>
+                        <div th:if="${item.href == null}" class="cd-activity-item__main">
+                            <span class="cd-activity-item__icon" th:attr="data-kind=${item.icon}"></span>
+                            <span class="cd-activity-item__body">
+                                <span class="cd-activity-item__title" th:text="${item.title}">Recent item</span>
+                                <span class="cd-activity-item__copy" th:text="${item.body}">Activity copy</span>
+                                <span class="cd-activity-item__meta" th:text="${item.meta}">Meta</span>
+                            </span>
                         </div>
-                    </div>
+                        <div class="cd-activity-item__actions" th:if="${item.canMarkRead or item.canDismiss}">
+                            <button type="button"
+                                    class="cd-activity-item__action cd-activity-item__action--check"
+                                    data-activity-read
+                                    th:if="${item.canMarkRead}"
+                                    aria-label="Mark trainer notification as read">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path d="M6 12.5 10 16 18 8"/>
+                                </svg>
+                            </button>
+                            <button type="button"
+                                    class="cd-activity-item__action"
+                                    data-activity-dismiss
+                                    th:if="${item.canDismiss}"
+                                    aria-label="Dismiss trainer notification">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path d="M8 8 16 16M16 8l-8 8"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </article>
                 </div>
             </div>
 
@@ -242,7 +165,9 @@
                 <a th:href="@{${trainerRail.manageHref}}" class="cd-button-chip">Manage</a>
             </div>
         </section>
+    </th:block>
 
+    <th:block th:fragment="leftRailGoals">
         <section class="cd-rail-card" aria-label="Goals summary">
             <div class="cd-rail-card__header">
                 <div class="cd-section-head">
@@ -304,6 +229,12 @@
                 </div>
             </div>
         </section>
+    </th:block>
+
+    <th:block th:fragment="leftRail">
+        <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: leftRailExplore}"></th:block>
+        <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: leftRailTrainer('trainer-premium-tooltip')}"></th:block>
+        <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: leftRailGoals}"></th:block>
     </th:block>
 
     <th:block th:fragment="mainColumn">
@@ -675,7 +606,7 @@
         </section>
     </th:block>
 
-    <th:block th:fragment="rightRail">
+    <th:block th:fragment="rightRailSupport">
         <section class="cd-rail-card cd-rail-card--support">
             <div class="cd-rail-card__header">
                 <div class="cd-section-head">
@@ -683,7 +614,7 @@
                     <h2 class="cd-rail-card__title">Support Without Leaving the Dashboard</h2>
                 </div>
             </div>
-            <p class="cd-rail-card__copy">Open support, privacy, and plan information without leaving the dashboard flow.</p>
+            <p class="cd-rail-card__copy">Keep essential help, privacy, and support access close to the main dashboard flow.</p>
             <nav class="cd-link-tile-stack" aria-label="Support links">
                 <a th:href="@{/faq}" class="cd-link-tile">
                     <span class="cd-link-tile__icon" aria-hidden="true">
@@ -712,24 +643,11 @@
                     </span>
                     <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
                 </a>
-                <a th:href="@{/pricing}" class="cd-link-tile">
-                    <span class="cd-link-tile__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M4 6h16"/>
-                            <path d="M6 6v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6"/>
-                            <path d="M10 11h4"/>
-                            <path d="M12 9v6"/>
-                        </svg>
-                    </span>
-                    <span class="cd-link-tile__body">
-                        <span class="cd-link-tile__title">Memberships and plans</span>
-                        <span class="cd-link-tile__text">Review upgrade paths, billing details, and membership options.</span>
-                    </span>
-                    <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
-                </a>
             </nav>
         </section>
+    </th:block>
 
+    <th:block th:fragment="rightRailProfile(tooltipId)">
         <section class="cd-rail-card cd-profile-card"
                  data-testid="profile-rail-card"
                  th:classappend="${profileRail.identity != null and profileRail.identity.cardBackStyle != null ? ' profile-card-back-theme--' + #strings.toLowerCase(profileRail.identity.cardBackStyle) : ''}">
@@ -739,7 +657,7 @@
                 </div>
             </div>
 
-            <th:block th:replace="~{dashboard/fragments/client-dashboard-identity :: banner(${profileRail.identity}, 'profile-premium-tooltip')}"></th:block>
+            <th:block th:replace="~{dashboard/fragments/client-dashboard-identity :: banner(${profileRail.identity}, ${tooltipId})}"></th:block>
 
             <div class="cd-profile-card__body">
                 <div class="profile-preview-bio-block profile-preview-bio-block--dashboard"
@@ -768,23 +686,6 @@
                     </div>
                 </section>
 
-                <section class="cd-profile-card__section cd-profile-card__section--milestones">
-                    <p class="cd-kicker">Milestones</p>
-                    <div class="profile-preview-milestone-grid">
-                        <span class="profile-preview-milestone is-achieved"
-                              th:each="milestone, iter : ${profileRail.milestones}"
-                              th:if="${iter.index < 4}">
-                            <span class="profile-preview-milestone__status">Achieved</span>
-                            <span class="profile-preview-milestone__title" th:text="${milestone}">Milestone</span>
-                        </span>
-                        <span class="profile-preview-milestone profile-preview-milestone--empty"
-                              th:if="${profileRail.milestones == null or #lists.isEmpty(profileRail.milestones)}">
-                            <span class="profile-preview-milestone__status">Milestones</span>
-                            <span class="profile-preview-milestone__title">No Milestones Displayed</span>
-                        </span>
-                    </div>
-                </section>
-
                 <section class="cd-profile-card__section">
                     <p class="cd-kicker">Daily focus</p>
                     <div class="cd-context-panel cd-context-panel--profile">
@@ -802,5 +703,10 @@
                 </section>
             </div>
         </section>
+    </th:block>
+
+    <th:block th:fragment="rightRail">
+        <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: rightRailSupport}"></th:block>
+        <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: rightRailProfile('profile-premium-tooltip')}"></th:block>
     </th:block>
 </th:block>

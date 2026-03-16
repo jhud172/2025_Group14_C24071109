@@ -47,88 +47,86 @@
 
     function initDashboardShell() {
         const page = getDashboardRoot();
-        const shell = document.getElementById("dashboardRoot");
         const backdrop = document.querySelector("[data-dashboard-drawer-backdrop]");
-        const drawers = Array.from(document.querySelectorAll("[data-dashboard-drawer]"));
-        const triggers = Array.from(document.querySelectorAll("[data-dashboard-drawer-trigger]"));
-        if (!page || !shell || !backdrop || !drawers.length || !triggers.length || !window.matchMedia) return;
+        const flyouts = Array.from(document.querySelectorAll("[data-dashboard-flyout]"));
+        if (!page || !backdrop || !flyouts.length || !window.matchMedia) return;
 
         const mobileQuery = window.matchMedia("(max-width: 1030px)");
-        let activeSide = null;
-        let lastTrigger = null;
+        let activeFlyout = null;
+        let lastHandle = null;
 
-        const drawerFor = (side) => drawers.find((drawer) => drawer.dataset.dashboardDrawer === side) || null;
-        const triggerFor = (side) => triggers.find((trigger) => trigger.dataset.dashboardDrawerTrigger === side) || null;
+        const getHandle = (flyout) => flyout.querySelector("[data-dashboard-flyout-handle]");
+        const getPanel = (flyout) => flyout.querySelector(".cd-dashboard-flyout__panel");
+        const getFocusTarget = (flyout) => flyout.querySelector(".cd-dashboard-flyout__panel-inner");
 
         const sync = () => {
             const isMobile = mobileQuery.matches;
             if (!isMobile) {
-                activeSide = null;
+                activeFlyout = null;
             }
 
             page.dataset.dashboardCondensed = isMobile ? "true" : "false";
-            document.body.classList.toggle("cd-dashboard-drawer-open", isMobile && Boolean(activeSide));
+            document.body.classList.toggle("cd-dashboard-drawer-open", isMobile && Boolean(activeFlyout));
 
             backdrop.hidden = !isMobile;
-            backdrop.classList.toggle("is-visible", isMobile && Boolean(activeSide));
-            backdrop.setAttribute("aria-hidden", isMobile && activeSide ? "false" : "true");
+            backdrop.classList.toggle("is-visible", isMobile && Boolean(activeFlyout));
+            backdrop.setAttribute("aria-hidden", isMobile && activeFlyout ? "false" : "true");
 
-            triggers.forEach((trigger) => {
-                const expanded = isMobile && trigger.dataset.dashboardDrawerTrigger === activeSide;
-                trigger.hidden = !isMobile;
-                trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
-                trigger.classList.toggle("is-active", expanded);
-            });
-
-            drawers.forEach((drawer) => {
-                const isOpen = isMobile && drawer.dataset.dashboardDrawer === activeSide;
-                drawer.classList.toggle("is-open", isOpen);
-                drawer.setAttribute("aria-hidden", isOpen ? "false" : isMobile ? "true" : "false");
+            flyouts.forEach((flyout) => {
+                const key = flyout.dataset.dashboardFlyout;
+                const isOpen = isMobile && key === activeFlyout;
+                const handle = getHandle(flyout);
+                const panel = getPanel(flyout);
+                flyout.hidden = !isMobile;
+                flyout.classList.toggle("is-open", isOpen);
+                handle?.setAttribute("aria-expanded", isOpen ? "true" : "false");
+                handle?.classList.toggle("is-active", isOpen);
+                panel?.setAttribute("aria-hidden", isOpen ? "false" : "true");
             });
         };
 
         const close = (restoreFocus = true) => {
-            if (!activeSide && !mobileQuery.matches) {
+            if (!activeFlyout && !mobileQuery.matches) {
                 sync();
                 return;
             }
-            activeSide = null;
+            activeFlyout = null;
             sync();
             if (restoreFocus) {
-                lastTrigger?.focus();
+                lastHandle?.focus();
             }
         };
 
-        const open = (side, trigger) => {
+        const open = (key, handle) => {
             if (!mobileQuery.matches) return;
-            activeSide = side;
-            lastTrigger = trigger || triggerFor(side) || null;
+            activeFlyout = key;
+            lastHandle = handle || null;
             sync();
-            drawerFor(side)?.querySelector(".cd-dashboard-rail__panel")?.focus();
+            getFocusTarget(flyouts.find((flyout) => flyout.dataset.dashboardFlyout === key))?.focus();
         };
 
-        triggers.forEach((trigger) => {
-            trigger.addEventListener("click", () => {
-                const side = trigger.dataset.dashboardDrawerTrigger;
-                if (!side) return;
-                if (activeSide === side) {
+        flyouts.forEach((flyout) => {
+            const key = flyout.dataset.dashboardFlyout;
+            const handle = getHandle(flyout);
+            if (!key || !handle) return;
+
+            handle.addEventListener("click", () => {
+                if (activeFlyout === key) {
                     close(false);
-                    trigger.focus();
+                    handle.focus();
                     return;
                 }
-                open(side, trigger);
+                open(key, handle);
             });
-        });
 
-        drawers.forEach((drawer) => {
-            drawer.querySelectorAll("[data-dashboard-drawer-close]").forEach((button) => {
+            flyout.querySelectorAll("[data-dashboard-flyout-close]").forEach((button) => {
                 button.addEventListener("click", () => close());
             });
         });
 
         backdrop.addEventListener("click", () => close());
         document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && activeSide) {
+            if (event.key === "Escape" && activeFlyout) {
                 close();
             }
         });
@@ -140,6 +138,58 @@
         }
 
         sync();
+    }
+
+    function initCardRevealAnimations() {
+        const page = getDashboardRoot();
+        if (!page) return;
+
+        const cards = Array.from(page.querySelectorAll([
+            ".cd-panel",
+            ".cd-rail-card",
+            ".cd-primary-cta",
+            ".cd-action-card",
+            ".cd-upcoming-card",
+            ".cd-goal-card",
+            ".cd-summary-card",
+            ".cd-week-preview",
+            ".cd-week-day-button",
+            ".cd-link-tile",
+            ".cd-context-panel",
+            ".cd-activity-item",
+            ".cd-identity-stat",
+            ".cd-profile-card__section",
+            ".cd-streak-card",
+            ".cd-trainer-banner-shell",
+            ".cd-reveal-panel",
+            ".cd-empty-state",
+            ".cd-dashboard-flyout__panel-inner"
+        ].join(",")));
+
+        if (!cards.length) return;
+
+        cards.forEach((card, index) => {
+            card.classList.add("cd-inview-reveal");
+            card.style.setProperty("--cd-reveal-delay", `${Math.min(index % 5, 4) * 85}ms`);
+        });
+
+        if (prefersReducedMotion() || !("IntersectionObserver" in window)) {
+            cards.forEach((card) => card.classList.add("is-visible"));
+            return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+            });
+        }, {
+            threshold: 0.12,
+            rootMargin: "0px 0px -10% 0px"
+        });
+
+        cards.forEach((card) => observer.observe(card));
     }
 
     function getDashboardTimeDisplayFormat() {
@@ -1296,6 +1346,7 @@
 
     function init() {
         initDashboardShell();
+        initCardRevealAnimations();
         initGoalSlider();
         initActionHubTabs();
         initCountdowns();

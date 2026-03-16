@@ -12,61 +12,194 @@
                                 data-dashboard-weather-display-mode=${dashboardAmbience != null ? dashboardAmbience.displayMode : 'VISUAL'},
                                 data-dashboard-time-display-format=${dashboardTimeDisplayFormat != null ? dashboardTimeDisplayFormat : 'TWELVE_HOUR'}">
 
-            <div class="cd-dashboard-mobile-controls" aria-label="Dashboard side panels">
-                <button type="button"
-                        class="cd-dashboard-edge-trigger cd-dashboard-edge-trigger--left"
-                        data-dashboard-drawer-trigger="left"
-                        aria-controls="dashboardLeftRail"
-                        aria-expanded="false"
-                        aria-label="Open dashboard tools">
-                    <span class="cd-dashboard-edge-trigger__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M4 12h16"/>
-                            <path d="M12 4v16"/>
-                            <circle cx="12" cy="12" r="8"/>
-                        </svg>
-                    </span>
-                    <span class="cd-dashboard-edge-trigger__label">Tools</span>
-                </button>
-                <button type="button"
-                        class="cd-dashboard-edge-trigger cd-dashboard-edge-trigger--right"
-                        data-dashboard-drawer-trigger="right"
-                        aria-controls="dashboardRightRail"
-                        aria-expanded="false"
-                        aria-label="Open support and profile">
-                    <span class="cd-dashboard-edge-trigger__icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M12 3l7 4v5c0 4.3-2.8 7.5-7 9-4.2-1.5-7-4.7-7-9V7l7-4Z"/>
-                            <path d="M9.5 12.5 11 14l3.5-4"/>
-                        </svg>
-                    </span>
-                    <span class="cd-dashboard-edge-trigger__label">Support</span>
-                </button>
+            <div class="cd-dashboard-drawer-backdrop" data-dashboard-drawer-backdrop aria-hidden="true" hidden></div>
+
+            <div class="cd-dashboard-drawer-stack cd-dashboard-drawer-stack--left" aria-label="Dashboard quick panels">
+                <div class="cd-dashboard-flyout cd-dashboard-flyout--left cd-dashboard-flyout--slot-1" data-dashboard-flyout="explore">
+                    <button type="button"
+                            class="cd-dashboard-flyout__handle"
+                            data-dashboard-flyout-handle
+                            aria-controls="dashboardDrawerExplore"
+                            aria-expanded="false"
+                            aria-label="Open explore platform panel">
+                        <span class="cd-dashboard-flyout__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <circle cx="12" cy="12" r="8"></circle>
+                                <path d="M12 4v16M4 12h16"></path>
+                            </svg>
+                        </span>
+                        <span class="cd-dashboard-flyout__label">Explore</span>
+                    </button>
+                    <aside id="dashboardDrawerExplore" class="cd-dashboard-flyout__panel" aria-label="Explore platform" aria-hidden="true">
+                        <div class="cd-dashboard-flyout__panel-inner" tabindex="-1">
+                            <div class="cd-dashboard-flyout__header">
+                                <div>
+                                    <p class="cd-kicker">Explore Platform</p>
+                                    <p class="cd-dashboard-flyout__title">Platform shortcuts</p>
+                                </div>
+                                <button type="button" class="cd-dashboard-flyout__close" data-dashboard-flyout-close aria-label="Close explore platform panel">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                        <path d="M8 8l8 8M16 8l-8 8"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="cd-dashboard-flyout__body">
+                                <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: leftRailExplore}"></th:block>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+
+                <div class="cd-dashboard-flyout cd-dashboard-flyout--left cd-dashboard-flyout--slot-2" data-dashboard-flyout="trainer">
+                    <button type="button"
+                            class="cd-dashboard-flyout__handle"
+                            data-dashboard-flyout-handle
+                            aria-controls="dashboardDrawerTrainer"
+                            aria-expanded="false"
+                            aria-label="Open trainer overview panel">
+                        <span class="cd-dashboard-flyout__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                <circle cx="12" cy="8" r="4"></circle>
+                            </svg>
+                        </span>
+                        <span class="cd-dashboard-flyout__label">Coach</span>
+                    </button>
+                    <aside id="dashboardDrawerTrainer" class="cd-dashboard-flyout__panel" aria-label="Trainer overview" aria-hidden="true">
+                        <div class="cd-dashboard-flyout__panel-inner" tabindex="-1">
+                            <div class="cd-dashboard-flyout__header">
+                                <div>
+                                    <p class="cd-kicker">Trainer Overview</p>
+                                    <p class="cd-dashboard-flyout__title">Coaching snapshot</p>
+                                </div>
+                                <button type="button" class="cd-dashboard-flyout__close" data-dashboard-flyout-close aria-label="Close trainer overview panel">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                        <path d="M8 8l8 8M16 8l-8 8"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="cd-dashboard-flyout__body">
+                                <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: leftRailTrainer('trainer-premium-tooltip-mobile')}"></th:block>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+
+                <div class="cd-dashboard-flyout cd-dashboard-flyout--left cd-dashboard-flyout--slot-3" data-dashboard-flyout="goals">
+                    <button type="button"
+                            class="cd-dashboard-flyout__handle"
+                            data-dashboard-flyout-handle
+                            aria-controls="dashboardDrawerGoals"
+                            aria-expanded="false"
+                            aria-label="Open goals panel">
+                        <span class="cd-dashboard-flyout__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M5 19 19 5"></path>
+                                <circle cx="7" cy="17" r="2"></circle>
+                                <circle cx="17" cy="7" r="2"></circle>
+                            </svg>
+                        </span>
+                        <span class="cd-dashboard-flyout__label">Goals</span>
+                    </button>
+                    <aside id="dashboardDrawerGoals" class="cd-dashboard-flyout__panel" aria-label="Goals overview" aria-hidden="true">
+                        <div class="cd-dashboard-flyout__panel-inner" tabindex="-1">
+                            <div class="cd-dashboard-flyout__header">
+                                <div>
+                                    <p class="cd-kicker">Goals</p>
+                                    <p class="cd-dashboard-flyout__title">Progress overview</p>
+                                </div>
+                                <button type="button" class="cd-dashboard-flyout__close" data-dashboard-flyout-close aria-label="Close goals panel">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                        <path d="M8 8l8 8M16 8l-8 8"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="cd-dashboard-flyout__body">
+                                <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: leftRailGoals}"></th:block>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
             </div>
 
-            <div class="cd-dashboard-drawer-backdrop" data-dashboard-drawer-backdrop aria-hidden="true" hidden></div>
+            <div class="cd-dashboard-drawer-stack cd-dashboard-drawer-stack--right" aria-label="Dashboard support panels">
+                <div class="cd-dashboard-flyout cd-dashboard-flyout--right cd-dashboard-flyout--slot-1" data-dashboard-flyout="support">
+                    <button type="button"
+                            class="cd-dashboard-flyout__handle"
+                            data-dashboard-flyout-handle
+                            aria-controls="dashboardDrawerSupport"
+                            aria-expanded="false"
+                            aria-label="Open support panel">
+                        <span class="cd-dashboard-flyout__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4Z"></path>
+                                <path d="m9.5 12 1.8 1.8L15 10"></path>
+                            </svg>
+                        </span>
+                        <span class="cd-dashboard-flyout__label">Help</span>
+                    </button>
+                    <aside id="dashboardDrawerSupport" class="cd-dashboard-flyout__panel" aria-label="Help and trust" aria-hidden="true">
+                        <div class="cd-dashboard-flyout__panel-inner" tabindex="-1">
+                            <div class="cd-dashboard-flyout__header">
+                                <div>
+                                    <p class="cd-kicker">Help and Trust</p>
+                                    <p class="cd-dashboard-flyout__title">Support shortcuts</p>
+                                </div>
+                                <button type="button" class="cd-dashboard-flyout__close" data-dashboard-flyout-close aria-label="Close help and trust panel">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                        <path d="M8 8l8 8M16 8l-8 8"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="cd-dashboard-flyout__body">
+                                <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: rightRailSupport}"></th:block>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+
+                <div class="cd-dashboard-flyout cd-dashboard-flyout--right cd-dashboard-flyout--slot-2" data-dashboard-flyout="profile">
+                    <button type="button"
+                            class="cd-dashboard-flyout__handle"
+                            data-dashboard-flyout-handle
+                            aria-controls="dashboardDrawerProfile"
+                            aria-expanded="false"
+                            aria-label="Open profile panel">
+                        <span class="cd-dashboard-flyout__icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M20 21a8 8 0 0 0-16 0"></path>
+                                <circle cx="12" cy="8" r="4"></circle>
+                            </svg>
+                        </span>
+                        <span class="cd-dashboard-flyout__label">Profile</span>
+                    </button>
+                    <aside id="dashboardDrawerProfile" class="cd-dashboard-flyout__panel" aria-label="Profile overview" aria-hidden="true">
+                        <div class="cd-dashboard-flyout__panel-inner" tabindex="-1">
+                            <div class="cd-dashboard-flyout__header">
+                                <div>
+                                    <p class="cd-kicker">Your Profile</p>
+                                    <p class="cd-dashboard-flyout__title">Account snapshot</p>
+                                </div>
+                                <button type="button" class="cd-dashboard-flyout__close" data-dashboard-flyout-close aria-label="Close profile panel">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                        <path d="M8 8l8 8M16 8l-8 8"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="cd-dashboard-flyout__body">
+                                <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: rightRailProfile('profile-premium-tooltip-mobile')}"></th:block>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
 
             <div id="dashboardRoot" class="cd-dashboard-shell">
                 <aside id="dashboardLeftRail"
                        aria-label="Explore platform"
                        data-dashboard-left-rail
-                       data-dashboard-drawer="left"
                        class="cd-dashboard-rail cd-dashboard-rail--left">
                     <div class="cd-dashboard-rail__panel" tabindex="-1">
-                        <div class="cd-dashboard-rail__mobile-header">
-                            <div class="cd-dashboard-rail__mobile-copy">
-                                <p class="cd-kicker">Dashboard Tools</p>
-                                <p class="cd-dashboard-rail__mobile-title">Explore, coaching, and goals</p>
-                            </div>
-                            <button type="button"
-                                    class="cd-dashboard-rail__close"
-                                    data-dashboard-drawer-close
-                                    aria-label="Close dashboard tools">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                    <path d="M8 8l8 8M16 8l-8 8"/>
-                                </svg>
-                            </button>
-                        </div>
                         <div class="cd-dashboard-rail__content">
                             <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: leftRail}"></th:block>
                         </div>
@@ -80,23 +213,8 @@
                 <aside id="dashboardRightRail"
                        aria-label="Help and trust"
                        data-dashboard-right-rail
-                       data-dashboard-drawer="right"
                        class="cd-dashboard-rail cd-dashboard-rail--right">
                     <div class="cd-dashboard-rail__panel" tabindex="-1">
-                        <div class="cd-dashboard-rail__mobile-header">
-                            <div class="cd-dashboard-rail__mobile-copy">
-                                <p class="cd-kicker">Support and Profile</p>
-                                <p class="cd-dashboard-rail__mobile-title">Help, trust, and your account snapshot</p>
-                            </div>
-                            <button type="button"
-                                    class="cd-dashboard-rail__close"
-                                    data-dashboard-drawer-close
-                                    aria-label="Close support and profile">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                                    <path d="M8 8l8 8M16 8l-8 8"/>
-                                </svg>
-                            </button>
-                        </div>
                         <div class="cd-dashboard-rail__content">
                             <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: rightRail}"></th:block>
                         </div>
@@ -107,6 +225,6 @@
     </div>
 
     <th:block th:fragment="pageScripts">
-        <script th:src="@{/js/dashboard/client-dashboard-page.js(v='20260316a')}" defer></script>
+        <script th:src="@{/js/dashboard/client-dashboard-page.js(v='20260316b')}" defer></script>
     </th:block>
 </th:block>

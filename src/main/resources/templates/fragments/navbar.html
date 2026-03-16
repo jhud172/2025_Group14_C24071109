@@ -433,7 +433,8 @@
     <!-- Accent strip -->
     <div class="accentstrip"></div>
     <div class="mx-auto w-full px-4 sm:px-6 lg:px-8">
-        <div class="navheader__bar">
+        <div class="navheader__bar"
+             th:classappend="${#authorization.expression('!isAuthenticated()')} ? ' navheader__bar--guest' : ' navheader__bar--auth'">
 
             <!-- Brand -->
             <div class="navheader__brand-slot">
@@ -550,12 +551,11 @@
                         aria-expanded="false"
                         aria-label="Toggle navigation">
                     <span class="sr-only">Toggle navigation</span>
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-dropdown-trigger__icon">
-                        <path d="M4 6h16" />
-                        <path d="M4 12h16" />
-                        <path d="M4 18h16" />
-                    </svg>
+                    <span class="nav-dropdown-trigger__icon" aria-hidden="true">
+                        <span class="nav-dropdown-trigger__line"></span>
+                        <span class="nav-dropdown-trigger__line"></span>
+                        <span class="nav-dropdown-trigger__line"></span>
+                    </span>
                 </button>
             </div>
         </div>
@@ -636,7 +636,7 @@
     </nav>
 
     <!-- Toggle behaviour -->
-    <script th:src="@{/js/core/navbar-page.js(v='20260316a')}"></script>
+    <script th:src="@{/js/core/navbar-page.js(v='20260316b')}"></script>
 </header>
 
 

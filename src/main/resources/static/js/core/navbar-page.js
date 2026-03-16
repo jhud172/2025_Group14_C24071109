@@ -3,7 +3,7 @@
     const menu = document.getElementById('siteNavMenu');
     if (!button || !menu) return;
 
-    const mobileNavBreakpoint = window.matchMedia('(max-width: 1028px)');
+    const mobileNavBreakpoint = window.matchMedia('(max-width: 1248px)');
     const header = button.closest('.navheader');
 
     const setOpen = (open) => {

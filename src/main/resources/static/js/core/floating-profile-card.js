@@ -8,6 +8,7 @@ class FloatingProfileCard {
         this.lastScrollY = window.scrollY || window.pageYOffset || 0;
         this.threshold = 24;
         this.foldStartOffset = 56;
+        this.foldBreakpoint = 1248;
         this.isFolded = false;
         this.ticking = false;
         this.onScroll = this.onScroll.bind(this);
@@ -23,7 +24,7 @@ class FloatingProfileCard {
     }
 
     onResize() {
-        if (window.innerWidth < 1024) {
+        if (window.innerWidth < this.foldBreakpoint) {
             this.profileCard.classList.remove('is-folded');
             this.isFolded = false;
         }
@@ -41,7 +42,7 @@ class FloatingProfileCard {
     }
 
     handleScroll() {
-        if (window.innerWidth < 1024) {
+        if (window.innerWidth < this.foldBreakpoint) {
             this.lastScrollY = window.scrollY || window.pageYOffset || 0;
             return;
         }
