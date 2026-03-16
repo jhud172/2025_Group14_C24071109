@@ -4,7 +4,7 @@
 
     <div th:fragment="content">
         <section sec:authorize="isAuthenticated()"
-                 class="mx-auto w-full max-w-7xl px-4 pb-6 pt-0 sm:px-6 lg:px-8 2xl:max-w-full 2xl:px-8"
+                 class="cd-dashboard-page mx-auto w-full max-w-7xl px-4 pb-6 pt-0 sm:px-6 lg:px-8 2xl:max-w-full 2xl:px-8"
                  data-dashboard-role="CLIENT"
                  th:attrappend="data-dashboard-immersive=${dashboardAmbience != null and dashboardAmbience.enabled ? 'true' : 'false'},
                                 data-dashboard-weather=${dashboardAmbience != null ? dashboardAmbience.weather : 'auto'},
@@ -12,27 +12,101 @@
                                 data-dashboard-weather-display-mode=${dashboardAmbience != null ? dashboardAmbience.displayMode : 'VISUAL'},
                                 data-dashboard-time-display-format=${dashboardTimeDisplayFormat != null ? dashboardTimeDisplayFormat : 'TWELVE_HOUR'}">
 
-            <div id="dashboardRoot" class="grid grid-cols-1 gap-4 min-[1028px]:grid-cols-12 min-[1028px]:gap-5 2xl:gap-8">
-                <aside aria-label="Explore platform"
+            <div class="cd-dashboard-mobile-controls" aria-label="Dashboard side panels">
+                <button type="button"
+                        class="cd-dashboard-edge-trigger cd-dashboard-edge-trigger--left"
+                        data-dashboard-drawer-trigger="left"
+                        aria-controls="dashboardLeftRail"
+                        aria-expanded="false"
+                        aria-label="Open dashboard tools">
+                    <span class="cd-dashboard-edge-trigger__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M4 12h16"/>
+                            <path d="M12 4v16"/>
+                            <circle cx="12" cy="12" r="8"/>
+                        </svg>
+                    </span>
+                    <span class="cd-dashboard-edge-trigger__label">Tools</span>
+                </button>
+                <button type="button"
+                        class="cd-dashboard-edge-trigger cd-dashboard-edge-trigger--right"
+                        data-dashboard-drawer-trigger="right"
+                        aria-controls="dashboardRightRail"
+                        aria-expanded="false"
+                        aria-label="Open support and profile">
+                    <span class="cd-dashboard-edge-trigger__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M12 3l7 4v5c0 4.3-2.8 7.5-7 9-4.2-1.5-7-4.7-7-9V7l7-4Z"/>
+                            <path d="M9.5 12.5 11 14l3.5-4"/>
+                        </svg>
+                    </span>
+                    <span class="cd-dashboard-edge-trigger__label">Support</span>
+                </button>
+            </div>
+
+            <div class="cd-dashboard-drawer-backdrop" data-dashboard-drawer-backdrop aria-hidden="true" hidden></div>
+
+            <div id="dashboardRoot" class="cd-dashboard-shell">
+                <aside id="dashboardLeftRail"
+                       aria-label="Explore platform"
                        data-dashboard-left-rail
-                       class="order-2 space-y-4 min-[1028px]:order-1 min-[1028px]:col-span-3 min-[1028px]:self-start min-[1028px]:sticky min-[1028px]:top-24 min-[1028px]:h-fit">
-                    <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: leftRail}"></th:block>
+                       data-dashboard-drawer="left"
+                       class="cd-dashboard-rail cd-dashboard-rail--left">
+                    <div class="cd-dashboard-rail__panel" tabindex="-1">
+                        <div class="cd-dashboard-rail__mobile-header">
+                            <div class="cd-dashboard-rail__mobile-copy">
+                                <p class="cd-kicker">Dashboard Tools</p>
+                                <p class="cd-dashboard-rail__mobile-title">Explore, coaching, and goals</p>
+                            </div>
+                            <button type="button"
+                                    class="cd-dashboard-rail__close"
+                                    data-dashboard-drawer-close
+                                    aria-label="Close dashboard tools">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path d="M8 8l8 8M16 8l-8 8"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="cd-dashboard-rail__content">
+                            <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: leftRail}"></th:block>
+                        </div>
+                    </div>
                 </aside>
 
-                <main class="order-1 space-y-4 min-[1028px]:order-2 min-[1028px]:col-span-6">
+                <main class="cd-dashboard-main">
                     <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: mainColumn}"></th:block>
                 </main>
 
-                <aside aria-label="Help and trust"
+                <aside id="dashboardRightRail"
+                       aria-label="Help and trust"
                        data-dashboard-right-rail
-                       class="order-3 space-y-4 min-[1028px]:col-span-3 min-[1028px]:self-start min-[1028px]:sticky min-[1028px]:top-24 min-[1028px]:h-fit">
-                    <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: rightRail}"></th:block>
+                       data-dashboard-drawer="right"
+                       class="cd-dashboard-rail cd-dashboard-rail--right">
+                    <div class="cd-dashboard-rail__panel" tabindex="-1">
+                        <div class="cd-dashboard-rail__mobile-header">
+                            <div class="cd-dashboard-rail__mobile-copy">
+                                <p class="cd-kicker">Support and Profile</p>
+                                <p class="cd-dashboard-rail__mobile-title">Help, trust, and your account snapshot</p>
+                            </div>
+                            <button type="button"
+                                    class="cd-dashboard-rail__close"
+                                    data-dashboard-drawer-close
+                                    aria-label="Close support and profile">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path d="M8 8l8 8M16 8l-8 8"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="cd-dashboard-rail__content">
+                            <th:block th:replace="~{dashboard/fragments/client-dashboard-shell :: rightRail}"></th:block>
+                        </div>
+                    </div>
                 </aside>
             </div>
         </section>
     </div>
 
     <th:block th:fragment="pageScripts">
-        <script th:src="@{/js/dashboard/client-dashboard-page.js(v='20260315a')}" defer></script>
+        <script th:src="@{/js/dashboard/client-dashboard-page.js(v='20260316a')}" defer></script>
     </th:block>
 </th:block>

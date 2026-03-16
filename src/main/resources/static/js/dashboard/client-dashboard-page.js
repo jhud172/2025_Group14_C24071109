@@ -45,6 +45,103 @@
         return document.querySelector("[data-dashboard-role='CLIENT']");
     }
 
+    function initDashboardShell() {
+        const page = getDashboardRoot();
+        const shell = document.getElementById("dashboardRoot");
+        const backdrop = document.querySelector("[data-dashboard-drawer-backdrop]");
+        const drawers = Array.from(document.querySelectorAll("[data-dashboard-drawer]"));
+        const triggers = Array.from(document.querySelectorAll("[data-dashboard-drawer-trigger]"));
+        if (!page || !shell || !backdrop || !drawers.length || !triggers.length || !window.matchMedia) return;
+
+        const mobileQuery = window.matchMedia("(max-width: 1030px)");
+        let activeSide = null;
+        let lastTrigger = null;
+
+        const drawerFor = (side) => drawers.find((drawer) => drawer.dataset.dashboardDrawer === side) || null;
+        const triggerFor = (side) => triggers.find((trigger) => trigger.dataset.dashboardDrawerTrigger === side) || null;
+
+        const sync = () => {
+            const isMobile = mobileQuery.matches;
+            if (!isMobile) {
+                activeSide = null;
+            }
+
+            page.dataset.dashboardCondensed = isMobile ? "true" : "false";
+            document.body.classList.toggle("cd-dashboard-drawer-open", isMobile && Boolean(activeSide));
+
+            backdrop.hidden = !isMobile;
+            backdrop.classList.toggle("is-visible", isMobile && Boolean(activeSide));
+            backdrop.setAttribute("aria-hidden", isMobile && activeSide ? "false" : "true");
+
+            triggers.forEach((trigger) => {
+                const expanded = isMobile && trigger.dataset.dashboardDrawerTrigger === activeSide;
+                trigger.hidden = !isMobile;
+                trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
+                trigger.classList.toggle("is-active", expanded);
+            });
+
+            drawers.forEach((drawer) => {
+                const isOpen = isMobile && drawer.dataset.dashboardDrawer === activeSide;
+                drawer.classList.toggle("is-open", isOpen);
+                drawer.setAttribute("aria-hidden", isOpen ? "false" : isMobile ? "true" : "false");
+            });
+        };
+
+        const close = (restoreFocus = true) => {
+            if (!activeSide && !mobileQuery.matches) {
+                sync();
+                return;
+            }
+            activeSide = null;
+            sync();
+            if (restoreFocus) {
+                lastTrigger?.focus();
+            }
+        };
+
+        const open = (side, trigger) => {
+            if (!mobileQuery.matches) return;
+            activeSide = side;
+            lastTrigger = trigger || triggerFor(side) || null;
+            sync();
+            drawerFor(side)?.querySelector(".cd-dashboard-rail__panel")?.focus();
+        };
+
+        triggers.forEach((trigger) => {
+            trigger.addEventListener("click", () => {
+                const side = trigger.dataset.dashboardDrawerTrigger;
+                if (!side) return;
+                if (activeSide === side) {
+                    close(false);
+                    trigger.focus();
+                    return;
+                }
+                open(side, trigger);
+            });
+        });
+
+        drawers.forEach((drawer) => {
+            drawer.querySelectorAll("[data-dashboard-drawer-close]").forEach((button) => {
+                button.addEventListener("click", () => close());
+            });
+        });
+
+        backdrop.addEventListener("click", () => close());
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && activeSide) {
+                close();
+            }
+        });
+
+        if (typeof mobileQuery.addEventListener === "function") {
+            mobileQuery.addEventListener("change", sync);
+        } else if (typeof mobileQuery.addListener === "function") {
+            mobileQuery.addListener(sync);
+        }
+
+        sync();
+    }
+
     function getDashboardTimeDisplayFormat() {
         return getDashboardRoot()?.dataset.dashboardTimeDisplayFormat || "TWELVE_HOUR";
     }
@@ -301,7 +398,7 @@
             }
         });
 
-        activate(buttons.find((button) => button.getAttribute("aria-selected") === "true") || buttons[0], true);
+        activate(buttons.find((button) => button.getAttribute("aria-selected") === "true") || buttons[0], false);
     }
 
     function initTrainerTabs() {
@@ -1198,6 +1295,7 @@
     }
 
     function init() {
+        initDashboardShell();
         initGoalSlider();
         initActionHubTabs();
         initCountdowns();

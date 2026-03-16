@@ -10,7 +10,7 @@
               navDaysLeft=${authUser != null ? @platformSubscriptionService.getDaysUntilRenewal(authUser.id, @systemClock) : null},
               navExpired=${authUser != null ? @platformSubscriptionService.hasExpiredSubscription(authUser.id, @systemClock) : false},
               navDaysUnit=${navDaysLeft != null and navDaysLeft == 1 ? 'day' : 'days'}"
-     class="flex items-center gap-3">
+     class="nav-identity-group flex items-center gap-3">
 
     <div sec:authorize="isAuthenticated()" class="nav-auth-container">
         <th:block th:replace="~{fragments/dev-mode :: pill('dev-mode-pill--profile', 'DEV MODE')}"></th:block>

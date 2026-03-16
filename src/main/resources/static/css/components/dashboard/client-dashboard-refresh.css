@@ -1,4 +1,173 @@
 @layer components {
+    .cd-dashboard-page {
+        position: relative;
+        overflow-x: clip;
+    }
+
+    .cd-dashboard-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .cd-dashboard-shell > * {
+        min-width: 0;
+    }
+
+    .cd-dashboard-main {
+        display: grid;
+        gap: 1rem;
+        min-width: 0;
+    }
+
+    .cd-primary-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .cd-dashboard-rail {
+        min-width: 0;
+    }
+
+    .cd-dashboard-rail__panel {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .cd-dashboard-rail__content {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .cd-dashboard-mobile-controls {
+        pointer-events: none;
+    }
+
+    .cd-dashboard-edge-trigger {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.4rem;
+        width: 3.25rem;
+        padding: 0.85rem 0.55rem;
+        border-radius: 1.25rem;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        background: rgba(255, 255, 255, 0.94);
+        color: rgb(15 23 42);
+        box-shadow: 0 22px 36px rgba(15, 23, 42, 0.14);
+        transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease;
+        pointer-events: auto;
+        backdrop-filter: blur(14px);
+    }
+
+    .cd-dashboard-edge-trigger:hover,
+    .cd-dashboard-edge-trigger:focus-visible,
+    .cd-dashboard-edge-trigger.is-active {
+        transform: translateY(-50%) scale(1.02);
+        border-color: rgba(5, 150, 105, 0.38);
+        box-shadow: 0 26px 42px rgba(16, 185, 129, 0.2);
+    }
+
+    .cd-dashboard-edge-trigger__icon {
+        display: inline-flex;
+        width: 1.35rem;
+        height: 1.35rem;
+        align-items: center;
+        justify-content: center;
+        color: rgb(4 120 87);
+    }
+
+    .cd-dashboard-edge-trigger__icon svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .cd-dashboard-edge-trigger__label {
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgb(51 65 85);
+    }
+
+    .cd-dashboard-drawer-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 55;
+        background: rgba(15, 23, 42, 0.32);
+        backdrop-filter: blur(8px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 220ms ease;
+    }
+
+    .cd-dashboard-drawer-backdrop.is-visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .cd-dashboard-rail__mobile-header {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1rem 0.85rem;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .cd-dashboard-rail__mobile-copy {
+        min-width: 0;
+        display: grid;
+        gap: 0.28rem;
+    }
+
+    .cd-dashboard-rail__mobile-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        line-height: 1.35;
+        color: rgb(15 23 42);
+    }
+
+    .cd-dashboard-rail__close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        flex-shrink: 0;
+        border-radius: 999px;
+        border: 1px solid rgba(15, 23, 42, 0.1);
+        background: rgba(255, 255, 255, 0.92);
+        color: rgb(51 65 85);
+        box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+        transition: transform 180ms ease, border-color 180ms ease, color 180ms ease;
+    }
+
+    .cd-dashboard-rail__close:hover,
+    .cd-dashboard-rail__close:focus-visible {
+        transform: translateY(-1px);
+        border-color: rgba(5, 150, 105, 0.36);
+        color: rgb(5 150 105);
+    }
+
+    .cd-dashboard-rail__close svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    body.cd-dashboard-drawer-open {
+        overflow: hidden;
+    }
+
+    body.cd-dashboard-drawer-open .cd-dashboard-edge-trigger {
+        opacity: 0;
+        pointer-events: none;
+    }
+
     .cd-panel,
     .cd-rail-card {
         @apply rounded-[28px] border border-slate-200 bg-white shadow-sm;
@@ -242,6 +411,20 @@
 
     .cd-primary-cta__copy {
         @apply pt-2 text-sm leading-6 text-slate-700;
+    }
+
+    .cd-primary-cta__headline,
+    .cd-primary-cta__title,
+    .cd-panel__title,
+    .cd-rail-card__title,
+    .cd-link-tile__title,
+    .cd-action-card__title,
+    .cd-upcoming-card__title,
+    .cd-goal-card__title,
+    .cd-week-preview__title,
+    .cd-empty-state__title,
+    .cd-activity-item__title {
+        text-wrap: balance;
     }
 
     .cd-ambience-card {
@@ -2141,6 +2324,400 @@
         z-index: 30;
     }
 
+    @media (min-width: 1031px) {
+        .cd-dashboard-shell {
+            grid-template-columns: minmax(15rem, 0.86fr) minmax(0, 1.34fr) minmax(15rem, 0.92fr);
+            gap: 1.1rem;
+        }
+
+        .cd-dashboard-rail {
+            position: sticky;
+            top: 6rem;
+            align-self: start;
+        }
+    }
+
+    @media (min-width: 1539px) {
+        .cd-dashboard-shell {
+            grid-template-columns: minmax(17.5rem, 0.88fr) minmax(0, 1.44fr) minmax(17rem, 0.94fr);
+            gap: 1.5rem;
+        }
+
+        .cd-dashboard-main,
+        .cd-dashboard-rail__content {
+            gap: 1.25rem;
+        }
+    }
+
+    @media (max-width: 1538px) and (min-width: 1031px) {
+        .cd-panel,
+        .cd-rail-card {
+            border-color: rgba(148, 163, 184, 0.22);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .cd-panel {
+            padding: 1.15rem;
+        }
+
+        .cd-rail-card {
+            padding: 0.95rem;
+        }
+
+        .cd-panel__title,
+        .cd-rail-card__title {
+            font-size: clamp(1.35rem, 1.4vw, 1.5rem);
+        }
+
+        .cd-link-tile {
+            gap: 0.85rem;
+            padding: 0.9rem;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .cd-link-tile__icon,
+        .cd-primary-cta__icon,
+        .cd-action-card__icon {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        }
+
+        .cd-primary-actions {
+            gap: 0.9rem;
+        }
+
+        .cd-primary-cta {
+            min-height: 232px;
+            padding: 1.1rem;
+            border-color: rgba(16, 185, 129, 0.22);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.1);
+        }
+
+        .cd-primary-cta__header-stack {
+            padding-inline: 3.1rem;
+        }
+
+        .cd-primary-cta__title {
+            font-size: clamp(1.45rem, 1.7vw, 1.7rem);
+        }
+
+        .cd-primary-cta__headline {
+            font-size: clamp(1.25rem, 1.65vw, 1.5rem);
+        }
+
+        .cd-action-card,
+        .cd-week-preview,
+        .cd-goal-card,
+        .cd-summary-card,
+        .cd-upcoming-card,
+        .cd-context-panel {
+            border-color: rgba(148, 163, 184, 0.2);
+        }
+    }
+
+    @media (max-width: 1030px) {
+        .cd-dashboard-page {
+            padding-bottom: 5rem;
+        }
+
+        .cd-dashboard-shell {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1rem;
+        }
+
+        .cd-dashboard-main {
+            gap: 1rem;
+        }
+
+        .cd-dashboard-edge-trigger {
+            display: inline-flex;
+            position: fixed;
+            top: 50%;
+            z-index: 70;
+            transform: translateY(-50%);
+        }
+
+        .cd-dashboard-edge-trigger--left {
+            left: max(0.55rem, env(safe-area-inset-left));
+        }
+
+        .cd-dashboard-edge-trigger--right {
+            right: max(0.55rem, env(safe-area-inset-right));
+        }
+
+        .cd-dashboard-rail {
+            position: fixed;
+            top: 0.7rem;
+            bottom: 0.7rem;
+            z-index: 65;
+            width: min(24rem, calc(100vw - 1.75rem));
+            max-width: calc(100vw - 1.75rem);
+            pointer-events: none;
+        }
+
+        .cd-dashboard-rail--left {
+            left: 0.7rem;
+        }
+
+        .cd-dashboard-rail--right {
+            right: 0.7rem;
+        }
+
+        .cd-dashboard-rail__panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 2rem;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background:
+                    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+            box-shadow: 0 30px 48px rgba(15, 23, 42, 0.2);
+            opacity: 0;
+            transform: translateX(-108%);
+            transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+        }
+
+        .cd-dashboard-rail--right .cd-dashboard-rail__panel {
+            transform: translateX(108%);
+        }
+
+        .cd-dashboard-rail.is-open {
+            pointer-events: auto;
+        }
+
+        .cd-dashboard-rail.is-open .cd-dashboard-rail__panel {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .cd-dashboard-rail__mobile-header {
+            display: flex;
+        }
+
+        .cd-dashboard-rail__content {
+            flex: 1;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 0 1rem 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cd-panel,
+        .cd-rail-card {
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.09);
+        }
+
+        .cd-action-hub .cd-panel__header,
+        .cd-ambience-card__top,
+        .cd-trainer-message-form__actions {
+            align-items: stretch;
+        }
+
+        .cd-action-grid,
+        .cd-action-secondary-grid,
+        .cd-summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .cd-week-layout {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    @media (max-width: 862px) {
+        .cd-dashboard-main,
+        .cd-dashboard-rail__content {
+            gap: 0.85rem;
+        }
+
+        .cd-panel,
+        .cd-rail-card {
+            border-radius: 24px;
+            padding: 1rem;
+            box-shadow: 0 14px 26px rgba(15, 23, 42, 0.1);
+        }
+
+        .cd-panel__title,
+        .cd-rail-card__title {
+            font-size: 1.32rem;
+            line-height: 1.2;
+        }
+
+        .cd-primary-actions {
+            gap: 0.75rem;
+        }
+
+        .cd-primary-cta {
+            min-height: 196px;
+            padding: 0.95rem;
+            border-radius: 24px;
+        }
+
+        .cd-primary-cta__top {
+            min-height: 4.6rem;
+            padding-block: 0 0.75rem;
+        }
+
+        .cd-primary-cta__header-stack {
+            padding-inline: 2.65rem;
+        }
+
+        .cd-primary-cta__icon {
+            top: 0;
+            height: 2.6rem;
+            min-width: 2.6rem;
+            border-radius: 0.95rem;
+        }
+
+        .cd-primary-cta__title {
+            font-size: clamp(1.08rem, 4.6vw, 1.4rem);
+        }
+
+        .cd-primary-cta__headline {
+            font-size: clamp(1.02rem, 4.4vw, 1.32rem);
+            line-height: 1.1;
+        }
+
+        .cd-primary-cta__subhead,
+        .cd-primary-cta__copy,
+        .cd-action-card__text,
+        .cd-upcoming-card__text,
+        .cd-panel__copy,
+        .cd-rail-card__copy {
+            font-size: 0.82rem;
+            line-height: 1.4;
+        }
+
+        .cd-chip-grid,
+        .cd-chip-row {
+            gap: 0.4rem;
+        }
+
+        .cd-stat-chip {
+            padding: 0.25rem 0.6rem;
+            font-size: 0.68rem;
+        }
+
+        .cd-ambience-card__body,
+        .cd-week-preview__lists,
+        .cd-identity-stats,
+        .cd-action-grid,
+        .cd-action-secondary-grid,
+        .cd-summary-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .cd-action-card__metrics--hero,
+        .cd-action-card__footer,
+        .cd-upcoming-card__footer,
+        .cd-trainer-message-form__actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .cd-action-card__countdown {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .cd-segmented,
+        .cd-goal-slider__tabs,
+        .cd-ambience-card__graph-toggle {
+            width: 100%;
+        }
+
+        .cd-segmented__button {
+            flex: 1 1 0;
+            text-align: center;
+        }
+
+        .cd-week-strip-shell {
+            padding: 0.45rem;
+            border-radius: 1.6rem;
+        }
+
+        .cd-week-day-button {
+            min-width: 9rem;
+            padding: 0.9rem 0.85rem;
+        }
+
+        .cd-dashboard-edge-trigger {
+            width: 3rem;
+            padding: 0.75rem 0.45rem;
+            border-radius: 1.05rem;
+        }
+
+        .cd-dashboard-edge-trigger__label {
+            font-size: 0.58rem;
+            letter-spacing: 0.14em;
+        }
+
+        .cd-dashboard-rail {
+            width: min(22rem, calc(100vw - 1.25rem));
+            max-width: calc(100vw - 1.25rem);
+            top: 0.5rem;
+            bottom: 0.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cd-dashboard-page {
+            padding-bottom: 4.5rem;
+        }
+
+        .cd-primary-actions {
+            gap: 0.6rem;
+        }
+
+        .cd-primary-cta {
+            min-height: 176px;
+            padding: 0.85rem;
+        }
+
+        .cd-primary-cta__top {
+            min-height: 4.1rem;
+        }
+
+        .cd-primary-cta__header-stack {
+            padding-inline: 2.25rem;
+        }
+
+        .cd-primary-cta__icon {
+            height: 2.35rem;
+            min-width: 2.35rem;
+        }
+
+        .cd-primary-cta__subhead,
+        .cd-primary-cta__copy {
+            font-size: 0.76rem;
+        }
+
+        .cd-kicker {
+            letter-spacing: 0.16em;
+        }
+
+        .cd-dashboard-edge-trigger {
+            width: 2.8rem;
+            padding-inline: 0.38rem;
+        }
+
+        .cd-dashboard-edge-trigger__label {
+            display: none;
+        }
+
+        .cd-dashboard-rail__mobile-header {
+            padding-inline: 0.85rem;
+        }
+
+        .cd-dashboard-rail__mobile-title {
+            font-size: 0.88rem;
+        }
+
+        .cd-dashboard-rail__content {
+            padding: 0 0.85rem 0.85rem;
+        }
+    }
+
     html.dark .cd-panel,
     html.dark .cd-rail-card,
     html.dark .cd-action-card,
@@ -2355,6 +2932,38 @@
     html.dark .cd-action-hub__route {
         border-color: rgba(148, 163, 184, 0.18);
         background: rgba(15, 23, 42, 0.72);
+    }
+
+    html.dark .cd-dashboard-edge-trigger,
+    html.dark .cd-dashboard-rail__panel {
+        border-color: rgba(148, 163, 184, 0.2);
+        background:
+                linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(17, 24, 39, 0.95));
+        color: rgb(241 245 249);
+        box-shadow: 0 28px 44px rgba(2, 6, 23, 0.48);
+    }
+
+    html.dark .cd-dashboard-edge-trigger__icon {
+        color: rgb(110 231 183);
+    }
+
+    html.dark .cd-dashboard-edge-trigger__label,
+    html.dark .cd-dashboard-rail__mobile-title {
+        color: rgb(226 232 240);
+    }
+
+    html.dark .cd-dashboard-drawer-backdrop {
+        background: rgba(2, 6, 23, 0.68);
+    }
+
+    html.dark .cd-dashboard-rail__mobile-header {
+        border-color: rgba(148, 163, 184, 0.16);
+    }
+
+    html.dark .cd-dashboard-rail__close {
+        border-color: rgba(148, 163, 184, 0.18);
+        background: rgba(15, 23, 42, 0.9);
+        color: rgb(226 232 240);
     }
 
     html.dark .cd-action-hub__route-copy {
