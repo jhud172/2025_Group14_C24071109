@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:with="pageTitle=${'Calendar — Day: ' + date}"
+          th:with="pageTitle=${'Calendar â€” Day: ' + date}"
           th:replace="~{base :: layout(${pageTitle}, null, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="content">
@@ -72,7 +72,7 @@
         </div>
         <div class="day-main-progress-tooltip" role="status" aria-live="polite">
             <p class="font-semibold" th:text="${remain > 0 ? remain + ' items left to complete today' : 'Completion reached for this day'}"></p>
-            <p class="text-xs mt-1" th:text="${tasksLeft + ' tasks left · ' + workoutsLeft + ' workouts left'}"></p>
+            <p class="text-xs mt-1" th:text="${tasksLeft + ' tasks left Â· ' + workoutsLeft + ' workouts left'}"></p>
         </div>
     </div>
 
@@ -135,7 +135,7 @@
                         th:classappend="${isToday} ? ' text-emerald-700 dark:text-emerald-400' : ' text-slate-900 dark:text-slate-100'">
                         <span th:text="${#temporals.format(date, 'EEEE')}"></span>
                         <span class="block text-base font-semibold text-slate-500 dark:text-slate-400 sm:inline sm:text-lg"
-                              th:text="${' — ' + day + suffix + ' ' + #temporals.format(date, 'MMMM yyyy')}"></span>
+                              th:text="${' â€” ' + day + suffix + ' ' + #temporals.format(date, 'MMMM yyyy')}"></span>
                     </h1>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                         <span th:if="${isToday}"
@@ -147,7 +147,7 @@
                         <span th:if="${dayCompletionStatus != null && dayCompletionStatus.name() == 'GREEN'}"
                               data-testid="gold-medal-badge"
                               class="day-gold-medal inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-200">
-                            🏅 Perfect day!
+                            ðŸ… Perfect day!
                         </span>
                         <span class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
                               data-testid="day-completion-summary"
@@ -172,7 +172,7 @@
                             </div>
                             <div id="timed-focus-value" class="text-lg font-semibold text-emerald-700 dark:text-emerald-300"
                                  data-testid="timed-focus-value"
-                                 th:text="${timedFocus != null ? timedFocus.label : '—'}">
+                                 th:text="${timedFocus != null ? timedFocus.label : 'â€”'}">
                             </div>
                         </div>
                         <p id="timed-focus-support" class="mt-2 text-xs text-emerald-700/90 dark:text-emerald-300/90">Live selection based on your day timeline.</p>
@@ -199,7 +199,7 @@
                                     th:disabled="${(hasAnyPreferences != null && !hasAnyPreferences) || isOptimised}"
                                     th:title="${isOptimised ? 'Locked by AI Optimise' : ''}"
                                     class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 sm:w-72">
-                                    <option value="" th:selected="${dailyFocus == null || #strings.isEmpty(dailyFocus)}">Select a focus…</option>
+                                    <option value="" th:selected="${dailyFocus == null || #strings.isEmpty(dailyFocus)}">Select a focusâ€¦</option>
                                     <option th:if="${dailyFocus != null && !#strings.isEmpty(dailyFocus) && (dailyFocusOptions == null || !dailyFocusOptions.contains(dailyFocus))}"
                                             th:value="${dailyFocus}"
                                             th:text="${dailyFocus}"
@@ -275,7 +275,7 @@
                         <p class="ring-pct"
                            th:text="${pct + '%'}">0%</p>
                         <p class="ring-label"
-                           th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? '🏅' : (dayCompletionStatus.name() == 'BLUE' ? 'Today' : (dayCompletionStatus.name() == 'ORANGE' ? 'Partial' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Started')))) : 'Started'}">
+                           th:text="${dayCompletionStatus != null ? (dayCompletionStatus.name() == 'GREEN' ? 'ðŸ…' : (dayCompletionStatus.name() == 'BLUE' ? 'Today' : (dayCompletionStatus.name() == 'ORANGE' ? 'Partial' : (dayCompletionStatus.name() == 'RED' ? 'Late' : 'Started')))) : 'Started'}">
                         </p>
                     </div>
                 </div>
@@ -408,7 +408,7 @@
                             <label class="sr-only" for="task-filter-input">Filter tasks by name</label>
                             <input id="task-filter-input"
                                    type="text"
-                                   placeholder="Filter tasks…"
+                                   placeholder="Filter tasksâ€¦"
                                    aria-label="Filter tasks by name"
                                    class="w-full rounded-lg border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"/>
                         </div>
@@ -463,7 +463,7 @@
                            th:text="${task.title}"></a>
                         <div class="mt-1 flex flex-wrap items-center gap-2">
                             <p data-testid="task-time" class="text-sm text-slate-600 dark:text-slate-300"
-                               th:text="${task.time != null ? #temporals.format(task.time, 'HH:mm') : '—'}"></p>
+                               th:text="${task.time != null ? #temporals.format(task.time, 'HH:mm') : 'â€”'}"></p>
                             <span th:if="${task.activityType != null}"
                                   class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800 dark:bg-blue-950/40 dark:text-blue-200"
                                   th:text="${task.activityType.icon + ' ' + task.activityType.label}"
@@ -517,7 +517,7 @@
                         <div class="rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
                             <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Notes</p>
                             <p data-testid="task-drawer-notes" class="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200"
-                               th:text="${task.notes != null && !#strings.isEmpty(task.notes) ? task.notes : '—'}"></p>
+                               th:text="${task.notes != null && !#strings.isEmpty(task.notes) ? task.notes : 'â€”'}"></p>
                         </div>
 
                         <div class="rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
@@ -526,7 +526,7 @@
                                 <li th:if="${warnings == null || warnings.isEmpty()}" class="text-sm text-slate-600 dark:text-slate-300">None</li>
                                 <li th:each="w : ${warnings}" class="rounded-xl border border-slate-200 bg-white/70 p-3 text-sm text-slate-700 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
                                     <span th:if="${w.triggerType != null && w.triggerType.name() == 'TIME'}">
-                                        Time warning at <span class="font-semibold" th:text="${w.triggerTime != null ? #temporals.format(w.triggerTime, 'HH:mm') : '—'}"></span>
+                                        Time warning at <span class="font-semibold" th:text="${w.triggerTime != null ? #temporals.format(w.triggerTime, 'HH:mm') : 'â€”'}"></span>
                                     </span>
                                     <span th:if="${w.triggerType != null && w.triggerType.name() == 'ON_TASK_COMPLETE'}">
                                         After completing <span class="font-semibold" th:text="${w.triggerTask != null ? w.triggerTask.title : 'another task'}"></span>
@@ -709,7 +709,7 @@
                             <article class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/50">
                                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Remaining actions</p>
                                 <p id="overview-remaining-total" class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100" th:text="${remaining} + ' left'">0 left</p>
-                                <p id="overview-remaining-breakdown" class="mt-1 text-xs text-slate-600 dark:text-slate-300" th:text="${tasksLeft + ' tasks · ' + workoutsLeft + ' workouts'}">0 tasks · 0 workouts</p>
+                                <p id="overview-remaining-breakdown" class="mt-1 text-xs text-slate-600 dark:text-slate-300" th:text="${tasksLeft + ' tasks Â· ' + workoutsLeft + ' workouts'}">0 tasks Â· 0 workouts</p>
                             </article>
                             <article class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/50">
                                 <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Next priority</p>
@@ -722,12 +722,12 @@
 
                     <section data-testid="day-overview"
                          class="day-overview-section p-4"
-                         th:with="isComplete=${dayCompletionStatus == T(uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionStatus).GREEN}">
+                         th:with="isComplete=${dayCompletionStatus == T(uk.ac.cf._5.group14.One_To_One.CalendarData.DailyCompletionStatus).GREEN}">
                         <!-- Premium gate: show lock if not premium -->
                         <div th:if="${!isPremium}"
                              class="flex flex-col items-center gap-3 rounded-xl border border-amber-200 bg-amber-50/60 p-6 text-center dark:border-amber-900/40 dark:bg-amber-950/15"
                              data-testid="overview-premium-gate">
-                            <span class="text-3xl" aria-hidden="true">🔒</span>
+                            <span class="text-3xl" aria-hidden="true">ðŸ”’</span>
                             <div>
                                 <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">Overview is a Premium feature</p>
                                 <p class="mt-1 text-xs text-amber-900/70 dark:text-amber-100/70">Upgrade to unlock AI reflection, performance insights, and streak tracking.</p>
@@ -744,7 +744,7 @@
                             <div>
                                 <h2 class="text-sm font-semibold text-amber-900 dark:text-amber-100">Day overview</h2>
                                 <p class="mt-0.5 text-sm text-amber-900/80 dark:text-amber-100/80"
-                                   th:text="${isComplete} ? 'Unlocked — reflect and ask AI about the day.' : 'Locked — complete all tasks &amp; workouts to unlock.'"></p>
+                                   th:text="${isComplete} ? 'Unlocked â€” reflect and ask AI about the day.' : 'Locked â€” complete all tasks &amp; workouts to unlock.'"></p>
                             </div>
 
                             <span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold"
@@ -899,7 +899,7 @@
                                data-testid="ai-task-input"
                                placeholder='I need to make my bed today'
                                class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                        <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Describe what you want to do and we’ll generate a task.</p>
+                        <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Describe what you want to do and weâ€™ll generate a task.</p>
                     </div>
                     <button class="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-base font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">
                         Generate and add task
@@ -978,7 +978,7 @@
                         <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="add-task-activity-type">Activity Type</label>
                         <select id="add-task-activity-type" name="activityType"
                                 class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                            <option value="">— None (non-exercise) —</option>
+                            <option value="">â€” None (non-exercise) â€”</option>
                             <option th:each="at : ${activityTypes}"
                                     th:value="${at.name()}"
                                     th:text="${at.icon + ' ' + at.label}"></option>

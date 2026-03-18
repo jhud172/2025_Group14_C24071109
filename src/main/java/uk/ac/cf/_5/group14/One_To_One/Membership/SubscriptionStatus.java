@@ -1,0 +1,7 @@
+package uk.ac.cf._5.group14.One_To_One.Membership;
+
+public enum SubscriptionStatus {
+    ACTIVE,
+    CANCELLED,
+    EXPIRED
+}

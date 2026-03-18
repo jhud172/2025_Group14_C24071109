@@ -1,7 +1,7 @@
 # System Overview
 
 ## Snapshot
-The One to One platform is a Spring Boot monolith for behaviour-change coaching, planning, tracking, and trainer-client collaboration. It currently delivers role-based dashboards, calendar planning, nutrition and health logging, goals and check-ins, trainer plan delivery, messaging, gym and billing flows, and profile/personalisation features.
+The One to One platform is a Spring Boot monolith for one-to-one coaching, planning, tracking, and trainer-client collaboration. It currently delivers role-based dashboards, calendar planning, nutrition and health logging, goals and check-ins, trainer plan delivery, messaging, gym and billing flows, and profile/personalisation features.
 
 Current project state as of 14 March 2026:
 - Client dashboard is active and heavily customised, including Action Hub, planner, weekly summary, trainer relationship card, profile rail, and live dashboard ambience/weather.
@@ -88,7 +88,7 @@ Current client dashboard sections include:
 - Your Profile
 
 ### Action Hub
-The Action Hub is the client’s prioritisation card. It currently supports:
+The Action Hub is the clientâ€™s prioritisation card. It currently supports:
 - Recommended view
 - All view
 - Task, workout, and meal/log-meal recommendation cards
@@ -273,8 +273,8 @@ Passed:
 - `node --check src/main/resources/static/js/profile/profile-page.js`
 - `node --check src/main/resources/static/js/profile/profile-cards-page.js`
 - `npm run build:css`
-- `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.DashboardTests.ClientDashboardMvcTest`
-- `./gradlew test --tests uk.ac.cf._5.group14.BehaviourChangeGroupProject.ProfileTests.ProfileRouteAccessTest`
+- `./gradlew test --tests uk.ac.cf._5.group14.One_To_One.DashboardTests.ClientDashboardMvcTest`
+- `./gradlew test --tests uk.ac.cf._5.group14.One_To_One.ProfileTests.ProfileRouteAccessTest`
 
 ### Full Suite Status
 `./gradlew test` is currently not fully green.

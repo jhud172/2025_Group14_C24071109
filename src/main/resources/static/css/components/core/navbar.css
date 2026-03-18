@@ -43,7 +43,8 @@
         transition: gap 0.22s ease, padding 0.22s ease, grid-template-columns 0.22s ease;
     }
 
-    .navheader__bar--guest {
+    .navheader__bar--guest,
+    .navheader-bar-guest {
         position: relative;
     }
 
@@ -93,30 +94,45 @@
     }
 
     @media (min-width: 1249px) {
-        .navheader__bar--guest .navheader__nav-slot {
-            position: absolute;
-            inset: 0;
+        .navheader__bar--guest,
+        .navheader-bar-guest {
+            grid-template-columns: max-content minmax(0, 1fr) max-content;
+            gap: clamp(1rem, 2vw, 2rem);
+        }
+
+        .navheader__bar--guest .navheader__nav-slot,
+        .navheader-bar-guest .navheader__nav-slot {
+            position: static;
+            inset: auto;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            pointer-events: none;
-            z-index: 1;
+            pointer-events: auto;
+            justify-self: stretch;
         }
 
-        .navheader__bar--guest .desktop-nav {
-            max-width: min(100%, calc(100% - 28rem));
-            pointer-events: auto;
+        .navheader__bar--guest .desktop-nav,
+        .navheader-bar-guest .desktop-nav {
+            width: 100%;
+            max-width: none;
+            justify-content: center;
         }
 
         .navheader__bar--guest .desktop-nav nav,
-        .navheader__bar--guest .navsurface--desktop {
+        .navheader__bar--guest .navsurface--desktop,
+        .navheader-bar-guest .desktop-nav nav,
+        .navheader-bar-guest .navsurface--desktop {
             max-width: 100%;
+            margin-inline: auto;
         }
 
         .navheader__bar--guest .navheader__brand-slot,
-        .navheader__bar--guest .navheader__banner-slot {
+        .navheader__bar--guest .navheader__banner-slot,
+        .navheader-bar-guest .navheader__brand-slot,
+        .navheader-bar-guest .navheader__banner-slot {
             position: relative;
-            z-index: 2;
+            z-index: auto;
         }
     }
 

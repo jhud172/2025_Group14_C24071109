@@ -12,7 +12,7 @@ In short:
 - The dev-mode overview is the live implementation snapshot.
 
 ## Current Dev Mode Snapshot
-As of 15 March 2026, the website remains a Spring Boot behaviour-change coaching platform with role-based dashboards, planning, tracking, trainer-client collaboration, messaging, profile customisation, and saved user settings.
+As of 15 March 2026, the website remains a Spring Boot one-to-one coaching platform with role-based dashboards, planning, tracking, trainer-client collaboration, messaging, profile customisation, and saved user settings.
 
 Dev mode currently reflects a more up-to-date UI and interaction layer than the stable overview in a few important areas:
 - Client dashboard interactions have been refined beyond the broader stable description.
@@ -24,7 +24,7 @@ Dev mode currently reflects a more up-to-date UI and interaction layer than the 
 
 ## What Dev Mode Covers That The Stable Overview Does Not
 
-### 1. Latest Behaviour Changes
+### 1. Latest One_To_One Updates
 This file should track recent feature changes before the stable overview is rewritten to absorb them.
 
 Current examples:
