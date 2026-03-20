@@ -66,4 +66,30 @@ class SchemaCompatibilityInitializerTest {
 
         verify(jdbcTemplate, never()).execute(anyString());
     }
+
+    @Test
+    void createsDevModePageSettingsTableWhenMissing() {
+        when(jdbcTemplate.queryForObject(
+            eq(SchemaCompatibilityInitializer.HAS_TABLE_SQL),
+            eq(Integer.class),
+            eq(SchemaCompatibilityInitializer.DEV_MODE_PAGE_SETTINGS_TABLE)
+        )).thenReturn(0);
+
+        initializer.ensureDevModePageSettingsTable();
+
+        verify(jdbcTemplate).execute(SchemaCompatibilityInitializer.CREATE_DEV_MODE_PAGE_SETTINGS_TABLE_SQL);
+    }
+
+    @Test
+    void skipsDevModePageSettingsCreationWhenTableAlreadyExists() {
+        when(jdbcTemplate.queryForObject(
+            eq(SchemaCompatibilityInitializer.HAS_TABLE_SQL),
+            eq(Integer.class),
+            eq(SchemaCompatibilityInitializer.DEV_MODE_PAGE_SETTINGS_TABLE)
+        )).thenReturn(1);
+
+        initializer.ensureDevModePageSettingsTable();
+
+        verify(jdbcTemplate, never()).execute(SchemaCompatibilityInitializer.CREATE_DEV_MODE_PAGE_SETTINGS_TABLE_SQL);
+    }
 }

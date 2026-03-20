@@ -20,6 +20,12 @@ public class SchemaCompatibilityInitializer {
         AND UPPER(column_name) = UPPER(?)
         """;
 
+    static final String HAS_TABLE_SQL = """
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE UPPER(table_name) = UPPER(?)
+        """;
+
     static final List<UserColumnPatch> USER_COLUMN_PATCHES = List.of(
         new UserColumnPatch("date_of_birth", """
             ALTER TABLE users
@@ -83,6 +89,18 @@ public class SchemaCompatibilityInitializer {
             """)
     );
 
+    static final String DEV_MODE_PAGE_SETTINGS_TABLE = "dev_mode_page_settings";
+
+    static final String CREATE_DEV_MODE_PAGE_SETTINGS_TABLE_SQL = """
+        CREATE TABLE IF NOT EXISTS dev_mode_page_settings
+        (
+            id BIGSERIAL PRIMARY KEY,
+            page_key VARCHAR(80) NOT NULL UNIQUE,
+            access_mode VARCHAR(20) NOT NULL DEFAULT 'ENABLED',
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """;
+
     private final JdbcTemplate jdbcTemplate;
 
     @PostConstruct
@@ -98,6 +116,17 @@ public class SchemaCompatibilityInitializer {
         }
     }
 
+    @PostConstruct
+    void ensureDevModePageSettingsTable() {
+        if (hasTable(DEV_MODE_PAGE_SETTINGS_TABLE)) {
+            log.debug("Schema compatibility check: {} already exists.", DEV_MODE_PAGE_SETTINGS_TABLE);
+            return;
+        }
+
+        jdbcTemplate.execute(CREATE_DEV_MODE_PAGE_SETTINGS_TABLE_SQL);
+        log.warn("Applied schema compatibility patch: created missing {} table.", DEV_MODE_PAGE_SETTINGS_TABLE);
+    }
+
     private boolean hasUsersColumn(String columnName) {
         Integer existingColumns = jdbcTemplate.queryForObject(
             HAS_USERS_COLUMN_SQL,
@@ -105,6 +134,15 @@ public class SchemaCompatibilityInitializer {
             columnName
         );
         return existingColumns != null && existingColumns > 0;
+    }
+
+    private boolean hasTable(String tableName) {
+        Integer existingTables = jdbcTemplate.queryForObject(
+            HAS_TABLE_SQL,
+            Integer.class,
+            tableName
+        );
+        return existingTables != null && existingTables > 0;
     }
 
     record UserColumnPatch(String columnName, String ddl) {}

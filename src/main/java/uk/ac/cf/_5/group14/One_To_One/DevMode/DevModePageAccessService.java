@@ -10,10 +10,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.AntPathMatcher;
 
 @Service
+@Slf4j
 public class DevModePageAccessService {
 
     private static final String RESTRICTED_MESSAGE =
@@ -132,10 +135,15 @@ public class DevModePageAccessService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown development page key."));
 
-        DevModePageSetting setting = settingRepository.findByPageKey(definition.key())
-                .orElseGet(() -> new DevModePageSetting(definition.key(), accessMode));
-        setting.setAccessMode(accessMode);
-        settingRepository.save(setting);
+        try {
+            DevModePageSetting setting = settingRepository.findByPageKey(definition.key())
+                    .orElseGet(() -> new DevModePageSetting(definition.key(), accessMode));
+            setting.setAccessMode(accessMode);
+            settingRepository.save(setting);
+        } catch (DataAccessException ex) {
+            log.warn("Dev mode page settings table is unavailable; unable to update page {}.", definition.key(), ex);
+            throw new IllegalStateException("Dev mode page settings are temporarily unavailable.", ex);
+        }
     }
 
     public boolean hasPage(String pageKey) {
@@ -185,9 +193,14 @@ public class DevModePageAccessService {
     }
 
     private Map<String, DevModePageAccessMode> loadOverrides() {
-        return settingRepository.findAll().stream()
-                .collect(Collectors.toMap(DevModePageSetting::getPageKey, DevModePageSetting::getAccessMode,
-                        (left, right) -> right, LinkedHashMap::new));
+        try {
+            return settingRepository.findAll().stream()
+                    .collect(Collectors.toMap(DevModePageSetting::getPageKey, DevModePageSetting::getAccessMode,
+                            (left, right) -> right, LinkedHashMap::new));
+        } catch (DataAccessException ex) {
+            log.warn("Dev mode page settings table is unavailable; falling back to default page access modes.", ex);
+            return Map.of();
+        }
     }
 
     private boolean matches(DevModePageDefinition definition, String requestPath) {

@@ -88,6 +88,8 @@ public class AdminSupportController {
             redirectAttributes.addFlashAttribute("devPageAccessSuccess", "Updated " + pageKey + " to " + accessMode.name().toLowerCase() + ".");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("devPageAccessError", "Invalid access mode selected.");
+        } catch (IllegalStateException ex) {
+            redirectAttributes.addFlashAttribute("devPageAccessError", ex.getMessage());
         }
 
         return "redirect:/admin/dashboard";
