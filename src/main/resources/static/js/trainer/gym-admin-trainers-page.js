@@ -1,43 +1,56 @@
-function showUpdateNotesModal(button) {
-    const requestId = button.getAttribute('data-request-id');
-    const trainerName = button.getAttribute('data-trainer-name');
-    const currentNotes = button.getAttribute('data-current-notes');
-    
-    document.getElementById('modalTrainerName').textContent = trainerName;
-    document.getElementById('modalNotes').value = currentNotes || '';
-    document.getElementById('updateNotesForm').action = '/gym/admin/trainers/' + encodeURIComponent(requestId) + '/update-notes';
-    
-    document.getElementById('updateNotesModal').classList.remove('hidden');
-    document.getElementById('updateNotesModal').classList.add('flex');
-}
+(function () {
+    const modal = document.getElementById('updateNotesModal');
+    const form = document.getElementById('updateNotesForm');
+    const trainerName = document.getElementById('modalTrainerName');
+    const notes = document.getElementById('modalNotes');
 
-function hideUpdateNotesModal() {
-    document.getElementById('updateNotesModal').classList.add('hidden');
-    document.getElementById('updateNotesModal').classList.remove('flex');
-}
+    if (!modal || !form || !trainerName || !notes) return;
 
-// Auto-open modal if server provided data
-(function() {
-    var data = window.gymTrainersData || {};
-    if (data.updateNotesRequestId !== null && data.updateNotesRequestId !== undefined) {
-        document.getElementById('modalTrainerName').textContent = data.updateNotesTrainerName || '';
-        document.getElementById('modalNotes').value = data.updateNotesNotes || '';
-        document.getElementById('updateNotesForm').action = '/gym/admin/trainers/' + encodeURIComponent(data.updateNotesRequestId) + '/update-notes';
-        document.getElementById('updateNotesModal').classList.remove('hidden');
-        document.getElementById('updateNotesModal').classList.add('flex');
+    function openModal(requestId, displayName, currentNotes) {
+        trainerName.textContent = displayName || '';
+        notes.value = currentNotes || '';
+        form.action = '/gym/admin/trainers/' + encodeURIComponent(requestId) + '/update-notes';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
-})();
 
-// Close modal on background click
-document.getElementById('updateNotesModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        hideUpdateNotesModal();
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
-});
 
-// Close modal on Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        hideUpdateNotesModal();
+    document.querySelectorAll('[data-open-update-notes]').forEach((button) => {
+        button.addEventListener('click', () => {
+            openModal(
+                button.getAttribute('data-request-id'),
+                button.getAttribute('data-trainer-name'),
+                button.getAttribute('data-current-notes')
+            );
+        });
+    });
+
+    document.querySelectorAll('[data-close-update-notes]').forEach((button) => {
+        button.addEventListener('click', closeModal);
+    });
+
+    const bootstrapRequestId = modal.dataset.requestId;
+    if (bootstrapRequestId) {
+        openModal(
+            bootstrapRequestId,
+            modal.dataset.trainerName,
+            modal.dataset.currentNotes
+        );
     }
-});
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+}());

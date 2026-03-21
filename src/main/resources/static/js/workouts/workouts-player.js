@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const bootstrap = window.__workoutPlayerBootstrap || {};
-    const sessionId = bootstrap.sessionId;
-    const csrfHeader = bootstrap.csrfHeader || "X-CSRF-TOKEN";
-    const csrfToken = bootstrap.csrfToken || "";
+    const root = document.querySelector("[data-workout-session-id]");
+    const sessionId = root ? Number(root.dataset.workoutSessionId || 0) : 0;
+    const csrfHeader = root?.dataset.csrfHeader || "X-CSRF-TOKEN";
+    const csrfToken = root?.dataset.csrfToken || "";
 
     if (!sessionId) {
         return;

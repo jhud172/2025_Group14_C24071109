@@ -4,7 +4,8 @@
     <div th:fragment="styles"></div>
 
     <div th:fragment="content">
-        <div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8"
+             th:attr="data-workout-session-id=${session.id}, data-csrf-header=${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}, data-csrf-token=${_csrf != null ? _csrf.token : ''}">
 
 
             <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_18rem]">
@@ -33,7 +34,7 @@
                             <label class="sr-only" for="session-goal-select">Session goal</label>
                             <select id="session-goal-select"
                                     name="goalId"
-                                    onchange="this.form.submit()"
+                                    data-auto-submit
                                     class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
                                 <option value="">No goal</option>
                                 <option th:each="goal : ${goalOptions}"
@@ -134,13 +135,6 @@
     </div>
 
     <div th:fragment="pageScripts">
-        <script>
-            window.__workoutPlayerBootstrap = {
-                csrfHeader: /*[[${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}]]*/ 'X-CSRF-TOKEN',
-                csrfToken: /*[[${_csrf != null ? _csrf.token : ''}]]*/ '',
-                sessionId: /*[[${session.id}]]*/ 0
-            };
-        </script>
         <script src="/js/workouts/workouts-player.js" defer></script>
     </div>
 </th:block>

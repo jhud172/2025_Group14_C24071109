@@ -1,7 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const bootstrap = window.__notesBootstrap || {};
-    const csrfHeader = bootstrap.csrfHeader || "X-CSRF-TOKEN";
-    const csrfToken = bootstrap.csrfToken || "";
+    const root = document.getElementById("notes-app");
+    if (!root) {
+        return;
+    }
+
+    const csrfHeader = root.dataset.csrfHeader || "X-CSRF-TOKEN";
+    const csrfToken = root.dataset.csrfToken || "";
 
     const addFolderBtn = document.getElementById("addFolderBtn");
     const newFolderRow = document.getElementById("newFolderRow");
@@ -23,8 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    let activeFolderId = bootstrap.activeFolderId || "";
-    let activeNoteId = bootstrap.activeNoteId || "";
+    let activeFolderId = root.dataset.activeFolder || "";
+    let activeNoteId = root.dataset.activeNote || "";
     let autosaveTimer = null;
     let isSaving = false;
 
@@ -41,8 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    if (bootstrap.activeNoteContent) {
-        quill.clipboard.dangerouslyPasteHTML(bootstrap.activeNoteContent);
+    const activeContent = document.getElementById("notes-active-content");
+    if (activeContent && activeContent.value) {
+        quill.clipboard.dangerouslyPasteHTML(activeContent.value);
     }
 
     const setStatus = (text, tone) => {

@@ -8,6 +8,13 @@ document.querySelectorAll('input[name="selectedCardId"]').forEach(function(radio
     });
 });
 
+var cardNumberInput = document.querySelector('[data-card-number-input]');
+if (cardNumberInput) {
+    cardNumberInput.addEventListener('input', function () {
+        this.value = this.value.replace(/[^\d\s]/g, '');
+    });
+}
+
 // Checkout form: extract last4 + generate stub provider token before submit.
 // In production this would be replaced with a real payment-provider JS SDK.
 var checkoutForm = document.querySelector('form[action*="/buy"]');

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.ac.cf._5.group14.One_To_One.Security.SecurityUtils;
 
 @Controller
 @RequiredArgsConstructor
@@ -19,6 +20,9 @@ public class PasswordResetController {
     @GetMapping("/forgot-password")
     public String showForgotPassword(Model model,
                                      @RequestParam(value = "sent", required = false) String sent) {
+        if (SecurityUtils.isAuthenticated()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
         model.addAttribute("forgotPasswordForm", new ForgotPasswordForm());
         model.addAttribute("sent", sent != null);
@@ -29,6 +33,9 @@ public class PasswordResetController {
     public String submitForgotPassword(@Valid @ModelAttribute("forgotPasswordForm") ForgotPasswordForm form,
                                        BindingResult result,
                                        Model model) {
+        if (SecurityUtils.isAuthenticated()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
         if (result.hasErrors()) {
             model.addAttribute("sent", false);

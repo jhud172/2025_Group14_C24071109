@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.ac.cf._5.group14.One_To_One.Config.DevModeProperties;
 import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfile;
 import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfileService;
+import uk.ac.cf._5.group14.One_To_One.Security.SecurityUtils;
 import uk.ac.cf._5.group14.One_To_One.TrainerProfile.TrainerProfile;
 import uk.ac.cf._5.group14.One_To_One.TrainerProfile.TrainerProfileService;
 import uk.ac.cf._5.group14.One_To_One.Verification.EmailVerificationService;
@@ -41,12 +42,18 @@ public class UserController {
     // signup choice
     @GetMapping("/signup")
     public String showSignupForm(Model model) {
+        if (isAuthenticatedUser()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
         return "User/signup-choice";
     }
 
     @GetMapping("/signup/client")
     public String showClientSignup(Model model) {
+        if (isAuthenticatedUser()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
         model.addAttribute("signupForm", new ClientSignupForm());
         return "User/signup-client";
@@ -57,6 +64,9 @@ public class UserController {
                                BindingResult result,
                                Model model,
                                RedirectAttributes redirectAttributes) {
+        if (isAuthenticatedUser()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
 
         // check for validation errors
@@ -103,6 +113,9 @@ public class UserController {
 
     @GetMapping("/signup/trainer")
     public String showTrainerSignup(Model model) {
+        if (isAuthenticatedUser()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
         model.addAttribute("signupForm", new TrainerSignupForm());
         return "User/signup-trainer";
@@ -110,6 +123,9 @@ public class UserController {
 
     @GetMapping("/signup/trainer/success")
     public String showTrainerSignupSuccess(Model model) {
+        if (isAuthenticatedUser()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
         // trainerCode and verifyEmail are flash attributes added after successful signup
         return "User/signup-trainer-success";
@@ -120,6 +136,9 @@ public class UserController {
                                 BindingResult result,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
+        if (isAuthenticatedUser()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
 
         if (result.hasErrors()) {
@@ -178,6 +197,9 @@ public class UserController {
 
     @GetMapping("/signup/gym")
     public String showGymSignup(Model model) {
+        if (isAuthenticatedUser()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
         model.addAttribute("signupForm", new GymSignupForm());
         return "User/signup-gym";
@@ -188,6 +210,9 @@ public class UserController {
                             BindingResult result,
                             Model model,
                             RedirectAttributes redirectAttributes) {
+        if (isAuthenticatedUser()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
 
         if (result.hasErrors()) {
@@ -241,6 +266,9 @@ public class UserController {
                                 @RequestParam(value = "devLogin", required = false) Boolean devLogin,
                                 @RequestParam(value = "role", required = false) String role,
                                 Model model) {
+        if (isAuthenticatedUser()) {
+            return "redirect:/dashboard";
+        }
         applyAuthLayout(model);
         if (expired != null) {
             return "redirect:/?expired=1";
@@ -274,6 +302,10 @@ public class UserController {
     private void applyAuthLayout(Model model) {
         model.addAttribute("authPageLayout", true);
         model.addAttribute("compactTopContent", true);
+    }
+
+    private boolean isAuthenticatedUser() {
+        return SecurityUtils.isAuthenticated();
     }
 
     private String normalizeUsername(String username) {

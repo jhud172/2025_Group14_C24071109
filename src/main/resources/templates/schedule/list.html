@@ -9,7 +9,7 @@
                     <h1 class="tcc-page-title">Training Control Centre</h1>
                     <p class="tcc-page-subtitle">Strategic overview of your training system</p>
                 </div>
-                <button onclick="showCreateModal()"
+                <button type="button" data-open-create-modal
                    class="tcc-btn-primary">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -55,7 +55,7 @@
                     </svg>
                     <h3 class="tcc-active-empty-title">No Active Schedule</h3>
                     <p class="tcc-active-empty-text">Apply a schedule to your calendar to start tracking your training</p>
-                    <button onclick="document.querySelector('.tcc-tab[data-tab=my-schedules]')?.click()" 
+                    <button type="button" data-open-my-schedules
                             class="tcc-btn-primary"
                             aria-label="Browse and select from your available schedules">
                         Browse Your Schedules
@@ -105,7 +105,7 @@
                                 </svg>
                                 Edit Schedule
                             </a>
-                            <button onclick="showSchedulePreview(this)" 
+                            <button type="button" data-open-schedule-preview
                                     th:attr="data-schedule-id=${applied.schedule.id}"
                                     class="tcc-btn-secondary">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,7 +116,7 @@
                             </button>
                             <a th:href="@{'/schedules/applied/' + ${applied.id} + '/remove'}"
                                class="tcc-btn-danger"
-                               onclick="return confirm('Remove this schedule from your calendar?')">
+                               data-confirm="Remove this schedule from your calendar?">
                                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
@@ -134,7 +134,7 @@
 
                             <label class="tcc-toggle-label">
                                 <input type="checkbox" name="shownOnCalendar" value="true" th:checked="${applied.shownOnCalendar}"
-                                       class="sr-only peer" onchange="this.form.submit()">
+                                       class="sr-only peer" data-auto-submit>
                                 <span class="tcc-toggle-switch" th:classappend="${applied.shownOnCalendar} ? 'checked' : ''">
                                     <span class="tcc-toggle-dot" th:classappend="${applied.shownOnCalendar} ? 'checked' : ''"></span>
                                 </span>
@@ -142,7 +142,7 @@
                             </label>
                             <label class="tcc-toggle-label">
                                 <input type="checkbox" name="requiresLogging" value="true" th:checked="${applied.requiresLogging}"
-                                       class="sr-only peer" onchange="this.form.submit()">
+                                       class="sr-only peer" data-auto-submit>
                                 <span class="tcc-toggle-switch" th:classappend="${applied.requiresLogging} ? 'checked' : ''">
                                     <span class="tcc-toggle-dot" th:classappend="${applied.requiresLogging} ? 'checked' : ''"></span>
                                 </span>
@@ -159,7 +159,7 @@
             <!-- Status Tabs and Schedule Cards Section -->
             <section>
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-                    <h2 class="tcc-section-title" style="margin-bottom:0">All Schedules</h2>
+                    <h2 class="tcc-section-title tcc-section-title--flush">All Schedules</h2>
                     <div class="tcc-search-bar">
                         <input id="schedule-search" type="text" placeholder="Search schedules..."
                                class="tcc-search-input" />
@@ -168,11 +168,11 @@
 
                 <!-- Status Tabs -->
                 <div class="tcc-tabs">
-                    <button class="tcc-tab active" data-tab="my-schedules" onclick="switchTab('my-schedules')">
+                    <button class="tcc-tab active" data-tab="my-schedules" type="button" data-switch-tab="my-schedules">
                         My Schedules
                         <span class="tcc-tab-count" th:text="${#lists.size(schedules)}">0</span>
                     </button>
-                    <button class="tcc-tab" data-tab="templates" onclick="switchTab('templates')" 
+                    <button class="tcc-tab" data-tab="templates" type="button" data-switch-tab="templates"
                             th:if="${sharedSchedules != null and !#lists.isEmpty(sharedSchedules)}">
                         Shared Templates
                         <span class="tcc-tab-count" th:text="${#lists.size(sharedSchedules)}">0</span>
@@ -181,23 +181,21 @@
 
                 <!-- Empty search state -->
                 <div id="schedule-search-empty"
-                     class="tcc-hidden mt-4 rounded-2xl p-6 text-sm"
-                     style="background:rgba(26,26,46,0.6);border:1px dashed rgba(0,243,255,0.15);color:rgba(148,163,184,0.8)">
+                     class="tcc-search-empty tcc-hidden mt-4 rounded-2xl p-6 text-sm">
                     No schedules match your search.
                 </div>
 
                 <!-- My Schedules Tab Content -->
                 <div id="tab-my-schedules" class="tab-content">
                     <div th:if="${#lists.isEmpty(schedules)}"
-                         class="mt-4 rounded-2xl p-8 text-center"
-                         style="background:rgba(26,26,46,0.6);border:2px dashed rgba(0,243,255,0.15)">
-                        <svg class="w-16 h-16 mx-auto mb-4" style="color:rgba(0,243,255,0.25)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         class="tcc-active-empty mt-4">
+                        <svg class="tcc-active-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        <h3 class="text-lg font-semibold mb-2" style="color:#e2e8f0">No schedules yet</h3>
-                        <p class="text-sm mb-4" style="color:rgba(148,163,184,0.7)">Create your first training schedule to get started</p>
-                        <button onclick="showCreateModal()" class="tcc-btn-primary">Create New Schedule</button>
+                        <h3 class="tcc-active-empty-title">No schedules yet</h3>
+                        <p class="tcc-active-empty-text">Create your first training schedule to get started</p>
+                        <button type="button" data-open-create-modal class="tcc-btn-primary">Create New Schedule</button>
                     </div>
 
                     <div class="mt-4 tcc-card-grid">
@@ -245,7 +243,7 @@
                                     </svg>
                                     Apply
                                 </a>
-                                <button onclick="duplicateSchedule(this)" 
+                                <button type="button" data-duplicate-schedule
                                         th:attr="data-schedule-id=${schedule.id}"
                                         class="tcc-card-action-secondary">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,7 +253,7 @@
                                 </button>
                                 <a th:href="@{'/schedules/' + ${schedule.id} + '/delete'}"
                                    class="tcc-card-action-danger"
-                                   onclick="return confirm('Delete this schedule? This cannot be undone.')">
+                                   data-confirm="Delete this schedule? This cannot be undone.">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -282,8 +280,8 @@
                                 </span>
                             </div>
 
-                            <p class="text-sm mb-2" style="color:rgba(148,163,184,0.8)">
-                                Shared by <span class="font-semibold" style="color:#e2e8f0" th:text="${schedule.user.username}">Trainer</span>
+                            <p class="tcc-card-description mb-2">
+                                Shared by <span class="tcc-card-inline-strong" th:text="${schedule.user.username}">Trainer</span>
                             </p>
 
                             <p th:if="${schedule.description}" 
@@ -293,7 +291,7 @@
                             </p>
 
                             <div class="tcc-card-footer">
-                                <button onclick="showSchedulePreview(this)" 
+                                <button type="button" data-open-schedule-preview
                                         th:attr="data-schedule-id=${schedule.id}"
                                         class="tcc-card-action-secondary">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,11 +315,11 @@
         </div>
 
         <!-- Create Schedule Modal -->
-        <div id="create-modal" class="tcc-preview-overlay tcc-hidden" onclick="if(event.target === this) hideCreateModal()">
-            <div class="tcc-preview-modal max-w-2xl" onclick="event.stopPropagation()">
+        <div id="create-modal" class="tcc-preview-overlay tcc-hidden" data-overlay-close>
+            <div class="tcc-preview-modal max-w-2xl">
                 <div class="tcc-preview-header">
                     <h3 class="tcc-preview-title">Create New Schedule</h3>
-                    <button onclick="hideCreateModal()" class="tcc-preview-close">
+                    <button type="button" data-close-create-modal class="tcc-preview-close">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -330,40 +328,32 @@
                 <div class="tcc-preview-body">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <a href="/schedules/builder" 
-                           class="group p-6 rounded-2xl transition-all duration-200"
-                           style="background:rgba(0,243,255,0.04);border:1px solid rgba(0,243,255,0.2)"
-                           onmouseover="this.style.borderColor='rgba(0,243,255,0.55)';this.style.boxShadow='0 0 20px rgba(0,243,255,0.15)'"
-                           onmouseout="this.style.borderColor='rgba(0,243,255,0.2)';this.style.boxShadow=''">
+                           class="tcc-create-option tcc-create-option--primary group p-6 rounded-2xl transition-all duration-200">
                             <div class="flex flex-col items-center text-center gap-3">
-                                <div class="w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200"
-                                     style="background:rgba(0,243,255,0.1);border:1px solid rgba(0,243,255,0.3)">
-                                    <svg class="w-7 h-7" style="color:#00f3ff" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="tcc-create-option-icon tcc-create-option-icon--primary w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200">
+                                    <svg class="tcc-create-option-svg tcc-create-option-svg--primary w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold mb-1" style="color:#f1f5f9">Create from Scratch</h4>
-                                    <p class="text-sm" style="color:rgba(148,163,184,0.8)">Build a custom schedule using the builder</p>
+                                    <h4 class="tcc-create-option-title font-bold mb-1">Create from Scratch</h4>
+                                    <p class="tcc-create-option-copy text-sm">Build a custom schedule using the builder</p>
                                 </div>
                             </div>
                         </a>
 
-                        <button onclick="handleTemplateNavigation()" 
+                        <button type="button" data-template-navigation
                                 th:if="${sharedSchedules != null and !#lists.isEmpty(sharedSchedules)}"
-                                class="group p-6 rounded-2xl transition-all duration-200"
-                                style="background:rgba(181,55,242,0.04);border:1px solid rgba(181,55,242,0.2)"
-                                onmouseover="this.style.borderColor='rgba(181,55,242,0.55)';this.style.boxShadow='0 0 20px rgba(181,55,242,0.15)'"
-                                onmouseout="this.style.borderColor='rgba(181,55,242,0.2)';this.style.boxShadow=''">
+                                class="tcc-create-option tcc-create-option--secondary group p-6 rounded-2xl transition-all duration-200">
                             <div class="flex flex-col items-center text-center gap-3">
-                                <div class="w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200"
-                                     style="background:rgba(181,55,242,0.1);border:1px solid rgba(181,55,242,0.3)">
-                                    <svg class="w-7 h-7" style="color:#b537f2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="tcc-create-option-icon tcc-create-option-icon--secondary w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200">
+                                    <svg class="tcc-create-option-svg tcc-create-option-svg--secondary w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold mb-1" style="color:#f1f5f9">Use a Template</h4>
-                                    <p class="text-sm" style="color:rgba(148,163,184,0.8)">Start from a trainer-shared template</p>
+                                    <h4 class="tcc-create-option-title font-bold mb-1">Use a Template</h4>
+                                    <p class="tcc-create-option-copy text-sm">Start from a trainer-shared template</p>
                                 </div>
                             </div>
                         </button>
@@ -373,11 +363,11 @@
         </div>
 
         <!-- Schedule Preview Modal -->
-        <div id="preview-modal" class="tcc-preview-overlay tcc-hidden" onclick="if(event.target === this) hidePreviewModal()">
-            <div class="tcc-preview-modal" onclick="event.stopPropagation()">
+        <div id="preview-modal" class="tcc-preview-overlay tcc-hidden" data-overlay-close>
+            <div class="tcc-preview-modal">
                 <div class="tcc-preview-header">
                     <h3 class="tcc-preview-title" id="preview-title">Schedule Preview</h3>
-                    <button onclick="hidePreviewModal()" class="tcc-preview-close">
+                    <button type="button" data-close-preview-modal class="tcc-preview-close">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -385,8 +375,8 @@
                 </div>
                 <div class="tcc-preview-body">
                     <div id="preview-content" class="text-center py-8">
-                        <div class="inline-block w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style="border-color:rgba(0,243,255,0.6);border-top-color:transparent"></div>
-                        <p class="mt-4" style="color:rgba(148,163,184,0.8)">Loading preview...</p>
+                        <div class="tcc-preview-loading-spinner inline-block w-8 h-8 border-2 border-t-transparent rounded-full animate-spin"></div>
+                        <p class="tcc-preview-loading-copy mt-4">Loading preview...</p>
                     </div>
                 </div>
             </div>

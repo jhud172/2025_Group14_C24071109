@@ -221,7 +221,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div th:if="${request} != null and ${request.status.name()} == 'NEEDS_INFO'" class="space-x-2">
                                         <button type="button"
-                                                onclick="showUpdateNotesModal(this)"
+                                                data-open-update-notes
                                                 th:attr="data-request-id=${request.id}, data-trainer-name=${trainer.firstName + ' ' + trainer.lastName}, data-current-notes=${request.notes}"
                                                 class="inline-flex items-center px-3 py-1.5 rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition-colors">
                                             Update Notes
@@ -242,7 +242,9 @@
         </div>
 
         <!-- Update Notes Modal (hidden by default) -->
-        <div id="updateNotesModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div id="updateNotesModal"
+             class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center"
+             th:attr="data-request-id=${updateNotesRequestId},data-trainer-name=${updateNotesTrainerName},data-current-notes=${updateNotesNotes}">
             <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6">
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Update Notes for <span id="modalTrainerName"></span></h3>
                 
@@ -272,8 +274,8 @@
                     </div>
 
                     <div class="flex items-center justify-end gap-3">
-                        <button type="button" 
-                                onclick="hideUpdateNotesModal()"
+                        <button type="button"
+                                data-close-update-notes
                                 class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70">
                             Cancel
                         </button>
@@ -290,13 +292,6 @@
     </div>
 
     <th:block th:fragment="pageScripts">
-        <script th:inline="javascript">
-var gymTrainersData = {
-    updateNotesRequestId: /*[[${updateNotesRequestId}]]*/ null,
-    updateNotesTrainerName: /*[[${updateNotesTrainerName}]]*/ '',
-    updateNotesNotes: /*[[${updateNotesNotes}]]*/ ''
-};
-        </script>
         <script th:src="@{/js/trainer/gym-admin-trainers-page.js}"></script>
     </th:block>
 

@@ -1,30 +1,7 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout('Template Builder', ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="styles">
-        <style>
-            .builder-layout { display: grid; grid-template-columns: 220px 1fr 260px; gap: 1rem; min-height: calc(100vh - 120px); }
-            @media (max-width: 1024px) { .builder-layout { grid-template-columns: 1fr; } }
-            .builder-panel { border-radius: 1rem; border: 1px solid var(--color-border, #e2e8f0); background: #fff; padding: 1rem; overflow-y: auto; }
-            .dark .builder-panel { background: #0f172a; border-color: #1e293b; }
-            .palette-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; background: #f8fafc; cursor: grab; font-size: 0.8125rem; font-weight: 600; color: #334155; user-select: none; transition: background 0.15s; }
-            .palette-item:hover { background: #e0f2fe; border-color: #38bdf8; color: #0369a1; }
-            .dark .palette-item { background: #1e293b; border-color: #334155; color: #94a3b8; }
-            .dark .palette-item:hover { background: #0c4a6e; border-color: #0ea5e9; color: #7dd3fc; }
-            .canvas-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 0.875rem; border-radius: 0.75rem; border: 1px solid #cbd5e1; background: #fff; font-size: 0.8125rem; font-weight: 500; color: #475569; cursor: grab; }
-            .dark .canvas-item { background: #1e293b; border-color: #334155; color: #94a3b8; }
-            .canvas-item .remove-btn { margin-left: auto; color: #94a3b8; cursor: pointer; padding: 0 0.25rem; line-height: 1; }
-            .canvas-item .remove-btn:hover { color: #ef4444; }
-            .canvas-drop-zone { min-height: 80px; border: 2px dashed #cbd5e1; border-radius: 0.75rem; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
-            .canvas-drop-zone.drag-over { border-color: #10b981; background: #f0fdf4; }
-            .dark .canvas-drop-zone { border-color: #334155; }
-            .prop-row { margin-bottom: 0.75rem; }
-            .prop-label { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.25rem; display: block; }
-            .prop-select, .prop-input { width: 100%; padding: 0.375rem 0.625rem; font-size: 0.8125rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; background: #f8fafc; color: #0f172a; }
-            .dark .prop-select, .dark .prop-input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
-            .prop-toggle { display: flex; align-items: center; justify-content: space-between; }
-        </style>
-    </div>
+    <div th:fragment="styles"></div>
 
     <div th:fragment="content">
         <main class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6" role="main" aria-label="Template Builder">
@@ -160,17 +137,17 @@
             <!-- Hidden form for submission -->
             <form id="template-save-form" method="post"
                   th:action="${isEdit ? '/workout-templates/' + editTemplate.id : '/workout-templates'}"
-                  style="display:none">
+                  class="builder-hidden">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <input type="hidden" id="form-name" name="name"/>
                 <input type="hidden" id="form-layout-type" name="layoutType"/>
                 <input type="hidden" id="form-config-json" name="configJson"/>
             </form>
+            <textarea id="builder-initial-config" class="builder-hidden" th:text="${editTemplate.configJson}"></textarea>
         </main>
     </div>
 
     <div th:fragment="pageScripts">
-        <script th:inline="javascript">var builderInitialConfigJson = /*[[${editTemplate.configJson}]]*/ null;</script>
         <script th:src="@{/js/workouts/workout-templates-builder-page.js}"></script>
     </div>
 

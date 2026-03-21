@@ -6,7 +6,7 @@
 
     /* Auth page container - clean background with emerald accents */
     .auth-container {
-        @apply mx-auto flex w-full max-w-md items-start justify-center px-4 sm:px-6 lg:px-8;
+        @apply mx-auto flex w-full max-w-7xl items-start justify-center px-4 sm:px-6 lg:px-8;
         padding-top: clamp(1.25rem, 3vw, 2.25rem);
         padding-bottom: clamp(1.5rem, 3vw, 2.75rem);
         min-height: min(40rem, calc(100svh - 6.5rem));
@@ -16,17 +16,27 @@
     }
 
     .auth-container--wide {
-        @apply max-w-2xl;
+        @apply max-w-7xl;
     }
 
     /* Auth card with enhanced design */
     .auth-card {
-        @apply relative rounded-3xl border border-gray-200 bg-white p-8 sm:p-10 w-full;
+        @apply relative w-full rounded-[2rem] bg-white p-8 sm:p-10;
+        max-width: 24rem;
+        padding-top: clamp(2.8rem, 5vw, 3.2rem);
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
         box-shadow: 
-            0 20px 25px -5px rgba(0, 0, 0, 0.05),
-            0 10px 10px -5px rgba(0, 0, 0, 0.02),
-            0 0 0 1px rgba(16, 185, 129, 0.05);
+            0 28px 54px -46px rgba(15, 23, 42, 0.22),
+            0 14px 24px -22px rgba(15, 23, 42, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.92);
+        overflow: hidden;
         animation: slideUp 0.5s ease-out;
+    }
+
+    .auth-container--wide .auth-card {
+        max-width: 56rem;
     }
 
     @keyframes slideUp {
@@ -42,11 +52,15 @@
 
     /* Emerald accent bar with glow */
     .auth-accent-bar {
-        @apply h-1.5 w-full rounded-t-3xl absolute -top-0 left-0;
+        @apply absolute rounded-full;
+        top: clamp(0.95rem, 2vw, 1.05rem);
+        left: clamp(1.1rem, 2vw, 1.35rem);
+        right: clamp(1.1rem, 2vw, 1.35rem);
+        height: 0.34rem;
         background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #10b981 100%);
         background-size: 200% 100%;
         animation: shimmer 3s linear infinite;
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 8px 18px rgba(16, 185, 129, 0.18);
     }
 
     @keyframes shimmer {
@@ -72,32 +86,74 @@
 
     /* Role slider for login with enhanced animations */
     .role-slider {
-        @apply inline-flex w-full rounded-full bg-gray-100 p-1.5 text-sm font-medium text-gray-500 border border-gray-200 relative;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        @apply relative grid w-full grid-cols-3 items-center rounded-[1.35rem] p-[0.35rem] text-sm font-semibold;
+        --indicator-left: 0.35rem;
+        --indicator-width: calc((100% - 1.4rem) / 3);
+        background: linear-gradient(180deg, rgba(241, 245, 249, 0.98) 0%, rgba(226, 232, 240, 0.8) 100%);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            inset 0 -1px 0 rgba(148, 163, 184, 0.08);
+        gap: 0.35rem;
+    }
+
+    .role-slider__indicator {
+        position: absolute;
+        top: 0.35rem;
+        bottom: 0.35rem;
+        left: 0;
+        width: var(--indicator-width);
+        border-radius: 9999px;
+        background: linear-gradient(135deg, #059669 0%, #10b981 55%, #34d399 100%);
+        box-shadow:
+            0 12px 20px -16px rgba(16, 185, 129, 0.55),
+            0 8px 18px -14px rgba(5, 150, 105, 0.42),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        transform: translateX(var(--indicator-left));
+        transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+        pointer-events: none;
     }
 
     .role-slider__option {
-        @apply flex-1 px-4 py-2.5 text-center cursor-pointer rounded-full relative z-10;
-        transition: color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        will-change: transform;
+        @apply relative z-10 rounded-[1rem] px-4 py-2.5 text-center;
+        appearance: none;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        color: #64748b;
+        transition: color 0.32s ease, transform 0.26s ease, opacity 0.3s ease;
     }
 
     .role-slider__option.active {
-        @apply bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold;
-        box-shadow: 
-            0 4px 6px -1px rgba(16, 185, 129, 0.3),
-            0 2px 4px -1px rgba(16, 185, 129, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        transform: scale(1.04);
+        @apply text-white font-bold;
+        text-shadow: 0 1px 1px rgba(6, 78, 59, 0.2);
     }
 
     .role-slider__option:not(.active):hover {
-        @apply bg-gray-200;
-        transform: scale(1.02);
+        color: #065f46;
+        transform: translateY(-1px);
     }
 
     .role-slider__option:not(.active):active {
-        transform: scale(0.98);
+        transform: translateY(0);
+    }
+
+    .role-slider__option:focus-visible {
+        outline: none;
+        box-shadow: inset 0 0 0 2px rgba(16, 185, 129, 0.28);
+    }
+
+    .role-hint {
+        min-height: 2.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .role-hint.role-hint--swapping {
+        opacity: 0;
+        transform: translateY(-6px);
     }
 
     /* Password toggle button with smooth transitions */
@@ -411,11 +467,12 @@
     }
 
     html.dark .auth-card {
-        @apply border-gray-700 bg-gray-800;
+        border-color: rgba(51, 65, 85, 0.95);
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.94) 100%);
         box-shadow: 
-            0 20px 25px -5px rgba(0, 0, 0, 0.3),
-            0 10px 10px -5px rgba(0, 0, 0, 0.2),
-            0 0 0 1px rgba(16, 185, 129, 0.1);
+            0 28px 50px -36px rgba(2, 6, 23, 0.82),
+            0 14px 24px -18px rgba(2, 6, 23, 0.45),
+            inset 0 1px 0 rgba(148, 163, 184, 0.08);
     }
 
     html.dark .auth-heading {
@@ -428,12 +485,26 @@
     }
 
     html.dark .role-slider {
-        @apply bg-gray-700 border-gray-600 text-gray-400;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(180deg, rgba(30, 41, 59, 0.96) 0%, rgba(15, 23, 42, 0.92) 100%);
+        border-color: rgba(100, 116, 139, 0.28);
+        box-shadow:
+            inset 0 1px 0 rgba(148, 163, 184, 0.08),
+            inset 0 -1px 0 rgba(2, 6, 23, 0.65);
+    }
+
+    html.dark .role-slider__indicator {
+        box-shadow:
+            0 14px 22px -16px rgba(16, 185, 129, 0.7),
+            0 10px 20px -16px rgba(5, 150, 105, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    }
+
+    html.dark .role-slider__option {
+        color: #94a3b8;
     }
 
     html.dark .role-slider__option:not(.active):hover {
-        @apply bg-gray-600;
+        color: #d1fae5;
     }
 
     html.dark .auth-field__label {
@@ -532,28 +603,67 @@
         @apply text-emerald-400;
     }
 
-    /* Smooth transitions for form field blocks */
-    .auth-fields-container {
+    .auth-panel-stage {
         position: relative;
-        min-height: 200px;
+        overflow: clip;
+        transition: height 0.48s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .auth-fields-block {
-        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, max-height 0.4s ease-in-out;
-        overflow: hidden;
-    }
-
-    .auth-fields-block.hidden {
+        --panel-offset: 2rem;
+        position: absolute;
+        inset: 0;
         opacity: 0;
-        transform: translateY(-10px);
-        max-height: 0;
+        transform: translateX(var(--panel-offset)) scale(0.985);
+        visibility: hidden;
         pointer-events: none;
+        transition:
+            opacity 0.28s ease,
+            transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+            visibility 0s linear 0.48s;
     }
 
-    .auth-fields-block:not(.hidden) {
+    .auth-fields-block--active {
+        position: relative;
+        inset: auto;
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        visibility: visible;
+        pointer-events: auto;
+        transition:
+            opacity 0.28s ease,
+            transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+            visibility 0s linear 0s;
+    }
+
+    .auth-inline-section {
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-12px);
+        margin-top: 0 !important;
+        pointer-events: none;
+        transition:
+            max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 0.25s ease,
+            transform 0.35s ease,
+            margin-top 0.35s ease;
+    }
+
+    .auth-inline-section--expanded {
+        max-height: 11rem;
         opacity: 1;
         transform: translateY(0);
-        max-height: 1000px;
+        margin-top: 1rem !important;
+        pointer-events: auto;
+    }
+
+    .auth-actions-row {
+        @apply flex flex-col items-center justify-center gap-3 pt-1 sm:flex-row;
+    }
+
+    .auth-actions-row .auth-btn {
+        @apply w-full sm:w-auto;
     }
 
     @media (max-width: 640px) {

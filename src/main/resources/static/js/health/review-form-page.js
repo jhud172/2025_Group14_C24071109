@@ -22,9 +22,24 @@ function setRating(rating) {
     document.getElementById('ratingText').textContent = texts[rating];
 }
 
-// Collect tags on form submit
-document.querySelector('form').addEventListener('submit', function(e) {
-    const checkboxes = document.querySelectorAll('input[name="tag"]:checked');
-    const tags = Array.from(checkboxes).map(cb => cb.value).join(',');
-    document.getElementById('tagsInput').value = tags;
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.star-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const rating = Number(button.dataset.rating || 0);
+            if (rating > 0) {
+                setRating(rating);
+            }
+        });
+    });
+
+    const form = document.querySelector('form');
+    if (!form) {
+        return;
+    }
+
+    form.addEventListener('submit', function () {
+        const checkboxes = document.querySelectorAll('input[name="tag"]:checked');
+        const tags = Array.from(checkboxes).map(cb => cb.value).join(',');
+        document.getElementById('tagsInput').value = tags;
+    });
 });

@@ -4,6 +4,13 @@ function toggleEdit(id) {
     panel.classList.toggle("hidden");
 }
 
+document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-toggle-edit-id]');
+    if (!trigger) return;
+
+    toggleEdit(trigger.getAttribute('data-toggle-edit-id'));
+});
+
 (function initAddTaskModal() {
     const openBtn = document.getElementById('open-add-task');
     const modal = document.getElementById('add-task-modal');

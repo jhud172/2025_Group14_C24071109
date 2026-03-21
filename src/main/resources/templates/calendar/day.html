@@ -195,7 +195,7 @@
                                 <select id="daily-focus-select"
                                         name="dailyFocus"
                                         data-testid="daily-focus-select"
-                                        onchange="this.form.submit()"
+                                        data-auto-submit
                                     th:disabled="${(hasAnyPreferences != null && !hasAnyPreferences) || isOptimised}"
                                     th:title="${isOptimised ? 'Locked by AI Optimise' : ''}"
                                     class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 sm:w-72">
@@ -567,7 +567,7 @@
                                 <p class="text-xs font-medium text-slate-500 dark:text-slate-400" data-task-drawer-completion-message
                                     th:text="${task.completed} ? 'This task is already completed. Re-open from the list if you need to change state.' : 'Mark complete to advance day progress and unlock insights faster.'"></p>
 
-                        <form data-testid="task-drawer-delete-form" th:action="@{'/calendar/task/' + ${task.id} + '/delete'}" method="post" onsubmit="return confirm('Delete this task?')" class="pt-2">
+                        <form data-testid="task-drawer-delete-form" th:action="@{'/calendar/task/' + ${task.id} + '/delete'}" method="post" data-confirm="Delete this task?" class="pt-2">
                             <input type="hidden" th:if="${_csrf != null}"
                                    th:name="${_csrf.parameterName}"
                                    th:value="${_csrf.token}"/>
@@ -1033,7 +1033,7 @@
                 <span class="custom-cb-box" aria-hidden="true">
                     <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                 </span>
-                <span class="custom-cb-label" style="color:inherit">Don't show this warning again</span>
+                <span class="custom-cb-label day-inherit-color">Don't show this warning again</span>
             </label>
             <div class="mt-5 flex items-center justify-end gap-3">
                 <button type="button" id="ai-optimise-cancel"

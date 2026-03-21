@@ -90,7 +90,7 @@
                                                 <span th:if="${chatSummary.nextWorkoutDate() != null}"
                                                       th:text="'(' + ${chatSummary.nextWorkoutDate()} + ')'"></span>
                                             </span>
-                                            <span th:if="${chatSummary.streakDays() == 0}" class="chat-stat-pill" style="opacity:0.7">
+                                            <span th:if="${chatSummary.streakDays() == 0}" class="chat-stat-pill chat-stat-pill--muted">
                                                 Start your streak today!
                                             </span>
                                         </div>
@@ -185,7 +185,7 @@
                                             stroke="rgb(16,185,129)" stroke-width="4"
                                             stroke-linecap="round"
                                             th:attr="stroke-dasharray='125.66 125.66',stroke-dashoffset=${metricsRingOffset != null ? metricsRingOffset : '125.66'}"
-                                            style="transition: stroke-dashoffset 0.6s ease;"/>
+                                            class="metrics-ring-fill"/>
                                 </svg>
                                 <span class="metrics-ring__value" id="metricsRingPct"
                                       th:text="${chatSummary != null ? chatSummary.completionPct() : 0} + '%'">0%</span>

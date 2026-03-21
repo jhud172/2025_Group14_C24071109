@@ -76,3 +76,34 @@ document.addEventListener('keydown', function(e) {
         hideModal('requestInfoModal');
     }
 });
+
+document.querySelectorAll('[data-select-request]').forEach((row) => {
+    row.addEventListener('click', () => selectRequest(row));
+});
+
+document.querySelectorAll('[data-approve-request]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        approveRequest(button);
+    });
+});
+
+document.querySelectorAll('[data-reject-request]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        rejectRequest(button);
+    });
+});
+
+document.querySelectorAll('[data-request-more-info]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        requestMoreInfo(button);
+    });
+});
+
+document.querySelectorAll('[data-close-modal]').forEach((button) => {
+    button.addEventListener('click', () => {
+        hideModal(button.getAttribute('data-close-modal'));
+    });
+});

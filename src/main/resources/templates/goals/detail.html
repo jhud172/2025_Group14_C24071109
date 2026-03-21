@@ -18,7 +18,7 @@
                         <span class="goal-state" th:attr="data-state=${goal.status}" th:text="${goal.status}">ACTIVE</span>
                     </div>
                 </div>
-                <div style="display:flex;flex-wrap:wrap;gap:.75rem;">
+                <div class="goal-head-actions">
                     <a th:href="@{/goals/{id}/edit(id=${goal.id})}" class="goal-secondary-btn">Edit</a>
                     <a th:href="@{/goals/{id}/checkins(id=${goal.id})}" class="goal-primary-btn">Check-ins</a>
                 </div>
@@ -38,8 +38,8 @@
 
                 <section class="goal-detail-card">
                     <h2 class="goal-detail-card__title">Weekly adherence</h2>
-                    <div th:each="week : ${adherenceWeeks}" style="margin-top:.85rem;">
-                        <p class="goal-copy" style="margin-top:0;" th:text="${week.weekStart + ' • ' + week.completedCount + '/' + week.plannedCount}"></p>
+                    <div th:each="week : ${adherenceWeeks}" class="goal-week-block">
+                        <p class="goal-copy goal-copy--flush" th:text="${week.weekStart + ' • ' + week.completedCount + '/' + week.plannedCount}"></p>
                         <div class="goal-progress" th:attr="data-progress=${week.percent}">
                             <span></span>
                         </div>
@@ -75,7 +75,7 @@
                 </section>
             </div>
 
-            <section class="goal-detail-card" style="margin-top:1rem;">
+            <section class="goal-detail-card goal-detail-card--spaced">
                 <h2 class="goal-detail-card__title">Link items</h2>
                 <div class="goal-detail-grid">
                     <form method="post" th:action="@{/goals/{id}/links(id=${goal.id})}">
@@ -88,7 +88,7 @@
                                 <option th:each="task : ${linkableTasks}" th:value="${task.id}" th:text="${task.title + ' · ' + task.date}"></option>
                             </select>
                         </div>
-                        <button type="submit" class="goal-secondary-btn" style="margin-top:1rem;">Link task</button>
+                        <button type="submit" class="goal-secondary-btn goal-btn-top-gap">Link task</button>
                     </form>
 
                     <form method="post" th:action="@{/goals/{id}/links(id=${goal.id})}">
@@ -101,7 +101,7 @@
                                 <option th:each="occ : ${linkableOccurrences}" th:value="${occ.id}" th:text="${occ.scheduleName + ' · ' + occ.date}"></option>
                             </select>
                         </div>
-                        <button type="submit" class="goal-secondary-btn" style="margin-top:1rem;">Link occurrence</button>
+                        <button type="submit" class="goal-secondary-btn goal-btn-top-gap">Link occurrence</button>
                     </form>
                 </div>
             </section>

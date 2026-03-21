@@ -7,12 +7,16 @@ DROP TABLE IF EXISTS merch_order_items CASCADE;
 DROP TABLE IF EXISTS merch_orders CASCADE;
 DROP TABLE IF EXISTS saved_payment_methods CASCADE;
 DROP TABLE IF EXISTS merch_products CASCADE;
+DROP TABLE IF EXISTS price_change_events CASCADE;
+DROP TABLE IF EXISTS gym_member_subscriptions CASCADE;
+DROP TABLE IF EXISTS gym_membership_products CASCADE;
 
 DROP TABLE IF EXISTS review_moderations CASCADE;
 DROP TABLE IF EXISTS client_assessments CASCADE;
 DROP TABLE IF EXISTS trainer_reviews CASCADE;
 DROP TABLE IF EXISTS trainer_profiles CASCADE;
 DROP TABLE IF EXISTS gym_profiles CASCADE;
+DROP TABLE IF EXISTS trainer_verification_requests CASCADE;
 
 DROP TABLE IF EXISTS off_platform_payment_attempts CASCADE;
 DROP TABLE IF EXISTS message_read_states CASCADE;
@@ -1059,6 +1063,150 @@ CREATE TABLE IF NOT EXISTS gym_profiles
 
 CREATE INDEX IF NOT EXISTS idx_trainer_profiles_user
     ON trainer_profiles (user_id);
+
+-- =========================
+-- GYM MEMBERSHIP PRODUCTS
+-- =========================
+CREATE TABLE IF NOT EXISTS gym_membership_products
+(
+    id             BIGSERIAL PRIMARY KEY,
+    gym_id         BIGINT       NOT NULL,
+    name           VARCHAR(200) NOT NULL,
+    description    TEXT         NULL,
+    price_cents    INTEGER      NOT NULL,
+    billing_period VARCHAR(20)  NOT NULL DEFAULT 'MONTHLY',
+    active         BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_gym_membership_products_gym
+        FOREIGN KEY (gym_id) REFERENCES gym_profiles (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_gym_membership_products_gym_created
+    ON gym_membership_products (gym_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_gym_membership_products_gym_active_created
+    ON gym_membership_products (gym_id, active, created_at DESC);
+
+-- =========================
+-- GYM MEMBER SUBSCRIPTIONS
+-- =========================
+CREATE TABLE IF NOT EXISTS gym_member_subscriptions
+(
+    id           BIGSERIAL PRIMARY KEY,
+    user_id      BIGINT       NOT NULL,
+    gym_id       BIGINT       NOT NULL,
+    product_id   BIGINT       NOT NULL,
+    status       VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE',
+    started_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    renews_at    TIMESTAMP    NOT NULL,
+    cancelled_at TIMESTAMP    NULL,
+    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT uq_gym_member_subscriptions_user_gym
+        UNIQUE (user_id, gym_id),
+
+    CONSTRAINT fk_gym_member_subscriptions_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_gym_member_subscriptions_gym
+        FOREIGN KEY (gym_id) REFERENCES gym_profiles (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_gym_member_subscriptions_product
+        FOREIGN KEY (product_id) REFERENCES gym_membership_products (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_gym_member_subscriptions_product_status
+    ON gym_member_subscriptions (product_id, status);
+
+CREATE INDEX IF NOT EXISTS idx_gym_member_subscriptions_user_gym_status
+    ON gym_member_subscriptions (user_id, gym_id, status);
+
+CREATE INDEX IF NOT EXISTS idx_gym_member_subscriptions_gym_status
+    ON gym_member_subscriptions (gym_id, status);
+
+-- =========================
+-- PRICE CHANGE EVENTS
+-- =========================
+CREATE TABLE IF NOT EXISTS price_change_events
+(
+    id                    BIGSERIAL PRIMARY KEY,
+    gym_id                BIGINT       NOT NULL,
+    product_id            BIGINT       NOT NULL,
+    old_price_cents       INTEGER      NOT NULL,
+    new_price_cents       INTEGER      NOT NULL,
+    effective_at          TIMESTAMP    NOT NULL,
+    reason                VARCHAR(500) NOT NULL,
+    changed_by_user_id    BIGINT       NOT NULL,
+    affected_member_count INTEGER      NOT NULL DEFAULT 0,
+    created_at            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_price_change_events_gym
+        FOREIGN KEY (gym_id) REFERENCES gym_profiles (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_price_change_events_product
+        FOREIGN KEY (product_id) REFERENCES gym_membership_products (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_price_change_events_changed_by
+        FOREIGN KEY (changed_by_user_id) REFERENCES users (id)
+            ON DELETE RESTRICT
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_change_events_product_created
+    ON price_change_events (product_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_price_change_events_gym_created
+    ON price_change_events (gym_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_price_change_events_product_effective
+    ON price_change_events (product_id, effective_at DESC);
+
+-- =========================
+-- TRAINER VERIFICATION REQUESTS
+-- =========================
+CREATE TABLE IF NOT EXISTS trainer_verification_requests
+(
+    id                  BIGSERIAL PRIMARY KEY,
+    trainer_user_id     BIGINT       NOT NULL,
+    gym_id              BIGINT       NULL,
+    status              VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    notes               TEXT         NULL,
+    admin_notes         TEXT         NULL,
+    submitted_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at         TIMESTAMP    NULL,
+    reviewed_by_user_id BIGINT       NULL,
+    created_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_trainer_verification_requests_trainer
+        FOREIGN KEY (trainer_user_id) REFERENCES users (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_trainer_verification_requests_gym
+        FOREIGN KEY (gym_id) REFERENCES gym_profiles (id)
+            ON DELETE SET NULL,
+
+    CONSTRAINT fk_trainer_verification_requests_reviewer
+        FOREIGN KEY (reviewed_by_user_id) REFERENCES users (id)
+            ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_trainer_verification_requests_status_submitted
+    ON trainer_verification_requests (status, submitted_at ASC);
+
+CREATE INDEX IF NOT EXISTS idx_trainer_verification_requests_gym_submitted
+    ON trainer_verification_requests (gym_id, submitted_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_trainer_verification_requests_trainer_submitted
+    ON trainer_verification_requests (trainer_user_id, submitted_at DESC);
 
 -- =========================
 -- TRAINER REVIEWS & CLIENT ASSESSMENTS

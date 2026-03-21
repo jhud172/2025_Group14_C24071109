@@ -74,7 +74,7 @@
                         </thead>
                         <tbody class="divide-y divide-white/10 bg-white dark:bg-slate-900">
                             <tr th:each="request : ${verificationRequests}" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
-                                onclick="selectRequest(this)"
+                                data-select-request
                                 th:attr="data-request-id=${request.id},
                                          data-trainer-name=${trainers[request.trainerUserId] != null ? trainers[request.trainerUserId].firstName + ' ' + trainers[request.trainerUserId].lastName : 'Unknown'},
                                          data-trainer-email=${trainers[request.trainerUserId] != null ? trainers[request.trainerUserId].email : ''},
@@ -157,20 +157,20 @@
                                         View Details
                                     </a>
                                     <div th:if="${request.status.name()} == 'PENDING' or ${request.status.name()} == 'NEEDS_INFO'" class="inline-flex items-center gap-2">
-                                        <button type="button" 
-                                                onclick="approveRequest(this)"
+                                        <button type="button"
+                                                data-approve-request
                                                 th:attr="data-request-id=${request.id}"
                                                 class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors">
                                             Approve
                                         </button>
-                                        <button type="button" 
-                                                onclick="rejectRequest(this)"
+                                        <button type="button"
+                                                data-reject-request
                                                 th:attr="data-request-id=${request.id}"
                                                 class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors">
                                             Reject
                                         </button>
-                                        <button type="button" 
-                                                onclick="requestMoreInfo(this)"
+                                        <button type="button"
+                                                data-request-more-info
                                                 th:attr="data-request-id=${request.id}"
                                                 th:if="${request.status.name()} == 'PENDING'"
                                                 class="inline-flex items-center px-3 py-1.5 rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition-colors">
@@ -231,7 +231,7 @@
                 <form id="approveForm" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="flex items-center justify-end gap-3">
-                        <button type="button" onclick="hideModal('approveModal')"
+                        <button type="button" data-close-modal="approveModal"
                                 class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70">
                             Cancel
                         </button>
@@ -263,7 +263,7 @@
                                   placeholder="Explain why this trainer is being rejected..."></textarea>
                     </div>
                     <div class="flex items-center justify-end gap-3">
-                        <button type="button" onclick="hideModal('rejectModal')"
+                        <button type="button" data-close-modal="rejectModal"
                                 class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70">
                             Cancel
                         </button>
@@ -295,7 +295,7 @@
                                   placeholder="Specify what additional information or clarification is needed..."></textarea>
                     </div>
                     <div class="flex items-center justify-end gap-3">
-                        <button type="button" onclick="hideModal('requestInfoModal')"
+                        <button type="button" data-close-modal="requestInfoModal"
                                 class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70">
                             Cancel
                         </button>

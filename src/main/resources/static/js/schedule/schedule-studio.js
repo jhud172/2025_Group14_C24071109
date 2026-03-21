@@ -3,6 +3,24 @@
  * Handles drag-and-drop, inline editing, insights, and all UI interactions
  */
 
+const scheduleStudioBootstrap = document.getElementById('schedule-studio-bootstrap');
+const scheduleId = Number(scheduleStudioBootstrap?.dataset.scheduleId || '0');
+let scheduleName = scheduleStudioBootstrap?.dataset.scheduleName || 'Schedule';
+const csrfToken = scheduleStudioBootstrap?.dataset.csrfToken || '';
+const csrfHeader = scheduleStudioBootstrap?.dataset.csrfHeader || 'X-CSRF-TOKEN';
+const existingEntries = scheduleStudioBootstrap
+    ? Array.from(scheduleStudioBootstrap.querySelectorAll('[data-existing-entry]')).map((entryEl) => ({
+        id: entryEl.dataset.entryId ? Number(entryEl.dataset.entryId) : null,
+        dayOfWeek: Number(entryEl.dataset.dayOfWeek || '0'),
+        exercise: entryEl.dataset.exerciseId
+            ? {
+                id: Number(entryEl.dataset.exerciseId),
+                name: entryEl.dataset.exerciseName || 'Custom Exercise'
+            }
+            : null
+    }))
+    : [];
+
 // ========================================
 // State Management
 // ========================================
@@ -80,15 +98,19 @@ function saveScheduleName() {
     formData.append('name', newName);
     formData.append('description', document.getElementById('scheduleDescription')?.value || '');
     
+    const headers = {};
+    if (csrfToken && csrfHeader) {
+        headers[csrfHeader] = csrfToken;
+    }
+
     fetch(`/schedules/${scheduleId}/update`, {
         method: 'POST',
-        headers: {
-            [csrfHeader]: csrfToken
-        },
+        headers,
         body: formData
     })
     .then(response => {
         if (response.ok) {
+            scheduleName = newName;
             nameEl.contentEditable = 'false';
             updateLastUpdatedTime();
             showNotification('Schedule name updated', 'success');
@@ -222,7 +244,7 @@ function showAddEntryModal(day, dayName) {
     const currentCount = dayContent ? dayContent.children.length : 0;
     document.getElementById('addEntryOrderValue').value = currentCount + 1;
     
-    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
     setTimeout(() => modal.classList.add('show'), 10);
     
     // Close handlers
@@ -293,7 +315,7 @@ function createWorkoutChip(exerciseId, exerciseName, entryId) {
                 </button>
             </div>
         </div>
-        <div class="flow-workout-chip-preview" style="display: none;">
+        <div class="flow-workout-chip-preview hidden">
             <div class="flow-workout-chip-stat">
                 <svg class="flow-workout-chip-stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
@@ -315,11 +337,11 @@ function createWorkoutChip(exerciseId, exerciseName, entryId) {
     const preview = chip.querySelector('.flow-workout-chip-preview');
     expandBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        if (preview.style.display === 'none') {
-            preview.style.display = 'block';
+        if (preview.classList.contains('hidden')) {
+            preview.classList.remove('hidden');
             preview.classList.add('expanded');
         } else {
-            preview.style.display = 'none';
+            preview.classList.add('hidden');
             preview.classList.remove('expanded');
         }
     });
@@ -483,7 +505,7 @@ function showApplyModal() {
     const modal = document.getElementById('applyModal');
     if (!modal) return;
     
-    modal.style.display = 'flex';
+    modal.classList.remove('hidden');
     setTimeout(() => modal.classList.add('show'), 10);
     
     // Click outside to close
@@ -500,7 +522,7 @@ function hideModal(modalId) {
     
     modal.classList.remove('show');
     setTimeout(() => {
-        modal.style.display = 'none';
+        modal.classList.add('hidden');
         modal.onclick = null;
     }, 300);
 }

@@ -41,6 +41,57 @@ document.addEventListener("DOMContentLoaded", () => {
         input.addEventListener("input", runFilter);
     }
 
+    document.querySelectorAll('[data-switch-tab]').forEach((button) => {
+        button.addEventListener('click', () => {
+            switchTab(button.getAttribute('data-switch-tab'));
+        });
+    });
+
+    document.querySelectorAll('[data-open-create-modal]').forEach((button) => {
+        button.addEventListener('click', showCreateModal);
+    });
+
+    document.querySelectorAll('[data-close-create-modal]').forEach((button) => {
+        button.addEventListener('click', hideCreateModal);
+    });
+
+    document.querySelectorAll('[data-open-my-schedules]').forEach((button) => {
+        button.addEventListener('click', () => {
+            document.querySelector('.tcc-tab[data-tab="my-schedules"]')?.click();
+        });
+    });
+
+    document.querySelectorAll('[data-open-schedule-preview]').forEach((button) => {
+        button.addEventListener('click', () => showSchedulePreview(button));
+    });
+
+    document.querySelectorAll('[data-duplicate-schedule]').forEach((button) => {
+        button.addEventListener('click', () => duplicateSchedule(button));
+    });
+
+    document.querySelectorAll('[data-template-navigation]').forEach((button) => {
+        button.addEventListener('click', handleTemplateNavigation);
+    });
+
+    document.querySelectorAll('[data-close-preview-modal]').forEach((button) => {
+        button.addEventListener('click', hidePreviewModal);
+    });
+
+    document.querySelectorAll('[data-overlay-close]').forEach((overlay) => {
+        overlay.addEventListener('click', (event) => {
+            if (event.target !== overlay) return;
+
+            if (overlay.id === 'create-modal') {
+                hideCreateModal();
+                return;
+            }
+
+            if (overlay.id === 'preview-modal') {
+                hidePreviewModal();
+            }
+        });
+    });
+
     // Load schedule metadata and update insights
     loadScheduleMetadata();
 });

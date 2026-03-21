@@ -2,6 +2,20 @@
           th:replace="~{base :: layout('Training Flow Editor', null, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="content">
+    <div id="schedule-studio-bootstrap"
+         class="hidden"
+         th:attr="data-schedule-id=${schedule.id},
+                  data-schedule-name=${schedule.name},
+                  data-csrf-token=${_csrf != null ? _csrf.token : ''},
+                  data-csrf-header=${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}">
+        <div th:each="entry : ${entries}"
+             data-existing-entry
+             th:attr="data-entry-id=${entry.id},
+                      data-day-of-week=${entry.dayOfWeek},
+                      data-exercise-id=${entry.exercise != null ? entry.exercise.id : ''},
+                      data-exercise-name=${entry.exercise != null ? entry.exercise.name : 'Custom Exercise'}"></div>
+    </div>
+
     <div class="studio-container">
         <!-- Studio Header (Document Editor Style) -->
         <div class="studio-header">
@@ -304,7 +318,7 @@
         </div>
 
         <!-- Apply to Calendar Modal -->
-        <div id="applyModal" class="modal-overlay" style="display: none;">
+        <div id="applyModal" class="modal-overlay hidden">
             <div class="modal-container">
                 <div class="modal-header">
                     <h3 class="modal-title">Apply Schedule to Calendar</h3>
@@ -376,7 +390,7 @@
         </div>
 
         <!-- Add Entry Modal -->
-        <div id="addEntryModal" class="modal-overlay" style="display: none;">
+        <div id="addEntryModal" class="modal-overlay hidden">
             <div class="modal-container">
                 <div class="modal-header">
                     <h3 class="modal-title">Add Exercise to <span id="addEntryDayName">Day</span></h3>
@@ -421,16 +435,6 @@
 </div>
 
 <div th:fragment="pageScripts">
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        const scheduleId = /*[[${schedule.id}]]*/ 0;
-        const scheduleName = /*[[${schedule.name}]]*/ 'Schedule';
-        const existingEntries = /*[[${entries}]]*/ [];
-        const exercises = /*[[${exercises}]]*/ [];
-        const csrfToken = /*[[${_csrf.token}]]*/ '';
-        const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
-        /*]]>*/
-    </script>
     <script src="/js/schedule/schedule-studio.js"></script>
 </div>
 

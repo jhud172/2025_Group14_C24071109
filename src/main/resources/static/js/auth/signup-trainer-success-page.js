@@ -1,7 +1,7 @@
-var code = (typeof trainerCodeData !== 'undefined') ? trainerCodeData : '';
 const copyBtn = document.getElementById('copyCodeBtn');
 const copyLabel = document.getElementById('copyLabel');
 const copyIcon = document.getElementById('copyIcon');
+const code = copyBtn?.dataset.trainerCode || document.getElementById('trainerCodeDisplay')?.dataset.trainerCode || '';
 
 if (copyBtn && code) {
     copyBtn.addEventListener('click', () => {

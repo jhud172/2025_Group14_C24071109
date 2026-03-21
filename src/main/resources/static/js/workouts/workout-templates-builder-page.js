@@ -1,6 +1,6 @@
 (function () {
     // ── State ─────────────────────────────────────────────────────
-    const initialConfigJson = (typeof builderInitialConfigJson !== 'undefined') ? builderInitialConfigJson : null;
+    const initialConfigJson = document.getElementById('builder-initial-config')?.value || null;
     let canvasComponents = [];
 
     // ── Elements ──────────────────────────────────────────────────

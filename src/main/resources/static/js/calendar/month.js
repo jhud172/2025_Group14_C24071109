@@ -1409,13 +1409,27 @@
 
         // ---- Read pane data ----
         function readPaneData() {
-            const script = document.querySelector('.sticker-pane-data');
-            if (!script) return null;
-            try {
-                return JSON.parse(script.textContent.trim());
-            } catch (e) {
-                return null;
-            }
+            const pane = currentSlot || monthPane || document.querySelector('[data-pane-center="true"]') || document.querySelector('[data-month-pane]');
+            const source = pane?.querySelector('[data-sticker-session-source]');
+            if (!source) return null;
+
+            const sessions = {};
+            source.querySelectorAll('[data-sticker-session-day]').forEach((dayEl) => {
+                const date = dayEl.getAttribute('data-date');
+                if (!date) return;
+                sessions[date] = Array.from(dayEl.querySelectorAll('[data-sticker-session-name]'))
+                    .map((nameEl) => nameEl.textContent.trim())
+                    .filter(Boolean);
+            });
+
+            return {
+                sessions,
+                pack: source.getAttribute('data-sticker-pack') || 'STARS',
+                target: parseInt(source.getAttribute('data-sticker-target') || '12', 10),
+                completed: parseInt(source.getAttribute('data-sticker-completed') || '0', 10),
+                year: parseInt(source.getAttribute('data-sticker-year') || '0', 10),
+                month: parseInt(source.getAttribute('data-sticker-month') || '0', 10)
+            };
         }
 
         // ---- Build sticker grid ----

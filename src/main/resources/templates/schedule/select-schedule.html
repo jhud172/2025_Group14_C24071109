@@ -1,33 +1,27 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-		  th:replace="~{base :: layout('Select Schedule', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Select Schedule', null, ~{::content}, null)}">
 
-	<div th:fragment="content">
-		<div class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
-			<h1 class="text-2xl font-bold tracking-tight" style="color:#f1f5f9">Select a schedule</h1>
-			<p class="mt-2 text-sm" style="color:rgba(148,163,184,0.8)">Choose a schedule to apply.</p>
+    <div th:fragment="content">
+        <div class="schedule-apply-page mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+            <h1 class="schedule-apply-title text-2xl font-bold tracking-tight">Select a schedule</h1>
+            <p class="schedule-apply-subtitle mt-2 text-sm">Choose a schedule to apply.</p>
 
-			<section class="mt-6 rounded-2xl p-6"
-					 style="background:rgba(26,26,46,0.65);backdrop-filter:blur(12px);border:1px solid rgba(0,243,255,0.2);box-shadow:0 0 20px rgba(0,243,255,0.06)">
-				<div th:if="${schedules != null and !#lists.isEmpty(schedules)}" class="space-y-3">
-					<a th:each="s : ${schedules}"
-					   th:href="@{'/schedules/' + ${s.id} + '/apply'}"
-					   class="block rounded-xl p-4 transition-all duration-200"
-					   style="background:rgba(17,24,39,0.5);border:1px solid rgba(0,243,255,0.15)"
-					   onmouseover="this.style.borderColor='rgba(0,243,255,0.45)';this.style.boxShadow='0 0 14px rgba(0,243,255,0.1)';this.style.transform='translateY(-1px)'"
-					   onmouseout="this.style.borderColor='rgba(0,243,255,0.15)';this.style.boxShadow='';this.style.transform=''">
-						<div class="font-semibold" style="color:#f1f5f9" th:text="${s.name}">Schedule name</div>
-						<div class="mt-1 text-sm" style="color:rgba(0,243,255,0.7)">Apply this schedule to your calendar →</div>
-					</a>
-				</div>
+            <section class="schedule-apply-list-surface mt-6 rounded-2xl p-6">
+                <div th:if="${schedules != null and !#lists.isEmpty(schedules)}" class="space-y-3">
+                    <a th:each="s : ${schedules}"
+                       th:href="@{'/schedules/' + ${s.id} + '/apply'}"
+                       class="schedule-apply-choice-link block rounded-xl p-4">
+                        <div class="schedule-apply-choice-title font-semibold" th:text="${s.name}">Schedule name</div>
+                        <div class="schedule-apply-choice-copy mt-1 text-sm">Apply this schedule to your calendar &rarr;</div>
+                    </a>
+                </div>
 
-				<div th:if="${schedules == null or #lists.isEmpty(schedules)}" class="text-sm" style="color:rgba(148,163,184,0.8)">
-					No schedules available.
-					<a href="/schedules" class="font-semibold transition-colors duration-200"
-					   style="color:#00f3ff"
-					   onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration=''">Go to schedules</a>.
-				</div>
-			</section>
-		</div>
-	</div>
+                <div th:if="${schedules == null or #lists.isEmpty(schedules)}" class="schedule-apply-empty text-sm">
+                    No schedules available.
+                    <a href="/schedules" class="schedule-apply-link font-semibold">Go to schedules</a>.
+                </div>
+            </section>
+        </div>
+    </div>
 
 </th:block>

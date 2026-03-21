@@ -1,5 +1,6 @@
 package uk.ac.cf._5.group14.One_To_One.Security;
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,6 +12,16 @@ public final class SecurityUtils {
 
     public static Authentication getAuthentication() {
         return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    public static boolean isAuthenticated() {
+        return isAuthenticated(getAuthentication());
+    }
+
+    public static boolean isAuthenticated(Authentication authentication) {
+        return authentication != null
+                && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken);
     }
 
     public static String getUsername(Authentication authentication) {

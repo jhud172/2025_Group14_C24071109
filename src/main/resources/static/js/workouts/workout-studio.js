@@ -41,6 +41,12 @@
                 switchMode(targetMode, tabs, panels);
             });
         });
+
+        document.querySelectorAll('[data-open-builder]').forEach((button) => {
+            button.addEventListener('click', () => {
+                switchMode('builder', tabs, panels);
+            });
+        });
     }
 
     function switchMode(targetMode, tabs, panels) {

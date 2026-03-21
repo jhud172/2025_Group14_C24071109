@@ -1,253 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Pricing', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
-
-    <th:block th:fragment="pageStyles">
-        <style>
-            .pricing-page {
-                --pricing-bg: #ffffff;
-                --pricing-text: #111827;
-                --pricing-muted: #4b5563;
-                --pricing-emerald: #059669;
-                --pricing-emerald-strong: #047857;
-                --pricing-emerald-soft: #ecfdf5;
-                --pricing-border: #d1fae5;
-                color: var(--pricing-text);
-                background: var(--pricing-bg);
-            }
-
-            .pricing-page .gradient-text {
-                background: none !important;
-                -webkit-text-fill-color: currentColor !important;
-                color: var(--pricing-text) !important;
-            }
-
-            .pricing-page .text-white,
-            .pricing-page .text-slate-100,
-            .pricing-page .text-slate-300 {
-                color: var(--pricing-text) !important;
-            }
-
-            .pricing-page .text-slate-400,
-            .pricing-page .text-slate-500,
-            .pricing-page .text-slate-600 {
-                color: var(--pricing-muted) !important;
-            }
-
-            .pricing-page .text-neon-cyan,
-            .pricing-page .text-neon-purple,
-            .pricing-page .text-neon-green {
-                color: var(--pricing-emerald) !important;
-            }
-
-            .pricing-page [class*="text-neon-"],
-            .pricing-page [class*="border-neon-"],
-            .pricing-page [class*="bg-neon-"],
-            .pricing-page [class*="shadow-neon-"] {
-                text-shadow: none !important;
-                filter: none !important;
-                box-shadow: none !important;
-            }
-
-            .pricing-page .border-neon-cyan\/40,
-            .pricing-page .border-neon-cyan\/30,
-            .pricing-page .border-neon-purple\/40,
-            .pricing-page .border-neon-purple\/30 {
-                border-color: rgba(5, 150, 105, 0.35) !important;
-            }
-
-            .pricing-page .bg-neon-cyan\/10,
-            .pricing-page .bg-neon-purple\/10,
-            .pricing-page .bg-neon-green\/10,
-            .pricing-page .bg-neon-purple\/20 {
-                background: rgba(5, 150, 105, 0.08) !important;
-            }
-
-            .pricing-page .card-neon,
-            .pricing-page .card--cyan,
-            .pricing-page .card--purple,
-            .pricing-page .card--green {
-                background: #ffffff !important;
-                border: 1px solid var(--pricing-border) !important;
-                box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06) !important;
-            }
-
-            .pricing-page .card-neon::before,
-            .pricing-page .card-neon::after,
-            .pricing-page .card--cyan::before,
-            .pricing-page .card--cyan::after,
-            .pricing-page .card--purple::before,
-            .pricing-page .card--purple::after,
-            .pricing-page .card--green::before,
-            .pricing-page .card--green::after {
-                content: none !important;
-                display: none !important;
-            }
-
-            .pricing-page .btn--primary,
-            .pricing-page .btn--secondary {
-                background: var(--pricing-emerald) !important;
-                background-image: none !important;
-                border-color: var(--pricing-emerald) !important;
-                color: #ffffff !important;
-                box-shadow: none !important;
-            }
-
-            .pricing-page .btn--primary:hover,
-            .pricing-page .btn--secondary:hover {
-                background: var(--pricing-emerald-strong) !important;
-                border-color: var(--pricing-emerald-strong) !important;
-            }
-
-            .pricing-page .btn--ghost {
-                background: #ffffff !important;
-                background-image: none !important;
-                border-color: rgba(5, 150, 105, 0.32) !important;
-                color: var(--pricing-emerald-strong) !important;
-            }
-
-            /* ── Pricing Hero ─────────────────────────────────── */
-            .pricing-hero {
-                position: relative;
-                overflow: hidden;
-                padding: 5rem 0 4rem;
-            }
-            .pricing-hero::before {
-                content: '';
-                position: absolute;
-                inset: 0;
-                background:
-                    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(5,150,105,0.14) 0%, transparent 70%),
-                    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(16,185,129,0.08) 0%, transparent 70%);
-                pointer-events: none;
-            }
-            .pricing-hero-grid {
-                position: absolute;
-                inset: 0;
-                background-image:
-                    linear-gradient(rgba(5,150,105,0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(5,150,105,0.05) 1px, transparent 1px);
-                background-size: 40px 40px;
-                pointer-events: none;
-            }
-            /* ── Plan Cards ───────────────────────────────────── */
-            .plan-card {
-                position: relative;
-                background: #ffffff;
-                border-radius: 1.25rem;
-                padding: 2rem;
-                transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
-                border: 1px solid var(--pricing-border);
-            }
-            .plan-card:hover {
-                transform: translateY(-6px);
-                box-shadow: 0 16px 32px rgba(17,24,39,0.12);
-            }
-            .plan-card.featured {
-                border-color: rgba(5,150,105,0.45);
-                background: var(--pricing-emerald-soft);
-            }
-            .plan-card.featured:hover {
-                box-shadow: 0 16px 32px rgba(5,150,105,0.18);
-            }
-            .plan-badge-recommended {
-                position: absolute;
-                top: -14px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: var(--pricing-emerald);
-                color: #fff;
-                font-size: 0.7rem;
-                font-weight: 700;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                padding: 3px 14px;
-                border-radius: 99px;
-                white-space: nowrap;
-            }
-            .price-display {
-                font-size: 3rem;
-                font-weight: 800;
-                line-height: 1;
-                background: linear-gradient(135deg, #047857, #059669);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
-            .price-display.cyan {
-                background: linear-gradient(135deg, #065f46, #10b981);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
-            /* ── Feature Table ────────────────────────────────── */
-            .feature-table-wrap {
-                overflow-x: auto;
-                border-radius: 1rem;
-                border: 1px solid rgba(5,150,105,0.2);
-            }
-            .feature-table {
-                width: 100%;
-                border-collapse: separate;
-                border-spacing: 0;
-            }
-            .feature-table th {
-                padding: 1rem 1.25rem;
-                background: rgba(5,150,105,0.07);
-                text-align: center;
-                font-size: 0.875rem;
-                font-weight: 700;
-            }
-            .feature-table th:first-child { text-align: left; }
-            .feature-table td {
-                padding: 0.85rem 1.25rem;
-                border-top: 1px solid rgba(5,150,105,0.12);
-                font-size: 0.875rem;
-                text-align: center;
-                color: #4b5563;
-            }
-            .feature-table td:first-child { text-align: left; color: #111827; }
-            .feature-table tr:hover td { background: rgba(5,150,105,0.05); }
-            /* ── FAQ ──────────────────────────────────────────── */
-            .faq-item summary {
-                list-style: none;
-                cursor: pointer;
-                user-select: none;
-            }
-            .faq-item summary::-webkit-details-marker { display: none; }
-            .faq-chevron {
-                transition: transform 0.3s ease;
-            }
-            .faq-item[open] .faq-chevron {
-                transform: rotate(180deg);
-            }
-            /* ── Feature Highlight Pills ──────────────────────── */
-            .feature-pill {
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.4rem 0.9rem;
-                border-radius: 99px;
-                font-size: 0.78rem;
-                font-weight: 600;
-                border: 1px solid;
-            }
-            /* ── Subtle top accent (replaces scanline) ───────── */
-            .scanline {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 2px;
-                background: linear-gradient(90deg, transparent, rgba(5,150,105,0.45), transparent);
-                pointer-events: none;
-                z-index: 0;
-            }
-            @media (prefers-reduced-motion: reduce) {
-                .plan-card { transition: none; }
-                .plan-card:hover { transform: none; }
-            }
-        </style>
-    </th:block>
+          th:replace="~{base :: layout('Pricing', null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="pricing-page"
          th:with="sub=${platformSubscription},
@@ -258,9 +10,9 @@
         <!-- Ambient scanline -->
         <div class="scanline" aria-hidden="true"></div>
 
-        <!-- ═══════════════════════════════════════════════════
+        <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
              HERO
-        ════════════════════════════════════════════════════ -->
+        Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
         <section class="pricing-hero text-center px-4">
             <div class="pricing-hero-grid" aria-hidden="true"></div>
             <div class="relative z-10 max-w-3xl mx-auto">
@@ -272,36 +24,34 @@
                     Level Up Your<br>Fitness Journey
                 </h1>
                 <p class="text-slate-400 text-lg max-w-xl mx-auto leading-relaxed">
-                    Unlock advanced dashboards, real-time insights, and priority support — everything you need to crush your goals faster.
+                    Unlock advanced dashboards, real-time insights, and priority support Ã¢â‚¬â€ everything you need to crush your goals faster.
                 </p>
             </div>
         </section>
 
         <div class="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
 
-            <!-- ══════════════════════════════════════════════════
+            <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
                  STATUS BANNERS
-            ══════════════════════════════════════════════════ -->
+            Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
             <!-- Lifetime -->
             <div th:if="${isInfinite}"
-                 class="mb-10 rounded-2xl p-5 flex items-center gap-4"
-                 style="background:rgba(16,185,129,0.08);border:1px solid rgba(5,150,105,0.32);">
-                <div class="flex-shrink-0 p-3 rounded-xl" style="background:rgba(16,185,129,0.12);border:1px solid rgba(5,150,105,0.3);">
+                 class="pricing-surface-success mb-10 rounded-2xl p-5 flex items-center gap-4">
+                <div class="pricing-surface-success-icon flex-shrink-0 p-3 rounded-xl">
                     <svg class="h-7 w-7 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636C16.948 4.22 15.026 3.25 13 3.25s-3.948.97-5.364 2.386L5.636 7.636m12.728 0 2 2m-2-2-2 2M5.636 7.636l-2 2m2-2 2 2M7.636 18.364C9.052 19.78 10.974 20.75 13 20.75s3.948-.97 5.364-2.386l2-2m-14.728 0-2-2m2 2 2-2"/>
                     </svg>
                 </div>
                 <div>
-                    <p class="font-bold text-neon-green text-lg">∞ Lifetime Premium Active</p>
-                    <p class="text-sm text-slate-400 mt-0.5">You have lifetime access to every Platform Premium feature — no renewal, no limits.</p>
+                    <p class="font-bold text-neon-green text-lg">Ã¢Ë†Å¾ Lifetime Premium Active</p>
+                    <p class="text-sm text-slate-400 mt-0.5">You have lifetime access to every Platform Premium feature Ã¢â‚¬â€ no renewal, no limits.</p>
                 </div>
             </div>
 
             <!-- Cancelled -->
             <div th:if="${isExpired}"
-                 class="mb-10 rounded-2xl p-5 flex items-center gap-4"
-                 style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.35);">
-                <div class="flex-shrink-0 p-3 rounded-xl" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);">
+                 class="pricing-surface-danger mb-10 rounded-2xl p-5 flex items-center gap-4">
+                <div class="pricing-surface-danger-icon flex-shrink-0 p-3 rounded-xl">
                     <svg class="h-7 w-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
@@ -314,29 +64,28 @@
 
             <!-- Active -->
             <div th:if="${isActive and !isInfinite}"
-                 class="mb-10 rounded-2xl p-5 flex items-center gap-4"
-                 style="background:rgba(16,185,129,0.08);border:1px solid rgba(5,150,105,0.3);">
-                <div class="flex-shrink-0 p-3 rounded-xl" style="background:rgba(16,185,129,0.1);border:1px solid rgba(5,150,105,0.28);">
+                 class="pricing-surface-success-soft mb-10 rounded-2xl p-5 flex items-center gap-4">
+                <div class="pricing-surface-success-icon-soft flex-shrink-0 p-3 rounded-xl">
                     <svg class="h-7 w-7 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
                 <div class="flex-1">
                     <p class="font-bold text-neon-green text-lg">Premium Active</p>
-                    <p class="text-sm text-slate-400 mt-0.5">Your subscription is active. <a th:href="@{/profile}" class="text-neon-cyan underline">Manage in your profile →</a></p>
+                    <p class="text-sm text-slate-400 mt-0.5">Your subscription is active. <a th:href="@{/profile}" class="text-neon-cyan underline">Manage in your profile Ã¢â€ â€™</a></p>
                 </div>
             </div>
 
-            <!-- ══════════════════════════════════════════════════
+            <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
                  PLAN CARDS
-            ══════════════════════════════════════════════════ -->
+            Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
             <div class="mt-4 grid gap-8 md:grid-cols-2">
                 <div th:each="plan : ${plans}"
                      class="plan-card"
                      th:classappend="${plan.plan.name() == 'YEARLY'} ? ' featured' : ''">
 
                     <!-- Recommended badge -->
-                    <span th:if="${plan.plan.name() == 'YEARLY'}" class="plan-badge-recommended">★ Best Value</span>
+                    <span th:if="${plan.plan.name() == 'YEARLY'}" class="plan-badge-recommended">Ã¢Ëœâ€¦ Best Value</span>
 
                     <!-- Active indicator -->
                     <div th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}"
@@ -359,14 +108,14 @@
                     <div class="mt-3 mb-1">
                         <span class="price-display"
                               th:classappend="${plan.plan.name() == 'MONTHLY'} ? ' cyan' : ''"
-                              th:text="${plan.priceLabel}">£12 / month</span>
+                              th:text="${plan.priceLabel}">Ã‚Â£12 / month</span>
                     </div>
                     <!-- Note: savings text is kept consistent with plan prices defined in PricingController -->
-                    <p th:if="${plan.plan.name() == 'YEARLY'}" class="text-xs text-slate-500 mb-4">Equivalent to £9 / month — billed annually</p>
-                    <p th:if="${plan.plan.name() == 'MONTHLY'}" class="text-xs text-slate-500 mb-4">Billed monthly · cancel anytime</p>
+                    <p th:if="${plan.plan.name() == 'YEARLY'}" class="text-xs text-slate-500 mb-4">Equivalent to Ã‚Â£9 / month Ã¢â‚¬â€ billed annually</p>
+                    <p th:if="${plan.plan.name() == 'MONTHLY'}" class="text-xs text-slate-500 mb-4">Billed monthly Ã‚Â· cancel anytime</p>
 
                     <!-- Divider -->
-                    <div class="h-px mb-4" style="background:linear-gradient(90deg, transparent, rgba(5,150,105,0.28), transparent)"></div>
+                    <div class="pricing-divider-emerald h-px mb-4"></div>
 
                     <!-- Benefits -->
                     <ul class="space-y-2.5 text-sm text-slate-300 mb-6">
@@ -396,7 +145,7 @@
                     </th:block>
                     <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}">
                         <a th:href="@{/profile}" class="btn w-full btn--ghost">
-                            Manage Subscription →
+                            Manage Subscription Ã¢â€ â€™
                         </a>
                     </th:block>
                     <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() != plan.plan.name()}">
@@ -408,15 +157,15 @@
                     </th:block>
                     <th:block th:if="${isInfinite}">
                         <span class="btn w-full btn--ghost inline-flex items-center justify-center gap-1.5 opacity-50 cursor-default">
-                            ∞ Included in Lifetime
+                            Ã¢Ë†Å¾ Included in Lifetime
                         </span>
                     </th:block>
                 </div>
             </div>
 
-            <!-- ══════════════════════════════════════════════════
+            <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
                  PREMIUM FEATURES SHOWCASE
-            ══════════════════════════════════════════════════ -->
+            Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
             <section class="mt-20">
                 <div class="text-center mb-10">
                     <h2 class="text-2xl sm:text-3xl font-bold gradient-text">Everything Premium Unlocks</h2>
@@ -425,7 +174,7 @@
                 <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     <!-- Feature 1 -->
                     <div class="card-neon card--cyan p-5 flex gap-4 items-start">
-                        <div class="p-2.5 rounded-xl flex-shrink-0" style="background:rgba(16,185,129,0.1);border:1px solid rgba(5,150,105,0.25);">
+                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
                             <svg class="h-6 w-6 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                         </div>
                         <div>
@@ -435,7 +184,7 @@
                     </div>
                     <!-- Feature 2 -->
                     <div class="card-neon card--purple p-5 flex gap-4 items-start">
-                        <div class="p-2.5 rounded-xl flex-shrink-0" style="background:rgba(16,185,129,0.1);border:1px solid rgba(5,150,105,0.25);">
+                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
                             <svg class="h-6 w-6 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
                         <div>
@@ -445,7 +194,7 @@
                     </div>
                     <!-- Feature 3 -->
                     <div class="card-neon card--green p-5 flex gap-4 items-start">
-                        <div class="p-2.5 rounded-xl flex-shrink-0" style="background:rgba(16,185,129,0.1);border:1px solid rgba(5,150,105,0.25);">
+                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
                             <svg class="h-6 w-6 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         </div>
                         <div>
@@ -455,7 +204,7 @@
                     </div>
                     <!-- Feature 4 -->
                     <div class="card-neon card--cyan p-5 flex gap-4 items-start">
-                        <div class="p-2.5 rounded-xl flex-shrink-0" style="background:rgba(16,185,129,0.1);border:1px solid rgba(5,150,105,0.25);">
+                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
                             <svg class="h-6 w-6 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                         </div>
                         <div>
@@ -465,7 +214,7 @@
                     </div>
                     <!-- Feature 5 -->
                     <div class="card-neon card--purple p-5 flex gap-4 items-start">
-                        <div class="p-2.5 rounded-xl flex-shrink-0" style="background:rgba(16,185,129,0.1);border:1px solid rgba(5,150,105,0.25);">
+                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
                             <svg class="h-6 w-6 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         </div>
                         <div>
@@ -475,7 +224,7 @@
                     </div>
                     <!-- Feature 6 -->
                     <div class="card-neon card--green p-5 flex gap-4 items-start">
-                        <div class="p-2.5 rounded-xl flex-shrink-0" style="background:rgba(16,185,129,0.1);border:1px solid rgba(5,150,105,0.25);">
+                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
                             <svg class="h-6 w-6 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         </div>
                         <div>
@@ -486,9 +235,9 @@
                 </div>
             </section>
 
-            <!-- ══════════════════════════════════════════════════
+            <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
                  FEATURE COMPARISON TABLE
-            ══════════════════════════════════════════════════ -->
+            Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
             <section class="mt-20">
                 <div class="text-center mb-10">
                     <h2 class="text-2xl sm:text-3xl font-bold gradient-text">Compare Plans</h2>
@@ -564,9 +313,9 @@
                 </div>
             </section>
 
-            <!-- ══════════════════════════════════════════════════
+            <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
                  FAQ
-            ══════════════════════════════════════════════════ -->
+            Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
             <section class="mt-20">
                 <div class="text-center mb-10">
                     <h2 class="text-2xl sm:text-3xl font-bold gradient-text">Frequently Asked Questions</h2>
@@ -578,7 +327,7 @@
                             <span class="font-semibold text-slate-100 text-sm">What is Platform Premium?</span>
                             <svg class="faq-chevron h-4 w-4 text-neon-cyan flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </summary>
-                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">Platform Premium is our subscription tier that unlocks advanced features across One To One — including premium dashboards, in-depth analytics, weekly insights, and priority support. It is separate from any gym membership you may hold.</p>
+                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">Platform Premium is our subscription tier that unlocks advanced features across One To One Ã¢â‚¬â€ including premium dashboards, in-depth analytics, weekly insights, and priority support. It is separate from any gym membership you may hold.</p>
                     </details>
 
                     <details class="faq-item card-neon card--cyan group">
@@ -602,7 +351,7 @@
                             <span class="font-semibold text-slate-100 text-sm">What's the difference between Monthly and Yearly?</span>
                             <svg class="faq-chevron h-4 w-4 text-neon-cyan flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </summary>
-                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">Both plans include the exact same features. The Yearly plan is billed annually at a discounted rate — saving you the equivalent of two months compared to paying monthly. If you're committed to your fitness journey, Yearly is the better deal.</p>
+                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">Both plans include the exact same features. The Yearly plan is billed annually at a discounted rate Ã¢â‚¬â€ saving you the equivalent of two months compared to paying monthly. If you're committed to your fitness journey, Yearly is the better deal.</p>
                     </details>
 
                     <details class="faq-item card-neon card--cyan group">
@@ -624,11 +373,10 @@
                 </div>
             </section>
 
-            <!-- ══════════════════════════════════════════════════
+            <!-- Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
                  BOTTOM NOTE
-            ══════════════════════════════════════════════════ -->
-            <div class="mt-16 rounded-2xl p-6 flex items-start gap-4 text-center justify-center"
-                  style="background:rgba(16,185,129,0.06);border:1px solid rgba(5,150,105,0.18);">
+            Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â -->
+            <div class="pricing-feature-panel mt-16 rounded-2xl p-6 flex items-start gap-4 text-center justify-center">
                 <svg class="h-5 w-5 text-neon-cyan flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>

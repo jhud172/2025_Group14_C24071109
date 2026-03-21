@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    var ROLE = (typeof tutorialRole !== 'undefined') ? tutorialRole : 'CLIENT';
+    var ROLE = document.body.getAttribute('data-tutorial-role') || 'CLIENT';
 
     // ── Step definitions ─────────────────────────────────────────────────────
     var CLIENT_STEPS = [
@@ -120,6 +120,10 @@
     var dotsEl    = document.getElementById('tutorial-dots');
     var finishForm= document.getElementById('tutorial-finish-form');
 
+    if (!icon || !title || !body || !progress || !stepLabel || !nextBtn || !backBtn || !dotsEl || !finishForm) {
+        return;
+    }
+
     // ── Build dots ────────────────────────────────────────────────────────────
     steps.forEach(function (_, i) {
         var dot = document.createElement('button');
@@ -163,26 +167,29 @@
         render();
     }
 
-    window.tutorialNext = function () {
+    function tutorialNext() {
         if (current < steps.length - 1) {
             current++;
             render();
         } else {
             finishForm.submit();
         }
-    };
+    }
 
-    window.tutorialBack = function () {
+    function tutorialBack() {
         if (current > 0) {
             current--;
             render();
         }
-    };
+    }
+
+    nextBtn.addEventListener('click', tutorialNext);
+    backBtn.addEventListener('click', tutorialBack);
 
     // Keyboard navigation
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowRight' || e.key === 'Enter') { window.tutorialNext(); }
-        else if (e.key === 'ArrowLeft') { window.tutorialBack(); }
+        if (e.key === 'ArrowRight' || e.key === 'Enter') { tutorialNext(); }
+        else if (e.key === 'ArrowLeft') { tutorialBack(); }
         else if (e.key === 'Escape') { finishForm.submit(); }
     });
 
