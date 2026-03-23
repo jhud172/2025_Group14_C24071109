@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.One_To_One.CalendarData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
 import java.time.Instant;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
+@Slf4j
 @Transactional
 @Service
 public class CalendarTaskServiceImpl implements CalendarTaskService {
@@ -136,7 +138,9 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
         Map<LocalDate, List<CalendarTask>> map = new HashMap<>();
 
         List<CalendarTask> tasks = repo.findByUserAndDateBetween(user, start, end);
-        System.out.println("DEBUG: CalendarTaskServiceImpl.getTasksByRange - user: " + user.getId() + ", start: " + start + ", end: " + end + ", foundTasks: " + tasks.size());
+        if (log.isDebugEnabled()) {
+            log.debug("Loaded {} calendar tasks for user {} between {} and {}", tasks.size(), user.getId(), start, end);
+        }
 
         warningService.applyWarningStates(tasks, Instant.now());
 
@@ -144,7 +148,7 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
             map.computeIfAbsent(task.getDate(), d -> new ArrayList<>()).add(task);
         }
 
-        System.out.println("DEBUG: CalendarTaskServiceImpl.getTasksByRange - final map size: " + map.size());
+        log.debug("Grouped calendar tasks into {} dates for user {}", map.size(), user.getId());
         return map;
     }
 }

@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.One_To_One.Security;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.DisabledException;
@@ -18,6 +19,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Component
+@Slf4j
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
     @Autowired(required = false)
@@ -31,8 +33,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        System.out.println("Authentication Failure Handler invoked: " + exception.getMessage());
-        System.out.println("Request URI: " + request.getRequestURI());
+        log.warn("Authentication failure for {} on {}", request.getParameter("username"), request.getRequestURI());
 
         // Record failed attempts for basic throttling.
         if (loginAttemptService != null) {

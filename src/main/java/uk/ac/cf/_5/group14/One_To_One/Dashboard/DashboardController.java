@@ -691,7 +691,7 @@ public class DashboardController {
                     buildRelationshipLabel(activeLink, "Connected"),
                     trainer != null ? trainer.getFullName() : null,
                     thread != null ? thread.getId() : null,
-                    thread != null ? "/messages/" + thread.getId() : null,
+                    thread != null ? "/inbox/" + thread.getId() : null,
                     planHref,
                     "/client/trainers",
                     planCtaLabel,
@@ -886,7 +886,7 @@ public class DashboardController {
 
         boolean threadMatch = thread != null
                 && ctaUrl != null
-                && ctaUrl.contains("/messages/" + thread.getId());
+                && ctaUrl.contains("/inbox/" + thread.getId());
         boolean requestState = title != null && (
                 title.contains("request accepted")
                         || title.contains("coaching ended")
@@ -1026,7 +1026,7 @@ public class DashboardController {
         }
         MessageThread thread = messageThreadRepository.findByLinkId(link.getId())
                 .orElseGet(() -> messagingService.ensureThreadForLink(link));
-        return thread != null ? "/messages/" + thread.getId() : null;
+        return thread != null ? "/inbox/" + thread.getId() : null;
     }
 
     private String buildPlanSummaryBody(int sharedWorkoutCount,

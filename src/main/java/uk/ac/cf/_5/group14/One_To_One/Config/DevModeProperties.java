@@ -2,6 +2,7 @@ package uk.ac.cf._5.group14.One_To_One.Config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 @ConfigurationProperties(prefix = "app")
 public class DevModeProperties {
@@ -38,7 +40,7 @@ public class DevModeProperties {
                     }
                 }
             } catch (IOException e) {
-                System.err.println("Error reading .env file: " + e.getMessage());
+                log.warn("Failed to read .env file for dev mode properties", e);
             }
         }
     }

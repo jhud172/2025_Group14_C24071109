@@ -2,6 +2,8 @@ package uk.ac.cf._5.group14.One_To_One.DevMode;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -14,20 +16,22 @@ import uk.ac.cf._5.group14.One_To_One.Config.DevModeProperties;
 @Component
 public class DevModePageRestrictionFilter extends OncePerRequestFilter {
 
+    @Nullable
     private final DevModeProperties devModeProperties;
+    @Nullable
     private final DevModePageAccessService pageAccessService;
 
-    public DevModePageRestrictionFilter(DevModeProperties devModeProperties,
-                                        DevModePageAccessService pageAccessService) {
-        this.devModeProperties = devModeProperties;
-        this.pageAccessService = pageAccessService;
+    public DevModePageRestrictionFilter(ObjectProvider<DevModeProperties> devModeProperties,
+                                        ObjectProvider<DevModePageAccessService> pageAccessService) {
+        this.devModeProperties = devModeProperties.getIfAvailable();
+        this.pageAccessService = pageAccessService.getIfAvailable();
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        if (!devModeProperties.isDevMode()) {
+        if (devModeProperties == null || !devModeProperties.isDevMode() || pageAccessService == null) {
             filterChain.doFilter(request, response);
             return;
         }

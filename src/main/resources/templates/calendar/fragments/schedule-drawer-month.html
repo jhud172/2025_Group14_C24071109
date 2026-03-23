@@ -143,7 +143,15 @@
                                 <div class="calendar-schedule-actions mt-2">
                                     <a th:href="@{'/schedules/' + ${schedule.id} + '/entries'}" class="calendar-schedule-action">Edit</a>
                                     <button type="button" class="calendar-schedule-action" data-duplicate-schedule th:attr="data-schedule-id=${schedule.id}">Duplicate</button>
-                                    <a th:href="@{'/schedules/' + ${schedule.id} + '/deactivate'}" class="calendar-schedule-action">Archive</a>
+                                    <form th:action="@{'/schedules/' + ${schedule.id} + '/deactivate'}"
+                                          method="post"
+                                          data-confirm="Archive this schedule?"
+                                          class="inline">
+                                        <input type="hidden" th:if="${_csrf != null}"
+                                               th:name="${_csrf.parameterName}"
+                                               th:value="${_csrf.token}" />
+                                        <button type="submit" class="calendar-schedule-action">Archive</button>
+                                    </form>
                                 </div>
                             </details>
                             <div class="calendar-schedule-card-actions">

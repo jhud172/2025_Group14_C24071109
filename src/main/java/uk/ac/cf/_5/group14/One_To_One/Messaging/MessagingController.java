@@ -4,42 +4,26 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLink;
-import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLinkRepository;
-import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLinkStatus;
 import uk.ac.cf._5.group14.One_To_One.Users.AuthHelper;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
-import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
 import uk.ac.cf._5.group14.One_To_One.Users.UserService;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 public class MessagingController {
 
     private final AuthHelper authHelper;
     private final UserService userService;
-    private final UserRepository userRepository;
-    private final TrainerClientLinkRepository linkRepository;
     private final MessagingService messagingService;
     private final uk.ac.cf._5.group14.One_To_One.Security.AccessGuard accessGuard;
 
     public MessagingController(AuthHelper authHelper,
                                UserService userService,
-                               UserRepository userRepository,
-                               TrainerClientLinkRepository linkRepository,
                                MessagingService messagingService,
                                uk.ac.cf._5.group14.One_To_One.Security.AccessGuard accessGuard) {
         this.authHelper = authHelper;
         this.userService = userService;
-        this.userRepository = userRepository;
-        this.linkRepository = linkRepository;
         this.messagingService = messagingService;
         this.accessGuard = accessGuard;
     }
@@ -62,85 +46,24 @@ public class MessagingController {
     }
 
     @GetMapping("/trainer/messages")
-    public String trainerInbox(Model model) {
-        User trainer = currentUserOrThrow();
-
-        List<MessageThread> threads = messagingService.getTrainerInboxThreads(trainer.getId());
-        List<Long> linkIds = threads.stream().map(MessageThread::getLinkId).distinct().toList();
-        Map<Long, TrainerClientLink> linksById = linkRepository.findAllById(linkIds)
-                .stream()
-                .collect(Collectors.toMap(TrainerClientLink::getId, l -> l));
-
-        List<Long> clientIds = threads.stream().map(MessageThread::getClientId).distinct().toList();
-        Map<Long, User> clientsById = userRepository.findAllById(clientIds)
-                .stream()
-                .collect(Collectors.toMap(User::getId, u -> u));
-
-        model.addAttribute("pageTitle", "Messages");
-        model.addAttribute("threads", threads);
-        model.addAttribute("linksById", linksById);
-        model.addAttribute("clientsById", clientsById);
-        return "messages/trainer-inbox";
+    public String trainerInbox() {
+        currentUserOrThrow();
+        return "redirect:/inbox";
     }
 
     @GetMapping("/client/messages")
-    public String clientInbox(Model model) {
-        User client = currentUserOrThrow();
-
-        List<MessageThread> threads = messagingService.getClientInboxThreads(client.getId());
-        MessageThread primaryThread = null;
-        if (!threads.isEmpty()) {
-            Map<Long, TrainerClientLink> linksById = linkRepository.findAllById(threads.stream().map(MessageThread::getLinkId).distinct().toList())
-                    .stream()
-                    .collect(Collectors.toMap(TrainerClientLink::getId, l -> l));
-
-            primaryThread = threads.stream()
-                    .sorted(Comparator.comparing((MessageThread t) -> {
-                        TrainerClientLink link = linksById.get(t.getLinkId());
-                        return (link != null && link.getStatus() == TrainerClientLinkStatus.ACTIVE) ? 0 : 1;
-                    }).thenComparing(MessageThread::getCreatedAt).reversed())
-                    .findFirst()
-                    .orElse(null);
-
-            model.addAttribute("linksById", linksById);
-        }
-
-        User trainerUser = null;
-        if (primaryThread != null) {
-            trainerUser = userRepository.findById(primaryThread.getTrainerId()).orElse(null);
-        }
-
-        model.addAttribute("pageTitle", "Messages");
-        model.addAttribute("thread", primaryThread);
-        model.addAttribute("trainerUser", trainerUser);
-        return "messages/client-inbox";
+    public String clientInbox() {
+        currentUserOrThrow();
+        return "redirect:/inbox";
     }
 
     @GetMapping("/messages/{threadId}")
-    public String thread(@PathVariable Long threadId, Model model) {
+    public String thread(@PathVariable Long threadId) {
         User user = currentUserOrThrow();
 
         try {
-            MessageThread thread = messagingService.getThreadForUser(threadId, user.getId());
-            List<Message> messages = messagingService.getMessagesForThread(threadId, user.getId());
-
-            TrainerClientLink link = linkRepository.findById(thread.getLinkId()).orElse(null);
-            TrainerClientLinkStatus linkStatus = link == null ? null : link.getStatus();
-
-            Long otherUserId = user.getId().equals(thread.getClientId()) ? thread.getTrainerId() : thread.getClientId();
-            User otherUser = userRepository.findById(otherUserId).orElse(null);
-
-            boolean canSend = thread.getStatus() == MessageThreadStatus.OPEN && linkStatus == TrainerClientLinkStatus.ACTIVE;
-
-            model.addAttribute("pageTitle", "Messages");
-            model.addAttribute("thread", thread);
-            model.addAttribute("linkStatus", linkStatus);
-            model.addAttribute("messages", messages);
-            model.addAttribute("currentUserId", user.getId());
-            model.addAttribute("otherUser", otherUser);
-            model.addAttribute("canSend", canSend);
-
-            return "messages/thread";
+            messagingService.getThreadForUser(threadId, user.getId());
+            return "redirect:/inbox/" + threadId;
         } catch (AccessDeniedException ex) {
             return "redirect:/access-denied";
         }
@@ -182,14 +105,14 @@ public class MessagingController {
         } catch (IllegalStateException ex) {
             if ("OFF_PLATFORM_PAYMENT".equals(ex.getMessage())) {
                 redirectAttributes.addFlashAttribute("offPlatformBlocked", true);
-                return "redirect:/messages/" + threadId;
+                return "redirect:/inbox/" + threadId;
             }
             // LOCKED or not ACTIVE; keep UX simple and return to thread view.
-            return "redirect:/messages/" + threadId;
+            return "redirect:/inbox/" + threadId;
         } catch (IllegalArgumentException ex) {
-            return "redirect:/messages/" + threadId;
+            return "redirect:/inbox/" + threadId;
         }
 
-        return "redirect:/messages/" + threadId;
+        return "redirect:/inbox/" + threadId;
     }
 }

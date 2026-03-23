@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.One_To_One.Security;
 import java.io.IOException;
 import java.net.URI;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -18,6 +19,7 @@ import uk.ac.cf._5.group14.One_To_One.Users.User;
 import uk.ac.cf._5.group14.One_To_One.Users.UserService;
 
 @Component
+@Slf4j
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private final RequestCache requestCache = new HttpSessionRequestCache();
@@ -38,7 +40,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                                         HttpServletResponse response,
                                         Authentication authentication)
             throws IOException, ServletException {
-        System.out.println("Authentication Success Handler invoked: " + authentication.getName());
+        log.info("Authentication success for user {}", authentication.getName());
 
         if (loginAttemptService != null) {
             loginAttemptService.recordSuccess(request);
@@ -46,7 +48,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
         String username = authentication.getName();
         User user = userService.findByUsername(username);
-        request.getSession().setAttribute("user", user);
 
         // First-login: redirect to the tutorial before the normal flow
         if (user != null && !user.isHasSeenTutorial()) {

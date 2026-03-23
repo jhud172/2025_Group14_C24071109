@@ -114,14 +114,19 @@
                                 </svg>
                                 Preview
                             </button>
-                            <a th:href="@{'/schedules/applied/' + ${applied.id} + '/remove'}"
-                               class="tcc-btn-danger"
-                               data-confirm="Remove this schedule from your calendar?">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                                Remove
-                            </a>
+                            <form th:action="@{'/schedules/applied/' + ${applied.id} + '/remove'}"
+                                  method="post"
+                                  data-confirm="Remove this schedule from your calendar?">
+                                <input type="hidden" th:if="${_csrf != null}"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}" />
+                                <button type="submit" class="tcc-btn-danger">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Remove
+                                </button>
+                            </form>
                         </div>
 
                         <form th:action="@{'/schedules/applied/' + ${applied.id} + '/settings'}" method="post" 
@@ -251,14 +256,19 @@
                                     </svg>
                                     Duplicate
                                 </button>
-                                <a th:href="@{'/schedules/' + ${schedule.id} + '/delete'}"
-                                   class="tcc-card-action-danger"
-                                   data-confirm="Delete this schedule? This cannot be undone.">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                    Delete
-                                </a>
+                                <form th:action="@{'/schedules/' + ${schedule.id} + '/delete'}"
+                                      method="post"
+                                      data-confirm="Delete this schedule? This cannot be undone.">
+                                    <input type="hidden" th:if="${_csrf != null}"
+                                           th:name="${_csrf.parameterName}"
+                                           th:value="${_csrf.token}" />
+                                    <button type="submit" class="tcc-card-action-danger">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Delete
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

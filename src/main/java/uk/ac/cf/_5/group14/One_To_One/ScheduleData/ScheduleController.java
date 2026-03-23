@@ -3,16 +3,16 @@ package uk.ac.cf._5.group14.One_To_One.ScheduleData;
 import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import uk.ac.cf._5.group14.One_To_One.ExerciseData.Exercise;
 import uk.ac.cf._5.group14.One_To_One.ExerciseData.ExerciseRepository;
-import uk.ac.cf._5.group14.One_To_One.ExerciseData.ExerciseService;
+import uk.ac.cf._5.group14.One_To_One.Security.CurrentUser;
 import uk.ac.cf._5.group14.One_To_One.ScheduleData.ScheduleEntryService;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLink;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLinkRepository;
@@ -25,6 +25,7 @@ import uk.ac.cf._5.group14.One_To_One.Workout.WorkoutRepository;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/schedules")
 public class ScheduleController {
@@ -75,7 +76,7 @@ public class ScheduleController {
     private ScheduleTemplateService scheduleTemplateService;
 
     @GetMapping("")
-    public String listSchedules(@SessionAttribute("user") User user, Model model) {
+    public String listSchedules(@CurrentUser User user, Model model) {
         List<Schedule> all = scheduleService.findByUser(user);
         List<ScheduleApplied> active = scheduleAppliedRepository.findByUser(user);
         User trainer = getActiveTrainer(user);
@@ -90,10 +91,10 @@ public class ScheduleController {
     }
 
     @Transactional
-    @GetMapping("/{id}/delete")
+    @PostMapping("/{id}/delete")
     public String deleteSchedule(
             @PathVariable Long id,
-            @SessionAttribute("user") User user) {
+            @CurrentUser User user) {
         Schedule schedule = scheduleRepository.findById(id).orElse(null);
         if (schedule == null || !schedule.getUser().getId().equals(user.getId())) {
             return "redirect:/schedules?error";
@@ -105,10 +106,10 @@ public class ScheduleController {
         return "redirect:/schedules?deleted";
     }
 
-    @GetMapping("/{id}/deactivate")
+    @PostMapping("/{id}/deactivate")
     public String deactivateSchedule(
             @PathVariable Long id,
-            @SessionAttribute("user") User user
+            @CurrentUser User user
     ) {
         Schedule schedule = scheduleService.findById(id);
         if (schedule == null || !schedule.getUser().equals(user)) {
@@ -128,7 +129,7 @@ public class ScheduleController {
     @PostMapping("/create")
     public String createSubmit(
             @ModelAttribute Schedule schedule,
-            @SessionAttribute("user") User user
+            @CurrentUser User user
     ) {
         schedule.setUser(user);
         scheduleService.save(schedule);
@@ -136,9 +137,9 @@ public class ScheduleController {
     }
 
     @Transactional
-    @GetMapping("/applied/{appliedId}/remove")
+    @PostMapping("/applied/{appliedId}/remove")
     public String removeApplied(@PathVariable Long appliedId,
-                                @SessionAttribute("user") User user) {
+                                @CurrentUser User user) {
         ScheduleApplied applied = scheduleAppliedRepository.findById(appliedId).orElse(null);
         if (applied == null || applied.getUser().getId() != user.getId()) {
             return "redirect:/schedules?error";
@@ -154,7 +155,7 @@ public class ScheduleController {
 
     @GetMapping("/{id:\\d+}/entries")
     public String entryForm(@PathVariable Long id,
-                            @SessionAttribute("user") User user,
+                            @CurrentUser User user,
                             Model model) {
 
         Schedule schedule = scheduleService.findById(id);
@@ -173,7 +174,7 @@ public class ScheduleController {
     @PostMapping("/{id}/entries")
     public String entrySubmit(
             @PathVariable Long id,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             @ModelAttribute ScheduleEntry entry
     ) {
         Schedule schedule = scheduleService.findById(id);
@@ -192,7 +193,7 @@ public class ScheduleController {
             @PathVariable Long id,
             @RequestParam LocalDate startDate,
             @RequestParam int weeks,
-            @SessionAttribute("user") User user
+            @CurrentUser User user
     ) {
         Schedule schedule = findAccessibleSchedule(user, id);
         if (schedule == null) {
@@ -228,7 +229,7 @@ public class ScheduleController {
 
     @GetMapping("/{id}/apply")
     public String showApplyForm(@PathVariable Long id,
-                                @SessionAttribute("user") User user,
+                                @CurrentUser User user,
                                 Model model) {
         Schedule schedule = findAccessibleSchedule(user, id);
         if (schedule == null) {
@@ -243,7 +244,7 @@ public class ScheduleController {
             @PathVariable Long appliedId,
             @RequestParam(defaultValue = "false") boolean shownOnCalendar,
             @RequestParam(defaultValue = "false") boolean requiresLogging,
-            @SessionAttribute("user") User user
+            @CurrentUser User user
     ) {
         ScheduleApplied applied = scheduleAppliedRepository.findById(appliedId).orElse(null);
         if (applied == null || !applied.getUser().getId().equals(user.getId())) {
@@ -285,7 +286,7 @@ public class ScheduleController {
             @PathVariable Long id,
             @RequestParam String name,
             @RequestParam(required = false) String description,
-            @SessionAttribute("user") User user
+            @CurrentUser User user
     ) {
         Schedule schedule = scheduleService.findById(id);
         if (!isOwner(user, schedule)) {
@@ -304,7 +305,7 @@ public class ScheduleController {
 
     @GetMapping("/builder")
     public String builderPage(
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             Model model
     ) {
         List<Workout> workouts = workoutRepository.findByUserId(user.getId());
@@ -326,7 +327,7 @@ public class ScheduleController {
             @RequestParam(required = false, defaultValue = "WEEKLY_REPEAT") String rotationMode,
             @RequestParam(required = false, defaultValue = "7") Integer customDayCount,
             @RequestParam(required = false) String templateId,
-            @SessionAttribute("user") User user
+            @CurrentUser User user
     ) throws Exception {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -340,16 +341,14 @@ public class ScheduleController {
         try {
             schedule.setScheduleType(ScheduleType.valueOf(scheduleType));
         } catch (IllegalArgumentException e) {
-            // Log warning and default to WEEKLY for invalid schedule type
-            System.err.println("Warning: Invalid schedule type '" + scheduleType + "', defaulting to WEEKLY");
+            log.warn("Invalid schedule type '{}' received; defaulting to WEEKLY", scheduleType);
             schedule.setScheduleType(ScheduleType.WEEKLY);
         }
         
         try {
             schedule.setRotationMode(RotationMode.valueOf(rotationMode));
         } catch (IllegalArgumentException e) {
-            // Log warning and default to WEEKLY_REPEAT for invalid rotation mode
-            System.err.println("Warning: Invalid rotation mode '" + rotationMode + "', defaulting to WEEKLY_REPEAT");
+            log.warn("Invalid rotation mode '{}' received; defaulting to WEEKLY_REPEAT", rotationMode);
             schedule.setRotationMode(RotationMode.WEEKLY_REPEAT);
         }
         

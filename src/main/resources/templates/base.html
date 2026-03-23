@@ -54,14 +54,14 @@
 <th:block th:insert="~{fragments/footer :: footer}"></th:block>
 
 <!-- CHATBOT (global) -->
-<div th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false'}"
+<div th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false' and disableGlobalChatbot != true}"
     th:replace="~{fragments/chat/chat-widget :: chatWidget}"></div>
 
 <!-- QUICK ACTIONS (global) -->
 <div th:replace="~{fragments/quick-actions :: quickActionsShelf}"></div>
 
 <!-- Core scripts -->
-<script th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false'}" th:src="@{/js/chat/chat.js(v='20260303')}" defer></script>
+<script th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false' and disableGlobalChatbot != true}" th:src="@{/js/chat/chat.js(v='20260303')}" defer></script>
 <script th:src="@{/js/core/form-auto-submit.js(v='20260320a')}" defer></script>
 <script th:src="@{/js/core/confirm-action.js(v='20260320a')}" defer></script>
 <script th:src="@{/js/core/back-navigation.js(v='20260320a')}" defer></script>

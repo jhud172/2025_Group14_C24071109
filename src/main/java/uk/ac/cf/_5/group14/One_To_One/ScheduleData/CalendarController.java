@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttribute;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -46,6 +45,7 @@ import uk.ac.cf._5.group14.One_To_One.Notifications.NotificationSseRegistry;
 import uk.ac.cf._5.group14.One_To_One.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.One_To_One.ReflectionData.ReflectionResult;
 import uk.ac.cf._5.group14.One_To_One.ReflectionData.ReflectionService;
+import uk.ac.cf._5.group14.One_To_One.Security.CurrentUser;
 import uk.ac.cf._5.group14.One_To_One.StrengthLog.WorkoutSession;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskLayoutPreference;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskOrderingPreference;
@@ -142,13 +142,15 @@ public class CalendarController {
             @RequestParam(value = "week", required = false) Integer week,
             @RequestParam(value = "weekYear", required = false) Integer weekYear,
             @RequestParam(value = "fragment", required = false) String fragment,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             Model model,
             HttpServletRequest request
     ) {
         LocalDate today = LocalDate.now();
         LocalDate tomorrow = today.plusDays(1);
-        System.out.println("DEBUG: CalendarController - User: " + (user != null ? user.getUsername() : "NULL") + ", UserId: " + (user != null ? user.getId() : "NULL"));
+        logger.debug("calendarView: user={}, userId={}",
+                user != null ? user.getUsername() : "NULL",
+                user != null ? user.getId() : null);
         boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
         UserSettings userSettings = userSettingsService.getOrCreate(user);
         CalendarTaskLayoutPreference layoutPreference = userSettings.getCalendarTaskLayout();
@@ -378,7 +380,7 @@ public class CalendarController {
     public String monthFragment(
             @RequestParam(value = "month", required = false) Integer month,
             @RequestParam(value = "year", required = false) Integer year,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             Model model,
             HttpServletRequest request
     ) {
@@ -389,7 +391,7 @@ public class CalendarController {
     public String weekFragment(
             @RequestParam(value = "week", required = false) Integer week,
             @RequestParam(value = "weekYear", required = false) Integer weekYear,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             Model model,
             HttpServletRequest request
     ) {
@@ -398,7 +400,7 @@ public class CalendarController {
 
     @PostMapping("/preferences")
     public String updateCalendarPreferences(
-            @SessionAttribute(name = "user") User user,
+            @CurrentUser User user,
             @RequestParam(name = "layout", required = false) CalendarTaskLayoutPreference layout,
             @RequestParam(name = "redirect", required = false) String redirect
     ) {
@@ -411,7 +413,7 @@ public class CalendarController {
 
     @PostMapping("/sticker-preferences")
     public String updateStickerPreferences(
-            @SessionAttribute(name = "user") User user,
+            @CurrentUser User user,
             @RequestParam(name = "stickerPack", required = false) uk.ac.cf._5.group14.One_To_One.UserSettings.StickerPackPreference stickerPack,
             @RequestParam(name = "monthlyWorkoutTarget", required = false, defaultValue = "12") int monthlyWorkoutTarget,
             @RequestParam(name = "redirect", required = false) String redirect
@@ -427,7 +429,7 @@ public class CalendarController {
     public String dayView(
             @PathVariable String dateStr,
             @RequestParam(name = "dailyFocus", required = false) String dailyFocus,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             Model model,
             HttpSession session
     ) {
@@ -694,7 +696,7 @@ public class CalendarController {
     @GetMapping("/focus/{dateStr}")
     public String focusView(
             @PathVariable String dateStr,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             Model model
     ) {
         LocalDate date = LocalDate.parse(dateStr, DATE_FORMAT);
@@ -772,7 +774,7 @@ public class CalendarController {
     @PostMapping("/day/{dateStr}/reflection")
     public String submitReflection(
             @PathVariable String dateStr,
-            @SessionAttribute(name = "user") User user,
+            @CurrentUser User user,
             @RequestParam(name = "reflection", required = false) String reflection,
             @RequestParam(name = "notes", required = false) String notes,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes
@@ -840,7 +842,7 @@ public class CalendarController {
     public Object updateDailyFocus(
             @PathVariable String dateStr,
             @RequestParam(name = "dailyFocus", required = false) String dailyFocus,
-            @SessionAttribute(name = "user", required = false) User user,
+            @CurrentUser(required = false) User user,
             HttpServletRequest request
     ) {
         boolean isAjax = request != null && "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
@@ -865,7 +867,7 @@ public class CalendarController {
     public ResponseEntity<?> optimiseDay(
             @PathVariable String dateStr,
             @RequestParam(name = "dontShowAgain", required = false, defaultValue = "false") boolean dontShowAgain,
-            @SessionAttribute(name = "user", required = false) User user,
+            @CurrentUser(required = false) User user,
             HttpServletRequest request
     ) {
         if (user == null) {
@@ -900,7 +902,7 @@ public class CalendarController {
     @PostMapping("/day/{dateStr}/task-preferences")
     public Object updateTaskPreferences(
             @PathVariable String dateStr,
-            @SessionAttribute(name = "user") User user,
+            @CurrentUser User user,
             @RequestParam(name = "ordering", required = false) CalendarTaskOrderingPreference ordering,
             @RequestParam(name = "layout", required = false) CalendarTaskLayoutPreference layout,
             HttpServletRequest request
@@ -913,7 +915,7 @@ public class CalendarController {
     @PostMapping("/day/{dateStr}/workout-preferences")
     public Object updateWorkoutPreferences(
             @PathVariable String dateStr,
-            @SessionAttribute(name = "user") User user,
+            @CurrentUser User user,
             @RequestParam(name = "ordering", required = false) CalendarWorkoutOrderingPreference ordering,
             HttpServletRequest request
     ) {
@@ -925,7 +927,7 @@ public class CalendarController {
     @PostMapping("/day/{dateStr}/day-health/generate")
     public String generateDayHealthOnce(
             @PathVariable String dateStr,
-            @SessionAttribute(name = "user", required = false) User user
+            @CurrentUser(required = false) User user
     ) {
         var dayHealthPersistenceService = dayHealthPersistenceServiceProvider.getIfAvailable();
         if (dayHealthPersistenceService != null && user != null) {
@@ -956,7 +958,7 @@ public class CalendarController {
     @PostMapping("/day/{dateStr}/add-task")
     public String addTask(
             @PathVariable String dateStr,
-            @SessionAttribute(name = "user") User user,
+            @CurrentUser User user,
             @RequestParam String title,
             @RequestParam(required = false) String time,
             @RequestParam(required = false) String notes,
@@ -981,7 +983,7 @@ public class CalendarController {
     @PostMapping("/day/{dateStr}/add-task-ai")
     public String addTaskFromAi(
             @PathVariable String dateStr,
-            @SessionAttribute(name = "user") User user,
+            @CurrentUser User user,
             @RequestParam(name = "prompt") String prompt
     ) {
         LocalDate date = LocalDate.parse(dateStr, CalendarTaskService.DATE_FORMAT);
@@ -1006,7 +1008,7 @@ public class CalendarController {
     @PostMapping("/day/{dateStr}/toggle-complete")
         public Object toggleComplete(
             @PathVariable String dateStr,
-            @SessionAttribute(name = "user") User user,
+            @CurrentUser User user,
             @RequestParam Long taskId,
             HttpServletRequest request
     ) {
@@ -1058,7 +1060,7 @@ public class CalendarController {
     @org.springframework.web.bind.annotation.ResponseBody
     public ResponseEntity<Map<String, Object>> updateTimelineSlot(
             @PathVariable String dateStr,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             @RequestParam String itemType,
             @RequestParam Long itemId,
             @RequestParam String time,
@@ -1146,7 +1148,7 @@ public class CalendarController {
     @PostMapping("/task/{id}/edit-inline")
     public String inlineUpdate(
             @PathVariable Long id,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             @RequestParam String title,
             @RequestParam(required = false) String time,
             @RequestParam(required = false) String notes,
@@ -1163,7 +1165,7 @@ public class CalendarController {
     @PostMapping("/task/{id}/delete")
     public String deleteTask(
             @PathVariable Long id,
-            @SessionAttribute("user") User user
+            @CurrentUser User user
     ) {
         CalendarTask task = taskService.getTaskById(id);
         if (task == null || task.getDate() == null) return "redirect:/calendar";
@@ -1175,7 +1177,7 @@ public class CalendarController {
     @PostMapping("/task/{id}/update-time")
     public ResponseEntity<Map<String, Object>> updateTaskTime(
             @PathVariable Long id,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             @RequestParam String date,
             @RequestParam String time
     ) {
@@ -1201,7 +1203,7 @@ public class CalendarController {
     @GetMapping("/task/{id}")
     public String taskDetail(
             @PathVariable Long id,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             Model model
     ) {
         CalendarTask task = taskService.getTaskById(id);
@@ -1228,7 +1230,7 @@ public class CalendarController {
     @PostMapping("/task/{id}/grace-period")
     public String updateGracePeriod(
             @PathVariable Long id,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             @RequestParam(required = false) Integer gracePeriodMinutes
     ) {
         CalendarTask task = taskService.getTaskById(id);
@@ -1241,7 +1243,7 @@ public class CalendarController {
     @PostMapping("/task/{id}/warning-time")
     public String addTimeWarning(
             @PathVariable Long id,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             @RequestParam String triggerTime
     ) {
         CalendarTask task = taskService.getTaskById(id);
@@ -1266,7 +1268,7 @@ public class CalendarController {
     @PostMapping("/task/{id}/warning-on-complete")
     public String addOnCompleteWarning(
             @PathVariable Long id,
-            @SessionAttribute("user") User user,
+            @CurrentUser User user,
             @RequestParam Long triggerTaskId
     ) {
         CalendarTask task = taskService.getTaskById(id);
@@ -1351,12 +1353,17 @@ public class CalendarController {
 
     private Map<LocalDate, List<CalendarTask>> getTasksByDateRange(User user, LocalDate start, LocalDate end) {
         if (user == null || start == null || end == null || end.isBefore(start)) {
-            System.out.println("DEBUG: getTasksByDateRange - returning empty due to null check");
+            logger.debug("getTasksByDateRange: returning empty because input was invalid");
             return new HashMap<>();
         }
 
         Map<LocalDate, List<CalendarTask>> result = taskService.getTasksByRange(user, start, end);
-        System.out.println("DEBUG: getTasksByDateRange - user: " + user.getId() + ", start: " + start + ", end: " + end + ", resultSize: " + result.size() + ", totalTasks: " + result.values().stream().mapToInt(List::size).sum());
+        logger.debug("getTasksByDateRange: userId={}, start={}, end={}, resultSize={}, totalTasks={}",
+                user.getId(),
+                start,
+                end,
+                result.size(),
+                result.values().stream().mapToInt(List::size).sum());
         return result;
     }
 

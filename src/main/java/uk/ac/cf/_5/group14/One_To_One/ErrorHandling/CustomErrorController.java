@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Custom error controller for handling common HTTP errors (404, 500, etc.)
  * Provides user-friendly error pages with helpful navigation options.
  */
+@Slf4j
 @Controller
 public class CustomErrorController implements ErrorController {
 
@@ -56,6 +58,6 @@ public class CustomErrorController implements ErrorController {
     private void logError(int statusCode, Object requestPath, Object message) {
         String path = requestPath != null ? requestPath.toString() : "Unknown";
         String msg = message != null ? message.toString() : "No message";
-        System.out.println("[ERROR " + statusCode + "] Path: " + path + " | Message: " + msg);
+        log.warn("HTTP error {} for path {}: {}", statusCode, path, msg);
     }
 }

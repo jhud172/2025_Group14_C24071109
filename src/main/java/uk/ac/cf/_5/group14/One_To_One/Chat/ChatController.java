@@ -103,6 +103,7 @@ public class ChatController {
         model.addAttribute("dailyLimit", FREE_DAILY_LIMIT);
         model.addAttribute("dailyUsed", used);
         model.addAttribute("dailyRemaining", remaining);
+        model.addAttribute("disableGlobalChatbot", true);
 
         // Build personalised page summary for zero-blank state and live metrics
         try {

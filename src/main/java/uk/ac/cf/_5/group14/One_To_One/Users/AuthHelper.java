@@ -1,30 +1,50 @@
 package uk.ac.cf._5.group14.One_To_One.Users;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import uk.ac.cf._5.group14.One_To_One.Users.User;
-
+import uk.ac.cf._5.group14.One_To_One.Security.CurrentUserResolver;
 
 @Component
 public class AuthHelper {
 
-    public User getAuthenticatedUser() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
-                .getRequestAttributes()).getRequest();
-        HttpSession session = request.getSession(false);
+    private final CurrentUserResolver currentUserResolver;
 
-        if (session != null) {
-            return (User) session.getAttribute("user");
+    public AuthHelper() {
+        this.currentUserResolver = null;
+    }
+
+    public AuthHelper(CurrentUserResolver currentUserResolver) {
+        this.currentUserResolver = currentUserResolver;
+    }
+
+    public User getAuthenticatedUser() {
+        if (currentUserResolver != null) {
+            User user = currentUserResolver.resolveCurrentUser();
+            if (user != null) {
+                return user;
+            }
         }
-        return null;
+        ServletRequestAttributes attributes =
+                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null || attributes.getRequest() == null) {
+            return null;
+        }
+        return getAuthenticatedUser(attributes.getRequest().getSession(false));
     }
 
     public User getAuthenticatedUser(HttpSession session) {
-        if (session != null) {
-            return (User) session.getAttribute("user");
+        if (currentUserResolver != null) {
+            User user = currentUserResolver.resolveCurrentUser(
+                    uk.ac.cf._5.group14.One_To_One.Security.SecurityUtils.getAuthentication(),
+                    session);
+            if (user != null) {
+                return user;
+            }
+        }
+        if (session != null && session.getAttribute("user") instanceof User user) {
+            return user;
         }
         return null;
     }

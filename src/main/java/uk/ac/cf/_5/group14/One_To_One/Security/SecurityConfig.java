@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,7 @@ import uk.ac.cf._5.group14.One_To_One.DevMode.DevModePageRestrictionFilter;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     
     @Autowired
@@ -118,6 +120,7 @@ public class SecurityConfig {
                             // Trainers area: keep role requirements
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
+                            .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
                             .requestMatchers("/client/trainers", "/client/trainers/**").hasAnyRole("CLIENT", "USER")
                             .requestMatchers("/client/messages", "/client/messages/**").authenticated()
                             .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**", "/admin/dev-pages/**")
@@ -144,6 +147,7 @@ public class SecurityConfig {
                             .requestMatchers("/confirm-logout").authenticated()
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
+                            .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
                             .requestMatchers("/client/**").hasAnyRole("CLIENT", "USER")
                             .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
                             .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**", "/admin/dev-pages/**")

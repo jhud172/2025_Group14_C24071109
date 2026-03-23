@@ -40,28 +40,72 @@ insert into physical_conditions(name)
 values ('Asthma');
 
 -- Test user
-INSERT INTO users (public_id, email,first_name, last_name, username, password, enabled, subscription_status)
-VALUES ('c4562d75-0c7f-4f3d-8c35-0e4a5f0a6c2b','Jane@gmail.com','Jane', 'Doe', 'user', '$2a$12$yOTznIO3eJBYmFckkJM.Xuu2qy59Rg4CQUhIrGpHzseNGj5KI5MSO', true, false);
-INSERT INTO users (public_id, email,first_name, last_name, username, password, enabled, subscription_status)
-VALUES ('a6cc7a41-9b0c-4b9a-9b19-9cdd2b1c3f58','John@gmail.com','John', 'Doe', 'user2', '$2a$12$yOTznIO3eJBYmFckkJM.Xuu2qy59Rg4CQUhIrGpHzseNGj5KI5MSO', true, false);
+INSERT INTO users (public_id, email, email_verified, email_verified_at, first_name, last_name, username, password, enabled, subscription_status, role)
+VALUES ('c4562d75-0c7f-4f3d-8c35-0e4a5f0a6c2b', 'Jane@gmail.com', true, CURRENT_TIMESTAMP, 'Jane', 'Doe', 'user', '$2a$12$yOTznIO3eJBYmFckkJM.Xuu2qy59Rg4CQUhIrGpHzseNGj5KI5MSO', true, false, 'CLIENT');
+INSERT INTO users (public_id, email, email_verified, email_verified_at, first_name, last_name, username, password, enabled, subscription_status, role)
+VALUES ('a6cc7a41-9b0c-4b9a-9b19-9cdd2b1c3f58', 'John@gmail.com', true, CURRENT_TIMESTAMP, 'John', 'Doe', 'user2', '$2a$12$yOTznIO3eJBYmFckkJM.Xuu2qy59Rg4CQUhIrGpHzseNGj5KI5MSO', true, false, 'CLIENT');
 
 -- Demo credentials (used by login integration test):
 --   username: demo
 --   password: Demo123!
-INSERT INTO users (public_id, email,first_name, last_name, username, password, enabled, subscription_status)
-VALUES ('f0d3b90c-65b6-4d78-a7ae-09a1639fd8a2','demo@example.com','Demo', 'User', 'demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, false);
+INSERT INTO users (public_id, email, email_verified, email_verified_at, first_name, last_name, username, password, enabled, subscription_status, role)
+VALUES ('f0d3b90c-65b6-4d78-a7ae-09a1639fd8a2', 'demo@example.com', true, CURRENT_TIMESTAMP, 'Demo', 'User', 'demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, false, 'CLIENT');
+
+INSERT INTO users (public_id, email, email_verified, email_verified_at, first_name, last_name, username, password, enabled, subscription_status, role, trainer_verified)
+VALUES ('76bce96e-54a4-47ee-a7fd-9ad2dfcfeb62', 'trainer_demo@example.com', true, CURRENT_TIMESTAMP, 'Trainer', 'Demo', 'trainer_demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, true, 'TRAINER', true);
+
+INSERT INTO users (public_id, email, email_verified, email_verified_at, first_name, last_name, username, password, enabled, subscription_status, role)
+VALUES ('1c24ee40-044f-4bf6-9b9e-2a8d34f31330', 'gymadmin_demo@example.com', true, CURRENT_TIMESTAMP, 'Gym', 'Admin', 'gymadmin_demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, true, 'GYM_ADMIN');
+
+INSERT INTO users (public_id, email, email_verified, email_verified_at, first_name, last_name, username, password, enabled, subscription_status, role)
+VALUES ('da7b6a5f-d203-4a3d-8b50-134d1843a466', 'admin_demo@example.com', true, CURRENT_TIMESTAMP, 'Platform', 'Admin', 'admin_demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, true, 'PLATFORM_ADMIN');
+
+INSERT INTO users (public_id, email, email_verified, email_verified_at, first_name, last_name, username, password, enabled, subscription_status, role)
+VALUES ('cb3d373e-8f3b-4957-a2bf-53ef4c0fe538', 'superadmin_demo@example.com', true, CURRENT_TIMESTAMP, 'Super', 'Admin', 'superadmin_demo', '$2a$10$2EZk8xjJekcabhOOKPsxtuHWvgrgWunYC2v57bCNiEk8c8HxHedH6', true, true, 'SUPER_ADMIN');
 
 -- Roles
 insert into roles(role_id, name)
 values (1, 'USER');
+insert into roles(role_id, name)
+values (2, 'CLIENT');
+insert into roles(role_id, name)
+values (3, 'TRAINER');
+insert into roles(role_id, name)
+values (4, 'GYM_ADMIN');
+insert into roles(role_id, name)
+values (5, 'PLATFORM_ADMIN');
+insert into roles(role_id, name)
+values (6, 'SUPER_ADMIN');
 
 -- Links user to a role
 insert into users_roles (username, role_id)
 values ('user', 1);
 insert into users_roles (username, role_id)
+values ('user', 2);
+insert into users_roles (username, role_id)
 values ('user2', 1);
 insert into users_roles (username, role_id)
+values ('user2', 2);
+insert into users_roles (username, role_id)
 values ('demo', 1);
+insert into users_roles (username, role_id)
+values ('demo', 2);
+insert into users_roles (username, role_id)
+values ('trainer_demo', 1);
+insert into users_roles (username, role_id)
+values ('trainer_demo', 3);
+insert into users_roles (username, role_id)
+values ('gymadmin_demo', 1);
+insert into users_roles (username, role_id)
+values ('gymadmin_demo', 4);
+insert into users_roles (username, role_id)
+values ('admin_demo', 1);
+insert into users_roles (username, role_id)
+values ('admin_demo', 5);
+insert into users_roles (username, role_id)
+values ('superadmin_demo', 1);
+insert into users_roles (username, role_id)
+values ('superadmin_demo', 6);
 
 -- Preference data
 insert into preferences(category, description)

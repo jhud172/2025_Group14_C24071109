@@ -4,25 +4,33 @@ import java.util.Locale;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import uk.ac.cf._5.group14.One_To_One.UserSettings.UserSettingsLocaleInterceptor;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.One_To_One.Users.AuthHelper;
 
+import java.util.List;
+
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
     private final AuthHelper authHelper;
     private final UserSettingsService userSettingsService;
+    private final ObjectProvider<CurrentUserArgumentResolver> currentUserArgumentResolverProvider;
 
-    public WebConfig(AuthHelper authHelper, UserSettingsService userSettingsService) {
+    public WebConfig(AuthHelper authHelper,
+                     UserSettingsService userSettingsService,
+                     ObjectProvider<CurrentUserArgumentResolver> currentUserArgumentResolverProvider) {
         this.authHelper = authHelper;
         this.userSettingsService = userSettingsService;
+        this.currentUserArgumentResolverProvider = currentUserArgumentResolverProvider;
     }
 
     @Override
@@ -42,6 +50,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(userSettingsLocaleInterceptor());
+    }
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        CurrentUserArgumentResolver resolver = currentUserArgumentResolverProvider.getIfAvailable();
+        if (resolver != null) {
+            resolvers.add(resolver);
+        }
     }
 
     @Bean

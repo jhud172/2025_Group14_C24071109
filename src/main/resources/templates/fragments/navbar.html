@@ -84,20 +84,25 @@
             <span th:text="#{nav.calendar}">Calendar</span>
         </a>
 
-        <!-- Vault -->
-        <a th:href="@{/vault}"
+        <!-- Coach -->
+        <a th:href="@{/chat}"
            class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('Vault')} ? ' navlink-active' : ''">
+           th:classappend="${pageTitle != null and (pageTitle.contains('Charlie') or pageTitle.contains('Coach') or pageTitle.contains('Command Centre'))} ? ' navlink-active' : ''">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                  class="navicon"
-                  th:classappend="${pageTitle != null and pageTitle.contains('Vault')} ? ' navicon-active' : ''">
-                <path d="M4 4h16v16H4z" />
-                <path d="M8 8h8" />
-                <path d="M8 12h8" />
-                <path d="M8 16h6" />
+                  th:classappend="${pageTitle != null and (pageTitle.contains('Charlie') or pageTitle.contains('Coach') or pageTitle.contains('Command Centre'))} ? ' navicon-active' : ''">
+                <path d="M12 3v4" />
+                <path d="M12 17v4" />
+                <path d="M4.93 4.93l2.83 2.83" />
+                <path d="M16.24 16.24l2.83 2.83" />
+                <path d="M3 12h4" />
+                <path d="M17 12h4" />
+                <path d="M4.93 19.07l2.83-2.83" />
+                <path d="M16.24 7.76l2.83-2.83" />
+                <circle cx="12" cy="12" r="3" />
             </svg>
-            <span th:text="#{nav.trainingVault}">Vault</span>
+            <span>Coach</span>
         </a>
 
         <!-- Leaderboard -->
@@ -232,7 +237,7 @@
         </a>
 
         <!-- Messages -->
-        <a th:href="@{/trainer/messages}"
+        <a th:href="@{/inbox}"
            class="navlink group"
            th:classappend="${pageTitle != null and pageTitle.contains('Messages')} ? ' navlink-active' : ''">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -241,7 +246,7 @@
                  th:classappend="${pageTitle != null and pageTitle.contains('Messages')} ? ' navicon-active' : ''">
                 <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
             </svg>
-            <span th:text="#{nav.inbox}">Messages</span>
+            <span th:text="#{nav.inbox}">Inbox</span>
             <span class="nav-notification-badge hidden min-w-[1.25rem] items-center justify-center rounded-full bg-slate-900 px-1.5 text-[10px] font-semibold text-white dark:bg-slate-100 dark:text-slate-900"
                   aria-live="polite"></span>
         </a>
@@ -262,11 +267,11 @@
     </th:block>
 
     <!-- ============================================== -->
-    <!-- GYM_ADMIN NAVBAR: Dashboard, Calendar, Vault, Staff, Profile -->
+    <!-- GYM_ADMIN NAVBAR: Dashboard, Trainers, Memberships, Support, Profile -->
     <!-- ============================================== -->
     <th:block sec:authorize="hasRole('GYM_ADMIN') and !hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')">
         <!-- Dashboard -->
-        <a th:href="@{/dashboard}"
+        <a th:href="@{/gym/dashboard}"
            class="navlink group"
            th:classappend="${pageTitle != null and pageTitle.contains('Dashboard')} ? ' navlink-active' : ''">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -281,51 +286,51 @@
             <span th:text="#{nav.dashboard}">Dashboard</span>
         </a>
 
-        <!-- Calendar -->
-        <a th:href="@{/calendar}"
+        <!-- Trainers -->
+        <a th:href="@{/gym/admin/trainers}"
            class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('Calendar')} ? ' navlink-active' : ''">
+           th:classappend="${pageTitle != null and (pageTitle.contains('Trainer') or pageTitle.contains('Staff'))} ? ' navlink-active' : ''">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                  class="navicon"
-                  th:classappend="${pageTitle != null and pageTitle.contains('Calendar')} ? ' navicon-active' : ''">
-                <path d="M8 2v4M16 2v4" />
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M3 10h18" />
-            </svg>
-            <span th:text="#{nav.calendar}">Calendar</span>
-        </a>
-
-        <!-- Vault -->
-        <a th:href="@{/vault}"
-           class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('Vault')} ? ' navlink-active' : ''">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                 class="navicon"
-                  th:classappend="${pageTitle != null and pageTitle.contains('Vault')} ? ' navicon-active' : ''">
-                <path d="M4 4h16v16H4z" />
-                <path d="M8 8h8" />
-                <path d="M8 12h8" />
-                <path d="M8 16h6" />
-            </svg>
-            <span th:text="#{nav.trainingVault}">Vault</span>
-        </a>
-
-        <!-- Staff -->
-        <a th:href="@{/gym/trainers}"
-           class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('Staff')} ? ' navlink-active' : ''">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                 class="navicon"
-                 th:classappend="${pageTitle != null and pageTitle.contains('Staff')} ? ' navicon-active' : ''">
+                 th:classappend="${pageTitle != null and (pageTitle.contains('Trainer') or pageTitle.contains('Staff'))} ? ' navicon-active' : ''">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="8.5" cy="7" r="4" />
                 <path d="M20 8v6" />
                 <path d="M23 11h-6" />
             </svg>
-            <span>Staff</span>
+            <span>Trainers</span>
+        </a>
+
+        <!-- Memberships -->
+        <a th:href="@{/gym/admin/memberships}"
+           class="navlink group"
+           th:classappend="${pageTitle != null and pageTitle.contains('Membership')} ? ' navlink-active' : ''">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="navicon"
+                 th:classappend="${pageTitle != null and pageTitle.contains('Membership')} ? ' navicon-active' : ''">
+                <path d="M3 7h18" />
+                <path d="M6 3v8" />
+                <path d="M18 3v8" />
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M7 14h10" />
+                <path d="M7 18h6" />
+            </svg>
+            <span>Memberships</span>
+        </a>
+
+        <!-- Support -->
+        <a th:href="@{/admin/feedback}"
+           class="navlink group"
+           th:classappend="${pageTitle != null and pageTitle.contains('Feedback')} ? ' navlink-active' : ''">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="navicon"
+                 th:classappend="${pageTitle != null and pageTitle.contains('Feedback')} ? ' navicon-active' : ''">
+                <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+            </svg>
+            <span>Support</span>
         </a>
 
         <!-- Profile -->
@@ -344,11 +349,11 @@
     </th:block>
 
     <!-- ============================================== -->
-    <!-- PLATFORM_ADMIN / SUPER_ADMIN NAVBAR -->
+    <!-- PLATFORM_ADMIN NAVBAR -->
     <!-- ============================================== -->
-    <th:block sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')">
+    <th:block sec:authorize="hasRole('PLATFORM_ADMIN') and !hasRole('SUPER_ADMIN')">
         <!-- Dashboard -->
-        <a th:href="@{/dashboard}"
+        <a th:href="@{/admin/dashboard}"
            class="navlink group"
            th:classappend="${pageTitle != null and pageTitle.contains('Dashboard')} ? ' navlink-active' : ''">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -363,35 +368,94 @@
             <span th:text="#{nav.dashboard}">Dashboard</span>
         </a>
 
-        <!-- Calendar -->
-        <a th:href="@{/calendar}"
+        <!-- Feedback -->
+        <a th:href="@{/admin/feedback}"
            class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('Calendar')} ? ' navlink-active' : ''">
+           th:classappend="${pageTitle != null and pageTitle.contains('Feedback')} ? ' navlink-active' : ''">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                  class="navicon"
-                  th:classappend="${pageTitle != null and pageTitle.contains('Calendar')} ? ' navicon-active' : ''">
-                <path d="M8 2v4M16 2v4" />
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M3 10h18" />
+                 th:classappend="${pageTitle != null and pageTitle.contains('Feedback')} ? ' navicon-active' : ''">
+                <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
             </svg>
-            <span th:text="#{nav.calendar}">Calendar</span>
+            <span>Feedback</span>
         </a>
 
-        <!-- Users -->
-        <a th:href="@{/admin/users}"
+        <!-- Merch Admin -->
+        <a th:href="@{/admin/merch}"
            class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('Users')} ? ' navlink-active' : ''">
+           th:classappend="${pageTitle != null and pageTitle.contains('Merch')} ? ' navlink-active' : ''">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                  class="navicon"
-                 th:classappend="${pageTitle != null and pageTitle.contains('Users')} ? ' navicon-active' : ''">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="8.5" cy="7" r="4" />
-                <path d="M20 8v6" />
-                <path d="M23 11h-6" />
+                 th:classappend="${pageTitle != null and pageTitle.contains('Merch')} ? ' navicon-active' : ''">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
             </svg>
-            <span>Users</span>
+            <span>Merch</span>
+        </a>
+
+        <!-- Profile -->
+        <a th:href="@{/profile}"
+           class="navlink group"
+           th:classappend="${pageTitle != null and pageTitle.contains('Profile')} ? ' navlink-active' : ''">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="navicon"
+                 th:classappend="${pageTitle != null and pageTitle.contains('Profile')} ? ' navicon-active' : ''">
+                <path d="M20 21a8 8 0 0 0-16 0" />
+                <circle cx="12" cy="8" r="4" />
+            </svg>
+            <span th:text="#{nav.profile}">Profile</span>
+        </a>
+    </th:block>
+
+    <!-- ============================================== -->
+    <!-- SUPER_ADMIN NAVBAR -->
+    <!-- ============================================== -->
+    <th:block sec:authorize="hasRole('SUPER_ADMIN')">
+        <!-- Dashboard -->
+        <a th:href="@{/admin/dashboard}"
+           class="navlink group"
+           th:classappend="${pageTitle != null and pageTitle.contains('Dashboard')} ? ' navlink-active' : ''">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="navicon"
+                 th:classappend="${pageTitle != null and pageTitle.contains('Dashboard')} ? ' navicon-active' : ''">
+                <path d="M3 3h7v7H3z" />
+                <path d="M14 3h7v7h-7z" />
+                <path d="M14 14h7v7h-7z" />
+                <path d="M3 14h7v7H3z" />
+            </svg>
+            <span th:text="#{nav.dashboard}">Dashboard</span>
+        </a>
+
+        <!-- Verification -->
+        <a th:href="@{/super-admin/verification/queue}"
+           class="navlink group"
+           th:classappend="${pageTitle != null and pageTitle.contains('Verification')} ? ' navlink-active' : ''">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="navicon"
+                 th:classappend="${pageTitle != null and pageTitle.contains('Verification')} ? ' navicon-active' : ''">
+                <path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4Z" />
+                <path d="m9.5 12 1.8 1.8L15 10" />
+            </svg>
+            <span>Verification</span>
+        </a>
+
+        <!-- Feedback -->
+        <a th:href="@{/admin/feedback}"
+           class="navlink group"
+           th:classappend="${pageTitle != null and pageTitle.contains('Feedback')} ? ' navlink-active' : ''">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="navicon"
+                 th:classappend="${pageTitle != null and pageTitle.contains('Feedback')} ? ' navicon-active' : ''">
+                <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+            </svg>
+            <span>Feedback</span>
         </a>
 
         <!-- Merch Admin -->
@@ -473,15 +537,20 @@
                                     <span th:text="#{nav.calendar}">Calendar</span>
                                 </a>
 
-                                <a th:href="@{/vault}" class="navlink group"
-                                           th:classappend="${pageTitle != null and pageTitle.contains('Vault')} ? ' navlink-active' : ''">
-                                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="navicon" th:classappend="${pageTitle != null and pageTitle.contains('Vault')} ? ' navicon-active' : ''">
-                                        <path d="M4 4h16v16H4z" />
-                                        <path d="M8 8h8" />
-                                        <path d="M8 12h8" />
-                                        <path d="M8 16h6" />
+                                <a th:href="@{/chat}" class="navlink group"
+                                           th:classappend="${pageTitle != null and (pageTitle.contains('Charlie') or pageTitle.contains('Coach') or pageTitle.contains('Command Centre'))} ? ' navlink-active' : ''">
+                                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="navicon" th:classappend="${pageTitle != null and (pageTitle.contains('Charlie') or pageTitle.contains('Coach') or pageTitle.contains('Command Centre'))} ? ' navicon-active' : ''">
+                                        <path d="M12 3v4" />
+                                        <path d="M12 17v4" />
+                                        <path d="M4.93 4.93l2.83 2.83" />
+                                        <path d="M16.24 16.24l2.83 2.83" />
+                                        <path d="M3 12h4" />
+                                        <path d="M17 12h4" />
+                                        <path d="M4.93 19.07l2.83-2.83" />
+                                        <path d="M16.24 7.76l2.83-2.83" />
+                                        <circle cx="12" cy="12" r="3" />
                                     </svg>
-                                    <span th:text="#{nav.trainingVault}">Training Vault</span>
+                                    <span>Coach</span>
                                 </a>
 
                                 <a th:href="@{/client/trainers}" class="navlink group"
