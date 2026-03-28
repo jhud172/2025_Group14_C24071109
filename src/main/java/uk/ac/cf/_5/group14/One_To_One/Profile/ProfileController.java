@@ -114,7 +114,7 @@ public class ProfileController {
         if (user == null) {
             return new ModelAndView("redirect:/login");
         }
-        ModelAndView modelAndView = new ModelAndView("/profile/profile");
+        ModelAndView modelAndView = new ModelAndView("profile/profile");
         PlatformSubscription platformSubscription = platformSubscriptionService.findByUserId(user.getId()).orElse(null);
         boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
         UserSettings settings = userSettingsService.getOrCreate(user);

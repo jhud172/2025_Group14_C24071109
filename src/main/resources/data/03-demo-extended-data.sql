@@ -276,10 +276,11 @@ WHERE EXISTS (SELECT 1 FROM users WHERE username = 'trainer_demo')
 -- GYM PROFILE
 -- =========================================================================
 
-INSERT INTO gym_profiles (user_id, gym_name, address, city, contact_name, contact_phone,
+INSERT INTO gym_profiles (user_id, gym_name, gym_code, address, city, contact_name, contact_phone,
     created_at, updated_at)
 SELECT (SELECT id FROM users WHERE username = 'gymadmin_demo'),
     'FitZone Gym Cardiff',
+    'GYMD20260001',
     '42 Capital Way',
     'Cardiff',
     'Gym Admin',
@@ -288,6 +289,15 @@ SELECT (SELECT id FROM users WHERE username = 'gymadmin_demo'),
     CURRENT_TIMESTAMP - INTERVAL '14' DAY
 WHERE EXISTS (SELECT 1 FROM users WHERE username = 'gymadmin_demo')
   AND NOT EXISTS (SELECT 1 FROM gym_profiles WHERE user_id = (SELECT id FROM users WHERE username = 'gymadmin_demo'));
+
+UPDATE gym_profiles
+SET gym_code = 'GYMD20260001',
+    address = '42 Capital Way',
+    city = 'Cardiff',
+    contact_name = 'Gym Admin',
+    contact_phone = '+44 29 2000 1234',
+    updated_at = CURRENT_TIMESTAMP - INTERVAL '6' DAY
+WHERE user_id = (SELECT id FROM users WHERE username = 'gymadmin_demo');
 
 -- =========================================================================
 -- TRAINER-CLIENT LINK (demo is client of trainer_demo)

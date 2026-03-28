@@ -58,6 +58,16 @@ public class CustomErrorController implements ErrorController {
     private void logError(int statusCode, Object requestPath, Object message) {
         String path = requestPath != null ? requestPath.toString() : "Unknown";
         String msg = message != null ? message.toString() : "No message";
-        log.warn("HTTP error {} for path {}: {}", statusCode, path, msg);
+        if (statusCode >= 500) {
+            log.error("HTTP error {} for path {}: {}", statusCode, path, msg);
+            return;
+        }
+
+        if (statusCode == 403) {
+            log.info("HTTP error {} for path {}: {}", statusCode, path, msg);
+            return;
+        }
+
+        log.debug("HTTP error {} for path {}: {}", statusCode, path, msg);
     }
 }

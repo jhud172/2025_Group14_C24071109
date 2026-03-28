@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface GymProfileRepository extends JpaRepository<GymProfile, Long> {
     Optional<GymProfile> findByUserId(Long userId);
+    Optional<GymProfile> findByGymCodeIgnoreCase(String gymCode);
+    boolean existsByGymCodeIgnoreCase(String gymCode);
 }

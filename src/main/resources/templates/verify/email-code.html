@@ -43,6 +43,13 @@
                     </div>
                 </div>
 
+                <div class="verify-card-stack" th:if="${gymCode != null}">
+                    <div class="verify-info-card">
+                        <p class="verify-info-card__eyebrow" th:text="#{verify.email.code.gymCode}">Your gym code</p>
+                        <p class="verify-info-card__value" th:text="${gymCode}">ABCD-EFGH-IJKL</p>
+                    </div>
+                </div>
+
                 <div th:if="${verificationSuccess == null}">
                     <form th:action="@{/verify/email/confirm}" method="post" class="verify-form" autocomplete="off">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

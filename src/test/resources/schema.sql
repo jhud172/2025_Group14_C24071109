@@ -2203,6 +2203,11 @@ CREATE TABLE IF NOT EXISTS gym_profiles
     id         BIGSERIAL PRIMARY KEY,
     user_id    BIGINT       NOT NULL,
     gym_name   VARCHAR(200) NOT NULL,
+    gym_code   VARCHAR(12),
+    address    VARCHAR(200),
+    city       VARCHAR(120),
+    contact_name VARCHAR(120),
+    contact_phone VARCHAR(40),
     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -2211,6 +2216,12 @@ CREATE TABLE IF NOT EXISTS gym_profiles
             ON DELETE CASCADE,
     CONSTRAINT uq_gym_profile_user UNIQUE (user_id)
 );
+
+ALTER TABLE gym_profiles
+    ADD COLUMN IF NOT EXISTS gym_code VARCHAR(12);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_gym_profiles_gym_code
+    ON gym_profiles (gym_code);
 
 CREATE TABLE IF NOT EXISTS email_verification_tokens
 (

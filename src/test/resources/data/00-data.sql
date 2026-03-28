@@ -107,6 +107,9 @@ values ('superadmin_demo', 1);
 insert into users_roles (username, role_id)
 values ('superadmin_demo', 6);
 
+INSERT INTO gym_profiles (user_id, gym_name, gym_code, created_at, updated_at)
+VALUES ((SELECT id FROM users WHERE username = 'gymadmin_demo'), 'Demo Gym', 'GYMD20260001', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
 -- Preference data
 insert into preferences(category, description)
 values ('Finance', 'Free');

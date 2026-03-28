@@ -248,7 +248,7 @@ public class UserController {
         profile.setCity(signupForm.getCity());
         profile.setContactName(signupForm.getContactName());
         profile.setContactPhone(signupForm.getContactPhone());
-        gymProfileService.saveProfile(profile);
+        GymProfile savedProfile = gymProfileService.saveProfile(profile);
 
         try {
             emailVerificationService.sendVerification(savedUser);
@@ -256,6 +256,11 @@ public class UserController {
             log.warn("Failed to send verification email to {} after gym signup", savedUser.getEmail(), e);
         }
 
+        String gymCode = savedProfile.getGymCode();
+        if (gymCode != null && gymCode.length() == 12) {
+            String formatted = gymCode.substring(0, 4) + "-" + gymCode.substring(4, 8) + "-" + gymCode.substring(8, 12);
+            redirectAttributes.addFlashAttribute("gymCode", formatted);
+        }
         redirectAttributes.addFlashAttribute("verifyRegistered", true);
         return "redirect:/verify/email/code?email=" + encodeEmail(savedUser.getEmail());
     }

@@ -17,7 +17,7 @@ public class ExerciseController {
 
     @GetMapping("/exercise/{id}")
     public ModelAndView getExercise(@PathVariable Long id, Model model) {
-        ModelAndView modelAndView = new ModelAndView("/exercise-log/ExerciseTutorial");
+        ModelAndView modelAndView = new ModelAndView("exercise-log/ExerciseTutorial");
         Exercise exercise = exerciseService.getExerciseById(id);
         modelAndView.addObject("exercise", exercise);
         return modelAndView;

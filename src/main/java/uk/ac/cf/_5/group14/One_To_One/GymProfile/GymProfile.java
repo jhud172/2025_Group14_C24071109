@@ -20,6 +20,10 @@ public class GymProfile {
     @Column(name = "gym_name", length = 120, nullable = false)
     private String gymName;
 
+    @Size(max = 12)
+    @Column(name = "gym_code", length = 12, unique = true)
+    private String gymCode;
+
     @Size(max = 200)
     @Column(name = "address", length = 200)
     private String address;
@@ -82,6 +86,14 @@ public class GymProfile {
 
     public void setGymName(String gymName) {
         this.gymName = gymName;
+    }
+
+    public String getGymCode() {
+        return gymCode;
+    }
+
+    public void setGymCode(String gymCode) {
+        this.gymCode = gymCode;
     }
 
     public String getAddress() {

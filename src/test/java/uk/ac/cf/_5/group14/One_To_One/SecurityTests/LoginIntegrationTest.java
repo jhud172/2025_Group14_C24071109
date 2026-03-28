@@ -29,4 +29,14 @@ class LoginIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(authenticated().withUsername("demo"));
     }
+
+    @Test
+    void gymAdminCanLoginWithSeededGymCode() throws Exception {
+        mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "GYMD-2026-0001")
+                        .param("password", "Demo123!"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(authenticated().withUsername("gymadmin_demo"));
+    }
 }

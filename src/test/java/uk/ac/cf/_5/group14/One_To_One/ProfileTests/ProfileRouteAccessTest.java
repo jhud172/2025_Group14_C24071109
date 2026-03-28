@@ -20,6 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import uk.ac.cf._5.group14.One_To_One.DataExport.DataExportRequestService;
 import uk.ac.cf._5.group14.One_To_One.DayMode.DayModeService;
@@ -99,7 +100,8 @@ class ProfileRouteAccessTest {
         given(merchOrderService.getOrdersForUser(eq(user.getId()))).willReturn(Collections.emptyList());
 
         mvc.perform(get("/profile").sessionAttr("user", user))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(view().name("profile/profile"));
     }
 
     @Test

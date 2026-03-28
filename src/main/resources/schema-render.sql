@@ -939,6 +939,7 @@ CREATE TABLE IF NOT EXISTS gym_profiles
     id            BIGSERIAL PRIMARY KEY,
     user_id       BIGINT       NOT NULL UNIQUE,
     gym_name      VARCHAR(120) NOT NULL,
+    gym_code      VARCHAR(12),
     address       VARCHAR(200),
     city          VARCHAR(120),
     contact_name  VARCHAR(120),
@@ -951,8 +952,14 @@ CREATE TABLE IF NOT EXISTS gym_profiles
             ON DELETE CASCADE
 );
 
+ALTER TABLE gym_profiles
+    ADD COLUMN IF NOT EXISTS gym_code VARCHAR(12);
+
 CREATE INDEX IF NOT EXISTS idx_trainer_profiles_user
     ON trainer_profiles (user_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_gym_profiles_gym_code
+    ON gym_profiles (gym_code);
 
 -- =========================
 -- GYM MEMBERSHIP PRODUCTS

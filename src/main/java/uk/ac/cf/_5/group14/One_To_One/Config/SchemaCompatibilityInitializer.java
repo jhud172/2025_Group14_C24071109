@@ -27,6 +27,13 @@ public class SchemaCompatibilityInitializer {
         AND UPPER(column_name) = UPPER(?)
         """;
 
+    static final String HAS_TABLE_COLUMN_SQL = """
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE UPPER(table_name) = UPPER(?)
+        AND UPPER(column_name) = UPPER(?)
+        """;
+
     static final String HAS_TABLE_SQL = """
         SELECT COUNT(*)
         FROM information_schema.tables
@@ -93,6 +100,17 @@ public class SchemaCompatibilityInitializer {
         new UserColumnPatch("has_seen_tutorial", """
             ALTER TABLE users
             ADD COLUMN IF NOT EXISTS has_seen_tutorial BOOLEAN NOT NULL DEFAULT FALSE
+            """)
+    );
+
+    static final List<TableColumnPatch> GYM_PROFILE_COLUMN_PATCHES = List.of(
+        new TableColumnPatch("gym_code", """
+            ALTER TABLE gym_profiles
+            ADD COLUMN IF NOT EXISTS gym_code VARCHAR(12)
+            """),
+        new TableColumnPatch("idx_gym_profiles_gym_code", """
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_gym_profiles_gym_code
+                ON gym_profiles (gym_code)
             """)
     );
 
@@ -257,6 +275,29 @@ public class SchemaCompatibilityInitializer {
         );
     }
 
+    @PostConstruct
+    void ensureGymProfileCompatibilityColumns() {
+        if (!hasTable(GYM_PROFILES_TABLE)) {
+            log.warn("Skipping gym_profiles compatibility patches because '{}' does not exist yet.", GYM_PROFILES_TABLE);
+            return;
+        }
+
+        for (TableColumnPatch patch : GYM_PROFILE_COLUMN_PATCHES) {
+            if (patch.isIndexPatch() || hasTableColumn(GYM_PROFILES_TABLE, patch.columnName())) {
+                if (!patch.isIndexPatch()) {
+                    log.debug("Schema compatibility check: {}.{} already exists.", GYM_PROFILES_TABLE, patch.columnName());
+                }
+                if (patch.isIndexPatch()) {
+                    jdbcTemplate.execute(patch.ddl());
+                }
+                continue;
+            }
+
+            jdbcTemplate.execute(patch.ddl());
+            log.warn("Applied schema compatibility patch: added missing {}.{}.", GYM_PROFILES_TABLE, patch.columnName());
+        }
+    }
+
     private boolean hasUsersColumn(String columnName) {
         Integer existingColumns = jdbcTemplate.queryForObject(
             HAS_USERS_COLUMN_SQL,
@@ -273,6 +314,16 @@ public class SchemaCompatibilityInitializer {
             tableName
         );
         return existingTables != null && existingTables > 0;
+    }
+
+    private boolean hasTableColumn(String tableName, String columnName) {
+        Integer existingColumns = jdbcTemplate.queryForObject(
+            HAS_TABLE_COLUMN_SQL,
+            Integer.class,
+            tableName,
+            columnName
+        );
+        return existingColumns != null && existingColumns > 0;
     }
 
     private void ensureTableIfMissing(String tableName, String ddl, String... requiredTables) {
@@ -295,4 +346,9 @@ public class SchemaCompatibilityInitializer {
     }
 
     record UserColumnPatch(String columnName, String ddl) {}
+    record TableColumnPatch(String columnName, String ddl) {
+        boolean isIndexPatch() {
+            return columnName.startsWith("idx_");
+        }
+    }
 }

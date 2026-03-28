@@ -204,9 +204,10 @@ SET trainer_code = 'DMTR20260001',
     updated_at = CURRENT_TIMESTAMP - INTERVAL '2' DAY
 WHERE user_id = (SELECT id FROM users WHERE username = 'demo_trainer');
 
-INSERT INTO gym_profiles (user_id, gym_name, address, city, contact_name, contact_phone, created_at, updated_at)
+INSERT INTO gym_profiles (user_id, gym_name, gym_code, address, city, contact_name, contact_phone, created_at, updated_at)
 SELECT (SELECT id FROM users WHERE username = 'demo_gym'),
     'Harbour Strength Club',
+    'DMGY20260001',
     '18 Dock Street',
     'Cardiff',
     'Harbour Operations',
@@ -215,6 +216,15 @@ SELECT (SELECT id FROM users WHERE username = 'demo_gym'),
     CURRENT_TIMESTAMP - INTERVAL '4' DAY
 WHERE EXISTS (SELECT 1 FROM users WHERE username = 'demo_gym')
   AND NOT EXISTS (SELECT 1 FROM gym_profiles WHERE user_id = (SELECT id FROM users WHERE username = 'demo_gym'));
+
+UPDATE gym_profiles
+SET gym_code = 'DMGY20260001',
+    address = '18 Dock Street',
+    city = 'Cardiff',
+    contact_name = 'Harbour Operations',
+    contact_phone = '+44 29 5555 0101',
+    updated_at = CURRENT_TIMESTAMP - INTERVAL '4' DAY
+WHERE user_id = (SELECT id FROM users WHERE username = 'demo_gym');
 
 INSERT INTO trainer_client_links (
     client_id, trainer_id, status, requested_at, activated_at, created_at, updated_at,
