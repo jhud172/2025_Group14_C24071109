@@ -1165,10 +1165,7 @@
     }
 
     .cd-profile-card__bio {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        overflow-wrap: anywhere;
     }
 
     .cd-context-panel--profile {
@@ -1632,6 +1629,7 @@
 
     .cd-ambience-card__icon {
         box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.64), 0 20px 34px rgba(15, 23, 42, 0.08);
+        transition: background 360ms ease, box-shadow 360ms ease;
     }
 
     .cd-ambience-card__icon[data-period="night"] {
@@ -1661,6 +1659,25 @@
 
     .cd-ambience-card__icon[data-weather="sunny"]::after {
         background: rgba(255, 255, 255, 0.76);
+    }
+
+    .cd-ambience-card__icon[data-period="night"][data-weather="rain"],
+    .cd-ambience-card__icon[data-period="night"][data-weather="storm"] {
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(30, 64, 175, 0.92));
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.34), 0 20px 34px rgba(15, 23, 42, 0.2);
+    }
+
+    .cd-ambience-card__icon[data-period="night"][data-weather="rain"]::before,
+    .cd-ambience-card__icon[data-period="night"][data-weather="storm"]::before {
+        background: rgba(226, 232, 240, 0.95);
+        box-shadow: 0 0 26px rgba(191, 219, 254, 0.36);
+        clip-path: path("M15 0C7 2 3 9 5 17c3 11 15 12 22 7-12-1-18-11-12-24Z");
+    }
+
+    .cd-ambience-card__icon[data-period="night"][data-weather="rain"]::after,
+    .cd-ambience-card__icon[data-period="night"][data-weather="storm"]::after {
+        background: rgba(226, 232, 240, 0.82);
+        box-shadow: 0 10px 16px rgba(15, 23, 42, 0.26), 14px 24px 0 -8px rgba(96, 165, 250, 0.7), 26px 30px 0 -8px rgba(59, 130, 246, 0.62), 6px 32px 0 -8px rgba(59, 130, 246, 0.62);
     }
 
     .cd-ambience-card__clock {
@@ -1734,6 +1751,12 @@
 
     .cd-ambience-timeline-wrap {
         margin-top: 1rem;
+        transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .cd-ambience-timeline.is-transitioning {
+        opacity: 0.45;
+        transform: translateY(4px);
     }
 
     .cd-ambience-timeline__strip,
@@ -1803,6 +1826,11 @@
         border-radius: 1.35rem;
         border: 1px solid rgba(148, 163, 184, 0.16);
         background: linear-gradient(180deg, rgba(239, 246, 255, 0.84), rgba(248, 250, 252, 0.92));
+        animation: cd-ambience-graph-enter 240ms ease;
+    }
+
+    .cd-ambience-graph[data-graph-mode="trend"] {
+        background: linear-gradient(180deg, rgba(236, 253, 245, 0.9), rgba(248, 250, 252, 0.94));
     }
 
     .cd-ambience-graph__inner {
@@ -1830,6 +1858,13 @@
 
     .cd-ambience-graph__line.is-visible {
         stroke-dashoffset: 0;
+    }
+
+    .cd-ambience-graph[data-graph-mode="trend"] .cd-ambience-graph__line,
+    .cd-ambience-graph[data-graph-mode="trend"] .cd-ambience-graph__dot {
+        stroke: rgb(16 185 129);
+        fill: rgb(16 185 129);
+        filter: drop-shadow(0 10px 18px rgba(16, 185, 129, 0.22));
     }
 
     .cd-ambience-graph__dot {
@@ -1871,6 +1906,17 @@
         to {
             opacity: 1;
             transform: scale(1);
+        }
+    }
+
+    @keyframes cd-ambience-graph-enter {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
@@ -2054,49 +2100,145 @@
         overflow-anchor: none;
     }
 
-    .cd-trainer-banner-shell {
-        padding: 0.55rem;
+    .cd-reveal-card--trainer {
+        border: 1px solid rgba(148, 163, 184, 0.2);
         border-radius: 2rem;
+        overflow: hidden;
+        background:
+                linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(255, 255, 255, 0.96));
+        box-shadow: 0 24px 42px rgba(15, 23, 42, 0.08);
+        transition: border-color 220ms ease, box-shadow 260ms ease, transform 260ms ease;
+    }
+
+    .cd-reveal-card--trainer:hover,
+    .cd-reveal-card--trainer:focus-within {
+        border-color: rgba(94, 234, 212, 0.42);
+        box-shadow: 0 28px 48px rgba(15, 23, 42, 0.11);
+    }
+
+    .cd-trainer-banner-shell {
+        padding: 0.65rem;
+        border: 0;
+        border-radius: 0;
         cursor: pointer;
         background:
                 radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 40%),
                 linear-gradient(180deg, rgba(248, 250, 252, 0.94), rgba(255, 255, 255, 0.96));
+        box-shadow: none;
     }
 
-    .cd-reveal-card.is-open .cd-trainer-banner-shell {
-        border-bottom-left-radius: 1.25rem;
-        border-bottom-right-radius: 1.25rem;
-        box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
+    .cd-reveal-card--trainer.is-open {
+        box-shadow: 0 30px 54px rgba(15, 23, 42, 0.12);
+    }
+
+    .cd-reveal-card--trainer.is-open .cd-trainer-banner-shell {
+        box-shadow: none;
     }
 
     .cd-reveal-panel-wrap {
         display: grid;
         grid-template-rows: 0fr;
         margin-top: 0;
-        padding: 0 0.55rem 0.2rem;
-        transition: grid-template-rows 360ms cubic-bezier(0.22, 1, 0.36, 1);
+        padding: 0;
+        overflow: hidden;
         overflow-anchor: none;
+        transition: grid-template-rows 380ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease;
+        border-top: 1px solid transparent;
+        background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.88));
     }
 
     .cd-reveal-panel {
         min-height: 0;
-        margin-top: 0.2rem;
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-        padding-top: 1.2rem;
+        margin-top: 0;
+        border: 0;
+        border-radius: 0;
+        padding: 1rem 1rem 1.05rem;
+        background: transparent;
+        box-shadow: none;
         opacity: 0;
-        transform: translateY(8px);
-        transition: opacity 240ms ease, transform 300ms ease;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(-12px);
+        transition:
+                opacity 220ms ease,
+                transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 0s linear 320ms;
     }
 
     .cd-reveal-card.is-open .cd-reveal-panel-wrap {
         grid-template-rows: 1fr;
+        border-top-color: rgba(148, 163, 184, 0.18);
     }
 
     .cd-reveal-card.is-open .cd-reveal-panel {
         opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
         transform: translateY(0);
+        transition-delay: 0s;
         max-height: none;
+    }
+
+    .profile-preview-bio-block--dashboard {
+        align-items: stretch;
+        gap: 0.8rem;
+        text-align: center;
+    }
+
+    .profile-preview-bio-block--dashboard .profile-preview-bio-block__viewport {
+        position: relative;
+        overflow: hidden;
+        max-height: none;
+        transition: max-height 340ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .profile-preview-bio-block--dashboard .profile-preview-bio-block__viewport::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 4.5rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.7) 50%, rgba(248, 250, 252, 0.98));
+        backdrop-filter: blur(6px);
+        opacity: 0;
+        transform: translateY(0.4rem);
+        transition: opacity 220ms ease, transform 220ms ease;
+        pointer-events: none;
+    }
+
+    .profile-preview-bio-block--dashboard.has-toggle.is-collapsed .profile-preview-bio-block__viewport {
+        max-height: var(--profile-bio-collapsed-height, 6.75rem);
+    }
+
+    .profile-preview-bio-block--dashboard.is-expanded .profile-preview-bio-block__viewport {
+        max-height: var(--profile-bio-full-height, 18rem);
+    }
+
+    .profile-preview-bio-block--dashboard.has-toggle.is-collapsed .profile-preview-bio-block__viewport::after {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .profile-preview-bio-block--dashboard .profile-preview-bio-block__actions {
+        justify-content: center;
+    }
+
+    .profile-preview-bio-block--dashboard .cd-reveal-panel__copy,
+    .profile-preview-bio-block--dashboard .cd-profile-card__bio {
+        margin-top: 0;
+    }
+
+    .profile-preview-bio-block--dashboard .profile-preview-bio__toggle {
+        min-width: 8.75rem;
+        padding: 0.55rem 1rem;
+        border-color: rgba(148, 163, 184, 0.26);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.96));
+        box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.8);
+    }
+
+    .profile-preview-bio-block--dashboard .profile-preview-bio__toggle:hover,
+    .profile-preview-bio-block--dashboard .profile-preview-bio__toggle:focus-visible {
+        box-shadow: 0 20px 32px -24px rgba(16, 185, 129, 0.52);
     }
 
     .cd-profile-card__section--milestones {
@@ -3376,6 +3518,39 @@
     html.dark .cd-trainer-banner-shell::before,
     html.dark .cd-reveal-panel::before {
         opacity: 0.62;
+    }
+
+    html.dark .cd-reveal-card--trainer {
+        border-color: rgba(51, 65, 85, 0.92);
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(17, 24, 39, 0.96));
+        box-shadow: 0 28px 50px rgba(2, 6, 23, 0.46);
+    }
+
+    html.dark .cd-reveal-card--trainer:hover,
+    html.dark .cd-reveal-card--trainer:focus-within,
+    html.dark .cd-reveal-card--trainer.is-open {
+        border-color: rgba(52, 211, 153, 0.3);
+        box-shadow: 0 34px 58px rgba(2, 6, 23, 0.54);
+    }
+
+    html.dark .cd-reveal-panel-wrap {
+        border-top-color: transparent;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(2, 6, 23, 0.2));
+    }
+
+    html.dark .cd-reveal-card.is-open .cd-reveal-panel-wrap {
+        border-top-color: rgba(51, 65, 85, 0.88);
+    }
+
+    html.dark .profile-preview-bio-block--dashboard .profile-preview-bio-block__viewport::after {
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0), rgba(15, 23, 42, 0.72) 50%, rgba(2, 6, 23, 0.98));
+    }
+
+    html.dark .profile-preview-bio-block--dashboard .profile-preview-bio__toggle {
+        border-color: rgba(51, 65, 85, 0.92);
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.92));
+        color: rgb(226 232 240);
+        box-shadow: 0 22px 34px -24px rgba(2, 6, 23, 0.9);
     }
 
     html.dark .cd-switch {

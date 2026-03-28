@@ -51,7 +51,7 @@
                       th:text="${trainerRail.statusLabel}">Active coach</span>
             </div>
 
-            <div th:if="${trainerRail.identity != null}" class="cd-reveal-card" data-profile-preview>
+            <div th:if="${trainerRail.identity != null}" class="cd-reveal-card cd-reveal-card--trainer" data-profile-preview>
                 <div class="cd-trainer-banner-shell"
                      data-profile-preview-trigger
                      tabindex="0"
@@ -64,15 +64,21 @@
                     <div class="cd-reveal-panel" data-profile-preview-panel aria-hidden="true">
                         <div class="profile-preview-bio-block profile-preview-bio-block--dashboard"
                              data-profile-bio-block
-                             data-bio-scroll-height="190">
-                            <p class="cd-reveal-panel__copy profile-preview-copy" data-profile-bio
-                               th:text="${trainerRail.bio != null ? trainerRail.bio : 'No coach bio added yet.'}">Coach bio</p>
-                            <button type="button"
-                                    class="profile-preview-bio__toggle"
-                                    data-profile-bio-toggle
-                                    hidden
-                                    aria-hidden="true"
-                                    aria-expanded="false">Read more</button>
+                             data-bio-scroll-height="190"
+                             data-bio-char-threshold="250"
+                             data-bio-collapsed-lines="4">
+                            <div class="profile-preview-bio-block__viewport" data-profile-bio-viewport>
+                                <p class="cd-reveal-panel__copy profile-preview-copy" data-profile-bio
+                                   th:text="${trainerRail.bio != null ? trainerRail.bio : 'No coach bio added yet.'}">Coach bio</p>
+                            </div>
+                            <div class="profile-preview-bio-block__actions">
+                                <button type="button"
+                                        class="profile-preview-bio__toggle"
+                                        data-profile-bio-toggle
+                                        hidden
+                                        aria-hidden="true"
+                                        aria-expanded="false">Show more</button>
+                            </div>
                         </div>
                         <div class="cd-identity-stats">
                             <div class="cd-identity-stat">
@@ -663,14 +669,20 @@
             <div class="cd-profile-card__body">
                 <div class="profile-preview-bio-block profile-preview-bio-block--dashboard"
                      data-profile-bio-block
-                     data-bio-scroll-height="180">
-                    <p class="cd-profile-card__bio profile-preview-copy" data-profile-bio th:text="${profileRail.bio}">Profile bio</p>
-                    <button type="button"
-                            class="profile-preview-bio__toggle"
-                            data-profile-bio-toggle
-                            hidden
-                            aria-hidden="true"
-                            aria-expanded="false">Read more</button>
+                     data-bio-scroll-height="180"
+                     data-bio-char-threshold="250"
+                     data-bio-collapsed-lines="4">
+                    <div class="profile-preview-bio-block__viewport" data-profile-bio-viewport>
+                        <p class="cd-profile-card__bio profile-preview-copy" data-profile-bio th:text="${profileRail.bio}">Profile bio</p>
+                    </div>
+                    <div class="profile-preview-bio-block__actions">
+                        <button type="button"
+                                class="profile-preview-bio__toggle"
+                                data-profile-bio-toggle
+                                hidden
+                                aria-hidden="true"
+                                aria-expanded="false">Show more</button>
+                    </div>
                 </div>
 
                 <section class="cd-profile-card__section">

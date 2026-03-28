@@ -722,10 +722,10 @@
 
     function weatherIcon(key, isDay) {
         if (key === "sunny") return isDay === false ? "🌙" : "☀️";
-        if (key === "cloudy") return isDay === false ? "☁️" : "⛅";
-        if (key === "rain") return "🌧️";
-        if (key === "snow") return "❄️";
-        if (key === "storm") return "⛈️";
+        if (key === "cloudy") return isDay === false ? "🌙☁️" : "⛅";
+        if (key === "rain") return isDay === false ? "🌙☁️🌧️" : "🌧️";
+        if (key === "snow") return isDay === false ? "🌙☁️❄️" : "🌨️";
+        if (key === "storm") return isDay === false ? "🌙☁️⛈️" : "⛈️";
         return "•";
     }
 
@@ -747,7 +747,7 @@
         const timeDisplayFormat = getDashboardTimeDisplayFormat();
         const label = date.toLocaleTimeString("en-GB", {
             hour: "numeric",
-            minute: timeDisplayFormat === "TWENTY_FOUR_HOUR" ? "2-digit" : undefined,
+            minute: "2-digit",
             hour12: timeDisplayFormat !== "TWENTY_FOUR_HOUR"
         }).replace(/\s+/g, " ").trim();
         return timeDisplayFormat === "TWENTY_FOUR_HOUR" ? label : label.toUpperCase();
@@ -759,6 +759,7 @@
         const label = date.toLocaleTimeString("en-GB", {
             hour: "numeric",
             minute: "2-digit",
+            second: "2-digit",
             hour12: timeDisplayFormat !== "TWENTY_FOUR_HOUR"
         }).replace(/\s+/g, " ").trim();
         return timeDisplayFormat === "TWENTY_FOUR_HOUR" ? label : label.toUpperCase();
@@ -879,6 +880,7 @@
 
     function buildTimelineSlots(forecast, unit) {
         const currentTime = new Date(forecast?.current?.time || Date.now());
+        const currentDayKey = `${currentTime.getFullYear()}-${currentTime.getMonth()}-${currentTime.getDate()}`;
         const hourlyTimes = Array.isArray(forecast?.hourly?.time) ? forecast.hourly.time : [];
         const hourlyTemps = Array.isArray(forecast?.hourly?.temperature_2m) ? forecast.hourly.temperature_2m : [];
         const hourlyCodes = Array.isArray(forecast?.hourly?.weather_code) ? forecast.hourly.weather_code : [];
@@ -902,6 +904,8 @@
         for (let i = 0; i < hourlyTimes.length && slots.length < 24; i += 1) {
             const time = new Date(hourlyTimes[i]);
             if (Number.isNaN(time.getTime()) || time <= currentTime) continue;
+            const slotDayKey = `${time.getFullYear()}-${time.getMonth()}-${time.getDate()}`;
+            if (slotDayKey !== currentDayKey) break;
             const code = Number(hourlyCodes[i] || 0);
             const key = weatherKey(code);
             slots.push({
@@ -1152,6 +1156,7 @@
             const points = createGraphPoints(slots, currentGraphMode, slotWidth, chartHeight, topPadding);
             const graph = document.createElement("div");
             graph.className = "cd-ambience-graph";
+            graph.dataset.graphMode = currentGraphMode;
 
             const scroller = document.createElement("div");
             scroller.className = "cd-ambience-graph__scroller";
@@ -1196,12 +1201,14 @@
 
                 const temp = document.createElement("p");
                 temp.className = "cd-ambience-graph__temp";
-                temp.textContent = point.tempDisplay;
+                temp.textContent = currentGraphMode === "trend"
+                    ? `${point.trendValue}%`
+                    : point.tempDisplay;
 
                 const meta = document.createElement("p");
                 meta.className = "cd-ambience-graph__meta";
                 meta.textContent = currentGraphMode === "trend"
-                    ? `${point.precipitationProbability}% precip`
+                    ? `${point.precipitationProbability}% precipitation`
                     : point.condition;
 
                 column.append(time, spacer, temp, meta);
@@ -1250,9 +1257,17 @@
         graphToggleEl?.querySelectorAll("[data-graph-mode]").forEach((button) => {
             button.addEventListener("click", () => {
                 if (displayMode !== "GRAPH") return;
+                if (timelineEl) {
+                    timelineEl.classList.add("is-transitioning");
+                }
                 currentGraphMode = button.dataset.graphMode || "temperature";
                 setGraphToggleState(currentGraphMode);
-                renderTimeline();
+                window.setTimeout(() => {
+                    renderTimeline();
+                    window.requestAnimationFrame(() => {
+                        timelineEl?.classList.remove("is-transitioning");
+                    });
+                }, 120);
             });
         });
 

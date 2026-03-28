@@ -71,6 +71,16 @@
         if (panel instanceof HTMLElement) {
             panel.setAttribute("aria-hidden", open ? "false" : "true");
         }
+
+        if (!open) {
+            root.querySelectorAll("[data-profile-bio-block]").forEach((block) => {
+                if (!(block instanceof HTMLElement)) {
+                    return;
+                }
+                block.classList.remove(BIO_EXPANDED_CLASS);
+                refreshBioBlock(block);
+            });
+        }
     }
 
     function initPreviewShell(root) {
@@ -137,6 +147,7 @@
         }
 
         const copy = block.querySelector("[data-profile-bio]");
+        const viewport = block.querySelector("[data-profile-bio-viewport]");
         const toggle = block.querySelector("[data-profile-bio-toggle]");
         if (!(copy instanceof HTMLElement) || !(toggle instanceof HTMLElement)) {
             return;
@@ -145,24 +156,36 @@
         const wasExpanded = block.classList.contains(BIO_EXPANDED_CLASS);
         const collapsedLines = Math.max(1, Number(block.dataset.bioCollapsedLines || "3"));
         const lineHeight = parseFloat(window.getComputedStyle(copy).lineHeight || "22");
+        const threshold = Number(block.dataset.bioCharThreshold || "0");
+        const bioLength = copy.textContent.replace(/\s+/g, " ").trim().length;
 
         block.classList.remove(BIO_COLLAPSED_CLASS, BIO_EXPANDED_CLASS);
 
         const collapsedHeight = Math.ceil(Math.max(lineHeight * collapsedLines, 66));
         const fullHeight = Math.ceil(copy.scrollHeight);
-        const needsToggle = fullHeight > collapsedHeight + 4;
+        const needsToggle = threshold > 0
+            ? bioLength > threshold
+            : fullHeight > collapsedHeight + 4;
+
+        block.classList.toggle("has-toggle", needsToggle);
+        block.style.setProperty("--profile-bio-collapsed-height", `${collapsedHeight}px`);
+        block.style.setProperty("--profile-bio-full-height", `${Math.max(fullHeight, collapsedHeight)}px`);
+
+        if (viewport instanceof HTMLElement) {
+            viewport.setAttribute("aria-hidden", "false");
+        }
 
         toggle.hidden = !needsToggle;
         toggle.setAttribute("aria-hidden", needsToggle ? "false" : "true");
 
         if (!needsToggle) {
-            toggle.textContent = "Read more";
+            toggle.textContent = "Show more";
             toggle.setAttribute("aria-expanded", "false");
             return;
         }
 
         block.classList.add(wasExpanded ? BIO_EXPANDED_CLASS : BIO_COLLAPSED_CLASS);
-        toggle.textContent = wasExpanded ? "Read less" : "Read more";
+        toggle.textContent = wasExpanded ? "Show less" : "Show more";
         toggle.setAttribute("aria-expanded", wasExpanded ? "true" : "false");
     }
 
