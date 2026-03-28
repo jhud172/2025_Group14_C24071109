@@ -19,7 +19,7 @@
 
                 <div th:if="${!#lists.isEmpty(threads)}" class="divide-y divide-white/10">
                     <a th:each="t : ${threads}"
-                       th:href="@{/messages/{id}(id=${t.id})}"
+                       th:href="@{/inbox/{id}(id=${t.id})}"
                        class="block px-5 py-4 hover:bg-white/5">
                         <div class="flex items-start justify-between gap-4">
                             <div class="min-w-0">
@@ -32,7 +32,7 @@
                                           th:text="${linksById[t.linkId] != null ? linksById[t.linkId].status.name() : 'UNKNOWN'}">ACTIVE</span>
                                 </div>
                                 <p class="mt-1 text-sm text-slate-600 dark:text-slate-300"
-                                   th:text="${clientsById[t.clientId] != null ? ('@' + clientsById[t.clientId].username + ' · ' + clientsById[t.clientId].email) : ''}">
+                                   th:text="${clientsById[t.clientId] != null ? ('@' + clientsById[t.clientId].username + ' | ' + clientsById[t.clientId].email) : ''}">
                                 </p>
                             </div>
 

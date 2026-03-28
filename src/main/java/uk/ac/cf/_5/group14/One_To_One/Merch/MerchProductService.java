@@ -27,6 +27,11 @@ public interface MerchProductService {
     boolean decrementStock(Long productId, int qty);
 
     /**
+     * Restores stock previously reserved for a pending order.
+     */
+    void incrementStock(Long productId, int qty);
+
+    /**
      * Deactivates the product. PENDING orders that contain it are cancelled;
      * CONFIRMED/SHIPPED/DELIVERED orders are left untouched.
      */

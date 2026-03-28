@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -51,9 +50,6 @@ public class ChatController {
     private final AiNotificationService aiNotificationService;
 
     private static final String CONTEXT_FALLBACK_REPLY = "I couldn't load some of your data right now, but I can still help. Try asking about your schedule or today's tasks.";
-
-    @Value("${openai.api.key:}")
-    private String apiKey;
 
     public ChatController(
             ChatService chatService,
@@ -104,6 +100,8 @@ public class ChatController {
         model.addAttribute("dailyUsed", used);
         model.addAttribute("dailyRemaining", remaining);
         model.addAttribute("disableGlobalChatbot", true);
+        model.addAttribute("aiAvailable", chatService.isAvailable());
+        model.addAttribute("aiDisclosure", chatService.disclosureMessage());
 
         // Build personalised page summary for zero-blank state and live metrics
         try {
@@ -253,7 +251,7 @@ public class ChatController {
         }
 
         try {
-            if (apiKey == null || apiKey.isBlank()) {
+            if (!chatService.isAvailable()) {
                 String reply = ChatRuleBasedResponder.respond(message, ctx);
                 if (!skipHistory) {
                     coachMessageService.append(conversation, CoachMessage.Role.ASSISTANT, reply);
@@ -407,7 +405,7 @@ public class ChatController {
             }
 
             try {
-                if (apiKey == null || apiKey.isBlank()) {
+                if (!chatService.isAvailable()) {
                 reply = ChatRuleBasedResponder.respond(message, ctx);
                 } else {
                 String systemPrompt = ChatPromptBuilder.buildSystemPrompt(ctx);

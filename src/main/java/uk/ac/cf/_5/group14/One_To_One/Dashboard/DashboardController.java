@@ -189,6 +189,7 @@ public class DashboardController {
 
         model.addAttribute("pageTitle", "Dashboard");
         model.addAttribute("disableChatHistory", true);
+        model.addAttribute("disableGlobalChatbot", true);
         model.addAttribute("compactTopContent", true);
 
         User user = currentUserOrThrow(authentication);

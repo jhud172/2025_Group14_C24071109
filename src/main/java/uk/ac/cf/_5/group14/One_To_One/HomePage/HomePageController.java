@@ -29,6 +29,7 @@ import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLink;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLinkRepository;
 import uk.ac.cf._5.group14.One_To_One.Users.AuthHelper;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
+import uk.ac.cf._5.group14.One_To_One.Users.UserService;
 
 @Controller
 public class HomePageController {
@@ -39,6 +40,7 @@ public class HomePageController {
     private final TrainerClientLinkRepository trainerClientLinkRepository;
     private final MessagingService messagingService;
     private final AuthHelper authHelper;
+    private final UserService userService;
     private final UserPreferenceService userPreferenceService;
     private final AdaptiveFeedbackService adaptiveFeedbackService;
     
@@ -55,6 +57,7 @@ public class HomePageController {
             TrainerClientLinkRepository trainerClientLinkRepository,
             MessagingService messagingService,
             AuthHelper authHelper,
+            UserService userService,
             UserPreferenceService userPreferenceService,
             AdaptiveFeedbackService adaptiveFeedbackService
     ) {
@@ -64,13 +67,14 @@ public class HomePageController {
         this.trainerClientLinkRepository = trainerClientLinkRepository;
         this.messagingService = messagingService;
         this.authHelper = authHelper;
+        this.userService = userService;
         this.userPreferenceService = userPreferenceService;
         this.adaptiveFeedbackService = adaptiveFeedbackService;
     }
 
     @GetMapping("/")
-    public ModelAndView homePage() {
-        User user = authHelper.getAuthenticatedUser();
+    public ModelAndView homePage(Authentication authentication) {
+        User user = resolveCurrentUser(authentication);
 
         if (user == null) {
             ModelAndView mav = new ModelAndView("home/public");
@@ -95,9 +99,19 @@ public class HomePageController {
 
     @GetMapping("/home")
     public ModelAndView roleHome(Authentication authentication) {
-        User user = authHelper.getAuthenticatedUser();
+        User user = resolveCurrentUser(authentication);
         if (user == null) {
             return new ModelAndView("redirect:/");
+        }
+
+        if (SecurityUtils.hasRole(authentication, "SUPER_ADMIN") || SecurityUtils.hasRole(authentication, "PLATFORM_ADMIN")) {
+            return new ModelAndView("redirect:/admin/dashboard");
+        }
+        if (SecurityUtils.hasRole(authentication, "GYM_ADMIN")) {
+            return new ModelAndView("redirect:/gym/dashboard");
+        }
+        if (SecurityUtils.hasRole(authentication, "TRAINER")) {
+            return new ModelAndView("redirect:/trainer/dashboard");
         }
 
         ModelAndView mav = new ModelAndView();
@@ -116,15 +130,20 @@ public class HomePageController {
         mav.addObject("overdueCount", calendarTaskRepository.countByUserAndDateBeforeAndCompletedFalse(user, today));
         mav.addObject("completedToday", calendarTaskRepository.countByUserAndDateAndCompletedTrue(user, today));
 
-        if (SecurityUtils.hasRole(authentication, "GYM_ADMIN")) {
-            mav.setViewName("home/gym");
-        } else if (SecurityUtils.hasRole(authentication, "TRAINER")) {
-            mav.setViewName("home/trainer");
-        } else {
-            mav.setViewName("home/user");
-        }
+        mav.setViewName("home/user");
 
         return mav;
+    }
+
+    private User resolveCurrentUser(Authentication authentication) {
+        User sessionUser = authHelper.getAuthenticatedUser();
+        if (sessionUser != null) {
+            return sessionUser;
+        }
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        return userService.findByUsername(authentication.getName());
     }
 
     private boolean hasWorkoutToLog(User user, LocalDate date) {

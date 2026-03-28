@@ -48,10 +48,25 @@ class RoleDashboardAccessTest {
     }
 
     @Test
+    void clientRoleCanAccessSignedInHome() throws Exception {
+        mockMvc.perform(get("/home")
+                        .with(client()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void trainerRoleCanAccessTrainerDashboard() throws Exception {
         mockMvc.perform(get("/trainer/dashboard")
                         .with(trainer()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void trainerHomeRedirectsToTrainerDashboard() throws Exception {
+        mockMvc.perform(get("/home")
+                        .with(trainer()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/trainer/dashboard"));
     }
 
     @Test
@@ -62,6 +77,14 @@ class RoleDashboardAccessTest {
     }
 
     @Test
+    void gymAdminHomeRedirectsToGymDashboard() throws Exception {
+        mockMvc.perform(get("/home")
+                        .with(gymAdmin()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/gym/dashboard"));
+    }
+
+    @Test
     void platformAdminRoleCanAccessAdminDashboard() throws Exception {
         mockMvc.perform(get("/admin/dashboard")
                         .with(platformAdmin()))
@@ -69,10 +92,26 @@ class RoleDashboardAccessTest {
     }
 
     @Test
+    void platformAdminHomeRedirectsToAdminDashboard() throws Exception {
+        mockMvc.perform(get("/home")
+                        .with(platformAdmin()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/dashboard"));
+    }
+
+    @Test
     void superAdminRoleCanAccessVerificationQueue() throws Exception {
         mockMvc.perform(get("/super-admin/verification/queue")
                         .with(superAdmin()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void superAdminHomeRedirectsToAdminDashboard() throws Exception {
+        mockMvc.perform(get("/home")
+                        .with(superAdmin()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/dashboard"));
     }
     @Test
     void trainerLegacyMessagesEntryRedirectsToInbox() throws Exception {
@@ -88,5 +127,13 @@ class RoleDashboardAccessTest {
                         .with(client()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/inbox"));
+    }
+
+    @Test
+    void legacyChatHubRedirectsToCanonicalCoachPage() throws Exception {
+        mockMvc.perform(get("/chatv2")
+                        .with(client()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/chat"));
     }
 }

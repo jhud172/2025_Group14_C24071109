@@ -11,6 +11,7 @@ import uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrder;
 import uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderItem;
 import uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderRepository;
 import uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderServiceImpl;
+import uk.ac.cf._5.group14.One_To_One.MerchOrders.PaymentStatus;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
 import java.math.BigDecimal;
@@ -37,7 +38,7 @@ class OrderSnapshotTest {
     private MerchOrderServiceImpl orderService;
 
     @Test
-    void placeOrder_snapshotsAllProductFields() {
+    void createPendingOrder_snapshotsAllProductFields() {
         MerchProduct product = new MerchProduct();
         product.setId(1L);
         product.setName("Limited Edition Shirt");
@@ -57,7 +58,7 @@ class OrderSnapshotTest {
             return o;
         });
 
-        MerchOrder order = orderService.placeOrder(user, product, 1, null);
+        MerchOrder order = orderService.createPendingOrder(user, product, 1);
 
         // Deactivate product to simulate soft-delete
         product.setActive(false);
@@ -76,6 +77,7 @@ class OrderSnapshotTest {
                 "Image URL snapshot must be preserved after product deactivation");
         assertEquals("Apparel", item.getCategorySnapshot(),
                 "Category snapshot must be preserved after product deactivation");
+        assertEquals(PaymentStatus.PENDING_PAYMENT, order.getPaymentStatus());
     }
 
     @Test

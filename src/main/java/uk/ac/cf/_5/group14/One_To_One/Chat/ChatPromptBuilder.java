@@ -38,19 +38,20 @@ public class ChatPromptBuilder {
         sj.add("You can help users navigate to specific pages by embedding tags in your reply.");
         sj.add("Format: [NAV:/path:Button Label]");
         sj.add("Only use these allowed pages (do NOT invent other paths):");
-        sj.add("  /dashboard          â€“ Dashboard (overview, stats, today's summary)");
-        sj.add("  /calendar           â€“ Calendar (scheduled workouts and tasks)");
-        sj.add("  /vault              â€“ Training Vault (workout library and history)");
-        sj.add("  /levels             â€“ Leaderboard (levels and points)");
-        sj.add("  /profile            â€“ Profile & Preferences (account settings, theme, accessibility, personal info)");
-        sj.add("  /inbox              â€“ Inbox (messages and notifications)");
-        sj.add("  /notes              â€“ Notes (training notes)");
-        sj.add("  /health-records     â€“ Health Records (body metrics)");
-        sj.add("  /nutrition          â€“ Nutrition (food diary and macros)");
-        sj.add("  /goals              â€“ Goals (set and track fitness goals)");
-        sj.add("  /schedule           â€“ Schedule Designer (plan and apply workout schedules by command)");
-        sj.add("  /client/trainers    â€“ Trainers (find or contact a trainer)");
-        sj.add("  /pricing            â€“ Pricing (subscription plans)");
+        sj.add("  /dashboard          - Dashboard (overview, stats, today's summary)");
+        sj.add("  /calendar           - Calendar (scheduled workouts and tasks)");
+        sj.add("  /chat               - Coach (primary AI assistant)");
+        sj.add("  /vault              - Training Vault (workout library and history)");
+        sj.add("  /levels             - Leaderboard (levels and points)");
+        sj.add("  /profile            - Profile & Preferences (account settings, theme, accessibility, personal info)");
+        sj.add("  /inbox              - Inbox (messages and notifications)");
+        sj.add("  /notes              - Notes (training notes)");
+        sj.add("  /health-records     - Health Records (body metrics)");
+        sj.add("  /nutrition          - Nutrition (food diary and macros)");
+        sj.add("  /goals              - Goals (set and track fitness goals)");
+        sj.add("  /schedule           - Schedule Designer (plan and apply workout schedules by command)");
+        sj.add("  /client/trainers    - Trainers (find or contact a trainer)");
+        sj.add("  /pricing            - Pricing (subscription plans)");
         sj.add("Example: \"Head to your calendar to see what's coming up. [NAV:/calendar:Open Calendar]\"");
         sj.add("Only suggest navigation when it genuinely helps the user's request.");
         sj.add("You may include at most 2 navigation tags per reply.");
@@ -68,19 +69,23 @@ public class ChatPromptBuilder {
         sj.add("Today: " + ctx.today());
 
         if (ctx.level() != null || ctx.points() != null) {
-            sj.add("User stats: level=" + (ctx.level() != null ? ctx.level() : "?") + ", points=" + (ctx.points() != null ? ctx.points() : "?") );
+            sj.add("User stats: level=" + (ctx.level() != null ? ctx.level() : "?") + ", points=" + (ctx.points() != null ? ctx.points() : "?"));
         }
 
         if (ctx.todaysTasks() != null && !ctx.todaysTasks().isEmpty()) {
             sj.add("Today's tasks:");
-            for (String t : ctx.todaysTasks()) sj.add("- " + t);
+            for (String t : ctx.todaysTasks()) {
+                sj.add("- " + t);
+            }
         } else {
             sj.add("Today's tasks: (none found)");
         }
 
         if (ctx.todaysScheduledItems() != null && !ctx.todaysScheduledItems().isEmpty()) {
             sj.add("Today's scheduled training:");
-            for (String w : ctx.todaysScheduledItems()) sj.add("- " + w);
+            for (String w : ctx.todaysScheduledItems()) {
+                sj.add("- " + w);
+            }
         } else {
             sj.add("Today's scheduled training: (none found)");
         }
@@ -88,7 +93,9 @@ public class ChatPromptBuilder {
         if (ctx.requestedDate() != null && ctx.requestedDateItems() != null && !ctx.requestedDateItems().isEmpty()) {
             sj.add("Requested date: " + ctx.requestedDate());
             sj.add("Items on requested date:");
-            for (String i : ctx.requestedDateItems()) sj.add("- " + i);
+            for (String i : ctx.requestedDateItems()) {
+                sj.add("- " + i);
+            }
         }
 
         if (ctx.recentWorkouts() != null && !ctx.recentWorkouts().isEmpty()) {
@@ -100,7 +107,9 @@ public class ChatPromptBuilder {
 
         if (ctx.recentNotes() != null && !ctx.recentNotes().isEmpty()) {
             sj.add("Recent notes:");
-            for (String n : ctx.recentNotes()) sj.add("- " + n);
+            for (String n : ctx.recentNotes()) {
+                sj.add("- " + n);
+            }
         }
 
         if (ctx.multiDayInsights() != null) {
@@ -108,7 +117,9 @@ public class ChatPromptBuilder {
             sj.add("Last " + ins.periodDays() + " days:");
             sj.add("  Tasks: " + ins.tasksCompleted() + "/" + ins.tasksTotal() + " completed");
             sj.add("  Workouts: " + ins.workoutsCompleted() + "/" + ins.workoutsTotal() + " completed, " + ins.missedSessions() + " missed");
-            if (ins.trendNote() != null) sj.add("  Trend: " + ins.trendNote());
+            if (ins.trendNote() != null) {
+                sj.add("  Trend: " + ins.trendNote());
+            }
         }
 
         sj.add("=== END CONTEXT ===\n");

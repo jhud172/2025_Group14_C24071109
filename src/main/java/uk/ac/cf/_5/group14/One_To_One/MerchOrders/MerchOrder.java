@@ -31,6 +31,22 @@ public class MerchOrder {
     private OrderStatus status = OrderStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false, length = 30)
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING_PAYMENT;
+
+    @Column(name = "payment_provider", length = 50)
+    private String paymentProvider;
+
+    @Column(name = "payment_reference", length = 200)
+    private String paymentReference;
+
+    @Column(name = "payment_failure_reason", length = 500)
+    private String paymentFailureReason;
+
+    @Column(name = "payment_confirmed_at")
+    private Instant paymentConfirmedAt;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "refund_status", nullable = false, length = 20)
     private RefundStatus refundStatus = RefundStatus.NONE;
 

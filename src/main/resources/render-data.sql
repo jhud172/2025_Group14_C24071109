@@ -1,0 +1,1 @@
+-- Render intentionally runs schema bootstrap only.

@@ -79,14 +79,4 @@
         });
     }
 
-    const mobileChatToggle = document.getElementById('mobileChatToggle');
-    if (mobileChatToggle) {
-        mobileChatToggle.addEventListener('click', () => {
-            const chatFab = document.getElementById('chatFab');
-            if (chatFab) {
-                chatFab.click();
-                closeMenu();
-            }
-        });
-    }
 })();

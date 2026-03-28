@@ -1,24 +1,23 @@
 package uk.ac.cf._5.group14.One_To_One.ChatV2;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import uk.ac.cf._5.group14.One_To_One.CalendarData.CalendarTask;
-import uk.ac.cf._5.group14.One_To_One.CalendarData.CalendarTaskRepository;
 import uk.ac.cf._5.group14.One_To_One.Chat.ChatContext;
 import uk.ac.cf._5.group14.One_To_One.Chat.ChatContextService;
 import uk.ac.cf._5.group14.One_To_One.Chat.ChatPromptBuilder;
 import uk.ac.cf._5.group14.One_To_One.Chat.ChatResponse;
 import uk.ac.cf._5.group14.One_To_One.Chat.ChatService;
-import uk.ac.cf._5.group14.One_To_One.Level.LevelProgressRepository;
 import uk.ac.cf._5.group14.One_To_One.Notes.NoteRepository;
 import uk.ac.cf._5.group14.One_To_One.Security.AccessGuard;
 import uk.ac.cf._5.group14.One_To_One.Users.AuthHelper;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
+import uk.ac.cf._5.group14.One_To_One.Users.UserService;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +35,9 @@ public class ChatV2Controller {
     private final ChatV2AiResponseParser aiResponseParser;
     private final ChatService chatService;
     private final ChatContextService chatContextService;
-    private final CalendarTaskRepository calendarTaskRepository;
-    private final LevelProgressRepository levelProgressRepository;
     private final NoteRepository noteRepository;
     private final AccessGuard accessGuard;
+    private final UserService userService;
 
     public ChatV2Controller(AuthHelper authHelper,
                             ChatV2ThreadService threadService,
@@ -47,55 +45,40 @@ public class ChatV2Controller {
                             ChatV2AiResponseParser aiResponseParser,
                             ChatService chatService,
                             ChatContextService chatContextService,
-                            CalendarTaskRepository calendarTaskRepository,
-                            LevelProgressRepository levelProgressRepository,
                             NoteRepository noteRepository,
-                            AccessGuard accessGuard) {
+                            AccessGuard accessGuard,
+                            UserService userService) {
         this.authHelper = authHelper;
         this.threadService = threadService;
         this.actionExecutor = actionExecutor;
         this.aiResponseParser = aiResponseParser;
         this.chatService = chatService;
         this.chatContextService = chatContextService;
-        this.calendarTaskRepository = calendarTaskRepository;
-        this.levelProgressRepository = levelProgressRepository;
         this.noteRepository = noteRepository;
         this.accessGuard = accessGuard;
+        this.userService = userService;
     }
 
     @GetMapping
-    public String hub(Model model) {
-        User user = requireUser();
-        model.addAttribute("pageTitle", "Chat");
-        model.addAttribute("folders", threadService.listFolders(user));
-        model.addAttribute("threads", threadService.listThreads(user));
-        model.addAttribute("icons", ChatV2IconRegistry.iconMap());
-        model.addAttribute("activeFolderId", null);
-        model.addAttribute("activeThreadId", null);
-        return "chat/hub";
+    public String hub() {
+        requireUser();
+        return "redirect:/chat";
     }
 
     @PostMapping("/new")
     public String createThread(@RequestParam(name = "folderId", required = false) Long folderId) {
         User user = requireUser();
         ChatFolder folder = folderId != null ? threadService.findFolder(user, folderId).orElse(null) : null;
-        ChatThread thread = threadService.createThread(user, folder);
-        return "redirect:/chatv2/" + thread.getId();
+        threadService.createThread(user, folder);
+        return "redirect:/chat";
     }
 
     @GetMapping("/folder/{folderId}")
-    public String folder(@PathVariable Long folderId, Model model) {
+    public String folder(@PathVariable Long folderId) {
         User user = requireUser();
-        ChatFolder folder = threadService.findFolder(user, folderId)
+        threadService.findFolder(user, folderId)
             .orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
-        model.addAttribute("pageTitle", folder.getName());
-        model.addAttribute("folders", threadService.listFolders(user));
-        model.addAttribute("threads", threadService.listThreadsInFolder(user, folder));
-        model.addAttribute("folder", folder);
-        model.addAttribute("icons", ChatV2IconRegistry.iconMap());
-        model.addAttribute("activeFolderId", folder.getId());
-        model.addAttribute("activeThreadId", null);
-        return "chat/folder";
+        return "redirect:/chat";
     }
 
     @PostMapping("/folder/new")
@@ -106,7 +89,7 @@ public class ChatV2Controller {
         String safeIcon = ChatV2IconRegistry.iconMap().containsKey(iconKey) ? iconKey : "chat";
         String safeColor = colorHex == null || colorHex.isBlank() ? "#0f172a" : colorHex.trim();
         threadService.createFolder(user, name, safeColor, safeIcon);
-        return "redirect:/chatv2";
+        return "redirect:/chat";
     }
 
     @PostMapping("/folder/{folderId}/settings")
@@ -120,36 +103,15 @@ public class ChatV2Controller {
         String safeIcon = ChatV2IconRegistry.iconMap().containsKey(iconKey) ? iconKey : folder.getIconKey();
         String safeColor = colorHex == null || colorHex.isBlank() ? folder.getColorHex() : colorHex.trim();
         threadService.updateFolder(folder, name, safeColor, safeIcon);
-        return "redirect:/chatv2/folder/" + folderId;
+        return "redirect:/chat";
     }
 
     @GetMapping("/{threadId}")
-    public String thread(@PathVariable Long threadId, Model model) {
+    public String thread(@PathVariable Long threadId) {
         User user = requireUser();
-        ChatThread thread = threadService.findThread(user, threadId)
+        threadService.findThread(user, threadId)
             .orElseThrow(() -> new ResponseStatusException(NOT_FOUND));
-
-        model.addAttribute("pageTitle", thread.getTitle());
-        model.addAttribute("folders", threadService.listFolders(user));
-        model.addAttribute("threads", threadService.listThreads(user));
-        model.addAttribute("thread", thread);
-        model.addAttribute("messages", threadService.listMessages(thread));
-        model.addAttribute("icons", ChatV2IconRegistry.iconMap());
-        model.addAttribute("activeFolderId", thread.getFolder() != null ? thread.getFolder().getId() : null);
-        model.addAttribute("activeThreadId", thread.getId());
-
-        LocalDate today = LocalDate.now();
-        CalendarTask nextTask = calendarTaskRepository.findFirstByUserAndDateAndCompletedFalseOrderByTimeAsc(user, today).orElse(null);
-        long overdueCount = calendarTaskRepository.countByUserAndDateBeforeAndCompletedFalse(user, today);
-        long completedToday = calendarTaskRepository.countByUserAndDateAndCompletedTrue(user, today);
-
-        model.addAttribute("nextTask", nextTask);
-        model.addAttribute("overdueCount", overdueCount);
-        model.addAttribute("completedToday", completedToday);
-        model.addAttribute("levelProgress", levelProgressRepository.findByUser(user).orElse(null));
-        model.addAttribute("hasCustomInstructions", thread.getCustomInstructions() != null && !thread.getCustomInstructions().isBlank());
-
-        return "chat/thread";
+        return "redirect:/chat";
     }
 
     @PostMapping("/{threadId}/rename")
@@ -315,7 +277,14 @@ public class ChatV2Controller {
     private User requireUser() {
         User user = authHelper.getAuthenticatedUser();
         if (user == null) {
-            throw new ResponseStatusException(UNAUTHORIZED);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                throw new ResponseStatusException(UNAUTHORIZED);
+            }
+            user = userService.findByUsername(authentication.getName());
+            if (user == null) {
+                throw new ResponseStatusException(UNAUTHORIZED);
+            }
         }
         return user;
     }

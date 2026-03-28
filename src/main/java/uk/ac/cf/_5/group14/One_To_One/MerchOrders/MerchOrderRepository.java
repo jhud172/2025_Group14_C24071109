@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,8 @@ public interface MerchOrderRepository extends JpaRepository<MerchOrder, Long> {
     List<MerchOrder> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     Optional<MerchOrder> findByIdAndUserId(Long id, Long userId);
+
+    List<MerchOrder> findByPaymentStatusAndCreatedAtBefore(PaymentStatus paymentStatus, Instant createdBefore);
 
     /**
      * Finds PENDING orders that contain the given product.

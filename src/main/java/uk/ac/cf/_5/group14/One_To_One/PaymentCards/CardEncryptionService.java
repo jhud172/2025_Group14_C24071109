@@ -27,8 +27,9 @@ public class CardEncryptionService {
 
     private final SecretKey secretKey;
 
-    public CardEncryptionService(
-            @Value("${app.encryption.card-key:}") String base64Key) {
+    public CardEncryptionService(@Value("${app.encryption.card-key:}") String base64Key,
+                                 @Value("${app.payments.stripe.secret-key:}") String stripeSecretKey,
+                                 @Value("${app.dev-mode:false}") boolean devMode) {
         if (base64Key != null && !base64Key.isBlank()) {
             byte[] keyBytes = Base64.getDecoder().decode(base64Key.trim());
             if (keyBytes.length != 32) {
@@ -36,15 +37,21 @@ public class CardEncryptionService {
                         "app.encryption.card-key must be a 32-byte (256-bit) Base64-encoded key");
             }
             this.secretKey = new SecretKeySpec(keyBytes, "AES");
-        } else {
-            // Fallback: ephemeral random key (dev / test only)
-            log.warning("SECURITY WARNING: app.encryption.card-key is not configured. " +
-                    "Using an ephemeral in-memory AES key â€“ encrypted card data will NOT survive restarts. " +
-                    "Set app.encryption.card-key to a 32-byte base64-encoded key in production.");
-            byte[] keyBytes = new byte[32];
-            new SecureRandom().nextBytes(keyBytes);
-            this.secretKey = new SecretKeySpec(keyBytes, "AES");
+            return;
         }
+
+        String message = "app.encryption.card-key is not configured. "
+                + "Using an ephemeral in-memory AES key so encrypted card data will not survive restarts.";
+        if (devMode || isSimulationMode(stripeSecretKey)) {
+            log.info("Demo payment mode: " + message);
+        } else {
+            log.warning("SECURITY WARNING: " + message
+                    + " Set app.encryption.card-key to a 32-byte base64-encoded key in production.");
+        }
+
+        byte[] keyBytes = new byte[32];
+        new SecureRandom().nextBytes(keyBytes);
+        this.secretKey = new SecretKeySpec(keyBytes, "AES");
     }
 
     /**
@@ -90,5 +97,9 @@ public class CardEncryptionService {
         } catch (Exception e) {
             throw new IllegalStateException("Card decryption failed", e);
         }
+    }
+
+    private boolean isSimulationMode(String stripeSecretKey) {
+        return stripeSecretKey != null && "false".equalsIgnoreCase(stripeSecretKey.trim());
     }
 }

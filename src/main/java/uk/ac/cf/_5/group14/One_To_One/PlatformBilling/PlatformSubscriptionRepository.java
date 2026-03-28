@@ -8,4 +8,6 @@ import java.util.Optional;
 @Repository
 public interface PlatformSubscriptionRepository extends JpaRepository<PlatformSubscription, Long> {
     Optional<PlatformSubscription> findByUserId(Long userId);
+
+    Optional<PlatformSubscription> findByProviderSubId(String providerSubId);
 }

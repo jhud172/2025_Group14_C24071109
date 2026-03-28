@@ -10,6 +10,7 @@ import uk.ac.cf._5.group14.One_To_One.Merch.MerchProductService;
 import uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrder;
 import uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderRepository;
 import uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderServiceImpl;
+import uk.ac.cf._5.group14.One_To_One.MerchOrders.PaymentStatus;
 import uk.ac.cf._5.group14.One_To_One.MerchOrders.RefundStatus;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
@@ -52,7 +53,7 @@ class StockAtomicUpdateTest {
     }
 
     @Test
-    void placeOrder_usesAtomicDecrement_notReadThenWrite() {
+    void createPendingOrder_usesAtomicDecrement_notReadThenWrite() {
         MerchProduct product = activeProduct(5);
         when(productService.decrementStock(42L, 2)).thenReturn(true);
         when(orderRepo.save(any())).thenAnswer(inv -> {
@@ -61,28 +62,29 @@ class StockAtomicUpdateTest {
             return o;
         });
 
-        MerchOrder order = orderService.placeOrder(testUser(), product, 2, null);
+        MerchOrder order = orderService.createPendingOrder(testUser(), product, 2);
 
         // Verify atomic decrement was called (not a direct field mutation)
         verify(productService).decrementStock(42L, 2);
         assertNotNull(order);
         assertEquals(RefundStatus.NONE, order.getRefundStatus());
+        assertEquals(PaymentStatus.PENDING_PAYMENT, order.getPaymentStatus());
     }
 
     @Test
-    void placeOrder_throwsWhenAtomicDecrementReturnsFalse() {
+    void createPendingOrder_throwsWhenAtomicDecrementReturnsFalse() {
         MerchProduct product = activeProduct(1);
         when(productService.decrementStock(42L, 2)).thenReturn(false);
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> orderService.placeOrder(testUser(), product, 2, null));
+                () -> orderService.createPendingOrder(testUser(), product, 2));
 
         assertTrue(ex.getMessage().toLowerCase().contains("stock"));
         verify(orderRepo, never()).save(any());
     }
 
     @Test
-    void placeOrder_setsImageAndCategorySnapshot() {
+    void createPendingOrder_setsImageAndCategorySnapshot() {
         MerchProduct product = activeProduct(5);
         product.setImageUrl("/uploads/merch/shirt.jpg");
         product.setCategory("Apparel");
@@ -93,10 +95,50 @@ class StockAtomicUpdateTest {
             return o;
         });
 
-        MerchOrder order = orderService.placeOrder(testUser(), product, 1, null);
+        MerchOrder order = orderService.createPendingOrder(testUser(), product, 1);
 
         assertFalse(order.getItems().isEmpty());
         assertEquals("/uploads/merch/shirt.jpg", order.getItems().get(0).getImageUrlSnapshot());
         assertEquals("Apparel", order.getItems().get(0).getCategorySnapshot());
+    }
+
+    @Test
+    void cancelPendingPayment_restoresReservedStock() {
+        MerchOrder order = new MerchOrder();
+        order.setId(55L);
+        order.setPaymentStatus(PaymentStatus.PENDING_PAYMENT);
+        order.getItems().add(buildItem(activeProduct(5), order, 2));
+
+        when(orderRepo.findById(55L)).thenReturn(java.util.Optional.of(order));
+        when(orderRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        MerchOrder cancelled = orderService.cancelPendingPayment(55L, "Checkout cancelled.");
+
+        verify(productService).incrementStock(42L, 2);
+        assertEquals(PaymentStatus.FAILED, cancelled.getPaymentStatus());
+    }
+
+    @Test
+    void completePaidOrder_marksOrderAsPaid() {
+        MerchOrder order = new MerchOrder();
+        order.setId(71L);
+        order.setPaymentStatus(PaymentStatus.PENDING_PAYMENT);
+        order.setPaymentReference("cs_test_123");
+
+        when(orderRepo.findById(71L)).thenReturn(java.util.Optional.of(order));
+        when(orderRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        MerchOrder completed = orderService.completePaidOrder(71L, "cs_test_123");
+
+        assertEquals(PaymentStatus.PAID, completed.getPaymentStatus());
+        assertNotNull(completed.getPaymentConfirmedAt());
+    }
+
+    private uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderItem buildItem(MerchProduct product, MerchOrder order, int quantity) {
+        uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderItem item = new uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderItem();
+        item.setProduct(product);
+        item.setOrder(order);
+        item.setQuantity(quantity);
+        return item;
     }
 }

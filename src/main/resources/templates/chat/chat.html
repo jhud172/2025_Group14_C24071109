@@ -63,6 +63,17 @@
                             </div>
                         </header>
 
+                        <div class="px-6 pt-4">
+                            <div th:if="${!aiAvailable}"
+                                 class="rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                                AI is currently unavailable, so Coach will fall back to rule-based guidance until the provider comes back.
+                            </div>
+                            <div class="mt-3 rounded-2xl border border-slate-200/70 bg-slate-50/90 px-4 py-3 text-xs text-slate-600 dark:border-slate-800/60 dark:bg-slate-900/50 dark:text-slate-300">
+                                <span class="font-semibold text-slate-900 dark:text-slate-100">Data use notice:</span>
+                                <span th:text="${aiDisclosure}">Coach responses may use your recent training, schedule, and progress data to generate a reply.</span>
+                            </div>
+                        </div>
+
                         <div class="relative">
                             <div class="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
                                 <div class="absolute left-10 top-8 h-24 w-24 rounded-full bg-violet-400/10 blur-2xl"></div>

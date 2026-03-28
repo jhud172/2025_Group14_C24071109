@@ -1,11 +1,29 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Checkout', null, ~{::content}, null)}">
+          th:replace="~{base :: layout('Checkout', null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="grid gap-6 lg:grid-cols-[2fr,1fr]">
             <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Confirm your plan</h1>
-                <p class="mt-1 text-sm text-slate-600">You're selecting Platform Premium for your account.</p>
+                <h1 class="text-2xl font-semibold tracking-tight text-slate-900"
+                    th:text="${paymentSimulationMode} ? 'Confirm your demo plan' : 'Confirm your plan'">Confirm your plan</h1>
+                <p class="mt-1 text-sm text-slate-600" th:if="${!paymentSimulationMode}">
+                    You are about to start Platform Premium through secure hosted checkout.
+                </p>
+                <p class="mt-1 text-sm text-slate-600" th:if="${paymentSimulationMode}">
+                    This environment is running a simulated Premium checkout. No real payment will be taken, but your account will still switch into Premium for testing.
+                </p>
+
+                <div th:if="${pricingError}" class="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                    <span th:text="${pricingError}">Subscription checkout error.</span>
+                </div>
+
+                <div th:if="${paymentSimulationMode}" class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    Demo mode is active because the Stripe secret key is set to <code>false</code>. Billing will be simulated, card details stay local to this app, and no real subscription charge will happen.
+                </div>
+
+                <div th:if="${!paymentSimulationMode and !paymentProviderConfigured}" class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    Secure subscription checkout is not configured yet for this environment.
+                </div>
 
                 <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
                     <div class="flex items-center justify-between">
@@ -13,33 +31,168 @@
                             <p class="text-sm font-semibold text-slate-900" th:text="${planInfo.displayName}">Monthly</p>
                             <p class="text-xs text-slate-500" th:text="${planInfo.badge}">Recommended</p>
                         </div>
-                        <p class="text-lg font-semibold text-slate-900" th:text="${planInfo.priceLabel}">£12 / month</p>
+                        <p class="text-lg font-semibold text-slate-900" th:text="${planInfo.priceLabel}">&pound;12 / month</p>
                     </div>
                     <ul class="mt-4 space-y-2 text-sm text-slate-600">
                         <li th:each="benefit : ${planInfo.benefits}" th:text="${benefit}">Premium dashboards</li>
                     </ul>
                 </div>
 
-                <div th:if="${providerResult != null && !providerResult.configured}" class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    <span th:text="${providerResult.message}">Payment provider not configured yet.</span>
-                </div>
+                <form th:action="@{/pricing/checkout}"
+                      method="post"
+                      class="mt-6 space-y-5"
+                      th:attr="data-simulated-payment-form=${paymentSimulationMode}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" name="plan" th:value="${selectedPlan}" />
 
-                <div class="mt-6 space-y-3">
-                    <details class="rounded-xl border border-slate-200 bg-white p-4">
-                        <summary class="cursor-pointer text-sm font-semibold text-slate-900">Legal terms summary</summary>
-                        <div class="mt-2 text-sm text-slate-600">
-                            This subscription is billed on a recurring basis. See full terms for details on billing and usage.
-                            <a th:href="@{/policies/terms}" class="font-semibold text-slate-900 underline underline-offset-4">View terms</a>.
+                    <div th:if="${paymentSimulationMode}" class="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                        <div>
+                            <p class="text-sm font-semibold text-slate-900">Choose a demo card</p>
+                            <p class="mt-1 text-xs text-slate-500">Saved cards from your profile can be reused here, or you can add a new demo card.</p>
                         </div>
-                    </details>
-                    <details class="rounded-xl border border-slate-200 bg-white p-4">
-                        <summary class="cursor-pointer text-sm font-semibold text-slate-900">Cancellation policy</summary>
-                        <div class="mt-2 text-sm text-slate-600">
-                            You can cancel at the end of your billing period at any time in your profile.
-                            <a th:href="@{/policies/subscription-terms}" class="font-semibold text-slate-900 underline underline-offset-4">View subscription terms</a>.
+
+                        <div th:if="${savedCards != null and !#lists.isEmpty(savedCards)}" class="space-y-3">
+                            <label th:each="card, stat : ${savedCards}"
+                                   class="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+                                <input type="radio"
+                                       name="selectedCardId"
+                                       th:value="${card.id}"
+                                       th:checked="${stat.index == 0}"
+                                       class="mt-1 h-4 w-4" />
+                                <span class="flex-1 text-sm text-slate-700">
+                                    <span class="block font-semibold text-slate-900"
+                                          th:text="${card.brand + ' ending ' + card.lastFour}">Visa ending 4242</span>
+                                    <span class="block text-xs text-slate-500"
+                                          th:text="${card.cardHolderName + ' · expires ' + card.expiryMonth + '/' + card.expiryYear + (card.default ? ' · default' : '')}">
+                                        Name · expires 01/2030
+                                    </span>
+                                </span>
+                            </label>
+
+                            <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-dashed border-slate-300 bg-white p-4">
+                                <input type="radio"
+                                       name="selectedCardId"
+                                       value=""
+                                       class="mt-1 h-4 w-4"
+                                       data-select-new-card="true" />
+                                <span class="flex-1 text-sm text-slate-700">
+                                    <span class="block font-semibold text-slate-900">Use a different demo card</span>
+                                    <span class="block text-xs text-slate-500">This still will not create a real subscription charge.</span>
+                                </span>
+                            </label>
                         </div>
-                    </details>
-                </div>
+
+                        <div th:if="${savedCards == null or #lists.isEmpty(savedCards)}"
+                             class="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-600">
+                            No saved cards yet. Add a demo card below to continue.
+                        </div>
+
+                        <div class="space-y-4"
+                             data-new-card-section="true"
+                             th:classappend="${savedCards != null and !#lists.isEmpty(savedCards)} ? ' hidden' : ''">
+                            <input type="hidden" name="newProviderToken" value="" data-provider-token="true" />
+                            <input type="hidden" name="newLastFour" value="" data-last-four="true" />
+
+                            <div>
+                                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Cardholder Name</label>
+                                <input type="text"
+                                       name="newCardHolderName"
+                                       maxlength="200"
+                                       class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400/20"
+                                       data-new-card-input="true"
+                                       placeholder="Name on card" />
+                            </div>
+
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Card Number</label>
+                                    <input type="text"
+                                           maxlength="23"
+                                           class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400/20"
+                                           data-card-number-display="true"
+                                           placeholder="4242 4242 4242 4242"
+                                           autocomplete="cc-number"
+                                           inputmode="numeric" />
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Brand</label>
+                                    <input type="text"
+                                           name="newBrand"
+                                           maxlength="50"
+                                           class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400/20"
+                                           data-new-card-input="true"
+                                           placeholder="Visa" />
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Expiry Month</label>
+                                    <input type="number"
+                                           name="newExpiryMonth"
+                                           min="1"
+                                           max="12"
+                                           class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400/20"
+                                           data-new-card-input="true"
+                                           placeholder="12" />
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Expiry Year</label>
+                                    <input type="number"
+                                           name="newExpiryYear"
+                                           min="2024"
+                                           max="2100"
+                                           class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400/20"
+                                           data-new-card-input="true"
+                                           placeholder="2030" />
+                                </div>
+                            </div>
+
+                            <label class="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+                                <input type="checkbox" name="saveCard" value="true" class="mt-1 h-4 w-4 rounded" />
+                                <span>Save this demo card to my profile for future simulation checkouts.</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                        <p class="text-sm font-semibold text-slate-900">How billing works</p>
+                        <ul class="mt-2 space-y-2 text-sm text-slate-600" th:if="${!paymentSimulationMode}">
+                            <li>1. We send you to <span class="font-semibold" th:text="${paymentProviderName}">Stripe</span> hosted checkout.</li>
+                            <li>2. The provider confirms the recurring subscription securely.</li>
+                            <li>3. We activate Platform Premium only after that provider session is verified.</li>
+                        </ul>
+                        <ul class="mt-2 space-y-2 text-sm text-slate-600" th:if="${paymentSimulationMode}">
+                            <li>1. You pick or add a demo card inside this app.</li>
+                            <li>2. We simulate a successful monthly or yearly charge.</li>
+                            <li>3. Your Premium access is activated immediately for testing, with no real charge.</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-3">
+                        <details class="rounded-xl border border-slate-200 bg-white p-4">
+                            <summary class="cursor-pointer text-sm font-semibold text-slate-900">Legal terms summary</summary>
+                            <div class="mt-2 text-sm text-slate-600">
+                                This subscription is billed on a recurring basis. See full terms for details on billing and usage.
+                                <a th:href="@{/policies/terms}" class="font-semibold text-slate-900 underline underline-offset-4">View terms</a>.
+                            </div>
+                        </details>
+                        <details class="rounded-xl border border-slate-200 bg-white p-4">
+                            <summary class="cursor-pointer text-sm font-semibold text-slate-900">Cancellation policy</summary>
+                            <div class="mt-2 text-sm text-slate-600">
+                                You can cancel at the end of your billing period at any time in your profile.
+                                <a th:href="@{/policies/subscription-terms}" class="font-semibold text-slate-900 underline underline-offset-4">View subscription terms</a>.
+                            </div>
+                        </details>
+                    </div>
+
+                    <button type="submit"
+                            class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                            th:disabled="${!paymentProviderConfigured}"
+                            th:text="${paymentSimulationMode} ? 'Activate demo Premium' : 'Continue to secure checkout'">
+                        Continue
+                    </button>
+                </form>
             </section>
 
             <aside class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -51,18 +204,27 @@
                     </div>
                     <div class="flex items-center justify-between">
                         <span>Billing</span>
-                        <span class="font-semibold" th:text="${planInfo.priceLabel}">£12 / month</span>
+                        <span class="font-semibold" th:text="${planInfo.priceLabel}">&pound;12 / month</span>
                     </div>
                 </div>
 
-                <button type="button"
-                        class="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-                    Continue (coming soon)
-                </button>
+                <a th:href="@{/pricing}" class="mt-6 inline-flex w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                    Back to pricing
+                </a>
 
-                <p class="mt-3 text-xs text-slate-500">Payments are not yet enabled for Platform Premium.</p>
+                <p class="mt-3 text-xs text-slate-500" th:if="${!paymentSimulationMode}">
+                    Subscription checkout is hosted by
+                    <span th:text="${paymentProviderName}">Stripe</span>.
+                </p>
+                <p class="mt-3 text-xs text-slate-500" th:if="${paymentSimulationMode}">
+                    Demo Premium activation does not create a real subscription charge.
+                </p>
             </aside>
         </div>
     </div>
+
+    <th:block th:fragment="pageScripts">
+        <script th:src="@{/js/payments/simulated-payment-form.js(v='20260328a')}" defer></script>
+    </th:block>
 
 </th:block>

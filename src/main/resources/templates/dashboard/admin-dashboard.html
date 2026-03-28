@@ -3,8 +3,8 @@
 
     <div th:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div>
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100">Admin Panel</h1>
-            <p class="mt-2 text-slate-600 dark:text-slate-300">Manage support feedback, outreach emails, and go-live waitlist updates.</p>
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100">Platform Operations</h1>
+            <p class="mt-2 text-slate-600 dark:text-slate-300">Run support, merchandise, waitlist communication, and dev-mode controls from one operational cockpit.</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -26,6 +26,33 @@
             </div>
         </div>
 
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Operations Shortcuts</h2>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Jump straight into the highest-traffic platform admin actions.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                <a th:href="@{/admin/feedback}" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-emerald-300 hover:bg-emerald-50/60 dark:border-slate-700 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/20">
+                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Support inbox</div>
+                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Triage feedback and keep issues moving.</div>
+                </a>
+                <a th:href="@{/admin/merch}" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-blue-300 hover:bg-blue-50/60 dark:border-slate-700 dark:hover:border-blue-700 dark:hover:bg-blue-950/20">
+                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Merch controls</div>
+                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Review products, stock, and storefront copy.</div>
+                </a>
+                <a href="#admin-outreach-form" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-amber-300 hover:bg-amber-50/60 dark:border-slate-700 dark:hover:border-amber-700 dark:hover:bg-amber-950/20">
+                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Outreach composer</div>
+                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Send updates to users or the waitlist from this page.</div>
+                </a>
+                <a href="#dev-page-controls" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-violet-300 hover:bg-violet-50/60 dark:border-slate-700 dark:hover:border-violet-700 dark:hover:bg-violet-950/20">
+                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Dev hub controls</div>
+                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Adjust page visibility and route access modes.</div>
+                </a>
+            </div>
+        </section>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
                 <div class="flex items-center justify-between mb-4">
@@ -38,7 +65,7 @@
                             <p class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${item.subject}">Subject</p>
                             <span class="text-xs rounded-full px-2 py-1 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200" th:text="${item.status}">NEW</span>
                         </div>
-                        <p class="mt-1 text-xs text-slate-500" th:text="${item.requestType} + ' • ' + ${#temporals.format(item.submittedAt, 'yyyy-MM-dd HH:mm')}">Type</p>
+                        <p class="mt-1 text-xs text-slate-500" th:text="${item.requestType} + ' | ' + ${#temporals.format(item.submittedAt, 'yyyy-MM-dd HH:mm')}">Type</p>
                     </div>
                 </div>
                 <p th:if="${latestFeedback == null or #lists.isEmpty(latestFeedback)}" class="text-sm text-slate-500">No feedback submitted yet.</p>
@@ -106,7 +133,7 @@
             </div>
         </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+        <section id="dev-page-controls" class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Dev Hub Page Controls</h2>

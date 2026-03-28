@@ -7,6 +7,14 @@
                   isActive=${sub != null and (sub.status.name() == 'ACTIVE' or sub.status.name() == 'EXPIRES')},
                   isExpired=${sub != null and sub.status.name() == 'CANCELLED'}">
 
+        <div class="mx-auto w-full max-w-5xl px-4 pt-6 sm:px-6 lg:px-8">
+            <div th:if="${pricingSuccess}" class="mb-4 rounded-2xl border border-emerald-300/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200" th:text="${pricingSuccess}">Platform Premium is now active.</div>
+            <div th:if="${pricingError}" class="mb-4 rounded-2xl border border-red-300/40 bg-red-500/10 px-4 py-3 text-sm text-red-200" th:text="${pricingError}">Subscription checkout error.</div>
+            <div th:if="${!paymentProviderConfigured}" class="mb-4 rounded-2xl border border-amber-300/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                Secure subscription checkout is not configured yet. Pricing is visible, but hosted payment is unavailable in this environment.
+            </div>
+        </div>
+
         <!-- Ambient scanline -->
         <div class="scanline" aria-hidden="true"></div>
 

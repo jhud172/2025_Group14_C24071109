@@ -21,4 +21,8 @@ public interface MerchProductRepository extends JpaRepository<MerchProduct, Long
     @Query("UPDATE MerchProduct p SET p.stockQuantity = p.stockQuantity - :qty " +
            "WHERE p.id = :id AND p.stockQuantity >= :qty")
     int decrementStock(@Param("id") Long id, @Param("qty") int qty);
+
+    @Modifying
+    @Query("UPDATE MerchProduct p SET p.stockQuantity = p.stockQuantity + :qty WHERE p.id = :id")
+    int incrementStock(@Param("id") Long id, @Param("qty") int qty);
 }

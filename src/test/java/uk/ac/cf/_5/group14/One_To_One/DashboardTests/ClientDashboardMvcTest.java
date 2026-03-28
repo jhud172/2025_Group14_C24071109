@@ -200,7 +200,7 @@ class ClientDashboardMvcTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-dashboard-weather-display-mode=\"VISUAL\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-dashboard-time-display-format=\"TWELVE_HOUR\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Keep protein consistent")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("/messages/55")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/inbox/55")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-action-hub")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Live Dashboard Ambience")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Using Your Local Area")))

@@ -20,7 +20,7 @@
     <button type="button"
             class="chat-fab-premium"
             id="chatFab"
-            aria-label="Open chat"
+            aria-label="Open coach"
             aria-controls="chatPanel"
             aria-expanded="false">
         <span class="chat-fab-pulse-ring" aria-hidden="true"></span>
@@ -53,26 +53,26 @@
                         <div class="chat-title-subtitle">One To One AI performance concierge</div>
                     </div>
                 </div>
-                
+
                 <div class="chat-header-actions">
                     <button type="button"
                             class="chat-icon-btn-premium flex"
                             id="chatNotificationsToggle"
                             title="Open notifications inbox"
-                            aria-label="Toggle notifications inbox">🔔</button>
+                            aria-label="Toggle notifications inbox">!</button>
                     <button type="button"
                             class="chat-icon-btn-premium"
                             id="chatClear"
-                            title="Clear chat history"
-                            aria-label="Clear chat history">🧹</button>
+                            title="Clear coach history"
+                            aria-label="Clear coach history">Clear</button>
                     <button type="button"
                             class="chat-icon-btn-premium"
                             id="chatClose"
                             title="Close Charlie"
-                            aria-label="Close chat">✕</button>
+                            aria-label="Close coach">X</button>
                 </div>
             </div>
-            
+
             <div class="chat-tabs-premium">
                 <button type="button"
                         id="chatNotificationsToggle2"
@@ -86,9 +86,9 @@
                         th:attr="data-locked=${!isPremium}"
                         class="chat-tab-btn"
                         th:title="${isPremium} ? 'Open Charlie Pro Chat' : 'Upgrade to Premium to unlock Pro Chat'"
-                        th:aria-label="${isPremium} ? 'Open Pro Chat' : 'Pro Chat — Premium required'">
+                        th:aria-label="${isPremium} ? 'Open Pro Chat' : 'Pro Chat - Premium required'">
                     <span>Pro Chat</span>
-                    <span th:if="${!isPremium}" aria-hidden="true" class="ml-1">🔒</span>
+                    <span th:if="${!isPremium}" aria-hidden="true" class="ml-1">Lock</span>
                 </button>
                 <span th:if="${!isPremium}" class="text-[10px] text-amber-500 dark:text-amber-400 font-medium">Premium only</span>
             </div>
@@ -124,7 +124,7 @@
                     <input id="chatInput" type="text" maxlength="800" required
                            class="chat-input-premium"
                            th:disabled="${!(#authentication != null and #authentication.authenticated)}"
-                           th:placeholder="${(#authentication != null and #authentication.authenticated) ? 'Message…' : 'Log in to use chat'}" />
+                           th:placeholder="${(#authentication != null and #authentication.authenticated) ? 'Message...' : 'Log in to use coach'}" />
 
                     <button type="submit"
                             class="chat-send-btn-premium"
@@ -136,7 +136,7 @@
             <div id="chatNotificationsView" class="chat-notifications-view hidden">
                 <div class="flex items-center justify-between border-b border-slate-200/60 px-4 py-3 dark:border-slate-700/60">
                     <div class="flex items-center gap-2">
-                        <span class="text-base" aria-hidden="true">🔔</span>
+                        <span class="text-base" aria-hidden="true">!</span>
                         <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Notifications</span>
                         <span id="chatNotificationsUnreadCount"
                               class="hidden min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-semibold text-white">0</span>
@@ -146,12 +146,12 @@
                                 class="chat-icon-btn-premium h-auto w-auto px-3 py-1 text-[11px] font-semibold"
                                 title="Mark all notifications as read"
                                 aria-label="Mark all notifications as read">
-                            ✓ All read
+                            Mark all read
                         </button>
                         <button id="chatNotificationsBackBtn"
                                 class="chat-icon-btn-premium h-auto w-auto px-2 py-1 text-[11px]"
-                                title="Back to chat"
-                                aria-label="Back to chat">← Back</button>
+                                title="Back to coach"
+                                aria-label="Back to coach">< Back</button>
                     </div>
                 </div>
                 <!-- Filter tabs -->
@@ -167,7 +167,7 @@
                 </div>
                 <div id="chatNotificationsList" class="flex-1 overflow-auto px-3 py-3 text-sm space-y-2">
                     <div class="rounded-xl border border-dashed border-slate-200/80 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500 dark:border-slate-700/80 dark:bg-slate-900/40 dark:text-slate-400">
-                        <div class="text-2xl mb-1" aria-hidden="true">🔔</div>
+                        <div class="text-2xl mb-1" aria-hidden="true">!</div>
                         No notifications yet.
                     </div>
                 </div>
@@ -182,7 +182,7 @@
              role="dialog" aria-modal="true" aria-labelledby="chatClearModalTitle">
             <div class="flex items-center gap-3 mb-4">
                 <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-950/40">
-                    <span class="text-xl" aria-hidden="true">🧹</span>
+                    <span class="text-xl" aria-hidden="true">!</span>
                 </div>
                 <div>
                     <h3 id="chatClearModalTitle" class="text-base font-semibold text-slate-900 dark:text-slate-100">Clear Chat History</h3>

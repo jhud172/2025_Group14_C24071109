@@ -2472,23 +2472,33 @@ CREATE TABLE IF NOT EXISTS merch_products
 
 CREATE TABLE IF NOT EXISTS merch_orders
 (
-    id              BIGSERIAL PRIMARY KEY,
-    user_id         BIGINT       NOT NULL,
-    status          VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
-    total_cents     INT          NOT NULL DEFAULT 0,
-    payment_method_id BIGINT     NULL,
-    shipping_status VARCHAR(30)  NOT NULL DEFAULT 'PENDING',
-    tracking_number VARCHAR(200) NULL,
-    shipped_at      TIMESTAMP    NULL,
-    delivered_at    TIMESTAMP    NULL,
-    estimated_delivery_date DATE NULL,
-    created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_merch_orders_user
-        FOREIGN KEY (user_id) REFERENCES users (id)
-            ON DELETE CASCADE
-);
+    id                   BIGSERIAL PRIMARY KEY,
+    user_id              BIGINT         NOT NULL,
+    status               VARCHAR(30)    NOT NULL DEFAULT 'PENDING',
+    payment_status       VARCHAR(30)    NOT NULL DEFAULT 'PENDING_PAYMENT',
+    payment_provider     VARCHAR(50)    NULL,
+    payment_reference    VARCHAR(200)   NULL,
+    payment_failure_reason VARCHAR(500) NULL,
+    payment_confirmed_at TIMESTAMP      NULL,
+    total_amount         NUMERIC(10, 2) NOT NULL,
+    payment_method_id    BIGINT         NULL,
+    refund_status        VARCHAR(20)    NOT NULL DEFAULT 'NONE',
+    refund_reference     VARCHAR(200)   NULL,
+    shipping_status      VARCHAR(30)    NOT NULL DEFAULT 'PENDING',
+    tracking_number      VARCHAR(200)   NULL,
+    shipped_at           TIMESTAMP      NULL,
+    delivered_at         TIMESTAMP      NULL,
+    estimated_delivery_date DATE        NULL,
+    created_at           TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at           TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  
+      CONSTRAINT fk_merch_orders_user
+          FOREIGN KEY (user_id) REFERENCES users (id)
+              ON DELETE CASCADE,
+      CONSTRAINT fk_merch_orders_pm
+          FOREIGN KEY (payment_method_id) REFERENCES saved_payment_methods (id)
+              ON DELETE SET NULL
+  );
 
 CREATE TABLE IF NOT EXISTS merch_order_items
 (

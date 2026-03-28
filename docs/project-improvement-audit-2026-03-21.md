@@ -40,6 +40,129 @@ If the team does only a few things next, the best return will come from:
 - replacing placeholder commerce/payment behaviour
 - cleaning encoding and template debt in public and calendar-facing pages
 
+## 1.1 Implementation Progress Update
+
+Update date: 2026-03-23
+Status basis: implemented changes in the main application and focused test verification completed after this audit was written.
+
+### Completed since this audit
+
+- Method security is now explicitly enabled in `src/main/java/uk/ac/cf/_5/group14/One_To_One/Security/SecurityConfig.java`.
+- `/super-admin/**` is now explicitly protected in `SecurityConfig` alongside the existing role-based route rules.
+- Identity handling has been moved toward Spring Security as the source of truth through:
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Security/CurrentUser.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Security/CurrentUserResolver.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Security/CurrentUserArgumentResolver.java`
+- The old session-first login bootstrap path was reduced by removing `src/main/java/uk/ac/cf/_5/group14/One_To_One/Security/PostLoginSessionInitializer.java`.
+- Destructive schedule actions were converted away from `GET` and now use CSRF-backed `POST` flows in:
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/ScheduleData/ScheduleController.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/ScheduleData/CalendarController.java`
+  - `src/main/resources/templates/schedule/list.html`
+  - `src/main/resources/templates/calendar/fragments/schedule-drawer-month.html`
+  - `src/main/resources/templates/calendar/fragments/schedule-drawer-week.html`
+- Dev-mode wiring was reduced as a source of MVC slice-test breakage through changes in `src/main/java/uk/ac/cf/_5/group14/One_To_One/DevMode/DevModePageRestrictionFilter.java`.
+- Several direct `System.out`, `System.err`, and stack-trace style debug paths were replaced with structured logging in:
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/CalendarData/CalendarTaskServiceImpl.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Config/DevModeProperties.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/ErrorHandling/CustomErrorController.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/ExerciseLog/PdfService.java`
+
+### Journey consolidation progress
+
+- The public homepage trainer discovery route now points at `/explore` rather than a protected trainer route.
+- The canonical human messaging route is now `/inbox`.
+- The canonical AI assistant route is now `/chat`.
+- Legacy client/trainer messaging entry routes now redirect into `/inbox`.
+- Legacy `chatv2` entry routes now redirect into `/chat`.
+- Dashboard and navigation links were updated so the primary surfaced routes now align with the canonical messaging and Coach flows.
+- Gym-admin navigation was updated toward operational routes instead of generic admin links.
+- Platform-admin and super-admin navigation is now more clearly separated, including direct verification access for super-admin.
+- High-traffic UI copy was partially cleaned for visible encoding corruption and inconsistent "chat" vs "Coach" wording in:
+  - `src/main/resources/templates/calendar/day.html`
+  - `src/main/resources/templates/fragments/chat/chat-widget.html`
+  - `src/main/resources/templates/messages/trainer-inbox.html`
+
+### Test recovery progress
+
+- Focused route-contract, access-control, login, and dashboard tests were repaired and expanded.
+- Shared authenticated-user test support was added in `src/test/java/uk/ac/cf/_5/group14/One_To_One/SecurityTests/TestSecurityUsers.java`.
+- Route-contract coverage now explicitly protects the new canonical navigation and inbox/Coach surfaces in:
+  - `src/test/java/uk/ac/cf/_5/group14/One_To_One/SecurityTests/TemplateRouteContractTest.java`
+  - `src/test/java/uk/ac/cf/_5/group14/One_To_One/SecurityTests/RoleDashboardAccessTest.java`
+  - `src/test/java/uk/ac/cf/_5/group14/One_To_One/DashboardTests/ClientDashboardMvcTest.java`
+- Focused verification has passed for:
+  - `uk.ac.cf._5.group14.One_To_One.SecurityTests.DevModeSecurityTest`
+  - `uk.ac.cf._5.group14.One_To_One.CalendarTests.CalendarDayHealthMvcTest`
+  - `uk.ac.cf._5.group14.One_To_One.SecurityTests.LoginIntegrationTest`
+  - `uk.ac.cf._5.group14.One_To_One.SecurityTests.RoleDashboardAccessTest`
+  - `uk.ac.cf._5.group14.One_To_One.SecurityTests.TemplateRouteContractTest`
+  - `uk.ac.cf._5.group14.One_To_One.DashboardTests.ClientDashboardMvcTest`
+
+### Phase 4 progress update
+
+Update date: 2026-03-27
+Status basis: implemented changes in the main application plus focused verification of merch, upload, workout, and AI-adjacent tests.
+
+- Merch checkout is no longer a fake local-token flow. `src/main/java/uk/ac/cf/_5/group14/One_To_One/Merch/MerchCheckoutController.java` now creates a pending merch order, launches provider-hosted checkout, verifies the returned provider session, and only then confirms the order.
+- Platform Premium checkout is no longer a placeholder "coming soon" path. `src/main/java/uk/ac/cf/_5/group14/One_To_One/Payments/PricingController.java` now launches provider-hosted recurring checkout and activates the subscription only after verifying the returned provider session.
+- A real Stripe-backed merch payment gateway was introduced in:
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/MerchOrders/MerchPaymentGateway.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/MerchOrders/StripeMerchPaymentGateway.java`
+- A real Stripe-backed platform billing provider service was introduced in:
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Payments/PaymentProviderService.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Payments/StripePaymentProviderService.java`
+- Stripe webhook reconciliation for Platform Premium was added through:
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Payments/StripeWebhookController.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Payments/StripeWebhookService.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/PlatformBilling/PlatformSubscriptionService.java`
+- Merch orders now track separate payment state and provider references through:
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/MerchOrders/PaymentStatus.java`
+  - updated `src/main/java/uk/ac/cf/_5/group14/One_To_One/MerchOrders/MerchOrder.java`
+  - updated schema in `src/main/resources/schema.sql` and `src/test/resources/schema.sql`
+- Pending-payment cleanup and stock restoration were added so abandoned or cancelled checkout attempts do not permanently hold merch stock.
+- The merch checkout UI was rewritten to explain the provider-hosted flow and remove the old fake card-entry/token-generation behaviour in:
+  - `src/main/resources/templates/merch/checkout.html`
+  - `src/main/resources/static/js/merch/merch-checkout-page.js`
+- The Platform Premium checkout UI was rewritten to use the same hosted-checkout trust model in:
+  - `src/main/resources/templates/payments/pricing-checkout.html`
+  - `src/main/resources/templates/payments/pricing.html`
+- AI provider traffic is now centralized behind a shared gateway abstraction instead of living directly inside the old chat service implementation:
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Chat/AiGateway.java`
+  - `src/main/java/uk/ac/cf/_5/group14/One_To_One/Chat/OpenAiGateway.java`
+  - updated `src/main/java/uk/ac/cf/_5/group14/One_To_One/Chat/ChatService.java`
+- The canonical Coach surface now exposes explicit data-use disclosure and an AI-unavailable fallback banner in `src/main/resources/templates/chat/chat.html`, and AI availability checks were moved to the shared gateway-aware path in `ChatController`, `AiCoachActionParser`, and `ChatV2ThreadService`.
+- Upload hardening was extended beyond profile images:
+  - merch product images are now signature-checked, decoded, and server-side re-encoded in `src/main/java/uk/ac/cf/_5/group14/One_To_One/Merch/MerchProductServiceImpl.java`
+  - workout feedback video uploads now validate file signatures for known video containers instead of trusting the declared MIME type in `src/main/java/uk/ac/cf/_5/group14/One_To_One/Workouts/WorkoutFormFeedbackService.java`
+- Focused verification has passed for:
+  - `uk.ac.cf._5.group14.One_To_One.PaymentsTests.*`
+  - `uk.ac.cf._5.group14.One_To_One.MerchTests.*`
+  - `uk.ac.cf._5.group14.One_To_One.ProfileTests.*`
+  - `uk.ac.cf._5.group14.One_To_One.WorkoutTests.*`
+  - `uk.ac.cf._5.group14.One_To_One.CalendarTests.TaskAiGenerationServiceTest`
+  - `uk.ac.cf._5.group14.One_To_One.DayHealthTests.DayHealthAiServiceTest`
+  - `uk.ac.cf._5.group14.One_To_One.FocusTests.DailyFocusAiServiceTest`
+  - `uk.ac.cf._5.group14.One_To_One.ReflectionTests.ReflectionAiServiceTest`
+
+### Still open
+
+- The full suite has not yet been fully restored and re-baselined after the focused security/navigation recovery work.
+- The broader role-home/dashboard consolidation is still incomplete, especially for trainer, gym-admin, and platform-admin "home cockpit" depth.
+- The larger frontend extraction plan from `docs/frontend-template-structure-audit-2026-03-20.md` is still ongoing rather than complete.
+- The merch payment flow currently relies on provider checkout success verification rather than full webhook reconciliation, so background reconciliation is still a future hardening step.
+- Merch payment flow still relies on success-return verification rather than a provider webhook path.
+- Platform billing now uses hosted checkout plus provider webhook reconciliation, but broader provider-driven billing lifecycle features such as payment-failure handling and invoice-level sync are still future hardening steps.
+
+### Updated audit read
+
+This audit remains directionally correct, but several original P0 and Phase 1 or Phase 2 items are now partially or substantially addressed. The highest-value remaining gaps are:
+
+1. full-suite test stability
+2. complete role-journey consolidation
+3. merch webhook reconciliation and deeper billing lifecycle sync
+4. broader full-stack AI governance and observability
+5. finishing the frontend extraction and cleanup backlog
+
 ## 2. What The Project Already Does Well
 
 Before focusing on change, it is worth saying what is already strong:

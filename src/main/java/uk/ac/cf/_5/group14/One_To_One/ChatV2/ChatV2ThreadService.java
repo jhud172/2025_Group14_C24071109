@@ -1,7 +1,6 @@
 package uk.ac.cf._5.group14.One_To_One.ChatV2;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.cf._5.group14.One_To_One.Chat.ChatService;
@@ -20,9 +19,6 @@ public class ChatV2ThreadService {
     private final ChatThreadRepository threadRepository;
     private final ChatMessageRepository messageRepository;
     private final ChatService chatService;
-
-    @Value("${openai.api.key:}")
-    private String apiKey;
 
     public ChatV2ThreadService(ChatFolderRepository folderRepository,
                                ChatThreadRepository threadRepository,
@@ -155,7 +151,7 @@ public class ChatV2ThreadService {
         thread.setTitle(fallback);
         threadRepository.save(thread);
 
-        if (apiKey == null || apiKey.isBlank()) return;
+        if (!chatService.isAvailable()) return;
         try {
             String prompt = "Create a short 4-6 word title for this message. Return only the title.";
             List<Message> msgs = new ArrayList<>();

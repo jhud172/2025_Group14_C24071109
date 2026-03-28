@@ -31,6 +31,60 @@ public class PlatformSubscriptionService {
     }
 
     @Transactional
+    public PlatformSubscription activateSubscription(Long userId,
+                                                     PlatformPlan plan,
+                                                     String providerCustomerId,
+                                                     String providerSubId,
+                                                     Instant currentPeriodEnd) {
+        if (userId == null || plan == null) {
+            throw new IllegalArgumentException("User and plan are required.");
+        }
+
+        PlatformSubscription subscription = repository.findByUserId(userId)
+                .orElseGet(PlatformSubscription::new);
+
+        subscription.setUserId(userId);
+        subscription.setPlan(plan);
+        subscription.setStatus(PlatformSubscriptionStatus.ACTIVE);
+        subscription.setCancelAtPeriodEnd(false);
+        subscription.setProviderCustomerId(providerCustomerId);
+        subscription.setProviderSubId(providerSubId);
+        subscription.setCurrentPeriodEnd(currentPeriodEnd);
+        return repository.save(subscription);
+    }
+
+    @Transactional
+    public Optional<PlatformSubscription> syncProviderSubscription(String providerSubId,
+                                                                   Instant currentPeriodEnd,
+                                                                   boolean cancelAtPeriodEnd,
+                                                                   boolean active) {
+        if (providerSubId == null || providerSubId.isBlank()) {
+            return Optional.empty();
+        }
+        Optional<PlatformSubscription> existing = repository.findByProviderSubId(providerSubId);
+        if (existing.isEmpty()) {
+            return Optional.empty();
+        }
+
+        PlatformSubscription subscription = existing.get();
+        subscription.setCurrentPeriodEnd(currentPeriodEnd);
+        subscription.setCancelAtPeriodEnd(cancelAtPeriodEnd);
+        if (!active) {
+            subscription.setStatus(PlatformSubscriptionStatus.CANCELLED);
+        } else if (cancelAtPeriodEnd) {
+            subscription.setStatus(PlatformSubscriptionStatus.EXPIRES);
+        } else {
+            subscription.setStatus(PlatformSubscriptionStatus.ACTIVE);
+        }
+        return Optional.of(repository.save(subscription));
+    }
+
+    @Transactional
+    public Optional<PlatformSubscription> cancelByProviderSubscriptionId(String providerSubId, Instant currentPeriodEnd) {
+        return syncProviderSubscription(providerSubId, currentPeriodEnd, false, false);
+    }
+
+    @Transactional
     public Optional<PlatformSubscription> updateCancelAtPeriodEnd(Long userId, boolean cancelAtPeriodEnd) {
         Optional<PlatformSubscription> existing = findByUserId(userId);
         if (existing.isEmpty()) {

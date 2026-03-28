@@ -2,7 +2,6 @@ package uk.ac.cf._5.group14.One_To_One.Chat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,9 +14,6 @@ public class AiCoachActionParser implements CoachActionParser {
     private final ChatService chatService;
     private final ObjectMapper mapper;
 
-    @Value("${openai.api.key:}")
-    private String apiKey;
-
     public AiCoachActionParser(ChatService chatService, ObjectMapper mapper) {
         this.chatService = chatService;
         this.mapper = mapper;
@@ -28,7 +24,7 @@ public class AiCoachActionParser implements CoachActionParser {
         if (message == null || message.isBlank()) {
             return Optional.empty();
         }
-        if (apiKey == null || apiKey.isBlank()) {
+        if (!chatService.isAvailable()) {
             return Optional.empty();
         }
 

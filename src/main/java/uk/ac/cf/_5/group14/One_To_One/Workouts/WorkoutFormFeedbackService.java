@@ -1,5 +1,6 @@
 package uk.ac.cf._5.group14.One_To_One.Workouts;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,13 +8,13 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -23,15 +24,18 @@ public class WorkoutFormFeedbackService {
     private final WorkoutSetLogRepository setLogRepository;
     private final WorkoutSetVideoRepository videoRepository;
     private final AiFormFeedbackRepository feedbackRepository;
+    private final Path uploadRoot;
 
     public WorkoutFormFeedbackService(WorkoutBuilderService workoutBuilderService,
                                       WorkoutSetLogRepository setLogRepository,
                                       WorkoutSetVideoRepository videoRepository,
-                                      AiFormFeedbackRepository feedbackRepository) {
+                                      AiFormFeedbackRepository feedbackRepository,
+                                      @Value("${app.storage.workout-video-dir:uploads/workout-videos}") String uploadRoot) {
         this.workoutBuilderService = workoutBuilderService;
         this.setLogRepository = setLogRepository;
         this.videoRepository = videoRepository;
         this.feedbackRepository = feedbackRepository;
+        this.uploadRoot = Paths.get(uploadRoot).toAbsolutePath().normalize();
     }
 
     @Transactional
@@ -42,8 +46,9 @@ public class WorkoutFormFeedbackService {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("No file uploaded");
         }
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.toLowerCase(Locale.ROOT).startsWith("video/")) {
+
+        VideoFormat videoFormat = detectVideoFormat(file);
+        if (videoFormat == null) {
             throw new IllegalArgumentException("Unsupported video type");
         }
 
@@ -51,13 +56,17 @@ public class WorkoutFormFeedbackService {
         WorkoutSetLog setLog = setLogRepository.findByIdAndSession(setId, session)
                 .orElseThrow(() -> new IllegalArgumentException("Set not found"));
 
-        String extension = contentType.toLowerCase(Locale.ROOT).contains("mp4") ? ".mp4" : ".webm";
-        Path uploadRoot = Paths.get("uploads", "workout-videos", "user-" + user.getId(), "session-" + sessionId);
-        Files.createDirectories(uploadRoot);
+        Path sessionUploadRoot = uploadRoot.resolve("user-" + user.getId()).resolve("session-" + sessionId).normalize();
+        Files.createDirectories(sessionUploadRoot);
 
-        String filename = "set-" + setId + "-" + System.currentTimeMillis() + extension;
-        Path target = uploadRoot.resolve(filename);
-        Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+        String filename = "set-" + setId + "-" + System.currentTimeMillis() + videoFormat.extension();
+        Path target = sessionUploadRoot.resolve(filename).normalize();
+        if (!target.startsWith(sessionUploadRoot)) {
+            throw new IllegalArgumentException("Invalid upload path");
+        }
+        try (InputStream inputStream = file.getInputStream()) {
+            Files.copy(inputStream, target, StandardCopyOption.REPLACE_EXISTING);
+        }
 
         WorkoutSetVideo video = new WorkoutSetVideo();
         video.setSetLog(setLog);
@@ -125,5 +134,41 @@ public class WorkoutFormFeedbackService {
                         "confidence", feedback.getConfidence()
                 )
         );
+    }
+
+    private VideoFormat detectVideoFormat(MultipartFile file) throws IOException {
+        try (InputStream inputStream = file.getInputStream()) {
+            byte[] header = inputStream.readNBytes(16);
+            if (header.length >= 12
+                    && header[4] == 'f'
+                    && header[5] == 't'
+                    && header[6] == 'y'
+                    && header[7] == 'p') {
+                return VideoFormat.MP4;
+            }
+            if (header.length >= 4
+                    && header[0] == (byte) 0x1A
+                    && header[1] == (byte) 0x45
+                    && header[2] == (byte) 0xDF
+                    && header[3] == (byte) 0xA3) {
+                return VideoFormat.WEBM;
+            }
+        }
+        return null;
+    }
+
+    private enum VideoFormat {
+        MP4(".mp4"),
+        WEBM(".webm");
+
+        private final String extension;
+
+        VideoFormat(String extension) {
+            this.extension = extension;
+        }
+
+        public String extension() {
+            return extension;
+        }
     }
 }

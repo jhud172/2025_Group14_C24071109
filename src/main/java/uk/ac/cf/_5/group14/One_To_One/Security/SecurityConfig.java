@@ -122,7 +122,8 @@ public class SecurityConfig {
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
                             .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
                             .requestMatchers("/client/trainers", "/client/trainers/**").hasAnyRole("CLIENT", "USER")
-                            .requestMatchers("/client/messages", "/client/messages/**").authenticated()
+                            .requestMatchers("/inbox", "/inbox/**", "/messages/**", "/client/messages", "/client/messages/**").authenticated()
+                            .requestMatchers("/chat", "/chat/**", "/chatv2/**").authenticated()
                             .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**", "/admin/dev-pages/**")
                             .hasAnyRole("GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
@@ -186,7 +187,8 @@ public class SecurityConfig {
                         .defaultAuthenticationEntryPointFor(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                                 request -> request.getRequestURI() != null
-                                        && request.getRequestURI().startsWith("/chat/")
+                                        && (request.getRequestURI().startsWith("/chat/")
+                                        || request.getRequestURI().startsWith("/chatv2/"))
                                         && (HttpMethod.GET.matches(request.getMethod())
                                         || HttpMethod.POST.matches(request.getMethod()))
                     ));

@@ -13,13 +13,16 @@ public interface MerchOrderService {
 
     Optional<MerchOrder> findByIdForUser(Long id, Long userId);
 
-    /**
-     * Creates a new CONFIRMED order for a single product.
-     */
-    MerchOrder placeOrder(User user,
-                          MerchProduct product,
-                          int quantity,
-                          SavedPaymentMethod paymentMethod);
+    MerchOrder createPendingOrder(User user, MerchProduct product, int quantity);
+
+    MerchOrder markCheckoutSessionCreated(Long orderId,
+                                          String paymentProvider,
+                                          String paymentReference,
+                                          SavedPaymentMethod paymentMethod);
+
+    MerchOrder completePaidOrder(Long orderId, String paymentReference);
+
+    MerchOrder cancelPendingPayment(Long orderId, String failureReason);
 
     /**
      * Called when a product is being deactivated:

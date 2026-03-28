@@ -9,6 +9,10 @@
         <p class="mt-2 text-slate-600 dark:text-slate-400">View and track all your orders</p>
     </div>
 
+    <div th:if="${orderSuccess}" class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-800/40 dark:bg-emerald-900/20 dark:text-emerald-200" th:text="${orderSuccess}">Order placed.</div>
+    <div th:if="${orderError}" class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800/40 dark:bg-red-900/20 dark:text-red-200" th:text="${orderError}">Order error.</div>
+    <div th:if="${checkoutError}" class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800/40 dark:bg-amber-900/20 dark:text-amber-100" th:text="${checkoutError}">Checkout cancelled.</div>
+
     <!-- Search Bar -->
     <div class="mb-8">
         <form th:action="@{/orders}" method="get" class="flex gap-3 flex-wrap">
@@ -52,7 +56,16 @@
                               th:text="${order.shippingStatus.displayName}">
                             Status
                         </span>
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                            Payment:
+                            <span class="font-semibold text-slate-700 dark:text-slate-200" th:text="${#strings.replace(order.paymentStatus.name(), '_', ' ')}">PAID</span>
+                        </p>
                     </div>
+                </div>
+
+                <div th:if="${order.paymentProvider == 'SIMULATED'}"
+                     class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-100">
+                    This was a demo checkout. No real payment was taken and this order will not be shipped.
                 </div>
 
                 <!-- Order Items -->
