@@ -11,7 +11,8 @@ import uk.ac.cf._5.group14.One_To_One.Users.Role;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
 
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -60,6 +61,8 @@ class ClientTrainerDirectoryVisibilityTest {
                 .with(user(client.getUsername()).roles("CLIENT")))
             .andExpect(status().isOk())
             .andExpect(view().name("client/trainers"))
-            .andExpect(model().attribute("trainers", hasSize(1)));
+            .andExpect(model().attribute("trainers", hasItem(verified)))
+            .andExpect(model().attribute("trainers", not(hasItem(unverified))))
+            .andExpect(model().attribute("trainers", not(hasItem(disabled))));
     }
 }

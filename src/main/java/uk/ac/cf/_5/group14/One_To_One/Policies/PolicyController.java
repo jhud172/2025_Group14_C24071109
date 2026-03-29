@@ -6,6 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class PolicyController {
 
+    @GetMapping("/policies/privacy")
+    public String privacyPolicy() {
+        return "policies/privacy";
+    }
+
     @GetMapping("/policies/payments")
     public String paymentsPolicy() {
         return "policies/payments";

@@ -19,7 +19,7 @@ public class UserPreferenceForm {
     Set<Long> selectedPreferenceIds = new HashSet<>();
     Set<Long> selectedConditionIds = new HashSet<>();
 
-    @Pattern(regexp = "^(en|cy|es|fr|de|it|pt|pl|nl|zh|ja|ko|ar|hi)$", message = "Please select a valid language.")
+    @Pattern(regexp = "^(en|cy)$", message = "Please select a valid language.")
     String language = "en";
 
     @Pattern(regexp = "^(SYSTEM|LIGHT|DARK)$", message = "Please select a valid theme.")

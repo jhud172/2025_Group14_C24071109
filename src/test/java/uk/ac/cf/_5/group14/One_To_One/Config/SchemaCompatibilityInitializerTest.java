@@ -34,6 +34,12 @@ class SchemaCompatibilityInitializerTest {
     @Test
     void addsEachCompatibilityColumnWhenMissing() {
         when(jdbcTemplate.queryForObject(
+            eq(SchemaCompatibilityInitializer.HAS_TABLE_SQL),
+            eq(Integer.class),
+            eq(SchemaCompatibilityInitializer.USERS_TABLE)
+        )).thenReturn(1);
+
+        when(jdbcTemplate.queryForObject(
             eq(SchemaCompatibilityInitializer.HAS_USERS_COLUMN_SQL),
             eq(Integer.class),
             anyString()
@@ -56,6 +62,12 @@ class SchemaCompatibilityInitializerTest {
 
     @Test
     void skipsPatchesWhenCompatibilityColumnsAlreadyExist() {
+        when(jdbcTemplate.queryForObject(
+            eq(SchemaCompatibilityInitializer.HAS_TABLE_SQL),
+            eq(Integer.class),
+            eq(SchemaCompatibilityInitializer.USERS_TABLE)
+        )).thenReturn(1);
+
         when(jdbcTemplate.queryForObject(
             eq(SchemaCompatibilityInitializer.HAS_USERS_COLUMN_SQL),
             eq(Integer.class),

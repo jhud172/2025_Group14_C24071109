@@ -1,11 +1,105 @@
-# Default model used by Codex in this repository
 model = "gpt-5.4"
+model_provider = "openai"
+model_reasoning_effort = "high"
+personality = "pragmatic"
 
-# Ask before running commands that modify the system
 approval_policy = "on-request"
+allow_login_shell = true
+sandbox_mode = "workspace-write"
 
-# Optional reasoning level
-model_reasoning_effort = "extra_high"
+mcp_oauth_credentials_store = "auto"
+cli_auth_credentials_store = "file"
+approvals_reviewer = "guardian_subagent"
 
-# Treat directories containing .git as project root
-project_root_markers = [".git"]
+[sandbox_workspace_write]
+writable_roots = []
+network_access = true
+exclude_tmpdir_env_var = false
+exclude_slash_tmp = false
+
+[features]
+shell_tool = true
+shell_snapshot = true
+multi_agent = true
+personality = true
+skill_mcp_dependency_install = true
+guardian_approval = true
+
+[mcp_servers.openaiDeveloperDocs]
+enabled = true
+required = false
+url = "https://developers.openai.com/mcp"
+startup_timeout_sec = 15.0
+tool_timeout_sec = 60.0
+
+[mcp_servers.render]
+enabled = true
+required = false
+url = "https://mcp.render.com/mcp"
+env_http_headers = { "Authorization" = "RENDER_MCP_AUTH_HEADER" }
+startup_timeout_sec = 20.0
+tool_timeout_sec = 90.0
+
+[mcp_servers.cloudflareExample]
+enabled = false
+required = false
+url = "https://remote-mcp-server-authless.jhud172.workers.dev/mcp"
+startup_timeout_sec = 20.0
+tool_timeout_sec = 120.0
+
+[mcp_servers.cloudflarePlaywright]
+enabled = true
+required = false
+command = "npx"
+args = ["mcp-remote", "https://one-to-one-playwright-mcp.jhud172.workers.dev/sse"]
+startup_timeout_sec = 30.0
+tool_timeout_sec = 300.0
+
+[projects]
+[projects."G:\\No OneDrive Work\\My Website\\Crystal-Productions-OneToOne\\One To One\\2025_Group14_C24071109"]
+trust_level = "trusted"
+
+[windows]
+sandbox = "unelevated"
+
+[plugins."hugging-face@openai-curated"]
+enabled = true
+
+[plugins."cloudflare@openai-curated"]
+enabled = true
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[plugins."google-drive@openai-curated"]
+enabled = true
+
+[plugins."stripe@openai-curated"]
+enabled = true
+
+[plugins."gmail@openai-curated"]
+enabled = true
+
+[plugins."google-calendar@openai-curated"]
+enabled = true
+
+[plugins."canva@openai-curated"]
+enabled = true
+
+[plugins."test-android-apps@openai-curated"]
+enabled = true
+
+[plugins."build-web-apps@openai-curated"]
+enabled = true
+
+[plugins."build-ios-apps@openai-curated"]
+enabled = true
+
+[plugins."game-studio@openai-curated"]
+enabled = true
+
+[plugins."vercel@openai-curated"]
+enabled = true
+
+[plugins."netlify@openai-curated"]
+enabled = true

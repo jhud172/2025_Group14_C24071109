@@ -7,7 +7,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -81,19 +80,6 @@ public class SecurityConfig {
      * 1. Set environment variable: DEV_MODE=false (or unset)
      * 2. Restart the application
      */
-
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers(
-                "/img/**",
-                "/css/**",
-                "/js/**",
-                "/webjars/**",
-                "/favicon.ico",
-                "/static/**",
-                "/uploads/**");
-    }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE + 1)

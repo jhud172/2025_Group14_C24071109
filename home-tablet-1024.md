@@ -1,0 +1,463 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo One To One" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+        - generic [ref=e9]: One To One
+      - navigation "Primary navigation" [ref=e12]:
+        - generic [ref=e14]:
+          - link "Home" [ref=e15] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e16]: Home
+          - link "About" [ref=e17] [cursor=pointer]:
+            - /url: /about
+            - generic [ref=e18]: About
+          - link "Pricing" [ref=e19] [cursor=pointer]:
+            - /url: /pricing
+            - generic [ref=e20]: Pricing
+          - link "FAQ" [ref=e21] [cursor=pointer]:
+            - /url: /faq
+            - generic [ref=e22]: FAQ
+          - link "Trainers" [ref=e23] [cursor=pointer]:
+            - /url: /explore
+            - generic [ref=e24]: Trainers
+          - link "Shop" [ref=e25] [cursor=pointer]:
+            - /url: /merch
+            - generic [ref=e26]: Shop
+      - generic [ref=e28]:
+        - link "DEV" [ref=e29] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e31]: DEV
+        - link "Login" [ref=e34] [cursor=pointer]:
+          - /url: /login
+  - main [ref=e35]:
+    - generic [ref=e36]:
+      - generic [ref=e39]:
+        - generic [ref=e40]:
+          - generic [ref=e41]: DEV MODE
+          - heading "Development Mode Active" [level=2] [ref=e43]
+          - paragraph [ref=e44]: Development Mode Active — Any data entered may be reset or changed during testing.
+        - link "Open Dev Hub" [ref=e46] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e47]: Open Dev Hub
+          - img [ref=e48]
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - generic [ref=e60]:
+            - img "One To One" [ref=e61]
+            - heading "Your Programmes, Your Progress." [level=1] [ref=e62]:
+              - text: Your Programmes,
+              - text: Your Progress.
+            - paragraph [ref=e63]: Build your own or follow verified trainer plans. Track workouts and tasks, get AI coaching, and train across gym, swim, and every sport.
+          - generic [ref=e64]:
+            - link "Start as a Client" [ref=e65] [cursor=pointer]:
+              - /url: /signup
+            - link "Explore Trainers" [ref=e66] [cursor=pointer]:
+              - /url: /explore
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - img [ref=e69]
+              - text: AI Coaching
+            - generic [ref=e71]:
+              - img [ref=e72]
+              - text: Verified Trainers
+            - generic [ref=e74]:
+              - img [ref=e75]
+              - text: Gym, Swim & More
+          - generic [ref=e77]:
+            - link "I'm a Trainer" [ref=e78] [cursor=pointer]:
+              - /url: "#roles"
+            - generic [ref=e79]: •
+            - link "For Gyms" [ref=e80] [cursor=pointer]:
+              - /url: "#roles"
+        - generic [ref=e81]:
+          - generic [ref=e83]:
+            - generic [ref=e84]:
+              - img [ref=e86]
+              - img [ref=e89]
+              - img [ref=e92]
+            - generic [ref=e101]:
+              - generic [ref=e107]: "98"
+              - img [ref=e123]
+          - generic [ref=e127]:
+            - img [ref=e129]
+            - generic [ref=e131]:
+              - heading "Current Streak" [level=4] [ref=e132]
+              - paragraph [ref=e133]: 24 Days
+      - generic [ref=e139]:
+        - generic [ref=e140]:
+          - generic [ref=e141]:
+            - heading "The Old Way" [level=3] [ref=e142]
+            - heading "Fighting Friction." [level=2] [ref=e143]
+          - list [ref=e144]:
+            - listitem [ref=e145]:
+              - img [ref=e147]
+              - generic [ref=e149]:
+                - paragraph [ref=e150]: Scattered spreadsheets & DMs
+                - paragraph [ref=e151]: Progress gets lost in the noise.
+            - listitem [ref=e152]:
+              - img [ref=e154]
+              - generic [ref=e156]:
+                - paragraph [ref=e157]: Inconsistent accountability
+                - paragraph [ref=e158]: Missed check-ins kill momentum.
+        - generic [ref=e160]:
+          - generic [ref=e161]:
+            - heading "One To One" [level=3] [ref=e162]
+            - heading "Engineered Flow." [level=2] [ref=e163]
+          - list [ref=e164]:
+            - listitem [ref=e165]:
+              - img [ref=e167]
+              - generic [ref=e169]:
+                - heading "Visualised Progress" [level=4] [ref=e170]
+                - paragraph [ref=e171]: See your strength and consistency climb with elite-grade analytics.
+            - listitem [ref=e172]:
+              - img [ref=e174]
+              - generic [ref=e176]:
+                - heading "Verified Safety" [level=4] [ref=e177]
+                - paragraph [ref=e178]: Every trainer is manually vetted for certifications and insurance.
+            - listitem [ref=e179]:
+              - img [ref=e181]
+              - generic [ref=e183]:
+                - heading "Zero Latency" [level=4] [ref=e184]
+                - paragraph [ref=e185]: Real-time chat, instant plan updates, and seamless payments.
+      - generic [ref=e188]:
+        - generic [ref=e189]:
+          - heading "The Standard" [level=2] [ref=e190]
+          - heading "Trust is our currency." [level=3] [ref=e191]
+        - generic [ref=e192]:
+          - generic [ref=e193]:
+            - generic [ref=e194]:
+              - img [ref=e196]
+              - heading "Verified Experts" [level=4] [ref=e198]
+            - paragraph [ref=e199]: Every "Pro" coach undergoes manual ID and certification review.
+          - generic [ref=e200]:
+            - generic [ref=e201]:
+              - img [ref=e203]
+              - heading "Escrow Protection" [level=4] [ref=e205]
+            - paragraph [ref=e206]: Funds are held securely until your session is successfully completed.
+          - generic [ref=e207]:
+            - generic [ref=e208]:
+              - img [ref=e210]
+              - heading "GDPR Compliant" [level=4] [ref=e212]
+            - paragraph [ref=e213]: Your health data is encrypted. We never sell your information.
+          - generic [ref=e214]:
+            - generic [ref=e215]:
+              - img [ref=e217]
+              - heading "Built-in Accountability" [level=4] [ref=e219]
+            - paragraph [ref=e220]: Automated streak tracking and check-ins keep you consistent.
+      - generic [ref=e223]:
+        - generic [ref=e224]:
+          - heading "Workflow" [level=2] [ref=e225]
+          - heading "Systematic Progression." [level=3] [ref=e226]
+        - generic [ref=e227]:
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - img [ref=e231]
+              - generic [ref=e233]: "01"
+            - heading "Match with Verified Trainer" [level=4] [ref=e234]
+            - paragraph [ref=e235]: Filter by specialization, bio-mechanics, or goals. Every "Pro" trainer is manually vetted for credentials.
+          - generic [ref=e236]:
+            - generic [ref=e237]:
+              - img [ref=e239]
+              - generic [ref=e241]: "02"
+            - heading "Build Plan & Schedule" [level=4] [ref=e242]
+            - paragraph [ref=e243]: Receive a custom protocol directly to your dashboard. Adjust volume and frequency in real-time.
+          - generic [ref=e244]:
+            - generic [ref=e245]:
+              - img [ref=e247]
+              - generic [ref=e249]: "03"
+            - heading "Train, Log, Progress" [level=4] [ref=e250]
+            - paragraph [ref=e251]: Execute the work. Payments are held in escrow until your trainer delivers the service.
+      - generic [ref=e254]:
+        - generic [ref=e255]:
+          - heading "The Engine" [level=2] [ref=e256]
+          - heading "The Cycle of Progress." [level=3] [ref=e257]
+        - generic [ref=e258]:
+          - generic [ref=e261]:
+            - img [ref=e263]
+            - heading "1. Assess" [level=4] [ref=e265]
+            - paragraph [ref=e266]:
+              - text: Goals defined.
+              - text: Baselines set.
+          - generic [ref=e267]:
+            - img [ref=e269]
+            - heading "2. Program" [level=4] [ref=e271]
+            - paragraph [ref=e272]:
+              - text: Protocol built.
+              - text: Schedule locked.
+          - generic [ref=e273]:
+            - img [ref=e275]
+            - heading "3. Execute" [level=4] [ref=e277]
+            - paragraph [ref=e278]:
+              - text: Workouts logged.
+              - text: Feedback loop active.
+          - generic [ref=e279]:
+            - img [ref=e281]
+            - heading "4. Analyze" [level=4] [ref=e283]
+            - paragraph [ref=e284]:
+              - text: Metrics reviewed.
+              - text: Progress visualized.
+          - generic [ref=e285]:
+            - img [ref=e287]
+            - heading "5. Evolve" [level=4] [ref=e289]
+            - paragraph [ref=e290]:
+              - text: Standards raised.
+              - text: Repeat.
+      - generic [ref=e293]:
+        - generic [ref=e294]:
+          - heading "Deploy for your Role." [level=2] [ref=e295]
+          - paragraph [ref=e296]: Optimized interfaces for every stakeholder in the ecosystem.
+        - generic [ref=e297]:
+          - generic [ref=e299]:
+            - heading "For Athletes" [level=3] [ref=e300]
+            - heading "Peak Performance." [level=4] [ref=e301]
+            - paragraph [ref=e302]: Build your own programmes or follow a verified trainer's plan — with AI coaching always in your corner.
+            - list [ref=e303]:
+              - listitem [ref=e304]:
+                - img [ref=e305]
+                - generic [ref=e307]: Track tasks, workouts & multi-sport sessions
+              - listitem [ref=e308]:
+                - img [ref=e309]
+                - generic [ref=e311]: AI Coach — instant feedback & optimisation
+              - listitem [ref=e312]:
+                - img [ref=e313]
+                - generic [ref=e315]: Real PT — verified trainer-delivered programmes
+            - link "Start as a Client" [ref=e316] [cursor=pointer]:
+              - /url: /signup
+              - img [ref=e317]
+              - text: Start as a Client
+              - img [ref=e319]
+          - generic [ref=e321]:
+            - heading "For Coaches" [level=3] [ref=e322]
+            - heading "Scale Your Business." [level=4] [ref=e323]
+            - list [ref=e324]:
+              - listitem [ref=e325]:
+                - generic [ref=e327]: Rapid program builder
+              - listitem [ref=e328]:
+                - generic [ref=e330]: Automated billing & subscriptions
+              - listitem [ref=e331]:
+                - generic [ref=e333]: Client video feedback tools
+            - link "Become a Trainer" [ref=e334] [cursor=pointer]:
+              - /url: /signup?role=trainer
+              - img [ref=e335]
+              - text: Become a Trainer
+              - img [ref=e337]
+          - generic [ref=e339]:
+            - heading "For Facilities" [level=3] [ref=e340]
+            - heading "Operational Excellence." [level=4] [ref=e341]
+            - list [ref=e342]:
+              - listitem [ref=e343]:
+                - generic [ref=e345]: Centralized staff management
+              - listitem [ref=e346]:
+                - generic [ref=e348]: Revenue aggregation
+              - listitem [ref=e349]:
+                - generic [ref=e351]: High-level retention metrics
+            - link "Partner as a Gym" [ref=e352] [cursor=pointer]:
+              - /url: /signup?role=gym
+              - img [ref=e353]
+              - text: Partner as a Gym
+              - img [ref=e355]
+      - generic [ref=e359]:
+        - generic [ref=e360]:
+          - heading "Interface" [level=2] [ref=e361]
+          - heading "Precision Engineered." [level=3] [ref=e362]
+        - generic [ref=e363]:
+          - generic [ref=e364]:
+            - generic [ref=e376]: PR
+            - heading "Progress Streaks" [level=4] [ref=e377]
+            - paragraph [ref=e378]: Visualize your consistency.
+          - generic [ref=e379]:
+            - generic [ref=e386]:
+              - generic [ref=e387]:
+                - generic [ref=e388]: Mon
+                - generic [ref=e389]: "12"
+              - generic [ref=e390]:
+                - generic [ref=e391]: Tue
+                - generic [ref=e392]: "13"
+              - generic [ref=e393]:
+                - generic [ref=e394]: Wed
+                - generic [ref=e395]: "14"
+            - heading "Smart Scheduling" [level=4] [ref=e398]
+            - paragraph [ref=e399]: Never miss a session.
+          - generic [ref=e400]:
+            - generic [ref=e405]:
+              - generic [ref=e406]: Great depth on that squat! 🚀
+              - generic [ref=e407]: Thanks coach, felt heavy today.
+              - generic [ref=e410]: Coach is typing...
+            - heading "Direct Feedback" [level=4] [ref=e411]
+            - paragraph [ref=e412]: Real-time adjustments.
+      - generic [ref=e415]:
+        - generic [ref=e416]:
+          - heading "Support feedback" [level=2] [ref=e417]
+          - paragraph [ref=e418]: Report a bug, suggest an improvement, raise an error, or ask a query. Our admin team tracks each submission.
+          - paragraph [ref=e419]:
+            - text: Need answers first? Visit
+            - link "FAQ" [ref=e420] [cursor=pointer]:
+              - /url: /faq
+            - text: .
+        - generic [ref=e422]:
+          - generic [ref=e423]:
+            - generic [ref=e424]:
+              - generic [ref=e425]: Your name
+              - textbox "Jane Doe" [ref=e426]
+            - generic [ref=e427]:
+              - generic [ref=e428]: Email (for replies)
+              - textbox "jane@email.com" [ref=e429]
+          - generic [ref=e430]:
+            - generic [ref=e431]: Support type
+            - combobox [ref=e432]:
+              - option "Choose one" [selected]
+              - option "Report a bug"
+              - option "Improvement suggestion"
+              - option "Platform error"
+              - option "General query"
+          - generic [ref=e433]:
+            - generic [ref=e434]: Subject
+            - textbox "Short summary" [ref=e435]
+          - generic [ref=e436]:
+            - generic [ref=e437]: Details
+            - textbox "Describe what happened, what you expected, and any steps to reproduce." [ref=e438]
+          - generic [ref=e439]:
+            - checkbox "I allow One To One support/admin to email me a response to this request." [ref=e440]
+            - generic [ref=e441]: I allow One To One support/admin to email me a response to this request.
+          - button "Send to support" [ref=e443] [cursor=pointer]
+      - generic [ref=e445]:
+        - generic [ref=e446]: Ready to Begin
+        - heading "Your Ceiling is Just a Suggestion." [level=2] [ref=e448]:
+          - text: Your Ceiling is
+          - text: Just a Suggestion.
+        - paragraph [ref=e449]: Join the high-performance ecosystem where structure guarantees results. Whether you're training or coaching, this is where you evolve.
+        - generic [ref=e450]:
+          - link "Start as a Client" [ref=e451] [cursor=pointer]:
+            - /url: /signup
+          - link "Become a Trainer" [ref=e452] [cursor=pointer]:
+            - /url: /signup?role=trainer
+        - link "Operational tools for Gym Owners" [ref=e454] [cursor=pointer]:
+          - /url: /signup?role=gym
+          - text: Operational tools for Gym Owners →
+  - contentinfo [ref=e455]:
+    - generic [ref=e456]:
+      - generic [ref=e457]:
+        - generic [ref=e458]:
+          - generic [ref=e459]:
+            - img "One To One" [ref=e460]
+            - generic [ref=e461]: One To One
+          - paragraph [ref=e462]: Verified coaching. Structured training. Progress that lasts.
+          - generic [ref=e463]:
+            - link "Twitter" [ref=e464] [cursor=pointer]:
+              - /url: "#"
+              - generic [ref=e465]: Twitter
+              - img [ref=e466]
+            - link "GitHub" [ref=e468] [cursor=pointer]:
+              - /url: "#"
+              - generic [ref=e469]: GitHub
+              - img [ref=e470]
+        - generic [ref=e472]:
+          - generic [ref=e473]:
+            - heading "Product" [level=3] [ref=e474]
+            - list [ref=e475]:
+              - listitem [ref=e476]:
+                - link "Workouts" [ref=e477] [cursor=pointer]:
+                  - /url: /workouts
+              - listitem [ref=e478]:
+                - link "Pricing" [ref=e479] [cursor=pointer]:
+                  - /url: /pricing
+              - listitem [ref=e480]:
+                - link "Features" [ref=e481] [cursor=pointer]:
+                  - /url: /features
+              - listitem [ref=e482]:
+                - link "Leaderboard" [ref=e483] [cursor=pointer]:
+                  - /url: /levels
+          - generic [ref=e484]:
+            - heading "Support" [level=3] [ref=e485]
+            - list [ref=e486]:
+              - listitem [ref=e487]:
+                - link "Help Center" [ref=e488] [cursor=pointer]:
+                  - /url: /support
+              - listitem [ref=e489]:
+                - link "Contact" [ref=e490] [cursor=pointer]:
+                  - /url: /contact
+          - generic [ref=e491]:
+            - heading "Company" [level=3] [ref=e492]
+            - list [ref=e493]:
+              - listitem [ref=e494]:
+                - link "About" [ref=e495] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e496]:
+                - link "Blog" [ref=e497] [cursor=pointer]:
+                  - /url: /blog
+              - listitem [ref=e498]:
+                - link "Careers" [ref=e499] [cursor=pointer]:
+                  - /url: /careers
+      - generic [ref=e501]:
+        - paragraph [ref=e502]: © 2026 Crystal Productions, Inc. All rights reserved.
+        - generic [ref=e503]:
+          - link "Privacy•" [ref=e504] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms•" [ref=e505] [cursor=pointer]:
+            - /url: /terms
+          - link "Cookies" [ref=e506] [cursor=pointer]:
+            - /url: /cookies
+        - generic [ref=e509]: All Systems Operational
+  - generic:
+    - button "Open coach" [ref=e510] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button [disabled]: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Hi, I am Charlie, the built-in AI assistant for One To One. I help with workouts, schedules, nutrition, goals, and momentum tracking. Log in or sign up to unlock personalized guidance.
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - button "Toggle quick actions" [ref=e514] [cursor=pointer]:
+      - generic [ref=e515]: ⚡
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started

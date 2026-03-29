@@ -51,11 +51,6 @@ class DevModeSecurityTest {
                 public boolean isDevMode() {
                     return true;
                 }
-
-                @Override
-                public void loadEnvFile() {
-                    // No-op: prevent .env loading in tests to avoid polluting system properties
-                }
             };
         }
 
