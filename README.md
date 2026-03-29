@@ -64,6 +64,8 @@ Run tests:
 - static assets: [`src/main/resources/static`](./src/main/resources/static)
 - application config: [`src/main/resources`](./src/main/resources)
 - deployment container: [`Dockerfile`](./Dockerfile)
+- repo tooling and MCP workers: [`tools`](./tools)
+- generated local artifacts and logs: [`output`](./output)
 
 ## Deployment
 
