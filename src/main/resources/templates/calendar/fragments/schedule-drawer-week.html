@@ -17,15 +17,15 @@
                         </div>
                         <div class="calendar-schedule-context-item">
                             <span class="calendar-schedule-context-label">Deploy window</span>
-                            <span id="schedule-context-summary" class="calendar-schedule-context-value">Starts — • Weekly</span>
+                            <span id="schedule-context-summary" class="calendar-schedule-context-value">Starts &#8212; Weekly</span>
                         </div>
                         <div class="calendar-schedule-context-item">
                             <span class="calendar-schedule-context-label">Visible dates</span>
-                            <span id="schedule-context-range" class="calendar-schedule-context-value">—</span>
+                            <span id="schedule-context-range" class="calendar-schedule-context-value">&#8212;</span>
                         </div>
                         <div class="calendar-schedule-context-item">
                             <span class="calendar-schedule-context-label">Impact</span>
-                            <span id="schedule-context-meta" class="calendar-schedule-context-value">Checking…</span>
+                            <span id="schedule-context-meta" class="calendar-schedule-context-value">Checking...</span>
                         </div>
                     </div>
                     <div class="calendar-schedule-scope" role="group" aria-label="Apply scope selection">
@@ -50,13 +50,13 @@
                     </div>
                     <div class="calendar-schedule-context-item">
                         <span class="calendar-schedule-context-label">Entries in view</span>
-                        <span id="schedule-context-existing" class="calendar-schedule-context-value">Checking…</span>
+                        <span id="schedule-context-existing" class="calendar-schedule-context-value">Checking...</span>
                     </div>
                 </div>
                 <label class="sr-only" for="schedule-search">Search schedules</label>
-                <input id="schedule-search" 
-                       type="text" 
-                       placeholder="Search schedules..." 
+                <input id="schedule-search"
+                       type="text"
+                       placeholder="Search schedules..."
                        class="calendar-schedule-search" />
                 <div class="calendar-schedule-scope mt-3" role="group" aria-label="Schedule filters">
                     <label class="sr-only" for="schedule-filter-type">Filter by type</label>
@@ -119,19 +119,19 @@
                                     <p class="calendar-schedule-card-subtitle" th:text="${schedule.description != null and !schedule.description.isBlank() ? schedule.description : 'Ready for calendar deployment'}"></p>
                                 </div>
                                 <div class="calendar-schedule-card-tools">
-                                    <button type="button" class="calendar-schedule-pin" data-pin-toggle th:attr="data-schedule-id=${schedule.id}" aria-label="Pin schedule">📌</button>
-                                    <button type="button" class="calendar-schedule-favourite" data-favourite-toggle th:attr="data-schedule-id=${schedule.id}" aria-label="Toggle favourite"><span data-fav-icon>☆</span></button>
+                                    <button type="button" class="calendar-schedule-pin" data-pin-toggle th:attr="data-schedule-id=${schedule.id}" aria-label="Pin schedule">&#128204;</button>
+                                    <button type="button" class="calendar-schedule-favourite" data-favourite-toggle th:attr="data-schedule-id=${schedule.id}" aria-label="Toggle favourite"><span data-fav-icon>&#9734;</span></button>
                                 </div>
                             </header>
                             <div class="calendar-schedule-metrics">
                                 <div class="calendar-schedule-metric"><span>Type</span><strong th:text="${#strings.capitalize(#strings.toLowerCase(schedule.scheduleType.name()).replace('_', ' '))}">Weekly</strong></div>
-                                <div class="calendar-schedule-metric"><span>Frequency</span><strong data-meta-field="sessionsPerWeek">—</strong></div>
-                                <div class="calendar-schedule-metric"><span>Active days</span><strong data-meta-field="activeDayLabels">—</strong></div>
-                                <div class="calendar-schedule-metric"><span>Next occurrence</span><strong data-meta-field="activeDayLabels">—</strong></div>
+                                <div class="calendar-schedule-metric"><span>Frequency</span><strong data-meta-field="sessionsPerWeek">&#8212;</strong></div>
+                                <div class="calendar-schedule-metric"><span>Active days</span><strong data-meta-field="activeDayLabels">&#8212;</strong></div>
+                                <div class="calendar-schedule-metric"><span>Next occurrence</span><strong data-meta-field="activeDayLabels">&#8212;</strong></div>
                             </div>
                             <div class="calendar-schedule-card-footer">
                                 <span class="calendar-schedule-status" data-deploy-status th:classappend="${status == 'Active' ? ' is-active' : (status == 'Applied' ? ' is-active' : ' is-archived')}" th:text="${status}">Not applied</span>
-                                <span class="calendar-schedule-last-applied" th:text="${latestApplied != null ? 'Last applied ' + #temporals.format(latestApplied, 'dd MMM yyyy') : 'Last applied —'}">Last applied —</span>
+                                <span class="calendar-schedule-last-applied" th:text="${latestApplied != null ? 'Last applied ' + #temporals.format(latestApplied, 'dd MMM yyyy') : 'Last applied —'}">Last applied &#8212;</span>
                             </div>
                             <details class="sched-card-menu">
                                 <summary class="calendar-schedule-action">Details</summary>

@@ -1237,7 +1237,7 @@
             const showGraph = displayMode === "GRAPH";
             if (permissionEl) permissionEl.hidden = true;
             if (timelineWrapEl) timelineWrapEl.hidden = false;
-            if (graphToggleEl) graphToggleEl.hidden = !showGraph;
+            if (graphToggleEl) graphToggleEl.hidden = !showGraph || !currentSlots.length;
             if (timelineEl) {
                 timelineEl.dataset.viewMode = showGraph ? "graph" : "visual";
             }

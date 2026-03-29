@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:with="pageTitle=${'Calendar â€” Day: ' + date}"
+          th:with="pageTitle=${'Calendar - Day: ' + date}"
           th:replace="~{base :: layout(${pageTitle}, null, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="content">
@@ -135,7 +135,7 @@
                         th:classappend="${isToday} ? ' text-emerald-700 dark:text-emerald-400' : ' text-slate-900 dark:text-slate-100'">
                         <span th:text="${#temporals.format(date, 'EEEE')}"></span>
                         <span class="block text-base font-semibold text-slate-500 dark:text-slate-400 sm:inline sm:text-lg"
-                              th:text="${' â€” ' + day + suffix + ' ' + #temporals.format(date, 'MMMM yyyy')}"></span>
+                              th:text="${&#39; - &#39; + day + suffix + &#39; &#39; + #temporals.format(date, &#39;MMMM yyyy&#39;)}"></span>
                     </h1>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                         <span th:if="${isToday}"
@@ -463,7 +463,7 @@
                            th:text="${task.title}"></a>
                         <div class="mt-1 flex flex-wrap items-center gap-2">
                             <p data-testid="task-time" class="text-sm text-slate-600 dark:text-slate-300"
-                               th:text="${task.time != null ? #temporals.format(task.time, 'HH:mm') : 'â€”'}"></p>
+                               th:text="${task.time != null ? #temporals.format(task.time, &#39;HH:mm&#39;) : &#39;&#8212;&#39;}"></p>
                             <span th:if="${task.activityType != null}"
                                   class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800 dark:bg-blue-950/40 dark:text-blue-200"
                                   th:text="${task.activityType.icon + ' ' + task.activityType.label}"
@@ -517,7 +517,7 @@
                         <div class="rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
                             <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Notes</p>
                             <p data-testid="task-drawer-notes" class="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200"
-                               th:text="${task.notes != null && !#strings.isEmpty(task.notes) ? task.notes : 'â€”'}"></p>
+                               th:text="${task.notes != null && !#strings.isEmpty(task.notes) ? task.notes : &#39;&#8212;&#39;}"></p>
                         </div>
 
                         <div class="rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
@@ -526,7 +526,7 @@
                                 <li th:if="${warnings == null || warnings.isEmpty()}" class="text-sm text-slate-600 dark:text-slate-300">None</li>
                                 <li th:each="w : ${warnings}" class="rounded-xl border border-slate-200 bg-white/70 p-3 text-sm text-slate-700 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
                                     <span th:if="${w.triggerType != null && w.triggerType.name() == 'TIME'}">
-                                        Time warning at <span class="font-semibold" th:text="${w.triggerTime != null ? #temporals.format(w.triggerTime, 'HH:mm') : 'â€”'}"></span>
+                                        Time warning at <span class="font-semibold" th:text="${w.triggerTime != null ? #temporals.format(w.triggerTime, &#39;HH:mm&#39;) : &#39;&#8212;&#39;}"></span>
                                     </span>
                                     <span th:if="${w.triggerType != null && w.triggerType.name() == 'ON_TASK_COMPLETE'}">
                                         After completing <span class="font-semibold" th:text="${w.triggerTask != null ? w.triggerTask.title : 'another task'}"></span>

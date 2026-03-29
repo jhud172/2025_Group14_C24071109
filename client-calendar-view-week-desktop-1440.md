@@ -1,0 +1,229 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo One To One" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+        - generic [ref=e9]: One To One
+      - navigation "Primary navigation" [ref=e12]:
+        - generic [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e21]: Dashboard
+          - link "Calendar" [ref=e22] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e23]
+            - generic [ref=e27]: Calendar
+          - link "Coach" [ref=e28] [cursor=pointer]:
+            - /url: /chat
+            - img [ref=e29]
+            - generic [ref=e39]: Coach
+          - link "Trainers" [ref=e40] [cursor=pointer]:
+            - /url: /client/trainers
+            - img [ref=e41]
+            - generic [ref=e44]: Trainers
+          - link "Shop" [ref=e45] [cursor=pointer]:
+            - /url: /merch
+            - img [ref=e46]
+            - generic [ref=e50]: Shop
+          - link "Leaderboard" [ref=e51] [cursor=pointer]:
+            - /url: /levels
+            - img [ref=e52]
+            - generic [ref=e59]: Leaderboard
+      - generic [ref=e61]:
+        - link "DEV MODE" [ref=e62] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e64]: DEV MODE
+        - region "User profile card" [ref=e68]:
+          - generic [ref=e69]:
+            - generic [ref=e70] [cursor=pointer]:
+              - link "Open profile" [ref=e71]:
+                - /url: /profile
+                - generic [ref=e73]: U
+              - link "Profile" [ref=e75]:
+                - /url: /profile
+              - button "Logout" [ref=e77]
+            - generic:
+              - generic:
+                - paragraph: Bio
+                - generic:
+                  - paragraph: No bio yet.
+              - generic:
+                - paragraph: Points + Level
+                - paragraph: 0 points | Level 1
+              - generic:
+                - paragraph: Milestones
+                - generic:
+                  - generic:
+                    - generic: Milestones
+                    - generic: No Milestones Displayed
+  - main [ref=e78]:
+    - generic [ref=e81]:
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - link "Month view" [ref=e84] [cursor=pointer]:
+            - /url: /calendar?view=month
+          - link "Week view" [ref=e85] [cursor=pointer]:
+            - /url: /calendar?view=week
+          - link "Day view" [ref=e86] [cursor=pointer]:
+            - /url: /calendar/day/2026-03-29
+        - generic [ref=e87]:
+          - generic [ref=e88]:
+            - text: Week View â€”
+            - generic [ref=e89]: Detailed
+          - generic "Calendar layout information" [ref=e90]:
+            - button "Calendar layout settings help" [ref=e91] [cursor=pointer]:
+              - generic [ref=e92]: i
+            - 'tooltip "Controls how cards display: Detailed combines items, Grouped separates categories. Open calendar settings"':
+              - text: "Controls how cards display: Detailed combines items, Grouped separates categories."
+              - link "Open calendar settings":
+                - /url: /profile
+          - button "Schedules" [ref=e93] [cursor=pointer]
+          - button "Toggle workout heatmap legend" [ref=e95] [cursor=pointer]:
+            - generic [ref=e96]: Heatmap legend
+            - img [ref=e98]
+      - generic "Week jump controls" [ref=e103]:
+        - generic [ref=e104]:
+          - button "Jump to today" [ref=e105] [cursor=pointer]
+          - generic [ref=e106]:
+            - generic [ref=e107]: Jump to date
+            - textbox "Jump to date" [ref=e108]
+            - button "Jump to date" [ref=e109] [cursor=pointer]
+          - button "Jump to next workout" [ref=e110] [cursor=pointer]
+          - generic [ref=e111]:
+            - generic [ref=e112]: Jump to task
+            - textbox "Jump to task" [ref=e113]:
+              - /placeholder: Task name
+            - button "Jump to task" [ref=e114] [cursor=pointer]
+        - paragraph
+      - generic [ref=e115]:
+        - 'link "â† Prev" [ref=e116] [cursor=pointer]':
+          - /url: /calendar?view=week&week=12&weekYear=2026
+        - generic [ref=e117]:
+          - generic [ref=e118]: 3/23/26 â€“ 3/29/26
+          - generic [ref=e119]: "2026"
+        - link "Next â†’" [ref=e120] [cursor=pointer]:
+          - /url: /calendar?view=week&week=14&weekYear=2026
+      - region "Calendar week navigation" [ref=e121]:
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - generic [ref=e128]: Mon
+            - generic [ref=e129]: Tue
+            - generic [ref=e130]: Wed
+            - generic [ref=e131]: Thu
+            - generic [ref=e132]: Fri
+            - generic [ref=e133]: Sat
+            - generic [ref=e134]: Sun
+          - generic [ref=e135]:
+            - generic [ref=e136] [cursor=pointer]:
+              - link "Mon 23rd" [ref=e139]:
+                - /url: /calendar/day/2026-03-23
+                - generic [ref=e140]: Mon
+                - generic [ref=e141]: 23rd
+              - generic [ref=e144]: ï¼‹
+            - generic [ref=e145] [cursor=pointer]:
+              - link "Tue 24th" [ref=e148]:
+                - /url: /calendar/day/2026-03-24
+                - generic [ref=e149]: Tue
+                - generic [ref=e150]: 24th
+              - generic [ref=e153]: ï¼‹
+            - generic [ref=e154] [cursor=pointer]:
+              - link "Wed 25th" [ref=e157]:
+                - /url: /calendar/day/2026-03-25
+                - generic [ref=e158]: Wed
+                - generic [ref=e159]: 25th
+              - generic [ref=e162]: ï¼‹
+            - generic [ref=e163] [cursor=pointer]:
+              - link "Thu 26th" [ref=e166]:
+                - /url: /calendar/day/2026-03-26
+                - generic [ref=e167]: Thu
+                - generic [ref=e168]: 26th
+              - generic [ref=e171]: ï¼‹
+            - generic [ref=e172] [cursor=pointer]:
+              - link "Fri 27th" [ref=e175]:
+                - /url: /calendar/day/2026-03-27
+                - generic [ref=e176]: Fri
+                - generic [ref=e177]: 27th
+              - generic [ref=e180]: ï¼‹
+            - generic [ref=e181] [cursor=pointer]:
+              - link "Sat 28th" [ref=e184]:
+                - /url: /calendar/day/2026-03-28
+                - generic [ref=e185]: Sat
+                - generic [ref=e186]: 28th
+              - generic [ref=e189]: ï¼‹
+            - generic [ref=e190] [cursor=pointer]:
+              - generic [ref=e192]:
+                - link "Sun 29th" [ref=e193]:
+                  - /url: /calendar/day/2026-03-29
+                  - generic [ref=e194]: Sun
+                  - generic [ref=e195]: 29th
+                - generic [ref=e196]: Today
+              - generic [ref=e199]: ï¼‹
+  - generic:
+    - button "Open coach" [ref=e201] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button [disabled]: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Good evening! Nice work getting through the day.
+          - generic:
+            - button: What's on today?
+            - button: Calendar
+            - button: Workouts
+            - button: Goals
+            - button: Progress
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - button "Toggle quick actions" [ref=e205] [cursor=pointer]:
+      - generic [ref=e206]: ⚡
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started

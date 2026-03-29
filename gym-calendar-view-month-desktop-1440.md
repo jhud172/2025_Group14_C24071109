@@ -1,0 +1,315 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo One To One" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+        - generic [ref=e9]: One To One
+      - navigation "Primary navigation" [ref=e12]:
+        - generic [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /gym/dashboard
+            - img [ref=e16]
+            - generic [ref=e21]: Dashboard
+          - link "Trainers" [ref=e22] [cursor=pointer]:
+            - /url: /gym/admin/trainers
+            - img [ref=e23]
+            - generic [ref=e28]: Trainers
+          - link "Memberships" [ref=e29] [cursor=pointer]:
+            - /url: /gym/admin/memberships
+            - img [ref=e30]
+            - generic [ref=e37]: Memberships
+          - link "Support" [ref=e38] [cursor=pointer]:
+            - /url: /admin/feedback
+            - img [ref=e39]
+            - generic [ref=e41]: Support
+          - link "Profile" [ref=e42] [cursor=pointer]:
+            - /url: /profile
+            - img [ref=e43]
+            - generic [ref=e46]: Profile
+      - generic [ref=e48]:
+        - link "DEV MODE" [ref=e49] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e51]: DEV MODE
+        - region "User profile card" [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e57] [cursor=pointer]:
+              - link "Open profile" [ref=e58]:
+                - /url: /profile
+                - generic [ref=e60]: U
+              - link "Profile" [ref=e62]:
+                - /url: /profile
+              - button "Logout" [ref=e64]
+            - generic:
+              - generic:
+                - paragraph: Bio
+                - generic:
+                  - paragraph: No bio yet.
+              - generic:
+                - paragraph: Points + Level
+                - paragraph: 0 points | Level 1
+              - generic:
+                - paragraph: Milestones
+                - generic:
+                  - generic:
+                    - generic: Milestones
+                    - generic: No Milestones Displayed
+  - main [ref=e65]:
+    - generic [ref=e66]:
+      - generic [ref=e68]:
+        - generic [ref=e69]:
+          - generic [ref=e70]:
+            - link "Month view" [ref=e71] [cursor=pointer]:
+              - /url: /calendar?view=month
+            - link "Week view" [ref=e72] [cursor=pointer]:
+              - /url: /calendar?view=week
+            - link "Day view" [ref=e73] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-29
+          - generic [ref=e74]:
+            - generic "Expand month view" [ref=e75]:
+              - button "Expand" [ref=e76] [cursor=pointer]
+            - generic "Expand mode information" [ref=e77]:
+              - button "How expand mode works" [ref=e78] [cursor=pointer]:
+                - generic [ref=e79]: i
+              - tooltip "Expand mode loads adjacent months as you scroll near either edge."
+            - generic [ref=e80]:
+              - text: "Month View ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â\x9d"
+              - generic [ref=e81]: Detailed
+            - generic "Calendar layout information" [ref=e82]:
+              - button "Calendar layout settings help" [ref=e83] [cursor=pointer]:
+                - generic [ref=e84]: i
+              - 'tooltip "Controls how cards display: Detailed combines items, Grouped separates categories. Open calendar settings"':
+                - text: "Controls how cards display: Detailed combines items, Grouped separates categories."
+                - link "Open calendar settings":
+                  - /url: /profile
+            - button "Schedules" [ref=e85] [cursor=pointer]
+            - 'button "ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬Â¦ Motivation" [ref=e86] [cursor=pointer]'
+        - generic "Month jump controls" [ref=e87]:
+          - generic [ref=e88]:
+            - button "Jump to today" [ref=e89] [cursor=pointer]
+            - generic [ref=e90]:
+              - generic [ref=e91]: Jump to date
+              - textbox "Jump to date" [ref=e92]
+              - button "Jump to date" [ref=e93] [cursor=pointer]
+            - button "Jump to next workout" [ref=e94] [cursor=pointer]
+            - generic [ref=e95]:
+              - generic [ref=e96]: Jump to task
+              - textbox "Jump to task" [ref=e97]:
+                - /placeholder: Task name
+              - button "Jump to task" [ref=e98] [cursor=pointer]
+          - paragraph
+        - generic [ref=e99]:
+          - 'link "ÃƒÂ¢Ã¢â‚¬Â Ã‚Â Prev" [ref=e100] [cursor=pointer]':
+            - /url: /calendar?view=month&month=2&year=2026
+          - generic [ref=e101]:
+            - generic [ref=e102]: March
+            - generic [ref=e103]: "2026"
+          - link "Next ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢" [ref=e104] [cursor=pointer]:
+            - /url: /calendar?view=month&month=4&year=2026
+        - region "Calendar month carousel" [ref=e106]:
+          - generic [ref=e108]:
+            - generic [ref=e109]:
+              - generic [ref=e110]: Mon
+              - generic [ref=e111]: Tue
+              - generic [ref=e112]: Wed
+              - generic [ref=e113]: Thu
+              - generic [ref=e114]: Fri
+              - generic [ref=e115]: Sat
+              - generic [ref=e116]: Sun
+            - generic [ref=e117]:
+              - generic [ref=e118] [cursor=pointer]:
+                - link "1st" [ref=e121]:
+                  - /url: /calendar/day/2026-03-01
+                - generic [ref=e124]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e125] [cursor=pointer]:
+                - link "2nd" [ref=e128]:
+                  - /url: /calendar/day/2026-03-02
+                - generic [ref=e131]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e132] [cursor=pointer]:
+                - link "3rd" [ref=e135]:
+                  - /url: /calendar/day/2026-03-03
+                - generic [ref=e138]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e139] [cursor=pointer]:
+                - link "4th" [ref=e142]:
+                  - /url: /calendar/day/2026-03-04
+                - generic [ref=e145]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e146] [cursor=pointer]:
+                - link "5th" [ref=e149]:
+                  - /url: /calendar/day/2026-03-05
+                - generic [ref=e152]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e153] [cursor=pointer]:
+                - link "6th" [ref=e156]:
+                  - /url: /calendar/day/2026-03-06
+                - generic [ref=e159]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e160] [cursor=pointer]:
+                - link "7th" [ref=e163]:
+                  - /url: /calendar/day/2026-03-07
+                - generic [ref=e166]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e167] [cursor=pointer]:
+                - link "8th" [ref=e170]:
+                  - /url: /calendar/day/2026-03-08
+                - generic [ref=e173]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e174] [cursor=pointer]:
+                - link "9th" [ref=e177]:
+                  - /url: /calendar/day/2026-03-09
+                - generic [ref=e180]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e181] [cursor=pointer]:
+                - link "10th" [ref=e184]:
+                  - /url: /calendar/day/2026-03-10
+                - generic [ref=e187]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e188] [cursor=pointer]:
+                - link "11th" [ref=e191]:
+                  - /url: /calendar/day/2026-03-11
+                - generic [ref=e194]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e195] [cursor=pointer]:
+                - link "12th" [ref=e198]:
+                  - /url: /calendar/day/2026-03-12
+                - generic [ref=e201]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e202] [cursor=pointer]:
+                - link "13th" [ref=e205]:
+                  - /url: /calendar/day/2026-03-13
+                - generic [ref=e208]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e209] [cursor=pointer]:
+                - link "14th" [ref=e212]:
+                  - /url: /calendar/day/2026-03-14
+                - generic [ref=e215]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e216] [cursor=pointer]:
+                - link "15th" [ref=e219]:
+                  - /url: /calendar/day/2026-03-15
+                - generic [ref=e222]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e223] [cursor=pointer]:
+                - link "16th" [ref=e226]:
+                  - /url: /calendar/day/2026-03-16
+                - generic [ref=e229]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e230] [cursor=pointer]:
+                - link "17th" [ref=e233]:
+                  - /url: /calendar/day/2026-03-17
+                - generic [ref=e236]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e237] [cursor=pointer]:
+                - link "18th" [ref=e240]:
+                  - /url: /calendar/day/2026-03-18
+                - generic [ref=e243]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e244] [cursor=pointer]:
+                - link "19th" [ref=e247]:
+                  - /url: /calendar/day/2026-03-19
+                - generic [ref=e250]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e251] [cursor=pointer]:
+                - link "20th" [ref=e254]:
+                  - /url: /calendar/day/2026-03-20
+                - generic [ref=e257]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e258] [cursor=pointer]:
+                - link "21st" [ref=e261]:
+                  - /url: /calendar/day/2026-03-21
+                - generic [ref=e264]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e265] [cursor=pointer]:
+                - link "22nd" [ref=e268]:
+                  - /url: /calendar/day/2026-03-22
+                - generic [ref=e271]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e272] [cursor=pointer]:
+                - link "23rd" [ref=e275]:
+                  - /url: /calendar/day/2026-03-23
+                - generic [ref=e278]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e279] [cursor=pointer]:
+                - link "24th" [ref=e282]:
+                  - /url: /calendar/day/2026-03-24
+                - generic [ref=e285]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e286] [cursor=pointer]:
+                - link "25th" [ref=e289]:
+                  - /url: /calendar/day/2026-03-25
+                - generic [ref=e292]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e293] [cursor=pointer]:
+                - link "26th" [ref=e296]:
+                  - /url: /calendar/day/2026-03-26
+                - generic [ref=e299]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e300] [cursor=pointer]:
+                - link "27th" [ref=e303]:
+                  - /url: /calendar/day/2026-03-27
+                - generic [ref=e306]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e307] [cursor=pointer]:
+                - link "28th" [ref=e310]:
+                  - /url: /calendar/day/2026-03-28
+                - generic [ref=e313]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e314] [cursor=pointer]:
+                - generic [ref=e316]:
+                  - link "29th" [ref=e317]:
+                    - /url: /calendar/day/2026-03-29
+                  - generic [ref=e318]: Today
+                - generic [ref=e321]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e322] [cursor=pointer]:
+                - generic [ref=e324]:
+                  - link "30th" [ref=e325]:
+                    - /url: /calendar/day/2026-03-30
+                  - generic [ref=e326]: Tomorrow
+                - generic [ref=e329]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+              - generic [ref=e330] [cursor=pointer]:
+                - link "31st" [ref=e333]:
+                  - /url: /calendar/day/2026-03-31
+                - generic [ref=e336]: ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹
+      - tooltip
+  - generic:
+    - button "Open coach" [ref=e337] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button [disabled]: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Good evening! Nice work getting through the day.
+          - generic:
+            - button: What's on today?
+            - button: Calendar
+            - button: Workouts
+            - button: Goals
+            - button: Progress
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - button "Toggle quick actions" [ref=e341] [cursor=pointer]:
+      - generic [ref=e342]: ⚡
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started

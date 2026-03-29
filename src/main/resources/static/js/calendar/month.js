@@ -82,7 +82,7 @@
         const type = item.dataset.type;
         const completed = item.dataset.completed;
         const title = item.dataset.title || 'Untitled';
-        const time = item.dataset.time || '—';
+        const time = item.dataset.time || '&#8212;';
         const notes = item.dataset.notes || 'No description';
         const isCompleted = completed === 'true';
         const isWorkout = type === 'occurrence';
@@ -97,7 +97,7 @@
         if (isCompleted) {
             html += `
                 <div class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
-                    ✓ Completed
+                    &#10003; Completed
                 </div>
                 <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">${getCompletedMessage(item)}</p>
             `;
@@ -474,9 +474,16 @@
         return 'heat-high';
     }
 
+    function normaliseSummaries(summaries) {
+        if (Array.isArray(summaries)) return summaries;
+        if (Array.isArray(summaries?.items)) return summaries.items;
+        if (Array.isArray(summaries?.summaries)) return summaries.summaries;
+        return [];
+    }
+
     function applySummaryToPane(pane, summaries) {
         if (!pane) return;
-        const summaryMap = new Map(summaries.map((item) => [item.date, item]));
+        const summaryMap = new Map(normaliseSummaries(summaries).map((item) => [item.date, item]));
 
         pane.querySelectorAll('.calendar-day-card[data-date]').forEach((card) => {
             const date = card.getAttribute('data-date');
@@ -1704,3 +1711,4 @@
         }
     }());
 })();
+

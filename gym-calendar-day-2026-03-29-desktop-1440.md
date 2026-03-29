@@ -1,0 +1,352 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo One To One" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+        - generic [ref=e9]: One To One
+      - navigation "Primary navigation" [ref=e12]:
+        - generic [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /gym/dashboard
+            - img [ref=e16]
+            - generic [ref=e21]: Dashboard
+          - link "Trainers" [ref=e22] [cursor=pointer]:
+            - /url: /gym/admin/trainers
+            - img [ref=e23]
+            - generic [ref=e28]: Trainers
+          - link "Memberships" [ref=e29] [cursor=pointer]:
+            - /url: /gym/admin/memberships
+            - img [ref=e30]
+            - generic [ref=e37]: Memberships
+          - link "Support" [ref=e38] [cursor=pointer]:
+            - /url: /admin/feedback
+            - img [ref=e39]
+            - generic [ref=e41]: Support
+          - link "Profile" [ref=e42] [cursor=pointer]:
+            - /url: /profile
+            - img [ref=e43]
+            - generic [ref=e46]: Profile
+      - generic [ref=e48]:
+        - link "DEV MODE" [ref=e49] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e51]: DEV MODE
+        - region "User profile card" [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e57] [cursor=pointer]:
+              - link "Open profile" [ref=e58]:
+                - /url: /profile
+                - generic [ref=e60]: U
+              - link "Profile" [ref=e62]:
+                - /url: /profile
+              - button "Logout" [ref=e64]
+            - generic:
+              - generic:
+                - paragraph: Bio
+                - generic:
+                  - paragraph: No bio yet.
+              - generic:
+                - paragraph: Points + Level
+                - paragraph: 0 points | Level 1
+              - generic:
+                - paragraph: Milestones
+                - generic:
+                  - generic:
+                    - generic: Milestones
+                    - generic: No Milestones Displayed
+  - main [ref=e65]:
+    - generic [ref=e66]:
+      - link "Skip to day content" [ref=e67] [cursor=pointer]:
+        - /url: "#day-main-content"
+      - generic [ref=e68]:
+        - generic [ref=e69]:
+          - navigation "Calendar mode navigation" [ref=e70]:
+            - link "Month view" [ref=e71] [cursor=pointer]:
+              - /url: /calendar?view=month
+            - link "Week view" [ref=e72] [cursor=pointer]:
+              - /url: /calendar?view=week
+            - generic [ref=e73]: Day view
+          - generic [ref=e74]:
+            - generic: Today
+            - 'button "Time theme: on" [pressed] [ref=e75] [cursor=pointer]':
+              - img [ref=e76]
+              - generic [ref=e78]: "Time theme: on"
+            - button "Show keyboard shortcuts" [ref=e79] [cursor=pointer]:
+              - img [ref=e80]
+        - generic [ref=e82]:
+          - generic [ref=e83]:
+            - paragraph [ref=e84]: Day Completion
+            - paragraph [ref=e85]: 0/0 completed (0%)
+          - progressbar [ref=e86]
+          - status:
+            - paragraph: Completion reached for this day
+            - paragraph: 0 tasks left · 0 workouts left
+        - generic "Week navigation" [ref=e87]:
+          - generic [ref=e88]:
+            - link "Mon 23" [ref=e89] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-23
+              - generic [ref=e90]: Mon
+              - generic [ref=e91]: "23"
+            - link "Tue 24" [ref=e92] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-24
+              - generic [ref=e93]: Tue
+              - generic [ref=e94]: "24"
+            - link "Wed 25" [ref=e95] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-25
+              - generic [ref=e96]: Wed
+              - generic [ref=e97]: "25"
+            - link "Thu 26" [ref=e98] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-26
+              - generic [ref=e99]: Thu
+              - generic [ref=e100]: "26"
+            - link "Fri 27" [ref=e101] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-27
+              - generic [ref=e102]: Fri
+              - generic [ref=e103]: "27"
+            - link "Sat 28" [ref=e104] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-28
+              - generic [ref=e105]: Sat
+              - generic [ref=e106]: "28"
+            - link "Sun 29" [ref=e107] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-29
+              - generic [ref=e108]: Sun
+              - generic [ref=e109]: "29"
+        - generic [ref=e110]:
+          - link "Previous day" [ref=e111] [cursor=pointer]:
+            - /url: /calendar/day/2026-03-28
+            - text: ← Prev
+          - generic [ref=e112]:
+            - generic [ref=e113]: 29th of March
+            - generic [ref=e114]: "2026"
+          - link "Next day" [ref=e115] [cursor=pointer]:
+            - /url: /calendar/day/2026-03-30
+            - text: Next →
+        - generic [ref=e117]:
+          - generic [ref=e118]:
+            - generic [ref=e121]:
+              - generic [ref=e122]: ⛅
+              - generic [ref=e123]:
+                - paragraph [ref=e124]: Good evening
+                - paragraph [ref=e125]: Mixed skies. A good day for balanced effort.
+            - paragraph [ref=e126]: "Day view: 2026-03-29"
+            - generic [ref=e127]:
+              - heading "Sunday â€” 29th March 2026" [level=1] [ref=e128]
+              - generic [ref=e129]:
+                - generic [ref=e130]: Today
+                - generic [ref=e131]: 0/0 completed (0%)
+            - generic [ref=e132]:
+              - generic [ref=e133]:
+                - generic [ref=e134]:
+                  - heading "Timed Focus" [level=2] [ref=e135]
+                  - generic [ref=e136]: Clock clear
+                - generic [ref=e137]:
+                  - generic [ref=e138]: "--:-- --"
+                  - generic [ref=e139]: Nothing scheduled
+                  - generic [ref=e140]: 17:39:58
+                - paragraph [ref=e141]: No tasks or workouts were planned for this day.
+              - generic [ref=e143]:
+                - generic [ref=e144]:
+                  - heading "Daily Focus" [level=2] [ref=e145]
+                  - generic [ref=e146]: Auto-saves
+                - generic [ref=e147]:
+                  - generic [ref=e148]: Daily Focus
+                  - combobox "Daily Focus" [disabled] [ref=e149]:
+                    - option "Select a focus..." [selected]
+                    - option "Midday"
+                    - option "Custom focus"
+                  - button "Save" [ref=e150] [cursor=pointer]
+                - button "Optimise with AI" [ref=e152] [cursor=pointer]:
+                  - img [ref=e153]
+                  - text: Optimise with AI
+                - link "Choose preferences" [ref=e155] [cursor=pointer]:
+                  - /url: /select-preferences#preferences
+          - generic [ref=e156]:
+            - generic "Day is 0% complete" [ref=e157]:
+              - img [ref=e158]
+              - generic [ref=e161]:
+                - paragraph [ref=e162]: 0%
+                - paragraph [ref=e163]: Started
+            - list "Day statistics" [ref=e164]:
+              - listitem [ref=e165]:
+                - paragraph [ref=e166]: "0"
+                - paragraph [ref=e167]: Done
+              - listitem [ref=e168]:
+                - paragraph [ref=e169]: "0"
+                - paragraph [ref=e170]: Total
+              - listitem "Go to tasks tab" [ref=e171] [cursor=pointer]:
+                - paragraph [ref=e172]: "0"
+                - paragraph [ref=e173]: Tasks left
+              - listitem [ref=e174]:
+                - paragraph [ref=e175]: "0"
+                - paragraph [ref=e176]: Workouts left
+        - generic [ref=e178]:
+          - generic [ref=e179]:
+            - paragraph [ref=e180]: Day completion
+            - paragraph [ref=e181]: 0/0 completed (0%)
+          - generic "Daily completion streak" [ref=e182]:
+            - link [ref=e184] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-16
+            - link [ref=e186] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-17
+            - link [ref=e188] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-18
+            - link [ref=e190] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-19
+            - link [ref=e192] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-20
+            - link [ref=e194] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-21
+            - link [ref=e196] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-22
+            - link [ref=e198] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-23
+            - link [ref=e200] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-24
+            - link [ref=e202] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-25
+            - link [ref=e204] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-26
+            - link [ref=e206] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-27
+            - link [ref=e208] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-28
+            - link [ref=e210] [cursor=pointer]:
+              - /url: /calendar/day/2026-03-29
+        - generic [ref=e211]:
+          - tablist "Day view sections" [ref=e212]:
+            - tab "Timeline" [selected] [ref=e213] [cursor=pointer]:
+              - img [ref=e214]
+              - generic [ref=e216]: Timeline
+            - tab "Tasks 0" [ref=e217] [cursor=pointer]:
+              - img [ref=e218]
+              - generic [ref=e220]: Tasks
+              - generic [ref=e221]: "0"
+            - tab "Workouts 0" [ref=e222] [cursor=pointer]:
+              - img [ref=e223]
+              - generic [ref=e225]: Workouts
+              - generic [ref=e226]: "0"
+            - tab "Overview" [ref=e227] [cursor=pointer]:
+              - img [ref=e228]
+              - generic [ref=e230]: Overview
+          - tabpanel "Timeline" [ref=e231]:
+            - generic [ref=e232]:
+              - generic [ref=e233]:
+                - generic [ref=e234]:
+                  - heading "Your Timeline for Today" [level=2] [ref=e235]
+                  - paragraph [ref=e236]: Your tasks and workouts visualised across the day. Tasks with a set time appear in their time slots.
+                - link "Focus mode" [ref=e237] [cursor=pointer]:
+                  - /url: /calendar/focus/2026-03-29
+                  - img [ref=e238]
+                  - generic [ref=e240]: Focus mode
+              - generic "Daily timeline" [ref=e241]:
+                - generic [ref=e242]:
+                  - generic [ref=e243]: 🌟
+                  - paragraph [ref=e244]: 🌟 No timed tasks scheduled for this day
+                - generic [ref=e245]:
+                  - generic [ref=e246]: Task
+                  - generic [ref=e248]: Workout
+                  - generic [ref=e250]: Now
+                - list "Day timeline" [ref=e252]:
+                  - listitem [ref=e253]:
+                    - generic [ref=e254]: 06:00
+                  - listitem [ref=e256]:
+                    - generic [ref=e257]: 07:00
+                  - listitem [ref=e259]:
+                    - generic [ref=e260]: 08:00
+                  - listitem [ref=e262]:
+                    - generic [ref=e263]: 09:00
+                  - listitem [ref=e265]:
+                    - generic [ref=e266]: 10:00
+                  - listitem [ref=e268]:
+                    - generic [ref=e269]: 11:00
+                  - listitem [ref=e271]:
+                    - generic [ref=e272]: 12:00
+                  - listitem [ref=e274]:
+                    - generic [ref=e275]: 13:00
+                  - listitem [ref=e277]:
+                    - generic [ref=e278]: 14:00
+                  - listitem [ref=e280]:
+                    - generic [ref=e281]: 15:00
+                  - listitem [ref=e283]:
+                    - generic [ref=e284]: 16:00
+                  - listitem [ref=e286]:
+                    - generic [ref=e288]: 17:00
+                  - listitem [ref=e290]:
+                    - generic [ref=e291]: 18:00
+                  - listitem [ref=e293]:
+                    - generic [ref=e294]: 19:00
+                  - listitem [ref=e296]:
+                    - generic [ref=e297]: 20:00
+                  - listitem [ref=e299]:
+                    - generic [ref=e300]: 21:00
+                  - listitem [ref=e302]:
+                    - generic [ref=e303]: 22:00
+                  - listitem [ref=e305]:
+                    - generic [ref=e306]: 23:00
+  - generic:
+    - button "Open coach" [ref=e308] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button [disabled]: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Good evening! Nice work getting through the day.
+          - generic:
+            - button: What's on today?
+            - button: Calendar
+            - button: Workouts
+            - button: Goals
+            - button: Progress
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - button "Toggle quick actions" [ref=e312] [cursor=pointer]:
+      - generic [ref=e313]: ⚡
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started

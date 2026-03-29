@@ -1,0 +1,424 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo One To One" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+        - generic [ref=e9]: One To One
+      - navigation "Primary navigation" [ref=e12]:
+        - generic [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e21]: Dashboard
+          - link "Calendar" [ref=e22] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e23]
+            - generic [ref=e27]: Calendar
+          - link "Trainer Library" [ref=e28] [cursor=pointer]:
+            - /url: /trainer/library
+            - img [ref=e29]
+            - generic [ref=e36]: Trainer Library
+          - link "Clients" [ref=e37] [cursor=pointer]:
+            - /url: /trainer/clients
+            - img [ref=e38]
+            - generic [ref=e43]: Clients
+          - link "Inbox" [ref=e44] [cursor=pointer]:
+            - /url: /inbox
+            - img [ref=e45]
+            - generic [ref=e47]: Inbox
+          - link "Profile" [ref=e48] [cursor=pointer]:
+            - /url: /profile
+            - img [ref=e49]
+            - generic [ref=e52]: Profile
+      - generic [ref=e54]:
+        - link "DEV MODE" [ref=e55] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e57]: DEV MODE
+        - region "User profile card" [ref=e61]:
+          - generic [ref=e62]:
+            - generic [ref=e63] [cursor=pointer]:
+              - link "Open profile" [ref=e64]:
+                - /url: /profile
+                - generic [ref=e66]: U
+              - link "Profile" [ref=e68]:
+                - /url: /profile
+              - button "Logout" [ref=e70]
+            - generic:
+              - generic:
+                - paragraph: Bio
+                - generic:
+                  - paragraph: No bio yet.
+              - generic:
+                - paragraph: Points + Level
+                - paragraph: 0 points | Level 1
+              - generic:
+                - paragraph: Milestones
+                - generic:
+                  - generic:
+                    - generic: Milestones
+                    - generic: No Milestones Displayed
+  - main [ref=e71]:
+    - generic [ref=e72]:
+      - generic [ref=e73]:
+        - complementary [ref=e74]:
+          - generic [ref=e75]:
+            - generic [ref=e77]:
+              - generic [ref=e78]:
+                - img "Profile photo"
+              - generic [ref=e79]:
+                - generic [ref=e80]:
+                  - heading "Avery" [level=1] [ref=e81]
+                  - button "Premium membership details" [ref=e82] [cursor=pointer]:
+                    - img
+                    - generic: Premium membership active
+                - paragraph [ref=e83]: "@demo_client"
+            - group "Profile completion guidance" [ref=e84]:
+              - generic [ref=e85]:
+                - generic [ref=e86]:
+                  - generic [ref=e87]: Profile radar
+                  - generic [ref=e88]: 100%
+                - generic [ref=e89]: Profile completed
+                - button "Dismiss" [ref=e90] [cursor=pointer]
+              - generic:
+                - paragraph: Profile radar checklist
+                - paragraph: Profile complete
+                - paragraph: Everything important is filled in and verified.
+                - generic: All done
+            - paragraph [ref=e92]: Premium client demo account with a live trainer link and a ready-to-use premium profile.
+            - generic [ref=e93]:
+              - paragraph [ref=e94]: Visible milestones
+              - generic [ref=e96]:
+                - generic [ref=e97]: Milestones
+                - generic [ref=e98]: No Milestones Displayed
+          - generic "Profile stats" [ref=e100]:
+            - generic [ref=e101]:
+              - paragraph [ref=e102]: "1840"
+              - paragraph [ref=e103]: Points
+            - generic [ref=e104]:
+              - paragraph [ref=e105]: "10"
+              - paragraph [ref=e106]: Level
+            - generic [ref=e107]:
+              - paragraph [ref=e108]: "0"
+              - paragraph [ref=e109]: Logs
+          - generic [ref=e110]:
+            - button "Customise Profile" [ref=e111] [cursor=pointer]:
+              - img [ref=e112]
+              - generic [ref=e114]: Customise Profile
+            - generic [ref=e115]:
+              - paragraph [ref=e116]: Account actions
+              - generic [ref=e117]:
+                - link "Goals" [ref=e118] [cursor=pointer]:
+                  - /url: /goals
+                  - img [ref=e119]
+                  - text: Goals
+                - link "Orders" [ref=e121] [cursor=pointer]:
+                  - /url: /orders
+                  - img [ref=e122]
+                  - text: Orders
+                - button "Options" [ref=e124] [cursor=pointer]: Options
+                - button "Settings" [ref=e129] [cursor=pointer]:
+                  - img [ref=e130]
+                  - text: Settings
+        - generic [ref=e133]:
+          - generic [ref=e134]:
+            - heading "Profile Details" [level=2] [ref=e137]
+            - generic [ref=e139]: "Dev mode preview: this profile is shown using demo data. Sign in to edit your own account."
+            - generic [ref=e140]:
+              - generic [ref=e141]:
+                - generic [ref=e142]:
+                  - paragraph [ref=e143]: Username
+                  - paragraph [ref=e145]: "@demo_client"
+                - generic [ref=e146]:
+                  - paragraph [ref=e147]: Email
+                  - generic [ref=e149]:
+                    - paragraph [ref=e150]: demo_client@example.com
+                    - generic [ref=e151]: Verified
+              - generic [ref=e152]:
+                - generic [ref=e153]:
+                  - paragraph [ref=e154]: Phone number
+                  - generic [ref=e156]:
+                    - paragraph [ref=e157]: +44 7911123456
+                    - generic [ref=e158]: Verified
+                - generic [ref=e159]:
+                  - paragraph [ref=e160]: Name
+                  - paragraph [ref=e162]: Avery Client
+              - generic [ref=e164]:
+                - generic [ref=e165]:
+                  - paragraph [ref=e166]: Date of birth
+                  - button "Date of birth can only be set once and cannot be changed" [ref=e167]:
+                    - img [ref=e168]
+                    - 'tooltip "One-time input: once saved, date of birth cannot be changed."'
+                - generic [ref=e171]:
+                  - paragraph [ref=e172]: 18 Apr 1998
+                  - generic [ref=e173]: Locked
+              - generic [ref=e174]:
+                - paragraph [ref=e175]: Bio
+                - paragraph [ref=e177]: Premium client demo account with a live trainer link and a ready-to-use premium profile.
+            - generic [ref=e178]:
+              - heading "Premium Feature – Customise Profile" [level=3] [ref=e181]
+              - generic [ref=e183]:
+                - generic [ref=e184]:
+                  - generic [ref=e185]:
+                    - paragraph [ref=e186]: Premium customiser active
+                    - paragraph [ref=e187]: Your selected profile customisation settings are active.
+                  - generic [ref=e188]: Premium
+                - generic [ref=e189]:
+                  - generic [ref=e190]:
+                    - paragraph [ref=e191]: Banner
+                    - paragraph [ref=e192]: AURORA
+                  - generic [ref=e193]:
+                    - paragraph [ref=e194]: Ring
+                    - paragraph [ref=e195]: NEON DUAL
+                  - generic [ref=e196]:
+                    - paragraph [ref=e197]: Card back
+                    - paragraph [ref=e198]: GLASS
+                  - generic [ref=e199]:
+                    - paragraph [ref=e200]: Milestones
+                    - paragraph [ref=e201]: No milestones selected
+          - generic [ref=e202]:
+            - generic [ref=e203]:
+              - generic [ref=e204]:
+                - heading "Health Conditions Why conditions affect training Health conditions shape recovery, exercise intensity, and movement safety. We use them to tailor workouts and recommendations." [level=2] [ref=e205]:
+                  - text: Health Conditions
+                  - generic [ref=e206]:
+                    - img "Why conditions affect training" [ref=e207] [cursor=pointer]
+                    - generic: Health conditions shape recovery, exercise intensity, and movement safety. We use them to tailor workouts and recommendations.
+                - paragraph [ref=e209]: Track permanent or time-limited conditions that affect your training.
+              - paragraph [ref=e210]: Premium members receive inbox follow-ups when timed conditions end.
+            - generic [ref=e211]:
+              - generic [ref=e212]:
+                - heading "Permanent conditions" [level=3] [ref=e213]
+                - list [ref=e214]:
+                  - listitem [ref=e215]: No permanent conditions saved.
+                - generic [ref=e216]:
+                  - generic [ref=e217]:
+                    - text: Add condition
+                    - textbox "Add condition" [ref=e218]
+                  - button "Add permanent" [ref=e219] [cursor=pointer]
+              - generic [ref=e220]:
+                - heading "Timed conditions" [level=3] [ref=e221]
+                - list [ref=e222]:
+                  - listitem [ref=e223]: No timed conditions saved.
+                - generic [ref=e224]:
+                  - generic [ref=e225]:
+                    - generic [ref=e226]:
+                      - text: Condition name
+                      - textbox "Condition name" [ref=e227]
+                    - generic [ref=e228]:
+                      - text: Start date
+                      - textbox "Start date" [ref=e229]: 2026-03-29
+                    - generic [ref=e230]:
+                      - text: Duration (days)
+                      - spinbutton "Duration (days)" [ref=e231]: "14"
+                  - button "Add timed condition" [ref=e232] [cursor=pointer]
+      - generic:
+        - dialog:
+          - generic:
+            - generic:
+              - img
+              - heading [level=2]: Options
+          - generic:
+            - generic:
+              - heading [level=3]: Appearance
+              - generic:
+                - heading [level=3]: Appearance
+                - paragraph: Choose between light and dark mode.
+                - generic:
+                  - generic:
+                    - button [pressed]:
+                      - img
+                      - text: Light
+                    - button:
+                      - img
+                      - text: Auto
+                    - button:
+                      - img
+                      - text: Dark
+              - generic:
+                - heading [level=3]: Calendar display
+                - paragraph: Control how tasks and workouts appear on the calendar.
+                - generic:
+                  - generic:
+                    - radio [checked]
+                    - generic:
+                      - generic: Detailed
+                      - generic: All tasks and workouts in a single combined list.
+                  - generic:
+                    - radio
+                    - generic:
+                      - generic: Grouped
+                      - generic: Tasks and workouts organised into separate categories.
+            - generic:
+              - heading [level=3]: Preferences
+              - generic:
+                - heading [level=3]: Exercise preferences
+                - paragraph: Update goals, training preferences, and more.
+                - link:
+                  - /url: /select-preferences
+                  - text: Open preferences
+            - generic:
+              - heading [level=3]: Templates
+              - generic:
+                - heading [level=3]: Workout session templates
+                - paragraph: "Choose your preferred workout layout: Flow, Professional, Plain, or Futuristic. Create custom layouts in the template builder."
+                - link:
+                  - /url: /workout-templates
+                  - text: Manage templates
+            - generic:
+              - heading [level=3]: Payments
+              - generic:
+                - heading [level=3]: Payment & Cards
+                - paragraph: Manage saved payment methods. Only the last 4 digits are shown.
+                - paragraph: No saved cards yet.
+                - group:
+                  - generic: + Add New Card
+            - generic:
+              - heading [level=3]: Password
+              - generic:
+                - heading [level=3]: Password change
+                - paragraph: Use secure reset flow to change your password.
+                - link:
+                  - /url: /forgot-password
+                  - text: Change password
+      - generic:
+        - dialog:
+          - generic:
+            - generic:
+              - img
+              - heading [level=2]: Settings
+            - button:
+              - img
+              - text: Close
+          - generic:
+            - generic:
+              - heading [level=3]: Activity
+              - generic:
+                - heading [level=3]: Exercise logs
+                - paragraph: Review your progress, trends, and workout history.
+                - link:
+                  - /url: /exercise-log/list
+                  - text: View exercise logs
+            - generic:
+              - heading [level=3]: Data Sharing
+              - generic:
+                - heading [level=3]: Accessibility
+                - paragraph: Colour blind mode and disability support toggles.
+                - generic:
+                  - generic:
+                    - generic: Colour blind mode
+                    - checkbox
+                  - generic:
+                    - generic: Hearing support
+                    - checkbox
+                  - generic:
+                    - generic: Mobility support
+                    - checkbox
+                  - generic:
+                    - generic: Vision support
+                    - checkbox
+                - button: Save accessibility
+              - generic:
+                - heading [level=3]: Trainer data sharing
+                - paragraph: Choose what your active trainer can view.
+                - generic:
+                  - generic:
+                    - generic: Recovery signals
+                    - checkbox
+                  - generic:
+                    - generic: Nutrition logs
+                    - checkbox
+                  - generic:
+                    - generic: Sleep signals
+                    - checkbox
+                  - generic:
+                    - generic: Fatigue signals
+                    - checkbox
+                  - generic:
+                    - generic: Weight trend
+                    - checkbox
+                - paragraph: Only your active trainer can see shared signals.
+                - button: Save sharing
+            - generic:
+              - heading [level=3]: Request data export
+              - paragraph: We will prepare a downloadable export and notify you in your inbox.
+              - generic:
+                - button: Request export
+          - generic:
+            - heading [level=3]: Danger Zone
+            - paragraph: Use this action only when you are sure. It cannot be undone.
+            - generic:
+              - heading [level=3]: Delete account
+              - paragraph: This action permanently removes all your data and cannot be undone.
+              - generic:
+                - generic:
+                  - text: Type DELETE to confirm
+                  - textbox
+                - button: Delete account
+  - generic:
+    - button "Open coach" [ref=e233] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button [disabled]: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Good evening! Nice work getting through the day.
+          - generic:
+            - button: What's on today?
+            - button: Calendar
+            - button: Workouts
+            - button: Goals
+            - button: Progress
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - button "Toggle quick actions" [ref=e237] [cursor=pointer]:
+      - generic [ref=e238]: ⚡
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started

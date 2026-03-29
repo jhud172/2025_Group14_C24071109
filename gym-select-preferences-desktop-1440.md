@@ -1,0 +1,153 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo One To One" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+        - generic [ref=e9]: One To One
+      - navigation "Primary navigation" [ref=e12]:
+        - generic [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /gym/dashboard
+            - img [ref=e16]
+            - generic [ref=e21]: Dashboard
+          - link "Trainers" [ref=e22] [cursor=pointer]:
+            - /url: /gym/admin/trainers
+            - img [ref=e23]
+            - generic [ref=e28]: Trainers
+          - link "Memberships" [ref=e29] [cursor=pointer]:
+            - /url: /gym/admin/memberships
+            - img [ref=e30]
+            - generic [ref=e37]: Memberships
+          - link "Support" [ref=e38] [cursor=pointer]:
+            - /url: /admin/feedback
+            - img [ref=e39]
+            - generic [ref=e41]: Support
+          - link "Profile" [ref=e42] [cursor=pointer]:
+            - /url: /profile
+            - img [ref=e43]
+            - generic [ref=e46]: Profile
+      - generic [ref=e48]:
+        - link "DEV MODE" [ref=e49] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e51]: DEV MODE
+        - region "User profile card" [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e57] [cursor=pointer]:
+              - link "Open profile" [ref=e58]:
+                - /url: /profile
+                - generic [ref=e60]: U
+              - link "Profile" [ref=e62]:
+                - /url: /profile
+              - button "Logout" [ref=e64]
+            - generic:
+              - generic:
+                - paragraph: Bio
+                - generic:
+                  - paragraph: No bio yet.
+              - generic:
+                - paragraph: Points + Level
+                - paragraph: 0 points | Level 1
+              - generic:
+                - paragraph: Milestones
+                - generic:
+                  - generic:
+                    - generic: Milestones
+                    - generic: No Milestones Displayed
+  - main [ref=e65]:
+    - generic [ref=e67]:
+      - generic [ref=e68]:
+        - paragraph [ref=e69]: Your profile
+        - heading "Quick Preferences" [level=1] [ref=e70]
+        - paragraph [ref=e71]: Choose a quick setup once, then we will take you straight into your full preferences page where everything can be adjusted anytime.
+      - generic "Quick preferences setup" [ref=e72]:
+        - generic [ref=e74]: Quick Setup
+        - generic [ref=e76]: "1"
+      - generic [ref=e77]:
+        - generic [ref=e78]:
+          - generic [ref=e79]:
+            - paragraph [ref=e80]: Quick Setup
+            - heading "Choose a starter profile" [level=2] [ref=e81]
+            - paragraph [ref=e82]: This screen appears only once per user. Pick a preset to pre-fill your training defaults, or skip and start from scratch.
+          - generic [ref=e83]:
+            - generic [ref=e84]: Starter preset
+            - combobox "Starter preset" [ref=e85]:
+              - option "Skip and start from scratch" [selected]
+              - option "Weight Loss - Beginner"
+              - option "Weight Loss - Intermediate"
+              - option "Muscle Building"
+              - option "Strength Training"
+              - option "Endurance / Cardio"
+              - option "Flexibility & Mobility"
+              - option "General Health & Fitness"
+              - option "Home Workout - Beginner"
+        - generic [ref=e86]:
+          - button "Skip" [ref=e87] [cursor=pointer]
+          - button "Continue to preferences" [ref=e88] [cursor=pointer]
+  - generic:
+    - button "Open coach" [ref=e89] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button [disabled]: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Evening! Still things to tick off? I can help.
+          - generic:
+            - button: What's on today?
+            - button: Calendar
+            - button: Workouts
+            - button: Goals
+            - button: Progress
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - button "Toggle quick actions" [ref=e93] [cursor=pointer]:
+      - generic [ref=e94]: ⚡
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started

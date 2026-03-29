@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Calendar â€” Week', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('Calendar - Week', ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="styles">
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}">
@@ -19,7 +19,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="calendar-mode-indicator hidden sm:flex">
-                        Week View â€” <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
+                        Week View - <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
                     </div>
                     <div class="calendar-info-link" aria-label="Calendar layout information">
                         <button type="button" class="calendar-info-link__button" aria-label="Calendar layout settings help">
@@ -99,15 +99,15 @@
 
             <div class="calendar-nav-controls">
                 <a id="week-prev" th:href="@{/calendar(view='week', week=${prevWeek}, weekYear=${prevWeekYear})}"
-                        class="calendar-nav-btn">â† Prev</a>
+                        class="calendar-nav-btn">&#8592; Prev</a>
 
                 <div class="calendar-month-title">
-                    <span id="week-range" class="calendar-month-name" th:text="${weekStart + ' â€“ ' + weekEnd}"></span>
+                    <span id="week-range" class="calendar-month-name" th:text="${weekStart + &#39; - &#39; + weekEnd}"></span>
                     <span id="week-range-year" class="calendar-month-year" th:text="${weekYear}"></span>
                 </div>
 
                 <a id="week-next" th:href="@{/calendar(view='week', week=${nextWeek}, weekYear=${nextWeekYear})}"
-                        class="calendar-nav-btn">Next â†’</a>
+                        class="calendar-nav-btn">Next &#8594;</a>
             </div>
 
             <!-- Week stats bar (populated by week.js after heatmap fetch) -->
@@ -154,7 +154,7 @@
                                     <div class="calendar-day-content" th:with="grouped=${calendarLayout == T(uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
                                         <!-- Empty state when no tasks or schedules -->
                                         <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
-                                            <span class="calendar-empty-state-icon">ï¼‹</span>
+                                            <span class="calendar-empty-state-icon"></span>
                                         </div>
                                         <!-- Detailed mode (COMBINED_LIST) -->
                                         <div th:if="${!grouped}" class="calendar-singular-list">
@@ -171,9 +171,9 @@
                                                           data-completed=${task.completed}">
                                                 <div class="calendar-item-content">
                                                     <div class="calendar-item-title" th:text="${task.title}"></div>
-                                                    <div class="calendar-item-meta" th:text="${task.time != null ? task.time : 'â€”'}"></div>
+                                                    <div class="calendar-item-meta" th:text="${task.time != null ? task.time : &#39;&#8212;&#39;}"></div>
                                                 </div>
-                                                <div th:if="${task.completed}" class="calendar-item-check">âœ“</div>
+                                                <div th:if="${task.completed}" class="calendar-item-check">&#10003;</div>
                                             </div>
                                             <a th:if="${tTotal > 5}" th:href="@{'/calendar/day/' + ${dayModel.isoDate}}" class="calendar-more-link" th:text="${'+' + (tTotal - 5) + ' more tasks'}"></a>
                                             <hr th:if="${tTotal > 0 and sTotal > 0}" class="calendar-week-section-divider" />
@@ -186,14 +186,14 @@
                                                           data-type='occurrence',
                                                           data-title=${occTitle},
                                                           data-notes=${occ.scheduleName},
-                                                          data-time='â€”',
+                                                          data-time='&#8212;',
                                                           data-completed=${occ.completed},
                                                           data-date=${dayModel.isoDate}">
                                                 <div class="calendar-item-content">
                                                     <div class="calendar-item-title" th:text="${occTitle}"></div>
                                                     <div class="calendar-item-meta" th:text="'From: ' + ${occ.scheduleName}"></div>
                                                 </div>
-                                                <div th:if="${occ.completed}" class="calendar-item-check">âœ“</div>
+                                                <div th:if="${occ.completed}" class="calendar-item-check">&#10003;</div>
                                             </div>
                                             <a th:if="${sTotal > 4}" th:href="@{'/calendar/day/' + ${dayModel.isoDate}}" class="calendar-more-link" th:text="${'+' + (sTotal - 4) + ' more workouts'}"></a>
                                         </div>
@@ -224,7 +224,7 @@
                                                          th:with="occTitle=${occ.exercise != null ? occ.exercise.name : (occ.customExercise != null ? occ.customExercise.name : 'Unknown')}"
                                                          class="calendar-grouped-item"
                                                          th:classappend="${occ.completed} ? ' completed' : ''"
-                                                         th:attr="data-type='occurrence',data-id=${occ.id},data-title=${occTitle},data-notes=${occ.scheduleName},data-time='â€”',data-completed=${occ.completed},data-date=${dayModel.isoDate}">
+                                                         th:attr="data-type='occurrence',data-id=${occ.id},data-title=${occTitle},data-notes=${occ.scheduleName},data-time='&#8212;',data-completed=${occ.completed},data-date=${dayModel.isoDate}">
                                                         <span class="truncate" th:text="${occTitle}"></span>
                                                     </div>
                                                     <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${dayModel.isoDate}}" class="calendar-more-link" th:text="${'+' + (sTotal - 3) + ' more'}"></a>

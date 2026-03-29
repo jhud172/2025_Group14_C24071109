@@ -1,0 +1,141 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo One To One" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+        - generic [ref=e9]: One To One
+      - navigation "Primary navigation" [ref=e12]:
+        - generic [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e21]: Dashboard
+          - link "Calendar" [ref=e22] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e23]
+            - generic [ref=e27]: Calendar
+          - link "Trainer Library" [ref=e28] [cursor=pointer]:
+            - /url: /trainer/library
+            - img [ref=e29]
+            - generic [ref=e36]: Trainer Library
+          - link "Clients" [ref=e37] [cursor=pointer]:
+            - /url: /trainer/clients
+            - img [ref=e38]
+            - generic [ref=e43]: Clients
+          - link "Inbox" [ref=e44] [cursor=pointer]:
+            - /url: /inbox
+            - img [ref=e45]
+            - generic [ref=e47]: Inbox
+          - link "Profile" [ref=e48] [cursor=pointer]:
+            - /url: /profile
+            - img [ref=e49]
+            - generic [ref=e52]: Profile
+      - generic [ref=e54]:
+        - link "DEV MODE" [ref=e55] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e57]: DEV MODE
+        - region "User profile card" [ref=e61]:
+          - generic [ref=e62]:
+            - generic [ref=e63] [cursor=pointer]:
+              - link "Open profile" [ref=e64]:
+                - /url: /profile
+                - generic [ref=e66]: U
+              - link "Profile" [ref=e68]:
+                - /url: /profile
+              - button "Logout" [ref=e70]
+            - generic:
+              - generic:
+                - paragraph: Bio
+                - generic:
+                  - paragraph: No bio yet.
+              - generic:
+                - paragraph: Points + Level
+                - paragraph: 0 points | Level 1
+              - generic:
+                - paragraph: Milestones
+                - generic:
+                  - generic:
+                    - generic: Milestones
+                    - generic: No Milestones Displayed
+  - main [ref=e71]:
+    - generic [ref=e73]:
+      - generic [ref=e74]:
+        - generic [ref=e75]:
+          - heading "Library · Programmes" [level=1] [ref=e76]
+          - paragraph [ref=e77]: Your saved programme templates.
+        - generic [ref=e78]:
+          - link "Back" [ref=e79] [cursor=pointer]:
+            - /url: /trainer/library
+          - link "Create" [ref=e80] [cursor=pointer]:
+            - /url: /trainer/library/programmes/create
+      - generic [ref=e81]:
+        - heading "No programmes yet" [level=2] [ref=e82]
+        - paragraph [ref=e83]: Create a programme and add days that reference workouts.
+  - generic:
+    - button "Open coach" [ref=e84] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button [disabled]: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Evening! Still things to tick off? I can help.
+          - generic:
+            - button: What's on today?
+            - button: Calendar
+            - button: Workouts
+            - button: Goals
+            - button: Progress
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - button "Toggle quick actions" [ref=e88] [cursor=pointer]:
+      - generic [ref=e89]: ⚡
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started

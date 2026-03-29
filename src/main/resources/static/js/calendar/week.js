@@ -13,6 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let hoverTimer = null;
     let closeTimer = null;
     const logModal = document.getElementById('calendar-log-modal');
+    const logForm = document.getElementById('calendar-log-form');
+    const logStatus = document.getElementById('calendar-log-status');
+    const logTitle = document.getElementById('calendar-log-title');
+    const logTaskFields = logModal?.querySelector('[data-log-task-fields]') || null;
+    const logWorkoutFields = logModal?.querySelector('[data-log-workout-fields]') || null;
+    const logWorkoutLink = document.getElementById('calendar-log-workout-link');
+    const logActions = logModal?.querySelector('.calendar-log-actions') || null;
     let activeItem = null;
 
     function positionPreviewAtItem(item) {
@@ -105,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildPreviewHtml(item) {
         const title = item.dataset.title || "Unknown";
-        const time = item.dataset.time || "—";
+        const time = item.dataset.time || "&#8212;";
         const notes = item.dataset.notes || "No notes";
         const completed = item.dataset.completed === "true";
         const type = item.dataset.type;
@@ -120,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (completed) {
             html += `
                 <div class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
-                    ✓ Completed
+                    &#10003; Completed
                 </div>
                 <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">${getCompletedMessage(item)}</p>
             `;
@@ -137,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 `;
             }
-            html += `<a href="${dayLink}" class="mt-3 block text-center text-xs text-slate-400 underline hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">View full day →</a>`;
+            html += `<a href="${dayLink}" class="mt-3 block text-center text-xs text-slate-400 underline hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">View full day &#8594;</a>`;
         } else if (type === "workout" || type === "occurrence") {
             const dayLink = date ? `/calendar/day/${date}#workouts` : '/calendar';
             const actionLabel = completed ? 'Review session' : 'Complete workout';
@@ -146,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="calendar-preview-actions">
                     <button type="button" class="calendar-preview-action" data-preview-action="${actionType}">${actionLabel}</button>
                 </div>
-                <a href="${dayLink}" class="mt-3 block text-center text-xs text-slate-400 underline hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">View full day →</a>
+                <a href="${dayLink}" class="mt-3 block text-center text-xs text-slate-400 underline hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">View full day &#8594;</a>
             `;
         }
 
@@ -1114,3 +1121,4 @@ document.addEventListener("DOMContentLoaded", () => {
         snapToCenter();
     });
 });
+

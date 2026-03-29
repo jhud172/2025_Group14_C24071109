@@ -1,0 +1,281 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+      - navigation "Primary navigation" [ref=e11]:
+        - generic [ref=e13]:
+          - link "Home" [ref=e14] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e15]: Home
+          - link "About" [ref=e16] [cursor=pointer]:
+            - /url: /about
+            - generic [ref=e17]: About
+          - link "Pricing" [ref=e18] [cursor=pointer]:
+            - /url: /pricing
+            - generic [ref=e19]: Pricing
+          - link "FAQ" [ref=e20] [cursor=pointer]:
+            - /url: /faq
+            - generic [ref=e21]: FAQ
+          - link "Trainers" [ref=e22] [cursor=pointer]:
+            - /url: /explore
+            - generic [ref=e23]: Trainers
+          - link "Shop" [ref=e24] [cursor=pointer]:
+            - /url: /merch
+            - generic [ref=e25]: Shop
+      - generic [ref=e27]:
+        - link "DEV" [ref=e28] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e30]: DEV
+        - link "Login" [ref=e33] [cursor=pointer]:
+          - /url: /login
+  - main [ref=e34]:
+    - generic [ref=e36]:
+      - region "Explore the platform while Dev Mode is active." [ref=e37]:
+        - link "DEV MODE" [ref=e39] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e41]: DEV MODE
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - img [ref=e46]
+            - generic [ref=e52]:
+              - paragraph [ref=e53]: Development Access
+              - heading "Explore the platform while Dev Mode is active." [level=1] [ref=e54]
+              - paragraph [ref=e55]: Development Mode lets you explore platform pages, create test accounts, experiment with available features, and experience the site while new work is still being built and refined.
+          - generic "Development mode summary" [ref=e56]:
+            - article [ref=e57]:
+              - paragraph [ref=e58]: Explore
+              - paragraph [ref=e59]: Browse public pages and see the current product direction.
+            - article [ref=e60]:
+              - paragraph [ref=e61]: Create
+              - paragraph [ref=e62]: Sign up test accounts and try onboarding and verification flows.
+            - article [ref=e63]:
+              - paragraph [ref=e64]: Experiment
+              - paragraph [ref=e65]: Try available planner, profile, and dashboard experiences as they evolve.
+            - article [ref=e66]:
+              - paragraph [ref=e67]: Expect Change
+              - paragraph [ref=e68]: Data, layouts, and feature behavior may reset or change during testing.
+      - region "Development mode actions and guidance" [ref=e69]:
+        - generic [ref=e70]:
+          - article [ref=e71]:
+            - generic [ref=e72]:
+              - paragraph [ref=e73]: Get Started
+              - heading "Choose how you want to test the platform" [level=2] [ref=e74]
+              - paragraph [ref=e75]: Sign in to reach protected areas, create a fresh account for testing, or stay in guest mode and browse the current public experience.
+              - generic [ref=e76]:
+                - link "Sign In Access dashboard, calendar, goals, workouts, and your profile with an existing account." [ref=e77] [cursor=pointer]:
+                  - /url: /login?devLogin=1
+                  - img [ref=e79]
+                  - generic [ref=e83]:
+                    - paragraph [ref=e84]: Sign In
+                    - paragraph [ref=e85]: Access dashboard, calendar, goals, workouts, and your profile with an existing account.
+                  - img [ref=e87]
+                - link "Create Test Account Run through signup, email verification, and first-time setup with fresh test data." [ref=e90] [cursor=pointer]:
+                  - /url: /signup
+                  - img [ref=e92]
+                  - generic [ref=e96]:
+                    - paragraph [ref=e97]: Create Test Account
+                    - paragraph [ref=e98]: Run through signup, email verification, and first-time setup with fresh test data.
+                  - img [ref=e100]
+                - link "Open Dev Hub Browse the public dev navigation hub and jump through pages without signing in first." [ref=e103] [cursor=pointer]:
+                  - /url: /dev-mode
+                  - img [ref=e105]
+                  - generic [ref=e109]:
+                    - paragraph [ref=e110]: Open Dev Hub
+                    - paragraph [ref=e111]: Browse the public dev navigation hub and jump through pages without signing in first.
+                  - img [ref=e113]
+                - link "Return Home Go back to the main landing page and continue browsing the public-facing site." [ref=e116] [cursor=pointer]:
+                  - /url: /
+                  - img [ref=e118]
+                  - generic [ref=e121]:
+                    - paragraph [ref=e122]: Return Home
+                    - paragraph [ref=e123]: Go back to the main landing page and continue browsing the public-facing site.
+                  - img [ref=e125]
+          - article [ref=e128]:
+            - generic [ref=e129]:
+              - paragraph [ref=e130]: Testing Guidance
+              - heading "Useful things to try during development" [level=2] [ref=e131]
+              - paragraph [ref=e132]: If you are exploring the platform for testing, these are good starting points for checking the current experience.
+              - generic [ref=e133]:
+                - article [ref=e134]:
+                  - img [ref=e135]
+                  - generic [ref=e138]:
+                    - strong [ref=e139]: Browse public pages
+                    - text: Check homepage flows, navigation, and public presentation without needing an account.
+                - article [ref=e140]:
+                  - img [ref=e141]
+                  - generic [ref=e145]:
+                    - strong [ref=e146]: Test account signup
+                    - text: Create fresh client, trainer, or gym accounts and verify the onboarding path.
+                - article [ref=e147]:
+                  - img [ref=e148]
+                  - generic [ref=e153]:
+                    - strong [ref=e154]: Explore trainer profiles
+                    - text: Review public trainer surfaces, profile content, and discovery journeys while designs evolve.
+                - article [ref=e155]:
+                  - img [ref=e156]
+                  - generic [ref=e163]:
+                    - strong [ref=e164]: Test planning features
+                    - text: Sign in with a test account to try planner, tasks, workouts, and related scheduling flows.
+        - generic [ref=e165]:
+          - article [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]:
+                - img [ref=e170]
+                - generic [ref=e173]:
+                  - paragraph [ref=e174]: Email Updates
+                  - heading "Stay visible for go-live updates" [level=2] [ref=e175]
+                  - paragraph [ref=e176]: Leave your email here if you want a launch notification while Dev Mode is active. This form is intentionally easy to find so testers can register interest without hunting for it.
+              - generic [ref=e177]:
+                - paragraph [ref=e178]: One email when the live platform is ready. No spam.
+                - generic [ref=e179]:
+                  - textbox "Enter your email address" [ref=e180]
+                  - button "Notify Me" [ref=e181] [cursor=pointer]
+                - paragraph [ref=e182]: You can use any test or real inbox you want to keep updated on launch progress.
+          - article [ref=e183]:
+            - generic [ref=e184]:
+              - paragraph [ref=e185]: Environment Details
+              - heading "What this session is optimized for" [level=2] [ref=e186]
+              - paragraph [ref=e187]: This environment is built for development feedback and hands-on checking, so some content or rules may differ from the live platform.
+              - generic [ref=e188]:
+                - article [ref=e189]:
+                  - paragraph [ref=e190]: Environment
+                  - paragraph [ref=e191]: Development
+                - article [ref=e192]:
+                  - paragraph [ref=e193]: Access Mode
+                  - paragraph [ref=e194]: Dev Mode Enabled
+                - article [ref=e195]:
+                  - paragraph [ref=e196]: Good For
+                  - paragraph [ref=e197]: Testing flows, previewing UI changes, and trying temporary data.
+                - article [ref=e198]:
+                  - paragraph [ref=e199]: Authentication
+                  - paragraph [ref=e200]: Optional until you need protected features.
+  - contentinfo [ref=e201]:
+    - generic [ref=e202]:
+      - generic [ref=e203]:
+        - generic [ref=e204]:
+          - generic [ref=e205]:
+            - img "One To One" [ref=e206]
+            - generic [ref=e207]: One To One
+          - paragraph [ref=e208]: Verified coaching. Structured training. Progress that lasts.
+          - generic [ref=e209]:
+            - link "Twitter" [ref=e210] [cursor=pointer]:
+              - /url: "#"
+              - generic [ref=e211]: Twitter
+              - img [ref=e212]
+            - link "GitHub" [ref=e214] [cursor=pointer]:
+              - /url: "#"
+              - generic [ref=e215]: GitHub
+              - img [ref=e216]
+        - generic [ref=e218]:
+          - generic [ref=e219]:
+            - heading "Product" [level=3] [ref=e220]
+            - list [ref=e221]:
+              - listitem [ref=e222]:
+                - link "Explore Trainers" [ref=e223] [cursor=pointer]:
+                  - /url: /explore
+              - listitem [ref=e224]:
+                - link "Pricing" [ref=e225] [cursor=pointer]:
+                  - /url: /pricing
+              - listitem [ref=e226]:
+                - link "Create Account" [ref=e227] [cursor=pointer]:
+                  - /url: /signup
+              - listitem [ref=e228]:
+                - link "FAQ" [ref=e229] [cursor=pointer]:
+                  - /url: /faq
+          - generic [ref=e230]:
+            - heading "Support" [level=3] [ref=e231]
+            - list [ref=e232]:
+              - listitem [ref=e233]:
+                - link "Privacy Policy" [ref=e234] [cursor=pointer]:
+                  - /url: /policies/privacy
+              - listitem [ref=e235]:
+                - link "Terms of Service" [ref=e236] [cursor=pointer]:
+                  - /url: /policies/terms
+              - listitem [ref=e237]:
+                - link "Payments Policy" [ref=e238] [cursor=pointer]:
+                  - /url: /policies/payments
+              - listitem [ref=e239]:
+                - link "Help & FAQ" [ref=e240] [cursor=pointer]:
+                  - /url: /faq
+          - generic [ref=e241]:
+            - heading "Company" [level=3] [ref=e242]
+            - list [ref=e243]:
+              - listitem [ref=e244]:
+                - link "About" [ref=e245] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e246]:
+                - link "Plans" [ref=e247] [cursor=pointer]:
+                  - /url: /pricing
+              - listitem [ref=e248]:
+                - link "Find a Trainer" [ref=e249] [cursor=pointer]:
+                  - /url: /explore
+      - generic [ref=e251]:
+        - paragraph [ref=e252]: © 2026 Crystal Productions, Inc. All rights reserved.
+        - generic [ref=e253]:
+          - link "Privacy•" [ref=e254] [cursor=pointer]:
+            - /url: /policies/privacy
+          - link "Terms•" [ref=e255] [cursor=pointer]:
+            - /url: /policies/terms
+          - link "Payments" [ref=e256] [cursor=pointer]:
+            - /url: /policies/payments
+        - generic [ref=e259]: All Systems Operational
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button [disabled]: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Hi, I am Charlie, the built-in AI assistant for One To One. I help with workouts, schedules, nutrition, goals, and momentum tracking. Log in or sign up to unlock personalized guidance.
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started

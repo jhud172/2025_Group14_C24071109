@@ -1,0 +1,236 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo One To One" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+        - generic [ref=e9]: One To One
+      - navigation "Primary navigation" [ref=e12]:
+        - generic [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /gym/dashboard
+            - img [ref=e16]
+            - generic [ref=e21]: Dashboard
+          - link "Trainers" [ref=e22] [cursor=pointer]:
+            - /url: /gym/admin/trainers
+            - img [ref=e23]
+            - generic [ref=e28]: Trainers
+          - link "Memberships" [ref=e29] [cursor=pointer]:
+            - /url: /gym/admin/memberships
+            - img [ref=e30]
+            - generic [ref=e37]: Memberships
+          - link "Support" [ref=e38] [cursor=pointer]:
+            - /url: /admin/feedback
+            - img [ref=e39]
+            - generic [ref=e41]: Support
+          - link "Profile" [ref=e42] [cursor=pointer]:
+            - /url: /profile
+            - img [ref=e43]
+            - generic [ref=e46]: Profile
+      - generic [ref=e48]:
+        - link "DEV MODE" [ref=e49] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e51]: DEV MODE
+        - region "User profile card" [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e57] [cursor=pointer]:
+              - link "Open profile" [ref=e58]:
+                - /url: /profile
+                - generic [ref=e60]: U
+              - link "Profile" [ref=e62]:
+                - /url: /profile
+              - button "Logout" [ref=e64]
+            - generic:
+              - generic:
+                - paragraph: Bio
+                - generic:
+                  - paragraph: No bio yet.
+              - generic:
+                - paragraph: Points + Level
+                - paragraph: 0 points | Level 1
+              - generic:
+                - paragraph: Milestones
+                - generic:
+                  - generic:
+                    - generic: Milestones
+                    - generic: No Milestones Displayed
+  - main [ref=e65]:
+    - generic [ref=e67]:
+      - generic [ref=e69]:
+        - generic [ref=e70]:
+          - heading "Welcome back, demo_gym" [level=1] [ref=e71]
+          - paragraph [ref=e72]: Manage your gym operations.
+        - generic [ref=e75]: Managing
+      - generic [ref=e77]:
+        - generic [ref=e78]:
+          - img [ref=e80]
+          - generic [ref=e82]:
+            - heading "Today's Overview" [level=2] [ref=e83]
+            - paragraph [ref=e84]: Sunday, March 29
+        - generic [ref=e85]:
+          - generic [ref=e86]:
+            - generic [ref=e87]:
+              - generic [ref=e88]: Admin Tasks
+              - img [ref=e89]
+            - generic [ref=e91]:
+              - generic [ref=e92]: "0"
+              - link "View ->" [ref=e93] [cursor=pointer]:
+                - /url: /calendar/day/2026-03-29
+          - generic [ref=e94]:
+            - generic [ref=e95]:
+              - generic [ref=e96]: Scheduled Items
+              - img [ref=e97]
+            - generic [ref=e99]:
+              - generic [ref=e100]: "0"
+              - link "Review ->" [ref=e101] [cursor=pointer]:
+                - /url: /calendar/day/2026-03-29
+        - generic [ref=e102]:
+          - link "View Today" [ref=e103] [cursor=pointer]:
+            - /url: /calendar/day/2026-03-29
+          - link "Full Calendar" [ref=e104] [cursor=pointer]:
+            - /url: /calendar
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - heading "Your Week Ahead" [level=2] [ref=e107]
+          - link "Full Calendar ->" [ref=e108] [cursor=pointer]:
+            - /url: /calendar
+        - generic [ref=e109]:
+          - link "Sun 29 TODAY Free day" [ref=e110] [cursor=pointer]:
+            - /url: /calendar/day/2026-03-29
+            - generic [ref=e111]:
+              - generic [ref=e113]: Sun
+              - generic [ref=e115]:
+                - generic [ref=e116]: "29"
+                - generic [ref=e117]: TODAY
+              - generic [ref=e119]: Free day
+          - link "Mon 30 Free day" [ref=e120] [cursor=pointer]:
+            - /url: /calendar/day/2026-03-30
+            - generic [ref=e121]:
+              - generic [ref=e123]: Mon
+              - generic [ref=e125]: "30"
+              - generic [ref=e127]: Free day
+          - link "Tue 31 Free day" [ref=e128] [cursor=pointer]:
+            - /url: /calendar/day/2026-03-31
+            - generic [ref=e129]:
+              - generic [ref=e131]: Tue
+              - generic [ref=e133]: "31"
+              - generic [ref=e135]: Free day
+          - link "Wed 1 Free day" [ref=e136] [cursor=pointer]:
+            - /url: /calendar/day/2026-04-01
+            - generic [ref=e137]:
+              - generic [ref=e139]: Wed
+              - generic [ref=e141]: "1"
+              - generic [ref=e143]: Free day
+          - link "Thu 2 Free day" [ref=e144] [cursor=pointer]:
+            - /url: /calendar/day/2026-04-02
+            - generic [ref=e145]:
+              - generic [ref=e147]: Thu
+              - generic [ref=e149]: "2"
+              - generic [ref=e151]: Free day
+          - link "Fri 3 Free day" [ref=e152] [cursor=pointer]:
+            - /url: /calendar/day/2026-04-03
+            - generic [ref=e153]:
+              - generic [ref=e155]: Fri
+              - generic [ref=e157]: "3"
+              - generic [ref=e159]: Free day
+          - link "Sat 4 Free day" [ref=e160] [cursor=pointer]:
+            - /url: /calendar/day/2026-04-04
+            - generic [ref=e161]:
+              - generic [ref=e163]: Sat
+              - generic [ref=e165]: "4"
+              - generic [ref=e167]: Free day
+      - generic [ref=e168]:
+        - heading "Quick Actions" [level=2] [ref=e169]
+        - generic [ref=e170]:
+          - link "Gym Overview Operational dashboard" [ref=e171] [cursor=pointer]:
+            - /url: /gym/dashboard
+            - img [ref=e173]
+            - generic [ref=e175]: Gym Overview
+            - generic [ref=e176]: Operational dashboard
+          - link "Trainers Onboarding and status" [ref=e177] [cursor=pointer]:
+            - /url: /gym/admin/trainers
+            - img [ref=e179]
+            - generic [ref=e181]: Trainers
+            - generic [ref=e182]: Onboarding and status
+          - link "Memberships Products and billing changes" [ref=e183] [cursor=pointer]:
+            - /url: /gym/admin/memberships
+            - img [ref=e185]
+            - generic [ref=e187]: Memberships
+            - generic [ref=e188]: Products and billing changes
+          - link "Support Inbox Feedback and outreach" [ref=e189] [cursor=pointer]:
+            - /url: /admin/feedback
+            - img [ref=e191]
+            - generic [ref=e194]: Support Inbox
+            - generic [ref=e195]: Feedback and outreach
+          - link "Inbox Operational communication" [ref=e196] [cursor=pointer]:
+            - /url: /inbox
+            - img [ref=e198]
+            - generic [ref=e200]: Inbox
+            - generic [ref=e201]: Operational communication
+  - generic:
+    - button "Open coach" [ref=e202] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button [disabled]: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Evening — let me know if you want to review today's progress.
+          - generic:
+            - button: What's on today?
+            - button: Calendar
+            - button: Workouts
+            - button: Goals
+            - button: Progress
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - button "Toggle quick actions" [ref=e206] [cursor=pointer]:
+      - generic [ref=e207]: ⚡
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started

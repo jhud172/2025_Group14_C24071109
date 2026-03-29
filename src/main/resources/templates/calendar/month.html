@@ -30,7 +30,7 @@
                         </span>
                     </div>
                     <div class="calendar-mode-indicator hidden sm:flex">
-                        Month View ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
+                        Month View - <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
                     </div>
                     <div class="calendar-info-link" aria-label="Calendar layout information">
                         <button type="button" class="calendar-info-link__button" aria-label="Calendar layout settings help">
@@ -42,7 +42,7 @@
                         </span>
                     </div>
                     <button type="button" id="scheduleDrawerButton" class="calendar-action-btn calendar-action-btn--primary">Schedules</button>
-                    <button type="button" id="motivation-mode-toggle" class="calendar-action-btn" aria-pressed="false" title="Show monthly goal progress and motivation insights">ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬Â¦ Motivation</button>
+                    <button type="button" id="motivation-mode-toggle" class="calendar-action-btn" aria-pressed="false" title="Show monthly goal progress and motivation insights">Motivation</button>
                 </div>
             </div>
 
@@ -65,12 +65,12 @@
             </div>
 
             <div class="calendar-nav-controls">
-                <a id="month-prev" th:href="@{'/calendar?view=month&month=' + ${prevMonth} + '&year=' + ${prevYear}}" class="calendar-nav-btn">ÃƒÂ¢Ã¢â‚¬Â Ã‚Â Prev</a>
+                <a id="month-prev" th:href="@{'/calendar?view=month&month=' + ${prevMonth} + '&year=' + ${prevYear}}" class="calendar-nav-btn">&#8592; Prev</a>
                 <div class="calendar-month-title">
                     <span id="month-name" class="calendar-month-name" th:text="${T(java.time.Month).of(month).getDisplayName(T(java.time.format.TextStyle).FULL, T(java.util.Locale).UK)}"></span>
                     <span id="month-year" class="calendar-month-year" th:text="${year}"></span>
                 </div>
-                <a id="month-next" th:href="@{'/calendar?view=month&month=' + ${nextMonth} + '&year=' + ${nextYear}}" class="calendar-nav-btn">Next ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢</a>
+                <a id="month-next" th:href="@{'/calendar?view=month&month=' + ${nextMonth} + '&year=' + ${nextYear}}" class="calendar-nav-btn">Next &#8594;</a>
             </div>
 
             <!-- Planning view (existing) -->
@@ -151,16 +151,16 @@
                                                 <span th:if="${occ.completed}"
                                                       class="activity-sticker"
                                                       data-activity-type="GYM"
-                                                      title="Gym workout">ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬Â¹ÃƒÂ¯Ã‚Â¸Ã‚Â</span>
+                                                      title="Gym workout">&#127947;</span>
                                                 <span th:if="${!occ.completed}"
                                                       class="activity-sticker activity-sticker--pending"
                                                       data-activity-type="GYM"
-                                                      title="Gym workout (pending)">ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬Â¹ÃƒÂ¯Ã‚Â¸Ã‚Â</span>
+                                                      title="Gym workout (pending)">&#127947;</span>
                                             </th:block>
                                         </div>
                                         <!-- Empty state when no tasks or schedules -->
                                         <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
-                                            <span class="calendar-empty-state-icon">ÃƒÂ¯Ã‚Â¼Ã¢â‚¬Â¹</span>
+                                            <span class="calendar-empty-state-icon"></span>
                                         </div>
                                         <!-- Detailed mode (COMBINED_LIST) -->
                                         <div th:if="${!grouped}" class="calendar-singular-list">
@@ -177,9 +177,9 @@
                                                           data-completed=${task.completed}">
                                                 <div class="calendar-item-content">
                                                     <div class="calendar-item-title" th:text="${task.title}"></div>
-                                                    <div class="calendar-item-meta" th:text="${task.time != null ? task.time : 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}"></div>
+                                                    <div class="calendar-item-meta" th:text="${task.time != null ? task.time : &#39;&#8212;&#39;}"></div>
                                                 </div>
-                                                <div th:if="${task.completed}" class="calendar-item-check">ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“</div>
+                                                <div th:if="${task.completed}" class="calendar-item-check">&#10003;</div>
                                             </div>
                                             <a th:if="${tTotal > 4}" th:href="@{'/calendar/day/' + ${dayModel.isoDate}}" class="calendar-more-link" th:text="${'+' + (tTotal - 4) + ' more tasks'}"></a>
                                             <div th:if="${tTotal > 0 and sTotal > 0}" class="my-1 border-t border-white/10"></div>
@@ -192,14 +192,14 @@
                                                           data-id=${occ.id},
                                                           data-title=${occTitle},
                                                           data-notes=${occ.scheduleName},
-                                                          data-time='ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â',
+                                                          data-time='&#8212;',
                                                           data-completed=${occ.completed},
                                                           data-date=${dayModel.isoDate}">
                                                 <div class="calendar-item-content">
                                                     <div class="calendar-item-title" th:text="${occTitle}"></div>
                                                     <div class="calendar-item-meta" th:text="'From: ' + ${occ.scheduleName}"></div>
                                                 </div>
-                                                <div th:if="${occ.completed}" class="calendar-item-check">ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“</div>
+                                                <div th:if="${occ.completed}" class="calendar-item-check">&#10003;</div>
                                             </div>
                                             <a th:if="${sTotal > 3}" th:href="@{'/calendar/day/' + ${dayModel.isoDate}}" class="calendar-more-link" th:text="${'+' + (sTotal - 3) + ' more workouts'}"></a>
                                         </div>
@@ -239,7 +239,7 @@
                                                                   data-id=${occ.id},
                                                                   data-title=${occTitle},
                                                                   data-notes=${occ.scheduleName},
-                                                                  data-time='ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â',
+                                                                  data-time='&#8212;',
                                                                   data-completed=${occ.completed},
                                                                   data-date=${dayModel.isoDate}">
                                                         <span class="truncate" th:text="${occTitle}"></span>
@@ -256,7 +256,7 @@
                 </div>
             </div>
 
-            <!-- Motivation View (sticker calendar) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â populated by JS -->
+            <!-- Motivation View (sticker calendar) - populated by JS -->
             <div id="sticker-view-panel" class="hidden" aria-label="Motivation sticker calendar">
                 <!-- Monthly target progress bar -->
                 <div class="sticker-target-bar">
@@ -272,9 +272,9 @@
                 <!-- Sticker pack selector -->
                 <div class="sticker-pack-selector mb-4" role="group" aria-label="Sticker style">
                     <span class="sticker-pack-label">Style:</span>
-                    <button type="button" class="sticker-pack-btn active" data-pack="STARS" aria-pressed="true">ÃƒÂ¢Ã‚Â­Ã‚Â Stars</button>
-                    <button type="button" class="sticker-pack-btn" data-pack="SPORT" aria-pressed="false">ÃƒÂ°Ã…Â¸Ã‚ÂÃ¢â‚¬Â¹ÃƒÂ¯Ã‚Â¸Ã‚Â Sport</button>
-                    <button type="button" class="sticker-pack-btn" data-pack="EMOJI" aria-pressed="false">ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Â° Emoji</button>
+                    <button type="button" class="sticker-pack-btn active" data-pack="STARS" aria-pressed="true">&#9733; Stars</button>
+                    <button type="button" class="sticker-pack-btn" data-pack="SPORT" aria-pressed="false">&#127947; Sport</button>
+                    <button type="button" class="sticker-pack-btn" data-pack="EMOJI" aria-pressed="false">&#9786; Emoji</button>
                 </div>
                 <!-- Day header row (same as planning) -->
                 <div class="calendar-day-headers grid grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm mb-1">

@@ -1,0 +1,517 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e5]:
+      - link "One To One Logo One To One" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img "One To One Logo" [ref=e8]
+        - generic [ref=e9]: One To One
+      - navigation "Primary navigation" [ref=e12]:
+        - generic [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e16]
+            - generic [ref=e21]: Dashboard
+          - link "Calendar" [ref=e22] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e23]
+            - generic [ref=e27]: Calendar
+          - link "Coach" [ref=e28] [cursor=pointer]:
+            - /url: /chat
+            - img [ref=e29]
+            - generic [ref=e39]: Coach
+          - link "Trainers" [ref=e40] [cursor=pointer]:
+            - /url: /client/trainers
+            - img [ref=e41]
+            - generic [ref=e44]: Trainers
+          - link "Shop" [ref=e45] [cursor=pointer]:
+            - /url: /merch
+            - img [ref=e46]
+            - generic [ref=e50]: Shop
+          - link "Leaderboard" [ref=e51] [cursor=pointer]:
+            - /url: /levels
+            - img [ref=e52]
+            - generic [ref=e59]: Leaderboard
+      - generic [ref=e61]:
+        - link "DEV MODE" [ref=e62] [cursor=pointer]:
+          - /url: /dev-mode
+          - generic [ref=e64]: DEV MODE
+        - region "User profile card" [ref=e68]:
+          - generic [ref=e69]:
+            - generic [ref=e70] [cursor=pointer]:
+              - link "Open profile" [ref=e71]:
+                - /url: /profile
+                - generic [ref=e73]: U
+              - link "Profile" [ref=e75]:
+                - /url: /profile
+              - button "Logout" [ref=e77]
+            - generic:
+              - generic:
+                - paragraph: Bio
+                - generic:
+                  - paragraph: No bio yet.
+              - generic:
+                - paragraph: Points + Level
+                - paragraph: 0 points | Level 1
+              - generic:
+                - paragraph: Milestones
+                - generic:
+                  - generic:
+                    - generic: Milestones
+                    - generic: No Milestones Displayed
+  - main [ref=e78]:
+    - generic [ref=e81]:
+      - complementary "Explore platform" [ref=e82]:
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - generic [ref=e87]:
+              - paragraph [ref=e88]: Explore Platform
+              - heading "Discover What Supports Your Goals" [level=2] [ref=e89]
+            - paragraph [ref=e90]: Jump into the most useful support spaces without losing your place in today's flow.
+            - navigation "Explore links" [ref=e91]:
+              - link "Explore trainers Compare coaching styles and find the right support for your routine." [ref=e92] [cursor=pointer]:
+                - /url: /explore
+                - img [ref=e94]
+                - generic [ref=e97]:
+                  - generic [ref=e98]: Explore trainers
+                  - generic [ref=e99]: Compare coaching styles and find the right support for your routine.
+                - generic [ref=e100]: →
+              - link "Explore gyms Find a setup and environment that suits the week ahead." [ref=e101] [cursor=pointer]:
+                - /url: /explore
+                - img [ref=e103]
+                - generic [ref=e105]:
+                  - generic [ref=e106]: Explore gyms
+                  - generic [ref=e107]: Find a setup and environment that suits the week ahead.
+                - generic [ref=e108]: →
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - generic [ref=e111]:
+                - paragraph [ref=e112]: Trainer Overview
+                - heading "Your Coaching Relationship" [level=2] [ref=e113]
+              - generic [ref=e114]: Active coach
+            - button "Profile photo Jordan Trainer Premium member @demo_trainer" [ref=e116] [cursor=pointer]:
+              - generic [ref=e118]:
+                - img "Profile photo" [ref=e120]
+                - generic [ref=e121]:
+                  - generic [ref=e122]:
+                    - generic [ref=e123]: Jordan Trainer
+                    - generic "Premium member" [ref=e124]:
+                      - button "Premium membership details" [ref=e125]:
+                        - img [ref=e126]
+                      - status: Premium Active
+                  - paragraph [ref=e128]: "@demo_trainer"
+            - generic [ref=e130]:
+              - generic [ref=e131]: Spring Strength Build
+              - generic [ref=e132]: Connected 8 Feb 2026
+            - generic [ref=e133]:
+              - generic [ref=e134]:
+                - heading "Your trainer link is active" [level=3] [ref=e135]
+                - paragraph [ref=e136]: Trainer demo account with an active code, premium access, and linked client data.
+                - paragraph [ref=e137]: Message your trainer or open the plan when you need direction.
+              - generic [ref=e139]:
+                - paragraph [ref=e140]: No trainer notifications yet
+                - paragraph [ref=e141]: Coach updates and progress checks will appear here when they are live.
+            - generic [ref=e142]:
+              - link "Open coach" [ref=e143] [cursor=pointer]:
+                - /url: /chat
+              - link "Message trainer" [ref=e144] [cursor=pointer]:
+                - /url: /inbox/1
+              - link "Open trainer plan" [ref=e145] [cursor=pointer]:
+                - /url: /client/trainers
+              - link "Manage" [ref=e146] [cursor=pointer]:
+                - /url: /client/trainers
+          - region "Goals summary" [ref=e147]:
+            - generic [ref=e148]:
+              - generic [ref=e149]:
+                - paragraph [ref=e150]: Goals
+                - heading "Keep Long-Term Progress Visible" [level=2] [ref=e151]
+              - link "Open" [ref=e152] [cursor=pointer]:
+                - /url: /goals
+            - paragraph [ref=e153]: 0 active and 0 completed.
+            - generic [ref=e154]:
+              - tablist "Goal sections" [ref=e155]:
+                - button "Week goals" [ref=e156] [cursor=pointer]
+                - button "Month goals" [ref=e157] [cursor=pointer]
+                - button "Targets" [ref=e158] [cursor=pointer]
+              - generic [ref=e160]:
+                - generic [ref=e161]:
+                  - generic [ref=e162]:
+                    - heading "Week goals" [level=3] [ref=e163]
+                    - generic [ref=e164]: "0"
+                  - paragraph [ref=e165]: Short weekly wins show up here once you add them on the goals page.
+                - generic [ref=e166]:
+                  - generic [ref=e167]:
+                    - heading [level=3] [ref=e168]: Month goals
+                    - generic [ref=e169]: "0"
+                  - paragraph [ref=e170]: Monthly goals give the dashboard a clear longer rhythm without crowding today.
+                - generic [ref=e171]:
+                  - generic [ref=e172]:
+                    - heading [level=3] [ref=e173]: Targets
+                    - generic [ref=e174]: "0"
+                  - paragraph [ref=e175]: Targets are ideal for weight, performance, or milestone outcomes with a specific finish line.
+      - main [ref=e176]:
+        - region "Primary dashboard actions" [ref=e177]:
+          - link "Daily tracking Track Body Ready to log Set a calorie target Log weight, food, or recovery data first to anchor the rest of the day. No entries today Add body targets 0 nutrition logs this week" [ref=e178] [cursor=pointer]:
+            - /url: /health-record/list
+            - generic [ref=e179]:
+              - img [ref=e181]
+              - generic [ref=e184]:
+                - paragraph [ref=e185]: Daily tracking
+                - heading "Track Body" [level=2] [ref=e186]
+            - generic [ref=e187]:
+              - paragraph [ref=e188]: Ready to log
+              - paragraph [ref=e189]: Set a calorie target
+              - paragraph [ref=e190]: Log weight, food, or recovery data first to anchor the rest of the day.
+              - generic [ref=e191]:
+                - generic [ref=e192]: No entries today
+                - generic [ref=e193]: Add body targets
+                - generic [ref=e194]: 0 nutrition logs this week
+          - link "Planner Track Schedule Day is clear 0 tasks | 0 workouts Your board is light today, so use the planner to set up the next active block. Use the planner to prep ahead" [ref=e195] [cursor=pointer]:
+            - /url: /calendar/day/2026-03-29
+            - generic [ref=e196]:
+              - img [ref=e198]
+              - generic [ref=e201]:
+                - paragraph [ref=e202]: Planner
+                - heading "Track Schedule" [level=2] [ref=e203]
+            - generic [ref=e204]:
+              - paragraph [ref=e205]: Day is clear
+              - paragraph [ref=e206]: 0 tasks | 0 workouts
+              - paragraph [ref=e207]: Your board is light today, so use the planner to set up the next active block.
+              - generic [ref=e209]: Use the planner to prep ahead
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - generic [ref=e212]:
+              - paragraph [ref=e213]: Dashboard Ambience
+              - heading "Live Dashboard Ambience" [level=2] [ref=e214]
+            - switch "Toggle immersive dashboard ambience" [checked] [ref=e215] [cursor=pointer]:
+              - generic [ref=e218]: Toggle immersive dashboard ambience
+          - generic [ref=e219]:
+            - generic [ref=e222]:
+              - paragraph [ref=e223]: Evening
+              - paragraph [ref=e224]: 5:37:48 PM
+              - paragraph [ref=e225]: Showers nearby
+            - generic [ref=e226]:
+              - generic [ref=e227]:
+                - generic [ref=e228]:
+                  - paragraph [ref=e229]: Weather outlook
+                  - paragraph [ref=e230]: Mixed local conditions across the next 24 hours
+                - generic [ref=e231]:
+                  - paragraph [ref=e232]: Using Your Local Area
+                  - generic [ref=e235]: CF10 1, Castle
+              - generic [ref=e236]:
+                - button "Temperature graph" [pressed] [ref=e237] [cursor=pointer]
+                - button "Weather trend graph" [ref=e238] [cursor=pointer]
+              - generic "Weather timeline for the next 24 hours" [ref=e240]:
+                - generic [ref=e241]:
+                  - article [ref=e242]:
+                    - paragraph [ref=e243]: Now
+                    - generic [ref=e244]: 🌧️
+                    - paragraph [ref=e245]: 10°
+                    - paragraph [ref=e246]: Showers nearby
+                  - article [ref=e247]:
+                    - paragraph [ref=e248]: 6:00 PM
+                    - generic [ref=e249]: 🌧️
+                    - paragraph [ref=e250]: 10°
+                    - paragraph [ref=e251]: Showers nearby
+                  - article [ref=e252]:
+                    - paragraph [ref=e253]: 7:00 PM
+                    - generic [ref=e254]: 🌙☁️
+                    - paragraph [ref=e255]: 10°
+                    - paragraph [ref=e256]: Mostly cloudy
+                  - article [ref=e257]:
+                    - paragraph [ref=e258]: 8:00 PM
+                    - generic [ref=e259]: 🌙☁️
+                    - paragraph [ref=e260]: 10°
+                    - paragraph [ref=e261]: Mostly cloudy
+                  - article [ref=e262]:
+                    - paragraph [ref=e263]: 9:00 PM
+                    - generic [ref=e264]: 🌙☁️
+                    - paragraph [ref=e265]: 10°
+                    - paragraph [ref=e266]: Mostly cloudy
+                  - article [ref=e267]:
+                    - paragraph [ref=e268]: 10:00 PM
+                    - generic [ref=e269]: 🌙
+                    - paragraph [ref=e270]: 10°
+                    - paragraph [ref=e271]: Clear and bright
+                  - article [ref=e272]:
+                    - paragraph [ref=e273]: 11:00 PM
+                    - generic [ref=e274]: 🌙
+                    - paragraph [ref=e275]: 9°
+                    - paragraph [ref=e276]: Clear and bright
+        - region "Action hub" [ref=e277]:
+          - generic [ref=e278]:
+            - generic [ref=e279]:
+              - generic [ref=e280]:
+                - paragraph [ref=e281]: Action Hub
+                - heading "What should I do next?" [level=2] [ref=e282]
+              - generic [ref=e283]:
+                - paragraph [ref=e284]: Baseline
+                - paragraph [ref=e285]: Nutrition context makes the rest of the dashboard easier to interpret.
+            - tablist "Action hub views" [ref=e286]:
+              - tab "Recommended" [selected] [ref=e287] [cursor=pointer]
+              - tab "All" [ref=e288] [cursor=pointer]
+          - generic [ref=e290]:
+            - link "Nutrition Missed Dinner Missed Dinner window passed The dinner window has passed without a log. Add it now so the day stays accurate. 0 kcal logged Last entry Not logged yet Log Meal" [ref=e293] [cursor=pointer]:
+              - /url: /nutrition
+              - generic [ref=e294]:
+                - generic [ref=e295]:
+                  - paragraph [ref=e296]: Nutrition
+                  - heading "Missed Dinner" [level=3] [ref=e297]
+                - generic [ref=e298]: Missed
+              - generic [ref=e300]:
+                - text: Dinner
+                - generic [ref=e301]: window passed
+              - paragraph [ref=e302]: The dinner window has passed without a log. Add it now so the day stays accurate.
+              - generic [ref=e303]:
+                - generic [ref=e304]: 0 kcal logged
+                - generic [ref=e305]: Last entry Not logged yet
+              - generic [ref=e307]: Log Meal
+            - generic:
+              - generic:
+                - link:
+                  - /url: /nutrition
+                  - generic:
+                    - generic:
+                      - paragraph: Nutrition
+                      - heading [level=3]: Missed Dinner
+                    - generic: Missed
+                  - paragraph: The dinner window has passed without a log. Add it now so the day stays accurate.
+                  - generic:
+                    - generic: 0 kcal logged
+                    - generic: Last entry Not logged yet
+                  - generic:
+                    - generic: Log Meal
+        - region "Your next 7 days" [ref=e308]:
+          - generic [ref=e309]:
+            - generic [ref=e310]:
+              - paragraph [ref=e311]: Planner
+              - heading "Your Next 7 Days" [level=2] [ref=e312]
+              - paragraph [ref=e313]: Pick a day to preview the useful detail, then jump straight into that date.
+            - link "Open Planner" [ref=e314] [cursor=pointer]:
+              - /url: /calendar
+          - generic [ref=e315]:
+            - generic [ref=e316]:
+              - generic [ref=e317]:
+                - paragraph [ref=e318]: Selected Day
+                - link "Open Day" [ref=e319] [cursor=pointer]:
+                  - /url: /calendar/day/2026-03-29
+              - heading "Sun, 29 Mar" [level=3] [ref=e320]
+              - paragraph [ref=e321]: 0 tasks, 0 workouts
+              - generic [ref=e322]:
+                - generic [ref=e323]:
+                  - paragraph [ref=e324]: Tasks
+                  - generic [ref=e326]: No tasks selected
+                - generic [ref=e327]:
+                  - paragraph [ref=e328]: Workouts
+                  - generic [ref=e330]: No workouts selected
+            - tablist "7 day selector" [ref=e333]:
+              - tab "Sun Today 29 Mar 0 tasks 0 workouts In progress" [selected] [ref=e334] [cursor=pointer]:
+                - generic [ref=e335]:
+                  - generic [ref=e336]: Sun
+                  - generic [ref=e337]: Today
+                - paragraph [ref=e338]: 29 Mar
+                - generic [ref=e339]:
+                  - generic [ref=e340]: 0 tasks
+                  - generic [ref=e341]: 0 workouts
+                - paragraph [ref=e342]: In progress
+              - tab "Mon Tomorrow 30 Mar 0 tasks 0 workouts Upcoming" [ref=e343] [cursor=pointer]:
+                - generic [ref=e344]:
+                  - generic [ref=e345]: Mon
+                  - generic [ref=e346]: Tomorrow
+                - paragraph [ref=e347]: 30 Mar
+                - generic [ref=e348]:
+                  - generic [ref=e349]: 0 tasks
+                  - generic [ref=e350]: 0 workouts
+                - paragraph [ref=e351]: Upcoming
+              - tab "Tue 31 Mar 0 tasks 0 workouts Upcoming" [ref=e352] [cursor=pointer]:
+                - generic [ref=e354]: Tue
+                - paragraph [ref=e355]: 31 Mar
+                - generic [ref=e356]:
+                  - generic [ref=e357]: 0 tasks
+                  - generic [ref=e358]: 0 workouts
+                - paragraph [ref=e359]: Upcoming
+              - tab "Wed 1 Apr 0 tasks 0 workouts Upcoming" [ref=e360] [cursor=pointer]:
+                - generic [ref=e362]: Wed
+                - paragraph [ref=e363]: 1 Apr
+                - generic [ref=e364]:
+                  - generic [ref=e365]: 0 tasks
+                  - generic [ref=e366]: 0 workouts
+                - paragraph [ref=e367]: Upcoming
+              - tab "Thu 2 Apr 0 tasks 0 workouts Upcoming" [ref=e368] [cursor=pointer]:
+                - generic [ref=e370]: Thu
+                - paragraph [ref=e371]: 2 Apr
+                - generic [ref=e372]:
+                  - generic [ref=e373]: 0 tasks
+                  - generic [ref=e374]: 0 workouts
+                - paragraph [ref=e375]: Upcoming
+              - tab "Fri 3 Apr 0 tasks 0 workouts Upcoming" [ref=e376] [cursor=pointer]:
+                - generic [ref=e378]: Fri
+                - paragraph [ref=e379]: 3 Apr
+                - generic [ref=e380]:
+                  - generic [ref=e381]: 0 tasks
+                  - generic [ref=e382]: 0 workouts
+                - paragraph [ref=e383]: Upcoming
+              - tab "Sat 4 Apr 0 tasks 0 workouts Upcoming" [ref=e384] [cursor=pointer]:
+                - generic [ref=e386]: Sat
+                - paragraph [ref=e387]: 4 Apr
+                - generic [ref=e388]:
+                  - generic [ref=e389]: 0 tasks
+                  - generic [ref=e390]: 0 workouts
+                - paragraph [ref=e391]: Upcoming
+        - region "Workout management" [ref=e392]:
+          - generic [ref=e393]:
+            - generic [ref=e394]:
+              - paragraph [ref=e395]: Workout Hub
+              - heading "Manage Your Workout Flow" [level=2] [ref=e396]
+              - paragraph [ref=e397]: Open upcoming workouts, edit personal logs, and review workout history from one dedicated page.
+            - link "Open Workout Management" [ref=e398] [cursor=pointer]:
+              - /url: /workout-management
+        - region "Weekly summary" [ref=e399]:
+          - generic [ref=e400]:
+            - generic [ref=e401]:
+              - paragraph [ref=e402]: Weekly Summary
+              - heading "This Week So Far" [level=2] [ref=e403]
+            - generic [ref=e404]:
+              - button "Weekly summary information" [ref=e405] [cursor=pointer]:
+                - img [ref=e406]
+              - generic:
+                - paragraph: You can change what is displayed and how it is displayed in preferences.
+                - link "Open preferences":
+                  - /url: /preferences/edit#weekly-summary-metrics
+          - generic [ref=e410]:
+            - article [ref=e411]:
+              - paragraph [ref=e412]: Workouts completed
+              - paragraph [ref=e413]: 0 / 1
+              - paragraph [ref=e414]: Completed inside this week
+              - paragraph [ref=e416]: Progress against your planned sessions
+            - article [ref=e417]:
+              - paragraph [ref=e418]: Meals logged
+              - paragraph [ref=e419]: "0"
+              - paragraph [ref=e420]: Nutrition logs recorded
+              - paragraph [ref=e422]: Logging consistency over the last 7 days
+            - article [ref=e423]:
+              - paragraph [ref=e424]: Habits completed
+              - paragraph [ref=e425]: "0"
+              - paragraph [ref=e426]: Habits marked complete
+              - paragraph [ref=e428]: Follow-through across the week
+      - complementary "Help and trust" [ref=e429]:
+        - generic [ref=e431]:
+          - generic [ref=e432]:
+            - generic [ref=e434]:
+              - paragraph [ref=e435]: Help and Trust
+              - heading "Support Without Leaving the Dashboard" [level=2] [ref=e436]
+            - paragraph [ref=e437]: Keep essential help, privacy, and support access close to the main dashboard flow.
+            - navigation "Support links" [ref=e438]:
+              - link "FAQ Fast answers to common questions and workflows." [ref=e439] [cursor=pointer]:
+                - /url: /faq
+                - img [ref=e441]
+                - generic [ref=e445]:
+                  - generic [ref=e446]: FAQ
+                  - generic [ref=e447]: Fast answers to common questions and workflows.
+                - generic [ref=e448]: →
+              - link "Privacy and terms See how your data and account rules are handled." [ref=e449] [cursor=pointer]:
+                - /url: /policies/terms
+                - img [ref=e451]
+                - generic [ref=e454]:
+                  - generic [ref=e455]: Privacy and terms
+                  - generic [ref=e456]: See how your data and account rules are handled.
+                - generic [ref=e457]: →
+          - generic [ref=e458]:
+            - paragraph [ref=e461]: Your Profile
+            - generic [ref=e463]:
+              - img "Profile photo" [ref=e465]
+              - generic [ref=e466]:
+                - generic [ref=e467]:
+                  - generic [ref=e468]: Avery Client
+                  - generic "Premium member" [ref=e469]:
+                    - button "Premium membership details" [ref=e470] [cursor=pointer]:
+                      - img [ref=e471]
+                    - status: Premium Active
+                - paragraph [ref=e473]: "@demo_client"
+            - generic [ref=e474]:
+              - paragraph [ref=e477]: Premium client demo account with a live trainer link and a ready-to-use premium profile.
+              - generic [ref=e478]:
+                - paragraph [ref=e479]: Points and level
+                - generic [ref=e480]:
+                  - generic [ref=e481]:
+                    - generic [ref=e482]: "1840"
+                    - generic [ref=e483]: points
+                  - generic [ref=e484]:
+                    - generic [ref=e485]: "10"
+                    - generic [ref=e486]: level
+              - generic [ref=e487]:
+                - paragraph [ref=e488]: Daily focus
+                - generic [ref=e489]:
+                  - heading "Daily focus" [level=3] [ref=e490]
+                  - paragraph [ref=e491]: Your plan is light today, so use the extra space to prepare tomorrow cleanly.
+              - generic [ref=e492]:
+                - paragraph [ref=e493]: Workout streak
+                - generic [ref=e494]:
+                  - generic [ref=e495]: "0"
+                  - generic [ref=e496]: days
+  - generic:
+    - button "Open coach" [ref=e497] [cursor=pointer]
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Charlie
+              - generic: One To One AI performance concierge
+          - generic:
+            - button: "!"
+            - button: Clear
+            - button: X
+        - generic:
+          - button: Inbox
+          - button: Pro Chat Lock
+          - generic: Premium only
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: Hi, I am Charlie, your One To One AI concierge. I can map your day, tune your training plan, surface priorities, and navigate you anywhere in the platform. What would you like to optimize first?
+          - generic:
+            - button: What's on today?
+            - button: Calendar
+            - button: Workouts
+            - button: Goals
+            - button: Progress
+          - generic:
+            - textbox:
+              - /placeholder: Message...
+            - button: Send
+    - generic:
+      - dialog "Clear Chat History":
+        - generic:
+          - generic:
+            - generic: "!"
+          - generic:
+            - heading "Clear Chat History" [level=3]
+            - paragraph: This cannot be undone
+        - paragraph: Are you sure you want to remove all chat history? All previous messages will be permanently deleted.
+        - generic:
+          - button "Cancel"
+          - button "Clear Chat"
+  - generic:
+    - button "Toggle quick actions" [ref=e501] [cursor=pointer]:
+      - generic [ref=e502]: ⚡
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - generic: ⚡
+            - generic:
+              - generic: Quick Actions
+              - generic: One-tap moves for today
+          - generic:
+            - button: ⚙️
+            - button: ✕
+      - generic:
+        - generic:
+          - generic:
+            - generic: Active
+            - generic: Tap to run
+          - generic:
+            - generic: 📋
+            - paragraph: No actions yet
+            - paragraph: Tap the gear icon to get started
