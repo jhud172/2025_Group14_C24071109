@@ -5,15 +5,15 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
-import uk.ac.cf._5.group14.One_To_One.Users.UserService;
+import uk.ac.cf._5.group14.One_To_One.Users.UserLookupService;
 
 @Component
 public class CurrentUserResolver {
 
-    private final UserService userService;
+    private final UserLookupService userLookupService;
 
-    public CurrentUserResolver(UserService userService) {
-        this.userService = userService;
+    public CurrentUserResolver(UserLookupService userLookupService) {
+        this.userLookupService = userLookupService;
     }
 
     public User resolveCurrentUser() {
@@ -26,7 +26,10 @@ public class CurrentUserResolver {
 
     public User resolveCurrentUser(Authentication authentication, HttpSession session) {
         if (SecurityUtils.isAuthenticated(authentication)) {
-            return userService.findByUsername(SecurityUtils.getUsername(authentication));
+            User user = userLookupService.findByLoginIdentifier(SecurityUtils.getUsername(authentication));
+            if (user != null) {
+                return user;
+            }
         }
         if (session != null) {
             Object sessionUser = session.getAttribute("user");

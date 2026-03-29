@@ -16,7 +16,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
-import uk.ac.cf._5.group14.One_To_One.Users.UserService;
+import uk.ac.cf._5.group14.One_To_One.Users.UserLookupService;
 
 @Component
 @Slf4j
@@ -30,7 +30,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     }
 
     @Autowired
-    private UserService userService;
+    private UserLookupService userLookupService;
 
     @Autowired(required = false)
     private LoginAttemptService loginAttemptService;
@@ -47,7 +47,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         }
 
         String username = authentication.getName();
-        User user = userService.findByUsername(username);
+        User user = userLookupService.findByLoginIdentifier(username);
 
         // First-login: redirect to the tutorial before the normal flow
         if (user != null && !user.isHasSeenTutorial()) {

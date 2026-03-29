@@ -1,14 +1,17 @@
 ﻿# Frontend Template Structure Audit
 
-Audit date: 2026-03-23
+Audit date: 2026-03-29
 
 Repository root: `G:\No OneDrive Work\My Website\Crystal-Productions-OneToOne\One To One\2025_Group14_C24071109`
+
+This is the current frontend template audit for the repository and supersedes the older duplicated copies that previously lived elsewhere in `docs/`.
 
 ## 1. Executive summary
 
 - Inspected `172` active HTML/Thymeleaf files under `src/main/resources/templates`.
 - Found `0` active inline `<style>` blocks and `0` active inline `<script>` blocks in the inspected templates.
 - Found `9` active template violations of the repository rule set, all via `th:style` or inline event-handler attributes.
+- Findings are unchanged from the previous verified baseline: the same 9 violations remain active in the current repository state.
 - Main problems found: dynamic inline colour/width styling in calendar/chat/schedule templates; repeated inline dialog handlers in trainer library detail pages; several oversized templates that are still maintainable but harder to edit safely; one stale asset-path issue in `calendar/focus.html`; and naming/organisation inconsistencies such as `templates/User` and `static/css/components/Cards`.
 - Priority areas to fix first:
   1. Remove inline `onclick` usage from the three trainer library detail pages and share the modal markup/behaviour.

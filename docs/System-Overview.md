@@ -1,306 +1,264 @@
 # System Overview
 
-## Snapshot
-The One to One platform is a Spring Boot monolith for one-to-one coaching, planning, tracking, and trainer-client collaboration. It currently delivers role-based dashboards, calendar planning, nutrition and health logging, goals and check-ins, trainer plan delivery, messaging, gym and billing flows, and profile/personalisation features.
+## Purpose
 
-Current project state as of 14 March 2026:
-- Client dashboard is active and heavily customised, including Action Hub, planner, weekly summary, trainer relationship card, profile rail, and live dashboard ambience/weather.
-- Profile customisation is active, including banner/ring/card themes, bio, visible milestone selection, profile previews, and navbar live preview.
-- Trainer, client, gym admin, and super admin flows exist in the codebase.
-- Frontend is server-rendered with Thymeleaf fragments plus external JS/CSS modules.
-- The focused dashboard/profile tests pass.
-- The full Gradle suite is not fully green yet: 361 tests ran and 5 failed in unrelated calendar/goal areas.
+This file is the stable product and platform overview for the One To One repository.
 
-## Platform Purpose
-The system is designed to help:
-- Clients manage day-to-day actions, logging, goals, planning, and coach communication.
-- Trainers manage clients, share workouts/programmes/schedules, review check-ins, and stay connected through messaging.
-- Gym admins manage memberships, trainers, verification workflows, and business-facing administration.
-- Super admins oversee platform-level verification, safety, moderation, and compliance-sensitive areas.
+Use this document when you need the broad answer to:
 
-## Main Roles And What They Can Do
+- what the platform is
+- which user roles exist
+- which feature areas are active in the codebase
+- how the application is structured at a technical level
+
+If you need the current development-only behavior, use [System-Overview-Dev-Mode.md](./System-Overview-Dev-Mode.md).
+
+## Platform Summary
+
+One To One is a Spring Boot coaching platform built around trainer-client collaboration. The codebase supports public marketing pages, signup and verification, role-based dashboards, planning and calendar flows, workouts, health and nutrition tracking, goals and check-ins, messaging, profile customization, trainer and gym operations, payments, merch, and admin oversight.
+
+At the time of this documentation refresh, the repository contains:
+
+- `69` controller classes
+- `172` HTML/Thymeleaf templates
+- `78` JavaScript files under `src/main/resources/static/js`
+- `71` CSS files under `src/main/resources/static/css`
+- `116` Java test files under `src/test/java`
+
+## Roles
+
+### Guest
+
+Guests can access the public landing and information pages, browse public discovery surfaces, view pricing, and start signup flows.
 
 ### Client
-- Use the client dashboard as the main operating surface.
-- View current trainer relationship status and open trainer messages.
-- See a recommended next action in the Action Hub.
-- Review the next 7 days planner and weekly summary cards.
-- Log nutrition, health data, goals, workouts, habits, and other progress inputs.
-- View live ambience/weather with location-aware forecast data.
-- Choose saved preferences such as theme, weather unit, weather display mode, and time format.
-- Edit profile details, bio, visible milestones, and profile appearance.
+
+Clients are the main end users of the product. Their core surfaces include:
+
+- dashboard
+- calendar and scheduling
+- goals and progress tracking
+- workouts and workout sessions
+- health, nutrition, and daily logging
+- inbox and chat
+- profile, preferences, milestones, and level progress
 
 ### Trainer
-- Maintain a trainer profile and public-facing coaching identity.
-- Manage trainer-client links and coaching phases.
-- Share workouts, programmes, and schedules with clients.
-- Review client check-ins and reply with trainer feedback.
-- Access trainer library, templates, assignments, and client-facing planning tools.
-- Use trainer dashboard and messaging flows to monitor and support clients.
+
+Trainers can manage their coaching presence and work with clients through:
+
+- trainer dashboard
+- trainer profile
+- trainer library and templates
+- client assignments and plan sharing
+- check-in review flows
+- messaging and client relationship pages
 
 ### Gym Admin
-- Manage gym account details and trainer onboarding.
-- Review subscription/membership data.
-- Access gym dashboard and gym profile flows.
-- Support trainer verification, memberships, and operational administration.
 
-### Super Admin / Platform Admin
-- Review trainer verification workflows.
-- Monitor policy-sensitive areas such as payment safety and off-platform messaging flags.
-- Access admin moderation and oversight pages.
+Gym admins handle operational and business-facing areas such as:
 
-## Core User Journeys
+- gym dashboard
+- trainer onboarding and verification support
+- membership management
+- gym profile and operational settings
 
-### Client Daily Journey
-1. Open dashboard.
-2. Review Action Hub recommended next action.
-3. Check planner for the next 7 days.
-4. Review weather/ambience and local time context.
-5. Log meals, tasks, workouts, health records, and goals.
-6. Message trainer if needed.
+### Platform Admin and Super Admin
 
-### Trainer Support Journey
-1. Link with client.
-2. Assign workouts, plans, or schedules.
-3. Review check-ins and progress.
-4. Send messages or respond to client updates.
-5. Keep the client relationship visible through dashboard/profile previews.
+Admin-facing areas cover broader platform oversight, including:
 
-### Gym Operations Journey
-1. Manage gym profile and operational settings.
-2. Oversee trainer onboarding and memberships.
-3. Track subscriptions and platform billing context.
+- admin dashboard
+- feedback and moderation-related surfaces
+- development page controls
+- super-admin-only routes
 
-## Key Dashboard Surfaces
+## Main Feature Areas
 
-### Client Dashboard
-Current client dashboard sections include:
-- Explore Platform
-- Track Body
-- Track Schedule
-- Live Dashboard Ambience
-- Trainer Overview
-- Action Hub
-- Planner: Your Next 7 Days
-- Weekly Summary
-- Goals
-- Help and Trust
-- Your Profile
+### Public and Marketing
 
-### Action Hub
-The Action Hub is the clientâ€™s prioritisation card. It currently supports:
-- Recommended view
-- All view
-- Task, workout, and meal/log-meal recommendation cards
-- Primary recommendation plus smaller follow-up cards
-- Countdown/timed states
-- Sliding tab transition between Recommended and All
+The public site includes the landing experience and supporting pages such as:
 
-### Live Dashboard Ambience / Weather
-The ambience panel currently supports:
-- Local time + weather context
-- Location permission handling
-- Reload on permission allow
-- Denied-permission fallback message
-- 24 hour weather overview summary
-- 24 hour forecast timeline
-- Saved Celsius / Fahrenheit preference
-- Saved Visual Weather View / Graph View preference
-- Graph toggle between temperature graph and weather trend graph
-- Horizontal drag-scroll forecast interaction
+- `/`
+- `/about`
+- `/faq`
+- `/pricing`
+- `/explore`
+- policy pages under `/policies/**`
 
-### Trainer Relationship Card
-Current trainer card behaviour includes:
-- Click-to-open trainer banner on dashboard
-- Trainer bio with read more / read less logic
-- Selected visible milestones only
-- Empty fallback when no milestones are selected
-- Trainer activity and messaging areas
+### Authentication and Verification
 
-### Shared Profile Preview Components
-Shared preview behaviour exists in:
-- Navbar floating profile preview
-- Dashboard profile rail
-- Trainer reveal card on dashboard
-- Profile sidebar preview
+The application includes:
 
-Shared preview features include:
-- Theme-aware banners and text colours
-- Bio read-more handling
-- Selected milestone-only rendering
-- Hover preview in navbar
-- Click-driven dashboard/profile reveal panels
+- login
+- role-based signup
+- forgot/reset password
+- email verification
+- phone verification
 
-## Major Page Groups
+Security is handled through Spring Security with method security enabled.
 
-### Public / Marketing Pages
-- Landing page
-- About page
-- Pricing and checkout pages
-- Public homepage variants
+### Dashboards and Role Home Surfaces
 
-### Authentication / Verification
-- Login
-- Signup choice and role-specific signup pages
-- Forgot/reset password
-- Email confirmation
-- Logout confirmation
-- Verification flows for email, phone, and trainer review
+The codebase includes dedicated dashboards for:
 
-### Dashboard Pages
-- Client dashboard
-- Trainer dashboard
-- Gym dashboard
-- Admin-facing dashboard areas
+- client
+- trainer
+- gym admin
+- platform/admin
 
-### Planning / Calendar Pages
-- Day view
-- Week view
-- Month view
-- Task detail and planning flows
-- Schedule selection and schedule application flows
+The root route redirects signed-in users to `/dashboard`.
 
-### Goals / Check-ins
-- Goals index
-- Goal create/edit/detail
-- Goal check-in history
-- Weekly client submission and trainer review pages
-- Milestone/achievement views
+### Planning, Calendar, and Scheduling
 
-### Health / Nutrition / Tracking
-- Health record input pages
-- Nutrition logging pages
-- Daily health and day-mode related pages
-- Strength/workout logging flows
+Planning is a major part of the repository and includes:
 
-### Coaching / Messaging / Relationship Pages
-- Explore trainers and related discovery pages
-- Trainer relationship and plan pages
-- Legacy messaging and inbox/chat areas
-- Notifications and quick-action driven surfaces
+- day, week, and month calendar views
+- task detail and day planning flows
+- schedule creation and application flows
+- workout-linked scheduling
 
-### Profile / Settings / Preferences
-- Profile page
-- Profile settings drawers
-- Preferences form
-- Preferences summary page
-- Public trainer profile
+### Workouts and Training
 
-### Gym / Billing / Membership
-- Membership management pages
-- Platform billing pages
-- Gym profile and operational pages
-- Payment/pricing stub flows
+Training-related modules include:
 
-## Important Data Connections
+- workout lists and sessions
+- workout templates
+- trainer-assigned plans
+- workout feedback and logging
+- exercise logging
 
-### User -> UserSettings
-Stores:
-- Theme and accessibility settings
-- Weather temperature unit
-- Weather display mode
-- Time display format
-- Profile banner/ring/card appearance
-- Visible profile milestones
+### Health, Nutrition, and Daily Tracking
 
-### Client -> TrainerClientLink -> Trainer
-Controls:
-- Whether trainer access is active/requested/inactive
-- Which trainer data is shown on the dashboard
-- Whether trainer messaging/review pages are allowed
+The repository contains active modules for:
 
-### Trainer -> Assignments / Library -> Client
-Connects:
-- Shared workouts
-- Shared programmes
-- Shared schedules
-- Trainer notes and coaching context
+- health records
+- nutrition logging
+- day health and day mode
+- strength and exercise logging
+- conditions and preference-driven defaults
 
-### Client -> Dashboard Summary / Calendar / Nutrition / Health
-Feeds:
-- Action Hub card composition
-- Planner preview
-- Weekly summary metrics
-- Dashboard ambience state
-- Progress and streak summaries
+### Goals, Check-Ins, and Progress
 
-### User -> Profile Preview Components
-Feeds:
-- Bio
-- Visible milestones
-- Profile themes
-- Points and level
-- Navbar preview card
-- Dashboard right-rail profile card
+Progress-related areas include:
 
-## Current Preference Support
-The preference system currently includes saved options for:
-- Theme
-- Easy mode
-- Weather temperature unit
-- Weather display mode
-- Time display format
-- Dashboard weekly summary cards
-- Nutrition and macro-related fields
-- Equipment and other wellness defaults
+- goals
+- check-ins
+- achievements
+- levels
+- milestones surfaced through profile previews
 
-## Architecture Notes
-- Backend: Java 21, Spring Boot, Spring MVC, Spring Security, Spring Data JPA, Hibernate.
-- Frontend: Thymeleaf templates, fragments, external JS modules, external CSS/Tailwind build pipeline.
-- Database: H2 for tests/dev support, PostgreSQL-style runtime usage.
-- Security: role-aware routes, ownership checks, trainer-client link enforcement.
-- Notifications: application notifications and real-time update handling.
-- Messaging safety: payment/off-platform detection exists in legacy messaging areas.
+### Messaging and AI
 
-## Current Frontend Structure Rules
-The current direction in the codebase is:
-- No inline JavaScript in touched templates.
-- No inline CSS in touched templates.
-- Shared interactions live in external JS modules.
-- Shared styling lives in external CSS files and compiled `app.css`.
+Communication surfaces include:
 
-This has already been applied to the updated dashboard/profile/weather work, including:
-- Dashboard weather/ambience interactions
-- Shared profile preview behaviour
-- Profile card management handlers
+- inbox and message flows
+- chat / AI coach surfaces
+- notifications
 
-## Testing Status
+AI behavior is environment-controlled and uses the configured model and API key from application properties.
 
-### Verified During This Update
-Passed:
-- `node --check src/main/resources/static/js/dashboard/client-dashboard-page.js`
-- `node --check src/main/resources/static/js/core/profile-preview.js`
-- `node --check src/main/resources/static/js/profile/profile-page.js`
-- `node --check src/main/resources/static/js/profile/profile-cards-page.js`
-- `npm run build:css`
-- `./gradlew test --tests uk.ac.cf._5.group14.One_To_One.DashboardTests.ClientDashboardMvcTest`
-- `./gradlew test --tests uk.ac.cf._5.group14.One_To_One.ProfileTests.ProfileRouteAccessTest`
+### Profile and Personalization
 
-### Full Suite Status
-`./gradlew test` is currently not fully green.
+Profile and preference work is a first-class feature area. The repository supports:
 
-Latest result:
-- 361 tests completed
-- 5 tests failed
+- editable user profile details
+- avatar and image upload
+- bio
+- profile theme customization
+- visible milestone selection
+- weather and time preferences
+- accessibility and equipment defaults
+- quick-preferences onboarding plus full settings management
 
-Current failing tests observed:
-- `CalendarNavigationAndJumpControlsTest > dayViewRendersAllThreeViewToggleLinks()`
-- `GoalAccessControlTest > trainerAccessRequiresActiveLink()`
-- `GoalAccessControlTest > goalLinkRejectsOtherUsersItems()`
-- `GoalAccessControlTest > clientCannotAccessOtherClientsGoal()`
-- `GoalAdherenceServiceTest > adherenceCountsLinkedItemsInWeek()`
+### Payments, Billing, and Merch
 
-Observed failure themes:
-- One calendar assertion failure
-- Four goal/H2 SQL grammar/resource usage failures
+Commerce and billing surfaces include:
 
-These failures were present in the broader suite and are not caused by the dashboard/profile/weather work completed in this pass.
+- pricing and checkout
+- platform billing
+- merch shop and merch checkout
+- payment-provider configuration through environment variables
 
-## Progress So Far
-The project is in a strong feature-rich state for client experience and role-based flows:
-- The client dashboard is highly developed and now supports richer action selection, trainer relationship previews, and weather context.
-- Profile personalisation is well established.
-- Trainer and gym pathways are present and connected into the wider platform.
-- Shared UI fragments and behaviour are becoming more standardised.
+## Technical Architecture
 
-The main remaining quality signal is test stability in some non-dashboard areas, especially calendar and goal-related tests. Outside of that, the current dashboard/profile surface is moving in a clear and maintainable direction.
+### Backend
+
+- Java 21
+- Spring Boot 3.5.7
+- Spring MVC
+- Spring Security
+- Spring Data JPA / Hibernate
+- scheduled jobs enabled through `@EnableScheduling`
+
+### Frontend
+
+- Thymeleaf server-rendered templates
+- shared fragments
+- external JavaScript modules
+- Tailwind/PostCSS CSS pipeline
+- compiled stylesheet at `src/main/resources/static/css/app.css`
+
+### Data
+
+The application uses different runtime profiles:
+
+- `local`: in-memory H2 database, schema plus seeded demo data, default port `8081`
+- `render`: PostgreSQL-oriented configuration, Render schema/data scripts, default port `8080`
+
+The application boot path also normalizes Render/PostgreSQL URLs in [`src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java`](../src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java).
+
+## Configuration Model
+
+### Shared Configuration
+
+Common configuration lives in:
+
+- [`src/main/resources/application.properties`](../src/main/resources/application.properties)
+- [`src/main/resources/application-local.properties`](../src/main/resources/application-local.properties)
+- [`src/main/resources/application-render.properties`](../src/main/resources/application-render.properties)
+
+### Important Runtime Flags
+
+The main repository-level flags and integrations include:
+
+- `DEV_MODE`
+- `OPENAI_API_KEY`
+- `APP_AI_ENABLED`
+- `APP_AI_MODEL`
+- `DATABASE_URL`
+- `DATABASE_USER`
+- `DATABASE_PASSWORD`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `APP_BASE_URL`
+- `SPRING_MAIL_*`
+- `APP_SMS_PROVIDER` and `TWILIO_*`
+
+## Seed Data and Demo Accounts
+
+Local development seeds run from `classpath:data/*.sql`.
+
+The demo auth seed lives in [`src/main/resources/data/00-auth-demo.sql`](../src/main/resources/data/00-auth-demo.sql) and includes demo accounts for:
+
+- client
+- trainer
+- gym admin
+- platform admin
+
+## Repository Layout
+
+Key paths:
+
+- application entry point: [`src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java`](../src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java)
+- Java source: [`src/main/java/uk/ac/cf/_5/group14/One_To_One`](../src/main/java/uk/ac/cf/_5/group14/One_To_One)
+- templates: [`src/main/resources/templates`](../src/main/resources/templates)
+- static assets: [`src/main/resources/static`](../src/main/resources/static)
+- schema and seed data: [`src/main/resources`](../src/main/resources)
+- tests: [`src/test/java`](../src/test/java)
+- deployment container: [`Dockerfile`](../Dockerfile)
+
+## Documentation Rule
+
+Keep this file stable and broad.
+
+When behavior changes in a way that is specific to active testing, development gates, or temporary branch state, update [System-Overview-Dev-Mode.md](./System-Overview-Dev-Mode.md) first. Move changes into this file only when they represent the normal baseline of the repository.

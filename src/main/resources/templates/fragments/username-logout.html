@@ -5,16 +5,16 @@
               isPremium=${authUser != null ? @platformSubscriptionService.isPremium(authUser.id, @systemClock) : false},
               isPremiumVerified=${authUser != null and authUser.emailVerified and authUser.phoneVerified and authUser.profileImageUrl != null and authUser.bio != null and !#strings.isEmpty(authUser.bio) and authUser.username != null and !#strings.isEmpty(authUser.username) and authUser.firstName != null and !#strings.isEmpty(authUser.firstName) and authUser.lastName != null and !#strings.isEmpty(authUser.lastName) and authUser.dateOfBirth != null},
               navSettings=${userSettings},
-              navProgress=${authUser != null ? authUser.levelProgress : null},
+              navProgress=${navLevelProgress != null ? navLevelProgress : (authUser != null ? authUser.levelProgress : null)},
               navSub=${authUser != null ? @platformSubscriptionService.findByUserId(authUser.id).orElse(null) : null},
               navDaysLeft=${authUser != null ? @platformSubscriptionService.getDaysUntilRenewal(authUser.id, @systemClock) : null},
               navExpired=${authUser != null ? @platformSubscriptionService.hasExpiredSubscription(authUser.id, @systemClock) : false},
-              navDaysUnit=${navDaysLeft != null and navDaysLeft == 1 ? 'day' : 'days'}"
+              navDaysUnit=${navDaysLeft != null and navDaysLeft == 1 ? 'day' : 'days'},
+              displayName=${authUser != null and authUser.firstName != null and !#strings.isEmpty(authUser.firstName) and authUser.lastName != null and !#strings.isEmpty(authUser.lastName) ? authUser.fullName : (authUser != null and authUser.firstName != null and !#strings.isEmpty(authUser.firstName) ? authUser.firstName : (authUser != null and authUser.username != null and !#strings.isEmpty(authUser.username) ? authUser.username : 'Profile'))},
+              avatarInitials=${authUser != null and authUser.firstName != null and !#strings.isEmpty(authUser.firstName) ? #strings.toUpperCase(#strings.substring(authUser.firstName, 0, 1)) + (authUser.lastName != null and !#strings.isEmpty(authUser.lastName) ? #strings.toUpperCase(#strings.substring(authUser.lastName, 0, 1)) : '') : (authUser != null and authUser.username != null and !#strings.isEmpty(authUser.username) ? #strings.toUpperCase(#strings.substring(authUser.username, 0, 1)) : 'U')}"
      class="nav-identity-group flex items-center gap-3">
 
     <div sec:authorize="isAuthenticated()" class="nav-auth-container">
-        <th:block th:replace="~{fragments/dev-mode :: pill('dev-mode-pill--profile', 'DEV MODE')}"></th:block>
-
         <section id="floating-profile-card"
                  class="floating-profile-card"
                  data-floating-profile
@@ -44,7 +44,7 @@
                                  alt="Profile photo"
                                  class="h-full w-full object-cover" />
                             <span th:if="${authUser == null or authUser.profileImageUrl == null or #strings.isEmpty(authUser.profileImageUrl)}"
-                                  th:text="${authUser != null and authUser.username != null and !#strings.isEmpty(authUser.username) ? #strings.toUpperCase(#strings.substring(authUser.username, 0, 1)) : 'U'}">U</span>
+                                  th:text="${avatarInitials}">U</span>
                         </span>
                     </a>
 
@@ -52,7 +52,7 @@
                         <a th:href="@{/profile}"
                            id="floating-profile-card-handle"
                            class="floating-profile-card__handle profile-preview-name"
-                           th:text="${authUser != null and authUser.firstName != null ? authUser.firstName : 'Profile'}">Profile</a>
+                           th:text="${displayName}">Profile</a>
 
                         <div class="floating-profile-card__premium">
                             <div th:if="${isPremium}"

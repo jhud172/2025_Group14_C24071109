@@ -2013,6 +2013,8 @@ function showDOBAwarenessModal() {
 
 (function initCustomDatePicker() {
     const datePickerElement = document.getElementById('custom-date-picker');
+    if (!datePickerElement) return;
+
     const datePickerBackdrop = datePickerElement.querySelector('.custom-date-picker__backdrop');
     const datePickerClose = document.getElementById('date-picker-close');
     const datePickerCalendar = document.getElementById('date-picker-calendar');
