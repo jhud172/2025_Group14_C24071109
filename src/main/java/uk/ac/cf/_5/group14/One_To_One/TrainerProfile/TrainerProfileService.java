@@ -11,6 +11,7 @@ import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
 
 @Service
 public class TrainerProfileService {
+    private static final int TRAINER_CODE_LENGTH = 12;
 
     private final TrainerProfileRepository profileRepository;
     private final UserRepository userRepository;
@@ -107,5 +108,16 @@ public class TrainerProfileService {
             }
         } while (profileRepository.existsByTrainerCode(code));
         return code;
+    }
+
+    public static String normalizeTrainerCode(String trainerCode) {
+        if (trainerCode == null) {
+            return null;
+        }
+        String normalized = trainerCode.replaceAll("[^A-Za-z0-9]", "").trim().toUpperCase();
+        if (normalized.isBlank()) {
+            return null;
+        }
+        return normalized.length() == TRAINER_CODE_LENGTH ? normalized : null;
     }
 }

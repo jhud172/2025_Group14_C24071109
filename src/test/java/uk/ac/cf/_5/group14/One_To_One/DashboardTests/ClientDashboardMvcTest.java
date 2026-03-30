@@ -207,7 +207,7 @@ class ClientDashboardMvcTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-ambience-permission-message")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-ambience-graph-toggle")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-selected-mode=\"temperature\"")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Weather timeline for the next 24 hours")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Weather outlook for the next 24 hours")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("No Milestones Displayed")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("First coaching win ahead"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Track Body")))

@@ -34,14 +34,20 @@ public class UserService {
 
     @Transactional
     public User saveUser(User user) {
+        return saveUser(user, false);
+    }
+
+    @Transactional
+    public User saveUser(User user, boolean passwordAlreadyEncoded) {
         if (user.getUsername() != null) {
             user.setUsername(user.getUsername().trim().toLowerCase());
         }
         if (user.getEmail() != null) {
-            user.setEmail(user.getEmail().trim());
+            user.setEmail(user.getEmail().trim().toLowerCase());
         }
-        // password encoder
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (!passwordAlreadyEncoded) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         user.setEnabled(true);
         user.setSubscriptionStatus(false);
 

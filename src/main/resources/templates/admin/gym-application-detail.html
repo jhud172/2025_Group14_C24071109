@@ -1,0 +1,122 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Gym Application Detail', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Gym application</p>
+                <h1 class="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100" th:text="${application.gymName}">Gym name</h1>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300" th:text="${application.adminEmail + ' • ' + application.gymUsername}">Email</p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800" th:text="${application.status}">PENDING</span>
+                <a th:href="@{/admin/gym-applications}" class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200">Back to queue</a>
+            </div>
+        </div>
+
+        <div th:if="${gymApplicationSuccess}" class="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" th:text="${gymApplicationSuccess}">Saved.</div>
+        <div th:if="${gymApplicationError}" class="rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800" th:text="${gymApplicationError}">Error.</div>
+
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+            <section class="space-y-4">
+                <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Application summary</h2>
+                    <dl class="mt-4 grid grid-cols-1 gap-4 text-sm text-slate-600 sm:grid-cols-2 dark:text-slate-300">
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Primary contact</dt>
+                            <dd class="mt-1 text-slate-900 dark:text-slate-100" th:text="${application.contactName}">Contact</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</dt>
+                            <dd class="mt-1 text-slate-900 dark:text-slate-100" th:text="${application.contactPhone}">000</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Address</dt>
+                            <dd class="mt-1 text-slate-900 dark:text-slate-100" th:text="${application.address}">Address</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">City</dt>
+                            <dd class="mt-1 text-slate-900 dark:text-slate-100" th:text="${application.city}">City</dd>
+                        </div>
+                    </dl>
+                    <div th:if="${application.reviewNotes != null}" class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-200">
+                        <p class="font-semibold">Review notes</p>
+                        <p class="mt-2 whitespace-pre-line" th:text="${application.reviewNotes}">Notes</p>
+                    </div>
+                </article>
+
+                <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Application timeline</h2>
+                        <span class="text-xs text-slate-500" th:text="${openApplicationCount} + ' open applications'">0 open applications</span>
+                    </div>
+                    <div class="mt-4 space-y-3">
+                        <div th:each="message : ${messages}" class="rounded-2xl border border-slate-200 px-4 py-3 dark:border-slate-700">
+                            <div class="flex items-center justify-between gap-3">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="${message.senderType}">ADMIN</p>
+                                <p class="text-xs text-slate-400" th:text="${#temporals.format(message.createdAt, 'yyyy-MM-dd HH:mm')}">2026-03-30 10:00</p>
+                            </div>
+                            <p th:if="${message.subject != null}" class="mt-2 text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${message.subject}">Subject</p>
+                            <p class="mt-2 whitespace-pre-line text-sm text-slate-700 dark:text-slate-200" th:text="${message.body}">Body</p>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="space-y-4">
+                <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Send follow-up</h2>
+                    <form th:action="@{/admin/gym-applications/{id}/message(id=${application.id})}" method="post" class="mt-4 space-y-3">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Subject</label>
+                            <input type="text" name="subject" maxlength="200" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900" placeholder="Follow-up on your gym application" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Message</label>
+                            <textarea name="message" rows="5" maxlength="5000" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900" placeholder="Ask for extra details, documents, or clarify next steps."></textarea>
+                        </div>
+                        <button type="submit" class="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500">Send email update</button>
+                    </form>
+                </article>
+
+                <article class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Review actions</h2>
+
+                    <form th:action="@{/admin/gym-applications/{id}/request-info(id=${application.id})}" method="post" class="mt-4 space-y-3">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="subject" value="More information needed for your 1 to 1 gym application" />
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Request more information</label>
+                            <textarea name="message" rows="4" maxlength="5000" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900" placeholder="Tell the gym exactly what still needs to be provided."></textarea>
+                        </div>
+                        <button type="submit" class="inline-flex items-center rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-500">Move to needs info</button>
+                    </form>
+
+                    <form th:action="@{/admin/gym-applications/{id}/decline(id=${application.id})}" method="post" class="mt-5 space-y-3">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="subject" value="Update on your 1 to 1 gym application" />
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Decline reason</label>
+                            <textarea name="message" rows="4" maxlength="5000" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900" placeholder="Explain why the application is being declined."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Internal review notes</label>
+                            <textarea name="reviewNotes" rows="3" maxlength="5000" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900" placeholder="Private internal notes for the review team."></textarea>
+                        </div>
+                        <button type="submit" class="inline-flex items-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500">Decline application</button>
+                    </form>
+
+                    <form th:action="@{/admin/gym-applications/{id}/approve(id=${application.id})}" method="post" class="mt-5 space-y-3">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Approval note</label>
+                            <textarea name="welcomeMessage" rows="4" maxlength="5000" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900" placeholder="Optional message sent alongside the live account approval."></textarea>
+                        </div>
+                        <button type="submit" class="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">Approve and create account</button>
+                    </form>
+                </article>
+            </section>
+        </div>
+    </div>
+</th:block>

@@ -19,6 +19,9 @@ public class SchemaCompatibilityInitializer {
     static final String GYM_MEMBER_SUBSCRIPTIONS_TABLE = "gym_member_subscriptions";
     static final String PRICE_CHANGE_EVENTS_TABLE = "price_change_events";
     static final String TRAINER_VERIFICATION_REQUESTS_TABLE = "trainer_verification_requests";
+    static final String USER_SOCIAL_IDENTITIES_TABLE = "user_social_identities";
+    static final String GYM_APPLICATIONS_TABLE = "gym_applications";
+    static final String GYM_APPLICATION_MESSAGES_TABLE = "gym_application_messages";
 
     static final String HAS_USERS_COLUMN_SQL = """
         SELECT COUNT(*)
@@ -106,7 +109,7 @@ public class SchemaCompatibilityInitializer {
     static final List<TableColumnPatch> GYM_PROFILE_COLUMN_PATCHES = List.of(
         new TableColumnPatch("gym_code", """
             ALTER TABLE gym_profiles
-            ADD COLUMN IF NOT EXISTS gym_code VARCHAR(12)
+            ADD COLUMN IF NOT EXISTS gym_code VARCHAR(16)
             """),
         new TableColumnPatch("idx_gym_profiles_gym_code", """
             CREATE UNIQUE INDEX IF NOT EXISTS idx_gym_profiles_gym_code
@@ -221,6 +224,96 @@ public class SchemaCompatibilityInitializer {
         )
         """;
 
+    static final String CREATE_USER_SOCIAL_IDENTITIES_TABLE_SQL = """
+        CREATE TABLE IF NOT EXISTS user_social_identities
+        (
+            id BIGSERIAL PRIMARY KEY,
+            user_id BIGINT NOT NULL,
+            provider VARCHAR(30) NOT NULL,
+            provider_subject VARCHAR(190) NOT NULL,
+            provider_email VARCHAR(255) NULL,
+            provider_display_name VARCHAR(200) NULL,
+            profile_image_url VARCHAR(500) NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT fk_user_social_identities_user
+                FOREIGN KEY (user_id) REFERENCES users (id)
+                    ON DELETE CASCADE
+        )
+        """;
+
+    static final String CREATE_USER_SOCIAL_IDENTITIES_PROVIDER_INDEX_SQL = """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_user_social_provider_subject
+            ON user_social_identities (provider, provider_subject)
+        """;
+
+    static final String CREATE_USER_SOCIAL_IDENTITIES_USER_INDEX_SQL = """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_user_social_user_provider
+            ON user_social_identities (user_id, provider)
+        """;
+
+    static final String CREATE_GYM_APPLICATIONS_TABLE_SQL = """
+        CREATE TABLE IF NOT EXISTS gym_applications
+        (
+            id BIGSERIAL PRIMARY KEY,
+            gym_name VARCHAR(120) NOT NULL,
+            admin_email VARCHAR(100) NOT NULL,
+            gym_username VARCHAR(100) NOT NULL,
+            requested_password_hash VARCHAR(500) NOT NULL,
+            address VARCHAR(200) NOT NULL,
+            city VARCHAR(120) NOT NULL,
+            contact_name VARCHAR(120) NOT NULL,
+            contact_phone VARCHAR(40) NOT NULL,
+            status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+            access_token VARCHAR(120) NOT NULL,
+            review_notes TEXT NULL,
+            reviewed_at TIMESTAMP NULL,
+            reviewed_by_user_id BIGINT NULL,
+            approved_user_id BIGINT NULL,
+            submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT uq_gym_applications_access_token UNIQUE (access_token),
+            CONSTRAINT fk_gym_applications_reviewer
+                FOREIGN KEY (reviewed_by_user_id) REFERENCES users (id)
+                    ON DELETE SET NULL,
+            CONSTRAINT fk_gym_applications_approved_user
+                FOREIGN KEY (approved_user_id) REFERENCES users (id)
+                    ON DELETE SET NULL
+        )
+        """;
+
+    static final String CREATE_GYM_APPLICATIONS_STATUS_INDEX_SQL = """
+        CREATE INDEX IF NOT EXISTS idx_gym_applications_status
+            ON gym_applications (status, submitted_at)
+        """;
+
+    static final String CREATE_GYM_APPLICATION_MESSAGES_TABLE_SQL = """
+        CREATE TABLE IF NOT EXISTS gym_application_messages
+        (
+            id BIGSERIAL PRIMARY KEY,
+            application_id BIGINT NOT NULL,
+            sender_type VARCHAR(20) NOT NULL,
+            sender_user_id BIGINT NULL,
+            sender_email VARCHAR(255) NULL,
+            subject VARCHAR(200) NULL,
+            body TEXT NOT NULL,
+            emailed BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT fk_gym_application_messages_application
+                FOREIGN KEY (application_id) REFERENCES gym_applications (id)
+                    ON DELETE CASCADE,
+            CONSTRAINT fk_gym_application_messages_sender
+                FOREIGN KEY (sender_user_id) REFERENCES users (id)
+                    ON DELETE SET NULL
+        )
+        """;
+
+    static final String CREATE_GYM_APPLICATION_MESSAGES_INDEX_SQL = """
+        CREATE INDEX IF NOT EXISTS idx_gym_application_messages_application
+            ON gym_application_messages (application_id, created_at)
+        """;
+
     private final JdbcTemplate jdbcTemplate;
 
     @PostConstruct
@@ -273,6 +366,32 @@ public class SchemaCompatibilityInitializer {
             USERS_TABLE,
             GYM_PROFILES_TABLE
         );
+        ensureTableIfMissing(
+            USER_SOCIAL_IDENTITIES_TABLE,
+            CREATE_USER_SOCIAL_IDENTITIES_TABLE_SQL,
+            USERS_TABLE
+        );
+        ensureTableIfMissing(
+            GYM_APPLICATIONS_TABLE,
+            CREATE_GYM_APPLICATIONS_TABLE_SQL,
+            USERS_TABLE
+        );
+        ensureTableIfMissing(
+            GYM_APPLICATION_MESSAGES_TABLE,
+            CREATE_GYM_APPLICATION_MESSAGES_TABLE_SQL,
+            GYM_APPLICATIONS_TABLE,
+            USERS_TABLE
+        );
+        if (hasTable(USER_SOCIAL_IDENTITIES_TABLE)) {
+            jdbcTemplate.execute(CREATE_USER_SOCIAL_IDENTITIES_PROVIDER_INDEX_SQL);
+            jdbcTemplate.execute(CREATE_USER_SOCIAL_IDENTITIES_USER_INDEX_SQL);
+        }
+        if (hasTable(GYM_APPLICATIONS_TABLE)) {
+            jdbcTemplate.execute(CREATE_GYM_APPLICATIONS_STATUS_INDEX_SQL);
+        }
+        if (hasTable(GYM_APPLICATION_MESSAGES_TABLE)) {
+            jdbcTemplate.execute(CREATE_GYM_APPLICATION_MESSAGES_INDEX_SQL);
+        }
     }
 
     @PostConstruct
@@ -281,6 +400,11 @@ public class SchemaCompatibilityInitializer {
             log.warn("Skipping gym_profiles compatibility patches because '{}' does not exist yet.", GYM_PROFILES_TABLE);
             return;
         }
+
+        jdbcTemplate.execute("""
+            ALTER TABLE gym_profiles
+            ALTER COLUMN gym_code TYPE VARCHAR(16)
+            """);
 
         for (TableColumnPatch patch : GYM_PROFILE_COLUMN_PATCHES) {
             if (patch.isIndexPatch() || hasTableColumn(GYM_PROFILES_TABLE, patch.columnName())) {

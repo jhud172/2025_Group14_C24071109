@@ -184,6 +184,82 @@ CREATE INDEX IF NOT EXISTS idx_support_requests_submitted_at
 CREATE INDEX IF NOT EXISTS idx_support_requests_status
     ON support_requests (status, viewed);
 
+CREATE TABLE IF NOT EXISTS user_social_identities
+(
+    id                    BIGSERIAL PRIMARY KEY,
+    user_id               BIGINT       NOT NULL,
+    provider              VARCHAR(30)  NOT NULL,
+    provider_subject      VARCHAR(190) NOT NULL,
+    provider_email        VARCHAR(255) NULL,
+    provider_display_name VARCHAR(200) NULL,
+    profile_image_url     VARCHAR(500) NULL,
+    created_at            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_user_social_identities_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_social_provider_subject
+    ON user_social_identities (provider, provider_subject);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_social_user_provider
+    ON user_social_identities (user_id, provider);
+
+CREATE TABLE IF NOT EXISTS gym_applications
+(
+    id                    BIGSERIAL PRIMARY KEY,
+    gym_name              VARCHAR(120) NOT NULL,
+    admin_email           VARCHAR(100) NOT NULL,
+    gym_username          VARCHAR(100) NOT NULL,
+    requested_password_hash VARCHAR(500) NOT NULL,
+    address               VARCHAR(200) NOT NULL,
+    city                  VARCHAR(120) NOT NULL,
+    contact_name          VARCHAR(120) NOT NULL,
+    contact_phone         VARCHAR(40)  NOT NULL,
+    status                VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    access_token          VARCHAR(120) NOT NULL,
+    review_notes          TEXT         NULL,
+    reviewed_at           TIMESTAMP    NULL,
+    reviewed_by_user_id   BIGINT       NULL,
+    approved_user_id      BIGINT       NULL,
+    submitted_at          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT uq_gym_applications_access_token UNIQUE (access_token),
+    CONSTRAINT fk_gym_applications_reviewer
+        FOREIGN KEY (reviewed_by_user_id) REFERENCES users (id)
+            ON DELETE SET NULL,
+    CONSTRAINT fk_gym_applications_approved_user
+        FOREIGN KEY (approved_user_id) REFERENCES users (id)
+            ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS gym_application_messages
+(
+    id             BIGSERIAL PRIMARY KEY,
+    application_id BIGINT       NOT NULL,
+    sender_type    VARCHAR(20)  NOT NULL,
+    sender_user_id BIGINT       NULL,
+    sender_email   VARCHAR(255) NULL,
+    subject        VARCHAR(200) NULL,
+    body           TEXT         NOT NULL,
+    emailed        BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_gym_application_messages_application
+        FOREIGN KEY (application_id) REFERENCES gym_applications (id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_gym_application_messages_sender
+        FOREIGN KEY (sender_user_id) REFERENCES users (id)
+            ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_gym_application_messages_application
+    ON gym_application_messages (application_id, created_at);
+
 -- =========================
 -- NOTIFICATIONS
 -- =========================
@@ -936,6 +1012,9 @@ CREATE TABLE IF NOT EXISTS trainer_profiles
     user_id           BIGINT       NOT NULL UNIQUE,
     bio               VARCHAR(500) NULL,
     specializations   VARCHAR(200) NULL,
+    location          VARCHAR(120) NULL,
+    primary_gym       VARCHAR(200) NULL,
+    price_per_session INTEGER      NULL,
     
     -- Social Media URLs
     instagram_url     VARCHAR(500) NULL,
@@ -950,6 +1029,7 @@ CREATE TABLE IF NOT EXISTS trainer_profiles
     show_youtube      BOOLEAN      NOT NULL DEFAULT FALSE,
     show_linkedin     BOOLEAN      NOT NULL DEFAULT FALSE,
     show_website      BOOLEAN      NOT NULL DEFAULT FALSE,
+    trainer_code      VARCHAR(12)  NULL UNIQUE,
     
     created_at        TIMESTAMP    NOT NULL,
     updated_at        TIMESTAMP    NOT NULL,
@@ -2203,7 +2283,7 @@ CREATE TABLE IF NOT EXISTS gym_profiles
     id         BIGSERIAL PRIMARY KEY,
     user_id    BIGINT       NOT NULL,
     gym_name   VARCHAR(200) NOT NULL,
-    gym_code   VARCHAR(12),
+    gym_code   VARCHAR(16),
     address    VARCHAR(200),
     city       VARCHAR(120),
     contact_name VARCHAR(120),
@@ -2218,7 +2298,7 @@ CREATE TABLE IF NOT EXISTS gym_profiles
 );
 
 ALTER TABLE gym_profiles
-    ADD COLUMN IF NOT EXISTS gym_code VARCHAR(12);
+    ADD COLUMN IF NOT EXISTS gym_code VARCHAR(16);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_gym_profiles_gym_code
     ON gym_profiles (gym_code);

@@ -5,7 +5,7 @@ import { Client } from "file:///C:/Users/jhuds/AppData/Local/npm-cache/_npx/5a9d
 import { StdioClientTransport } from "file:///C:/Users/jhuds/AppData/Local/npm-cache/_npx/5a9d879542beca3a/node_modules/@modelcontextprotocol/sdk/dist/esm/client/stdio.js";
 
 const root = process.cwd();
-const outputDir = path.join(root, "output", "playwright");
+const outputDir = path.join(root, "output", "playwright", "general");
 const command = process.platform === "win32" ? "npx.cmd" : "npx";
 const args = [
   "@playwright/mcp@latest",
@@ -47,6 +47,8 @@ const capturePage = async ({ label, url, width, height, waitSeconds = 2 }) => {
   const snapshot = `${label}-${width}.md`;
   const consoleLog = `${label}-${width}-console.json`;
   const absoluteScreenshotPath = path.join(outputDir, screenshot);
+  const absoluteSnapshotPath = path.join(outputDir, snapshot);
+  const absoluteConsoleLogPath = path.join(outputDir, consoleLog);
   await callTool("browser_run_code", {
     code: `async (page) => {
       await page.screenshot({
@@ -56,10 +58,10 @@ const capturePage = async ({ label, url, width, height, waitSeconds = 2 }) => {
       return { url: page.url() };
     }`,
   });
-  await callTool("browser_snapshot", { filename: snapshot });
+  await callTool("browser_snapshot", { filename: absoluteSnapshotPath });
   const consoleMessages = await callTool("browser_console_messages", {
     level: "info",
-    filename: consoleLog,
+    filename: absoluteConsoleLogPath,
   });
   return {
     label,
@@ -206,7 +208,7 @@ const main = async () => {
       return { url: page.url() };
     }`,
   });
-  await callTool("browser_snapshot", { filename: "dashboard-desktop.md" });
+  await callTool("browser_snapshot", { filename: path.join(outputDir, "dashboard-desktop.md") });
 
   const profileMenu = await callTool("browser_run_code", {
     code: `async (page) => {

@@ -1,4 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
           th:replace="~{base :: layout('Admin Dashboard', null, ~{::content}, null)}">
 
     <div th:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -7,7 +8,7 @@
             <p class="mt-2 text-slate-600 dark:text-slate-300">Run support, merchandise, waitlist communication, and dev-mode controls from one operational cockpit.</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
                 <p class="text-xs uppercase tracking-wide text-slate-500">Unread feedback</p>
                 <p class="mt-2 text-3xl font-bold text-emerald-600" th:text="${feedbackUnreadCount}">0</p>
@@ -24,6 +25,10 @@
                 <p class="text-xs uppercase tracking-wide text-slate-500">Waitlist signups</p>
                 <p class="mt-2 text-3xl font-bold text-violet-600" th:text="${waitlistCount}">0</p>
             </div>
+            <div sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')" class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                <p class="text-xs uppercase tracking-wide text-slate-500">Open gym applications</p>
+                <p class="mt-2 text-3xl font-bold text-rose-600" th:text="${gymApplicationCount}">0</p>
+            </div>
         </div>
 
         <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
@@ -37,6 +42,10 @@
                 <a th:href="@{/admin/feedback}" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-emerald-300 hover:bg-emerald-50/60 dark:border-slate-700 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/20">
                     <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Support inbox</div>
                     <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Triage feedback and keep issues moving.</div>
+                </a>
+                <a sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')" th:href="@{/admin/gym-applications}" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-rose-300 hover:bg-rose-50/60 dark:border-slate-700 dark:hover:border-rose-700 dark:hover:bg-rose-950/20">
+                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Gym applications</div>
+                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Review new gym onboarding requests before accounts go live.</div>
                 </a>
                 <a th:href="@{/admin/merch}" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-blue-300 hover:bg-blue-50/60 dark:border-slate-700 dark:hover:border-blue-700 dark:hover:bg-blue-950/20">
                     <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Merch controls</div>

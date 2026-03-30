@@ -13,9 +13,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import uk.ac.cf._5.group14.One_To_One.Config.DevModeProperties;
+import uk.ac.cf._5.group14.One_To_One.GymApplications.GymApplication;
+import uk.ac.cf._5.group14.One_To_One.GymApplications.GymApplicationService;
 import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfile;
 import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfileService;
 import uk.ac.cf._5.group14.One_To_One.Security.SecurityUtils;
+import uk.ac.cf._5.group14.One_To_One.Security.SocialAuth.SocialAuthAvailabilityService;
 import uk.ac.cf._5.group14.One_To_One.TrainerProfile.TrainerProfile;
 import uk.ac.cf._5.group14.One_To_One.TrainerProfile.TrainerProfileService;
 import uk.ac.cf._5.group14.One_To_One.Verification.EmailVerificationService;
@@ -38,6 +41,17 @@ public class UserController {
 
     @Autowired
     private EmailVerificationService emailVerificationService;
+
+    @Autowired
+    private SocialAuthAvailabilityService socialAuthAvailabilityService;
+
+    @Autowired
+    private GymApplicationService gymApplicationService;
+
+    @ModelAttribute("socialProviders")
+    public java.util.List<uk.ac.cf._5.group14.One_To_One.Security.SocialAuth.SocialProviderOption> socialProviders() {
+        return socialAuthAvailabilityService.getVisibleProviders();
+    }
 
     // signup choice
     @GetMapping("/signup")
@@ -224,45 +238,26 @@ public class UserController {
             return "User/signup-gym";
         }
 
-        String generatedUsername = generateGymUsername(signupForm.getGymName());
-        if (generatedUsername == null) {
-            result.rejectValue("gymName", "gym.invalid", "Please provide a valid gym name.");
+        String normalizedGymUsername = normalizeUsername(signupForm.getGymUsername());
+        if (normalizedGymUsername == null) {
+            result.rejectValue("gymUsername", "username.invalid", "Please provide a valid gym username.");
             return "User/signup-gym";
         }
 
-        String[] contactNames = splitName(signupForm.getContactName());
-
-        User user = new User(
-                signupForm.getAdminEmail(),
-                contactNames[0],
-                contactNames[1],
-                generatedUsername,
-                signupForm.getPassword()
-        );
-        user.setRole(Role.GYM_ADMIN);
-
-        User savedUser = userService.saveUser(user);
-
-        GymProfile profile = new GymProfile(savedUser.getId(), signupForm.getGymName());
-        profile.setAddress(signupForm.getAddress());
-        profile.setCity(signupForm.getCity());
-        profile.setContactName(signupForm.getContactName());
-        profile.setContactPhone(signupForm.getContactPhone());
-        GymProfile savedProfile = gymProfileService.saveProfile(profile);
+        if (userService.usernameExists(normalizedGymUsername)) {
+            result.rejectValue("gymUsername", "username.taken", "Gym username already taken!");
+            return "User/signup-gym";
+        }
 
         try {
-            emailVerificationService.sendVerification(savedUser);
-        } catch (Exception e) {
-            log.warn("Failed to send verification email to {} after gym signup", savedUser.getEmail(), e);
+            GymApplication application = gymApplicationService.submitApplication(signupForm);
+            redirectAttributes.addFlashAttribute("gymApplicationSuccess", "Application submitted. We will review it before activating the gym account.");
+            return "redirect:/signup/gym/application/" + application.getAccessToken();
+        } catch (Exception ex) {
+            log.warn("Failed to submit gym application for {}", signupForm.getAdminEmail(), ex);
+            result.reject("gym.application.failed", "We could not submit the gym application. Please try again.");
+            return "User/signup-gym";
         }
-
-        String gymCode = savedProfile.getGymCode();
-        if (gymCode != null && gymCode.length() == 12) {
-            String formatted = gymCode.substring(0, 4) + "-" + gymCode.substring(4, 8) + "-" + gymCode.substring(8, 12);
-            redirectAttributes.addFlashAttribute("gymCode", formatted);
-        }
-        redirectAttributes.addFlashAttribute("verifyRegistered", true);
-        return "redirect:/verify/email/code?email=" + encodeEmail(savedUser.getEmail());
     }
 
     // login page
@@ -318,36 +313,6 @@ public class UserController {
             return null;
         }
         return username.trim().toLowerCase();
-    }
-
-    private String generateGymUsername(String gymName) {
-        if (gymName == null || gymName.isBlank()) {
-            return null;
-        }
-        String base = gymName.trim().toLowerCase().replaceAll("[^a-z0-9]+", "_");
-        base = base.replaceAll("^_+|_+$", "");
-        if (base.isBlank()) {
-            base = "gym";
-        }
-        String candidate = base;
-        int suffix = 1;
-        while (userService.usernameExists(candidate)) {
-            candidate = base + "_" + suffix;
-            suffix++;
-        }
-        return candidate;
-    }
-
-    private String[] splitName(String fullName) {
-        String cleaned = fullName == null ? "" : fullName.trim();
-        if (cleaned.isBlank()) {
-            return new String[]{"Gym", "Admin"};
-        }
-        String[] parts = cleaned.split("\\s+", 2);
-        if (parts.length == 1) {
-            return new String[]{parts[0], "Admin"};
-        }
-        return new String[]{parts[0], parts[1]};
     }
 
     private String encodeEmail(String email) {

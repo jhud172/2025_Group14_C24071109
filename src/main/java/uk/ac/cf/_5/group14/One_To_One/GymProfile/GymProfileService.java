@@ -2,11 +2,12 @@ package uk.ac.cf._5.group14.One_To_One.GymProfile;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Locale;
-import java.util.UUID;
+import java.security.SecureRandom;
 
 @Service
 public class GymProfileService {
+    private static final int GYM_CODE_LENGTH = 16;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final GymProfileRepository repository;
 
@@ -28,17 +29,22 @@ public class GymProfileService {
         if (gymCode == null) {
             return null;
         }
-        String normalized = gymCode.replaceAll("[^A-Za-z0-9]", "")
-                .trim()
-                .toUpperCase(Locale.ROOT);
-        return normalized.isBlank() ? null : normalized;
+        String normalized = gymCode.replaceAll("\\D", "").trim();
+        if (normalized.isBlank()) {
+            return null;
+        }
+        return normalized.length() == GYM_CODE_LENGTH ? normalized : null;
     }
 
     private String generateUniqueGymCode() {
         String code;
         int attempts = 0;
         do {
-            code = UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase(Locale.ROOT);
+            StringBuilder builder = new StringBuilder(GYM_CODE_LENGTH);
+            for (int i = 0; i < GYM_CODE_LENGTH; i++) {
+                builder.append(RANDOM.nextInt(10));
+            }
+            code = builder.toString();
             attempts++;
             if (attempts > 100) {
                 throw new IllegalStateException("Unable to generate unique gym code");

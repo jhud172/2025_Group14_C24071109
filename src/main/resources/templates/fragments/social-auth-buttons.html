@@ -1,0 +1,30 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="buttons(role, providers)" th:if="${providers != null and !#lists.isEmpty(providers)}" class="social-auth">
+        <div class="social-auth__divider">
+            <span>Quick access</span>
+        </div>
+        <div class="social-auth__stack">
+            <th:block th:each="provider : ${providers}">
+                <a th:if="${provider.enabled}"
+                   th:href="@{'/auth/social/' + ${provider.id}(role=${role})}"
+                   th:class="'social-auth__button social-auth__button--' + ${provider.id}">
+                    <span class="social-auth__brand"
+                          aria-hidden="true"
+                          th:text="${provider.id == 'google' ? 'G' : (provider.id == 'microsoft' ? 'M' : 'A')}">G</span>
+                    <span th:text="'Continue with ' + ${provider.label}">Continue with Google</span>
+                </a>
+                <button th:if="${!provider.enabled}"
+                        type="button"
+                        disabled
+                        aria-disabled="true"
+                        th:class="'social-auth__button social-auth__button--' + ${provider.id} + ' social-auth__button--disabled'">
+                    <span class="social-auth__brand"
+                          aria-hidden="true"
+                          th:text="${provider.id == 'google' ? 'G' : (provider.id == 'microsoft' ? 'M' : 'A')}">G</span>
+                    <span th:text="'Continue with ' + ${provider.label}">Continue with Google</span>
+                </button>
+            </th:block>
+        </div>
+        <p class="social-auth__note">If an account does not exist yet, we will create the matching <span th:text="${role}">client</span> account and sign you in immediately.</p>
+    </div>
+</th:block>

@@ -384,6 +384,128 @@
         box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     }
 
+    .social-auth {
+        margin-bottom: 1.5rem;
+    }
+
+    .social-auth__divider {
+        position: relative;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .social-auth__divider::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.35) 15%, rgba(148, 163, 184, 0.35) 85%, transparent 100%);
+    }
+
+    .social-auth__divider span {
+        position: relative;
+        display: inline-block;
+        padding: 0 0.85rem;
+        background: inherit;
+        color: #64748b;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .social-auth__stack {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .social-auth__button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        min-height: 3.25rem;
+        padding: 0.9rem 1rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(255, 255, 255, 0.9);
+        color: #0f172a;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease, background-color 0.24s ease;
+    }
+
+    .social-auth__button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 24px -22px rgba(15, 23, 42, 0.4);
+        border-color: rgba(16, 185, 129, 0.32);
+        background: rgba(255, 255, 255, 1);
+    }
+
+    .social-auth__button--disabled,
+    .social-auth__button--disabled:hover,
+    .social-auth__button--disabled:focus-visible {
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(148, 163, 184, 0.2);
+        background: rgba(248, 250, 252, 0.92);
+        color: #94a3b8;
+    }
+
+    .social-auth__button--disabled .social-auth__brand {
+        opacity: 0.55;
+    }
+
+    .social-auth__brand {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 9999px;
+        font-size: 0.9rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        color: #fff;
+    }
+
+    .social-auth__button--google .social-auth__brand {
+        background: linear-gradient(135deg, #ea4335 0%, #fbbc05 48%, #34a853 100%);
+    }
+
+    .social-auth__button--microsoft .social-auth__brand {
+        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+    }
+
+    .social-auth__button--apple .social-auth__brand {
+        background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    }
+
+    .social-auth__note {
+        margin-top: 0.9rem;
+        text-align: center;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: #64748b;
+    }
+
+    .social-auth-panels {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .social-auth-panel {
+        display: none;
+    }
+
+    .social-auth-panel--active {
+        display: block;
+    }
+
     /* Choice cards for signup selection with enhanced interactions */
     .auth-choice-card {
         @apply relative rounded-2xl border-2 border-gray-200 bg-white p-6 transition-all duration-300 cursor-pointer;
@@ -575,6 +697,34 @@
         @apply text-emerald-300;
     }
 
+    html.dark .social-auth__divider span {
+        color: #94a3b8;
+    }
+
+    html.dark .social-auth__button {
+        background: rgba(15, 23, 42, 0.9);
+        border-color: rgba(100, 116, 139, 0.32);
+        color: #f8fafc;
+    }
+
+    html.dark .social-auth__button:hover {
+        background: rgba(30, 41, 59, 0.96);
+        border-color: rgba(52, 211, 153, 0.36);
+    }
+
+    html.dark .social-auth__button--disabled,
+    html.dark .social-auth__button--disabled:hover,
+    html.dark .social-auth__button--disabled:focus-visible {
+        background: rgba(15, 23, 42, 0.72);
+        border-color: rgba(71, 85, 105, 0.82);
+        color: #64748b;
+        box-shadow: none;
+    }
+
+    html.dark .social-auth__note {
+        color: #94a3b8;
+    }
+
     html.dark .auth-choice-card {
         @apply border-gray-700 bg-gray-800;
     }
@@ -673,6 +823,16 @@
 
         .auth-container {
             min-height: min(34rem, calc(100svh - 5.75rem));
+        }
+
+        .code-input-group {
+            gap: 0.35rem;
+        }
+
+        .code-input-part {
+            max-width: 4rem;
+            padding-left: 0.65rem;
+            padding-right: 0.65rem;
         }
     }
 }

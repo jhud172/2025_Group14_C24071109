@@ -14,12 +14,35 @@
     @apply border-cyber-700;
   }
 
+  html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-x: clip;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
   body {
     @apply bg-cyber-900 text-slate-100;
+    width: 100%;
+    max-width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-x: clip;
     background-image: 
       radial-gradient(circle at 20% 50%, rgba(0, 243, 255, 0.05) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, rgba(181, 55, 242, 0.05) 0%, transparent 50%);
     background-attachment: fixed;
+  }
+
+  /* Use overlay scrollbars when the browser supports them, otherwise keep a stable gutter
+     so page layouts do not jump when vertical scrolling becomes available. */
+  @supports (overflow: overlay) {
+    html {
+      overflow-y: overlay;
+      scrollbar-gutter: auto;
+    }
   }
 
   /* Custom scrollbar styling - Emerald green mix */

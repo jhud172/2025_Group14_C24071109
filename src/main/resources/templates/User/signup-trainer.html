@@ -10,6 +10,8 @@
                 <p class="auth-subheading">Showcase your expertise and connect with clients.</p>
             </div>
 
+            <th:block th:replace="~{fragments/social-auth-buttons :: buttons('trainer', ${socialProviders})}"></th:block>
+
             <form th:action="@{/signup/trainer}" th:object="${signupForm}" method="post" class="space-y-5">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 

@@ -145,6 +145,8 @@ async function capturePage(callTool, { role, label, url, width, height, waitSeco
   const screenshotName = `${role}-${label}-${width}.png`;
   const snapshotName = `${role}-${label}-${width}.md`;
   const consoleName = `${role}-${label}-${width}-console.json`;
+  const absoluteSnapshotPath = path.join(outputDir, snapshotName);
+  const absoluteConsolePath = path.join(outputDir, consoleName);
   const diagnostics = await callTool("browser_run_code", {
     code: `async (page) => {
       await page.screenshot({ path: ${JSON.stringify(path.join(outputDir, screenshotName))}, fullPage: true });
@@ -166,10 +168,10 @@ async function capturePage(callTool, { role, label, url, width, height, waitSeco
       };
     }`,
   });
-  await callTool("browser_snapshot", { filename: snapshotName });
+  await callTool("browser_snapshot", { filename: absoluteSnapshotPath });
   const consoleMessages = await callTool("browser_console_messages", {
     level: "info",
-    filename: consoleName,
+    filename: absoluteConsolePath,
   });
   return {
     role,

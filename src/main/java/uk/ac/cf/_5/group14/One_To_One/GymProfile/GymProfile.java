@@ -20,8 +20,8 @@ public class GymProfile {
     @Column(name = "gym_name", length = 120, nullable = false)
     private String gymName;
 
-    @Size(max = 12)
-    @Column(name = "gym_code", length = 12, unique = true)
+    @Size(max = 16)
+    @Column(name = "gym_code", length = 16, unique = true)
     private String gymCode;
 
     @Size(max = 200)

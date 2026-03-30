@@ -207,7 +207,7 @@ WHERE user_id = (SELECT id FROM users WHERE username = 'demo_trainer');
 INSERT INTO gym_profiles (user_id, gym_name, gym_code, address, city, contact_name, contact_phone, created_at, updated_at)
 SELECT (SELECT id FROM users WHERE username = 'demo_gym'),
     'Harbour Strength Club',
-    'DMGY20260001',
+    '4827001938456201',
     '18 Dock Street',
     'Cardiff',
     'Harbour Operations',
@@ -218,7 +218,7 @@ WHERE EXISTS (SELECT 1 FROM users WHERE username = 'demo_gym')
   AND NOT EXISTS (SELECT 1 FROM gym_profiles WHERE user_id = (SELECT id FROM users WHERE username = 'demo_gym'));
 
 UPDATE gym_profiles
-SET gym_code = 'DMGY20260001',
+SET gym_code = '4827001938456201',
     address = '18 Dock Street',
     city = 'Cardiff',
     contact_name = 'Harbour Operations',

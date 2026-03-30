@@ -7,9 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfile;
-import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfileRepository;
-import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfileService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +15,9 @@ import java.util.List;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final GymProfileRepository gymProfileRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository,
-                                    GymProfileRepository gymProfileRepository) {
+    public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.gymProfileRepository = gymProfileRepository;
     }
 
     @Override
@@ -53,29 +47,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Nullable
     private User resolveUser(String identifier) {
-        User user = identifier.contains("@")
+        return identifier.contains("@")
                 ? userRepository.findByEmailIgnoreCase(identifier).orElse(null)
                 : userRepository.findByUsernameIgnoreCase(identifier).orElse(null);
-
-        if (user != null) {
-            return user;
-        }
-
-        user = userRepository.findByUsernameIgnoreCase(identifier).orElse(null);
-        if (user != null) {
-            return user;
-        }
-
-        String normalizedGymCode = GymProfileService.normalizeGymCode(identifier);
-        if (normalizedGymCode == null) {
-            return null;
-        }
-
-        GymProfile gymProfile = gymProfileRepository.findByGymCodeIgnoreCase(normalizedGymCode).orElse(null);
-        if (gymProfile == null) {
-            return null;
-        }
-
-        return userRepository.findById(gymProfile.getUserId()).orElse(null);
     }
 }

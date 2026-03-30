@@ -2,6 +2,7 @@ package uk.ac.cf._5.group14.One_To_One.Users;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 @PasswordMatches
@@ -15,6 +16,11 @@ public class GymSignupForm implements PasswordConfirmable {
     @Email(message = "Please enter a valid admin email address.")
     @Size(max = 100, message = "Email cannot exceed 100 characters")
     private String adminEmail;
+
+    @NotBlank(message = "Please enter a gym username")
+    @Size(min = 3, max = 20, message = "Gym username must be between 3 and 20 characters")
+    @Pattern(regexp = "^[A-Za-z0-9_]{3,20}$", message = "Gym username can only contain letters, numbers, and underscores")
+    private String gymUsername;
 
     @NotBlank(message = "Please enter a password.")
     @Size(min = 8, message = "Password must be at least 8 characters")
@@ -53,6 +59,14 @@ public class GymSignupForm implements PasswordConfirmable {
 
     public void setAdminEmail(String adminEmail) {
         this.adminEmail = adminEmail;
+    }
+
+    public String getGymUsername() {
+        return gymUsername;
+    }
+
+    public void setGymUsername(String gymUsername) {
+        this.gymUsername = gymUsername;
     }
 
     @Override

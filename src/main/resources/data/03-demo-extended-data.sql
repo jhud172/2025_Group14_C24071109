@@ -280,7 +280,7 @@ INSERT INTO gym_profiles (user_id, gym_name, gym_code, address, city, contact_na
     created_at, updated_at)
 SELECT (SELECT id FROM users WHERE username = 'gymadmin_demo'),
     'FitZone Gym Cardiff',
-    'GYMD20260001',
+    '4827001938456202',
     '42 Capital Way',
     'Cardiff',
     'Gym Admin',
@@ -291,7 +291,7 @@ WHERE EXISTS (SELECT 1 FROM users WHERE username = 'gymadmin_demo')
   AND NOT EXISTS (SELECT 1 FROM gym_profiles WHERE user_id = (SELECT id FROM users WHERE username = 'gymadmin_demo'));
 
 UPDATE gym_profiles
-SET gym_code = 'GYMD20260001',
+SET gym_code = '4827001938456202',
     address = '42 Capital Way',
     city = 'Cardiff',
     contact_name = 'Gym Admin',

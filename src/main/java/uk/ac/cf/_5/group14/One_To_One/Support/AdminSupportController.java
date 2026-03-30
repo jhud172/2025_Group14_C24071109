@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.ac.cf._5.group14.One_To_One.DevMode.DevModePageAccessMode;
 import uk.ac.cf._5.group14.One_To_One.DevMode.DevModePageAccessService;
+import uk.ac.cf._5.group14.One_To_One.GymApplications.GymApplicationService;
 import uk.ac.cf._5.group14.One_To_One.Membership.EmailService;
 import uk.ac.cf._5.group14.One_To_One.Security.SecurityUtils;
 import uk.ac.cf._5.group14.One_To_One.Users.AuthHelper;
@@ -30,19 +31,22 @@ public class AdminSupportController {
     private final EmailService emailService;
     private final AuthHelper authHelper;
     private final DevModePageAccessService devModePageAccessService;
+    private final GymApplicationService gymApplicationService;
 
     public AdminSupportController(SupportRequestRepository supportRequestRepository,
                                   WaitlistEmailRepository waitlistEmailRepository,
                                   UserRepository userRepository,
                                   EmailService emailService,
                                   AuthHelper authHelper,
-                                  DevModePageAccessService devModePageAccessService) {
+                                  DevModePageAccessService devModePageAccessService,
+                                  GymApplicationService gymApplicationService) {
         this.supportRequestRepository = supportRequestRepository;
         this.waitlistEmailRepository = waitlistEmailRepository;
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.authHelper = authHelper;
         this.devModePageAccessService = devModePageAccessService;
+        this.gymApplicationService = gymApplicationService;
     }
 
     @GetMapping("/admin/dashboard")
@@ -62,6 +66,8 @@ public class AdminSupportController {
         model.addAttribute("waitlistCount", waitlist.size());
         model.addAttribute("waitlistEntries", waitlist.stream().sorted((a, b) -> b.getSignedUpAt().compareTo(a.getSignedUpAt())).limit(25).toList());
         model.addAttribute("userCount", userRepository.count());
+        model.addAttribute("gymApplicationCount", gymApplicationService.countOpenApplications());
+        model.addAttribute("latestGymApplications", gymApplicationService.getAllApplications().stream().limit(6).toList());
         model.addAttribute("devPageSummary", devModePageAccessService.buildAdminSummary());
         model.addAttribute("devPageRows", devModePageAccessService.buildAdminRows());
         model.addAttribute("devPageModes", DevModePageAccessMode.values());

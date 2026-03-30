@@ -1,6 +1,7 @@
 package uk.ac.cf._5.group14.One_To_One.Security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,6 +23,8 @@ import org.springframework.security.web.session.InvalidSessionStrategy;
 
 import uk.ac.cf._5.group14.One_To_One.Config.DevModeProperties;
 import uk.ac.cf._5.group14.One_To_One.DevMode.DevModePageRestrictionFilter;
+import uk.ac.cf._5.group14.One_To_One.Security.SocialAuth.SocialOAuth2UserService;
+import uk.ac.cf._5.group14.One_To_One.Security.SocialAuth.SocialOidcUserService;
 
 @Configuration
 @EnableWebSecurity
@@ -50,6 +54,8 @@ public class SecurityConfig {
             "/u/**",
             "/error/**",
             "/login/**",
+            "/oauth2/**",
+            "/auth/social/**",
             "/dev-mode/**",
             "/access-denied/**",
                 "/signup/**",
@@ -86,8 +92,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    LoginThrottleFilter loginThrottleFilter,
                                                    DevModePageRestrictionFilter devModePageRestrictionFilter,
+                                                   RoleAwareAuthenticationProvider roleAwareAuthenticationProvider,
+                                                   LoginRequestDetailsSource loginRequestDetailsSource,
                                                    CustomAuthenticationFailureHandler failureHandler,
                                                    CustomAuthenticationSuccessHandler successHandler,
+                                                   SocialOAuth2UserService socialOAuth2UserService,
+                                                   SocialOidcUserService socialOidcUserService,
+                                                   ObjectProvider<ClientRegistrationRepository> clientRegistrationRepositoryProvider,
                                                    LogoutHandler logoutHandler,
                                                    AccessDeniedHandler accessDeniedHandler) throws Exception {
         http
@@ -110,6 +121,7 @@ public class SecurityConfig {
                             .requestMatchers("/client/trainers", "/client/trainers/**").hasAnyRole("CLIENT", "USER")
                             .requestMatchers("/inbox", "/inbox/**", "/messages/**", "/client/messages", "/client/messages/**").authenticated()
                             .requestMatchers("/chat", "/chat/**", "/chatv2/**").authenticated()
+                            .requestMatchers("/admin/gym-applications", "/admin/gym-applications/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**", "/admin/dev-pages/**")
                             .hasAnyRole("GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
@@ -137,6 +149,7 @@ public class SecurityConfig {
                             .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
                             .requestMatchers("/client/**").hasAnyRole("CLIENT", "USER")
                             .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
+                            .requestMatchers("/admin/gym-applications", "/admin/gym-applications/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/admin/dashboard", "/admin/feedback", "/admin/feedback/**", "/admin/outreach/**", "/admin/dev-pages/**")
                             .hasAnyRole("GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
@@ -156,10 +169,21 @@ public class SecurityConfig {
                     .permitAll()
                     .usernameParameter("username")
                     .passwordParameter("password")
+                    .authenticationDetailsSource(loginRequestDetailsSource)
                     .failureHandler(failureHandler)
-                    .successHandler(successHandler))
+                    .successHandler(successHandler));
 
-                .logout((l) -> l
+            if (clientRegistrationRepositoryProvider.getIfAvailable() != null) {
+                http.oauth2Login(oauth -> oauth
+                    .loginPage("/login")
+                    .failureUrl("/login?error=social")
+                    .userInfoEndpoint(userInfo -> userInfo
+                        .userService(socialOAuth2UserService)
+                        .oidcUserService(socialOidcUserService))
+                    .successHandler(successHandler));
+            }
+
+            http.logout((l) -> l
                     .logoutUrl("/logout")
                     .addLogoutHandler(logoutHandler)
                     .logoutSuccessUrl("/")
@@ -170,7 +194,7 @@ public class SecurityConfig {
                     .invalidSessionStrategy(invalidSessionStrategy()))
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(accessDeniedHandler)
-                        .defaultAuthenticationEntryPointFor(
+                    .defaultAuthenticationEntryPointFor(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                                 request -> request.getRequestURI() != null
                                         && (request.getRequestURI().startsWith("/chat/")
@@ -178,6 +202,7 @@ public class SecurityConfig {
                                         && (HttpMethod.GET.matches(request.getMethod())
                                         || HttpMethod.POST.matches(request.getMethod()))
                     ));
+            http.authenticationProvider(roleAwareAuthenticationProvider);
             http.addFilterBefore(devModePageRestrictionFilter, UsernamePasswordAuthenticationFilter.class);
             http.addFilterBefore(loginThrottleFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

@@ -115,6 +115,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function close() {
+        const activeElement = document.activeElement;
+        if (activeElement && panel.contains(activeElement)) {
+            fab.focus();
+        }
+        hideNotificationsPanel();
         panel.classList.remove("open");
         panel.setAttribute("aria-hidden", "true");
         fab.setAttribute("aria-expanded", "false");
@@ -621,34 +626,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Events
-    fab.addEventListener("click", (e) => {
-        try {
-            e.preventDefault();
-            e.stopPropagation();
-            const isOpen = panel.classList.contains("open");
-            console.log("Chat FAB clicked, current state:", isOpen ? "open" : "closed");
-            isOpen ? close() : open();
-        } catch (err) {
-            console.error("Error handling chat FAB click:", err);
-        }
-    });
-    
-    // Enhanced FAB click handler for better reliability
-    fab.addEventListener("click", function(e) {
-        // This is a second listener for redundancy
-        window.toggleChatPanel();
-    }, true); // Use capture phase to ensure it fires
-    
-    closeBtn.addEventListener("click", (e) => {
-        try {
-            e.preventDefault();
-            close();
-        } catch (err) {
-            console.error("Error handling chat close:", err);
-        }
-    });
-    
-    // Global toggle function for fallback (overrides the earlier fallback)
     window.toggleChatPanel = function() {
         try {
             const isOpen = panel.classList.contains("open");
@@ -658,6 +635,26 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error in toggleChatPanel:", err);
         }
     };
+
+    fab.addEventListener("click", (e) => {
+        try {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("Chat FAB clicked");
+            window.toggleChatPanel();
+        } catch (err) {
+            console.error("Error handling chat FAB click:", err);
+        }
+    });
+    
+    closeBtn.addEventListener("click", (e) => {
+        try {
+            e.preventDefault();
+            close();
+        } catch (err) {
+            console.error("Error handling chat close:", err);
+        }
+    });
     
     console.log("Chat widget initialized successfully. FAB element:", fab);
 

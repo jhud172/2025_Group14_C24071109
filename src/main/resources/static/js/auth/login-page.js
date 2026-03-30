@@ -2,6 +2,7 @@
     "use strict";
 
     const pageRoot = document.querySelector("[data-login-server-role]");
+    const loginForm = document.getElementById("loginForm");
     const roleSlider = document.getElementById("roleSlider");
     const roleOptions = document.querySelectorAll(".role-slider__option");
     const loginTypeInput = document.getElementById("loginType");
@@ -10,20 +11,30 @@
     const gymFields = document.getElementById("gymFields");
     const trainerCodeField = document.getElementById("trainerCodeField");
     const roleHint = document.getElementById("roleHint");
+    const socialAuthPanels = document.getElementById("socialAuthPanels");
     const usernameInput = document.getElementById("username");
     const passwordInput = document.getElementById("password");
-    const gymCodeInput = document.getElementById("gymCode");
+    const gymUsernameInput = document.getElementById("gymUsername");
     const gymPasswordInput = document.getElementById("gymPassword");
     const togglePassword = document.getElementById("togglePassword");
     const eyeIcon = document.getElementById("eyeIcon");
     const toggleGymPassword = document.getElementById("toggleGymPassword");
     const gymEyeIcon = document.getElementById("gymEyeIcon");
-    const trainerCode1 = document.getElementById("trainerCode1");
-    const trainerCode2 = document.getElementById("trainerCode2");
-    const trainerCode3 = document.getElementById("trainerCode3");
     const trainerCodeFull = document.getElementById("trainerCodeFull");
+    const gymSecretCodeFull = document.getElementById("gymSecretCodeFull");
+    const trainerCodeInputs = [
+        document.getElementById("trainerCode1"),
+        document.getElementById("trainerCode2"),
+        document.getElementById("trainerCode3")
+    ].filter(Boolean);
+    const gymSecretCodeInputs = [
+        document.getElementById("gymSecretCode1"),
+        document.getElementById("gymSecretCode2"),
+        document.getElementById("gymSecretCode3"),
+        document.getElementById("gymSecretCode4")
+    ].filter(Boolean);
 
-    if (!loginTypeInput || !authPanelStage || !emailFields || !gymFields || !trainerCodeField || !roleHint) {
+    if (!loginForm || !loginTypeInput || !authPanelStage || !emailFields || !gymFields || !trainerCodeField || !roleHint) {
         return;
     }
 
@@ -41,7 +52,7 @@
     const hints = {
         client: pageRoot && pageRoot.dataset.clientHint ? pageRoot.dataset.clientHint : "Login with your email and password.",
         trainer: pageRoot && pageRoot.dataset.trainerHint ? pageRoot.dataset.trainerHint : "Login with email, password, and trainer code.",
-        gym: pageRoot && pageRoot.dataset.gymHint ? pageRoot.dataset.gymHint : "Login with your gym code and password."
+        gym: pageRoot && pageRoot.dataset.gymHint ? pageRoot.dataset.gymHint : "Login with your gym username, gym secret code, and password."
     };
     let activeRole = null;
     let hintSwapTimer = null;
@@ -67,7 +78,7 @@
         try {
             sessionStorage.setItem("authRole", role);
         } catch (error) {
-            // Session storage may be unavailable; skip persistence.
+            // Ignore storage failures.
         }
     }
 
@@ -206,6 +217,134 @@
         trainerCodeField.setAttribute("aria-hidden", visible ? "false" : "true");
     }
 
+    function setSocialAuthRole(role) {
+        if (!socialAuthPanels) {
+            return;
+        }
+
+        const panels = socialAuthPanels.querySelectorAll("[data-social-role]");
+        let matched = false;
+
+        panels.forEach((panel) => {
+            const isActive = panel.getAttribute("data-social-role") === role;
+            panel.classList.toggle("social-auth-panel--active", isActive);
+            panel.setAttribute("aria-hidden", isActive ? "false" : "true");
+            matched = matched || isActive;
+        });
+
+        socialAuthPanels.hidden = !matched;
+    }
+
+    function sanitizeTrainerSegment(value) {
+        return value.replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 4);
+    }
+
+    function normalizeTrainerCode(value) {
+        return value.replace(/[^a-z0-9]/gi, "").toUpperCase();
+    }
+
+    function sanitizeGymSecretSegment(value) {
+        return value.replace(/\D/g, "").slice(0, 4);
+    }
+
+    function normalizeGymSecretCode(value) {
+        return value.replace(/\D/g, "");
+    }
+
+    function updateSegmentedCode(inputs, hiddenInput, sanitizer) {
+        if (!hiddenInput || inputs.length === 0) {
+            return;
+        }
+        hiddenInput.value = inputs.map((input) => sanitizer(input.value)).join("");
+    }
+
+    function clearSegmentValidation(inputs) {
+        inputs.forEach((input) => input.setCustomValidity(""));
+    }
+
+    function focusFirstIncomplete(inputs) {
+        const firstIncomplete = inputs.find((input) => input.value.length < 4) || inputs[0];
+        if (firstIncomplete) {
+            firstIncomplete.focus();
+            firstIncomplete.select();
+            firstIncomplete.reportValidity();
+        }
+    }
+
+    function validateSegmentedCode(inputs, hiddenInput, expectedLength, message, sanitizer) {
+        if (!hiddenInput || inputs.length === 0) {
+            return true;
+        }
+
+        updateSegmentedCode(inputs, hiddenInput, sanitizer);
+        const isComplete = hiddenInput.value.length === expectedLength && inputs.every((input) => sanitizer(input.value).length === 4);
+
+        clearSegmentValidation(inputs);
+        if (isComplete) {
+            return true;
+        }
+
+        inputs[0].setCustomValidity(message);
+        focusFirstIncomplete(inputs);
+        return false;
+    }
+
+    function bindSegmentedCodeInputs(inputs, hiddenInput, sanitizer, fullSanitizer) {
+        inputs.forEach((input, index) => {
+            input.addEventListener("input", () => {
+                input.value = sanitizer(input.value);
+                clearSegmentValidation(inputs);
+                updateSegmentedCode(inputs, hiddenInput, sanitizer);
+
+                if (input.value.length === 4 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                    inputs[index + 1].select();
+                }
+            });
+
+            input.addEventListener("keydown", (event) => {
+                if (event.key === "Backspace" && input.value.length === 0 && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener("paste", (event) => {
+                event.preventDefault();
+                const pasted = fullSanitizer((event.clipboardData || window.clipboardData).getData("text"));
+                if (!pasted) {
+                    return;
+                }
+
+                const sliceLength = inputs.length * 4;
+                const normalized = pasted.slice(0, sliceLength);
+                inputs.forEach((segmentInput, segmentIndex) => {
+                    segmentInput.value = normalized.slice(segmentIndex * 4, (segmentIndex + 1) * 4);
+                });
+                clearSegmentValidation(inputs);
+                updateSegmentedCode(inputs, hiddenInput, sanitizer);
+
+                const lastFilledIndex = Math.min(Math.ceil(normalized.length / 4) - 1, inputs.length - 1);
+                if (lastFilledIndex >= 0) {
+                    inputs[lastFilledIndex].focus();
+                }
+            });
+        });
+    }
+
+    function setFieldMode(input, options) {
+        if (!input) {
+            return;
+        }
+
+        if (options.required) {
+            input.setAttribute("required", "required");
+        } else {
+            input.removeAttribute("required");
+        }
+
+        input.name = options.name || "";
+    }
+
     function activateRole(role, animate) {
         const resolvedRole = roles.includes(role) ? role : "client";
         const previousRole = activeRole || resolvedRole;
@@ -216,47 +355,29 @@
         loginTypeInput.value = resolvedRole;
         updateHint(resolvedRole, shouldAnimate);
         persistRole(resolvedRole);
+        setSocialAuthRole(resolvedRole);
 
         if (resolvedRole === "gym") {
             switchPanels(targetPanel, roleIndexMap[resolvedRole] - roleIndexMap[previousRole], shouldAnimate);
             setTrainerCodeVisible(false);
 
-            if (usernameInput) {
-                usernameInput.removeAttribute("required");
-                usernameInput.name = "";
-            }
-            if (passwordInput) {
-                passwordInput.removeAttribute("required");
-                passwordInput.name = "";
-            }
-            if (gymCodeInput) {
-                gymCodeInput.setAttribute("required", "required");
-                gymCodeInput.name = "username";
-            }
-            if (gymPasswordInput) {
-                gymPasswordInput.setAttribute("required", "required");
-                gymPasswordInput.name = "password";
-            }
+            setFieldMode(usernameInput, { required: false, name: "" });
+            setFieldMode(passwordInput, { required: false, name: "" });
+            setFieldMode(gymUsernameInput, { required: true, name: "username" });
+            setFieldMode(gymPasswordInput, { required: true, name: "password" });
+            setFieldMode(trainerCodeFull, { required: false, name: "" });
+            setFieldMode(gymSecretCodeFull, { required: false, name: "gymSecretCode" });
+
             activeRole = resolvedRole;
             return;
         }
 
-        if (usernameInput) {
-            usernameInput.setAttribute("required", "required");
-            usernameInput.name = "username";
-        }
-        if (passwordInput) {
-            passwordInput.setAttribute("required", "required");
-            passwordInput.name = "password";
-        }
-        if (gymCodeInput) {
-            gymCodeInput.removeAttribute("required");
-            gymCodeInput.name = "";
-        }
-        if (gymPasswordInput) {
-            gymPasswordInput.removeAttribute("required");
-            gymPasswordInput.name = "";
-        }
+        setFieldMode(usernameInput, { required: true, name: "username" });
+        setFieldMode(passwordInput, { required: true, name: "password" });
+        setFieldMode(gymUsernameInput, { required: false, name: "" });
+        setFieldMode(gymPasswordInput, { required: false, name: "" });
+        setFieldMode(gymSecretCodeFull, { required: false, name: "" });
+        setFieldMode(trainerCodeFull, { required: false, name: resolvedRole === "trainer" ? "trainerCode" : "" });
 
         switchPanels(targetPanel, roleIndexMap[resolvedRole] - roleIndexMap[previousRole], shouldAnimate);
         setTrainerCodeVisible(resolvedRole === "trainer");
@@ -320,29 +441,32 @@
         });
     }
 
-    function updateTrainerCode() {
-        if (!trainerCodeFull || !trainerCode1 || !trainerCode2 || !trainerCode3) {
+    bindSegmentedCodeInputs(trainerCodeInputs, trainerCodeFull, sanitizeTrainerSegment, normalizeTrainerCode);
+    bindSegmentedCodeInputs(gymSecretCodeInputs, gymSecretCodeFull, sanitizeGymSecretSegment, normalizeGymSecretCode);
+
+    loginForm.addEventListener("submit", (event) => {
+        clearSegmentValidation(trainerCodeInputs);
+        clearSegmentValidation(gymSecretCodeInputs);
+
+        if (activeRole === "trainer" && !validateSegmentedCode(
+            trainerCodeInputs,
+            trainerCodeFull,
+            12,
+            "Enter your full trainer authorization code.",
+            sanitizeTrainerSegment
+        )) {
+            event.preventDefault();
             return;
         }
-        trainerCodeFull.value = trainerCode1.value + trainerCode2.value + trainerCode3.value;
-    }
 
-    [trainerCode1, trainerCode2, trainerCode3].forEach((input, index, inputs) => {
-        if (!input) {
-            return;
+        if (activeRole === "gym" && !validateSegmentedCode(
+            gymSecretCodeInputs,
+            gymSecretCodeFull,
+            16,
+            "Enter your full 16-digit gym secret code.",
+            sanitizeGymSecretSegment
+        )) {
+            event.preventDefault();
         }
-
-        input.addEventListener("input", (event) => {
-            updateTrainerCode();
-            if (event.target.value.length === 4 && index < inputs.length - 1) {
-                inputs[index + 1].focus();
-            }
-        });
-
-        input.addEventListener("keydown", (event) => {
-            if (event.key === "Backspace" && event.target.value.length === 0 && index > 0) {
-                inputs[index - 1].focus();
-            }
-        });
     });
 })();

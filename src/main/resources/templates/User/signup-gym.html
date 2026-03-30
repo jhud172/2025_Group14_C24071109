@@ -6,8 +6,8 @@
             <div class="auth-accent-bar"></div>
 
             <div class="mb-6 mt-4 text-center">
-                <h1 class="auth-heading">Create your gym account</h1>
-                <p class="auth-subheading">Set up your gym profile and admin access.</p>
+                <h1 class="auth-heading">Apply for your gym account</h1>
+                <p class="auth-subheading">Submit your gym details for review. We only create the live gym admin account after approval.</p>
             </div>
 
             <form th:action="@{/signup/gym}" th:object="${signupForm}" method="post" class="space-y-5">
@@ -55,6 +55,21 @@
                         class="auth-field__input" />
                     <div th:if="${#fields.hasErrors('adminEmail')}" class="mt-1 text-sm text-red-600">
                         <span th:errors="*{adminEmail}"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="gymUsername" class="auth-field__label">Gym username *</label>
+                    <input
+                        type="text"
+                        id="gymUsername"
+                        th:field="*{gymUsername}"
+                        required
+                        autocomplete="username"
+                        class="auth-field__input" />
+                    <p class="mt-1 text-xs text-gray-500">3-20 characters. Letters, numbers, underscore only.</p>
+                    <div th:if="${#fields.hasErrors('gymUsername')}" class="mt-1 text-sm text-red-600">
+                        <span th:errors="*{gymUsername}"></span>
                     </div>
                 </div>
 
@@ -154,7 +169,7 @@
                         <span>Choose account type</span>
                     </a>
                     <button type="submit" class="auth-btn auth-btn--primary">
-                        <span>Sign up as gym</span>
+                        <span>Submit gym application</span>
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>

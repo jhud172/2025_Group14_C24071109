@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import uk.ac.cf._5.group14.One_To_One.Security.SocialAuth.SocialAuthAccountService;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 import uk.ac.cf._5.group14.One_To_One.Users.UserLookupService;
 
@@ -35,6 +36,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Autowired(required = false)
     private LoginAttemptService loginAttemptService;
 
+    @Autowired(required = false)
+    private SocialAuthAccountService socialAuthAccountService;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -44,6 +48,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
         if (loginAttemptService != null) {
             loginAttemptService.recordSuccess(request);
+        }
+        if (socialAuthAccountService != null) {
+            socialAuthAccountService.clearRequestedRole(request);
         }
 
         String username = authentication.getName();

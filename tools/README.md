@@ -13,3 +13,5 @@ Supporting tooling lives here so the application root stays focused on the Sprin
 
 - Tool-specific `node_modules`, `.wrangler`, and local editor files are ignored.
 - Generated outputs belong under [`../output`](../output), not in the repository root.
+- Playwright general audits belong under [`../output/playwright/general`](../output/playwright/general).
+- Playwright cross-role audits belong under [`../output/playwright/roles`](../output/playwright/roles).

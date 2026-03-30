@@ -49,6 +49,7 @@
                     <span th:case="'disabled'" th:text="#{auth.error.disabled}">Account disabled. Contact support.</span>
                     <span th:case="'locked'" th:text="#{auth.error.locked}">Too many attempts. Try again later.</span>
                     <span th:case="'throttled'" th:text="#{auth.error.throttled}">Too many attempts. Try again later.</span>
+                    <span th:case="'social'">Social sign-in could not be completed. Check the selected account type and provider configuration.</span>
                     <span th:case="*" th:text="#{auth.error.invalid}">Invalid username or password.</span>
                 </span>
             </div>
@@ -67,6 +68,15 @@
 
             <div th:if="${param.reset}" class="auth-alert auth-alert--success" role="alert">
                 <span th:text="#{auth.reset.success}">Password updated. Please log in with your new password.</span>
+            </div>
+
+            <div id="socialAuthPanels" th:if="${socialProviders != null and !#lists.isEmpty(socialProviders)}" class="social-auth-panels">
+                <section class="social-auth-panel social-auth-panel--active" data-social-role="client">
+                    <th:block th:replace="~{fragments/social-auth-buttons :: buttons('client', ${socialProviders})}"></th:block>
+                </section>
+                <section class="social-auth-panel" data-social-role="trainer" aria-hidden="true">
+                    <th:block th:replace="~{fragments/social-auth-buttons :: buttons('trainer', ${socialProviders})}"></th:block>
+                </section>
             </div>
 
             <form th:action="@{/login}" method="post" class="space-y-4" id="loginForm">
@@ -115,7 +125,7 @@
                                     autocomplete="off" />
                             </div>
                             <input type="hidden" name="trainerCode" id="trainerCodeFull" />
-                            <p class="mt-2 text-xs text-gray-500 text-center">Enter your 12-digit trainer authorization code</p>
+                            <p class="mt-2 text-xs text-gray-500 text-center">Enter your 12-character trainer authorization code</p>
                         </div>
 
                         <div class="mt-4">
@@ -143,20 +153,62 @@
 
                     <div id="gymFields" class="auth-fields-block auth-fields-block--inactive space-y-4" aria-hidden="true">
                         <div>
-                            <label for="gymCode" class="auth-field__label">Gym Code</label>
+                            <label for="gymUsername" class="auth-field__label">Gym Username</label>
                             <input
                                 type="text"
-                                id="gymCode"
+                                id="gymUsername"
                                 name="gymUsername"
-                                placeholder="Enter your gym code"
-                                class="auth-field__input auth-field__code-input"
-                                autocomplete="off" />
-                            <p class="mt-1 text-xs text-gray-500">Your unique gym identification code</p>
+                                placeholder="Enter your gym username"
+                                class="auth-field__input"
+                                autocomplete="username" />
+                        </div>
+
+                        <div>
+                            <label for="gymSecretCode1" class="auth-field__label">Gym Secret Code</label>
+                            <div class="code-input-group">
+                                <input
+                                    type="text"
+                                    id="gymSecretCode1"
+                                    maxlength="4"
+                                    placeholder="0000"
+                                    inputmode="numeric"
+                                    class="code-input-part"
+                                    autocomplete="one-time-code" />
+                                <span class="code-input-separator">-</span>
+                                <input
+                                    type="text"
+                                    id="gymSecretCode2"
+                                    maxlength="4"
+                                    placeholder="0000"
+                                    inputmode="numeric"
+                                    class="code-input-part"
+                                    autocomplete="off" />
+                                <span class="code-input-separator">-</span>
+                                <input
+                                    type="text"
+                                    id="gymSecretCode3"
+                                    maxlength="4"
+                                    placeholder="0000"
+                                    inputmode="numeric"
+                                    class="code-input-part"
+                                    autocomplete="off" />
+                                <span class="code-input-separator">-</span>
+                                <input
+                                    type="text"
+                                    id="gymSecretCode4"
+                                    maxlength="4"
+                                    placeholder="0000"
+                                    inputmode="numeric"
+                                    class="code-input-part"
+                                    autocomplete="off" />
+                            </div>
+                            <input type="hidden" name="gymSecretCode" id="gymSecretCodeFull" />
+                            <p class="mt-2 text-xs text-gray-500 text-center">Enter your 16-digit gym secret code</p>
                         </div>
 
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <label for="gymPassword" class="auth-field__label !mb-0">Password</label>
+                                <label for="gymPassword" class="auth-field__label !mb-0">Gym Password</label>
                                 <a th:href="@{/forgot-password}" class="text-xs font-semibold auth-link" th:text="#{auth.login.forgot}">Forgot password?</a>
                             </div>
                             <div class="auth-field__input-wrapper">
