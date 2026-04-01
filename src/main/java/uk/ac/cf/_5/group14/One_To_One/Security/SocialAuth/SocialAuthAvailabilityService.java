@@ -6,6 +6,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +71,10 @@ public class SocialAuthAvailabilityService {
         return isActivationEnabled(provider.trim().toLowerCase());
     }
 
+    public boolean hasEnabledProviders() {
+        return SUPPORTED_PROVIDERS.stream().anyMatch(this::isProviderEnabled);
+    }
+
     private boolean isActivationEnabled(String provider) {
         String property = ACTIVATION_PROPERTIES.get(provider);
         if (property == null) {
@@ -99,6 +104,18 @@ public class SocialAuthAvailabilityService {
         }
 
         String trimmed = value.trim();
-        return !trimmed.isEmpty() && !"false".equalsIgnoreCase(trimmed);
+        if (trimmed.isEmpty() || "false".equalsIgnoreCase(trimmed)) {
+            return false;
+        }
+
+        if (property.endsWith("issuer-uri")) {
+            try {
+                return URI.create(trimmed).isAbsolute();
+            } catch (IllegalArgumentException ex) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

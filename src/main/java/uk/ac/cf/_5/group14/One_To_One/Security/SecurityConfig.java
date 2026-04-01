@@ -23,6 +23,7 @@ import org.springframework.security.web.session.InvalidSessionStrategy;
 
 import uk.ac.cf._5.group14.One_To_One.Config.DevModeProperties;
 import uk.ac.cf._5.group14.One_To_One.DevMode.DevModePageRestrictionFilter;
+import uk.ac.cf._5.group14.One_To_One.Security.SocialAuth.SocialAuthAvailabilityService;
 import uk.ac.cf._5.group14.One_To_One.Security.SocialAuth.SocialOAuth2UserService;
 import uk.ac.cf._5.group14.One_To_One.Security.SocialAuth.SocialOidcUserService;
 
@@ -96,6 +97,7 @@ public class SecurityConfig {
                                                    LoginRequestDetailsSource loginRequestDetailsSource,
                                                    CustomAuthenticationFailureHandler failureHandler,
                                                    CustomAuthenticationSuccessHandler successHandler,
+                                                   SocialAuthAvailabilityService socialAuthAvailabilityService,
                                                    SocialOAuth2UserService socialOAuth2UserService,
                                                    SocialOidcUserService socialOidcUserService,
                                                    ObjectProvider<ClientRegistrationRepository> clientRegistrationRepositoryProvider,
@@ -173,7 +175,7 @@ public class SecurityConfig {
                     .failureHandler(failureHandler)
                     .successHandler(successHandler));
 
-            if (clientRegistrationRepositoryProvider.getIfAvailable() != null) {
+            if (clientRegistrationRepositoryProvider.getIfAvailable() != null && socialAuthAvailabilityService.hasEnabledProviders()) {
                 http.oauth2Login(oauth -> oauth
                     .loginPage("/login")
                     .failureUrl("/login?error=social")

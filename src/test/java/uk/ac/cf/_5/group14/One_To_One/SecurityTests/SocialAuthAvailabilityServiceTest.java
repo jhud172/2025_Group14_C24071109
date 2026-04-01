@@ -55,6 +55,24 @@ class SocialAuthAvailabilityServiceTest {
     }
 
     @Test
+    void microsoftIsDisabledWhenIssuerUriIsNotAbsolute() {
+        ClientRegistrationRepository repository = mock(ClientRegistrationRepository.class);
+        given(repository.findByRegistrationId("microsoft")).willReturn(buildRegistration("microsoft"));
+
+        MockEnvironment environment = new MockEnvironment()
+            .withProperty("app.oauth.microsoft-login-active", "true")
+            .withProperty("spring.security.oauth2.client.registration.microsoft.client-id", "client-id")
+            .withProperty("spring.security.oauth2.client.registration.microsoft.client-secret", "secret")
+            .withProperty("spring.security.oauth2.client.provider.microsoft.issuer-uri", "false");
+
+        SocialAuthAvailabilityService service = new SocialAuthAvailabilityService(objectProvider(repository), environment);
+
+        assertThat(service.isProviderVisible("microsoft")).isTrue();
+        assertThat(service.isProviderEnabled("microsoft")).isFalse();
+        assertThat(service.hasEnabledProviders()).isFalse();
+    }
+
+    @Test
     void googleRemainsEnabledWhenFlagIsTrueAndRequiredPropertiesArePresent() {
         ClientRegistrationRepository repository = mock(ClientRegistrationRepository.class);
         given(repository.findByRegistrationId("google")).willReturn(buildRegistration("google"));
