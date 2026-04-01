@@ -8,21 +8,21 @@ public class PolicyController {
 
     @GetMapping("/policies/privacy")
     public String privacyPolicy() {
-        return "policies/privacy";
+        return "public-views/policies/privacy";
     }
 
     @GetMapping("/policies/payments")
     public String paymentsPolicy() {
-        return "policies/payments";
+        return "public-views/policies/payments";
     }
 
     @GetMapping("/policies/terms")
     public String termsPolicy() {
-        return "policies/terms";
+        return "public-views/policies/terms";
     }
 
     @GetMapping("/policies/subscription-terms")
     public String subscriptionTermsPolicy() {
-        return "policies/subscription-terms";
+        return "public-views/policies/subscription-terms";
     }
 }

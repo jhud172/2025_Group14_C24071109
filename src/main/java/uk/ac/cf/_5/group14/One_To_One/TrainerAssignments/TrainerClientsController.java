@@ -23,6 +23,7 @@ import uk.ac.cf._5.group14.One_To_One.DayHealthData.DayHealth;
 import uk.ac.cf._5.group14.One_To_One.DayHealthData.DayHealthRepository;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.CoachingPhase;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLink;
+import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLinkException;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLinkService;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.UserSettingsService;
@@ -123,7 +124,7 @@ public class TrainerClientsController {
             return new ModelAndView("redirect:/trainer/clients");
         }
 
-        ModelAndView mav = new ModelAndView("trainer/client-detail");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/client-detail");
         mav.addObject("pageTitle", "Client Overview");
         mav.addObject("client", client);
         mav.addObject("assignedWorkouts", trainerAssignmentService.listWorkoutsForTrainerClient(trainer.getId(), clientId));
@@ -192,8 +193,8 @@ public class TrainerClientsController {
         }
         try {
             trainerClientLinkService.changeCoachingPhase(trainer.getId(), clientId, phase, customLabel, notes);
-        } catch (IllegalStateException ex) {
-            if (TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
+        } catch (TrainerClientLinkException ex) {
+            if (ex.getReason() == TrainerClientLinkException.Reason.TRAINER_NOT_VERIFIED) {
                 return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
             }
             throw ex;

@@ -62,7 +62,7 @@ public class CreateTaskActionHandler implements CoachActionHandler<CreateTaskAct
         if (time != null) {
             sb.append(" at ").append(time.format(TIME_FMT));
         }
-        sb.append(" â€” ").append(title).append(". Want to adjust anything?");
+        sb.append(" - ").append(title).append(". Want to adjust anything?");
         return new CoachActionExecution(true, sb.toString(), null);
     }
 

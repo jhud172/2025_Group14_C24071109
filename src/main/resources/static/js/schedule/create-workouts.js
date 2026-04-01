@@ -7,9 +7,22 @@ document.addEventListener("DOMContentLoaded", function () {
     const premiumRoot = document.querySelector("[data-premium]");
     const isPremium = premiumRoot?.getAttribute("data-premium") === "true";
 
+    function hydrateColorDots(scope = document) {
+        scope.querySelectorAll("[data-custom-color-dot][data-color]").forEach((dot) => {
+            const color = dot.getAttribute("data-color");
+            if (!color) {
+                return;
+            }
+
+            dot.style.backgroundColor = color;
+        });
+    }
+
     if (!suggestedList || !container) {
         return;
     }
+
+    hydrateColorDots();
 
     new Sortable(suggestedList, {
         group: {
@@ -488,7 +501,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         item.innerHTML = `
             <div class="flex min-w-0 items-center gap-2">
-                ${data.colorTag ? `<span class="h-2 w-2 rounded-full" style="background:${data.colorTag}"></span>` : ''}
+                ${data.colorTag ? `<span class="h-2 w-2 rounded-full" data-custom-color-dot data-color="${escapeHtml(data.colorTag)}"></span>` : ''}
                 <span class="truncate font-semibold text-slate-900">${escapeHtml(data.name)}</span>
             </div>
             <div class="flex items-center gap-2">
@@ -497,6 +510,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 <button class="custom-delete text-xs text-rose-600">Delete</button>
             </div>
         `;
+
+        hydrateColorDots(item);
     }
 
     function addCustomToWorkout(item) {

@@ -36,7 +36,7 @@ public class WorkoutTemplateBuilderController {
         model.addAttribute("userTemplates", userTemplates);
         model.addAttribute("globalTemplates", globalTemplates);
         model.addAttribute("preferredTemplate", preferred);
-        return "workout-templates/index";
+        return "trainer-views/workout-templates/index";
     }
 
     // â”€â”€â”€ Builder page (new) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -48,7 +48,7 @@ public class WorkoutTemplateBuilderController {
 
         model.addAttribute("editTemplate", new WorkoutTemplate());
         model.addAttribute("isEdit", false);
-        return "workout-templates/builder";
+        return "trainer-views/workout-templates/builder";
     }
 
     // â”€â”€â”€ Builder page (edit) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -69,7 +69,7 @@ public class WorkoutTemplateBuilderController {
 
         model.addAttribute("editTemplate", tpl);
         model.addAttribute("isEdit", true);
-        return "workout-templates/builder";
+        return "trainer-views/workout-templates/builder";
     }
 
     // â”€â”€â”€ Create â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

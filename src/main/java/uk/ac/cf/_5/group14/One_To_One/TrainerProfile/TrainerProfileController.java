@@ -32,7 +32,7 @@ public class TrainerProfileController {
         User currentUser = authHelper.getAuthenticatedUser();
         TrainerProfile profile = profileService.getOrCreateProfile(currentUser.getId());
 
-        ModelAndView mav = new ModelAndView("trainer/profile/edit");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/profile/edit");
         mav.addObject("pageTitle", "Edit Profile");
         mav.addObject("profile", profile);
         mav.addObject("user", currentUser);

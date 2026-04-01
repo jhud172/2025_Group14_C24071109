@@ -43,7 +43,7 @@ public class TrainerReviewService {
         User client = userRepository.findById(clientUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Client not found"));
         if (client.getRole() != Role.CLIENT) {
-            throw new IllegalStateException(ERROR_NOT_CLIENT);
+            throw new TrainerReviewException(TrainerReviewException.Reason.USER_NOT_CLIENT, ERROR_NOT_CLIENT);
         }
 
         // Verify trainer exists
@@ -56,12 +56,12 @@ public class TrainerReviewService {
         // Find active or most recent ended link
         TrainerClientLink link = findEligibleLink(clientUserId, trainerId);
         if (link == null) {
-            throw new IllegalStateException(ERROR_LINK_NOT_ELIGIBLE);
+            throw new TrainerReviewException(TrainerReviewException.Reason.LINK_NOT_ELIGIBLE, ERROR_LINK_NOT_ELIGIBLE);
         }
 
         // Check if review already exists for this link
         if (reviewRepository.existsByTrainerIdAndClientIdAndLinkId(trainerId, clientUserId, link.getId())) {
-            throw new IllegalStateException(ERROR_REVIEW_ALREADY_EXISTS);
+            throw new TrainerReviewException(TrainerReviewException.Reason.REVIEW_ALREADY_EXISTS, ERROR_REVIEW_ALREADY_EXISTS);
         }
 
         // Create review

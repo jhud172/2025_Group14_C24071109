@@ -47,7 +47,7 @@ public class SuperAdminVerificationController {
         model.addAttribute("needsInfoCount", needsInfoCount);
         model.addAttribute("approvedCount", approvedCount);
         model.addAttribute("rejectedCount", rejectedCount);
-        return "super-admin/verification-queue";
+        return "admin-views/super-admin/verification-queue";
     }
     
     /**
@@ -59,8 +59,8 @@ public class SuperAdminVerificationController {
         try {
             request = verificationService.getRequestById(id);
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("error", "Verification request not found");
-            return "error/404";
+            model.addAttribute("system-views/error/error", "Verification request not found");
+            return "system-views/error/404";
         }
         
         User trainer = userRepository.findById(request.getTrainerUserId())
@@ -75,7 +75,7 @@ public class SuperAdminVerificationController {
         model.addAttribute("trainer", trainer);
         model.addAttribute("reviewer", reviewer);
 
-        return "super-admin/verification-detail";
+        return "admin-views/super-admin/verification-detail";
     }
     
     /**

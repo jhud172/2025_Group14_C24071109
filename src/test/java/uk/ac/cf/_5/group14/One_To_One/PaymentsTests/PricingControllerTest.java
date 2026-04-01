@@ -57,7 +57,7 @@ class PricingControllerTest {
 
         String view = controller.checkoutPage(PlatformPlan.MONTHLY, model, new RedirectAttributesModelMap());
 
-        assertThat(view).isEqualTo("payments/pricing-checkout");
+        assertThat(view).isEqualTo("public-views/payments/pricing-checkout");
         assertThat(model.getAttribute("paymentProviderConfigured")).isEqualTo(true);
         assertThat(model.getAttribute("paymentProviderName")).isEqualTo("Stripe");
     }

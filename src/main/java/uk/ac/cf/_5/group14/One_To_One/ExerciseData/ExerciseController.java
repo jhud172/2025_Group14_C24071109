@@ -17,17 +17,17 @@ public class ExerciseController {
 
     @GetMapping("/exercise/{id}")
     public ModelAndView getExercise(@PathVariable Long id, Model model) {
-        ModelAndView modelAndView = new ModelAndView("exercise-log/ExerciseTutorial");
+        ModelAndView modelAndView = new ModelAndView("shared-views/exercise-log/ExerciseTutorial");
         Exercise exercise = exerciseService.getExerciseById(id);
         modelAndView.addObject("exercise", exercise);
         return modelAndView;
 
       /*  if (exercise != null) {
             model.("exercise", exercise);
-            return "exercise-log/ExerciseTutorial"; //
+            return "shared-views/exercise-log/ExerciseTutorial"; //
         } else {
             // Handle exercise not found
-            return "error"; // to be written?
+            return "system-views/error/error"; // to be written?
         } */
     }
 }

@@ -91,7 +91,7 @@ public class VerificationController {
             }
             model.addAttribute("verificationSuccess", messageSource.getMessage("verify.email.success", null, locale));
         }
-        return "verify/email-confirm";
+        return "public-views/verify/email-confirm";
     }
 
     @GetMapping("/verify/email/code")
@@ -127,7 +127,7 @@ public class VerificationController {
         } else if (resendError != null) {
             model.addAttribute("verifyError", messageSource.getMessage("verify.email.error.generic", null, locale));
         }
-        return "verify/email-code";
+        return "public-views/verify/email-code";
     }
 
     @PostMapping("/verify/email/confirm")
@@ -224,7 +224,7 @@ public class VerificationController {
     @GetMapping("/verify/phone/code")
     public String showPhoneCodePage(Model model) {
         applyAuthLayout(model);
-        return "verify/phone-code";
+        return "public-views/verify/phone-code";
     }
 
     @PostMapping("/verify/phone/confirm")

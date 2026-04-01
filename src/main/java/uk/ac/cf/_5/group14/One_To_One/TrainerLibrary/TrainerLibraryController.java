@@ -10,6 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import uk.ac.cf._5.group14.One_To_One.Security.TrainerAccessException;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLink;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLinkService;
 import uk.ac.cf._5.group14.One_To_One.Users.AuthHelper;
@@ -65,7 +66,7 @@ public class TrainerLibraryController {
             throw new AccessDeniedException("Not a trainer");
         }
         if (!user.isTrainerVerified() || !user.isEnabled()) {
-            throw new IllegalStateException(TrainerLibraryService.ERROR_TRAINER_NOT_VERIFIED);
+            throw new TrainerAccessException(TrainerAccessException.Reason.TRAINER_NOT_VERIFIED);
         }
         return user;
     }
@@ -84,24 +85,23 @@ public class TrainerLibraryController {
     }
 
     @GetMapping
-    public ModelAndView overview(@RequestParam(value = "error", required = false) String error) {
+    public ModelAndView overview(@RequestParam(value = "system-views/error/error", required = false) String error) {
         Long trainerId = currentTrainerIdOrThrow();
 
-        ModelAndView mav = new ModelAndView("trainer/library");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/library");
         mav.addObject("pageTitle", "Trainer Library");
         mav.addObject("exerciseCount", trainerLibraryService.listExercises(trainerId).size());
         mav.addObject("workoutCount", trainerLibraryService.listWorkouts(trainerId).size());
         mav.addObject("programmeCount", trainerLibraryService.listProgrammes(trainerId).size());
-        mav.addObject("error", error);
+        mav.addObject("system-views/error/error", error);
         return mav;
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ModelAndView handleIllegalState(IllegalStateException ex) {
-        if (TrainerLibraryService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
-            return new ModelAndView("redirect:/trainer/library?error=trainer-unverified");
-        }
-        throw ex;
+    @ExceptionHandler(TrainerAccessException.class)
+    public ModelAndView handleTrainerAccess(TrainerAccessException ex) {
+        return switch (ex.getReason()) {
+            case TRAINER_NOT_VERIFIED -> new ModelAndView("redirect:/trainer/library?error=trainer-unverified");
+        };
     }
 
     // -------------------------
@@ -111,15 +111,15 @@ public class TrainerLibraryController {
     @GetMapping("/exercises")
     public ModelAndView exercisesList() {
         Long trainerId = currentTrainerIdOrThrow();
-        ModelAndView mav = new ModelAndView("trainer/exercises/list");
-        mav.addObject("pageTitle", "Library Â· Exercises");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/exercises/list");
+        mav.addObject("pageTitle", "Library - Exercises");
         mav.addObject("exercises", trainerLibraryService.listExercises(trainerId));
         return mav;
     }
 
     @GetMapping("/exercises/create")
     public ModelAndView exercisesCreate() {
-        ModelAndView mav = new ModelAndView("trainer/exercises/create");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/exercises/create");
         mav.addObject("pageTitle", "Create Exercise");
         mav.addObject("form", new TrainerLibraryExerciseForm());
         return mav;
@@ -130,7 +130,7 @@ public class TrainerLibraryController {
                                               BindingResult bindingResult) {
         Long trainerId = currentTrainerIdOrThrow();
         if (bindingResult.hasErrors()) {
-            ModelAndView mav = new ModelAndView("trainer/exercises/create");
+            ModelAndView mav = new ModelAndView("trainer-views/trainer/exercises/create");
             mav.addObject("pageTitle", "Create Exercise");
             return mav;
         }
@@ -148,8 +148,8 @@ public class TrainerLibraryController {
             return new ModelAndView("redirect:/access-denied");
         }
 
-        ModelAndView mav = new ModelAndView("trainer/exercises/view");
-        mav.addObject("pageTitle", "Exercise Â· " + exercise.getName());
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/exercises/view");
+        mav.addObject("pageTitle", "Exercise - " + exercise.getName());
         mav.addObject("exercise", exercise);
         mav.addObject("notes", trainerLibraryService.getExerciseNotes(id));
 
@@ -178,7 +178,7 @@ public class TrainerLibraryController {
         form.setVideoUrl(exercise.getVideoUrl());
         form.setNotesText(String.join("\n", trainerLibraryService.getExerciseNotes(id).stream().map(TrainerLibraryExerciseNote::getNoteText).toList()));
 
-        ModelAndView mav = new ModelAndView("trainer/exercises/edit");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/exercises/edit");
         mav.addObject("pageTitle", "Edit Exercise");
         mav.addObject("exerciseId", id);
         mav.addObject("form", form);
@@ -191,7 +191,7 @@ public class TrainerLibraryController {
                                             BindingResult bindingResult) {
         Long trainerId = currentTrainerIdOrThrow();
         if (bindingResult.hasErrors()) {
-            ModelAndView mav = new ModelAndView("trainer/exercises/edit");
+            ModelAndView mav = new ModelAndView("trainer-views/trainer/exercises/edit");
             mav.addObject("pageTitle", "Edit Exercise");
             mav.addObject("exerciseId", id);
             return mav;
@@ -223,15 +223,15 @@ public class TrainerLibraryController {
     @GetMapping("/workouts")
     public ModelAndView workoutsList() {
         Long trainerId = currentTrainerIdOrThrow();
-        ModelAndView mav = new ModelAndView("trainer/workouts/list");
-        mav.addObject("pageTitle", "Library Â· Workouts");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/workouts/list");
+        mav.addObject("pageTitle", "Library - Workouts");
         mav.addObject("workouts", trainerLibraryService.listWorkouts(trainerId));
         return mav;
     }
 
     @GetMapping("/workouts/create")
     public ModelAndView workoutsCreate() {
-        ModelAndView mav = new ModelAndView("trainer/workouts/create");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/workouts/create");
         mav.addObject("pageTitle", "Create Workout");
         mav.addObject("form", new TrainerLibraryWorkoutTemplateForm());
         return mav;
@@ -242,7 +242,7 @@ public class TrainerLibraryController {
                                              BindingResult bindingResult) {
         Long trainerId = currentTrainerIdOrThrow();
         if (bindingResult.hasErrors()) {
-            ModelAndView mav = new ModelAndView("trainer/workouts/create");
+            ModelAndView mav = new ModelAndView("trainer-views/trainer/workouts/create");
             mav.addObject("pageTitle", "Create Workout");
             return mav;
         }
@@ -276,8 +276,8 @@ public class TrainerLibraryController {
             }
         }
 
-        ModelAndView mav = new ModelAndView("trainer/workouts/view");
-        mav.addObject("pageTitle", "Workout Â· " + workout.getTitle());
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/workouts/view");
+        mav.addObject("pageTitle", "Workout - " + workout.getTitle());
         mav.addObject("workout", workout);
         mav.addObject("items", items);
         mav.addObject("notes", notes);
@@ -307,7 +307,7 @@ public class TrainerLibraryController {
         form.setSummary(workout.getSummary());
         form.setNotesText(String.join("\n", trainerLibraryService.getWorkoutNotes(id).stream().map(TrainerLibraryWorkoutNote::getNoteText).toList()));
 
-        ModelAndView mav = new ModelAndView("trainer/workouts/edit");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/workouts/edit");
         mav.addObject("pageTitle", "Edit Workout");
         mav.addObject("workoutId", id);
         mav.addObject("form", form);
@@ -320,7 +320,7 @@ public class TrainerLibraryController {
                                            BindingResult bindingResult) {
         Long trainerId = currentTrainerIdOrThrow();
         if (bindingResult.hasErrors()) {
-            ModelAndView mav = new ModelAndView("trainer/workouts/edit");
+            ModelAndView mav = new ModelAndView("trainer-views/trainer/workouts/edit");
             mav.addObject("pageTitle", "Edit Workout");
             mav.addObject("workoutId", id);
             return mav;
@@ -383,15 +383,15 @@ public class TrainerLibraryController {
     @GetMapping("/programmes")
     public ModelAndView programmesList() {
         Long trainerId = currentTrainerIdOrThrow();
-        ModelAndView mav = new ModelAndView("trainer/programmes/list");
-        mav.addObject("pageTitle", "Library Â· Programmes");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/programmes/list");
+        mav.addObject("pageTitle", "Library - Programmes");
         mav.addObject("programmes", trainerLibraryService.listProgrammes(trainerId));
         return mav;
     }
 
     @GetMapping("/programmes/create")
     public ModelAndView programmesCreate() {
-        ModelAndView mav = new ModelAndView("trainer/programmes/create");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/programmes/create");
         mav.addObject("pageTitle", "Create Programme");
         mav.addObject("form", new TrainerLibraryProgrammeTemplateForm());
         return mav;
@@ -402,7 +402,7 @@ public class TrainerLibraryController {
                                                BindingResult bindingResult) {
         Long trainerId = currentTrainerIdOrThrow();
         if (bindingResult.hasErrors()) {
-            ModelAndView mav = new ModelAndView("trainer/programmes/create");
+            ModelAndView mav = new ModelAndView("trainer-views/trainer/programmes/create");
             mav.addObject("pageTitle", "Create Programme");
             return mav;
         }
@@ -436,8 +436,8 @@ public class TrainerLibraryController {
             }
         }
 
-        ModelAndView mav = new ModelAndView("trainer/programmes/view");
-        mav.addObject("pageTitle", "Programme Â· " + programme.getTitle());
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/programmes/view");
+        mav.addObject("pageTitle", "Programme - " + programme.getTitle());
         mav.addObject("programme", programme);
         mav.addObject("days", days);
         mav.addObject("notes", notes);
@@ -467,7 +467,7 @@ public class TrainerLibraryController {
         form.setWeeks(programme.getWeeks());
         form.setNotesText(String.join("\n", trainerLibraryService.getProgrammeNotes(id).stream().map(TrainerLibraryProgrammeNote::getNoteText).toList()));
 
-        ModelAndView mav = new ModelAndView("trainer/programmes/edit");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/programmes/edit");
         mav.addObject("pageTitle", "Edit Programme");
         mav.addObject("programmeId", id);
         mav.addObject("form", form);
@@ -480,7 +480,7 @@ public class TrainerLibraryController {
                                              BindingResult bindingResult) {
         Long trainerId = currentTrainerIdOrThrow();
         if (bindingResult.hasErrors()) {
-            ModelAndView mav = new ModelAndView("trainer/programmes/edit");
+            ModelAndView mav = new ModelAndView("trainer-views/trainer/programmes/edit");
             mav.addObject("pageTitle", "Edit Programme");
             mav.addObject("programmeId", id);
             return mav;
@@ -581,3 +581,4 @@ public class TrainerLibraryController {
         return form;
     }
 }
+

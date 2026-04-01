@@ -70,14 +70,8 @@ public class TrainerClientLinkController {
         try {
             trainerClientLinkService.requestLink(client.getId(), trainerId);
             redirectAttributes.addFlashAttribute("successMessage", "Trainer request sent.");
-        } catch (IllegalStateException ex) {
-            if (TrainerClientLinkService.ERROR_CLIENT_ALREADY_HAS_ACTIVE_TRAINER.equals(ex.getMessage())) {
-                return new ModelAndView("redirect:/client/trainers?error=active");
-            }
-            if (TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
-                return new ModelAndView("redirect:/client/trainers?error=trainer-unverified");
-            }
-            return new ModelAndView("redirect:/client/trainers?error=invalid");
+        } catch (TrainerClientLinkException ex) {
+            return redirectClientTrainerError(ex.getReason());
         } catch (IllegalArgumentException ex) {
             return new ModelAndView("redirect:/client/trainers?error=invalid");
         }
@@ -100,9 +94,9 @@ public class TrainerClientLinkController {
     }
 
     @GetMapping("/trainer/clients")
-    public ModelAndView trainerClients(@RequestParam(value = "error", required = false) String error) {
+    public ModelAndView trainerClients(@RequestParam(value = "system-views/error/error", required = false) String error) {
         User trainer = currentUserOrThrow();
-        ModelAndView mav = new ModelAndView("trainer/clients");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/clients");
         mav.addObject("pageTitle", "Trainer Clients");
 
         List<TrainerClientLink> allLinks = trainerClientLinkService.listTrainerClients(trainer.getId());
@@ -121,7 +115,7 @@ public class TrainerClientLinkController {
                 .stream()
                 .collect(Collectors.toMap(User::getId, u -> u));
         mav.addObject("clientsById", clientsById);
-        mav.addObject("error", error);
+        mav.addObject("system-views/error/error", error);
         return mav;
     }
 
@@ -133,14 +127,8 @@ public class TrainerClientLinkController {
             redirectAttributes.addFlashAttribute("successMessage", "Client request accepted.");
         } catch (org.springframework.security.access.AccessDeniedException ex) {
             return new ModelAndView("redirect:/access-denied");
-        } catch (IllegalStateException ex) {
-            if (TrainerClientLinkService.ERROR_CLIENT_ALREADY_HAS_ACTIVE_TRAINER.equals(ex.getMessage())) {
-                return new ModelAndView("redirect:/trainer/clients?error=client-active");
-            }
-            if (TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
-                return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
-            }
-            return new ModelAndView("redirect:/trainer/clients?error=invalid");
+        } catch (TrainerClientLinkException ex) {
+            return redirectTrainerClientError(ex.getReason());
         } catch (IllegalArgumentException ex) {
             return new ModelAndView("redirect:/trainer/clients?error=invalid");
         }
@@ -155,11 +143,8 @@ public class TrainerClientLinkController {
             redirectAttributes.addFlashAttribute("successMessage", "Client relationship paused.");
         } catch (org.springframework.security.access.AccessDeniedException ex) {
             return new ModelAndView("redirect:/access-denied");
-        } catch (IllegalStateException ex) {
-            if (TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
-                return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
-            }
-            return new ModelAndView("redirect:/trainer/clients?error=invalid");
+        } catch (TrainerClientLinkException ex) {
+            return redirectTrainerClientError(ex.getReason());
         } catch (IllegalArgumentException ex) {
             return new ModelAndView("redirect:/trainer/clients?error=invalid");
         }
@@ -174,15 +159,26 @@ public class TrainerClientLinkController {
             redirectAttributes.addFlashAttribute("successMessage", "Client relationship ended.");
         } catch (org.springframework.security.access.AccessDeniedException ex) {
             return new ModelAndView("redirect:/access-denied");
-        } catch (IllegalStateException ex) {
-            if (TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED.equals(ex.getMessage())) {
-                return new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
-            }
-            return new ModelAndView("redirect:/trainer/clients?error=invalid");
+        } catch (TrainerClientLinkException ex) {
+            return redirectTrainerClientError(ex.getReason());
         } catch (IllegalArgumentException ex) {
             return new ModelAndView("redirect:/trainer/clients?error=invalid");
         }
         return new ModelAndView("redirect:/trainer/clients");
+    }
+
+    private ModelAndView redirectClientTrainerError(TrainerClientLinkException.Reason reason) {
+        return switch (reason) {
+            case CLIENT_ALREADY_HAS_ACTIVE_TRAINER -> new ModelAndView("redirect:/client/trainers?error=active");
+            case TRAINER_NOT_VERIFIED -> new ModelAndView("redirect:/client/trainers?error=trainer-unverified");
+        };
+    }
+
+    private ModelAndView redirectTrainerClientError(TrainerClientLinkException.Reason reason) {
+        return switch (reason) {
+            case CLIENT_ALREADY_HAS_ACTIVE_TRAINER -> new ModelAndView("redirect:/trainer/clients?error=client-active");
+            case TRAINER_NOT_VERIFIED -> new ModelAndView("redirect:/trainer/clients?error=trainer-unverified");
+        };
     }
 
     @GetMapping("/client/my-trainer")
@@ -191,11 +187,11 @@ public class TrainerClientLinkController {
     }
 
     @GetMapping("/client/trainers")
-    public ModelAndView myTrainers(@RequestParam(value = "error", required = false) String error,
+    public ModelAndView myTrainers(@RequestParam(value = "system-views/error/error", required = false) String error,
                                    @RequestParam(value = "q", required = false) String q) {
         User client = currentUserOrThrow();
 
-        ModelAndView mav = new ModelAndView("client/trainers");
+        ModelAndView mav = new ModelAndView("client-views/client/trainers");
         mav.addObject("pageTitle", "Trainers");
 
         TrainerClientLink active = trainerClientLinkService.getActiveLinkForClient(client.getId());
@@ -221,7 +217,7 @@ public class TrainerClientLinkController {
 
         mav.addObject("q", q);
         mav.addObject("trainers", trainers);
-        mav.addObject("error", error);
+        mav.addObject("system-views/error/error", error);
         return mav;
     }
 }

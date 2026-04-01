@@ -156,7 +156,7 @@ public class CalendarDayViewStreakBarTest {
 
         mvc.perform(get("/calendar/day/2026-01-15").sessionAttr("user", sessionUser))
                 .andExpect(status().isOk())
-                .andExpect(view().name("calendar/day"))
+                .andExpect(view().name("shared-views/calendar/day"))
             .andExpect(content().string(org.hamcrest.Matchers.containsString("data-testid=\"daily-streak-bar\"")))
             .andExpect(content().string(org.hamcrest.Matchers.containsString("0/0 completed (0%)")))
             .andExpect(content().string(org.hamcrest.Matchers.containsString("Remaining tasks: 0, Remaining workouts: 0")));

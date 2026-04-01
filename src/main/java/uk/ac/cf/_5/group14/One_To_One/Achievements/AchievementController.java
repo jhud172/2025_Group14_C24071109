@@ -73,7 +73,7 @@ public class AchievementController {
 
         model.addAttribute("unlockedMilestones", unlockedMilestones);
         model.addAttribute("undiscoveredMilestones", undiscoveredMilestones);
-        return "achievements/index";
+        return "client-views/achievements/index";
     }
 
     private List<MilestoneDefinition> milestoneCatalog() {

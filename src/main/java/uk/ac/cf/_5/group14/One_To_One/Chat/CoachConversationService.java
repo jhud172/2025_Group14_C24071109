@@ -58,7 +58,7 @@ public class CoachConversationService {
         if (trimmed.isBlank()) {
             return;
         }
-        String nextTitle = trimmed.length() > 60 ? trimmed.substring(0, 60).trim() + "â€¦" : trimmed;
+        String nextTitle = trimmed.length() > 60 ? trimmed.substring(0, 60).trim() + "..." : trimmed;
         conversation.setTitle(nextTitle);
         repository.save(conversation);
     }

@@ -71,7 +71,10 @@ public class TrainerClientLinkService {
                 .orElseThrow(() -> new IllegalArgumentException("Client not found"));
 
         if (clientHasActiveTrainer(clientUserId)) {
-            throw new IllegalStateException(ERROR_CLIENT_ALREADY_HAS_ACTIVE_TRAINER);
+            throw new TrainerClientLinkException(
+                    TrainerClientLinkException.Reason.CLIENT_ALREADY_HAS_ACTIVE_TRAINER,
+                    ERROR_CLIENT_ALREADY_HAS_ACTIVE_TRAINER
+            );
         }
 
         User trainer = userRepository.findById(trainerUserId)
@@ -80,7 +83,10 @@ public class TrainerClientLinkService {
             throw new IllegalArgumentException("User is not a trainer");
         }
         if (!trainer.isTrainerVerified()) {
-            throw new IllegalStateException(ERROR_TRAINER_NOT_VERIFIED);
+            throw new TrainerClientLinkException(
+                    TrainerClientLinkException.Reason.TRAINER_NOT_VERIFIED,
+                    ERROR_TRAINER_NOT_VERIFIED
+            );
         }
 
         TrainerClientLink link = new TrainerClientLink(clientUserId, trainerUserId, TrainerClientLinkStatus.REQUESTED);
@@ -262,7 +268,10 @@ public class TrainerClientLinkService {
 
     private void requireVerifiedTrainer(User trainer) {
         if (trainer == null || !trainer.isTrainerVerified() || !trainer.isEnabled()) {
-            throw new IllegalStateException(ERROR_TRAINER_NOT_VERIFIED);
+            throw new TrainerClientLinkException(
+                    TrainerClientLinkException.Reason.TRAINER_NOT_VERIFIED,
+                    ERROR_TRAINER_NOT_VERIFIED
+            );
         }
     }
 }

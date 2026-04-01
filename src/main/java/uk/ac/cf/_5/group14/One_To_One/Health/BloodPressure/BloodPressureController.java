@@ -63,7 +63,7 @@ public class BloodPressureController {
         model.addAttribute("arms", BloodPressureReading.Arm.values());
         model.addAttribute("positions", BloodPressureReading.Position.values());
         model.addAttribute("bpCategories", BpCategory.values());
-        return "health/blood-pressure";
+        return "client-views/health/blood-pressure";
     }
 
     @PostMapping
@@ -82,14 +82,14 @@ public class BloodPressureController {
         if (result.hasErrors()) {
             populateModel(model, user, range);
             model.addAttribute("quickAdd", reading);
-            return "health/blood-pressure";
+            return "client-views/health/blood-pressure";
         }
 
         try {
             service.save(reading);
             ra.addFlashAttribute("success", "Reading saved.");
         } catch (IllegalStateException e) {
-            ra.addFlashAttribute("error", e.getMessage());
+            ra.addFlashAttribute("system-views/error/error", e.getMessage());
         }
         return "redirect:/health/blood-pressure?range=" + range;
     }
@@ -106,7 +106,7 @@ public class BloodPressureController {
         model.addAttribute("reading", opt.get());
         model.addAttribute("arms", BloodPressureReading.Arm.values());
         model.addAttribute("positions", BloodPressureReading.Position.values());
-        return "health/blood-pressure-edit";
+        return "client-views/health/blood-pressure-edit";
     }
 
     @PostMapping("/edit/{id}")
@@ -122,14 +122,14 @@ public class BloodPressureController {
         if (result.hasErrors()) {
             model.addAttribute("arms", BloodPressureReading.Arm.values());
             model.addAttribute("positions", BloodPressureReading.Position.values());
-            return "health/blood-pressure-edit";
+            return "client-views/health/blood-pressure-edit";
         }
 
         try {
             service.update(id, updated, user);
             ra.addFlashAttribute("success", "Reading updated.");
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Could not update reading.");
+            ra.addFlashAttribute("system-views/error/error", "Could not update reading.");
         }
         return "redirect:/health/blood-pressure";
     }
@@ -142,7 +142,7 @@ public class BloodPressureController {
             service.delete(id, user);
             ra.addFlashAttribute("success", "Reading deleted.");
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Could not delete reading.");
+            ra.addFlashAttribute("system-views/error/error", "Could not delete reading.");
         }
         return "redirect:/health/blood-pressure";
     }

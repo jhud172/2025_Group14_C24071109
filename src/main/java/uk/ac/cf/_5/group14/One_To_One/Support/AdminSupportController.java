@@ -71,7 +71,7 @@ public class AdminSupportController {
         model.addAttribute("devPageSummary", devModePageAccessService.buildAdminSummary());
         model.addAttribute("devPageRows", devModePageAccessService.buildAdminRows());
         model.addAttribute("devPageModes", DevModePageAccessMode.values());
-        return "dashboard/admin-dashboard";
+        return "admin-views/dashboard/admin-dashboard";
     }
 
     @PostMapping("/admin/dev-pages/{pageKey}")

@@ -1,0 +1,251 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Login', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+
+    <th:block th:fragment="pageStyles"></th:block>
+
+    <div th:fragment="content"
+         class="auth-container animate-fade-in"
+         th:attr="data-login-server-role=${preselectedRole},data-client-hint=#{auth.login.clientHint},data-trainer-hint=#{auth.login.trainerHint},data-gym-hint=#{auth.login.gymHint}">
+
+        <div class="auth-card">
+            <div class="auth-accent-bar"></div>
+
+            <div class="mb-6 mt-4 text-center">
+                <h1 class="auth-heading" th:text="#{auth.login.title}">Welcome back</h1>
+                <p class="auth-subheading" th:text="#{auth.login.subtitle}">Log in to continue.</p>
+            </div>
+
+            <div th:if="${isDevMode}" class="auth-alert auth-alert--dev auth-alert--stacked" role="alert">
+                <div class="auth-dev-alert__row">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="auth-dev-alert__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <strong class="auth-dev-alert__title">Development Mode Active</strong>
+                </div>
+                <p class="auth-dev-alert__copy">Some platform features may be restricted or behave differently. This environment allows testing of authentication and user features without affecting production data.</p>
+                <div class="auth-dev-alert__demo">
+                    <strong>Demo account available</strong> - Username: <code class="auth-dev-alert__code">demo_client</code> / Password: <code class="auth-dev-alert__code">Demo123!</code>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <div class="role-slider" id="roleSlider" role="tablist" aria-label="Login type">
+                    <span class="role-slider__indicator" aria-hidden="true"></span>
+                    <button type="button" class="role-slider__option active" data-role="client" data-index="0" role="tab" aria-selected="true" th:text="#{auth.role.client}">Client</button>
+                    <button type="button" class="role-slider__option" data-role="trainer" data-index="1" role="tab" aria-selected="false" th:text="#{auth.role.trainer}">Trainer</button>
+                    <button type="button" class="role-slider__option" data-role="gym" data-index="2" role="tab" aria-selected="false" th:text="#{auth.role.gym}">Gym</button>
+                </div>
+                <p class="role-hint mt-3 text-xs text-gray-500 text-center" id="roleHint" th:text="#{auth.login.clientHint}">Login with your email and password.</p>
+            </div>
+
+            <div th:if="${success}" class="auth-alert auth-alert--success" role="alert">
+                <span th:text="${success}"></span>
+            </div>
+
+            <div th:if="${param.error}" class="auth-alert auth-alert--error" role="alert">
+                <span th:switch="${param.error[0]}">
+                    <span th:case="'disabled'" th:text="#{auth.error.disabled}">Account disabled. Contact support.</span>
+                    <span th:case="'locked'" th:text="#{auth.error.locked}">Too many attempts. Try again later.</span>
+                    <span th:case="'throttled'" th:text="#{auth.error.throttled}">Too many attempts. Try again later.</span>
+                    <span th:case="'social'">Social sign-in could not be completed. Check the selected account type and provider configuration.</span>
+                    <span th:case="*" th:text="#{auth.error.invalid}">Invalid username or password.</span>
+                </span>
+            </div>
+
+            <div th:if="${param.logout}" class="auth-alert auth-alert--success" role="alert">
+                <span th:text="#{auth.logout}">You've been signed out.</span>
+            </div>
+
+            <div th:if="${param.expired}" class="auth-alert auth-alert--success" role="alert">
+                <span th:text="#{auth.logout}">You've been signed out.</span>
+            </div>
+
+            <div th:if="${param.registered}" class="auth-alert auth-alert--success" role="alert">
+                <span th:text="#{auth.registered}">Registration successful! Please login.</span>
+            </div>
+
+            <div th:if="${param.reset}" class="auth-alert auth-alert--success" role="alert">
+                <span th:text="#{auth.reset.success}">Password updated. Please log in with your new password.</span>
+            </div>
+
+            <div id="socialAuthPanels" th:if="${socialProviders != null and !#lists.isEmpty(socialProviders)}" class="social-auth-panels">
+                <section class="social-auth-panel social-auth-panel--active" data-social-role="client">
+                    <th:block th:replace="~{public-views/auth/fragments/social-auth-buttons :: buttons('client', ${socialProviders})}"></th:block>
+                </section>
+                <section class="social-auth-panel" data-social-role="trainer" aria-hidden="true">
+                    <th:block th:replace="~{public-views/auth/fragments/social-auth-buttons :: buttons('trainer', ${socialProviders})}"></th:block>
+                </section>
+            </div>
+
+            <form th:action="@{/login}" method="post" class="space-y-4" id="loginForm">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" name="next" th:if="${param.next}" th:value="${param.next}" />
+                <input type="hidden" name="loginType" id="loginType" value="client" />
+
+                <div class="auth-panel-stage" id="authPanelStage">
+                    <div id="emailFields" class="auth-fields-block auth-fields-block--active" aria-hidden="false">
+                        <div>
+                            <label for="username" class="auth-field__label" th:text="#{auth.login.username}">Email or username</label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                required
+                                autocomplete="username"
+                                class="auth-field__input" />
+                        </div>
+
+                        <div id="trainerCodeField" class="auth-inline-section auth-inline-section--collapsed mt-4" aria-hidden="true">
+                            <label for="trainerCode" class="auth-field__label">Trainer Code</label>
+                            <div class="code-input-group">
+                                <input
+                                    type="text"
+                                    id="trainerCode1"
+                                    maxlength="4"
+                                    placeholder="****"
+                                    class="code-input-part"
+                                    autocomplete="off" />
+                                <span class="code-input-separator">-</span>
+                                <input
+                                    type="text"
+                                    id="trainerCode2"
+                                    maxlength="4"
+                                    placeholder="****"
+                                    class="code-input-part"
+                                    autocomplete="off" />
+                                <span class="code-input-separator">-</span>
+                                <input
+                                    type="text"
+                                    id="trainerCode3"
+                                    maxlength="4"
+                                    placeholder="****"
+                                    class="code-input-part"
+                                    autocomplete="off" />
+                            </div>
+                            <input type="hidden" name="trainerCode" id="trainerCodeFull" />
+                            <p class="mt-2 text-xs text-gray-500 text-center">Enter your 12-character trainer authorization code</p>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="password" class="auth-field__label !mb-0" th:text="#{auth.login.password}">Password</label>
+                                <a th:href="@{/forgot-password}" class="text-xs font-semibold auth-link" th:text="#{auth.login.forgot}">Forgot password?</a>
+                            </div>
+                            <div class="auth-field__input-wrapper">
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    required
+                                    autocomplete="current-password"
+                                    class="auth-field__input auth-field__input--with-icon" />
+                                <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                                    <svg class="h-5 w-5" id="eyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="gymFields" class="auth-fields-block auth-fields-block--inactive space-y-4" aria-hidden="true">
+                        <div>
+                            <label for="gymUsername" class="auth-field__label">Gym Username</label>
+                            <input
+                                type="text"
+                                id="gymUsername"
+                                name="gymUsername"
+                                placeholder="Enter your gym username"
+                                class="auth-field__input"
+                                autocomplete="username" />
+                        </div>
+
+                        <div>
+                            <label for="gymSecretCode1" class="auth-field__label">Gym Secret Code</label>
+                            <div class="code-input-group">
+                                <input
+                                    type="text"
+                                    id="gymSecretCode1"
+                                    maxlength="4"
+                                    placeholder="0000"
+                                    inputmode="numeric"
+                                    class="code-input-part"
+                                    autocomplete="one-time-code" />
+                                <span class="code-input-separator">-</span>
+                                <input
+                                    type="text"
+                                    id="gymSecretCode2"
+                                    maxlength="4"
+                                    placeholder="0000"
+                                    inputmode="numeric"
+                                    class="code-input-part"
+                                    autocomplete="off" />
+                                <span class="code-input-separator">-</span>
+                                <input
+                                    type="text"
+                                    id="gymSecretCode3"
+                                    maxlength="4"
+                                    placeholder="0000"
+                                    inputmode="numeric"
+                                    class="code-input-part"
+                                    autocomplete="off" />
+                                <span class="code-input-separator">-</span>
+                                <input
+                                    type="text"
+                                    id="gymSecretCode4"
+                                    maxlength="4"
+                                    placeholder="0000"
+                                    inputmode="numeric"
+                                    class="code-input-part"
+                                    autocomplete="off" />
+                            </div>
+                            <input type="hidden" name="gymSecretCode" id="gymSecretCodeFull" />
+                            <p class="mt-2 text-xs text-gray-500 text-center">Enter your 16-digit gym secret code</p>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="gymPassword" class="auth-field__label !mb-0">Gym Password</label>
+                                <a th:href="@{/forgot-password}" class="text-xs font-semibold auth-link" th:text="#{auth.login.forgot}">Forgot password?</a>
+                            </div>
+                            <div class="auth-field__input-wrapper">
+                                <input
+                                    type="password"
+                                    id="gymPassword"
+                                    name="gymPass"
+                                    autocomplete="current-password"
+                                    class="auth-field__input auth-field__input--with-icon" />
+                                <button type="button" class="password-toggle" id="toggleGymPassword" aria-label="Toggle password visibility">
+                                    <svg class="h-5 w-5" id="gymEyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn auth-btn--primary">
+                    <span th:text="#{auth.login.submit}">Log in</span>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </button>
+
+                <p class="text-center text-sm text-gray-600">
+                    <span th:text="#{auth.login.noAccount}">Don't have an account?</span>
+                    <a th:href="@{/signup}" class="auth-link" th:text="#{auth.login.signup}">Sign up</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <th:block th:fragment="pageScripts">
+        <script th:src="@{/js/auth/login-page.js}"></script>
+    </th:block>
+
+</th:block>

@@ -87,7 +87,7 @@ public class ScheduleController {
         model.addAttribute("sharedSchedules", shared);
         model.addAttribute("currentUserId", user.getId());
 
-        return "schedule/list";
+        return "trainer-views/schedule/list";
     }
 
     @Transactional
@@ -123,7 +123,7 @@ public class ScheduleController {
     @GetMapping("/create")
     public String createForm(Model model) {
         model.addAttribute("schedule", new Schedule());
-        return "schedule/create";
+        return "trainer-views/schedule/create";
     }
 
     @PostMapping("/create")
@@ -168,7 +168,7 @@ public class ScheduleController {
         model.addAttribute("entry", new ScheduleEntry());
         model.addAttribute("entries", scheduleEntryService.getEntries(id));
 
-        return "schedule/add-entry";
+        return "trainer-views/schedule/add-entry";
     }
 
     @PostMapping("/{id}/entries")
@@ -236,7 +236,7 @@ public class ScheduleController {
             return "redirect:/schedules?error";
         }
         model.addAttribute("schedule", schedule);
-        return "schedule/apply";
+        return "trainer-views/schedule/apply";
     }
 
     @PostMapping("/applied/{appliedId}/settings")
@@ -315,7 +315,7 @@ public class ScheduleController {
         model.addAttribute("schedule", new Schedule());
         model.addAttribute("templates", scheduleTemplateService.getAllTemplates());
 
-        return "schedule/builder";
+        return "trainer-views/schedule/builder";
     }
 
 

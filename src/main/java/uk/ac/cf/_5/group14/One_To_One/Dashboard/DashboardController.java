@@ -287,7 +287,7 @@ public class DashboardController {
                         intakeLastLogged, intakeLoggedToday, mealWindow, now, timeDisplayFormat));
         model.addAttribute("weekDays", weekDays);
 
-        return "dashboard/client-dashboard";
+        return "client-views/dashboard/client-dashboard";
     }
 
     @GetMapping("/dashboard/trainer-thread/{threadId}/messages")
@@ -374,7 +374,7 @@ public class DashboardController {
             return "redirect:/dashboard";
         }
         model.addAttribute("pageTitle", "One to One");
-        return "dashboard/client-dashboard-public";
+        return "public-views/dashboard/client-dashboard-public";
     }
 
     @GetMapping("/trainer/dashboard")
@@ -384,7 +384,7 @@ public class DashboardController {
         User trainer = currentUserOrThrow(authentication);
         DashboardSummaryDto summary = dashboardSummaryService.getSummary(trainer);
         model.addAttribute("summary", summary);
-        return "dashboard/trainer-dashboard";
+        return "trainer-views/dashboard/trainer-dashboard";
     }
 
     @GetMapping("/gym/dashboard")
@@ -394,7 +394,7 @@ public class DashboardController {
         User admin = currentUserOrThrow(authentication);
         DashboardSummaryDto summary = dashboardSummaryService.getSummary(admin);
         model.addAttribute("summary", summary);
-        return "dashboard/gym-dashboard";
+        return "gym-views/dashboard/gym-dashboard";
     }
 
     private TopActionCard buildBodyActionCard(UserSettings settings,

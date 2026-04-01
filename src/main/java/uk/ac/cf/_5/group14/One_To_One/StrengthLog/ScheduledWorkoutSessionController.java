@@ -59,7 +59,7 @@ public class ScheduledWorkoutSessionController {
         }
 
         model.addAttribute("view", scheduledWorkoutSessionService.buildViewModel(user, sessionId));
-        return "workout-session/session";
+        return "shared-views/workout-session/session";
     }
 
     @GetMapping("/workout-session/{sessionId}/complete")
@@ -75,7 +75,7 @@ public class ScheduledWorkoutSessionController {
         }
 
         model.addAttribute("view", scheduledWorkoutSessionService.buildViewModel(user, sessionId));
-        return "workout-session/complete";
+        return "shared-views/workout-session/complete";
     }
 
     @PostMapping("/workout-session/{sessionId}/exercises/{exerciseSessionId}/sets")

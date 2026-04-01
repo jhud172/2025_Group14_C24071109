@@ -88,8 +88,9 @@ class TrainerReviewServiceTest {
         // AND: Client cannot leave another review for the same link
         assertThatThrownBy(() -> {
             reviewService.createReview(client.getId(), trainer.getId(), 4, null, "Another review");
-        }).isInstanceOf(IllegalStateException.class)
-          .hasMessage(TrainerReviewService.ERROR_REVIEW_ALREADY_EXISTS);
+        }).isInstanceOf(TrainerReviewException.class)
+          .extracting(ex -> ((TrainerReviewException) ex).getReason())
+          .isEqualTo(TrainerReviewException.Reason.REVIEW_ALREADY_EXISTS);
     }
 
     @Test
@@ -130,8 +131,9 @@ class TrainerReviewServiceTest {
         // AND: Attempting to create review throws exception
         assertThatThrownBy(() -> {
             reviewService.createReview(savedClient.getId(), trainer.getId(), 5, null, "Review");
-        }).isInstanceOf(IllegalStateException.class)
-          .hasMessage(TrainerReviewService.ERROR_LINK_NOT_ELIGIBLE);
+        }).isInstanceOf(TrainerReviewException.class)
+          .extracting(ex -> ((TrainerReviewException) ex).getReason())
+          .isEqualTo(TrainerReviewException.Reason.LINK_NOT_ELIGIBLE);
     }
 
     @Test

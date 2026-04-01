@@ -1,0 +1,86 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout(${pageTitle} ?: 'Exercise', null, ~{::content}, ~{::pageScripts})}">
+
+    <div th:fragment="content" class="detail-container">
+        <!-- Header with key metadata at top -->
+        <div class="detail-header">
+            <div class="detail-header-content">
+                <div class="detail-header-meta">
+                    <p class="detail-label">Exercise</p>
+                    <h1 class="detail-title" th:text="${exercise.name}">Exercise</h1>
+                    <p class="detail-subtitle" th:text="${exercise.primaryMuscles}">Primary muscles</p>
+                </div>
+                <!-- Primary actions - sticky on larger screens -->
+                <div class="detail-actions-sticky">
+                    <a th:href="@{/trainer/library/exercises}" class="detail-btn-secondary">Back</a>
+                    <a th:href="@{/trainer/library/exercises/{id}/edit(id=${exercise.id})}" class="detail-btn-primary">Edit</a>
+                    <button type="button" class="detail-btn-secondary"
+                            data-share-dialog-open="shareDialog">Share</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Structured content sections -->
+        <div class="detail-sections">
+            <!-- Main content in grid layout -->
+            <div class="detail-grid-2">
+                <!-- Exercise Details Section -->
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Exercise details</h2>
+                    <div class="detail-section-content">
+                        <div class="detail-metadata">
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Equipment</p>
+                                <p class="detail-metadata-value" th:text="${exercise.equipment}">Equipment</p>
+                            </div>
+                            <div class="detail-metadata-item">
+                                <p class="detail-metadata-label">Difficulty</p>
+                                <p class="detail-metadata-value" th:text="${exercise.difficulty}">Difficulty</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4" th:if="${exercise.description != null and !#strings.isEmpty(exercise.description)}">
+                            <p class="detail-metadata-label">Description</p>
+                            <p class="detail-metadata-value mt-1" th:text="${exercise.description}">Description</p>
+                        </div>
+
+                        <div class="mt-4" th:if="${exercise.videoUrl != null and !#strings.isEmpty(exercise.videoUrl)}">
+                            <p class="detail-metadata-label">Video</p>
+                            <a class="detail-metadata-value mt-1 inline-block underline"
+                               th:href="${exercise.videoUrl}" th:text="${exercise.videoUrl}" target="_blank" rel="noreferrer">Video URL</a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Coaching Notes Section -->
+                <section class="detail-section">
+                    <h2 class="detail-section-title">Coaching notes</h2>
+                    <div class="detail-section-content">
+                        <div th:if="${#lists.isEmpty(notes)}" class="detail-empty">No notes.</div>
+                        <ul th:if="${!#lists.isEmpty(notes)}" class="detail-list">
+                            <li th:each="n : ${notes}" class="detail-list-item">
+                                <span class="detail-list-item-description" th:text="${n.noteText}">Note</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Delete Action -->
+                    <div class="detail-section-content border-t border-slate-200 dark:border-white/10 pt-4 flex items-center justify-end">
+                        <form method="post" th:action="@{/trainer/library/exercises/{id}/delete(id=${exercise.id})}">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit" class="detail-btn-destructive">Delete Exercise</button>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <th:block th:replace="~{trainer-views/trainer/fragments/library-share-dialog :: libraryShareDialog('shareDialog')}"></th:block>
+    </div>
+
+
+
+    <div th:fragment="pageScripts">
+        <script th:src="@{/js/trainer/trainer-library-share-dialog.js}" defer></script>
+    </div>
+
+</th:block>

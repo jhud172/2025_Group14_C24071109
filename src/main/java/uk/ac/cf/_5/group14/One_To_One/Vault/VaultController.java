@@ -96,7 +96,7 @@ public class VaultController {
         model.addAttribute("pinnedOnly", pinned);
         model.addAttribute("metrics", metrics);
         model.addAttribute("moods", MOOD_OPTIONS);
-        return "vault/index";
+        return "shared-views/vault/index";
     }
 
     @GetMapping("/new")
@@ -111,7 +111,7 @@ public class VaultController {
         model.addAttribute("noteTypes", VaultNoteType.values());
         model.addAttribute("moods", MOOD_OPTIONS);
         model.addAttribute("recentSessions", workoutSessionRepository.findTop20ByUserOrderByDateDesc(user));
-        return "vault/note-form";
+        return "shared-views/vault/note-form";
     }
 
     @PostMapping("/new")
@@ -150,7 +150,7 @@ public class VaultController {
         model.addAttribute("pageTitle", "Training Vault");
         model.addAttribute("note", note);
         model.addAttribute("linkedSession", linkedSession);
-        return "vault/note-view";
+        return "shared-views/vault/note-view";
     }
 
     @GetMapping("/{id}/edit")
@@ -167,7 +167,7 @@ public class VaultController {
         model.addAttribute("noteTypes", VaultNoteType.values());
         model.addAttribute("moods", MOOD_OPTIONS);
         model.addAttribute("recentSessions", workoutSessionRepository.findTop20ByUserOrderByDateDesc(user));
-        return "vault/note-form";
+        return "shared-views/vault/note-form";
     }
 
     @PostMapping("/{id}/edit")

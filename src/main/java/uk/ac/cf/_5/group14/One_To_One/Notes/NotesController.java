@@ -55,7 +55,7 @@ public class NotesController {
         model.addAttribute("activeFolderId", activeFolderId);
         model.addAttribute("notes", activeFolderId != null ? noteService.search(user, activeFolderId, null) : List.of());
         model.addAttribute("activeNote", null);
-        return "notes/index";
+        return "shared-views/notes/index";
     }
 
     @GetMapping(params = {"folderId"})
@@ -84,7 +84,7 @@ public class NotesController {
         model.addAttribute("notes", notes);
         model.addAttribute("activeNote", activeNote);
         model.addAttribute("q", q);
-        return "notes/index";
+        return "shared-views/notes/index";
     }
 
     @GetMapping("/folders/{id}")
@@ -98,7 +98,7 @@ public class NotesController {
         model.addAttribute("activeFolder", activeFolder);
         model.addAttribute("notes", noteService.getNotesForFolder(user, id, q));
         model.addAttribute("q", q);
-        return "notes/folders";
+        return "shared-views/notes/folders";
     }
 
     @PostMapping("/folders/new")
@@ -135,7 +135,7 @@ public class NotesController {
         NoteFolder folder = folderService.getFolderForUser(user, folderId);
         model.addAttribute("folder", folder);
         model.addAttribute("note", new Note());
-        return "notes/note-form";
+        return "shared-views/notes/note-form";
     }
 
     @PostMapping("/folders/{folderId}/new")
@@ -161,7 +161,7 @@ public class NotesController {
         User user = authHelper.getAuthenticatedUser(session);
         Note note = noteService.getNoteForUser(user, id);
         model.addAttribute("note", note);
-        return "notes/note-view";
+        return "shared-views/notes/note-view";
     }
 
     @GetMapping("/{id}/edit")
@@ -172,7 +172,7 @@ public class NotesController {
         Note note = noteService.getNoteForUser(user, id);
         model.addAttribute("note", note);
         model.addAttribute("folder", note.getFolder());
-        return "notes/note-form";
+        return "shared-views/notes/note-form";
     }
 
     @PostMapping("/{id}/edit")

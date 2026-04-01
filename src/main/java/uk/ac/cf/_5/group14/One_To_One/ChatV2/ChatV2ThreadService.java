@@ -177,6 +177,6 @@ public class ChatV2ThreadService {
             sb.append(words[i]);
         }
         String title = sb.toString();
-        return title.length() > 60 ? title.substring(0, 60).trim() + "â€¦" : title;
+        return title.length() > 60 ? title.substring(0, 60).trim() + "..." : title;
     }
 }

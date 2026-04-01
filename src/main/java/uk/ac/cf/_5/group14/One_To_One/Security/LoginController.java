@@ -8,12 +8,12 @@
 //
 //    @GetMapping("/login")
 //    String login() {
-//        return "User/login";
+//        return "public-views/auth/login";
 //    }
 //
 //    @GetMapping("/signup")
 //    String signup() {
-//        return "User/signup";
+//        return "public-views/auth/signup";
 //    }
 //}
 //

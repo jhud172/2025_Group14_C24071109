@@ -113,7 +113,7 @@ class MerchCheckoutControllerTest {
 
         ModelAndView mav = controller.buyForm(9L, new RedirectAttributesModelMap());
 
-        assertThat(mav.getViewName()).isEqualTo("merch/checkout");
+        assertThat(mav.getViewName()).isEqualTo("shared-views/merch/checkout");
         assertThat(mav.getModel()).containsEntry("paymentProviderConfigured", false);
         assertThat(mav.getModel()).containsEntry("paymentProviderName", "Stripe");
     }

@@ -42,7 +42,7 @@ public class OrdersController {
             return new ModelAndView("redirect:/login");
         }
 
-        ModelAndView modelAndView = new ModelAndView("orders/orders");
+        ModelAndView modelAndView = new ModelAndView("shared-views/orders/orders");
 
         // Get all orders for the user
         List<MerchOrder> allOrders = merchOrderService.getOrdersForUser(user.getId());

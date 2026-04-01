@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.One_To_One.TrainerLibrary;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.ac.cf._5.group14.One_To_One.Security.TrainerAccessException;
 import uk.ac.cf._5.group14.One_To_One.Users.Role;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
@@ -442,7 +443,7 @@ public class TrainerLibraryService {
             throw new AccessDeniedException("User is not a trainer");
         }
         if (!trainer.isTrainerVerified() || !trainer.isEnabled()) {
-            throw new AccessDeniedException(ERROR_TRAINER_NOT_VERIFIED);
+            throw new TrainerAccessException(TrainerAccessException.Reason.TRAINER_NOT_VERIFIED);
         }
     }
 }

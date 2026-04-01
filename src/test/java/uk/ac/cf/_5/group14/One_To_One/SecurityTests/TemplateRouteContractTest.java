@@ -12,7 +12,7 @@ class TemplateRouteContractTest {
 
     @Test
     void publicHomeUsesPublicExploreRouteForTrainerDiscovery() throws IOException {
-        String template = read("src/main/resources/templates/home/public.html");
+        String template = read("src/main/resources/templates/public-views/home/public.html");
 
         assertThat(template).contains("th:href=\"@{/explore}\"");
         assertThat(template).doesNotContain("th:href=\"@{/trainers}\"");
@@ -20,7 +20,7 @@ class TemplateRouteContractTest {
 
     @Test
     void signedInHomeUsesInboxAsCanonicalMessagingEntryPoint() throws IOException {
-        String template = read("src/main/resources/templates/home/user.html");
+        String template = read("src/main/resources/templates/public-views/home/user.html");
 
         assertThat(template).contains("th:href=\"@{/inbox}\"");
         assertThat(template).contains("th:href=\"@{/chat}\"");
@@ -30,7 +30,7 @@ class TemplateRouteContractTest {
 
     @Test
     void gymDashboardUsesGymSpecificOperationalRoutes() throws IOException {
-        String template = read("src/main/resources/templates/dashboard/gym-dashboard.html");
+        String template = read("src/main/resources/templates/gym-views/dashboard/gym-dashboard.html");
 
         assertThat(template).contains("href=\"/gym/dashboard\"");
         assertThat(template).contains("href=\"/gym/admin/trainers\"");
@@ -45,7 +45,7 @@ class TemplateRouteContractTest {
 
     @Test
     void trainerDashboardUsesInboxAsPrimaryMessagingSurface() throws IOException {
-        String template = read("src/main/resources/templates/dashboard/trainer-dashboard.html");
+        String template = read("src/main/resources/templates/trainer-views/dashboard/trainer-dashboard.html");
 
         assertThat(template).contains("th:href=\"@{/inbox}\"");
         assertThat(template).contains("th:href=\"@{/trainer/clients}\"");
@@ -64,7 +64,7 @@ class TemplateRouteContractTest {
 
     @Test
     void adminDashboardUsesCleanOperationalMetadata() throws IOException {
-        String template = read("src/main/resources/templates/dashboard/admin-dashboard.html");
+        String template = read("src/main/resources/templates/admin-views/dashboard/admin-dashboard.html");
 
         assertThat(template).contains("Platform Operations");
         assertThat(template).contains("th:href=\"@{/admin/feedback}\"");
@@ -76,7 +76,7 @@ class TemplateRouteContractTest {
 
     @Test
     void scheduleListUsesPostFormsForDestructiveActions() throws IOException {
-        String template = read("src/main/resources/templates/schedule/list.html");
+        String template = read("src/main/resources/templates/trainer-views/schedule/list.html");
 
         assertThat(template).contains("method=\"post\"");
         assertThat(template).contains("/schedules/applied/' + ${applied.id} + '/remove");
@@ -87,7 +87,7 @@ class TemplateRouteContractTest {
 
     @Test
     void navbarUsesCanonicalCoachAndRoleSpecificOperationalRoutes() throws IOException {
-        String template = read("src/main/resources/templates/fragments/navbar.html");
+        String template = read("src/main/resources/templates/universal-fragments/layout/navbar.html");
 
         assertThat(template).contains("th:href=\"@{/chat}\"");
         assertThat(template).contains("th:href=\"@{/inbox}\"");
@@ -102,7 +102,7 @@ class TemplateRouteContractTest {
 
     @Test
     void calendarDayUsesCoachWordingAndCleanAsciiFallbacks() throws IOException {
-        String template = read("src/main/resources/templates/calendar/day.html");
+        String template = read("src/main/resources/templates/shared-views/calendar/day.html");
 
         assertThat(template).contains("Open Coach");
         assertThat(template).contains("Generate coach reflection");
@@ -115,7 +115,7 @@ class TemplateRouteContractTest {
 
     @Test
     void clientDashboardShellExposesCoachAsCanonicalAiAction() throws IOException {
-        String template = read("src/main/resources/templates/dashboard/fragments/client-dashboard-shell.html");
+        String template = read("src/main/resources/templates/client-views/dashboard/fragments/client-dashboard-shell.html");
 
         assertThat(template).contains("th:href=\"@{/chat}\"");
         assertThat(template).contains("Open coach");
@@ -123,8 +123,8 @@ class TemplateRouteContractTest {
 
     @Test
     void legacyMessageTemplatesPointAtInboxThreads() throws IOException {
-        String trainerInbox = read("src/main/resources/templates/messages/trainer-inbox.html");
-        String clientInbox = read("src/main/resources/templates/messages/client-inbox.html");
+        String trainerInbox = read("src/main/resources/templates/shared-views/messages/trainer-inbox.html");
+        String clientInbox = read("src/main/resources/templates/shared-views/messages/client-inbox.html");
 
         assertThat(trainerInbox).contains("th:href=\"@{/inbox/{id}(id=${t.id})}\"");
         assertThat(clientInbox).contains("th:href=\"@{/inbox/{id}(id=${thread.id})}\"");
@@ -135,7 +135,7 @@ class TemplateRouteContractTest {
 
     @Test
     void globalChatWidgetUsesCoachWordingAndCleanAsciiText() throws IOException {
-        String template = read("src/main/resources/templates/fragments/chat/chat-widget.html");
+        String template = read("src/main/resources/templates/universal-fragments/chat/chat-widget.html");
 
         assertThat(template).contains("aria-label=\"Open coach\"");
         assertThat(template).contains("Log in to use coach");

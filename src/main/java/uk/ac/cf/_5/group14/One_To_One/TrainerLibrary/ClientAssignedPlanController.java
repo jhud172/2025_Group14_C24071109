@@ -52,7 +52,7 @@ public class ClientAssignedPlanController {
             return new ModelAndView("redirect:/access-denied");
         }
 
-        ModelAndView mav = new ModelAndView("client/assigned-plan");
+        ModelAndView mav = new ModelAndView("client-views/client/assigned-plan");
         mav.addObject("pageTitle", "Assigned Plan");
         mav.addObject("assignedWorkouts", trainerLibraryService.getAssignedWorkoutsForClient(user.getId()));
         mav.addObject("assignedProgrammes", trainerLibraryService.getAssignedProgrammesForClient(user.getId()));

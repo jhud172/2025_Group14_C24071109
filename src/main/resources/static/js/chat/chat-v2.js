@@ -1,4 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
+    function hydrateAccentBadges(scope = document) {
+        scope.querySelectorAll("[data-chat-accent-badge][data-chat-color]").forEach((badge) => {
+            const color = badge.getAttribute("data-chat-color");
+            if (!color) {
+                return;
+            }
+
+            badge.style.backgroundColor = color;
+            badge.style.color = "#ffffff";
+        });
+    }
+
+    hydrateAccentBadges();
+
     const root = document.getElementById("chatV2Root");
     if (!root) return;
 

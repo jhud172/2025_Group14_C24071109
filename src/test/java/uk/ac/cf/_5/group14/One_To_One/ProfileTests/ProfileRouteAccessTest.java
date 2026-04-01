@@ -101,7 +101,7 @@ class ProfileRouteAccessTest {
 
         mvc.perform(get("/profile").sessionAttr("user", user))
                 .andExpect(status().isOk())
-                .andExpect(view().name("profile/profile"));
+                .andExpect(view().name("client-views/profile/profile"));
     }
 
     @Test

@@ -77,7 +77,7 @@ public class HomePageController {
         User user = resolveCurrentUser(authentication);
 
         if (user == null) {
-            ModelAndView mav = new ModelAndView("home/public");
+            ModelAndView mav = new ModelAndView("public-views/home/public");
             mav.addObject("isDevMode", devModeProperties.isDevMode());
             return mav;
         }
@@ -89,12 +89,12 @@ public class HomePageController {
 
     @GetMapping("/about")
     public ModelAndView aboutPage() {
-        return new ModelAndView("public/about");
+        return new ModelAndView("public-views/public/about");
     }
 
     @GetMapping("/faq")
     public ModelAndView faqPage() {
-        return new ModelAndView("public/faq");
+        return new ModelAndView("public-views/public/faq");
     }
 
     @GetMapping("/home")
@@ -130,7 +130,7 @@ public class HomePageController {
         mav.addObject("overdueCount", calendarTaskRepository.countByUserAndDateBeforeAndCompletedFalse(user, today));
         mav.addObject("completedToday", calendarTaskRepository.countByUserAndDateAndCompletedTrue(user, today));
 
-        mav.setViewName("home/user");
+        mav.setViewName("public-views/home/user");
 
         return mav;
     }

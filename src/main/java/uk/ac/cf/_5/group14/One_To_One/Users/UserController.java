@@ -60,7 +60,7 @@ public class UserController {
             return "redirect:/dashboard";
         }
         applyAuthLayout(model);
-        return "User/signup-choice";
+        return "public-views/auth/signup-choice";
     }
 
     @GetMapping("/signup/client")
@@ -70,7 +70,7 @@ public class UserController {
         }
         applyAuthLayout(model);
         model.addAttribute("signupForm", new ClientSignupForm());
-        return "User/signup-client";
+        return "public-views/auth/signup-client";
     }
 
     @PostMapping("/signup/client")
@@ -85,19 +85,19 @@ public class UserController {
 
         // check for validation errors
         if (result.hasErrors()) {
-            return "User/signup-client";
+            return "public-views/auth/signup-client";
         }
 
         // check whether email exists
         if (userService.emailExists(signupForm.getEmail())) {
             result.rejectValue("email", "email.taken", "Email already registered!");
-            return "User/signup-client";
+            return "public-views/auth/signup-client";
         }
 
         // check whether username exists
         if (userService.usernameExists(signupForm.getUsername())) {
             result.rejectValue("username", "username.taken", "Username already taken!");
-            return "User/signup-client";
+            return "public-views/auth/signup-client";
         }
 
         String normalizedUsername = normalizeUsername(signupForm.getUsername());
@@ -132,7 +132,7 @@ public class UserController {
         }
         applyAuthLayout(model);
         model.addAttribute("signupForm", new TrainerSignupForm());
-        return "User/signup-trainer";
+        return "public-views/auth/signup-trainer";
     }
 
     @GetMapping("/signup/trainer/success")
@@ -142,7 +142,7 @@ public class UserController {
         }
         applyAuthLayout(model);
         // trainerCode and verifyEmail are flash attributes added after successful signup
-        return "User/signup-trainer-success";
+        return "public-views/auth/signup-trainer-success";
     }
 
     @PostMapping("/signup/trainer")
@@ -156,17 +156,17 @@ public class UserController {
         applyAuthLayout(model);
 
         if (result.hasErrors()) {
-            return "User/signup-trainer";
+            return "public-views/auth/signup-trainer";
         }
 
         if (userService.emailExists(signupForm.getEmail())) {
             result.rejectValue("email", "email.taken", "Email already registered!");
-            return "User/signup-trainer";
+            return "public-views/auth/signup-trainer";
         }
 
         if (userService.usernameExists(signupForm.getUsername())) {
             result.rejectValue("username", "username.taken", "Username already taken!");
-            return "User/signup-trainer";
+            return "public-views/auth/signup-trainer";
         }
 
         String normalizedUsername = normalizeUsername(signupForm.getUsername());
@@ -216,7 +216,7 @@ public class UserController {
         }
         applyAuthLayout(model);
         model.addAttribute("signupForm", new GymSignupForm());
-        return "User/signup-gym";
+        return "public-views/auth/signup-gym";
     }
 
     @PostMapping("/signup/gym")
@@ -230,23 +230,23 @@ public class UserController {
         applyAuthLayout(model);
 
         if (result.hasErrors()) {
-            return "User/signup-gym";
+            return "public-views/auth/signup-gym";
         }
 
         if (userService.emailExists(signupForm.getAdminEmail())) {
             result.rejectValue("adminEmail", "email.taken", "Email already registered!");
-            return "User/signup-gym";
+            return "public-views/auth/signup-gym";
         }
 
         String normalizedGymUsername = normalizeUsername(signupForm.getGymUsername());
         if (normalizedGymUsername == null) {
             result.rejectValue("gymUsername", "username.invalid", "Please provide a valid gym username.");
-            return "User/signup-gym";
+            return "public-views/auth/signup-gym";
         }
 
         if (userService.usernameExists(normalizedGymUsername)) {
             result.rejectValue("gymUsername", "username.taken", "Gym username already taken!");
-            return "User/signup-gym";
+            return "public-views/auth/signup-gym";
         }
 
         try {
@@ -256,7 +256,7 @@ public class UserController {
         } catch (Exception ex) {
             log.warn("Failed to submit gym application for {}", signupForm.getAdminEmail(), ex);
             result.reject("gym.application.failed", "We could not submit the gym application. Please try again.");
-            return "User/signup-gym";
+            return "public-views/auth/signup-gym";
         }
     }
 
@@ -284,13 +284,13 @@ public class UserController {
             model.addAttribute("compactTopContent", true);
             if (Boolean.TRUE.equals(devLogin)) {
                 model.addAttribute("isDevMode", true);
-                return "User/login";
+                return "public-views/auth/login";
             }
             model.addAttribute("isDevMode", true);
-            return "User/login-demo";
+            return "public-views/auth/login-demo";
         }
         
-        return "User/login";
+        return "public-views/auth/login";
     }
 
     @PostMapping("/login")

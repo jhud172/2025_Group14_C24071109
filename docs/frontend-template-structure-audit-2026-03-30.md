@@ -1,11 +1,11 @@
 ﻿# Frontend Template Structure Audit
 
-Date: 2026-03-30
+Date: 2026-03-31
 Scope: full audit of src/main/resources/templates for inline CSS/JS, inline event handlers, and fragment structure.
 
 ## 1. Executive summary
 
-- Overall health: strong. 173 templates were inspected, 164 are already compliant with the no-inline-CSS / no-inline-JS rule, and only 9 contain real structure violations.
+- Overall health: strong. 177 templates were inspected, 168 are already compliant with the no-inline-CSS / no-inline-JS rule, and only 9 contain real structure violations.
 - Main problems found: the repo does not use inline style blocks or inline script blocks at all; the remaining breaches are limited to a handful of th:style attributes for dynamic colours/widths and three inline onclick handlers on trainer library detail pages.
 - Priority areas to fix first:
   1. Remove the shared chat colour-chip th:style usage from the V2 chat pages and shared sidebar fragment.
@@ -13,15 +13,16 @@ Scope: full audit of src/main/resources/templates for inline CSS/JS, inline even
   3. Remove the two remaining dynamic style attributes in calendar/day.html and schedule/workout.html.
   4. Plan structural cleanup for the oversized templates listed below, starting with profile/profile.html, calendar/day.html, home/public.html, and fragments/navbar.html.
 - Largest templates by line count:
-  - src/main/resources/templates/profile/profile.html (1516 lines)
-  - src/main/resources/templates/calendar/day.html (1088 lines)
-  - src/main/resources/templates/home/public.html (795 lines)
-  - src/main/resources/templates/dashboard/fragments/client-dashboard-shell.html (725 lines)
-  - src/main/resources/templates/fragments/navbar.html (723 lines)
+  - src/main/resources/templates/profile/profile.html (1426 lines)
+  - src/main/resources/templates/calendar/day.html (1015 lines)
+  - src/main/resources/templates/home/public.html (716 lines)
+  - src/main/resources/templates/dashboard/fragments/client-dashboard-shell.html (695 lines)
+  - src/main/resources/templates/fragments/navbar.html (666 lines)
 - Structural consistency notes:
   - Shared layout loading is centralised correctly in base.html and most page-specific JS already lives in dedicated files.
   - Fragment use is uneven: some areas are strongly componentised (dashboard, calendar, chat sidebar), while other large templates are still monolithic (profile/profile.html, home/public.html, fragments/navbar.html).
   - Naming is inconsistent across templates: the repo mixes lowercase paths with User/, HomePage.html, and ExerciseTutorial.html, plus legacy variants such as *-old.html and builder-redesigned.html.
+  - Template inventory has grown since the 2026-03-30 snapshot; the newly added admin gym-application screens, social-auth fragment, and gym-application status page are all structurally compliant.
 
 ## 2. File-by-file audit
 
@@ -35,7 +36,7 @@ Scope: full audit of src/main/resources/templates for inline CSS/JS, inline even
   - exact destination file(s): Append width initialisation to src/main/resources/static/js/calendar/day-enhancements.js and let src/main/resources/static/css/components/calendar/day-view.css read a CSS variable or JS-set width.
   - append or create: Append to existing files
   - fragment recommendation: Partially fragment
-  - rationale: The page is compliant apart from one dynamic width style, but at 1088 lines it is also large enough that the progress/header strip can be split into day subfragments when touched again.
+  - rationale: The page is compliant apart from one dynamic width style, but at 1015 lines it is also large enough that the progress/header strip can be split into day subfragments when touched again.
 - src/main/resources/templates/chat/folder.html
   - inline CSS: Yes (th:style thread colour chip)
   - inline JS: No
@@ -122,6 +123,8 @@ All files in this subsection have: inline CSS = No, inline JS = No, inline event
 
 #### src\main\resources\templates\admin
 - src/main/resources/templates/admin/feedback.html | fragment recommendation: Leave as-is | rationale: Compliant and appropriately scoped for its current responsibility.
+- src/main/resources/templates/admin/gym-application-detail.html | fragment recommendation: Leave as-is | rationale: Review detail, messaging, and decision forms are cohesive in one admin flow; fragmenting now would not materially improve maintainability.
+- src/main/resources/templates/admin/gym-applications.html | fragment recommendation: Leave as-is | rationale: Small queue page with one repeated card pattern; it is already easy to edit and does not yet justify more fragment structure.
 - src/main/resources/templates/admin/off-platform-payments.html | fragment recommendation: Leave as-is | rationale: Compliant and appropriately scoped for its current responsibility.
 
 #### src\main\resources\templates\auth
@@ -200,6 +203,7 @@ All files in this subsection have: inline CSS = No, inline JS = No, inline event
 - src/main/resources/templates/fragments/quick-actions.html | fragment recommendation: Leave as-is (already fragment) | rationale: Already extracted for reuse; no further split needed now.
 - src/main/resources/templates/fragments/slimselectCss.html | fragment recommendation: Leave as-is (already fragment) | rationale: Already extracted for reuse; no further split needed now.
 - src/main/resources/templates/fragments/slimselectJs.html | fragment recommendation: Leave as-is (already fragment) | rationale: Already extracted for reuse; no further split needed now.
+- src/main/resources/templates/fragments/social-auth-buttons.html | fragment recommendation: Leave as-is (already fragment) | rationale: This is already the right reusable surface for provider buttons across auth flows, so further splitting would be unnecessary.
 - src/main/resources/templates/fragments/tailwind-components.html | fragment recommendation: Leave as-is (already fragment) | rationale: Already extracted for reuse; no further split needed now.
 - src/main/resources/templates/fragments/ui-shell.html | fragment recommendation: Leave as-is (already fragment) | rationale: Already extracted for reuse; no further split needed now.
 - src/main/resources/templates/fragments/username-logout.html | fragment recommendation: Leave as-is (already fragment) | rationale: Already extracted for reuse; no further split needed now.
@@ -291,7 +295,7 @@ All files in this subsection have: inline CSS = No, inline JS = No, inline event
 - src/main/resources/templates/policies/terms.html | fragment recommendation: Leave as-is | rationale: Compliant and appropriately scoped for its current responsibility.
 
 #### src\main\resources\templates\profile
-- src/main/resources/templates/profile/profile.html | fragment recommendation: Partially fragment | rationale: At 1516 lines this page is too large for easy editing; split the sidebar card, alerts/drawers, and main form sections, reusing fragments/profile-modules.html where possible.
+- src/main/resources/templates/profile/profile.html | fragment recommendation: Partially fragment | rationale: At 1426 lines this page is too large for easy editing; split the sidebar card, alerts/drawers, and main form sections, reusing fragments/profile-modules.html where possible.
 
 #### src\main\resources\templates\public
 - src/main/resources/templates/public/about.html | fragment recommendation: Partially fragment | rationale: Static marketing sections can be broken into hero, audience grids, steps, and platform features if copy iteration continues.
@@ -357,6 +361,7 @@ All files in this subsection have: inline CSS = No, inline JS = No, inline event
 - src/main/resources/templates/User/signup-choice.html | fragment recommendation: Leave as-is | rationale: Compliant and appropriately scoped for its current responsibility.
 - src/main/resources/templates/User/signup-client.html | fragment recommendation: Leave as-is | rationale: Compliant and appropriately scoped for its current responsibility.
 - src/main/resources/templates/User/signup-gym.html | fragment recommendation: Leave as-is | rationale: Compliant and appropriately scoped for its current responsibility.
+- src/main/resources/templates/User/signup-gym-application.html | fragment recommendation: Leave as-is | rationale: Status view plus reply form are intentionally kept together for a single applicant flow; fragmenting now would add indirection without reuse.
 - src/main/resources/templates/User/signup-trainer.html | fragment recommendation: Leave as-is | rationale: Compliant and appropriately scoped for its current responsibility.
 - src/main/resources/templates/User/signup-trainer-success.html | fragment recommendation: Leave as-is | rationale: Compliant and appropriately scoped for its current responsibility.
 

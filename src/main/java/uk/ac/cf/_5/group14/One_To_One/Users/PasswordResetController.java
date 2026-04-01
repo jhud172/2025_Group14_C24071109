@@ -26,7 +26,7 @@ public class PasswordResetController {
         applyAuthLayout(model);
         model.addAttribute("forgotPasswordForm", new ForgotPasswordForm());
         model.addAttribute("sent", sent != null);
-        return "User/forgot-password";
+        return "public-views/auth/forgot-password";
     }
 
     @PostMapping("/forgot-password")
@@ -39,7 +39,7 @@ public class PasswordResetController {
         applyAuthLayout(model);
         if (result.hasErrors()) {
             model.addAttribute("sent", false);
-            return "User/forgot-password";
+            return "public-views/auth/forgot-password";
         }
 
         passwordResetService.requestPasswordReset(form.getEmail());
@@ -52,7 +52,7 @@ public class PasswordResetController {
         model.addAttribute("resetPasswordForm", new ResetPasswordForm());
         model.addAttribute("token", token);
         model.addAttribute("tokenValid", passwordResetService.getValidToken(token).isPresent());
-        return "User/reset-password";
+        return "public-views/auth/reset-password";
     }
 
     @PostMapping("/reset-password")
@@ -64,14 +64,14 @@ public class PasswordResetController {
         if (result.hasErrors()) {
             model.addAttribute("token", token);
             model.addAttribute("tokenValid", passwordResetService.getValidToken(token).isPresent());
-            return "User/reset-password";
+            return "public-views/auth/reset-password";
         }
 
         boolean success = passwordResetService.resetPassword(token, form.getPassword());
         if (!success) {
             model.addAttribute("token", token);
             model.addAttribute("tokenValid", false);
-            return "User/reset-password";
+            return "public-views/auth/reset-password";
         }
 
         return "redirect:/login?reset=1";

@@ -61,7 +61,7 @@ public class MerchCheckoutController {
             return new ModelAndView("redirect:/merch");
         }
 
-        ModelAndView mav = new ModelAndView("merch/checkout");
+        ModelAndView mav = new ModelAndView("shared-views/merch/checkout");
         mav.addObject("product", opt.get());
         mav.addObject("paymentProviderConfigured", paymentGateway.isConfigured());
         mav.addObject("paymentSimulationMode", paymentGateway.isSimulationMode());

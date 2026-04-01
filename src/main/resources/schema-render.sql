@@ -981,6 +981,9 @@ CREATE TABLE IF NOT EXISTS gym_profiles
 ALTER TABLE gym_profiles
     ADD COLUMN IF NOT EXISTS gym_code VARCHAR(16);
 
+ALTER TABLE gym_profiles
+    ALTER COLUMN gym_code TYPE VARCHAR(16);
+
 CREATE INDEX IF NOT EXISTS idx_trainer_profiles_user
     ON trainer_profiles (user_id);
 

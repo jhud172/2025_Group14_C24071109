@@ -37,7 +37,7 @@ public class HealthRecordController {
 
     @GetMapping("/health-record")
     public ModelAndView getHealthDataForm() {
-        ModelAndView modelAndView = new ModelAndView("health-record/health-record-form");
+        ModelAndView modelAndView = new ModelAndView("client-views/health-record/health-record-form");
         User user = authHelper.getAuthenticatedUser();
 
         HealthRecordForm emptyHealthRecordForm = healthRecordService.createHealthRecordForm(user);
@@ -58,7 +58,7 @@ public class HealthRecordController {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("allPhysicalConditions", physicalConditionService.getAllPhysicalConditions());
-            return new ModelAndView("health-record/health-record-form", model.asMap());
+            return new ModelAndView("client-views/health-record/health-record-form", model.asMap());
         }
 
         healthRecordService.addHealthRecord(healthRecordForm,user);
@@ -69,14 +69,14 @@ public class HealthRecordController {
     @GetMapping("/health-record/list")
     public ModelAndView listHealthRecords() {
         User user = authHelper.getAuthenticatedUser();
-        ModelAndView mav = new ModelAndView("health-record/health-record-list");
+        ModelAndView mav = new ModelAndView("client-views/health-record/health-record-list");
         mav.addObject("records", healthRecordService.getAllHealthRecords(user));
         return mav;
     }
 
     @GetMapping("/health-record/{id}")
     public ModelAndView viewHealthRecord(@PathVariable Long id) {
-        ModelAndView mav = new ModelAndView("health-record/health-record-view");
+        ModelAndView mav = new ModelAndView("client-views/health-record/health-record-view");
         mav.addObject("record", healthRecordService.getHealthRecordById(id));
         return mav;
     }

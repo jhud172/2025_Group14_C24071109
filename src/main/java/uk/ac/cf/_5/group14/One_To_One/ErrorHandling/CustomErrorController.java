@@ -42,13 +42,13 @@ public class CustomErrorController implements ErrorController {
         // Route to appropriate error template
         switch (statusCode) {
             case 404:
-                return "error/404";
+                return "system-views/error/404";
             case 403:
-                return "error/403";
+                return "system-views/error/403";
             case 500:
-                return "error/500";
+                return "system-views/error/500";
             default:
-                return "error/error";
+                return "system-views/error/error";
         }
     }
 

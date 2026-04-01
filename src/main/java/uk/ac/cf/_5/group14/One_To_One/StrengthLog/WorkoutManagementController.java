@@ -51,6 +51,6 @@ public class WorkoutManagementController {
         model.addAttribute("completedSessions", scheduledWorkoutSessionService.listRecentCompletedSessions(user, 12));
         model.addAttribute("exerciseLogs", exerciseLogService.getLogsByUser(user).stream().limit(12).toList());
 
-        return "workout-management/index";
+        return "shared-views/workout-management/index";
     }
 }

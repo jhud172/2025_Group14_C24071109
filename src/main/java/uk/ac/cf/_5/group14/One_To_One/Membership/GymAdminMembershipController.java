@@ -51,8 +51,8 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("error", "You must be associated with a gym to manage memberships");
-            return "error/403";
+            model.addAttribute("system-views/error/error", "You must be associated with a gym to manage memberships");
+            return "system-views/error/403";
         }
         
         int pageSize = resolvePageSize(size);
@@ -79,7 +79,7 @@ public class GymAdminMembershipController {
         model.addAttribute("activeProductsCount", activeProductsCount);
         model.addAttribute("pageSize", pageSize);
         
-        return "gym-admin/memberships/list";
+        return "gym-views/gym-admin/memberships/list";
     }
 
     @PostMapping("/{id}/status")
@@ -115,8 +115,8 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("error", "You must be associated with a gym to create memberships");
-            return "error/403";
+            model.addAttribute("system-views/error/error", "You must be associated with a gym to create memberships");
+            return "system-views/error/403";
         }
         
         GymMembershipProduct product = new GymMembershipProduct();
@@ -124,7 +124,7 @@ public class GymAdminMembershipController {
         product.setBillingPeriod(BillingPeriod.MONTHLY);
         
         model.addAttribute("product", product);
-        return "gym-admin/memberships/form";
+        return "gym-views/gym-admin/memberships/form";
     }
     
     /**
@@ -149,7 +149,7 @@ public class GymAdminMembershipController {
         }
 
         if (result.hasErrors()) {
-            return "gym-admin/memberships/form";
+            return "gym-views/gym-admin/memberships/form";
         }
         
         product.setGymId(admin.getGymId());
@@ -171,14 +171,14 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("error", "Access denied");
-            return "error/403";
+            model.addAttribute("system-views/error/error", "Access denied");
+            return "system-views/error/403";
         }
         
         GymMembershipProduct product = membershipService.getProductByIdAndGymId(id, admin.getGymId());
         model.addAttribute("product", product);
         
-        return "gym-admin/memberships/form";
+        return "gym-views/gym-admin/memberships/form";
     }
     
     /**
@@ -200,7 +200,7 @@ public class GymAdminMembershipController {
         }
         
         if (result.hasErrors()) {
-            return "gym-admin/memberships/form";
+            return "gym-views/gym-admin/memberships/form";
         }
         
         GymMembershipProduct existingProduct = membershipService.getProductByIdAndGymId(id, admin.getGymId());
@@ -228,8 +228,8 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("error", "Access denied");
-            return "error/403";
+            model.addAttribute("system-views/error/error", "Access denied");
+            return "system-views/error/403";
         }
         
         GymMembershipProduct product = membershipService.getProductByIdAndGymId(id, admin.getGymId());
@@ -244,7 +244,7 @@ public class GymAdminMembershipController {
         model.addAttribute("defaultEffectiveDate", defaultEffectiveDate);
         model.addAttribute("priceChange", priceChange);
         
-        return "gym-admin/memberships/price-change";
+        return "gym-views/gym-admin/memberships/price-change";
     }
     
     /**
@@ -288,7 +288,7 @@ public class GymAdminMembershipController {
             model.addAttribute("product", product);
             model.addAttribute("affectedMemberCount", affectedCount);
             model.addAttribute("defaultEffectiveDate", defaultEffectiveDate);
-            return "gym-admin/memberships/price-change";
+            return "gym-views/gym-admin/memberships/price-change";
         }
 
         Instant effectiveAt = effectiveDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
@@ -324,16 +324,16 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("error", "Access denied");
-            return "error/403";
+            model.addAttribute("system-views/error/error", "Access denied");
+            return "system-views/error/403";
         }
         
         GymMembershipProduct product;
         try {
             product = membershipService.getProductByIdAndGymId(id, admin.getGymId());
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("error", "Access denied");
-            return "error/403";
+            model.addAttribute("system-views/error/error", "Access denied");
+            return "system-views/error/403";
         }
 
         int pageSize = resolvePageSize(size);
@@ -370,7 +370,7 @@ public class GymAdminMembershipController {
         model.addAttribute("decreaseCount", decreaseCount);
         model.addAttribute("changedByUsers", changedByUsers);
         
-        return "gym-admin/memberships/price-history";
+        return "gym-views/gym-admin/memberships/price-history";
     }
 
     private Optional<LocalDate> resolveDefaultEffectiveDate(Long productId) {

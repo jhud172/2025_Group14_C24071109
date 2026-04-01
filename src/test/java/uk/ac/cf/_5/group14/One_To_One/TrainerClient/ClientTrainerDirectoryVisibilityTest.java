@@ -60,7 +60,7 @@ class ClientTrainerDirectoryVisibilityTest {
         mockMvc.perform(get("/client/trainers")
                 .with(user(client.getUsername()).roles("CLIENT")))
             .andExpect(status().isOk())
-            .andExpect(view().name("client/trainers"))
+            .andExpect(view().name("client-views/client/trainers"))
             .andExpect(model().attribute("trainers", hasItem(verified)))
             .andExpect(model().attribute("trainers", not(hasItem(unverified))))
             .andExpect(model().attribute("trainers", not(hasItem(disabled))));

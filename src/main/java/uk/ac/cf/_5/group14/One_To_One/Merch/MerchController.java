@@ -25,7 +25,7 @@ public class MerchController {
     @GetMapping
     public ModelAndView shop() {
         User user = authHelper.getAuthenticatedUser();
-        ModelAndView mav = new ModelAndView("merch/shop");
+        ModelAndView mav = new ModelAndView("shared-views/merch/shop");
         List<MerchProduct> products = productService.getActiveProducts();
         boolean demoMode = products.isEmpty();
         if (demoMode) {

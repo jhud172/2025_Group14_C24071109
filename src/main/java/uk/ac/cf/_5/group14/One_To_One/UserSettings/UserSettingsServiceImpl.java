@@ -16,6 +16,8 @@ import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
 @Service("userSettingsService")
 public class UserSettingsServiceImpl implements UserSettingsService {
 
+    private static final List<String> SUPPORTED_LANGUAGES = List.of("en", "cy");
+
     private static final List<String> ALLOWED_WEEKLY_METRICS = List.of(
         "WORKOUTS_COMPLETED",
         "WORKOUTS_REMAINING",
@@ -101,7 +103,7 @@ public class UserSettingsServiceImpl implements UserSettingsService {
                 .orElseGet(() -> {
                     UserSettings newSettings = new UserSettings();
                     newSettings.setUser(userRepository.getReferenceById(user.getId()));
-                    newSettings.setLanguage("en");
+                    newSettings.setLanguage(normalizeLanguage(null));
                     newSettings.setTheme(isDemoUser(user) ? ThemePreference.LIGHT : ThemePreference.SYSTEM);
                     newSettings.setEasyMode(false);
                     newSettings.setColorBlindMode(false);
@@ -142,6 +144,12 @@ public class UserSettingsServiceImpl implements UserSettingsService {
         // Keep demo accounts in light mode for consistent demos.
         if (isDemoUser(user) && settings.getTheme() != ThemePreference.LIGHT) {
             settings.setTheme(ThemePreference.LIGHT);
+            settings = userSettingsRepository.save(settings);
+        }
+
+        String normalizedLanguage = normalizeLanguage(settings.getLanguage());
+        if (!normalizedLanguage.equals(settings.getLanguage())) {
+            settings.setLanguage(normalizedLanguage);
             settings = userSettingsRepository.save(settings);
         }
 
@@ -205,9 +213,7 @@ public class UserSettingsServiceImpl implements UserSettingsService {
             return null;
         }
 
-        if (language != null && !language.isBlank()) {
-            settings.setLanguage(language);
-        }
+        settings.setLanguage(normalizeLanguage(language));
         if (theme != null) {
             settings.setTheme(theme);
         }
@@ -565,6 +571,14 @@ public class UserSettingsServiceImpl implements UserSettingsService {
             return fallback;
         }
         return normalized.toUpperCase(Locale.ROOT);
+    }
+
+    private String normalizeLanguage(String value) {
+        if (value == null || value.isBlank()) {
+            return "en";
+        }
+        String normalized = value.trim().toLowerCase(Locale.ROOT);
+        return SUPPORTED_LANGUAGES.contains(normalized) ? normalized : "en";
     }
 
     private List<String> normalizeMilestoneKeys(Set<String> selected) {

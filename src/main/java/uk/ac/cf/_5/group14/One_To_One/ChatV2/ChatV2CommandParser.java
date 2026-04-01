@@ -76,7 +76,7 @@ public final class ChatV2CommandParser {
 
         if (lower.startsWith("/note search")) {
             String rest = trimmed.substring(12).trim();
-            return new ParsedCommand("NOTE_SEARCH", Map.of("query", rest), "Searching notesâ€¦");
+            return new ParsedCommand("NOTE_SEARCH", Map.of("query", rest), "Searching notes...");
         }
 
         if (lower.startsWith("/schedule list")) {

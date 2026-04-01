@@ -72,7 +72,7 @@ public class ExerciseLogController {
         model.addAttribute("user", user);
         model.addAttribute("formAction", "/exercise-log");
         model.addAttribute("editing", false);
-        return "exercise-log/exercise-log-form";
+        return "shared-views/exercise-log/exercise-log-form";
     }
 
     // Save form
@@ -102,7 +102,7 @@ public class ExerciseLogController {
             return "redirect:/login";
         }
         model.addAttribute("logs", service.getLogsForUser(user));
-        return "exercise-log/exercise-log-list";
+        return "shared-views/exercise-log/exercise-log-list";
     }
 
     // View single
@@ -120,7 +120,7 @@ public class ExerciseLogController {
             return "redirect:/exercise-log/list";
         }
         model.addAttribute("log", log);
-        return "exercise-log/exercise-log-view";
+        return "shared-views/exercise-log/exercise-log-view";
     }
 
     @GetMapping("/edit/{id}")
@@ -154,7 +154,7 @@ public class ExerciseLogController {
         model.addAttribute("exerciseLog", form);
         model.addAttribute("formAction", "/exercise-log/edit/" + id);
         model.addAttribute("editing", true);
-        return "exercise-log/exercise-log-form";
+        return "shared-views/exercise-log/exercise-log-form";
     }
 
     @PostMapping("/edit/{id}")
@@ -195,7 +195,7 @@ public class ExerciseLogController {
         model.addAttribute("exerciseLog", form);
         model.addAttribute("formAction", "/exercise-log");
         model.addAttribute("editing", false);
-        return "exercise-log/exercise-log-form";
+        return "shared-views/exercise-log/exercise-log-form";
     }
 
     @GetMapping("/add-calendar")
@@ -220,7 +220,7 @@ public class ExerciseLogController {
         model.addAttribute("exerciseLog", form);
         model.addAttribute("formAction", "/exercise-log");
         model.addAttribute("editing", false);
-        return "exercise-log/exercise-log-form";
+        return "shared-views/exercise-log/exercise-log-form";
     }
 
     @GetMapping("/export/pdf")

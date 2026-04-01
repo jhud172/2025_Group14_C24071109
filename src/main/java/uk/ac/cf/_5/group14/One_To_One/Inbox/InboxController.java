@@ -25,7 +25,7 @@ public class InboxController {
     @GetMapping
     public ModelAndView inbox() {
         User user = authHelper.getAuthenticatedUser();
-        ModelAndView mav = new ModelAndView("inbox/index");
+        ModelAndView mav = new ModelAndView("shared-views/inbox/index");
         mav.addObject("conversations", inboxService.listConversations(user));
         return mav;
     }
@@ -41,7 +41,7 @@ public class InboxController {
                 : thread.getClientId();
         User otherUser = userRepository.findById(otherUserId).orElse(null);
 
-        ModelAndView mav = new ModelAndView("inbox/thread");
+        ModelAndView mav = new ModelAndView("shared-views/inbox/thread");
         mav.addObject("conversations", inboxService.listConversations(user));
         mav.addObject("thread", thread);
         mav.addObject("messages", inboxService.getMessages(user, conversationId));

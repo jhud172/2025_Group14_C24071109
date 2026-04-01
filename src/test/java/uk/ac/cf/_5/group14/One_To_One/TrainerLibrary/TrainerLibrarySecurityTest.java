@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.ac.cf._5.group14.One_To_One.Security.TrainerAccessException;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLink;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLinkRepository;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLinkStatus;
@@ -171,7 +172,7 @@ class TrainerLibrarySecurityTest {
         mockMvc.perform(get("/client/assigned-plan")
                 .with(user(client.getUsername()).roles("CLIENT")))
             .andExpect(status().isOk())
-            .andExpect(view().name("client/assigned-plan"))
+            .andExpect(view().name("client-views/client/assigned-plan"))
             .andExpect(content().string(containsString("Full Body A")))
             .andExpect(content().string(not(containsString("Full Body B"))));
     }
@@ -210,7 +211,9 @@ class TrainerLibrarySecurityTest {
         form.setDifficulty("Easy");
 
         assertThatThrownBy(() -> trainerLibraryService.createExercise(savedUnverified.getId(), form))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage(TrainerLibraryService.ERROR_TRAINER_NOT_VERIFIED);
+                .isInstanceOf(TrainerAccessException.class)
+                .hasMessage(TrainerLibraryService.ERROR_TRAINER_NOT_VERIFIED)
+                .extracting(ex -> ((TrainerAccessException) ex).getReason())
+                .isEqualTo(TrainerAccessException.Reason.TRAINER_NOT_VERIFIED);
     }
 }

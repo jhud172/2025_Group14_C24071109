@@ -53,7 +53,7 @@ public class PublicProfileController {
                 .orElse(null);
         List<TrainerReview> reviews = trainerReviewService.getVisibleReviewsForTrainer(user.getId());
 
-        ModelAndView mav = new ModelAndView("public/profile");
+        ModelAndView mav = new ModelAndView("public-views/public/profile");
         mav.addObject("pageTitle", user.getFirstName() + " " + user.getLastName());
         mav.addObject("trainer", user);
         mav.addObject("trainerProfile", trainerProfile);

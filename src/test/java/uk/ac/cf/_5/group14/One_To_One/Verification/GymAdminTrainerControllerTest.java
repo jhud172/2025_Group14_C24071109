@@ -67,7 +67,7 @@ class GymAdminTrainerControllerTest {
                 .with(csrf())
                 .param("notes", "updated"))
             .andExpect(status().isOk())
-            .andExpect(view().name("error/403"));
+            .andExpect(view().name("system-views/error/403"));
     }
 
     @Test

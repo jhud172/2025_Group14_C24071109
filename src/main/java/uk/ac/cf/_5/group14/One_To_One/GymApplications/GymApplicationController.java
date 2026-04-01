@@ -143,7 +143,7 @@ public class GymApplicationController {
             model.addAttribute("compactTopContent", true);
             model.addAttribute("application", application);
             model.addAttribute("messages", gymApplicationService.getMessages(application.getId()));
-            return "User/signup-gym-application";
+            return "public-views/auth/signup-gym-application";
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("gymApplicationError", ex.getMessage());
             return "redirect:/signup/gym";

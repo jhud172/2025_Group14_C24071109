@@ -62,7 +62,7 @@ public class PricingController {
             model.addAttribute("platformSubscription",
                     platformSubscriptionService.findByUserId(user.getId()).orElse(null));
         }
-        return "payments/pricing";
+        return "public-views/payments/pricing";
     }
 
     @GetMapping("/pricing/checkout")
@@ -95,7 +95,7 @@ public class PricingController {
         model.addAttribute("platformSubscription", subscription);
         model.addAttribute("savedCards", savedPaymentMethodService.getCardsForUser(user.getId()));
 
-        return "payments/pricing-checkout";
+        return "public-views/payments/pricing-checkout";
     }
 
     @PostMapping("/pricing/checkout")

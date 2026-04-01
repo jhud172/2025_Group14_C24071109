@@ -26,26 +26,26 @@ public class NoOpEmailService implements EmailService {
             Instant effectiveAt,
             String reason,
             String manageUrl) {
-        log.warn("No email provider configured â€“ skipping price change notification to {}", user.getEmail());
+        log.warn("No email provider configured - skipping price change notification to {}", user.getEmail());
     }
 
     @Override
     public void sendTrainerVerificationUpdate(User user, String status, String adminNotes) {
-        log.warn("No email provider configured â€“ skipping trainer verification update to {}", user.getEmail());
+        log.warn("No email provider configured - skipping trainer verification update to {}", user.getEmail());
     }
 
     @Override
     public void sendPasswordReset(User user, String resetUrl, Instant expiresAt) {
-        log.warn("No email provider configured â€“ skipping password reset email to {}", user.getEmail());
+        log.warn("No email provider configured - skipping password reset email to {}", user.getEmail());
     }
 
     @Override
     public void sendEmailVerification(User user, String verifyUrl, String code, Instant expiresAt) {
-        log.warn("No email provider configured â€“ skipping email verification to {}", user.getEmail());
+        log.warn("No email provider configured - skipping email verification to {}", user.getEmail());
     }
 
     @Override
     public void sendAdminMessage(String to, String subject, String body) {
-        log.warn("No email provider configured â€“ skipping admin email to {}", to);
+        log.warn("No email provider configured - skipping admin email to {}", to);
     }
 }

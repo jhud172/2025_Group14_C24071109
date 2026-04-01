@@ -38,7 +38,7 @@ public class WorkoutController {
 
     @GetMapping("/workout")
     public ModelAndView createWorkout() {
-        ModelAndView mav = new ModelAndView("schedule/workout");
+        ModelAndView mav = new ModelAndView("trainer-views/schedule/workout");
         User user = authHelper.getAuthenticatedUser();
         boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
 
@@ -60,7 +60,7 @@ public class WorkoutController {
 
     @GetMapping("/workout/create")
     public String getCreateFragment() {
-        return "fragments/workout/workout-frags :: createWorkout";
+        return "trainer-views/workouts/fragments/workout-frags :: createWorkout";
     }
 
     @GetMapping("/workout/edit/{id}")
@@ -73,7 +73,7 @@ public class WorkoutController {
                 .collect(Collectors.toMap(CustomExercise::getId, ex -> toEmbedUrl(ex.getVideoUrl())));
         model.addAttribute("customExerciseEmbeds", customExerciseEmbeds);
 
-        return "fragments/workout/workout-frags.html :: editWorkout";
+        return "trainer-views/workouts/fragments/workout-frags.html :: editWorkout";
     }
 
     @PostMapping("/save-workout")

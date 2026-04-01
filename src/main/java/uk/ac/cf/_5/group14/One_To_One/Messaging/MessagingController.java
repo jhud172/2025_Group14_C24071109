@@ -102,12 +102,10 @@ public class MessagingController {
             messagingService.sendMessage(threadId, sender.getId(), type, finalBody);
         } catch (AccessDeniedException ex) {
             return "redirect:/access-denied";
-        } catch (IllegalStateException ex) {
-            if ("OFF_PLATFORM_PAYMENT".equals(ex.getMessage())) {
+        } catch (MessagingException ex) {
+            if (ex.getReason() == MessagingException.Reason.OFF_PLATFORM_PAYMENT) {
                 redirectAttributes.addFlashAttribute("offPlatformBlocked", true);
-                return "redirect:/inbox/" + threadId;
             }
-            // LOCKED or not ACTIVE; keep UX simple and return to thread view.
             return "redirect:/inbox/" + threadId;
         } catch (IllegalArgumentException ex) {
             return "redirect:/inbox/" + threadId;

@@ -26,7 +26,7 @@ public class LevelController {
     @GetMapping
     public String leaderboard(Model model) {
         model.addAttribute("leaderboard", levelService.getLeaderboard());
-        return "levels/leaderboard";
+        return "shared-views/levels/leaderboard";
     }
 
     @GetMapping("/me")
@@ -34,6 +34,6 @@ public class LevelController {
         User user = authHelper.getAuthenticatedUser(session);
         model.addAttribute("progress", levelService.getProgress(user));
         model.addAttribute("leaderboard", levelService.getLeaderboard());
-        return "levels/me";
+        return "shared-views/levels/me";
     }
 }

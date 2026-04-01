@@ -80,7 +80,7 @@ public class DailyNutritionLogController {
         model.addAttribute("selectedDate", targetDate);
         model.addAttribute("saved", "1".equals(saved));
 
-        return "nutrition/daily-log";
+        return "shared-views/nutrition/daily-log";
     }
 
     @PostMapping
@@ -105,7 +105,7 @@ public class DailyNutritionLogController {
             model.addAttribute("selectedDate", targetDate);
             model.addAttribute("saved", false);
 
-            return "nutrition/daily-log";
+            return "shared-views/nutrition/daily-log";
         }
 
         service.upsert(user, form.getDate(), new UpsertRequest(

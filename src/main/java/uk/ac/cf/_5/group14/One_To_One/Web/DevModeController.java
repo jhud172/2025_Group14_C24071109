@@ -49,7 +49,7 @@ public class DevModeController {
                 devModePageAccessService.buildHubView(authentication != null
                         && authentication.isAuthenticated()
                         && !(authentication instanceof AnonymousAuthenticationToken)));
-        return "dev-mode/hub";
+        return "system-views/dev-mode/hub";
     }
     
     /**
@@ -65,7 +65,7 @@ public class DevModeController {
 
         model.addAttribute("compactTopContent", true);
         model.addAttribute("isDevMode", true);
-        return "dev-mode/unauthorized";
+        return "system-views/dev-mode/unauthorized";
     }
 
     @GetMapping("/restricted")
@@ -78,7 +78,7 @@ public class DevModeController {
         model.addAttribute("compactTopContent", true);
         model.addAttribute("isDevMode", true);
         model.addAttribute("restrictedNotice", devModePageAccessService.resolveRestrictedNotice(pageKey));
-        return "dev-mode/restricted";
+        return "system-views/dev-mode/restricted";
     }
 
     /**

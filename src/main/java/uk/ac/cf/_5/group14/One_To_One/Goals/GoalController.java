@@ -88,7 +88,7 @@ public class GoalController {
             userRepository.findById(clientId).ifPresent(client -> model.addAttribute("client", client));
         }
 
-        return "goals/index";
+        return "client-views/goals/index";
     }
 
     @GetMapping("/milestones")
@@ -112,7 +112,7 @@ public class GoalController {
         model.addAttribute("goalTypes", GoalType.values());
         model.addAttribute("goalTimeframes", GoalTimeframe.values());
         model.addAttribute("clientId", clientId);
-        return "goals/create";
+        return "client-views/goals/create";
     }
 
     @PostMapping("/create")
@@ -152,7 +152,7 @@ public class GoalController {
         model.addAttribute("linkableTasks", linkableTasks);
         model.addAttribute("linkableOccurrences", linkableOccurrences);
         model.addAttribute("canEditTargets", goalService.canEditTargetMetrics(user, goal));
-        return "goals/detail";
+        return "client-views/goals/detail";
     }
 
     @GetMapping("/{id}/edit")
@@ -169,7 +169,7 @@ public class GoalController {
         model.addAttribute("goalTypes", GoalType.values());
         model.addAttribute("goalTimeframes", GoalTimeframe.values());
         model.addAttribute("canEditTargets", goalService.canEditTargetMetrics(user, goal));
-        return "goals/edit";
+        return "client-views/goals/edit";
     }
 
     @PostMapping("/{id}/edit")
@@ -197,7 +197,7 @@ public class GoalController {
         model.addAttribute("checkIns", checkIns);
         model.addAttribute("form", form);
         model.addAttribute("isTrainer", user.getRole() == Role.TRAINER);
-        return "goals/checkins";
+        return "client-views/goals/checkins";
     }
 
     @PostMapping("/{id}/checkins")

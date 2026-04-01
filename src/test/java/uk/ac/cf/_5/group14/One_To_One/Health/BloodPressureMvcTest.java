@@ -86,7 +86,7 @@ class BloodPressureMvcTest {
 
         mvc.perform(get("/health/blood-pressure").sessionAttr("user", user))
                 .andExpect(status().isOk())
-                .andExpect(view().name("health/blood-pressure"));
+                .andExpect(view().name("client-views/health/blood-pressure"));
     }
 
     @Test

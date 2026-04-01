@@ -112,13 +112,13 @@ public class MessagingService {
         if (desiredThreadStatus(link.getStatus()) == MessageThreadStatus.LOCKED) {
             thread.setStatus(MessageThreadStatus.LOCKED);
             threadRepository.save(thread);
-            throw new IllegalStateException("THREAD_LOCKED");
+            throw new MessagingException(MessagingException.Reason.THREAD_LOCKED);
         }
         if (thread.getStatus() != MessageThreadStatus.OPEN) {
-            throw new IllegalStateException("THREAD_LOCKED");
+            throw new MessagingException(MessagingException.Reason.THREAD_LOCKED);
         }
         if (link.getStatus() != TrainerClientLinkStatus.ACTIVE) {
-            throw new IllegalStateException("THREAD_NOT_ACTIVE");
+            throw new MessagingException(MessagingException.Reason.THREAD_NOT_ACTIVE);
         }
 
         if (bodyText == null || bodyText.isBlank()) {
@@ -133,7 +133,7 @@ public class MessagingService {
                     matched,
                     trimmed
             ));
-            throw new IllegalStateException("OFF_PLATFORM_PAYMENT");
+            throw new MessagingException(MessagingException.Reason.OFF_PLATFORM_PAYMENT);
         }
 
         Message saved = threadMessageRepository.save(new Message(

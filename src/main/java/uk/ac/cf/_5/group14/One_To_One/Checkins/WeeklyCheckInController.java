@@ -78,7 +78,7 @@ public class WeeklyCheckInController {
         }
 
         TrainerClientLink link = trainerClientLinkService.getActiveLinkForClient(client.getId());
-        ModelAndView mav = new ModelAndView("checkins/client-submit");
+        ModelAndView mav = new ModelAndView("client-views/checkins/client-submit");
         mav.addObject("pageTitle", "Weekly Check-in");
         mav.addObject("activeLink", link);
 
@@ -129,7 +129,7 @@ public class WeeklyCheckInController {
         List<Map<String, String>> responses = parseResponses(checkIn.getResponsesJson());
         List<Goal> goals = goalService.listGoalsForViewer(trainer, checkIn.getClientId(), GoalStatus.ACTIVE, null, false);
 
-        ModelAndView mav = new ModelAndView("checkins/trainer-review");
+        ModelAndView mav = new ModelAndView("trainer-views/checkins/trainer-review");
         mav.addObject("pageTitle", "Weekly Check-in Review");
         mav.addObject("checkIn", checkIn);
         mav.addObject("responses", responses);

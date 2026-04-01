@@ -51,7 +51,7 @@ public class ClientPlanController {
             return new ModelAndView("redirect:/access-denied");
         }
 
-        ModelAndView mav = new ModelAndView("client/plan");
+        ModelAndView mav = new ModelAndView("client-views/client/plan");
         mav.addObject("pageTitle", "Assigned Plan");
         mav.addObject("assignedWorkouts", trainerAssignmentService.listWorkoutsForClient(client.getId()));
         mav.addObject("assignedSchedules", trainerAssignmentService.listSchedulesForClient(client.getId()));

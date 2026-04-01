@@ -14,6 +14,6 @@ public class AccessDeniedControllerAdvice {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String handleAccessDeniedException(AccessDeniedException ex, Model model) {
         model.addAttribute("errorMessage", ex.getMessage());
-        return "error/403";
+        return "system-views/error/403";
     }
 }

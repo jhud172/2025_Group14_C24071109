@@ -160,18 +160,18 @@ public class AdaptiveFeedbackService {
         return switch (tone == null ? AdaptiveFeedbackTone.ENCOURAGING : tone) {
             case COACHING -> {
                 if (!hasPlan) yield "Plan 1 small thing for today, then do it. " + nudge;
-                if (highConsistency) yield "Youâ€™re building consistency â€” keep it simple and repeatable. " + nudge;
+                if (highConsistency) yield "You're building consistency - keep it simple and repeatable. " + nudge;
                 yield "Focus on one priority and get it done, then reassess. " + nudge;
             }
             case GENTLE -> {
-                if (!hasPlan) yield "No pressure â€” start with one small plan for today. " + nudge;
-                if (highConsistency) yield "Youâ€™re doing well â€” keep going at a steady pace. " + nudge;
+                if (!hasPlan) yield "No pressure - start with one small plan for today. " + nudge;
+                if (highConsistency) yield "You're doing well - keep going at a steady pace. " + nudge;
                 yield "Be kind to yourself and aim for one clear win today. " + nudge;
             }
             default -> {
-                if (!hasPlan) yield "Letâ€™s build momentum: plan one small thing for today. " + nudge;
-                if (highConsistency) yield "Nice work â€” your consistency is paying off. " + nudge;
-                yield "Youâ€™ve got this â€” pick one win and lock it in. " + nudge;
+                if (!hasPlan) yield "Let's build momentum: plan one small thing for today. " + nudge;
+                if (highConsistency) yield "Nice work - your consistency is paying off. " + nudge;
+                yield "You've got this - pick one win and lock it in. " + nudge;
             }
         };
     }

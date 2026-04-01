@@ -78,7 +78,7 @@ class GymAdminMembershipControllerTest {
                 .param("page", "0")
                 .param("size", "1"))
             .andExpect(status().isOk())
-            .andExpect(view().name("gym-admin/memberships/list"))
+            .andExpect(view().name("gym-views/gym-admin/memberships/list"))
             .andExpect(model().attribute("productsPage", hasProperty("totalElements", is(2L))))
             .andExpect(model().attribute("products", hasSize(1)))
             .andExpect(model().attribute("subscriberCounts", hasEntry(product2.getId(), 1L)))
@@ -123,7 +123,7 @@ class GymAdminMembershipControllerTest {
                 .param("gymId", "77")
                 .param("billingPeriod", "MONTHLY"))
             .andExpect(status().isOk())
-            .andExpect(view().name("gym-admin/memberships/form"))
+            .andExpect(view().name("gym-views/gym-admin/memberships/form"))
             .andExpect(model().attributeHasFieldErrors("product", "name", "priceDollars"));
     }
 
@@ -150,7 +150,7 @@ class GymAdminMembershipControllerTest {
                 .param("description", "Updated description")
                 .param("active", "true"))
             .andExpect(status().isOk())
-            .andExpect(view().name("gym-admin/memberships/form"))
+            .andExpect(view().name("gym-views/gym-admin/memberships/form"))
             .andExpect(model().attributeHasFieldErrors("product", "name"));
     }
 
@@ -169,6 +169,6 @@ class GymAdminMembershipControllerTest {
         mockMvc.perform(get("/gym/admin/memberships/" + otherProduct.getId() + "/price-history")
                 .with(user(admin.getUsername()).roles("GYM_ADMIN")))
             .andExpect(status().isOk())
-            .andExpect(view().name("error/403"));
+            .andExpect(view().name("system-views/error/403"));
     }
 }

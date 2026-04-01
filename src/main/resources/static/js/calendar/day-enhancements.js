@@ -486,6 +486,17 @@
             }, 500);
         }
     }
+
+    function initMainProgressFill() {
+        const root = document.querySelector('[data-main-progress]');
+        const fill = document.getElementById('day-main-progress-fill');
+        if (!root || !fill) {
+            return;
+        }
+
+        const pct = Number(root.getAttribute('data-progress-pct') || 0);
+        fill.style.width = pct + '%';
+    }
     
     // ==================== Keyboard Shortcuts ====================
     function initKeyboardShortcuts() {
@@ -1677,6 +1688,7 @@
             mainContent.classList.add('day-page-enter');
         }
         
+        initMainProgressFill();
         applyTimeOfDayTheme();
         initTimeThemeToggle();
         animateCompletionDots();

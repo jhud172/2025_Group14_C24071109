@@ -26,7 +26,7 @@ public class AdminMerchController {
 
     @GetMapping
     public ModelAndView list() {
-        ModelAndView mav = new ModelAndView("merch/admin-list");
+        ModelAndView mav = new ModelAndView("admin-views/merch/admin-list");
         mav.addObject("products", productService.getAllProducts());
         return mav;
     }
@@ -35,7 +35,7 @@ public class AdminMerchController {
 
     @GetMapping("/new")
     public ModelAndView newForm() {
-        ModelAndView mav = new ModelAndView("merch/admin-form");
+        ModelAndView mav = new ModelAndView("admin-views/merch/admin-form");
         mav.addObject("product", new MerchProduct());
         mav.addObject("formAction", "/admin/merch/create");
         mav.addObject("formTitle", "Add New Product");
@@ -74,7 +74,7 @@ public class AdminMerchController {
     @GetMapping("/{id}/edit")
     public ModelAndView editForm(@PathVariable Long id, RedirectAttributes ra) {
         return productService.findById(id).map(product -> {
-            ModelAndView mav = new ModelAndView("merch/admin-form");
+            ModelAndView mav = new ModelAndView("admin-views/merch/admin-form");
             mav.addObject("product", product);
             mav.addObject("formAction", "/admin/merch/" + id + "/update");
             mav.addObject("formTitle", "Edit Product");

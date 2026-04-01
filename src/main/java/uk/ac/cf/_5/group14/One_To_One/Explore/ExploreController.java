@@ -83,7 +83,7 @@ public class ExploreController {
         model.addAttribute("selectedMinRating", minRating);
         model.addAttribute("selectedSort", sort);
         model.addAttribute("hasFilters", hasFilters(location, selectedTags, minPrice, maxPrice, minRating));
-        return "explore/index";
+        return "client-views/explore/index";
     }
 
     private TrainerDirectoryCard buildCard(User trainer) {

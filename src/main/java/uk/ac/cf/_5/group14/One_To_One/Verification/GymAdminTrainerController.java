@@ -37,13 +37,13 @@ public class GymAdminTrainerController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("error", "You must be associated with a gym");
-            return "error/403";
+            model.addAttribute("system-views/error/error", "You must be associated with a gym");
+            return "system-views/error/403";
         }
 
         populateTrainerModel(admin, model);
         
-        return "gym-admin/trainers";
+        return "gym-views/gym-admin/trainers";
     }
     
     /**
@@ -73,7 +73,7 @@ public class GymAdminTrainerController {
         if (result.hasErrors()) {
             populateTrainerModel(admin, model);
             model.addAttribute("errorMessage", "Please correct the form errors");
-            return "gym-admin/trainers";
+            return "gym-views/gym-admin/trainers";
         }
 
         try {
@@ -102,7 +102,7 @@ public class GymAdminTrainerController {
             log.error("Error creating trainer verification request", e);
             populateTrainerModel(admin, model);
             model.addAttribute("errorMessage", e.getMessage());
-            return "gym-admin/trainers";
+            return "gym-views/gym-admin/trainers";
         }
         
         return "redirect:/gym/admin/trainers";
@@ -131,8 +131,8 @@ public class GymAdminTrainerController {
         try {
             request = verificationService.getRequestForGym(id, admin.getGymId());
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("error", "Access denied");
-            return "error/403";
+            model.addAttribute("system-views/error/error", "Access denied");
+            return "system-views/error/403";
         }
 
         if (result.hasErrors()) {
@@ -140,7 +140,7 @@ public class GymAdminTrainerController {
             model.addAttribute("updateNotesRequestId", id);
             model.addAttribute("updateNotesTrainerName", resolveTrainerName(request.getTrainerUserId()));
             model.addAttribute("updateNotesNotes", form.getNotes());
-            return "gym-admin/trainers";
+            return "gym-views/gym-admin/trainers";
         }
 
         try {
@@ -154,7 +154,7 @@ public class GymAdminTrainerController {
             model.addAttribute("updateNotesRequestId", id);
             model.addAttribute("updateNotesTrainerName", resolveTrainerName(request.getTrainerUserId()));
             model.addAttribute("updateNotesNotes", form.getNotes());
-            return "gym-admin/trainers";
+            return "gym-views/gym-admin/trainers";
         }
         
         return "redirect:/gym/admin/trainers";

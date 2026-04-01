@@ -338,7 +338,7 @@ public class ScheduleApiController {
 
         DeploymentWindow window = resolveWindow(request);
         if (window == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Invalid deployment window"));
+            return ResponseEntity.badRequest().body(Map.of("system-views/error/error", "Invalid deployment window"));
         }
 
         String strategy = normalizeStrategy((String) request.get("strategy"));
@@ -361,7 +361,7 @@ public class ScheduleApiController {
 
         DeploymentWindow window = resolveWindow(request);
         if (window == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Invalid deployment window"));
+            return ResponseEntity.badRequest().body(Map.of("system-views/error/error", "Invalid deployment window"));
         }
 
         String strategy = normalizeStrategy((String) request.get("strategy"));
@@ -470,16 +470,16 @@ public class ScheduleApiController {
 
         String undoToken = request.get("undoToken") instanceof String token ? token : null;
         if (undoToken == null || undoToken.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Missing undo token"));
+            return ResponseEntity.badRequest().body(Map.of("system-views/error/error", "Missing undo token"));
         }
 
         UndoOperation operation = undoOperations.remove(undoToken);
         if (operation == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Undo token is invalid or expired"));
+            return ResponseEntity.badRequest().body(Map.of("system-views/error/error", "Undo token is invalid or expired"));
         }
 
         if (operation.expiresAt().isBefore(java.time.Instant.now())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Undo window expired"));
+            return ResponseEntity.badRequest().body(Map.of("system-views/error/error", "Undo window expired"));
         }
 
         if (!Objects.equals(operation.userId(), user.getId()) || !Objects.equals(operation.scheduleId(), id)) {

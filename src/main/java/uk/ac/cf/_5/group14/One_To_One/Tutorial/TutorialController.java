@@ -43,7 +43,7 @@ public class TutorialController {
         String role = resolveRole(authentication);
         model.addAttribute("tutorialRole", role);
         model.addAttribute("user", user);
-        return "tutorial/tutorial";
+        return "shared-views/tutorial/tutorial";
     }
 
     @PostMapping("/complete")

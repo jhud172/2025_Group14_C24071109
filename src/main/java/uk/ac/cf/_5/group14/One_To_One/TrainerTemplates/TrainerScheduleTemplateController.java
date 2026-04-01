@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import uk.ac.cf._5.group14.One_To_One.Security.TrainerAccessException;
 import uk.ac.cf._5.group14.One_To_One.CustomExerciseData.CustomExerciseRepository;
 import uk.ac.cf._5.group14.One_To_One.ExerciseData.ExerciseRepository;
 import uk.ac.cf._5.group14.One_To_One.TrainerClient.TrainerClientLink;
@@ -71,25 +72,25 @@ public class TrainerScheduleTemplateController {
             throw new AccessDeniedException("Not a trainer");
         }
         if (!trainer.isTrainerVerified() || !trainer.isEnabled()) {
-            throw new IllegalStateException("TRAINER_NOT_VERIFIED");
+            throw new TrainerAccessException(TrainerAccessException.Reason.TRAINER_NOT_VERIFIED);
         }
         return trainer;
     }
 
     @GetMapping
-    public ModelAndView index(@RequestParam(value = "error", required = false) String error) {
+    public ModelAndView index(@RequestParam(value = "system-views/error/error", required = false) String error) {
         User trainer = currentTrainerOrThrow();
-        ModelAndView mav = new ModelAndView("trainer/templates/index");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/templates/index");
         mav.addObject("pageTitle", "Trainer Templates");
         mav.addObject("templates", templateService.listForTrainer(trainer));
-        mav.addObject("error", error);
+        mav.addObject("system-views/error/error", error);
         return mav;
     }
 
     @GetMapping("/create")
     public ModelAndView createForm() {
         User trainer = currentTrainerOrThrow();
-        ModelAndView mav = new ModelAndView("trainer/templates/edit");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/templates/edit");
         mav.addObject("pageTitle", "Create Template");
         mav.addObject("template", new TrainerScheduleTemplate());
         mav.addObject("entries", List.of());
@@ -112,7 +113,7 @@ public class TrainerScheduleTemplateController {
     public ModelAndView edit(@PathVariable Long id) {
         User trainer = currentTrainerOrThrow();
         TrainerScheduleTemplate template = templateService.getForTrainer(trainer, id);
-        ModelAndView mav = new ModelAndView("trainer/templates/edit");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/templates/edit");
         mav.addObject("pageTitle", "Edit Template");
         mav.addObject("template", template);
         mav.addObject("entries", template.getEntries());
@@ -205,7 +206,7 @@ public class TrainerScheduleTemplateController {
         User trainer = currentTrainerOrThrow();
         TrainerScheduleTemplate template = templateService.getForTrainer(trainer, id);
         List<TrainerClientLink> activeLinks = trainerClientLinkService.getActiveClientsForTrainer(trainer.getId());
-        ModelAndView mav = new ModelAndView("trainer/templates/apply");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/templates/apply");
         mav.addObject("pageTitle", "Apply Template");
         mav.addObject("template", template);
         mav.addObject("activeLinks", activeLinks);
@@ -237,12 +238,11 @@ public class TrainerScheduleTemplateController {
         return new ModelAndView("redirect:/trainer/templates/" + id + "/apply?clientId=" + clientId + "&start=" + start + "&end=" + end + "&idempotent=" + idempotentFlag);
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ModelAndView handleIllegalState(IllegalStateException ex) {
-        if ("TRAINER_NOT_VERIFIED".equals(ex.getMessage())) {
-            return new ModelAndView("redirect:/trainer/templates?error=trainer-unverified");
-        }
-        throw ex;
+    @ExceptionHandler(TrainerAccessException.class)
+    public ModelAndView handleTrainerAccess(TrainerAccessException ex) {
+        return switch (ex.getReason()) {
+            case TRAINER_NOT_VERIFIED -> new ModelAndView("redirect:/trainer/templates?error=trainer-unverified");
+        };
     }
 
     private LocalTime parseTime(String value) {

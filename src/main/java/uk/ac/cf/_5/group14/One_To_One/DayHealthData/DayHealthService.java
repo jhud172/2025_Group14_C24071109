@@ -188,8 +188,8 @@ public class DayHealthService {
         if (upcomingHeavy) {
             List<String> pool = List.of(
                 "A heavier day is coming up soon. Keep today simple and protect recovery so you can stay consistent.",
-                "Your next week has a heavier spike. Aim for steady effort today so tomorrow doesnâ€™t feel like a reset.",
-                "Thereâ€™s a heavier day ahead. Keep the plan repeatable and save your biggest push for when it matters."
+                "Your next week has a heavier spike. Aim for steady effort today so tomorrow doesn't feel like a reset.",
+                "There's a heavier day ahead. Keep the plan repeatable and save your biggest push for when it matters."
             );
             return pool.get(idx);
         }
@@ -197,8 +197,8 @@ public class DayHealthService {
         if (todayHeavy) {
             List<String> pool = List.of(
                 "Today is a fuller day. Pick one priority first, then keep the rest short and repeatable.",
-                "Youâ€™ve got a lot planned today. Start with the anchor task, then scale volume if energy dips.",
-                "Itâ€™s a packed day. Win early with one completion, then keep momentum with small steps."
+                "You've got a lot planned today. Start with the anchor task, then scale volume if energy dips.",
+                "It's a packed day. Win early with one completion, then keep momentum with small steps."
             );
             return pool.get(idx);
         }
@@ -207,7 +207,7 @@ public class DayHealthService {
             List<String> pool = List.of(
                 "The last week looks a bit heavy relative to completions. Today is a good day to simplify and rebuild momentum.",
                 "Your recent completion pattern suggests load might be high. Keep today light and focus on consistency.",
-                "Recent days look like theyâ€™ve been tough to finish. Aim for a smaller, winnable plan today."
+                "Recent days look like they've been tough to finish. Aim for a smaller, winnable plan today."
             );
             return pool.get(idx);
         }
@@ -215,7 +215,7 @@ public class DayHealthService {
         List<String> pool = List.of(
             "Your plan looks manageable. Keep a steady pace and protect recovery to stay consistent.",
             "Today looks doable. Keep it simple: one priority first, then smooth, repeatable effort.",
-            "The day looks balanced. Keep momentum with small wins and donâ€™t overcomplicate the plan."
+            "The day looks balanced. Keep momentum with small wins and don't overcomplicate the plan."
         );
         return pool.get(idx);
     }
@@ -230,7 +230,7 @@ public class DayHealthService {
         if (todayPlanned >= 6) {
             firstPool = List.of(
                 "Start with your Daily Focus and get one completion early.",
-                "Pick the smallest â€˜must-doâ€™ first and finish it before expanding the plan.",
+                "Pick the smallest 'must-do' first and finish it before expanding the plan.",
                 "Win the first 20 minutes: one task or one workout block, then reassess."
             );
         } else {
@@ -281,7 +281,7 @@ public class DayHealthService {
         String label = labelFor(tomorrow.date());
         List<String> pool = List.of(
             "Tomorrow looks heavy (" + planned + " planned items). Prep one thing tonight and protect your start.",
-            "Tomorrow is stacked (" + planned + " planned items). Keep today simple so you donâ€™t carry fatigue into it.",
+            "Tomorrow is stacked (" + planned + " planned items). Keep today simple so you don't carry fatigue into it.",
             "Tomorrow has a big load (" + planned + " planned items). Consider moving one item or planning a recovery slot."
         );
         return pool.get(idx);
@@ -310,7 +310,7 @@ public class DayHealthService {
     }
 
     private static String formatSummaryLine(DaySummary s) {
-        if (s == null) return "â€”";
+        if (s == null) return "--";
         return labelFor(s.date()) + ": " +
                 "tasks " + s.completedTasks() + "/" + s.totalTasks() + ", " +
                 "workouts " + s.completedWorkouts() + "/" + s.scheduledWorkouts() + ", " +
@@ -318,7 +318,7 @@ public class DayHealthService {
     }
 
     private static String labelFor(LocalDate d) {
-        if (d == null) return "â€”";
+        if (d == null) return "--";
         String day = d.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.UK);
         return day + " " + d;
     }

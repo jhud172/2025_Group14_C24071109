@@ -66,7 +66,7 @@ public class WorkoutBuilderController {
         model.addAttribute("exercises", exerciseService.getAllExercises());
         model.addAttribute("customExercises", customExerciseService.getCustomExercisesByUser(user.getId()));
         
-        return "workouts/index";
+        return "trainer-views/workouts/index";
     }
 
     @PostMapping
@@ -95,7 +95,7 @@ public class WorkoutBuilderController {
         model.addAttribute("form", form);
         hydrateExerciseOptions(model, user);
         applySmartDefaults(model, user);
-        return "workouts/edit";
+        return "trainer-views/workouts/edit";
     }
 
     @PostMapping("/{id}/edit")
@@ -133,7 +133,7 @@ public class WorkoutBuilderController {
         model.addAttribute("exerciseViews", buildPlayerViews(session));
         model.addAttribute("goalOptions", goalService.listGoalsForViewer(user, null, GoalStatus.ACTIVE, null, false));
         model.addAttribute("selectedGoal", goalLinkService.findGoalForWorkoutSession(user, session.getId()));
-        return "workouts/start";
+        return "trainer-views/workouts/start";
     }
 
     @GetMapping("/studio/{sessionId}")
@@ -147,7 +147,7 @@ public class WorkoutBuilderController {
         model.addAttribute("exerciseViews", buildPlayerViews(session));
         model.addAttribute("goalOptions", goalService.listGoalsForViewer(user, null, GoalStatus.ACTIVE, null, false));
         model.addAttribute("selectedGoal", goalLinkService.findGoalForWorkoutSession(user, session.getId()));
-        return "workouts/start";
+        return "trainer-views/workouts/start";
     }
 
     @PostMapping("/studio/{sessionId}/goal")

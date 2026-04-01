@@ -101,8 +101,8 @@ class TrainerClientLinkServiceTest {
         requested.setRequestedAt(Instant.now());
         linkRepository.save(requested);
 
-        IllegalStateException ex = assertThrows(IllegalStateException.class,
+        TrainerClientLinkException ex = assertThrows(TrainerClientLinkException.class,
                 () -> trainerClientLinkService.acceptRequest(savedUnverified.getId(), client.getId()));
-        assertThat(ex.getMessage()).isEqualTo(TrainerClientLinkService.ERROR_TRAINER_NOT_VERIFIED);
+        assertThat(ex.getReason()).isEqualTo(TrainerClientLinkException.Reason.TRAINER_NOT_VERIFIED);
     }
 }

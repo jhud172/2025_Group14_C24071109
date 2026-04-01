@@ -117,7 +117,7 @@ public class ChatController {
             model.addAttribute("metricsRingOffset", "125.66");
         }
 
-        return "chat/chat";
+        return "shared-views/chat/chat";
     }
 
     @GetMapping(path = "/context", produces = "application/json")
@@ -356,7 +356,7 @@ public class ChatController {
             ) {
             String message = request != null ? request.message() : null;
             if (message == null || message.isBlank()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Message is required."));
+                return ResponseEntity.badRequest().body(Map.of("system-views/error/error", "Message is required."));
             }
 
             User user = requireUser(principal);
@@ -368,7 +368,7 @@ public class ChatController {
             if (!usage.allowed()) {
                 return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .body(Map.of(
-                        "error", "limit_reached",
+                        "system-views/error/error", "limit_reached",
                         "limit", FREE_DAILY_LIMIT,
                         "used", usage.used()
                     ));

@@ -253,9 +253,9 @@ public class CalendarController {
             model.addAttribute("schedules", schedules);
             populateScheduleDrawerState(user, schedules, model);
             if ("weekPane".equals(fragment)) {
-                return "calendar/week :: weekPane";
+                return "shared-views/calendar/week :: weekPane";
             }
-            return "calendar/week";
+            return "shared-views/calendar/week";
         }
 
         if (month == null || year == null) {
@@ -334,9 +334,9 @@ public class CalendarController {
         model.addAttribute("activityTypes", ActivityType.values());
 
         if ("monthPane".equals(fragment)) {
-            return "calendar/month :: monthPane";
+            return "shared-views/calendar/month :: monthPane";
         }
-        return "calendar/month";
+        return "shared-views/calendar/month";
     }
 
     private void populateScheduleDrawerState(User user, List<Schedule> schedules, Model model) {
@@ -687,7 +687,7 @@ public class CalendarController {
             );
         }
 
-        return "calendar/day";
+        return "shared-views/calendar/day";
     }
 
     /**
@@ -740,7 +740,7 @@ public class CalendarController {
         List<ScheduleOccurrence> occurrences = scheduleOccurrenceService.getOccurrencesForUserOnDate(user, date);
         model.addAttribute("occurrences", occurrences);
 
-        return "calendar/focus";
+        return "shared-views/calendar/focus";
     }
 
     private static String computeTimeOfDayMoodClass(String timedFocusLabel) {
@@ -877,7 +877,7 @@ public class CalendarController {
 
         // Server-side one-shot check
         if (dayOptimisationRepository.findByUserIdAndDate(user.getId(), date).isPresent()) {
-            return ResponseEntity.status(409).body(java.util.Map.of("error", "Already optimised for this date"));
+            return ResponseEntity.status(409).body(java.util.Map.of("system-views/error/error", "Already optimised for this date"));
         }
 
         // Pick a deterministic day theme based on the date's hash code so the same
@@ -1069,13 +1069,13 @@ public class CalendarController {
         try {
             LocalDate date = LocalDate.parse(dateStr, DATE_FORMAT);
             if (itemType == null || itemId == null || time == null || time.isBlank()) {
-                return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Missing timeline payload"));
+                return ResponseEntity.badRequest().body(Map.of("success", false, "system-views/error/error", "Missing timeline payload"));
             }
 
             if ("task".equalsIgnoreCase(itemType)) {
                 CalendarTask task = taskService.getTaskById(itemId);
                 if (task == null || task.getUser() == null || !Objects.equals(task.getUser().getId(), user.getId())) {
-                    return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Task not found"));
+                    return ResponseEntity.badRequest().body(Map.of("success", false, "system-views/error/error", "Task not found"));
                 }
 
                 taskService.updateTask(
@@ -1096,10 +1096,10 @@ public class CalendarController {
                 return ResponseEntity.ok(Map.of("success", true, "itemType", itemType.toLowerCase(), "time", time));
             }
 
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Unsupported timeline item type"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "system-views/error/error", "Unsupported timeline item type"));
         } catch (Exception ex) {
             logger.error("Failed to update timeline slot", ex);
-            return ResponseEntity.internalServerError().body(Map.of("success", false, "error", "Unable to update timeline slot"));
+            return ResponseEntity.internalServerError().body(Map.of("success", false, "system-views/error/error", "Unable to update timeline slot"));
         }
     }
 
@@ -1185,7 +1185,7 @@ public class CalendarController {
             CalendarTask task = taskService.getTaskById(id);
             if (task == null || !task.getUser().equals(user)) {
                 return ResponseEntity.badRequest()
-                    .body(Map.of("success", false, "error", "Task not found"));
+                    .body(Map.of("success", false, "system-views/error/error", "Task not found"));
             }
 
             // Update task time
@@ -1196,7 +1196,7 @@ public class CalendarController {
         } catch (Exception e) {
             logger.error("Failed to update task time", e);
             return ResponseEntity.internalServerError()
-                .body(Map.of("success", false, "error", e.getMessage()));
+                .body(Map.of("success", false, "system-views/error/error", e.getMessage()));
         }
     }
 
@@ -1224,7 +1224,7 @@ public class CalendarController {
         sameDayTasks.removeIf(t -> t == null || t.getId() == null || t.getId().equals(task.getId()));
         model.addAttribute("warningTriggerTasks", sameDayTasks);
 
-        return "calendar/task-detail";
+        return "shared-views/calendar/task-detail";
     }
 
     @PostMapping("/task/{id}/grace-period")

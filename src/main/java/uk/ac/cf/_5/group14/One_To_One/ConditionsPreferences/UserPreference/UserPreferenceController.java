@@ -75,14 +75,14 @@ public class UserPreferenceController {
     }
 
     private ModelAndView buildQuickPreferencesModelAndView(User user) {
-        ModelAndView modelAndView = new ModelAndView("conditions-preference/quick-preferences");
+        ModelAndView modelAndView = new ModelAndView("client-views/conditions-preference/quick-preferences");
         modelAndView.addObject("userPreferenceForm", new UserPreferenceForm());
         modelAndView.addObject("quickPresets", QUICK_PRESETS);
         return modelAndView;
     }
 
     private ModelAndView buildPreferenceEditorModelAndView(User user) {
-        ModelAndView modelAndView = new ModelAndView("conditions-preference/select-preferences");
+        ModelAndView modelAndView = new ModelAndView("client-views/conditions-preference/select-preferences");
 
         List<PhysicalCondition> allPhysicalConditions = physicalConditionService.getAllPhysicalConditions();
         List<PhysicalCondition> userPhysicalConditions = userPreferenceService.getUsersPhysicalConditions(user);
@@ -174,7 +174,7 @@ public class UserPreferenceController {
             model.addAttribute("allPhysicalConditions", physicalConditionService.getAllPhysicalConditions());
             model.addAttribute("preferencesByCategory", preferenceService.getPreferencesByCategory());
 
-            return new ModelAndView("conditions-preference/select-preferences", model.asMap());
+            return new ModelAndView("client-views/conditions-preference/select-preferences", model.asMap());
         }
 
         userPreferenceService.selectPreferences(user, userPreferenceForm);

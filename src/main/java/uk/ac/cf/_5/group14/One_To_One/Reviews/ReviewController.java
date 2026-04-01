@@ -69,7 +69,7 @@ public class ReviewController {
             throw new IllegalArgumentException("Trainer not found");
         }
 
-        ModelAndView mav = new ModelAndView("trainer/profile/view");
+        ModelAndView mav = new ModelAndView("trainer-views/trainer/profile/view");
         mav.addObject("pageTitle", trainer.getFirstName() + " " + trainer.getLastName());
         mav.addObject("trainer", trainer);
 
@@ -118,7 +118,7 @@ public class ReviewController {
             return new ModelAndView("redirect:/trainers/" + trainerId + "/profile?error=cannot_review");
         }
 
-        ModelAndView mav = new ModelAndView("review/form");
+        ModelAndView mav = new ModelAndView("shared-views/review/form");
         mav.addObject("pageTitle", "Review " + trainer.getFirstName() + " " + trainer.getLastName());
         mav.addObject("trainer", trainer);
         return mav;
@@ -139,13 +139,8 @@ public class ReviewController {
             reviewService.createReview(client.getId(), trainerId, stars, tags, comment);
             redirectAttributes.addFlashAttribute("successMessage", "Review submitted successfully!");
             return new ModelAndView("redirect:/trainers/" + trainerId + "/profile");
-        } catch (IllegalStateException ex) {
-            if (TrainerReviewService.ERROR_REVIEW_ALREADY_EXISTS.equals(ex.getMessage())) {
-                return new ModelAndView("redirect:/trainers/" + trainerId + "/profile?error=already_reviewed");
-            } else if (TrainerReviewService.ERROR_LINK_NOT_ELIGIBLE.equals(ex.getMessage())) {
-                return new ModelAndView("redirect:/trainers/" + trainerId + "/profile?error=not_eligible");
-            }
-            return new ModelAndView("redirect:/trainers/" + trainerId + "/profile?error=invalid");
+        } catch (TrainerReviewException ex) {
+            return new ModelAndView("redirect:/trainers/" + trainerId + "/profile?error=" + reviewErrorParam(ex.getReason()));
         } catch (Exception ex) {
             return new ModelAndView("redirect:/trainers/" + trainerId + "/profile?error=invalid");
         }
@@ -184,7 +179,7 @@ public class ReviewController {
         User client = userRepository.findById(clientId)
                 .orElseThrow(() -> new IllegalArgumentException("Client not found"));
 
-        ModelAndView mav = new ModelAndView("client/assessment-form");
+        ModelAndView mav = new ModelAndView("client-views/client/assessment-form");
         mav.addObject("pageTitle", "Assess " + client.getFirstName() + " " + client.getLastName());
         mav.addObject("client", client);
 
@@ -305,5 +300,13 @@ public class ReviewController {
         }
 
         return new ModelAndView("redirect:/admin/moderation");
+    }
+
+    private String reviewErrorParam(TrainerReviewException.Reason reason) {
+        return switch (reason) {
+            case REVIEW_ALREADY_EXISTS -> "already_reviewed";
+            case LINK_NOT_ELIGIBLE -> "not_eligible";
+            case USER_NOT_CLIENT -> "invalid";
+        };
     }
 }
