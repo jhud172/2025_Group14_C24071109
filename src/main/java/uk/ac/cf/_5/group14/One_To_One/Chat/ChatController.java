@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.ac.cf._5.group14.One_To_One.Notifications.AiNotificationHelper;
 import uk.ac.cf._5.group14.One_To_One.Notifications.AiNotificationService;
 import uk.ac.cf._5.group14.One_To_One.PlatformBilling.PlatformSubscriptionService;
+import uk.ac.cf._5.group14.One_To_One.Users.Role;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
 
@@ -35,7 +36,7 @@ public class ChatController {
 
     private static final Logger log = LoggerFactory.getLogger(ChatController.class);
 
-    private static final int FREE_DAILY_LIMIT = 3;
+    private static final int FREE_DAILY_LIMIT = 15;
 
     private final ChatService chatService;
     private final ChatContextService chatContextService;
@@ -260,7 +261,10 @@ public class ChatController {
                 return ResponseEntity.ok(Map.<String, Object>of("reply", reply));
             }
 
-            String systemPrompt = ChatPromptBuilder.buildSystemPrompt(ctx);
+            String systemPrompt = ChatPromptBuilder.buildSystemPrompt(
+                    ctx,
+                    buildRoleCapabilityInstructions(user, isPremium)
+            );
 
             List<CoachMessage> recent = coachMessageService.listRecent(conversation, 20);
             List<ChatService.Message> msgs = new ArrayList<>();
@@ -408,7 +412,10 @@ public class ChatController {
                 if (!chatService.isAvailable()) {
                 reply = ChatRuleBasedResponder.respond(message, ctx);
                 } else {
-                String systemPrompt = ChatPromptBuilder.buildSystemPrompt(ctx);
+                String systemPrompt = ChatPromptBuilder.buildSystemPrompt(
+                        ctx,
+                        buildRoleCapabilityInstructions(user, isPremium)
+                );
                 List<CoachMessage> recent = coachMessageService.listRecent(conversation, 20);
                 List<ChatService.Message> msgs = new ArrayList<>();
                 msgs.add(new ChatService.Message("system", systemPrompt));
@@ -463,5 +470,19 @@ public class ChatController {
 
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+
+    private String buildRoleCapabilityInstructions(User user, boolean isPremium) {
+        Role role = user.getRole() != null ? user.getRole() : Role.CLIENT;
+        String roleGuidance = switch (role) {
+            case TRAINER -> "Role mode: trainer. Prioritise client management support, training-plan guidance, and coach workflow clarity.";
+            case GYM_ADMIN -> "Role mode: gym account. Prioritise trainer operations support, gym oversight, and operational workflow clarity.";
+            default -> "Role mode: client. Prioritise personal planning, progress clarity, motivation, and next-best actions.";
+        };
+
+        if (isPremium) {
+            return roleGuidance + " Premium enabled: full assistant support is available. Never assist with destructive, unsafe, policy-violating, or system-harming actions.";
+        }
+        return roleGuidance + " Starter enabled: user has 15 prompts/day with basic guidance only. Do not claim to create or modify schedules, todos, workouts, or any persisted system state. You may provide guidance and allowed [NAV:/path:Label] links.";
     }
 }

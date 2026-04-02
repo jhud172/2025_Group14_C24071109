@@ -3,7 +3,7 @@
     th:fragment="chatWidget"
     id="chatWidget"
     th:with="authUser=${@authHelper.getAuthenticatedUser()}, isPremium=${authUser != null ? @platformSubscriptionService.isPremium(authUser.id, @systemClock) : false}"
-    th:attr="data-premium=${isPremium}">
+    th:attr="data-premium=${isPremium},data-role=${authUser != null and authUser.role != null ? authUser.role.name() : 'GUEST'}">
 
     <!-- CSRF values (blank if not available) -->
     <input type="hidden" id="chat_csrf" name="chat_csrf"
@@ -56,30 +56,32 @@
 
                 <div class="chat-header-actions">
                     <button type="button"
-                            class="chat-icon-btn-premium flex"
-                            id="chatNotificationsToggle"
-                            title="Open notifications inbox"
-                            aria-label="Toggle notifications inbox">!</button>
-                    <button type="button"
                             class="chat-icon-btn-premium"
                             id="chatClear"
                             title="Clear coach history"
-                            aria-label="Clear coach history">Clear</button>
+                            aria-label="Clear coach history">🧹</button>
                     <button type="button"
                             class="chat-icon-btn-premium"
                             id="chatClose"
                             title="Close Charlie"
-                            aria-label="Close coach">X</button>
+                            aria-label="Close coach">✕</button>
                 </div>
             </div>
 
             <div class="chat-tabs-premium">
                 <button type="button"
+                        id="chatTabNormal"
+                        class="chat-tab-btn active"
+                        title="Open normal chat"
+                        aria-label="Open normal chat">
+                    Normal Chat
+                </button>
+                <button type="button"
                         id="chatNotificationsToggle2"
                         class="chat-tab-btn"
                         title="Open notifications inbox"
                         aria-label="View notifications">
-                    Inbox
+                    Inbox Slider
                 </button>
                 <button type="button"
                         id="chatProChatBtn"
@@ -87,10 +89,8 @@
                         class="chat-tab-btn"
                         th:title="${isPremium} ? 'Open Charlie Pro Chat' : 'Upgrade to Premium to unlock Pro Chat'"
                         th:aria-label="${isPremium} ? 'Open Pro Chat' : 'Pro Chat - Premium required'">
-                    <span>Pro Chat</span>
-                    <span th:if="${!isPremium}" aria-hidden="true" class="ml-1">Lock</span>
+                    <span>Premium Chat</span>
                 </button>
-                <span th:if="${!isPremium}" class="text-[10px] text-amber-500 dark:text-amber-400 font-medium">Premium only</span>
             </div>
         </header>
 
@@ -99,15 +99,58 @@
         <div class="chat-panel-content-wrapper">
             <div id="chatChatView" class="flex h-full flex-col">
                 <div class="chat-conversation-premium" id="chatBody">
-                    <div class="chat-message-wrapper assistant" sec:authorize="isAuthenticated()">
+                    <div class="chat-message-wrapper assistant"
+                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'CLIENT' and isPremium}">
                         <div class="chat-message-bubble" id="charlieWelcome">
-                            Hi, I am Charlie, your One To One AI concierge. I can map your day, tune your training plan, surface priorities, and navigate you anywhere in the platform. What would you like to optimize first?
+                            Welcome back — I’m Charlie, your premium One To One assistant. I can guide your training, progress, planning, and platform navigation in real time. Choose your style in Pro Chat: trainer, friend, or professional.
                         </div>
                     </div>
 
-                    <div class="chat-message-wrapper assistant" sec:authorize="!isAuthenticated()">
+                    <div class="chat-message-wrapper assistant"
+                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'CLIENT' and !isPremium}">
+                        <div class="chat-message-bubble" id="charlieWelcome">
+                            Welcome back — I’m Charlie, your One To One client assistant. You have 15 prompts per day on Starter access. I can answer questions, explain features, and guide you to pages like subscriptions, goals, and calendar.
+                        </div>
+                    </div>
+
+                    <div class="chat-message-wrapper assistant"
+                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'TRAINER' and isPremium}">
+                        <div class="chat-message-bubble" id="charlieWelcome">
+                            Welcome coach — I’m Charlie, your premium trainer assistant. I can help you manage client workflows, planning, and platform navigation while keeping responses secure and professional.
+                        </div>
+                    </div>
+
+                    <div class="chat-message-wrapper assistant"
+                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'TRAINER' and !isPremium}">
+                        <div class="chat-message-bubble" id="charlieWelcome">
+                            Welcome coach — I’m Charlie. You have 15 prompts per day on Starter access. I can help with client guidance, page navigation, and feature walkthroughs, but advanced in-app actions require Premium.
+                        </div>
+                    </div>
+
+                    <div class="chat-message-wrapper assistant"
+                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'GYM_ADMIN' and isPremium}">
+                        <div class="chat-message-bubble" id="charlieWelcome">
+                            Welcome gym admin — I’m Charlie, your premium operations assistant. I can support trainer oversight, operational planning, and fast navigation across your workspace with secure guardrails.
+                        </div>
+                    </div>
+
+                    <div class="chat-message-wrapper assistant"
+                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'GYM_ADMIN' and !isPremium}">
+                        <div class="chat-message-bubble" id="charlieWelcome">
+                            Welcome gym admin — I’m Charlie. You have 15 prompts per day on Starter access. I can guide features and direct you to the right pages quickly, while advanced automated actions stay Premium.
+                        </div>
+                    </div>
+
+                    <div class="chat-message-wrapper assistant"
+                         th:if="${#authorization.expression('isAuthenticated()') and (authUser == null or authUser.role == null or !(authUser.role.name() == 'CLIENT' or authUser.role.name() == 'TRAINER' or authUser.role.name() == 'GYM_ADMIN'))}">
+                        <div class="chat-message-bubble" id="charlieWelcome">
+                            Hi, I’m Charlie, your One To One assistant. I can help with planning, progress, and navigation across the platform.
+                        </div>
+                    </div>
+
+                    <div class="chat-message-wrapper assistant" th:if="${!#authorization.expression('isAuthenticated()')}">
                         <div class="chat-message-bubble">
-                            Hi, I am Charlie, the built-in AI assistant for One To One. I help with workouts, schedules, nutrition, goals, and momentum tracking. Log in or sign up to unlock personalized guidance.
+                            Hi, I’m Charlie — the One To One website assistant. I can explain what each feature does, how clients/trainers/gyms use the platform, and where to get started. Log in or sign up for personalised guidance and Pro access.
                         </div>
                     </div>
                 </div>
@@ -121,7 +164,13 @@
                     <button type="button" class="chat-suggestion-chip" data-msg="Show my progress this week">Progress</button>
                 </div>
                 <form class="chat-input-container" id="chatForm" autocomplete="off">
-                    <input id="chatInput" type="text" maxlength="800" required
+                    <input type="file" id="chatImageInput" accept="image/*" class="hidden" />
+                    <button type="button"
+                            id="chatAttachImageBtn"
+                            class="chat-icon-btn-premium"
+                            title="Attach image"
+                            aria-label="Attach image">🖼️</button>
+                    <input id="chatInput" type="text" maxlength="800"
                            class="chat-input-premium"
                            th:disabled="${!(#authentication != null and #authentication.authenticated)}"
                            th:placeholder="${(#authentication != null and #authentication.authenticated) ? 'Message...' : 'Log in to use coach'}" />
@@ -134,10 +183,10 @@
             </div>
 
             <div id="chatNotificationsView" class="chat-notifications-view hidden">
-                <div class="flex items-center justify-between border-b border-slate-200/60 px-4 py-3 dark:border-slate-700/60">
+                <div class="chat-inbox-toolbar">
                     <div class="flex items-center gap-2">
-                        <span class="text-base" aria-hidden="true">!</span>
-                        <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Notifications</span>
+                        <span class="text-base" aria-hidden="true">🔔</span>
+                        <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Inbox</span>
                         <span id="chatNotificationsUnreadCount"
                               class="hidden min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-semibold text-white">0</span>
                     </div>
@@ -148,10 +197,6 @@
                                 aria-label="Mark all notifications as read">
                             Mark all read
                         </button>
-                        <button id="chatNotificationsBackBtn"
-                                class="chat-icon-btn-premium h-auto w-auto px-2 py-1 text-[11px]"
-                                title="Back to coach"
-                                aria-label="Back to coach">< Back</button>
                     </div>
                 </div>
                 <!-- Filter tabs -->
