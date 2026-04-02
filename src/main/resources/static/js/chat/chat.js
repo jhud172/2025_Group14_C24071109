@@ -31,9 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const body = document.getElementById("chatBody");
     const sendBtn = document.getElementById("chatSend");
     const dot = document.getElementById("chatNotificationDot");
-    const notificationsToggle = document.getElementById("chatNotificationsToggle");
+    const normalTabBtn = document.getElementById("chatTabNormal");
     const notificationsToggle2 = document.getElementById("chatNotificationsToggle2");
-    const notificationsBackBtn = document.getElementById("chatNotificationsBackBtn");
     const notifFilterAll = document.getElementById("chatNotifFilterAll");
     const notifFilterUnread = document.getElementById("chatNotifFilterUnread");
     const notificationsUnreadCount = document.getElementById("chatNotificationsUnreadCount");
@@ -45,6 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const toastRegion = document.getElementById("chatToastRegion");
     const inlineToast = document.getElementById("chatInlineToast");
     const proChatBtn = document.getElementById("chatProChatBtn");
+    const chatImageInput = document.getElementById("chatImageInput");
+    const chatAttachImageBtn = document.getElementById("chatAttachImageBtn");
 
     const clearModal = document.getElementById("chatClearModal");
     const clearModalCancel = document.getElementById("chatClearCancel");
@@ -81,6 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const isAuthenticated = authMarker?.dataset?.authenticated === "true";
     const historyAllowed = document.body?.dataset?.chatHistory !== "off";
     const isPremium = root?.dataset?.premium === "true";
+    const accountRole = root?.dataset?.role || "GUEST";
+    const initialWelcomeText = body.querySelector(".chat-message-bubble")?.textContent?.trim() || "";
 
     const csrfToken = document.getElementById("chat_csrf")?.value || null;
     const csrfHeader = document.getElementById("chat_csrf_header")?.value || "X-CSRF-TOKEN";
@@ -92,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let sseRetryCount = 0;
     const MAX_SSE_RETRIES = 5;
     const notificationSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel("one-to-one-notifications") : null;
+    let pendingImageAttachment = null;
 
     function broadcastNotificationSync(detail) {
         const payload = detail || {};
@@ -135,21 +139,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const bubble = document.createElement("div");
         bubble.className = "chat-message-bubble";
-        bubble.textContent = text;
+        bubble.appendChild(renderRichMessageContent(text));
 
         wrap.appendChild(bubble);
+        appendImagePreviews(wrap, text);
         body.appendChild(wrap);
         scrollToBottom();
     }
 
-    function addMsgWithNav(text, who, navActions) {
+    function renderRichMessageContent(text) {
+        const fragment = document.createDocumentFragment();
+        const safeText = (text || "").trim();
+        const urlRegex = /(https?:\/\/[^\s]+)/gi;
+        const parts = safeText.split(urlRegex);
+        parts.forEach((part) => {
+            if (!part) return;
+            if (urlRegex.test(part)) {
+                const link = document.createElement("a");
+                link.href = part;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.textContent = part;
+                fragment.appendChild(link);
+            } else {
+                fragment.appendChild(document.createTextNode(part));
+            }
+            urlRegex.lastIndex = 0;
+        });
+        return fragment;
+    }
+
+    function appendImagePreviews(target, text) {
+        const matches = (text || "").match(/https?:\/\/[^\s]+/gi) || [];
+        matches
+            .filter((url) => /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(url))
+            .slice(0, 2)
+            .forEach((url) => {
+                const image = document.createElement("img");
+                image.src = url;
+                image.alt = "Shared image";
+                image.className = "chat-image-preview";
+                target.appendChild(image);
+            });
+    }
+
+    function addMsgWithNav(text, who, navActions, imageUrl) {
         const wrap = document.createElement("div");
         wrap.className = `chat-message-wrapper ${who === "me" ? "user" : "assistant"}`;
 
         const bubble = document.createElement("div");
         bubble.className = "chat-message-bubble";
-        bubble.textContent = text;
+        bubble.appendChild(renderRichMessageContent(text));
         wrap.appendChild(bubble);
+
+        if (imageUrl) {
+            const image = document.createElement("img");
+            image.src = imageUrl;
+            image.alt = "Attached image";
+            image.className = "chat-image-preview";
+            wrap.appendChild(image);
+        }
+        appendImagePreviews(wrap, text);
 
         if (Array.isArray(navActions) && navActions.length > 0) {
             const navRow = document.createElement("div");
@@ -179,7 +229,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const bubble = document.createElement("div");
         bubble.className = "chat-typing-bubble";
-        bubble.textContent = "✨ Charlie is thinking…";
+        bubble.textContent = "Charlie is thinking";
+        const dots = document.createElement("span");
+        dots.className = "chat-typing-dots";
+        dots.innerHTML = "<span></span><span></span><span></span>";
+        bubble.appendChild(dots);
 
         wrap.appendChild(bubble);
         body.appendChild(wrap);
@@ -191,27 +245,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (t) t.remove();
     }
 
-    function getDynamicWelcome() {
-        const hour = new Date().getHours();
-        const greetings = hour < 6
-            ? ["Working late? I've got you covered — here's what's on tonight.",
-               "Burning the midnight oil? Let me know if you need anything."]
-            : hour < 12
-            ? ["Good morning! Ready to make today count?",
-               "Morning! Let me know what you need — I can check your schedule, tasks, and more.",
-               "Rise and grind! What's the plan today?"]
-            : hour < 17
-            ? ["Good afternoon! How's your day going so far?",
-               "Afternoon check-in — need help with anything on your list?",
-               "Hey! I can show what's on today, track your workouts, or navigate you anywhere."]
-            : ["Good evening! Nice work getting through the day.",
-               "Evening! Still things to tick off? I can help.",
-               "Evening — let me know if you want to review today's progress."];
-        return greetings[Math.floor(Math.random() * greetings.length)];
+    function getAuthenticatedWelcome() {
+        if (initialWelcomeText) return initialWelcomeText;
+        const roleLabel = accountRole === "TRAINER"
+            ? "trainer"
+            : accountRole === "GYM_ADMIN"
+                ? "gym"
+                : "client";
+        if (isPremium) {
+            return `Welcome back — I’m Charlie, your premium ${roleLabel} assistant.`;
+        }
+        return `Welcome back — I’m Charlie. You have 15 prompts per day on Starter access.`;
     }
 
     function getUnauthWelcome() {
-        return "Hi, I am Charlie, the built-in AI assistant for One To One. I help with workouts, schedules, nutrition, goals, and momentum tracking. Log in or sign up to unlock personalized guidance.";
+        return initialWelcomeText || "Hi, I’m Charlie — the One To One website assistant. I can explain platform features and guide you to the right pages.";
     }
 
     function saveHistory() {
@@ -242,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderHistory(msgs) {
         body.innerHTML = "";
         if (!Array.isArray(msgs) || msgs.length === 0) {
-            addMsg(getDynamicWelcome(), "ai");
+            addMsg(getAuthenticatedWelcome(), "ai");
             return;
         }
         msgs.forEach(m => addMsg(m.text, m.who));
@@ -315,9 +363,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function showInlineToast(message) {
+    function showInlineToast(message, tone = "default") {
         if (!inlineToast) return;
         inlineToast.textContent = message;
+        inlineToast.classList.toggle("chat-inline-toast-warning", tone === "warning");
         inlineToast.classList.remove("hidden");
         setTimeout(() => inlineToast.classList.add("hidden"), 2500);
     }
@@ -677,6 +726,8 @@ document.addEventListener("DOMContentLoaded", () => {
         notificationsView.classList.remove("hidden");
         chatView.style.display = "none";
         notificationsView.style.display = "flex";
+        notificationsToggle2?.classList.add("active");
+        normalTabBtn?.classList.remove("active");
         loadNotifications();
     }
 
@@ -686,6 +737,8 @@ document.addEventListener("DOMContentLoaded", () => {
         chatView.classList.remove("hidden");
         notificationsView.style.display = "none";
         chatView.style.display = "flex";
+        notificationsToggle2?.classList.remove("active");
+        normalTabBtn?.classList.add("active");
     }
 
     function showCharlieOutput(message) {
@@ -701,18 +754,6 @@ document.addEventListener("DOMContentLoaded", () => {
         showCharlieOutput(message);
     };
 
-    if (notificationsToggle && notificationsView && chatView) {
-        notificationsToggle.addEventListener("click", async () => {
-            const showingNotifications = !notificationsView.classList.contains("hidden");
-            if (showingNotifications) {
-                hideNotificationsPanel();
-            } else {
-                if (!panel.classList.contains("open")) open();
-                showNotificationsPanel();
-            }
-        });
-    }
-
     if (notificationsToggle2 && notificationsView && chatView) {
         notificationsToggle2.addEventListener("click", async () => {
             const showingNotifications = !notificationsView.classList.contains("hidden");
@@ -724,8 +765,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (notificationsBackBtn && notificationsView && chatView) {
-        notificationsBackBtn.addEventListener("click", hideNotificationsPanel);
+    if (normalTabBtn) {
+        normalTabBtn.addEventListener("click", () => {
+            hideNotificationsPanel();
+            if (!panel.classList.contains("open")) open();
+        });
     }
 
     // Notification filter tabs
@@ -798,14 +842,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (proChatBtn) {
         const locked = proChatBtn.getAttribute("data-locked") === "true" || !isPremium;
         if (locked) {
-            proChatBtn.classList.add("opacity-60");
-            proChatBtn.classList.add("cursor-not-allowed");
+            proChatBtn.classList.add("locked-pill");
             proChatBtn.setAttribute("aria-disabled", "true");
+            proChatBtn.title = "Upgrade to use Pro Chat";
         }
         proChatBtn.addEventListener("click", (e) => {
             if (locked) {
                 e.preventDefault();
-                showInlineToast("Upgrade to use Pro Chat");
+                showInlineToast("Upgrade to use Pro Chat", "warning");
+                setTimeout(() => {
+                    window.location.href = "/pricing";
+                }, 320);
             } else {
                 window.location.href = "/chat";
             }
@@ -845,6 +892,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    chatAttachImageBtn?.addEventListener("click", () => {
+        if (input.disabled) return;
+        chatImageInput?.click();
+    });
+
+    chatImageInput?.addEventListener("change", () => {
+        const file = chatImageInput.files?.[0];
+        if (!file) return;
+        const previewUrl = URL.createObjectURL(file);
+        pendingImageAttachment = {
+            fileName: file.name,
+            previewUrl
+        };
+        showInlineToast(`Attached image: ${file.name}`);
+    });
+
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -854,11 +917,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const msg = (input.value || "").trim();
-        if (!msg) return;
+        if (!msg && !pendingImageAttachment) return;
+        const finalMessage = pendingImageAttachment
+            ? `${msg}${msg ? "\n\n" : ""}[Attached image: ${pendingImageAttachment.fileName}]`
+            : msg;
         input.value = "";
-        addMsg(msg, "me");
+        addMsgWithNav(finalMessage, "me", [], pendingImageAttachment?.previewUrl || null);
+        if (pendingImageAttachment?.previewUrl) {
+            URL.revokeObjectURL(pendingImageAttachment.previewUrl);
+        }
+        pendingImageAttachment = null;
+        if (chatImageInput) chatImageInput.value = "";
         saveHistory();
-        await sendMessage(msg);
+        await sendMessage(finalMessage);
     });
 
     // Load previous messages
