@@ -1071,6 +1071,10 @@
             });
         };
 
+        const setCompactState = (compact) => {
+            root.dataset.compact = compact ? "true" : "false";
+        };
+
         const applyTheme = () => {
             const now = new Date();
             const period = resolvePeriod(now);
@@ -1100,6 +1104,7 @@
         const renderStatusOnly = (weatherCopy, summaryCopy, showPermission) => {
             currentWeather = "auto";
             page.dataset.dashboardWeather = currentWeather;
+            setCompactState(true);
             if (weatherEl) weatherEl.textContent = weatherCopy;
             if (summaryEl) summaryEl.textContent = summaryCopy;
             if (locationIndicatorEl) locationIndicatorEl.hidden = true;
@@ -1327,6 +1332,7 @@
                 clearPermissionPromptFlags(true);
                 const { forecast, reverse } = payload;
                 currentSlots = buildTimelineSlots(forecast, temperatureUnit);
+                setCompactState(!currentSlots.length);
                 currentWeather = currentSlots[0]?.key || weatherKey(Number(forecast?.current?.weather_code ?? -1));
                 page.dataset.dashboardWeather = currentWeather;
                 if (weatherEl) weatherEl.textContent = weatherLabel(currentWeather);
