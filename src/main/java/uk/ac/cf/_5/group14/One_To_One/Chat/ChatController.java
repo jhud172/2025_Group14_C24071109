@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.ac.cf._5.group14.One_To_One.Notifications.AiNotificationHelper;
 import uk.ac.cf._5.group14.One_To_One.Notifications.AiNotificationService;
@@ -49,6 +50,7 @@ public class ChatController {
     private final UserRepository userRepository;
     private final Clock clock;
     private final AiNotificationService aiNotificationService;
+    private final ChatImageStorageService chatImageStorageService;
 
     private static final String CONTEXT_FALLBACK_REPLY = "I couldn't load some of your data right now, but I can still help. Try asking about your schedule or today's tasks.";
 
@@ -63,7 +65,8 @@ public class ChatController {
                 CoachActionPipeline coachActionPipeline,
             UserRepository userRepository,
             Clock clock,
-            AiNotificationService aiNotificationService
+            AiNotificationService aiNotificationService,
+            ChatImageStorageService chatImageStorageService
     ) {
         this.chatService = chatService;
         this.chatContextService = chatContextService;
@@ -76,6 +79,7 @@ public class ChatController {
         this.userRepository = userRepository;
         this.clock = clock;
         this.aiNotificationService = aiNotificationService;
+        this.chatImageStorageService = chatImageStorageService;
     }
 
     @GetMapping
@@ -174,13 +178,21 @@ public class ChatController {
     @PostMapping("/ask")
     @ResponseBody
     public ResponseEntity<ChatResponse> ask(@RequestBody ChatRequest request) {
-        ChatResponse response = chatService.chat(request.message());
+        String message = composePromptMessage(
+                request != null ? request.message() : null,
+                request != null ? request.attachments() : List.of(),
+                false
+        );
+        if (message.isBlank()) {
+            return ResponseEntity.badRequest().body(new ChatResponse("Message is required."));
+        }
+        ChatResponse response = chatService.chat(message);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(path = "/history", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<List<Map<String, String>>> history(
+    public ResponseEntity<List<Map<String, Object>>> history(
             Principal principal,
             @RequestParam(name = "limit", defaultValue = "200") int limit
     ) {
@@ -190,14 +202,41 @@ public class ChatController {
             .orElseGet(() -> coachConversationService.create(user.getId()));
         List<CoachMessage> msgs = coachMessageService.listRecent(conversation, limit);
 
-        List<Map<String, String>> out = msgs.stream()
-                .map(m -> Map.of(
-                    "who", m.getRole() == CoachMessage.Role.USER ? "me" : "ai",
-                        "text", m.getContent() == null ? "" : m.getContent()
-                ))
+        List<Map<String, Object>> out = msgs.stream()
+                .map(this::toPopupHistoryItem)
                 .toList();
 
         return ResponseEntity.ok(out);
+    }
+
+    @PostMapping(path = "/attachments", consumes = "multipart/form-data", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> uploadAttachments(
+            @RequestParam("files") List<MultipartFile> files,
+            Principal principal
+    ) {
+        User user = requireUser(principal);
+        List<MultipartFile> safeFiles = files == null ? List.of() : files.stream()
+                .filter(file -> file != null && !file.isEmpty())
+                .limit(5)
+                .toList();
+
+        if (safeFiles.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "At least one image is required."));
+        }
+
+        try {
+            List<ChatAttachmentPayload> attachments = chatImageStorageService.storeChatImages(user.getId(), safeFiles);
+            return ResponseEntity.ok(Map.of(
+                    "attachments", attachments.stream().map(this::toAttachmentMap).toList()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            log.warn("Chat attachment upload failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Unable to upload chat images right now."));
+        }
     }
 
     @PostMapping(path = "/clear", produces = "application/json")
@@ -215,7 +254,8 @@ public class ChatController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> api(@RequestBody ChatRequest request, Principal principal) {
         String message = request != null ? request.message() : null;
-        if (message == null || message.isBlank()) {
+        List<ChatAttachmentPayload> attachments = sanitizeStoredAttachments(request != null ? request.attachments() : List.of());
+        if ((message == null || message.isBlank()) && attachments.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.<String, Object>of("reply", "Message is required."));
         }
 
@@ -233,14 +273,15 @@ public class ChatController {
 
         // Skip history persistence for quick-action internal prompts
         boolean skipHistory = request.skipHistory() != null && request.skipHistory();
+        String promptMessage = composePromptMessage(message, attachments, true);
         if (!skipHistory) {
-            coachMessageService.append(conversation, CoachMessage.Role.USER, message);
+            coachMessageService.append(conversation, CoachMessage.Role.USER, message, attachments);
             coachConversationService.updateTitleIfNew(conversation, message);
         }
 
         ChatContext ctx;
         try {
-            Optional<LocalDate> requestedDate = ChatDateParser.tryParse(message);
+            Optional<LocalDate> requestedDate = ChatDateParser.tryParse(promptMessage);
             ctx = chatContextService.build(user, requestedDate.orElse(null));
         } catch (Exception e) {
             log.warn("Chat context build failed; continuing with fallback reply", e);
@@ -271,7 +312,7 @@ public class ChatController {
             msgs.add(new ChatService.Message("system", systemPrompt));
             for (CoachMessage m : recent) {
                 String role = m.getRole() == CoachMessage.Role.USER ? "user" : "assistant";
-                msgs.add(new ChatService.Message(role, m.getContent()));
+                msgs.add(new ChatService.Message(role, coachMessageService.modelContent(m)));
             }
 
             ChatResponse response = chatService.chat(msgs);
@@ -333,7 +374,7 @@ public class ChatController {
 
             @GetMapping(path = "/conversations/{id}/messages", produces = "application/json")
             @ResponseBody
-            public ResponseEntity<List<Map<String, String>>> messages(
+    public ResponseEntity<List<Map<String, String>>> messages(
                 @PathVariable("id") Long id,
                 @RequestParam(name = "limit", defaultValue = "200") int limit,
                 Principal principal
@@ -345,7 +386,7 @@ public class ChatController {
             List<Map<String, String>> out = msgs.stream()
                 .map(m -> Map.of(
                     "role", m.getRole() == CoachMessage.Role.USER ? "user" : "assistant",
-                    "content", m.getContent() == null ? "" : m.getContent()
+                    "content", coachMessageService.visibleContent(m)
                 ))
                 .toList();
             return ResponseEntity.ok(out);
@@ -421,7 +462,7 @@ public class ChatController {
                 msgs.add(new ChatService.Message("system", systemPrompt));
                 for (CoachMessage m : recent) {
                     String role = m.getRole() == CoachMessage.Role.USER ? "user" : "assistant";
-                    msgs.add(new ChatService.Message(role, m.getContent()));
+                    msgs.add(new ChatService.Message(role, coachMessageService.modelContent(m)));
                 }
                 ChatResponse response = chatService.chat(msgs);
                 reply = response != null && response.reply() != null && !response.reply().isBlank()
@@ -451,6 +492,72 @@ public class ChatController {
                     .collect(Collectors.toList()));
             }
             return ResponseEntity.ok(convResult);
+            }
+
+            private Map<String, Object> toPopupHistoryItem(CoachMessage message) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("who", message.getRole() == CoachMessage.Role.USER ? "me" : "ai");
+            item.put("text", coachMessageService.visibleContent(message));
+            item.put("attachments", coachMessageService.attachments(message).stream()
+                .map(this::toAttachmentMap)
+                .toList());
+            return item;
+            }
+
+            private Map<String, Object> toAttachmentMap(ChatAttachmentPayload attachment) {
+            return Map.of(
+                "url", attachment.url(),
+                "fileName", attachment.fileName() == null ? "image" : attachment.fileName(),
+                "contentType", attachment.contentType() == null ? "image/jpeg" : attachment.contentType()
+            );
+            }
+
+            private List<ChatAttachmentPayload> sanitizeStoredAttachments(List<ChatAttachmentPayload> attachments) {
+            if (attachments == null || attachments.isEmpty()) {
+                return List.of();
+            }
+            return attachments.stream()
+                .filter(attachment -> attachment != null && attachment.url() != null && !attachment.url().isBlank())
+                .filter(attachment -> chatImageStorageService.isChatUploadUrl(attachment.url()))
+                .limit(5)
+                .map(attachment -> new ChatAttachmentPayload(
+                    attachment.url().trim(),
+                    attachment.fileName(),
+                    attachment.contentType()
+                ))
+                .toList();
+            }
+
+            private String composePromptMessage(
+                String message,
+                List<ChatAttachmentPayload> attachments,
+                boolean includeNames
+            ) {
+            String base = message == null ? "" : message.trim();
+            List<ChatAttachmentPayload> safeAttachments = attachments == null ? List.of() : attachments.stream()
+                .filter(attachment -> attachment != null)
+                .limit(5)
+                .toList();
+
+            if (safeAttachments.isEmpty()) {
+                return base;
+            }
+
+            String summary;
+            if (includeNames) {
+                summary = safeAttachments.stream()
+                    .map(attachment -> attachment.fileName() == null || attachment.fileName().isBlank()
+                        ? "image"
+                        : attachment.fileName().trim())
+                    .collect(Collectors.joining(", "));
+            } else {
+                summary = safeAttachments.size() == 1 ? "1 image" : safeAttachments.size() + " images";
+            }
+
+            if (base.isBlank()) {
+                return "The user shared image context: " + summary + ".";
+            }
+            return base + "\n\nThe user also shared image context: " + summary + ".";
             }
 
             private Map<String, Object> usageToMap(DailyUsageService.UsageStatus usage, boolean isPremium) {

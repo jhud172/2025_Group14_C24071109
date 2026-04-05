@@ -5,18 +5,15 @@
     th:with="authUser=${@authHelper.getAuthenticatedUser()}, isPremium=${authUser != null ? @platformSubscriptionService.isPremium(authUser.id, @systemClock) : false}"
     th:attr="data-premium=${isPremium},data-role=${authUser != null and authUser.role != null ? authUser.role.name() : 'GUEST'}">
 
-    <!-- CSRF values (blank if not available) -->
     <input type="hidden" id="chat_csrf" name="chat_csrf"
            th:value="${_csrf != null ? _csrf.token : ''}"/>
 
     <input type="hidden" id="chat_csrf_header" name="chat_csrf_header"
            th:value="${_csrf != null ? _csrf.headerName : ''}"/>
 
-    <!-- Auth marker (chat.js reads this) -->
-        <div id="chatAuth" hidden
-            th:attr="data-authenticated=${#authorization.expression('isAuthenticated()')}"></div>
+    <div id="chatAuth" hidden
+         th:attr="data-authenticated=${#authorization.expression('isAuthenticated()')}"></div>
 
-    <!-- Floating button -->
     <button type="button"
             class="chat-fab-premium"
             id="chatFab"
@@ -38,7 +35,6 @@
          class="fixed bottom-[5rem] right-4 sm:bottom-[6.5rem] sm:right-6 z-50 flex w-[22.5rem] max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-3rem)] flex-col gap-2">
     </div>
 
-    <!-- Chat panel -->
     <section id="chatPanel" aria-hidden="true"
              class="chat-panel-premium">
         <header class="chat-header-premium">
@@ -58,13 +54,25 @@
                     <button type="button"
                             class="chat-icon-btn-premium"
                             id="chatClear"
+                            data-tooltip="Clear chat"
                             title="Clear coach history"
-                            aria-label="Clear coach history">🧹</button>
+                            aria-label="Clear coach history">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" class="chat-icon-svg">
+                            <path d="M9 3h6m-9 4h12m-9 0v10m6-10v10M8 7l.6 11.2A2 2 0 0 0 10.6 20h2.8a2 2 0 0 0 2-1.8L16 7"
+                                  fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+                        </svg>
+                    </button>
                     <button type="button"
                             class="chat-icon-btn-premium"
                             id="chatClose"
+                            data-tooltip="Close"
                             title="Close Charlie"
-                            aria-label="Close coach">✕</button>
+                            aria-label="Close Charlie">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" class="chat-icon-svg">
+                            <path d="M6 6l12 12M18 6L6 18"
+                                  fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -72,177 +80,244 @@
                 <button type="button"
                         id="chatTabNormal"
                         class="chat-tab-btn active"
-                        title="Open normal chat"
-                        aria-label="Open normal chat">
-                    Normal Chat
+                        title="Open Charlie chat"
+                        aria-label="Open Charlie chat">
+                    Chat
                 </button>
                 <button type="button"
                         id="chatNotificationsToggle2"
                         class="chat-tab-btn"
-                        title="Open notifications inbox"
-                        aria-label="View notifications">
-                    Inbox Slider
+                        title="Open inbox"
+                        aria-label="Open inbox">
+                    Inbox
                 </button>
                 <button type="button"
                         id="chatProChatBtn"
                         th:attr="data-locked=${!isPremium}"
                         class="chat-tab-btn"
-                        th:title="${isPremium} ? 'Open Charlie Pro Chat' : 'Upgrade to Premium to unlock Pro Chat'"
-                        th:aria-label="${isPremium} ? 'Open Pro Chat' : 'Pro Chat - Premium required'">
-                    <span>Premium Chat</span>
+                        th:title="${isPremium} ? 'Open Charlie Pro Chat' : 'Upgrade to Premium to unlock Charlie Pro Chat'}"
+                        th:aria-label="${isPremium} ? 'Open Charlie Pro Chat' : 'Charlie Pro Chat - Premium required'">
+                    <span>Chat +</span>
                 </button>
             </div>
         </header>
 
         <div id="chatInlineToast" class="hidden border-b border-slate-200/60 bg-slate-50 px-4 py-2 text-xs text-slate-600 dark:border-slate-700/60 dark:bg-slate-900 dark:text-slate-200"></div>
 
-        <div class="chat-panel-content-wrapper">
-            <div id="chatChatView" class="flex h-full flex-col">
-                <div class="chat-conversation-premium" id="chatBody">
-                    <div class="chat-message-wrapper assistant"
-                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'CLIENT' and isPremium}">
-                        <div class="chat-message-bubble" id="charlieWelcome">
-                            Welcome back — I’m Charlie, your premium One To One assistant. I can guide your training, progress, planning, and platform navigation in real time. Choose your style in Pro Chat: trainer, friend, or professional.
+        <div class="chat-panel-content-wrapper" id="chatPanelContent" data-view="chat" data-clear-confirm="false">
+            <div class="chat-panel-views" id="chatPanelViews">
+                <div id="chatChatView" class="chat-view-pane chat-view-pane-chat">
+                    <div class="chat-conversation-premium" id="chatBody">
+                        <div class="chat-message-wrapper assistant"
+                             th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'CLIENT' and isPremium}">
+                            <div class="chat-message-bubble" id="charlieWelcome">
+                                Welcome back. I am Charlie, your premium One To One assistant. I can guide your training, progress, planning, and platform navigation in real time. Choose your style in Pro Chat: trainer, friend, or professional.
+                            </div>
+                        </div>
+
+                        <div class="chat-message-wrapper assistant"
+                             th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'CLIENT' and !isPremium}">
+                            <div class="chat-message-bubble" id="charlieWelcome">
+                                Welcome back. I am Charlie, your One To One client assistant. You have 15 prompts per day on Starter access. I can answer questions, explain features, and guide you to pages like subscriptions, goals, and calendar.
+                            </div>
+                        </div>
+
+                        <div class="chat-message-wrapper assistant"
+                             th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'TRAINER' and isPremium}">
+                            <div class="chat-message-bubble" id="charlieWelcome">
+                                Welcome coach. I am Charlie, your premium trainer assistant. I can help you manage client workflows, planning, and platform navigation while keeping responses secure and professional.
+                            </div>
+                        </div>
+
+                        <div class="chat-message-wrapper assistant"
+                             th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'TRAINER' and !isPremium}">
+                            <div class="chat-message-bubble" id="charlieWelcome">
+                                Welcome coach. I am Charlie. You have 15 prompts per day on Starter access. I can help with client guidance, page navigation, and feature walkthroughs, but advanced in-app actions require Premium.
+                            </div>
+                        </div>
+
+                        <div class="chat-message-wrapper assistant"
+                             th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'GYM_ADMIN' and isPremium}">
+                            <div class="chat-message-bubble" id="charlieWelcome">
+                                Welcome gym admin. I am Charlie, your premium operations assistant. I can support trainer oversight, operational planning, and fast navigation across your workspace with secure guardrails.
+                            </div>
+                        </div>
+
+                        <div class="chat-message-wrapper assistant"
+                             th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'GYM_ADMIN' and !isPremium}">
+                            <div class="chat-message-bubble" id="charlieWelcome">
+                                Welcome gym admin. I am Charlie. You have 15 prompts per day on Starter access. I can guide features and direct you to the right pages quickly, while advanced automated actions stay Premium.
+                            </div>
+                        </div>
+
+                        <div class="chat-message-wrapper assistant"
+                             th:if="${#authorization.expression('isAuthenticated()') and (authUser == null or authUser.role == null or !(authUser.role.name() == 'CLIENT' or authUser.role.name() == 'TRAINER' or authUser.role.name() == 'GYM_ADMIN'))}">
+                            <div class="chat-message-bubble" id="charlieWelcome">
+                                Hi, I am Charlie, your One To One assistant. I can help with planning, progress, and navigation across the platform.
+                            </div>
+                        </div>
+
+                        <div class="chat-message-wrapper assistant" th:if="${!#authorization.expression('isAuthenticated()')}">
+                            <div class="chat-message-bubble" id="charlieWelcome">
+                                Hi, I am Charlie, the One To One website assistant. I can explain what each feature does, how clients, trainers, and gyms use the platform, and where to get started. Log in or sign up for personalised guidance and Pro access.
+                            </div>
                         </div>
                     </div>
 
-                    <div class="chat-message-wrapper assistant"
-                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'CLIENT' and !isPremium}">
-                        <div class="chat-message-bubble" id="charlieWelcome">
-                            Welcome back — I’m Charlie, your One To One client assistant. You have 15 prompts per day on Starter access. I can answer questions, explain features, and guide you to pages like subscriptions, goals, and calendar.
-                        </div>
+                    <div class="chat-suggestions" id="chatSuggestions" sec:authorize="isAuthenticated()">
+                        <button type="button" class="chat-suggestion-chip" data-msg="What's on today?">What's on today?</button>
+                        <button type="button" class="chat-suggestion-chip" data-msg="Show my calendar">Calendar</button>
+                        <button type="button" class="chat-suggestion-chip" data-msg="Show my recent workouts">Workouts</button>
+                        <button type="button" class="chat-suggestion-chip" data-msg="Show my goals">Goals</button>
+                        <button type="button" class="chat-suggestion-chip" data-msg="Show my progress this week">Progress</button>
                     </div>
 
-                    <div class="chat-message-wrapper assistant"
-                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'TRAINER' and isPremium}">
-                        <div class="chat-message-bubble" id="charlieWelcome">
-                            Welcome coach — I’m Charlie, your premium trainer assistant. I can help you manage client workflows, planning, and platform navigation while keeping responses secure and professional.
-                        </div>
-                    </div>
+                    <div class="chat-composer-shell">
+                        <div id="chatAttachmentPreviewTray" class="chat-attachment-preview-tray hidden" aria-live="polite"></div>
 
-                    <div class="chat-message-wrapper assistant"
-                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'TRAINER' and !isPremium}">
-                        <div class="chat-message-bubble" id="charlieWelcome">
-                            Welcome coach — I’m Charlie. You have 15 prompts per day on Starter access. I can help with client guidance, page navigation, and feature walkthroughs, but advanced in-app actions require Premium.
+                        <div id="chatComposerOptions" class="chat-composer-options hidden" aria-hidden="true">
+                            <button type="button" id="chatUseCameraBtn" class="chat-composer-option">
+                                <span class="chat-composer-option-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" class="chat-option-svg">
+                                        <path d="M7 8l1.2-2h7.6L17 8h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h2zm5 9.2a3.7 3.7 0 1 0 0-7.4 3.7 3.7 0 0 0 0 7.4z"
+                                              fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+                                    </svg>
+                                </span>
+                                <span>Camera</span>
+                            </button>
+                            <button type="button" id="chatUsePhotosBtn" class="chat-composer-option">
+                                <span class="chat-composer-option-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" class="chat-option-svg">
+                                        <path d="M5 5h14v14H5zM8.5 14.5l2.1-2.4 1.8 2 2.5-3 2.6 3.4"
+                                              fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+                                        <circle cx="9" cy="9" r="1.1" fill="currentColor"/>
+                                    </svg>
+                                </span>
+                                <span>Photos</span>
+                            </button>
                         </div>
-                    </div>
 
-                    <div class="chat-message-wrapper assistant"
-                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'GYM_ADMIN' and isPremium}">
-                        <div class="chat-message-bubble" id="charlieWelcome">
-                            Welcome gym admin — I’m Charlie, your premium operations assistant. I can support trainer oversight, operational planning, and fast navigation across your workspace with secure guardrails.
-                        </div>
-                    </div>
+                        <form class="chat-input-container" id="chatForm" autocomplete="off">
+                            <input type="file" id="chatCameraInput" accept="image/*" capture="environment" class="hidden" multiple />
+                            <input type="file" id="chatPhotoInput" accept="image/*" class="hidden" multiple />
+                            <button type="button"
+                                    id="chatAttachImageBtn"
+                                    class="chat-icon-btn-premium chat-upload-btn"
+                                    data-tooltip="Upload photo"
+                                    title="Upload photo"
+                                    aria-label="Upload photo">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" class="chat-icon-svg">
+                                    <path d="M7 8l1.2-2h7.6L17 8h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h2zm5 9.2a3.7 3.7 0 1 0 0-7.4 3.7 3.7 0 0 0 0 7.4z"
+                                          fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+                                </svg>
+                            </button>
 
-                    <div class="chat-message-wrapper assistant"
-                         th:if="${#authorization.expression('isAuthenticated()') and authUser != null and authUser.role != null and authUser.role.name() == 'GYM_ADMIN' and !isPremium}">
-                        <div class="chat-message-bubble" id="charlieWelcome">
-                            Welcome gym admin — I’m Charlie. You have 15 prompts per day on Starter access. I can guide features and direct you to the right pages quickly, while advanced automated actions stay Premium.
-                        </div>
-                    </div>
+                            <div class="chat-input-stack">
+                                <textarea id="chatInput"
+                                          rows="1"
+                                          maxlength="1600"
+                                          class="chat-input-premium chat-input-textarea"
+                                          th:placeholder="${(#authentication != null and #authentication.authenticated) ? 'Message Charlie...' : 'Ask Charlie about One To One...'}"></textarea>
+                                <div class="chat-input-meta">
+                                    <span id="chatAttachmentCount" class="chat-input-hint hidden">0 / 5 photos</span>
+                                    <span class="chat-input-hint">Shift + Enter for a new line</span>
+                                </div>
+                            </div>
 
-                    <div class="chat-message-wrapper assistant"
-                         th:if="${#authorization.expression('isAuthenticated()') and (authUser == null or authUser.role == null or !(authUser.role.name() == 'CLIENT' or authUser.role.name() == 'TRAINER' or authUser.role.name() == 'GYM_ADMIN'))}">
-                        <div class="chat-message-bubble" id="charlieWelcome">
-                            Hi, I’m Charlie, your One To One assistant. I can help with planning, progress, and navigation across the platform.
-                        </div>
-                    </div>
-
-                    <div class="chat-message-wrapper assistant" th:if="${!#authorization.expression('isAuthenticated()')}">
-                        <div class="chat-message-bubble">
-                            Hi, I’m Charlie — the One To One website assistant. I can explain what each feature does, how clients/trainers/gyms use the platform, and where to get started. Log in or sign up for personalised guidance and Pro access.
-                        </div>
+                            <button type="submit"
+                                    class="chat-send-btn-premium"
+                                    id="chatSend"
+                                    disabled>Send</button>
+                        </form>
+                        <span class="sr-only">Log in to use coach</span>
                     </div>
                 </div>
 
-                <!-- Quick-action suggestion chips -->
-                <div class="chat-suggestions" id="chatSuggestions" sec:authorize="isAuthenticated()">
-                    <button type="button" class="chat-suggestion-chip" data-msg="What's on today?">What's on today?</button>
-                    <button type="button" class="chat-suggestion-chip" data-msg="Show my calendar">Calendar</button>
-                    <button type="button" class="chat-suggestion-chip" data-msg="Show my recent workouts">Workouts</button>
-                    <button type="button" class="chat-suggestion-chip" data-msg="Show my goals">Goals</button>
-                    <button type="button" class="chat-suggestion-chip" data-msg="Show my progress this week">Progress</button>
-                </div>
-                <form class="chat-input-container" id="chatForm" autocomplete="off">
-                    <input type="file" id="chatImageInput" accept="image/*" class="hidden" />
-                    <button type="button"
-                            id="chatAttachImageBtn"
-                            class="chat-icon-btn-premium"
-                            title="Attach image"
-                            aria-label="Attach image">🖼️</button>
-                    <input id="chatInput" type="text" maxlength="800"
-                           class="chat-input-premium"
-                           th:disabled="${!(#authentication != null and #authentication.authenticated)}"
-                           th:placeholder="${(#authentication != null and #authentication.authenticated) ? 'Message...' : 'Log in to use coach'}" />
+                <div id="chatNotificationsView" class="chat-view-pane chat-view-pane-inbox chat-notifications-view">
+                    <div class="chat-inbox-toolbar">
+                        <div class="flex items-center gap-2">
+                            <span class="chat-inbox-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" class="chat-icon-svg">
+                                    <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5zm2 2.2l6 4.5 6-4.5"
+                                          fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+                                </svg>
+                            </span>
+                            <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Inbox</span>
+                            <span id="chatNotificationsUnreadCount"
+                                  class="hidden min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-semibold text-white">0</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="chatNotificationsReadAll"
+                                    class="chat-icon-btn-premium h-auto w-auto px-3 py-1 text-[11px] font-semibold"
+                                    title="Mark all notifications as read"
+                                    aria-label="Mark all notifications as read">
+                                Mark all read
+                            </button>
+                        </div>
+                    </div>
 
-                    <button type="submit"
-                            class="chat-send-btn-premium"
-                            id="chatSend"
-                            th:disabled="${!(#authentication != null and #authentication.authenticated)}">Send</button>
-                </form>
+                    <div class="flex gap-3 border-b border-slate-200/60 px-4 py-2 dark:border-slate-700/60">
+                        <button type="button"
+                                id="chatNotifFilterAll"
+                                class="chat-notif-filter-btn active"
+                                data-filter="all">All</button>
+                        <button type="button"
+                                id="chatNotifFilterUnread"
+                                class="chat-notif-filter-btn"
+                                data-filter="unread">Unread</button>
+                    </div>
+
+                    <div id="chatNotificationsList" class="flex-1 overflow-auto px-3 py-3 text-sm space-y-2">
+                        <div class="rounded-xl border border-dashed border-slate-200/80 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500 dark:border-slate-700/80 dark:bg-slate-900/40 dark:text-slate-400">
+                            <div class="text-2xl mb-1" aria-hidden="true">!</div>
+                            No notifications yet.
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="chatNotificationsView" class="chat-notifications-view hidden">
-                <div class="chat-inbox-toolbar">
-                    <div class="flex items-center gap-2">
-                        <span class="text-base" aria-hidden="true">🔔</span>
-                        <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Inbox</span>
-                        <span id="chatNotificationsUnreadCount"
-                              class="hidden min-w-[1.25rem] items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-semibold text-white">0</span>
+            <div id="chatInlineClearConfirm"
+                 class="chat-inline-clear-confirm hidden"
+                 role="dialog"
+                 aria-modal="false"
+                 aria-labelledby="chatInlineClearConfirmTitle">
+                <div class="chat-inline-clear-card">
+                    <div class="chat-inline-clear-header">
+                        <div class="chat-inline-clear-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" class="chat-icon-svg">
+                                <path d="M9 3h6m-9 4h12m-9 0v10m6-10v10M8 7l.6 11.2A2 2 0 0 0 10.6 20h2.8a2 2 0 0 0 2-1.8L16 7"
+                                      fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 id="chatInlineClearConfirmTitle" class="text-sm font-semibold text-slate-900 dark:text-slate-100">Delete this chat history?</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">This only affects Charlie history.</p>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button id="chatNotificationsReadAll"
-                                class="chat-icon-btn-premium h-auto w-auto px-3 py-1 text-[11px] font-semibold"
-                                title="Mark all notifications as read"
-                                aria-label="Mark all notifications as read">
-                            Mark all read
-                        </button>
-                    </div>
-                </div>
-                <!-- Filter tabs -->
-                <div class="flex gap-3 border-b border-slate-200/60 px-4 py-2 dark:border-slate-700/60">
-                    <button type="button"
-                            id="chatNotifFilterAll"
-                            class="chat-notif-filter-btn active"
-                            data-filter="all">All</button>
-                    <button type="button"
-                            id="chatNotifFilterUnread"
-                            class="chat-notif-filter-btn"
-                            data-filter="unread">Unread</button>
-                </div>
-                <div id="chatNotificationsList" class="flex-1 overflow-auto px-3 py-3 text-sm space-y-2">
-                    <div class="rounded-xl border border-dashed border-slate-200/80 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500 dark:border-slate-700/80 dark:bg-slate-900/40 dark:text-slate-400">
-                        <div class="text-2xl mb-1" aria-hidden="true">!</div>
-                        No notifications yet.
+                    <p class="chat-inline-clear-text">This confirmation stays inside the chat so the rest of the website remains usable. This action cannot be undone.</p>
+                    <div class="chat-inline-clear-actions">
+                        <button id="chatClearCancel"
+                                class="chat-inline-clear-btn"
+                                type="button">Cancel</button>
+                        <button id="chatClearConfirm"
+                                class="chat-inline-clear-btn chat-inline-clear-btn-danger"
+                                type="button">Delete chat</button>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Clear chat confirmation modal -->
-    <div id="chatClearModal"
-         class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40 p-4 opacity-0 pointer-events-none transition-opacity [&.show]:opacity-100 [&.show]:pointer-events-auto">
-        <div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900"
-             role="dialog" aria-modal="true" aria-labelledby="chatClearModalTitle">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-950/40">
-                    <span class="text-xl" aria-hidden="true">!</span>
-                </div>
-                <div>
-                    <h3 id="chatClearModalTitle" class="text-base font-semibold text-slate-900 dark:text-slate-100">Clear Chat History</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">This cannot be undone</p>
-                </div>
-            </div>
-            <p class="text-sm text-slate-600 dark:text-slate-300">Are you sure you want to remove all chat history? All previous messages will be permanently deleted.</p>
-            <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <button id="chatClearCancel"
-                        class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                        type="button">Cancel</button>
-                <button id="chatClearConfirm"
-                        class="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-700"
-                        type="button">Clear Chat</button>
-            </div>
+    <div id="chatMediaLightbox" class="chat-media-lightbox hidden" aria-hidden="true">
+        <div class="chat-media-lightbox-backdrop" id="chatMediaLightboxBackdrop"></div>
+        <div class="chat-media-lightbox-shell" role="dialog" aria-modal="true" aria-label="Full size attached image">
+            <button type="button" id="chatMediaLightboxClose" class="chat-media-lightbox-close" aria-label="Close image preview">
+                <svg viewBox="0 0 24 24" aria-hidden="true" class="chat-icon-svg">
+                    <path d="M6 6l12 12M18 6L6 18"
+                          fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+                </svg>
+            </button>
+            <img id="chatMediaLightboxImage" class="chat-media-lightbox-image" alt="Expanded chat attachment" />
         </div>
     </div>
 

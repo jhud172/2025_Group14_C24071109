@@ -17,6 +17,528 @@ window.toggleChatPanel = function() {
     console.log("Chat panel toggled via fallback:", !isOpen ? "open" : "closed");
 };
 
+function initCharlieWidget(config) {
+    const {
+        root, fab, panel, panelContent, closeBtn, clearBtn, form, input, body, sendBtn,
+        dot, normalTabBtn, notificationsToggle2, notifFilterAll, notifFilterUnread,
+        notificationsUnreadCount, notificationsList, notificationsReadAll, unreadBadge,
+        inlineToast, proChatBtn, chatAttachImageBtn, chatComposerOptions, chatUseCameraBtn,
+        chatUsePhotosBtn, chatCameraInput, chatPhotoInput, chatAttachmentPreviewTray,
+        chatAttachmentCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
+        chatMediaLightbox, chatMediaLightboxBackdrop, chatMediaLightboxClose, chatMediaLightboxImage,
+        isAuthenticated, isPremium, accountRole, initialWelcomeText, csrfToken, csrfHeader,
+        STORAGE_KEY, LEGACY_STORAGE_KEY, MAX_ATTACHMENTS, MAX_COMPOSER_HEIGHT
+    } = config;
+
+    const state = {
+        view: "chat",
+        filter: "all",
+        sending: false,
+        pendingAttachments: [],
+        history: []
+    };
+
+    const headers = (json = true) => {
+        const next = {};
+        if (json) next["Content-Type"] = "application/json";
+        if (csrfToken) next[csrfHeader] = csrfToken;
+        return next;
+    };
+
+    const createId = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const getWelcome = () => {
+        if (initialWelcomeText) return initialWelcomeText;
+        if (!isAuthenticated) return "Hi, I am Charlie, the One To One website assistant. I can explain platform features and guide you to the right pages.";
+        const roleLabel = accountRole === "TRAINER" ? "trainer" : accountRole === "GYM_ADMIN" ? "gym" : "client";
+        return isPremium
+            ? `Welcome back. I am Charlie, your premium ${roleLabel} assistant.`
+            : "Welcome back. I am Charlie. You have 15 prompts per day on Starter access.";
+    };
+
+    const safeParse = (value) => {
+        try {
+            return JSON.parse(value);
+        } catch (_) {
+            return null;
+        }
+    };
+
+    const normalizeAttachment = (raw) => {
+        if (!raw) return null;
+        const url = raw.url || raw.previewUrl || raw.dataUrl || "";
+        if (!url) return null;
+        return {
+            id: raw.id || createId("attachment"),
+            url,
+            fileName: raw.fileName || "image",
+            contentType: raw.contentType || "image/jpeg"
+        };
+    };
+
+    const normalizeMessage = (raw) => {
+        if (!raw) return null;
+        return {
+            id: raw.id || createId("message"),
+            who: raw.who === "me" ? "me" : "ai",
+            text: typeof raw.text === "string" ? raw.text : "",
+            attachments: Array.isArray(raw.attachments) ? raw.attachments.map(normalizeAttachment).filter(Boolean).slice(0, MAX_ATTACHMENTS) : [],
+            navActions: Array.isArray(raw.navActions) ? raw.navActions : []
+        };
+    };
+
+    const renderRichText = (text) => {
+        const fragment = document.createDocumentFragment();
+        const parts = String(text || "").trim().split(/(https?:\/\/[^\s]+)/gi);
+        parts.forEach((part) => {
+            if (!part) return;
+            if (/^https?:\/\//i.test(part)) {
+                const link = document.createElement("a");
+                link.href = part;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.textContent = part;
+                fragment.appendChild(link);
+            } else {
+                fragment.appendChild(document.createTextNode(part));
+            }
+        });
+        return fragment;
+    };
+
+    const openLightbox = (url, label) => {
+        if (!chatMediaLightbox || !chatMediaLightboxImage) return;
+        chatMediaLightboxImage.src = url;
+        chatMediaLightboxImage.alt = label || "Expanded chat attachment";
+        chatMediaLightbox.classList.remove("hidden");
+        chatMediaLightbox.setAttribute("aria-hidden", "false");
+    };
+
+    const closeLightbox = () => {
+        if (!chatMediaLightbox || !chatMediaLightboxImage) return;
+        chatMediaLightbox.classList.add("hidden");
+        chatMediaLightbox.setAttribute("aria-hidden", "true");
+        chatMediaLightboxImage.src = "";
+    };
+
+    const buildGallery = (attachments, pending = false) => {
+        if (!attachments?.length) return null;
+        const gallery = document.createElement("div");
+        gallery.className = pending ? "chat-pending-gallery" : "chat-attachment-gallery";
+        attachments.forEach((attachment) => {
+            const card = document.createElement(pending ? "div" : "button");
+            card.className = pending ? "chat-pending-attachment-card" : "chat-attachment-card";
+            if (!pending) {
+                card.type = "button";
+                card.addEventListener("click", () => openLightbox(attachment.url, attachment.fileName));
+            }
+            const image = document.createElement("img");
+            image.src = attachment.url;
+            image.alt = attachment.fileName || "Attached image";
+            image.className = pending ? "chat-pending-attachment-image" : "chat-attachment-image";
+            card.appendChild(image);
+            const meta = document.createElement("div");
+            meta.className = pending ? "chat-pending-attachment-meta" : "chat-attachment-meta";
+            const label = document.createElement("span");
+            label.className = "chat-attachment-name";
+            label.textContent = attachment.fileName || "image";
+            meta.appendChild(label);
+            if (pending) {
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.className = "chat-pending-attachment-remove";
+                remove.textContent = "X";
+                remove.addEventListener("click", () => {
+                    state.pendingAttachments = state.pendingAttachments.filter((item) => item.id !== attachment.id);
+                    renderPendingAttachments();
+                    updateSendState();
+                });
+                card.appendChild(remove);
+            } else {
+                const expand = document.createElement("span");
+                expand.className = "chat-attachment-expand";
+                expand.textContent = "View";
+                meta.appendChild(expand);
+            }
+            card.appendChild(meta);
+            gallery.appendChild(card);
+        });
+        return gallery;
+    };
+
+    const buildMessageElement = (message) => {
+        const wrap = document.createElement("div");
+        wrap.className = `chat-message-wrapper ${message.who === "me" ? "user" : "assistant"}`;
+        const bubble = document.createElement("div");
+        bubble.className = "chat-message-bubble";
+        bubble.appendChild(renderRichText(message.text));
+        wrap.appendChild(bubble);
+        const gallery = buildGallery(message.attachments, false);
+        if (gallery) wrap.appendChild(gallery);
+        if (Array.isArray(message.navActions) && message.navActions.length) {
+            const nav = document.createElement("div");
+            nav.className = "chat-nav-actions";
+            message.navActions.forEach((action) => {
+                if (!action?.url || !String(action.url).startsWith("/")) return;
+                const link = document.createElement("a");
+                link.href = action.url;
+                link.className = "chat-nav-btn";
+                link.textContent = action.label || "Open";
+                nav.appendChild(link);
+            });
+            if (nav.children.length) wrap.appendChild(nav);
+        }
+        return wrap;
+    };
+
+    const persistHistory = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state.history.slice(-120)));
+    const readHistory = () => {
+        const next = safeParse(localStorage.getItem(STORAGE_KEY));
+        if (Array.isArray(next)) return next.map(normalizeMessage).filter(Boolean);
+        const legacy = safeParse(localStorage.getItem(LEGACY_STORAGE_KEY));
+        return Array.isArray(legacy) ? legacy.map(normalizeMessage).filter(Boolean) : [];
+    };
+
+    const renderHistory = (messages) => {
+        body.innerHTML = "";
+        state.history = Array.isArray(messages) ? messages.map(normalizeMessage).filter(Boolean) : [];
+        if (!state.history.length) {
+            const welcome = normalizeMessage({ who: "ai", text: getWelcome(), attachments: [], navActions: [] });
+            state.history = [welcome];
+            persistHistory();
+        }
+        state.history.forEach((message) => body.appendChild(buildMessageElement(message)));
+        body.scrollTop = body.scrollHeight;
+    };
+
+    const appendMessage = (message, persist = true) => {
+        const normalized = normalizeMessage(message);
+        if (!normalized) return;
+        state.history.push(normalized);
+        state.history = state.history.slice(-120);
+        body.appendChild(buildMessageElement(normalized));
+        body.scrollTop = body.scrollHeight;
+        if (persist) persistHistory();
+    };
+
+    const setActiveView = (view) => {
+        state.view = view === "inbox" ? "inbox" : "chat";
+        panelContent.dataset.view = state.view;
+        normalTabBtn?.classList.toggle("active", state.view === "chat");
+        notificationsToggle2?.classList.toggle("active", state.view === "inbox");
+    };
+
+    const closeComposerOptions = () => {
+        chatComposerOptions?.classList.add("hidden");
+        chatComposerOptions?.setAttribute("aria-hidden", "true");
+    };
+
+    const toggleComposerOptions = () => {
+        if (!chatComposerOptions) return;
+        const isOpen = !chatComposerOptions.classList.contains("hidden");
+        chatComposerOptions.classList.toggle("hidden", isOpen);
+        chatComposerOptions.setAttribute("aria-hidden", isOpen ? "true" : "false");
+    };
+
+    const openInlineClearConfirm = () => {
+        panelContent.dataset.clearConfirm = "true";
+        clearInlineConfirm?.classList.remove("hidden");
+    };
+
+    const closeInlineClearConfirm = () => {
+        panelContent.dataset.clearConfirm = "false";
+        clearInlineConfirm?.classList.add("hidden");
+    };
+
+    const autoResizeInput = () => {
+        input.style.height = "auto";
+        input.style.height = `${Math.min(input.scrollHeight, MAX_COMPOSER_HEIGHT)}px`;
+        input.style.overflowY = input.scrollHeight > MAX_COMPOSER_HEIGHT ? "auto" : "hidden";
+    };
+
+    const updateSendState = () => {
+        const hasText = input.value.trim().length > 0;
+        sendBtn.disabled = state.sending || (!hasText && !state.pendingAttachments.length);
+    };
+
+    const renderPendingAttachments = () => {
+        if (!chatAttachmentPreviewTray) return;
+        chatAttachmentPreviewTray.innerHTML = "";
+        const gallery = buildGallery(state.pendingAttachments, true);
+        if (gallery) {
+            chatAttachmentPreviewTray.appendChild(gallery);
+            chatAttachmentPreviewTray.classList.remove("hidden");
+        } else {
+            chatAttachmentPreviewTray.classList.add("hidden");
+        }
+        if (chatAttachmentCount) {
+            chatAttachmentCount.textContent = state.pendingAttachments.length ? `${state.pendingAttachments.length} / ${MAX_ATTACHMENTS} photos` : "";
+            chatAttachmentCount.classList.toggle("hidden", !state.pendingAttachments.length);
+        }
+        autoResizeInput();
+    };
+
+    const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+    });
+
+    const createPreviewDataUrl = async (file) => {
+        try {
+            const objectUrl = URL.createObjectURL(file);
+            const image = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = objectUrl;
+            });
+            const scale = Math.min(1, 1440 / Math.max(image.naturalWidth || 1, image.naturalHeight || 1));
+            const width = Math.max(1, Math.round((image.naturalWidth || 1) * scale));
+            const height = Math.max(1, Math.round((image.naturalHeight || 1) * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext("2d").drawImage(image, 0, 0, width, height);
+            URL.revokeObjectURL(objectUrl);
+            return canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", file.type === "image/png" ? undefined : 0.82);
+        } catch (_) {
+            return readFileAsDataUrl(file);
+        }
+    };
+
+    const prepareAttachment = async (file) => ({
+        id: createId("pending"),
+        file,
+        fileName: file.name || "image",
+        contentType: file.type || "image/jpeg",
+        url: await createPreviewDataUrl(file)
+    });
+
+    const showInlineMessage = (message, tone = "default") => {
+        if (!inlineToast) return;
+        inlineToast.textContent = message;
+        inlineToast.classList.toggle("chat-inline-toast-warning", tone === "warning");
+        inlineToast.classList.toggle("chat-inline-toast-success", tone === "success");
+        inlineToast.classList.remove("hidden");
+        clearTimeout(showInlineMessage.timerId);
+        showInlineMessage.timerId = setTimeout(() => inlineToast.classList.add("hidden"), 2800);
+    };
+
+    const setUnread = (count) => {
+        const hasUnread = count > 0;
+        if (unreadBadge) {
+            unreadBadge.textContent = hasUnread ? (count > 99 ? "99+" : `${count}`) : "";
+            unreadBadge.classList.toggle("hidden", !hasUnread);
+            unreadBadge.classList.toggle("inline-flex", hasUnread);
+        }
+        if (notificationsUnreadCount) {
+            notificationsUnreadCount.textContent = hasUnread ? (count > 99 ? "99+" : `${count}`) : "";
+            notificationsUnreadCount.classList.toggle("hidden", !hasUnread);
+            notificationsUnreadCount.classList.toggle("inline-flex", hasUnread);
+        }
+        document.querySelectorAll(".nav-notification-badge").forEach((badge) => {
+            badge.textContent = hasUnread ? (count > 99 ? "99+" : `${count}`) : "";
+            badge.classList.toggle("hidden", !hasUnread);
+            badge.classList.toggle("inline-flex", hasUnread);
+        });
+    };
+
+    const refreshUnread = async () => {
+        if (!isAuthenticated) return;
+        try {
+            const response = await fetch("/api/notifications/unread-count");
+            if (!response.ok) return;
+            const data = await response.json();
+            setUnread(Number(data?.count || 0));
+        } catch (_) {
+            // ignore
+        }
+    };
+
+    const renderGuestInbox = () => {
+        if (!notificationsList) return;
+        notificationsList.innerHTML = "<div class=\"chat-empty-state-card\"><div class=\"chat-empty-state-icon\">Inbox</div><p class=\"chat-empty-state-title\">Log in to use your inbox</p><p class=\"chat-empty-state-text\">Charlie chat is available on the website, but notifications stay attached to signed-in accounts.</p></div>";
+    };
+
+    const loadNotifications = async () => {
+        if (!notificationsList) return;
+        if (!isAuthenticated) {
+            renderGuestInbox();
+            return;
+        }
+        try {
+            const response = await fetch("/api/notifications?limit=20");
+            if (!response.ok) return;
+            let items = await response.json();
+            notificationsList.innerHTML = "";
+            if (!Array.isArray(items)) return;
+            if (state.filter === "unread") {
+                items = items.filter((item) => !item.readAt && !item.dismissedAt);
+            }
+            if (!items.length) {
+                notificationsList.innerHTML = `<div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">${state.filter === "unread" ? "No unread notifications." : "No notifications yet."}</div>`;
+                return;
+            }
+            items.forEach((item) => {
+                const row = document.createElement("div");
+                row.className = `group rounded-xl border p-3 shadow-sm transition-all ${!item.readAt && !item.dismissedAt ? "border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/10" : "border-slate-200 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/60"}`;
+                row.innerHTML = `<div class="flex items-start justify-between gap-2"><div class="text-xs font-semibold text-slate-600 dark:text-slate-300">${item.title || "Notification"}</div><button type="button" class="text-[11px] font-semibold text-slate-400">Dismiss</button></div><div class="mt-1.5 text-sm leading-snug text-slate-700 dark:text-slate-200">${item.message || ""}</div>`;
+                row.querySelector("button")?.addEventListener("click", async (event) => {
+                    event.stopPropagation();
+                    await fetch(`/api/notifications/${item.id}/dismiss`, { method: "POST", headers: headers(false) });
+                    await loadNotifications();
+                    await refreshUnread();
+                });
+                notificationsList.appendChild(row);
+            });
+        } catch (_) {
+            // ignore
+        }
+    };
+
+    const handleFilesSelected = async (files) => {
+        const candidates = Array.from(files || []).filter((file) => file?.type?.startsWith("image/"));
+        const availableSlots = MAX_ATTACHMENTS - state.pendingAttachments.length;
+        if (availableSlots <= 0) {
+            showInlineMessage("You can attach up to 5 photos per message.", "warning");
+            return;
+        }
+        const selected = candidates.slice(0, availableSlots);
+        if (candidates.length > availableSlots) {
+            showInlineMessage("Only the first 5 photos were kept for this message.", "warning");
+        }
+        for (const file of selected) {
+            state.pendingAttachments.push(await prepareAttachment(file));
+        }
+        renderPendingAttachments();
+        updateSendState();
+        closeComposerOptions();
+    };
+
+    const uploadAttachments = async (queuedAttachments) => {
+        if (!queuedAttachments.length || !isAuthenticated) return [];
+        const formData = new FormData();
+        queuedAttachments.forEach((attachment) => attachment.file && formData.append("files", attachment.file));
+        const nextHeaders = {};
+        if (csrfToken) nextHeaders[csrfHeader] = csrfToken;
+        const response = await fetch("/chat/attachments", { method: "POST", headers: nextHeaders, body: formData });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data?.error || "Unable to upload chat images right now.");
+        return Array.isArray(data?.attachments) ? data.attachments.map(normalizeAttachment).filter(Boolean) : [];
+    };
+
+    const fetchHistory = async () => {
+        if (!isAuthenticated) return [];
+        try {
+            const response = await fetch("/chat/history");
+            if (!response.ok) return [];
+            const data = await response.json();
+            return Array.isArray(data) ? data.map(normalizeMessage).filter(Boolean) : [];
+        } catch (_) {
+            return [];
+        }
+    };
+
+    const resetComposer = () => {
+        input.value = "";
+        input.style.height = "auto";
+        chatCameraInput && (chatCameraInput.value = "");
+        chatPhotoInput && (chatPhotoInput.value = "");
+        state.pendingAttachments = [];
+        renderPendingAttachments();
+        updateSendState();
+    };
+
+    const submitMessage = async (event) => {
+        event.preventDefault();
+        if (state.sending) return;
+        const text = input.value.trim();
+        const queuedAttachments = state.pendingAttachments.slice();
+        if (!text && !queuedAttachments.length) {
+            showInlineMessage("Add a message or photo before sending.", "warning");
+            updateSendState();
+            return;
+        }
+        appendMessage({ who: "me", text, attachments: queuedAttachments, navActions: [] });
+        state.sending = true;
+        updateSendState();
+        resetComposer();
+        try {
+            const attachments = await uploadAttachments(queuedAttachments);
+            const response = await fetch(isAuthenticated ? "/chat/api" : "/chat/ask", {
+                method: "POST",
+                headers: headers(true),
+                body: JSON.stringify({
+                    message: text,
+                    attachments: isAuthenticated
+                        ? attachments
+                        : queuedAttachments.map((attachment) => ({ fileName: attachment.fileName, contentType: attachment.contentType }))
+                })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data?.reply || "Charlie is unavailable right now.");
+            appendMessage({ who: "ai", text: data?.reply || "No response received.", attachments: [], navActions: Array.isArray(data?.navActions) ? data.navActions : [] });
+            dot?.classList.add("active");
+        } catch (error) {
+            appendMessage({ who: "ai", text: error?.message || "Charlie is unavailable right now.", attachments: [], navActions: [] });
+        } finally {
+            state.sending = false;
+            updateSendState();
+        }
+    };
+
+    window.toggleChatPanel = () => (panel.classList.contains("open") ? close() : open());
+    window.openCharlieChatWithMessage = (message) => {
+        if (!message || typeof message !== "string") return;
+        open();
+        setActiveView("chat");
+        appendMessage({ who: "ai", text: message.trim(), attachments: [], navActions: [] });
+    };
+
+    fab.addEventListener("click", (event) => { event.preventDefault(); window.toggleChatPanel(); });
+    closeBtn.addEventListener("click", close);
+    clearBtn.addEventListener("click", openInlineClearConfirm);
+    clearInlineCancel?.addEventListener("click", closeInlineClearConfirm);
+    clearInlineConfirmBtn?.addEventListener("click", async () => {
+        closeInlineClearConfirm();
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+        renderHistory([]);
+        showInlineMessage("Chat history cleared.", "success");
+        if (isAuthenticated) await fetch("/chat/clear", { method: "POST", headers: headers(false) }).catch(() => undefined);
+    });
+    normalTabBtn?.addEventListener("click", () => { open(); setActiveView("chat"); });
+    notificationsToggle2?.addEventListener("click", async () => { open(); setActiveView(state.view === "inbox" ? "chat" : "inbox"); if (state.view === "inbox") await loadNotifications(); });
+    proChatBtn?.addEventListener("click", (event) => { const locked = proChatBtn.getAttribute("data-locked") === "true" || !isPremium; if (locked) { event.preventDefault(); showInlineMessage("Upgrade to use Chat +.", "warning"); setTimeout(() => { window.location.href = "/pricing"; }, 320); } else { window.location.href = "/chat"; } });
+    chatAttachImageBtn?.addEventListener("click", toggleComposerOptions);
+    chatUseCameraBtn?.addEventListener("click", () => chatCameraInput?.click());
+    chatUsePhotosBtn?.addEventListener("click", () => chatPhotoInput?.click());
+    chatCameraInput?.addEventListener("change", (event) => handleFilesSelected(event.target.files));
+    chatPhotoInput?.addEventListener("change", (event) => handleFilesSelected(event.target.files));
+    chatMediaLightboxBackdrop?.addEventListener("click", closeLightbox);
+    chatMediaLightboxClose?.addEventListener("click", closeLightbox);
+    notifFilterAll?.addEventListener("click", async () => { state.filter = "all"; notifFilterAll.classList.add("active"); notifFilterUnread?.classList.remove("active"); await loadNotifications(); });
+    notifFilterUnread?.addEventListener("click", async () => { state.filter = "unread"; notifFilterUnread.classList.add("active"); notifFilterAll?.classList.remove("active"); await loadNotifications(); });
+    notificationsReadAll?.addEventListener("click", async () => { if (!isAuthenticated) return; await fetch("/api/notifications/read-all", { method: "POST", headers: headers(false) }); await loadNotifications(); await refreshUnread(); });
+    form.addEventListener("submit", submitMessage);
+    input.addEventListener("input", () => { autoResizeInput(); updateSendState(); });
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); form.requestSubmit(); } });
+    document.addEventListener("click", (event) => { if (!chatComposerOptions?.contains(event.target) && !chatAttachImageBtn?.contains(event.target)) closeComposerOptions(); });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") { if (!chatMediaLightbox?.classList.contains("hidden")) closeLightbox(); else if (!clearInlineConfirm?.classList.contains("hidden")) closeInlineClearConfirm(); else if (panel.classList.contains("open")) close(); } });
+
+    renderHistory(readHistory());
+    autoResizeInput();
+    renderPendingAttachments();
+    updateSendState();
+    refreshUnread();
+    if (isAuthenticated) {
+        fetchHistory().then((messages) => { if (messages.length) renderHistory(messages); });
+        setInterval(refreshUnread, 30000);
+    }
+    return true;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.getElementById("chatWidget") || document;
     if (root !== document && root.dataset.chatInitialized === "true") return;
@@ -24,6 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const fab = document.getElementById("chatFab");
     const panel = document.getElementById("chatPanel");
+    const panelContent = document.getElementById("chatPanelContent");
     const closeBtn = document.getElementById("chatClose");
     const clearBtn = document.getElementById("chatClear");
     const form = document.getElementById("chatForm");
@@ -44,15 +567,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const toastRegion = document.getElementById("chatToastRegion");
     const inlineToast = document.getElementById("chatInlineToast");
     const proChatBtn = document.getElementById("chatProChatBtn");
-    const chatImageInput = document.getElementById("chatImageInput");
     const chatAttachImageBtn = document.getElementById("chatAttachImageBtn");
-
-    const clearModal = document.getElementById("chatClearModal");
-    const clearModalCancel = document.getElementById("chatClearCancel");
-    const clearModalConfirm = document.getElementById("chatClearConfirm");
+    const chatComposerOptions = document.getElementById("chatComposerOptions");
+    const chatUseCameraBtn = document.getElementById("chatUseCameraBtn");
+    const chatUsePhotosBtn = document.getElementById("chatUsePhotosBtn");
+    const chatCameraInput = document.getElementById("chatCameraInput");
+    const chatPhotoInput = document.getElementById("chatPhotoInput");
+    const chatAttachmentPreviewTray = document.getElementById("chatAttachmentPreviewTray");
+    const chatAttachmentCount = document.getElementById("chatAttachmentCount");
+    const clearInlineConfirm = document.getElementById("chatInlineClearConfirm");
+    const clearInlineCancel = document.getElementById("chatClearCancel");
+    const clearInlineConfirmBtn = document.getElementById("chatClearConfirm");
+    const chatMediaLightbox = document.getElementById("chatMediaLightbox");
+    const chatMediaLightboxBackdrop = document.getElementById("chatMediaLightboxBackdrop");
+    const chatMediaLightboxClose = document.getElementById("chatMediaLightboxClose");
+    const chatMediaLightboxImage = document.getElementById("chatMediaLightboxImage");
 
     // Detailed error logging for debugging
-    if (!fab || !panel || !closeBtn || !clearBtn || !form || !input || !body || !sendBtn) {
+    if (!fab || !panel || !panelContent || !closeBtn || !clearBtn || !form || !input || !body || !sendBtn) {
         console.error("Chat widget init failed - missing elements:", {
             fab: !!fab, panel: !!panel, closeBtn: !!closeBtn, clearBtn: !!clearBtn,
             form: !!form, input: !!input, body: !!body, sendBtn: !!sendBtn
@@ -80,7 +612,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const authMarker = document.getElementById("chatAuth");
     const isAuthenticated = authMarker?.dataset?.authenticated === "true";
-    const historyAllowed = document.body?.dataset?.chatHistory !== "off";
     const isPremium = root?.dataset?.premium === "true";
     const accountRole = root?.dataset?.role || "GUEST";
     const initialWelcomeText = body.querySelector(".chat-message-bubble")?.textContent?.trim() || "";
@@ -88,14 +619,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const csrfToken = document.getElementById("chat_csrf")?.value || null;
     const csrfHeader = document.getElementById("chat_csrf_header")?.value || "X-CSRF-TOKEN";
 
-    const STORAGE_KEY = "one2one_chat_history_v1";
+    const STORAGE_KEY = "one2one_chat_history_v2";
+    const LEGACY_STORAGE_KEY = "one2one_chat_history_v1";
     const TOAST_DURATION = 5000;
+    const MAX_ATTACHMENTS = 5;
+    const MAX_COMPOSER_HEIGHT = 160;
     let notificationsPollTimer = null;
     let eventSource = null;
     let sseRetryCount = 0;
     const MAX_SSE_RETRIES = 5;
     const notificationSyncChannel = "BroadcastChannel" in window ? new BroadcastChannel("one-to-one-notifications") : null;
-    let pendingImageAttachment = null;
+
+    return initCharlieWidget({
+        root, fab, panel, panelContent, closeBtn, clearBtn, form, input, body, sendBtn,
+        dot, normalTabBtn, notificationsToggle2, notifFilterAll, notifFilterUnread,
+        notificationsUnreadCount, notificationsList, notificationsReadAll, unreadBadge,
+        inlineToast, proChatBtn, chatAttachImageBtn, chatComposerOptions, chatUseCameraBtn,
+        chatUsePhotosBtn, chatCameraInput, chatPhotoInput, chatAttachmentPreviewTray,
+        chatAttachmentCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
+        chatMediaLightbox, chatMediaLightboxBackdrop, chatMediaLightboxClose, chatMediaLightboxImage,
+        isAuthenticated, isPremium, accountRole, initialWelcomeText, csrfToken, csrfHeader,
+        STORAGE_KEY, LEGACY_STORAGE_KEY, MAX_ATTACHMENTS, MAX_COMPOSER_HEIGHT
+    });
 
     function broadcastNotificationSync(detail) {
         const payload = detail || {};

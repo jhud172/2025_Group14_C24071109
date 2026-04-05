@@ -79,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setCustomizeMode(enabled) {
         customizeOpen = enabled;
+        shelf?.setAttribute("data-view", enabled ? "customize" : "main");
         viewPane?.classList.toggle("hidden", enabled);
         customizePane?.classList.toggle("hidden", !enabled);
         if (!enabled) renderActive();
@@ -87,6 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
     customizeToggle?.addEventListener("click", () => {
         setCustomizeMode(!customizeOpen);
     });
+
+    setCustomizeMode(false);
 
     function authHeaders() {
         const headers = { "Content-Type": "application/json" };
