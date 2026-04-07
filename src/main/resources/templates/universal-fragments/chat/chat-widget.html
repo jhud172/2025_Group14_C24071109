@@ -46,16 +46,15 @@
                     </div>
                     <div class="chat-title-text">
                         <div class="chat-title-main">Charlie</div>
-                        <div class="chat-title-subtitle">One To One AI performance concierge</div>
+                        <div class="chat-title-subtitle">One To One AI Assistant</div>
                     </div>
                 </div>
 
                 <div class="chat-header-actions">
                     <button type="button"
-                            class="chat-icon-btn-premium"
+                            class="chat-icon-btn-premium chat-tooltip-below"
                             id="chatClear"
                             data-tooltip="Clear chat"
-                            title="Clear coach history"
                             aria-label="Clear coach history">
                         <svg viewBox="0 0 24 24" aria-hidden="true" class="chat-icon-svg">
                             <path d="M9 3h6m-9 4h12m-9 0v10m6-10v10M8 7l.6 11.2A2 2 0 0 0 10.6 20h2.8a2 2 0 0 0 2-1.8L16 7"
@@ -63,10 +62,9 @@
                         </svg>
                     </button>
                     <button type="button"
-                            class="chat-icon-btn-premium"
+                            class="chat-icon-btn-premium chat-tooltip-below"
                             id="chatClose"
                             data-tooltip="Close"
-                            title="Close Charlie"
                             aria-label="Close Charlie">
                         <svg viewBox="0 0 24 24" aria-hidden="true" class="chat-icon-svg">
                             <path d="M6 6l12 12M18 6L6 18"
@@ -84,7 +82,8 @@
                         aria-label="Open Charlie chat">
                     Chat
                 </button>
-                <button type="button"
+                <button sec:authorize="isAuthenticated()"
+                        type="button"
                         id="chatNotificationsToggle2"
                         class="chat-tab-btn"
                         title="Open inbox"
@@ -175,42 +174,46 @@
                     <div class="chat-composer-shell">
                         <div id="chatAttachmentPreviewTray" class="chat-attachment-preview-tray hidden" aria-live="polite"></div>
 
-                        <div id="chatComposerOptions" class="chat-composer-options hidden" aria-hidden="true">
-                            <button type="button" id="chatUseCameraBtn" class="chat-composer-option">
-                                <span class="chat-composer-option-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" class="chat-option-svg">
-                                        <path d="M7 8l1.2-2h7.6L17 8h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h2zm5 9.2a3.7 3.7 0 1 0 0-7.4 3.7 3.7 0 0 0 0 7.4z"
-                                              fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
-                                    </svg>
-                                </span>
-                                <span>Camera</span>
-                            </button>
-                            <button type="button" id="chatUsePhotosBtn" class="chat-composer-option">
-                                <span class="chat-composer-option-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" class="chat-option-svg">
-                                        <path d="M5 5h14v14H5zM8.5 14.5l2.1-2.4 1.8 2 2.5-3 2.6 3.4"
-                                              fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
-                                        <circle cx="9" cy="9" r="1.1" fill="currentColor"/>
-                                    </svg>
-                                </span>
-                                <span>Photos</span>
-                            </button>
-                        </div>
-
                         <form class="chat-input-container" id="chatForm" autocomplete="off">
                             <input type="file" id="chatCameraInput" accept="image/*" capture="environment" class="hidden" multiple />
                             <input type="file" id="chatPhotoInput" accept="image/*" class="hidden" multiple />
-                            <button type="button"
-                                    id="chatAttachImageBtn"
-                                    class="chat-icon-btn-premium chat-upload-btn"
-                                    data-tooltip="Upload photo"
-                                    title="Upload photo"
-                                    aria-label="Upload photo">
-                                <svg viewBox="0 0 24 24" aria-hidden="true" class="chat-icon-svg">
-                                    <path d="M7 8l1.2-2h7.6L17 8h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h2zm5 9.2a3.7 3.7 0 1 0 0-7.4 3.7 3.7 0 0 0 0 7.4z"
-                                          fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
-                                </svg>
-                            </button>
+                            <div class="chat-composer-tools" id="chatComposerTools">
+                                <button type="button"
+                                        id="chatAttachImageBtn"
+                                        class="chat-icon-btn-premium chat-upload-btn chat-tooltip-above"
+                                        data-tooltip="Upload photo"
+                                        aria-label="Upload photo"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                        aria-controls="chatComposerOptions">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" class="chat-icon-svg">
+                                        <path d="M7 8l1.2-2h7.6L17 8h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h2zm5 9.2a3.7 3.7 0 1 0 0-7.4 3.7 3.7 0 0 0 0 7.4z"
+                                              fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+                                    </svg>
+                                </button>
+
+                                <div id="chatComposerOptions" class="chat-composer-options hidden" aria-hidden="true">
+                                    <button type="button" id="chatUseCameraBtn" class="chat-composer-option" aria-label="Open camera">
+                                        <span class="chat-composer-option-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" class="chat-option-svg">
+                                                <path d="M7 8l1.2-2h7.6L17 8h2a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h2zm5 9.2a3.7 3.7 0 1 0 0-7.4 3.7 3.7 0 0 0 0 7.4z"
+                                                      fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+                                            </svg>
+                                        </span>
+                                        <span>Camera</span>
+                                    </button>
+                                    <button type="button" id="chatUsePhotosBtn" class="chat-composer-option" aria-label="Choose photos">
+                                        <span class="chat-composer-option-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" class="chat-option-svg">
+                                                <path d="M5 5h14v14H5zM8.5 14.5l2.1-2.4 1.8 2 2.5-3 2.6 3.4"
+                                                      fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"/>
+                                                <circle cx="9" cy="9" r="1.1" fill="currentColor"/>
+                                            </svg>
+                                        </span>
+                                        <span>Photos</span>
+                                    </button>
+                                </div>
+                            </div>
 
                             <div class="chat-input-stack">
                                 <textarea id="chatInput"
@@ -220,7 +223,6 @@
                                           th:placeholder="${(#authentication != null and #authentication.authenticated) ? 'Message Charlie...' : 'Ask Charlie about One To One...'}"></textarea>
                                 <div class="chat-input-meta">
                                     <span id="chatAttachmentCount" class="chat-input-hint hidden">0 / 5 photos</span>
-                                    <span class="chat-input-hint">Shift + Enter for a new line</span>
                                 </div>
                             </div>
 
@@ -233,7 +235,9 @@
                     </div>
                 </div>
 
-                <div id="chatNotificationsView" class="chat-view-pane chat-view-pane-inbox chat-notifications-view">
+                <div sec:authorize="isAuthenticated()"
+                     id="chatNotificationsView"
+                     class="chat-view-pane chat-view-pane-inbox chat-notifications-view">
                     <div class="chat-inbox-toolbar">
                         <div class="flex items-center gap-2">
                             <span class="chat-inbox-icon" aria-hidden="true">

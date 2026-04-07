@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import uk.ac.cf._5.group14.One_To_One.Membership.EmailService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PasswordResetService {
@@ -53,7 +55,11 @@ public class PasswordResetService {
 
         PasswordResetToken saved = tokenRepository.save(token);
         String resetUrl = buildResetUrl(saved.getToken());
-        emailService.sendPasswordReset(user, resetUrl, saved.getExpiresAt());
+        try {
+            emailService.sendPasswordReset(user, resetUrl, saved.getExpiresAt());
+        } catch (RuntimeException ex) {
+            log.error("Password reset delivery failed for user {}", user.getId(), ex);
+        }
     }
 
     public Optional<PasswordResetToken> getValidToken(String tokenValue) {

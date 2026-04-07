@@ -19,6 +19,10 @@
         @apply max-w-7xl;
     }
 
+    .auth-container--login {
+        @apply max-w-3xl;
+    }
+
     /* Auth card with enhanced design */
     .auth-card {
         @apply relative w-full rounded-[2rem] bg-white p-8 sm:p-10;
@@ -37,6 +41,10 @@
 
     .auth-container--wide .auth-card {
         max-width: 56rem;
+    }
+
+    .auth-card--login {
+        max-width: min(30rem, 100%);
     }
 
     @keyframes slideUp {
@@ -209,14 +217,24 @@
 
     /* Multi-part code input with enhanced styling */
     .code-input-group {
-        @apply flex gap-2 items-center justify-center;
+        @apply grid w-full items-center;
+        column-gap: 0.5rem;
+        justify-content: stretch;
+    }
+
+    .code-input-group--trainer {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+
+    .code-input-group--gym {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
     }
 
     .code-input-part {
-        @apply flex-1 text-center font-mono text-lg tracking-widest rounded-xl border-2 border-gray-300 bg-white px-3 py-3.5 text-gray-900
+        @apply w-full min-w-0 text-center font-mono text-lg tracking-[0.22em] rounded-xl border-2 border-gray-300 bg-white px-3 py-3.5 text-gray-900
         placeholder:text-gray-400 transition-all duration-300
         focus-visible:outline-none focus-visible:border-emerald-500
-        hover:border-gray-400 max-w-[80px];
+        hover:border-gray-400;
     }
 
     .code-input-part:focus {
@@ -225,8 +243,9 @@
     }
 
     .code-input-separator {
-        @apply text-emerald-400 font-bold text-xl;
+        @apply text-center text-emerald-400 font-bold text-xl;
         text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        line-height: 1;
     }
 
     /* Auth buttons with ripple effect */
@@ -825,14 +844,56 @@
             min-height: min(34rem, calc(100svh - 5.75rem));
         }
 
+        .auth-card--login {
+            max-width: min(32rem, 100%);
+            padding-left: 1.4rem;
+            padding-right: 1.4rem;
+        }
+
         .code-input-group {
-            gap: 0.35rem;
+            column-gap: 0.3rem;
         }
 
         .code-input-part {
-            max-width: 4rem;
-            padding-left: 0.65rem;
-            padding-right: 0.65rem;
+            font-size: 1rem;
+            letter-spacing: 0.14em;
+            padding-left: 0.55rem;
+            padding-right: 0.55rem;
+        }
+
+        .code-input-separator {
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 430px) {
+        .auth-card {
+            padding-left: 1.2rem;
+            padding-right: 1.2rem;
+        }
+
+        .auth-card--login {
+            max-width: 100%;
+        }
+
+        .role-slider__option {
+            padding-left: 0.85rem;
+            padding-right: 0.85rem;
+        }
+
+        .code-input-group {
+            column-gap: 0.24rem;
+        }
+
+        .code-input-part {
+            font-size: 0.92rem;
+            letter-spacing: 0.1em;
+            padding-left: 0.35rem;
+            padding-right: 0.35rem;
+        }
+
+        .code-input-separator {
+            font-size: 0.92rem;
         }
     }
 }

@@ -20,9 +20,9 @@ window.toggleChatPanel = function() {
 function initCharlieWidget(config) {
     const {
         root, fab, panel, panelContent, closeBtn, clearBtn, form, input, body, sendBtn,
-        dot, normalTabBtn, notificationsToggle2, notifFilterAll, notifFilterUnread,
+        dot, normalTabBtn, notificationsToggle2, notificationsView, notifFilterAll, notifFilterUnread,
         notificationsUnreadCount, notificationsList, notificationsReadAll, unreadBadge,
-        inlineToast, proChatBtn, chatAttachImageBtn, chatComposerOptions, chatUseCameraBtn,
+        inlineToast, proChatBtn, chatAttachImageBtn, chatComposerTools, chatComposerOptions, chatUseCameraBtn,
         chatUsePhotosBtn, chatCameraInput, chatPhotoInput, chatAttachmentPreviewTray,
         chatAttachmentCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
         chatMediaLightbox, chatMediaLightboxBackdrop, chatMediaLightboxClose, chatMediaLightboxImage,
@@ -37,6 +37,8 @@ function initCharlieWidget(config) {
         pendingAttachments: [],
         history: []
     };
+    const canUseInbox = Boolean(isAuthenticated && notificationsToggle2 && notificationsView && notificationsList);
+    const composerTooltipLabel = chatAttachImageBtn?.dataset?.tooltip || "";
 
     const headers = (json = true) => {
         const next = {};
@@ -220,23 +222,52 @@ function initCharlieWidget(config) {
         if (persist) persistHistory();
     };
 
+    const syncHeaderState = () => {
+        const showingInbox = state.view === "inbox";
+        if (clearBtn) {
+            clearBtn.hidden = showingInbox;
+            clearBtn.disabled = showingInbox;
+            clearBtn.setAttribute("aria-hidden", showingInbox ? "true" : "false");
+            clearBtn.tabIndex = showingInbox ? -1 : 0;
+        }
+    };
+
     const setActiveView = (view) => {
-        state.view = view === "inbox" ? "inbox" : "chat";
+        state.view = canUseInbox && view === "inbox" ? "inbox" : "chat";
         panelContent.dataset.view = state.view;
         normalTabBtn?.classList.toggle("active", state.view === "chat");
         notificationsToggle2?.classList.toggle("active", state.view === "inbox");
+        normalTabBtn?.setAttribute("aria-pressed", state.view === "chat" ? "true" : "false");
+        notificationsToggle2?.setAttribute("aria-pressed", state.view === "inbox" ? "true" : "false");
+        if (state.view === "inbox") {
+            closeComposerOptions();
+            closeInlineClearConfirm();
+        }
+        syncHeaderState();
+    };
+
+    const setComposerOptionsOpen = (isOpen) => {
+        chatComposerOptions?.classList.toggle("hidden", !isOpen);
+        chatComposerOptions?.setAttribute("aria-hidden", isOpen ? "false" : "true");
+        chatAttachImageBtn?.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        if (chatAttachImageBtn) {
+            if (isOpen || window.matchMedia("(max-width: 640px)").matches) {
+                chatAttachImageBtn.removeAttribute("data-tooltip");
+            } else if (composerTooltipLabel) {
+                chatAttachImageBtn.dataset.tooltip = composerTooltipLabel;
+            }
+        }
+        panelContent.dataset.composerOpen = isOpen ? "true" : "false";
     };
 
     const closeComposerOptions = () => {
-        chatComposerOptions?.classList.add("hidden");
-        chatComposerOptions?.setAttribute("aria-hidden", "true");
+        setComposerOptionsOpen(false);
     };
 
     const toggleComposerOptions = () => {
-        if (!chatComposerOptions) return;
+        if (!chatComposerOptions || input.disabled || state.view !== "chat") return;
         const isOpen = !chatComposerOptions.classList.contains("hidden");
-        chatComposerOptions.classList.toggle("hidden", isOpen);
-        chatComposerOptions.setAttribute("aria-hidden", isOpen ? "true" : "false");
+        setComposerOptionsOpen(isOpen ? false : true);
     };
 
     const openInlineClearConfirm = () => {
@@ -264,6 +295,7 @@ function initCharlieWidget(config) {
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
         fab.setAttribute("aria-expanded", "true");
+        syncHeaderState();
     };
 
     const closePanel = () => {
@@ -377,7 +409,7 @@ function initCharlieWidget(config) {
 
     const loadNotifications = async () => {
         if (!notificationsList) return;
-        if (!isAuthenticated) {
+        if (!canUseInbox) {
             renderGuestInbox();
             return;
         }
@@ -523,11 +555,24 @@ function initCharlieWidget(config) {
         if (isAuthenticated) await fetch("/chat/clear", { method: "POST", headers: headers(false) }).catch(() => undefined);
     });
     normalTabBtn?.addEventListener("click", () => { openPanel(); setActiveView("chat"); });
-    notificationsToggle2?.addEventListener("click", async () => { openPanel(); setActiveView(state.view === "inbox" ? "chat" : "inbox"); if (state.view === "inbox") await loadNotifications(); });
+    notificationsToggle2?.addEventListener("click", async () => {
+        openPanel();
+        setActiveView(state.view === "inbox" ? "chat" : "inbox");
+        if (state.view === "inbox") await loadNotifications();
+    });
     proChatBtn?.addEventListener("click", (event) => { const locked = proChatBtn.getAttribute("data-locked") === "true" || !isPremium; if (locked) { event.preventDefault(); showInlineMessage("Upgrade to use Chat +.", "warning"); setTimeout(() => { window.location.href = "/pricing"; }, 320); } else { window.location.href = "/chat"; } });
-    chatAttachImageBtn?.addEventListener("click", toggleComposerOptions);
-    chatUseCameraBtn?.addEventListener("click", () => chatCameraInput?.click());
-    chatUsePhotosBtn?.addEventListener("click", () => chatPhotoInput?.click());
+    chatAttachImageBtn?.addEventListener("click", (event) => {
+        event.preventDefault();
+        toggleComposerOptions();
+    });
+    chatUseCameraBtn?.addEventListener("click", () => {
+        closeComposerOptions();
+        chatCameraInput?.click();
+    });
+    chatUsePhotosBtn?.addEventListener("click", () => {
+        closeComposerOptions();
+        chatPhotoInput?.click();
+    });
     chatCameraInput?.addEventListener("change", (event) => handleFilesSelected(event.target.files));
     chatPhotoInput?.addEventListener("change", (event) => handleFilesSelected(event.target.files));
     chatMediaLightboxBackdrop?.addEventListener("click", closeLightbox);
@@ -538,10 +583,14 @@ function initCharlieWidget(config) {
     form.addEventListener("submit", submitMessage);
     input.addEventListener("input", () => { autoResizeInput(); updateSendState(); });
     input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); form.requestSubmit(); } });
-    document.addEventListener("click", (event) => { if (!chatComposerOptions?.contains(event.target) && !chatAttachImageBtn?.contains(event.target)) closeComposerOptions(); });
+    document.addEventListener("click", (event) => {
+        if (!chatComposerTools?.contains(event.target)) closeComposerOptions();
+    });
     document.addEventListener("keydown", (event) => { if (event.key === "Escape") { if (!chatMediaLightbox?.classList.contains("hidden")) closeLightbox(); else if (!clearInlineConfirm?.classList.contains("hidden")) closeInlineClearConfirm(); else if (panel.classList.contains("open")) closePanel(); } });
 
     renderHistory(readHistory());
+    setActiveView("chat");
+    closeComposerOptions();
     autoResizeInput();
     renderPendingAttachments();
     updateSendState();
@@ -582,6 +631,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inlineToast = document.getElementById("chatInlineToast");
     const proChatBtn = document.getElementById("chatProChatBtn");
     const chatAttachImageBtn = document.getElementById("chatAttachImageBtn");
+    const chatComposerTools = document.getElementById("chatComposerTools");
     const chatComposerOptions = document.getElementById("chatComposerOptions");
     const chatUseCameraBtn = document.getElementById("chatUseCameraBtn");
     const chatUsePhotosBtn = document.getElementById("chatUsePhotosBtn");
@@ -646,9 +696,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return initCharlieWidget({
         root, fab, panel, panelContent, closeBtn, clearBtn, form, input, body, sendBtn,
-        dot, normalTabBtn, notificationsToggle2, notifFilterAll, notifFilterUnread,
+        dot, normalTabBtn, notificationsToggle2, notificationsView, notifFilterAll, notifFilterUnread,
         notificationsUnreadCount, notificationsList, notificationsReadAll, unreadBadge,
-        inlineToast, proChatBtn, chatAttachImageBtn, chatComposerOptions, chatUseCameraBtn,
+        inlineToast, proChatBtn, chatAttachImageBtn, chatComposerTools, chatComposerOptions, chatUseCameraBtn,
         chatUsePhotosBtn, chatCameraInput, chatPhotoInput, chatAttachmentPreviewTray,
         chatAttachmentCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
         chatMediaLightbox, chatMediaLightboxBackdrop, chatMediaLightboxClose, chatMediaLightboxImage,
