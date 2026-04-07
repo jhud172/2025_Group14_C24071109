@@ -1366,6 +1366,9 @@
     }
 
     function init() {
+        if (getDashboardRoot()) {
+            document.body.classList.add("cd-dashboard-shell-active");
+        }
         initDashboardShell();
         initCardRevealAnimations();
         initGoalSlider();
