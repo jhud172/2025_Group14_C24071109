@@ -20,10 +20,17 @@ import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
 public class DemoAccountVerificationInitializer implements ApplicationRunner {
 
     private static final List<String> DEMO_USERNAMES = List.of(
+        "demo",
+        "demo2",
+        "admin_demo",
         "demo_admin",
         "demo_client",
+        "demo_gym",
         "demo_trainer",
-        "demo_gym"
+        "gymadmin_demo",
+        "superadmin_demo",
+        "superadmin_ops",
+        "trainer_demo"
     );
 
     private final DevModeProperties devModeProperties;
