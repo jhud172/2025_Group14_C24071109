@@ -260,6 +260,20 @@ function initCharlieWidget(config) {
         sendBtn.disabled = state.sending || (!hasText && !state.pendingAttachments.length);
     };
 
+    const openPanel = () => {
+        panel.classList.add("open");
+        panel.setAttribute("aria-hidden", "false");
+        fab.setAttribute("aria-expanded", "true");
+    };
+
+    const closePanel = () => {
+        panel.classList.remove("open");
+        panel.setAttribute("aria-hidden", "true");
+        fab.setAttribute("aria-expanded", "false");
+        closeComposerOptions();
+        closeInlineClearConfirm();
+    };
+
     const renderPendingAttachments = () => {
         if (!chatAttachmentPreviewTray) return;
         chatAttachmentPreviewTray.innerHTML = "";
@@ -488,16 +502,16 @@ function initCharlieWidget(config) {
         }
     };
 
-    window.toggleChatPanel = () => (panel.classList.contains("open") ? close() : open());
+    window.toggleChatPanel = () => (panel.classList.contains("open") ? closePanel() : openPanel());
     window.openCharlieChatWithMessage = (message) => {
         if (!message || typeof message !== "string") return;
-        open();
+        openPanel();
         setActiveView("chat");
         appendMessage({ who: "ai", text: message.trim(), attachments: [], navActions: [] });
     };
 
     fab.addEventListener("click", (event) => { event.preventDefault(); window.toggleChatPanel(); });
-    closeBtn.addEventListener("click", close);
+    closeBtn.addEventListener("click", closePanel);
     clearBtn.addEventListener("click", openInlineClearConfirm);
     clearInlineCancel?.addEventListener("click", closeInlineClearConfirm);
     clearInlineConfirmBtn?.addEventListener("click", async () => {
@@ -508,8 +522,8 @@ function initCharlieWidget(config) {
         showInlineMessage("Chat history cleared.", "success");
         if (isAuthenticated) await fetch("/chat/clear", { method: "POST", headers: headers(false) }).catch(() => undefined);
     });
-    normalTabBtn?.addEventListener("click", () => { open(); setActiveView("chat"); });
-    notificationsToggle2?.addEventListener("click", async () => { open(); setActiveView(state.view === "inbox" ? "chat" : "inbox"); if (state.view === "inbox") await loadNotifications(); });
+    normalTabBtn?.addEventListener("click", () => { openPanel(); setActiveView("chat"); });
+    notificationsToggle2?.addEventListener("click", async () => { openPanel(); setActiveView(state.view === "inbox" ? "chat" : "inbox"); if (state.view === "inbox") await loadNotifications(); });
     proChatBtn?.addEventListener("click", (event) => { const locked = proChatBtn.getAttribute("data-locked") === "true" || !isPremium; if (locked) { event.preventDefault(); showInlineMessage("Upgrade to use Chat +.", "warning"); setTimeout(() => { window.location.href = "/pricing"; }, 320); } else { window.location.href = "/chat"; } });
     chatAttachImageBtn?.addEventListener("click", toggleComposerOptions);
     chatUseCameraBtn?.addEventListener("click", () => chatCameraInput?.click());
@@ -525,7 +539,7 @@ function initCharlieWidget(config) {
     input.addEventListener("input", () => { autoResizeInput(); updateSendState(); });
     input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); form.requestSubmit(); } });
     document.addEventListener("click", (event) => { if (!chatComposerOptions?.contains(event.target) && !chatAttachImageBtn?.contains(event.target)) closeComposerOptions(); });
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape") { if (!chatMediaLightbox?.classList.contains("hidden")) closeLightbox(); else if (!clearInlineConfirm?.classList.contains("hidden")) closeInlineClearConfirm(); else if (panel.classList.contains("open")) close(); } });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") { if (!chatMediaLightbox?.classList.contains("hidden")) closeLightbox(); else if (!clearInlineConfirm?.classList.contains("hidden")) closeInlineClearConfirm(); else if (panel.classList.contains("open")) closePanel(); } });
 
     renderHistory(readHistory());
     autoResizeInput();

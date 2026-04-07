@@ -53,17 +53,22 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => messageEl.classList.add("hidden"), 4000);
     }
 
+    function syncToggleState(isOpen) {
+        shelf?.setAttribute("aria-hidden", isOpen ? "false" : "true");
+        toggleBtn?.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        toggleBtn?.setAttribute("aria-label", isOpen ? "Close quick actions" : "Open quick actions");
+        toggleBtn?.setAttribute("title", isOpen ? "Close quick actions" : "Open quick actions");
+    }
+
     function openShelf() {
         shelf?.classList.add("open");
-        shelf?.setAttribute("aria-hidden", "false");
-        toggleBtn?.setAttribute("aria-expanded", "true");
+        syncToggleState(true);
         if (customizeOpen) setCustomizeMode(false);
     }
 
     function closeShelf() {
         shelf?.classList.remove("open");
-        shelf?.setAttribute("aria-hidden", "true");
-        toggleBtn?.setAttribute("aria-expanded", "false");
+        syncToggleState(false);
     }
 
     function toggleShelf() {
@@ -76,6 +81,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toggleBtn?.addEventListener("click", toggleShelf);
     closeBtn?.addEventListener("click", closeShelf);
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && shelf?.classList.contains("open")) {
+            closeShelf();
+        }
+    });
+    document.addEventListener("click", (event) => {
+        if (!shelf?.classList.contains("open")) return;
+        if (shelf.contains(event.target) || toggleBtn?.contains(event.target)) return;
+        closeShelf();
+    });
 
     function setCustomizeMode(enabled) {
         customizeOpen = enabled;
@@ -90,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     setCustomizeMode(false);
+    syncToggleState(false);
 
     function authHeaders() {
         const headers = { "Content-Type": "application/json" };
@@ -426,27 +442,32 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        const navigateTo = (url) => {
+            closeShelf();
+            window.location.href = url;
+        };
+
         switch (action.actionKey) {
             case "OPEN_CALENDAR":
-                window.location.href = "/calendar";
+                navigateTo("/calendar");
                 break;
             case "OPEN_NOTES":
-                window.location.href = "/notes";
+                navigateTo("/notes");
                 break;
             case "LOG_NUTRITION":
-                window.location.href = "/nutrition/daily-log";
+                navigateTo("/nutrition/daily-log");
                 break;
             case "START_WORKOUT":
-                window.location.href = "/workouts/start";
+                navigateTo("/workout-management");
                 break;
             case "PROGRESS_CHECK":
-                window.location.href = "/levels/me";
+                navigateTo("/levels/me");
                 break;
             case "OPEN_INBOX":
-                window.location.href = "/inbox";
+                navigateTo("/inbox");
                 break;
             case "CREATE_TASK":
-                window.location.href = "/calendar";
+                navigateTo("/calendar");
                 break;
             default:
                 showMessage("Action not available.");

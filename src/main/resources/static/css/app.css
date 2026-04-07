@@ -34604,6 +34604,7 @@ body[data-easy-mode="on"] .chat-inline-clear-actions {
     align-items: center;
     
     justify-content: center;
+    overflow: hidden;
     
     /* Smooth transitions */
     
@@ -34641,8 +34642,30 @@ body[data-easy-mode="on"] .chat-inline-clear-actions {
     transition-duration: 150ms;
   }
 .quick-actions-fab-icon {
+    position: absolute;
+    inset: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: clamp(1.2rem, 1rem + 0.45vw, 1.5rem);
     line-height: 1;
+    transition: opacity 180ms ease, transform 220ms ease;
+}
+.quick-actions-fab-icon--primary {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+.quick-actions-fab-icon--close {
+    opacity: 0;
+    transform: scale(0.72) rotate(-18deg);
+  }
+.quick-actions-fab-premium[aria-expanded="true"] .quick-actions-fab-icon--primary {
+    opacity: 0;
+    transform: scale(0.72) rotate(18deg);
+  }
+.quick-actions-fab-premium[aria-expanded="true"] .quick-actions-fab-icon--close {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
   }
 /* === QUICK ACTIONS PANEL CONTAINER === */
 .quick-actions-panel-premium {

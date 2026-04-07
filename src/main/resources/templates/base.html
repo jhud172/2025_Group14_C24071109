@@ -6,6 +6,10 @@
              data-lang=${userSettings != null && userSettings.language != null ? userSettings.language : 'en'},
              data-theme=${userSettings != null && userSettings.theme != null ? userSettings.theme.toString().toLowerCase() : 'light'},
              data-colorblind=${userSettings != null && userSettings.colorBlindMode ? 'on' : 'off'}"
+    th:with="authUser=${@authHelper.getAuthenticatedUser()},
+             includeNavbar=${@environment.getProperty('app.ui.includeNavbar') != 'false'},
+             includeGlobalChatbot=${@environment.getProperty('app.ui.includeChatbot') != 'false' and disableGlobalChatbot != true and disableGlobalChatbot != 'true'},
+             includeQuickActions=${#authentication != null and #authentication.authenticated and #authentication.principal != 'anonymousUser'}"
     th:fragment="layout(pageTitle, pageStyles, content, pageScripts)">
 <head>
     <meta charset="UTF-8">
@@ -20,7 +24,7 @@
     <script th:src="@{/js/core/theme-preload.js(v='20260314')}"></script>
 
     <!-- Core styles (compiled Tailwind + all component styles) -->
-    <link rel="stylesheet" th:href="@{/css/app.css(v='20260407a')}">
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260407b')}">
 
     <!-- Page-specific styles -->
     <th:block th:if="${pageStyles != null}">
@@ -41,9 +45,9 @@
              data-day-mode=${dayMode != null ? dayMode : 'REST_DAY'}">
 
 <!-- NAVBAR -->
-<th:block
-    th:if="${@environment.getProperty('app.ui.includeNavbar') != 'false'}"
-    th:insert="~{universal-fragments/layout/navbar :: navbar}"></th:block>
+<th:block th:if="${includeNavbar}">
+    <th:block th:insert="~{universal-fragments/layout/navbar :: navbar}"></th:block>
+</th:block>
 
 <!-- MAIN CONTENT -->
 <main th:class="${authPageLayout == true ? 'auth-page-main pt-2 sm:pt-3' : 'min-h-[calc(100vh-5rem)] ' + (compactTopContent == true ? 'pt-2 sm:pt-3' : 'pt-16')}">
@@ -54,20 +58,22 @@
 <th:block th:insert="~{universal-fragments/layout/footer :: footer}"></th:block>
 
 <!-- CHATBOT (global) -->
-<div th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false' and disableGlobalChatbot != true}"
-    th:replace="~{universal-fragments/chat/chat-widget :: chatWidget}"></div>
+<th:block th:if="${includeGlobalChatbot}">
+    <div th:replace="~{universal-fragments/chat/chat-widget :: chatWidget}"></div>
+</th:block>
 
 <!-- QUICK ACTIONS (global, authenticated only) -->
-<div th:if="${#authorization.expression('isAuthenticated()')}"
-    th:replace="~{universal-fragments/layout/quick-actions :: quickActionsShelf}"></div>
+<th:block th:if="${includeQuickActions}">
+    <div th:replace="~{universal-fragments/layout/quick-actions :: quickActionsShelf}"></div>
+</th:block>
 
 <!-- Core scripts -->
-<script th:if="${@environment.getProperty('app.ui.includeChatbot') != 'false' and disableGlobalChatbot != true}" th:src="@{/js/chat/chat.js(v='20260303')}" defer></script>
+<script th:if="${includeGlobalChatbot}" th:src="@{/js/chat/chat.js(v='20260407a')}" defer></script>
 <script th:src="@{/js/core/form-auto-submit.js(v='20260320a')}" defer></script>
 <script th:src="@{/js/core/confirm-action.js(v='20260320a')}" defer></script>
 <script th:src="@{/js/core/back-navigation.js(v='20260320a')}" defer></script>
 <script th:src="@{/js/core/health-chart-toggle.js(v='20260320a')}" defer></script>
-<script th:if="${#authorization.expression('isAuthenticated()')}" th:src="@{/js/core/quick-actions.js(v='20260303')}" defer></script>
+<script th:if="${includeQuickActions}" th:src="@{/js/core/quick-actions.js(v='20260407a')}" defer></script>
 <script th:src="@{/js/core/navbar-premium.js(v='20260316a')}" defer></script>
 <script th:src="@{/js/core/floating-profile-card.js(v='20260316c')}" defer></script>
 <script th:src="@{/js/core/profile-preview.js(v='20260315a')}" defer></script>

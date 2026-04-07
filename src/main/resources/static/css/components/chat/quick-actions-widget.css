@@ -27,6 +27,7 @@
     
     /* Content centering */
     @apply flex items-center justify-center;
+    overflow: hidden;
     
     /* Smooth transitions */
     @apply transition-all duration-300 ease-out;
@@ -55,8 +56,30 @@
   }
   
   .quick-actions-fab-icon {
+    @apply absolute inset-0 flex items-center justify-center;
     font-size: clamp(1.2rem, 1rem + 0.45vw, 1.5rem);
     line-height: 1;
+    transition: opacity 180ms ease, transform 220ms ease;
+  }
+
+  .quick-actions-fab-icon--primary {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
+  .quick-actions-fab-icon--close {
+    opacity: 0;
+    transform: scale(0.72) rotate(-18deg);
+  }
+
+  .quick-actions-fab-premium[aria-expanded="true"] .quick-actions-fab-icon--primary {
+    opacity: 0;
+    transform: scale(0.72) rotate(18deg);
+  }
+
+  .quick-actions-fab-premium[aria-expanded="true"] .quick-actions-fab-icon--close {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
   }
   
   /* === QUICK ACTIONS PANEL CONTAINER === */
