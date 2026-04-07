@@ -1,19 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('opening-overlay');
-    
+
+    const finishOverlay = () => {
+        if (!overlay || overlay.classList.contains('finished')) {
+            return;
+        }
+
+        overlay.classList.add('finished');
+
+        window.setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+        }, 800);
+    };
+
     // INTRO SEQUENCE
     if (overlay) {
-        // Total cinematic duration: 1400ms
-        setTimeout(() => {
-            overlay.classList.add('finished');
-            
-            // Garbage Collection: Remove from DOM after fade-out completes
-            setTimeout(() => {
-                if(overlay.parentNode) {
-                    overlay.parentNode.removeChild(overlay);
-                }
-            }, 800); // Matches CSS transition time
-        }, 1400); 
+        window.setTimeout(finishOverlay, 1400);
+        overlay.addEventListener('animationend', (event) => {
+            if (event.animationName === 'overlayDismiss') {
+                finishOverlay();
+            }
+        });
     }
 
     // SCROLL REVEAL

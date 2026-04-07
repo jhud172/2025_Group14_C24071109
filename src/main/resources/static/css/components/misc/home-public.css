@@ -21,6 +21,7 @@
                 opacity: 1;
                 visibility: visible;
                 transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+                animation: overlayDismiss 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
             }
             #opening-overlay.finished {
                 opacity: 0;
@@ -60,6 +61,17 @@
             @keyframes textSlideUp {
                 0% { opacity: 0; transform: translateY(10px); }
                 100% { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes overlayDismiss {
+                from {
+                    opacity: 1;
+                    visibility: visible;
+                }
+                to {
+                    opacity: 0;
+                    visibility: hidden;
+                    pointer-events: none;
+                }
             }
 
             /* REDUCED MOTION */
