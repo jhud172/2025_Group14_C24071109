@@ -19,6 +19,10 @@ Prerequisites:
 - Java 21
 - Node.js and npm
 
+Optional local overrides:
+
+- copy [`.env.example`](./.env.example) to `.env` if you need to provide mail, SMS, AI, payment, or base-URL settings for local runs
+
 Install frontend dependencies:
 
 ```bash
@@ -55,6 +59,13 @@ Run tests:
 
 ```bash
 ./gradlew test
+```
+
+Check dependency drift:
+
+```bash
+./gradlew dependencyUpdates
+npm outdated
 ```
 
 ## Key Paths

@@ -1,5 +1,5 @@
 # ---- Build stage ----
-FROM gradle:8.7-jdk21 AS build
+FROM gradle:8.14.3-jdk21 AS build
 WORKDIR /app
 COPY . .
 RUN ./gradlew clean build -x test
