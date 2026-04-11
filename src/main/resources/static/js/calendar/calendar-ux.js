@@ -114,7 +114,7 @@ function initCalendarUx() {
 
     function formatDateLabel(dateIso) {
         const date = parseDate(dateIso);
-        if (!date) return dateIso || '—';
+        if (!date) return dateIso || '--';
         return date.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
     }
 
@@ -523,7 +523,7 @@ function initCalendarUx() {
 
             const ghost = document.createElement('div');
             ghost.className = 'calendar-preview-ghost';
-            const visibleLabels = labels.slice(0, 2).join(' • ');
+            const visibleLabels = labels.slice(0, 2).join(' | ');
             ghost.textContent = labels.length > 2 ? `${visibleLabels} +${labels.length - 2}` : visibleLabels;
             content.appendChild(ghost);
 
@@ -569,7 +569,7 @@ function initCalendarUx() {
 
             const ghost = document.createElement('div');
             ghost.className = 'calendar-preview-ghost calendar-preview-ghost--sim';
-            ghost.textContent = `Projected • ${rotationMode}`;
+            ghost.textContent = `Projected | ${rotationMode}`;
             content.appendChild(ghost);
             card.classList.add('calendar-day-card--simulated');
         });
@@ -888,10 +888,10 @@ function initCalendarUx() {
         const scopeLabel = selectedScope === 'day' ? 'Selected day' : selectedScope === 'custom' ? 'Custom range' : 'Visible range';
         const endText = config.repeat === 'forever' || !config.endDate
             ? ''
-            : ` • Ends ${formatDateLabel(config.endDate)}`;
+            : ` | Ends ${formatDateLabel(config.endDate)}`;
 
         if (contextSummary) {
-            contextSummary.textContent = `${scopeLabel} • Starts ${formatDateLabel(config.startDate)} • ${repeatLabel}${endText}`;
+            contextSummary.textContent = `${scopeLabel} | Starts ${formatDateLabel(config.startDate)} | ${repeatLabel}${endText}`;
         }
         setScopeBadge(entryCount);
     }
@@ -927,9 +927,9 @@ function initCalendarUx() {
             const isFavourite = id ? favourites.has(id) : false;
             const iconEl = button.querySelector('[data-fav-icon]');
             if (iconEl) {
-                iconEl.textContent = isFavourite ? '★' : '☆';
+                iconEl.textContent = isFavourite ? '\u2605' : '\u2606';
             } else {
-                button.textContent = isFavourite ? '★' : '☆';
+                button.textContent = isFavourite ? '\u2605' : '\u2606';
             }
             button.classList.toggle('is-favourite', isFavourite);
             button.setAttribute('aria-pressed', String(isFavourite));
@@ -976,7 +976,7 @@ function initCalendarUx() {
                 const labels = Array.isArray(metadata.activeDayLabels) ? metadata.activeDayLabels : [];
                 activeDayLabels.textContent = labels.length ? labels.join('/') : 'Any day';
             }
-            if (restDays) restDays.textContent = String(metadata.restDays ?? '—');
+            if (restDays) restDays.textContent = String(metadata.restDays ?? '--');
             renderHealthIndicators(card, metadata);
         });
 
@@ -1376,8 +1376,8 @@ function initCalendarUx() {
             if (impactSummary) {
                 const summary = impact.summary || {};
                 impactSummary.innerHTML = `
-                    Simulation: ${weeks} week(s) • ${formatDateLabel(impact.windowStart)} → ${formatDateLabel(impact.windowEnd)}
-                    <br/>Projected adds: ${summary.added ?? 0} • Potential conflicts: ${summary.existingConflicts ?? 0}
+                    Simulation: ${weeks} week(s) | ${formatDateLabel(impact.windowStart)} -> ${formatDateLabel(impact.windowEnd)}
+                    <br/>Projected adds: ${summary.added ?? 0} | Potential conflicts: ${summary.existingConflicts ?? 0}
                     <br/>Rotation: ${(getListItemForSchedule(selectedScheduleId)?.getAttribute('data-schedule-rotation') || 'weekly_repeat').replaceAll('_', ' ')}
                 `;
             }

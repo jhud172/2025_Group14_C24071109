@@ -190,6 +190,7 @@ Do not commit real secrets.
 ### Setup And Working Notes
 
 - [Codex_Automation_Setup.md](./Codex_Automation_Setup.md)
+- [dependency-migration-plan-2026-04-11.md](./dependency-migration-plan-2026-04-11.md)
 
 ### Audits
 

@@ -502,8 +502,8 @@ public class CalendarController {
         model.addAttribute("taskWarningsByTaskId", taskWarningService.listWarningsForTasks(taskIds));
         model.addAttribute("taskGoalsById", goalLinkService.goalsByTaskIds(user, taskIds));
 
-        model.addAttribute("occurrences",
-                scheduleOccurrenceService.getOccurrencesForUserOnDate(user, date));
+        List<ScheduleOccurrence> occurrencesForDay = scheduleOccurrenceService.getOccurrencesForUserOnDate(user, date);
+        model.addAttribute("occurrences", occurrencesForDay);
 
         // scheduled workouts for this weekday
         int dow = date.getDayOfWeek().getValue();
@@ -614,8 +614,9 @@ public class CalendarController {
 
         int totalTasks = tasks.size();
         int completedTasks = (int) tasks.stream().filter(CalendarTask::getCompleted).count();
-        int totalWorkouts = sessions.size();
-        int completedWorkouts = (int) sessions.stream().filter(uk.ac.cf._5.group14.One_To_One.StrengthLog.WorkoutSession::isCompleted).count();
+        int totalWorkouts = sessions.size() + occurrencesForDay.size();
+        int completedWorkouts = (int) sessions.stream().filter(uk.ac.cf._5.group14.One_To_One.StrengthLog.WorkoutSession::isCompleted).count()
+            + (int) occurrencesForDay.stream().filter(ScheduleOccurrence::isCompleted).count();
 
         if ((dailyFocus == null || dailyFocus.isBlank()) && hasAnyPreferences) {
             var dailyFocusAiService = dailyFocusAiServiceProvider.getIfAvailable();

@@ -411,6 +411,26 @@
             overviewRemainingBreakdown.textContent = tasksLeft + ' tasks · ' + workoutsLeft + ' workouts';
         }
 
+        const dayStatDone = document.getElementById('day-stat-done');
+        if (dayStatDone) {
+            dayStatDone.textContent = String(done);
+        }
+
+        const dayStatTotal = document.getElementById('day-stat-total');
+        if (dayStatTotal) {
+            dayStatTotal.textContent = String(total);
+        }
+
+        const dayStatTasksLeft = document.getElementById('day-stat-tasks-left');
+        if (dayStatTasksLeft) {
+            dayStatTasksLeft.textContent = String(tasksLeft);
+        }
+
+        const dayStatWorkoutsLeft = document.getElementById('day-stat-workouts-left');
+        if (dayStatWorkoutsLeft) {
+            dayStatWorkoutsLeft.textContent = String(workoutsLeft);
+        }
+
         const overviewNext = document.getElementById('overview-next-priority');
         if (overviewNext) {
             if (tasksLeft > 0) {
@@ -1876,5 +1896,347 @@
         connectSse();
     }
     
+    function stripLeadingGarble(text) {
+        return String(text || '').replace(/^[^A-Za-z0-9"']+\s*/u, '');
+    }
+
+    function normalizeCalendarCopy(text) {
+        return String(text || '')
+            .replace(/\u00C2\u00B7/g, '|')
+            .replace(/\u00E2\u20AC\u00A6/g, '...')
+            .replace(/\u00E2\u20AC\u201D/g, '--')
+            .replace(/\s+\|\s+/g, ' | ')
+            .trim();
+    }
+
+    function sanitizeTimelineBanner() {
+        const timeline = document.getElementById('day-timeline');
+        if (!timeline) return;
+
+        const banner = timeline.querySelector('.mb-3.flex.items-start.gap-2');
+        if (!banner) return;
+
+        const icon = banner.querySelector('span[aria-hidden="true"]');
+        const copy = banner.querySelector('p');
+        if (!copy) return;
+
+        const normalizedText = normalizeCalendarCopy(stripLeadingGarble(copy.textContent));
+        copy.textContent = normalizedText;
+
+        if (!icon) return;
+        if (normalizedText.includes('starts now')) {
+            icon.textContent = '\u23F0';
+        } else if (normalizedText.includes('starts in')) {
+            icon.textContent = '\uD83D\uDD14';
+        } else if (normalizedText.includes('Next task in') || normalizedText.includes('scheduled for this day')) {
+            icon.textContent = '\uD83D\uDCC5';
+        } else if (normalizedText.includes('All scheduled tasks completed')) {
+            icon.textContent = '\u2705';
+        } else if (normalizedText.includes('No more timed tasks')) {
+            icon.textContent = '\uD83D\uDDED';
+        } else if (normalizedText.includes('No timed tasks scheduled')) {
+            icon.textContent = '\uD83C\uDF1F';
+        }
+    }
+
+    function sanitizeLiveClockCopy() {
+        const clockEl = document.getElementById('live-clock');
+        if (!clockEl) return;
+        clockEl.textContent = normalizeCalendarCopy(clockEl.textContent);
+    }
+
+    const buildGreetingModelOriginal = buildGreetingModel;
+    buildGreetingModel = function buildGreetingModelPatched(ctx) {
+        const periodTone = {
+            morning: 'Good morning',
+            afternoon: 'Good afternoon',
+            evening: 'Good evening',
+            night: 'Good night'
+        };
+
+        const weatherTone = {
+            clear: { icon: '\u2600\uFE0F', accent: 'from-amber-300/30 to-orange-300/20', sub: 'Clear conditions. Great window for high-energy work.' },
+            sunny: { icon: '\uD83C\uDF24\uFE0F', accent: 'from-amber-300/30 to-orange-300/20', sub: 'Sunlight is on your side. Keep momentum steady.' },
+            rainy: { icon: '\uD83C\uDF27\uFE0F', accent: 'from-sky-300/25 to-slate-300/15', sub: 'Rainy conditions. Ideal for focused indoor sessions.' },
+            cloudy: { icon: '\u2601\uFE0F', accent: 'from-slate-300/25 to-slate-400/15', sub: 'Cloud cover today. Keep your pace deliberate and calm.' },
+            'partly-cloudy': { icon: '\u26C5', accent: 'from-sky-300/25 to-amber-300/20', sub: 'Mixed skies. A good day for balanced effort.' }
+        };
+
+        const weatherData = weatherTone[ctx.weather] || weatherTone['partly-cloudy'];
+        return {
+            title: periodTone[ctx.period] || periodTone.afternoon,
+            subtitle: weatherData.sub,
+            icon: weatherData.icon,
+            accent: weatherData.accent,
+            themeEnabled: ctx.themeEnabled
+        };
+    };
+
+    addMotivationalMessage = function addMotivationalMessagePatched() {
+        const completionSection = document.querySelector('[data-testid="day-hub-header"] section[aria-label="Day completion"]');
+        if (!completionSection) return;
+
+        const percentageText = completionSection.querySelector('p.text-sm.font-semibold span');
+        if (!percentageText) return;
+
+        const percentage = parseInt(percentageText.textContent, 10) || 0;
+        const messages = [
+            { range: [0, 20], text: "Let's get started! \uD83D\uDCAA", color: 'text-slate-600 dark:text-slate-400' },
+            { range: [21, 40], text: 'Making progress! \uD83C\uDFAF', color: 'text-blue-600 dark:text-blue-400' },
+            { range: [41, 60], text: 'Halfway there! \uD83D\uDE80', color: 'text-indigo-600 dark:text-indigo-400' },
+            { range: [61, 80], text: 'Almost done! \u2B50', color: 'text-amber-600 dark:text-amber-400' },
+            { range: [81, 99], text: 'Final stretch! \uD83D\uDD25', color: 'text-orange-600 dark:text-orange-400' },
+            { range: [100, 100], text: 'Perfect day! \uD83C\uDF89', color: 'text-emerald-600 dark:text-emerald-400' }
+        ];
+
+        const message = messages.find((entry) => percentage >= entry.range[0] && percentage <= entry.range[1]);
+        const existing = document.getElementById('motivation-message');
+        if (!message) {
+            existing?.remove();
+            return;
+        }
+
+        const msgDiv = existing || document.createElement('p');
+        msgDiv.id = 'motivation-message';
+        msgDiv.className = `mt-2 text-xs font-medium ${message.color}`;
+        msgDiv.textContent = message.text;
+        if (!existing) {
+            completionSection.appendChild(msgDiv);
+        }
+    };
+
+    refreshMainCompletionProgress = function refreshMainCompletionProgressPatched() {
+        const root = document.querySelector('[data-main-progress]');
+        const fill = document.getElementById('day-main-progress-fill');
+        if (!root || !fill) return;
+
+        const tasks = Array.from(document.querySelectorAll('[data-task-item]'));
+        const totalTasks = tasks.length;
+        const doneTasks = tasks.filter((task) => (task.getAttribute('data-task-status') || '') === 'done').length;
+
+        const workoutItems = Array.from(document.querySelectorAll('[data-workout-item], [data-occurrence-item]'));
+        const totalWorkouts = workoutItems.length;
+        const doneWorkouts = workoutItems.filter((item) => {
+            const value = item.getAttribute('data-workout-completed') || item.getAttribute('data-completed') || 'false';
+            return value === 'true';
+        }).length;
+
+        const total = totalTasks + totalWorkouts;
+        const done = doneTasks + doneWorkouts;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        const tasksLeft = Math.max(totalTasks - doneTasks, 0);
+        const workoutsLeft = Math.max(totalWorkouts - doneWorkouts, 0);
+        const remaining = tasksLeft + workoutsLeft;
+
+        root.setAttribute('data-progress-pct', String(pct));
+        root.setAttribute('data-progress-tasks-left', String(tasksLeft));
+        root.setAttribute('data-progress-workouts-left', String(workoutsLeft));
+        root.setAttribute('data-progress-remaining', String(remaining));
+        fill.style.width = pct + '%';
+
+        const track = root.querySelector('.day-main-progress-track');
+        if (track) {
+            track.setAttribute('aria-valuenow', String(pct));
+        }
+
+        const labelText = done + '/' + total + ' completed (' + pct + '%)';
+        const label = document.getElementById('day-main-progress-label');
+        if (label) {
+            label.textContent = labelText;
+        }
+
+        const summaryChip = document.querySelector('[data-testid="day-completion-summary"]');
+        if (summaryChip) {
+            summaryChip.textContent = labelText;
+        }
+
+        const tooltip = root.querySelector('.day-main-progress-tooltip');
+        if (tooltip) {
+            tooltip.innerHTML = '<p class="font-semibold">'
+                + (remaining > 0 ? remaining + ' items left to complete today' : 'Completion reached for this day')
+                + '</p><p class="text-xs mt-1">'
+                + tasksLeft + ' tasks left | ' + workoutsLeft + ' workouts left'
+                + '</p>';
+        }
+
+        const overviewProgress = document.getElementById('overview-progress-copy');
+        if (overviewProgress) {
+            overviewProgress.textContent = labelText;
+        }
+
+        const overviewRemainingTotal = document.getElementById('overview-remaining-total');
+        if (overviewRemainingTotal) {
+            overviewRemainingTotal.textContent = remaining + ' left';
+        }
+
+        const overviewRemainingBreakdown = document.getElementById('overview-remaining-breakdown');
+        if (overviewRemainingBreakdown) {
+            overviewRemainingBreakdown.textContent = tasksLeft + ' tasks | ' + workoutsLeft + ' workouts';
+        }
+
+        const dayStatDone = document.getElementById('day-stat-done');
+        if (dayStatDone) {
+            dayStatDone.textContent = String(done);
+        }
+
+        const dayStatTotal = document.getElementById('day-stat-total');
+        if (dayStatTotal) {
+            dayStatTotal.textContent = String(total);
+        }
+
+        const dayStatTasksLeft = document.getElementById('day-stat-tasks-left');
+        if (dayStatTasksLeft) {
+            dayStatTasksLeft.textContent = String(tasksLeft);
+        }
+
+        const dayStatWorkoutsLeft = document.getElementById('day-stat-workouts-left');
+        if (dayStatWorkoutsLeft) {
+            dayStatWorkoutsLeft.textContent = String(workoutsLeft);
+        }
+
+        const overviewNext = document.getElementById('overview-next-priority');
+        if (overviewNext) {
+            if (tasksLeft > 0) {
+                overviewNext.textContent = 'Clear your next task block.';
+            } else if (workoutsLeft > 0) {
+                overviewNext.textContent = 'Complete your next workout block.';
+            } else {
+                overviewNext.textContent = 'Everything planned is complete.';
+            }
+        }
+
+        renderDayInsights();
+        sanitizeTimelineBanner();
+        sanitizeLiveClockCopy();
+    };
+
+    showKeyboardHelp = function showKeyboardHelpPatched() {
+        if (document.getElementById('keyboard-help-modal')) return;
+
+        const modal = document.createElement('div');
+        modal.id = 'keyboard-help-modal';
+        modal.className = 'fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm';
+        modal.innerHTML = `
+            <div class="mx-4 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-950">
+                <div class="flex items-start justify-between">
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Keyboard Shortcuts</h3>
+                    <button class="close-help-btn rounded-lg bg-slate-100 px-3 py-1 text-sm font-medium text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">Close</button>
+                </div>
+                <div class="mt-4 space-y-2 text-sm">
+                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900">
+                        <span class="text-slate-700 dark:text-slate-200">New Task</span>
+                        <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">Ctrl+N</kbd>
+                    </div>
+                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900">
+                        <span class="text-slate-700 dark:text-slate-200">Previous Day</span>
+                        <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">\u2190</kbd>
+                    </div>
+                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900">
+                        <span class="text-slate-700 dark:text-slate-200">Next Day</span>
+                        <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">\u2192</kbd>
+                    </div>
+                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900">
+                        <span class="text-slate-700 dark:text-slate-200">Show Help</span>
+                        <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">?</kbd>
+                    </div>
+                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-900">
+                        <span class="text-slate-700 dark:text-slate-200">Switch tabs (Tasks/Workouts/Timeline/Overview)</span>
+                        <div class="flex gap-1">
+                            <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">1</kbd>
+                            <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">2</kbd>
+                            <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">3</kbd>
+                            <kbd class="rounded bg-white px-2 py-1 text-xs font-semibold text-slate-900 shadow dark:bg-slate-800 dark:text-slate-100">4</kbd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        function closeModal() {
+            modal.remove();
+            document.removeEventListener('keydown', handleEscape);
+        }
+
+        function handleEscape(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        }
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) closeModal();
+        });
+
+        const closeBtn = modal.querySelector('.close-help-btn');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
+
+        document.addEventListener('keydown', handleEscape);
+    };
+
+    renderDayInsights = function renderDayInsightsPatched() {
+        const host = document.getElementById('day-insights-output');
+        const root = document.querySelector('[data-main-progress]');
+        if (!host || !root) return;
+
+        const tasksLeft = parseInt(root.getAttribute('data-progress-tasks-left') || '0', 10);
+        const workoutsLeft = parseInt(root.getAttribute('data-progress-workouts-left') || '0', 10);
+        const remaining = parseInt(root.getAttribute('data-progress-remaining') || '0', 10);
+        const pct = parseInt(root.getAttribute('data-progress-pct') || '0', 10);
+        const nowHour = new Date().getHours();
+
+        let type = 'priority';
+        let title = 'Priority guidance';
+        let body = 'Start with one high-friction item in the next 30 minutes to unlock momentum for this day.';
+
+        if (remaining === 0 && pct > 0) {
+            type = 'positive';
+            title = 'Positive momentum';
+            body = 'Today is complete. Capture one reflection now to reinforce what worked today.';
+        } else if (remaining > 0 && nowHour >= 18 && tasksLeft > 0) {
+            type = 'caution';
+            title = 'Caution';
+            body = 'Late-day task load is building. Clear one short task now to prevent today from rolling over.';
+        } else if (workoutsLeft > 0 && nowHour >= 12 && nowHour <= 20) {
+            type = 'reminder';
+            title = 'Reminder';
+            body = 'You still have a workout pending today. Reserve a concrete time block before evening closes.';
+        }
+
+        const classes = {
+            positive: 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/40 dark:bg-emerald-950/30 dark:text-emerald-200',
+            caution: 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-200',
+            reminder: 'border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800/40 dark:bg-blue-950/30 dark:text-blue-200',
+            priority: 'border-slate-200 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-200'
+        };
+
+        host.innerHTML = '<article class="rounded-xl border p-3 ' + classes[type] + '">'
+            + '<p class="text-xs font-semibold uppercase tracking-wide">' + title + '</p>'
+            + '<p class="mt-1 text-sm font-medium">' + body + '</p>'
+            + '<p class="mt-1 text-xs opacity-80">Remaining: ' + tasksLeft + ' tasks | ' + workoutsLeft + ' workouts</p>'
+            + '</article>';
+    };
+
+    const buildTimelineOriginal = buildTimeline;
+    buildTimeline = function buildTimelinePatched() {
+        buildTimelineOriginal();
+        sanitizeTimelineBanner();
+        sanitizeLiveClockCopy();
+    };
+
+    const initOriginal = init;
+    init = function initPatched() {
+        initOriginal();
+        sanitizeTimelineBanner();
+        sanitizeLiveClockCopy();
+        window.setInterval(() => {
+            sanitizeTimelineBanner();
+            sanitizeLiveClockCopy();
+        }, 1000);
+    };
+
     init();
 })();

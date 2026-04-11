@@ -202,7 +202,7 @@ class ClientDashboardMvcTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Keep protein consistent")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/inbox/55")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-action-hub")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Live Dashboard Ambience")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Local Time And Weather Context")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Using Your Local Area")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-ambience-permission-message")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-ambience-graph-toggle")))

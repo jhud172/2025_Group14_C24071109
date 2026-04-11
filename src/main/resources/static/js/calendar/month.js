@@ -266,7 +266,7 @@
                 if (completed && !check) {
                     check = document.createElement('div');
                     check.className = 'calendar-item-check';
-                    check.textContent = '✓';
+                    check.textContent = '\u2713';
                     el.appendChild(check);
                 }
                 if (!completed && check) {
@@ -1312,7 +1312,7 @@
     setMonthHeader(currentYear, currentMonth);
     updateHeatmapForPane(monthPane);
 
-    // Motivation Mode toggle — shows activity type stickers on calendar day cells
+    // Motivation Mode toggle - shows activity type stickers on calendar day cells
     (function initMotivationMode() {
         const btn = document.getElementById('motivation-mode-toggle');
         if (!btn) return;
@@ -1369,28 +1369,28 @@
         // ---- Pack icons ----
         const PACKS = {
             STARS: {
-                legs:    '🌟',
-                push:    '⭐',
-                pull:    '💫',
-                cardio:  '✨',
-                core:    '🌠',
-                default: '⭐'
+                legs:    '\uD83C\uDF1F',
+                push:    '\u2B50',
+                pull:    '\uD83D\uDCAB',
+                cardio:  '\u2728',
+                core:    '\uD83C\uDF20',
+                default: '\u2B50'
             },
             SPORT: {
-                legs:    '🦵',
-                push:    '💪',
-                pull:    '🏋️',
-                cardio:  '🏃',
-                core:    '🧘',
-                default: '🏋️'
+                legs:    '\uD83E\uDDB5',
+                push:    '\uD83D\uDCAA',
+                pull:    '\uD83C\uDFCB\uFE0F',
+                cardio:  '\uD83C\uDFC3',
+                core:    '\uD83E\uDDD8',
+                default: '\uD83C\uDFCB\uFE0F'
             },
             EMOJI: {
-                legs:    '🔥',
-                push:    '💥',
-                pull:    '🎯',
-                cardio:  '⚡',
-                core:    '🎖️',
-                default: '🎉'
+                legs:    '\uD83D\uDD25',
+                push:    '\uD83D\uDCA5',
+                pull:    '\uD83C\uDFAF',
+                cardio:  '\u26A1',
+                core:    '\uD83C\uDF96\uFE0F',
+                default: '\uD83C\uDF89'
             }
         };
 
@@ -1489,11 +1489,11 @@
 
                 // Pick motivational message
                 const MESSAGES = [
-                    { min: 100, msg: '🏆 Goal smashed! You\'re unstoppable this month!', cls: 'motivation-insights__msg--gold' },
-                    { min: 70,  msg: '🔥 Almost there — keep the fire burning!', cls: 'motivation-insights__msg--amber' },
-                    { min: 40,  msg: '💪 Good progress — stay consistent!', cls: '' },
-                    { min: 1,   msg: '🚀 You\'ve started — now build the habit!', cls: '' },
-                    { min: 0,   msg: '✨ Log your first workout to start your journey!', cls: '' }
+                    { min: 100, msg: '\uD83C\uDFC6 Goal smashed! You\'re unstoppable this month!', cls: 'motivation-insights__msg--gold' },
+                    { min: 70,  msg: '\uD83D\uDD25 Almost there - keep the fire burning!', cls: 'motivation-insights__msg--amber' },
+                    { min: 40,  msg: '\uD83D\uDCAA Good progress - stay consistent!', cls: '' },
+                    { min: 1,   msg: '\uD83D\uDE80 You\'ve started - now build the habit!', cls: '' },
+                    { min: 0,   msg: '\u2728 Log your first workout to start your journey!', cls: '' }
                 ];
                 const msgEntry = MESSAGES.find(m => pct >= m.min) || MESSAGES[MESSAGES.length - 1];
 
@@ -1508,7 +1508,7 @@
                             '<span class="motivation-insights__stat-label">Workouts</span>' +
                         '</div>' +
                         (streak > 0 ? '<div class="motivation-insights__stat">' +
-                            '<span class="motivation-insights__stat-value motivation-insights__stat-value--streak">🔥 ' + streak + '</span>' +
+                            '<span class="motivation-insights__stat-value motivation-insights__stat-value--streak">\uD83D\uDD25 ' + streak + '</span>' +
                             '<span class="motivation-insights__stat-label">Day streak</span>' +
                         '</div>' : '') +
                         '<div class="motivation-insights__stat">' +
@@ -1575,9 +1575,9 @@
             const date = badge.dataset.stickerDate || '';
             const formattedDate = date ? new Date(date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
             tooltip.innerHTML =
-                '<div class="sticker-tooltip-title">✓ ' + name + '</div>' +
+                '<div class="sticker-tooltip-title">\u2713 ' + name + '</div>' +
                 (formattedDate ? '<div class="sticker-tooltip-meta">' + formattedDate + '</div>' : '') +
-                '<div class="sticker-tooltip-meta" style="margin-top:0.25rem">Workout completed 💪</div>';
+                '<div class="sticker-tooltip-meta" style="margin-top:0.25rem">Workout completed \uD83D\uDCAA</div>';
 
             const rect = badge.getBoundingClientRect();
             const tw = 220;
@@ -1644,7 +1644,7 @@
                 packInput.name = 'stickerPack';
                 packInput.value = pack;
                 form.appendChild(packInput);
-                // Don't redirect — submit via fetch so we stay on page
+                // Do not redirect - submit via fetch so we stay on page
                 fetch('/calendar/sticker-preferences', {
                     method: 'POST',
                     headers: {
