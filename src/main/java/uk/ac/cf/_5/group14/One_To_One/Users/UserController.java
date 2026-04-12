@@ -263,7 +263,6 @@ public class UserController {
     // login page
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "expired", required = false) String expired,
-                                @RequestParam(value = "devLogin", required = false) Boolean devLogin,
                                 @RequestParam(value = "role", required = false) String role,
                                 Model model) {
         if (isAuthenticatedUser()) {
@@ -279,15 +278,11 @@ public class UserController {
             model.addAttribute("preselectedRole", role);
         }
         
-        // Check if dev mode is enabled
+        // In dev mode, keep the normal login form and layer the dev alert onto it.
         if (devModeProperties.isDevMode()) {
             model.addAttribute("compactTopContent", true);
-            if (Boolean.TRUE.equals(devLogin)) {
-                model.addAttribute("isDevMode", true);
-                return "public-views/auth/login";
-            }
             model.addAttribute("isDevMode", true);
-            return "public-views/auth/login-demo";
+            return "public-views/auth/login";
         }
         
         return "public-views/auth/login";

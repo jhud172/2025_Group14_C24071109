@@ -73,11 +73,11 @@ public class SecurityConfig {
     /*
      * DEVELOPMENT MODE:
      * When DEV_MODE environment variable is set to "true":
-     * - GET /login renders the dev-mode landing page (login-demo.html)
+     * - GET /login keeps the normal login form and adds development messaging
      * - Home page displays a development mode indicator badge
      * - Public pages are freely accessible without login
      * - Auth pages (dashboard, calendar, workouts, goals, profile) still require login
-     *   but are fully functional once the user signs in via /login?devLogin=1
+     *   but are fully functional once the user signs in via /login
      *
      * To enable dev mode:
      * 1. Set environment variable: DEV_MODE=true

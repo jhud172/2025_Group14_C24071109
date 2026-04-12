@@ -171,7 +171,7 @@ public class DevModePageAccessService {
             href = definition.path();
             availabilityCopy = "Open after login";
         } else {
-            href = "/login?devLogin=1&next=" + urlEncode(definition.path());
+            href = "/login?next=" + urlEncode(definition.path());
             availabilityCopy = "Sign in to access";
         }
 
