@@ -19,6 +19,12 @@ Prerequisites:
 - Java 21
 - Node.js and npm
 
+Use the pinned Node version before installing frontend tooling:
+
+```bash
+nvm use
+```
+
 Optional local overrides:
 
 - copy [`.env.example`](./.env.example) to `.env` if you need to provide mail, SMS, AI, payment, or base-URL settings for local runs
