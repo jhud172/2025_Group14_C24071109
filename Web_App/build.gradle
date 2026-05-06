@@ -1,0 +1,126 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.7'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
+	id "com.github.ben-manes.versions" version "0.54.0"
+}
+
+group = 'uk.ac.cf.2025.group14'
+version = '0.0.1-SNAPSHOT'
+description = 'Group project for the One_To_One coaching platform.'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+jacocoTestReport {
+	dependsOn test
+
+	reports {
+		xml.required = true
+		csv.required = false
+		html.required = true
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+def isNonStable = { String version ->
+	def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { keyword -> version?.toUpperCase()?.contains(keyword) }
+	def stableVersion = (version ==~ /^[0-9,.v-]+(-r)?$/)
+	return !(stableKeyword || stableVersion)
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	compileOnly 'org.projectlombok:lombok:1.18.46'
+	annotationProcessor 'org.projectlombok:lombok:1.18.46'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.5.RELEASE'
+	implementation 'com.github.librepdf:openpdf:1.3.30'
+	implementation 'org.jsoup:jsoup:1.22.2'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	runtimeOnly 'org.postgresql:postgresql:42.7.11'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+	runtimeOnly 'com.h2database:h2'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	exclude '**/UserRepositoryTest.*'
+	exclude '**/UserPreferenceFullContainerMockTests.*'
+}
+
+compileJava {
+	options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+	options.compilerArgs << '-Xlint:unchecked'
+	options.compilerArgs << '-parameters'
+}
+
+tasks.named('bootRun') {
+	doFirst {
+		if (!System.getenv('SPRING_PROFILES_ACTIVE') && !System.getProperty('spring.profiles.active')) {
+			environment 'SPRING_PROFILES_ACTIVE', 'local'
+		}
+
+		def envFile = file('.env')
+		if (!envFile.exists()) {
+			return
+		}
+
+		envFile.eachLine { line ->
+			def trimmed = line?.trim()
+			if (!trimmed || trimmed.startsWith('#') || !trimmed.contains('=')) {
+				return
+			}
+
+			def separator = trimmed.indexOf('=')
+			def key = trimmed.substring(0, separator).trim()
+			def value = trimmed.substring(separator + 1).trim()
+
+			if (key.startsWith('SPRING_MAIL_') || key.startsWith('APP_EMAIL_') || key == 'APP_BASE_URL' || key.startsWith('APP_SMS_') || key.startsWith('TWILIO_')) {
+				environment key, value
+			}
+		}
+	}
+}
+
+tasks.named('dependencyUpdates').configure {
+	rejectVersionIf {
+		isNonStable(it.candidate.version) && !isNonStable(it.currentVersion)
+	}
+}
+
+tasks.register('bcrypt', JavaExec) {
+	group = 'help'
+	description = 'Prints a BCrypt hash for -Ppw (defaults to Demo123!)'
+	javaLauncher = javaToolchains.launcherFor {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'uk.ac.cf._5.group14.One_To_One.Security.BcryptTool'
+	args((project.findProperty('pw') ?: 'Demo123!').toString())
+}
