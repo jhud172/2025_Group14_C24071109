@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,6 +23,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +45,8 @@ import uk.ac.cardiff.trainerhub.domain.BusinessRules
 import uk.ac.cardiff.trainerhub.domain.ExercisePrescription
 import uk.ac.cardiff.trainerhub.domain.PlanDraft
 import uk.ac.cardiff.trainerhub.domain.PlanWeekDraft
+import uk.ac.cardiff.trainerhub.ui.components.AppBackground
+import uk.ac.cardiff.trainerhub.ui.components.PremiumButton
 import androidx.compose.ui.text.input.KeyboardType
 
 data class PlanEditorUiState(
@@ -192,8 +194,14 @@ fun PlanEditorScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
                 title = { Text("Create plan") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -206,8 +214,8 @@ fun PlanEditorScreen(
             )
         },
         bottomBar = {
-            Surface {
-                Button(
+            Surface(color = MaterialTheme.colorScheme.surface) {
+                PremiumButton(
                     onClick = viewModel::savePlan,
                     enabled = !uiState.isSaving,
                     modifier = Modifier
@@ -227,6 +235,7 @@ fun PlanEditorScreen(
             }
         },
     ) { innerPadding ->
+        AppBackground {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -297,6 +306,7 @@ fun PlanEditorScreen(
                     color = MaterialTheme.colorScheme.error,
                 )
             }
+        }
         }
     }
 }

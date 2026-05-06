@@ -1,91 +1,105 @@
-# Trainer Hub Requirements
+# One To One Android Requirements
 
 ## Functional Requirements
 
-### Dashboard
+### Public Access
 
-- The application should provide a trainer dashboard with the total number of active clients, sessions booked on that day, overdue bills, and any critical notifications.
+- The app shall open to a premium public home screen when no user is logged in.
+- The app shall provide an explore screen describing the One To One service.
+- The app shall support login with username or email and password.
+- The app shall support signup for client, trainer, and gym account roles.
+- The app shall provide demo mode for assessment use when the hosted service is unavailable.
+- The app shall hide server URL configuration from normal users and use the configured hosted HTTPS API.
 
-### Trainer Profile
+### Authentication
 
-- The application should indicate that the user is currently the active trainer and display as verified.
-- The application should show that the trainer is affiliated with some gyms but can also work independently.
+- The app shall restore a remembered login session securely.
+- The app shall route restored users to the correct role-specific interface.
+- The app shall support logout.
+- Logout shall clear the encrypted Android session token.
+- Logout shall request server-side mobile session invalidation when the backend is reachable.
+- The app shall never store user passwords after login or signup.
 
-### Client Management
+### Client Experience
 
-- The application should list down all the clients associated with the trainer.
-- The application should have search and sorting features for clients.
-- The application should provide an option for the trainer to create a new client account with validation of mandatory fields.
-- The application should automatically assign the newly created client account to the active trainer.
-- The application should ensure that a single client cannot be under multiple trainers simultaneously.
-- The application should maintain the history of the clients' previous trainers.
+- Client users shall see a role-specific home screen.
+- Client users shall see calendar, training, and chat navigation.
+- Calendar days with work assigned shall be tappable.
+- Tapping a calendar day shall open the matching day plan.
+- Day plan items shall show completion state.
+- Completing a day item shall write the change through the mobile API.
+- Training logs shall require notes before submission.
+- Training logs shall be written through the mobile API.
+- Chat messages shall require message text before submission.
+- Chat messages shall be sent through the mobile API.
 
-### Client Detail
+### Trainer Experience
 
-- The app should provide a client detail screen that includes tabs for overview, plans, sessions, payments, notes, and privacy.
-- The app should show client information such as status, goals, contacts, and trainer allocation.
+- Trainer users shall see home, clients, calendar, chat, and account navigation.
+- Trainer users shall see trainer verification state where relevant.
+- Trainer-only backend actions shall require a verified trainer account.
+- Trainer actions against a client shall require an active trainer-client relationship.
+- Trainer-created sessions and plans shall be saved through backend APIs.
 
-### Training Plans
+### Gym Experience
 
-- The app should enable trainers to create a plan for clients using a simple form.
-- The app should generate a training plan that consists of the first week and at least one exercise.
-- The app should enable trainers to have only one training plan per client and archive previous plans.
-- The app should display an empty state for the plan when there is no plan.
+- Gym users shall see home, trainers, requests, calendar, and account navigation.
+- Gym request review actions shall be role-restricted by the backend.
+- Gym request approval shall preserve reviewer metadata on the server.
 
-### Sessions
+### Validation And Error Handling
 
-- The app should enable trainers to schedule sessions and include date, time, location, and session type.
-- The app should enable trainers to mark sessions as scheduled, done, or cancelled.
-- The app should keep notes on sessions.
+- Required login fields shall show validation errors before any login request is made.
+- Required signup fields shall show validation errors before any signup request is made.
+- Signup email shall be validated locally before submission.
+- Signup password shall require a minimum length before submission.
+- Training logs and chat messages shall show local validation errors when empty.
+- Loading, empty, server error, unauthorised, and demo states shall be visible and understandable.
 
-### Payments
+## Non-Functional Requirements
 
-- The app shall facilitate the creation of invoices by the trainer for the client.
-- The app shall display the status of the invoice (draft, payable, late, paid).
-- The app shall allow payments to be entered into the app.
-- The app shall record invoices and payments with reference to the client.
+### Product Fit
 
-### Notes and Privacy
+- The app should feel premium and consistent with the One To One platform.
+- The app should support client training, trainer management, gym oversight, messaging, and account access only.
+- The app should avoid generic fitness tracker feature bloat.
+- The app should preserve the One To One rule that a client has only one active trainer at a time.
+- Payments should remain server-managed.
+- The Android app must not collect or process card details directly.
 
-- The app shall record notes on the client and individual training sessions.
-- The app shall record any consent from the clients.
-- The app shall facilitate the ability to export and delete data to comply with GDPR.
+### Security And Privacy
 
-### Preferences and Reliability
+- Android shall store only an opaque mobile session token.
+- The mobile token shall be encrypted locally using Android Keystore.
+- Server-side mobile tokens shall be hashed and revocable.
+- Passwords, database URLs, database passwords, Stripe secrets, and OpenAI keys shall not be present in Android code.
+- Chatbot requests shall send only necessary coaching context and must not expose payment details or private server configuration.
+- Role-based access control shall be enforced by the backend.
+- Client users shall not be able to access trainer or gym private data.
+- Trainer users shall not be able to access unrelated clients.
 
-- The app shall enable resetting of demo data to default seed values.
-- The app shall record any user preferences like reminders and sorting of clients.
-- The app shall schedule local reminders for training sessions and late invoices when enabled.
+### Platform And Build
 
-## Non-functional requirements
+- The app shall be implemented in Kotlin with Jetpack Compose.
+- The app shall use Material 3 components and Android platform APIs.
+- The app shall build with Gradle.
+- The app shall install successfully on the Android emulator.
+- The app shall remain usable on a clean emulator install through demo mode.
 
-### Usability
+## Verification Requirements
 
-- The app should provide an elegant and professional user interface appropriate for a coaching application.
-- The app should be consistently laid out and utilize reusable widgets.
-- The app should display important actions prominently, especially those related to forms.
-- The app should not force authentication for access to basic functionality.
+The final verification sequence should include:
 
-### Reliability
+```powershell
+.\gradlew.bat assembleDebug
+.\gradlew.bat installDebug
+```
 
-- The app should work offline using local data.
-- The app should function without any issues on a fresh install.
-- The app should restore its state after being closed and reopened.
-- The app should handle empty states without disrupting the navigation.
+Backend verification should include the Spring Boot build and boot run from the website repository:
 
-### Maintainability
+```powershell
+.\gradlew.bat clean build
+.\gradlew.bat bootRun
+```
 
-- The app should follow the MVVM design pattern by separating concerns like data access, logic, and view layer.
-- The app should implement repository pattern in order to support future integration with backend.
-- The app should avoid usage of outdated Android SDK.
-
-### Privacy and compliance
-
-- The app should make privacy actions easily accessible from the client's perspective.
-- The app should model data collection and consent actions appropriately.
-- The app should minimize data collection from users.
-
-### Performance & scope
-
-- The app should prioritize responsiveness and navigational aspects of its usage.
-- The app should target only coaching-related features avoiding other aspects like news feeds or dietary advice.
+Production verification should confirm that the hosted Render deployment exposes the `/api/mobile/**` endpoints used by Android.

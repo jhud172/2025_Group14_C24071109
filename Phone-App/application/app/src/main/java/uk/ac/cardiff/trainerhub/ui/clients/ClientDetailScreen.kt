@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,6 +22,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,7 +48,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.ac.cardiff.trainerhub.data.repository.TrainerHubRepository
 import uk.ac.cardiff.trainerhub.domain.ClientDetail
+import uk.ac.cardiff.trainerhub.ui.components.AppBackground
 import uk.ac.cardiff.trainerhub.ui.components.EmptyStateCard
+import uk.ac.cardiff.trainerhub.ui.components.InfoRow
+import uk.ac.cardiff.trainerhub.ui.components.PremiumButton
+import uk.ac.cardiff.trainerhub.ui.components.PremiumCard
 import uk.ac.cardiff.trainerhub.ui.components.SectionTitle
 import uk.ac.cardiff.trainerhub.ui.components.StatusChip
 import uk.ac.cardiff.trainerhub.ui.components.TimelineRow
@@ -163,8 +167,14 @@ fun ClientDetailScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
                 title = { Text(detail?.fullName ?: "Client detail") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -177,6 +187,7 @@ fun ClientDetailScreen(
             )
         },
     ) { innerPadding ->
+        AppBackground {
         if (detail == null) {
             Column(
                 modifier = Modifier
@@ -226,6 +237,7 @@ fun ClientDetailScreen(
                 }
             }
         }
+        }
     }
 }
 
@@ -242,30 +254,20 @@ private fun androidx.compose.foundation.lazy.LazyListScope.overviewItems(detail:
     }
 
     item {
-        Text("Assigned trainer", fontWeight = FontWeight.SemiBold)
-        Text(detail.assignedTrainerName)
-    }
-
-    item {
-        Text("Contact", fontWeight = FontWeight.SemiBold)
-        Text(detail.email)
-        Text(detail.phone)
-    }
-
-    item {
-        Text("Gym access", fontWeight = FontWeight.SemiBold)
-        if (detail.assignedGyms.isEmpty()) {
-            Text("Independent coaching setup")
-        } else {
-            for (gym in detail.assignedGyms) {
-                Text(gym)
-            }
+        PremiumCard {
+            InfoRow("Assigned trainer", detail.assignedTrainerName)
+            InfoRow("Email", detail.email)
+            InfoRow("Phone", detail.phone)
+            InfoRow(
+                label = "Gym access",
+                value = if (detail.assignedGyms.isEmpty()) {
+                    "Independent coaching setup"
+                } else {
+                    detail.assignedGyms.joinToString()
+                },
+            )
+            InfoRow("Notes", detail.notes)
         }
-    }
-
-    item {
-        Text("Notes", fontWeight = FontWeight.SemiBold)
-        Text(detail.notes)
     }
 }
 
@@ -274,7 +276,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.planItems(
     onCreatePlan: (String) -> Unit,
 ) {
     item {
-        Button(
+        PremiumButton(
             onClick = { onCreatePlan(detail.id) },
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -291,6 +293,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.planItems(
         }
     } else {
         items(detail.plans) { plan ->
+            PremiumCard {
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
@@ -305,6 +308,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.planItems(
                         Text("• ${exercise.exerciseName} - ${exercise.sets} x ${exercise.reps}")
                     }
                 }
+            }
             }
         }
     }
@@ -324,7 +328,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.sessionItems(
     }
 
     item {
-        Button(
+        PremiumButton(
             onClick = { onCreateSession(detail.id) },
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -353,6 +357,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.sessionItems(
             }
         } else {
             items(upcomingSessions) { session ->
+                PremiumCard {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
@@ -364,13 +369,13 @@ private fun androidx.compose.foundation.lazy.LazyListScope.sessionItems(
                             modifier = Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
-                            Button(
+                            PremiumButton(
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = { viewModel.completeSession(session.id, session.notes) },
                             ) {
                                 Text("Mark completed")
                             }
-                            Button(
+                            PremiumButton(
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = { viewModel.cancelSession(session.id, session.notes) },
                             ) {
@@ -378,6 +383,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.sessionItems(
                             }
                         }
                     }
+                }
                 }
             }
         }
@@ -395,12 +401,14 @@ private fun androidx.compose.foundation.lazy.LazyListScope.sessionItems(
             }
         } else {
             items(pastSessions) { session ->
+                PremiumCard {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(session.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Text("${prettyDateTime(session.scheduledAt)} • ${session.location}")
                     StatusChip(session.status)
+                }
                 }
             }
         }
@@ -413,7 +421,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.paymentItems(
     onCreateInvoice: (String) -> Unit,
 ) {
     item {
-        Button(
+        PremiumButton(
             onClick = { onCreateInvoice(detail.id) },
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -430,6 +438,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.paymentItems(
         }
     } else {
         items(detail.invoices) { invoice ->
+            PremiumCard {
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
@@ -440,13 +449,14 @@ private fun androidx.compose.foundation.lazy.LazyListScope.paymentItems(
                     Text("Reference: ${invoice.paymentReference}")
                 }
                 if (invoice.status != "PAID") {
-                    Button(
+                    PremiumButton(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { viewModel.markInvoicePaid(invoice.id) },
                     ) {
                         Text("Mark invoice as paid")
                     }
                 }
+            }
             }
         }
     }
@@ -490,6 +500,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.privacyItems(
         }
     } else {
         items(detail.consents) { consent ->
+            PremiumCard {
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
@@ -497,17 +508,24 @@ private fun androidx.compose.foundation.lazy.LazyListScope.privacyItems(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(consent.consentType, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = consent.consentType,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 12.dp),
+                        fontWeight = FontWeight.SemiBold,
+                    )
                     StatusChip(if (consent.granted) "ACTIVE" else "ATTENTION")
                 }
                 Text(prettyDateTime(consent.recordedAt))
                 Text(consent.details)
             }
+            }
         }
     }
 
     item {
-        Button(
+        PremiumButton(
             onClick = { viewModel.requestExport(detail.id) },
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -516,7 +534,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.privacyItems(
     }
 
     item {
-        Button(
+        PremiumButton(
             onClick = { viewModel.requestDelete(detail.id) },
             modifier = Modifier.fillMaxWidth(),
         ) {

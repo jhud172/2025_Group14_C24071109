@@ -11,12 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -24,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -47,7 +49,9 @@ import kotlinx.coroutines.launch
 import uk.ac.cardiff.trainerhub.data.repository.TrainerHubRepository
 import uk.ac.cardiff.trainerhub.domain.ClientSortMode
 import uk.ac.cardiff.trainerhub.domain.ClientSummary
+import uk.ac.cardiff.trainerhub.ui.components.AppBackground
 import uk.ac.cardiff.trainerhub.ui.components.EmptyStateCard
+import uk.ac.cardiff.trainerhub.ui.components.PremiumCard
 import uk.ac.cardiff.trainerhub.ui.components.SectionTitle
 import uk.ac.cardiff.trainerhub.ui.components.StatusChip
 import uk.ac.cardiff.trainerhub.ui.components.moneyText
@@ -138,8 +142,13 @@ fun ClientsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
                 title = { Text("Clients") },
             )
         },
@@ -153,9 +162,13 @@ fun ClientsScreen(
                     )
                 },
                 onClick = onAddClient,
+                shape = RoundedCornerShape(16.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
             )
         },
     ) { innerPadding ->
+        AppBackground {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -194,6 +207,11 @@ fun ClientsScreen(
                             selected = uiState.sortMode == ClientSortMode.NEXT_SESSION,
                             onClick = { viewModel.onSortModeSelected(ClientSortMode.NEXT_SESSION) },
                             label = { Text("Next session") },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            ),
                         )
                     }
                     item {
@@ -201,6 +219,11 @@ fun ClientsScreen(
                             selected = uiState.sortMode == ClientSortMode.PAYMENT_STATUS,
                             onClick = { viewModel.onSortModeSelected(ClientSortMode.PAYMENT_STATUS) },
                             label = { Text("Payments") },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            ),
                         )
                     }
                     item {
@@ -208,6 +231,11 @@ fun ClientsScreen(
                             selected = uiState.sortMode == ClientSortMode.NAME,
                             onClick = { viewModel.onSortModeSelected(ClientSortMode.NAME) },
                             label = { Text("Name") },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            ),
                         )
                     }
                 }
@@ -222,7 +250,7 @@ fun ClientsScreen(
                 }
             } else {
                 items(uiState.clients) { client ->
-                    Card(
+                    PremiumCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .semantics {
@@ -231,7 +259,6 @@ fun ClientsScreen(
                             .clickable { onOpenClient(client.id) },
                     ) {
                         Column(
-                            modifier = Modifier.padding(18.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             Row(
@@ -239,6 +266,9 @@ fun ClientsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 12.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp),
                                 ) {
                                     Text(
@@ -250,6 +280,7 @@ fun ClientsScreen(
                                         text = client.goal,
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 2,
                                     )
                                 }
                                 StatusChip(client.status)
@@ -274,6 +305,7 @@ fun ClientsScreen(
                     }
                 }
             }
+        }
         }
     }
 }

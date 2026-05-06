@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,6 +23,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +43,8 @@ import kotlinx.coroutines.launch
 import uk.ac.cardiff.trainerhub.data.repository.TrainerHubRepository
 import uk.ac.cardiff.trainerhub.domain.BusinessRules
 import uk.ac.cardiff.trainerhub.domain.NewClientDraft
+import uk.ac.cardiff.trainerhub.ui.components.AppBackground
+import uk.ac.cardiff.trainerhub.ui.components.PremiumButton
 import androidx.compose.ui.text.input.KeyboardType
 
 data class AddClientUiState(
@@ -143,8 +145,14 @@ fun AddClientScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
                 title = { Text("Add client") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -157,8 +165,8 @@ fun AddClientScreen(
             )
         },
         bottomBar = {
-            Surface {
-                Button(
+            Surface(color = MaterialTheme.colorScheme.surface) {
+                PremiumButton(
                     onClick = viewModel::saveClient,
                     enabled = !uiState.isSaving,
                     modifier = Modifier
@@ -178,6 +186,7 @@ fun AddClientScreen(
             }
         },
     ) { innerPadding ->
+        AppBackground {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -240,6 +249,7 @@ fun AddClientScreen(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
+        }
         }
     }
 }

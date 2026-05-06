@@ -8,15 +8,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +44,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uk.ac.cardiff.trainerhub.data.repository.TrainerHubRepository
+import uk.ac.cardiff.trainerhub.ui.components.AppBackground
+import uk.ac.cardiff.trainerhub.ui.components.PremiumButton
+import uk.ac.cardiff.trainerhub.ui.components.PremiumCard
 import uk.ac.cardiff.trainerhub.ui.components.SectionTitle
 
 data class SettingsUiState(
@@ -147,12 +150,18 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
                 title = { Text("Settings") },
             )
         },
     ) { innerPadding ->
+        AppBackground {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -170,11 +179,7 @@ fun SettingsScreen(
                 subtitle = "These tools keep the assessment build reliable on a clean install.",
             )
 
-            Card {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
+            PremiumCard {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -195,25 +200,23 @@ fun SettingsScreen(
                             },
                         )
                     }
-                }
             }
 
-            Card {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    Text("Privacy note", fontWeight = FontWeight.SemiBold)
-                    Text("Export and delete request actions are stored locally so the app can show GDPR-aware flows before a live backend is added.")
-                }
+            PremiumCard(tonal = true) {
+                Text("Privacy note", fontWeight = FontWeight.SemiBold)
+                Text(
+                    text = "Export and delete request actions are stored locally so the app can show GDPR-aware flows before a live backend is added.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
-            Button(
+            PremiumButton(
                 onClick = { showResetDialog = true },
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Reset demo data")
             }
+        }
         }
     }
 }
