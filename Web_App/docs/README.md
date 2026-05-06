@@ -105,10 +105,13 @@ Useful targeted checks:
 - database: PostgreSQL
 - SQL init: `schema-render.sql` plus `render-data.sql`
 - Docker image entry point: [`Dockerfile`](../Dockerfile)
+- repo-level Blueprint: [`../../render.yaml`](../../render.yaml)
 
 The Dockerfile already sets:
 
 - `SPRING_PROFILES_ACTIVE=render`
+
+If Render starts the app with `./gradlew bootRun`, the Gradle task now detects Render's default `RENDER=true` environment variable and uses the `render` Spring profile instead of the local H2 profile.
 
 The application also normalizes PostgreSQL-style `DATABASE_URL` values at startup in [`src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java`](../src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java).
 
@@ -124,6 +127,13 @@ Render should host the application container and provide:
 - `PORT`
 - PostgreSQL connection details
 - any production secrets
+
+Because the repository now has the web application inside `Web_App`, Render must build from that folder. Use one of these setups:
+
+- Recommended Docker setup: use the repo root [`render.yaml`](../../render.yaml), or set Dockerfile Path to `./Web_App/Dockerfile` and Docker Build Context to `./Web_App`.
+- Existing Dashboard service using commands: set Root Directory to `Web_App`, Build Command to `chmod +x ./gradlew && npm ci && npm run build:css && ./gradlew build -x test`, and Start Command to `chmod +x ./gradlew && ./gradlew bootRun --no-daemon`.
+
+For the command-based setup, keep `SPRING_PROFILES_ACTIVE=render` in Render environment variables. The app also falls back to the render profile automatically when Render provides `RENDER=true`.
 
 Minimum environment variables for a working Render deployment:
 
