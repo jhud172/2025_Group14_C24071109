@@ -105,4 +105,50 @@ class TrainerClientLinkServiceTest {
                 () -> trainerClientLinkService.acceptRequest(savedUnverified.getId(), client.getId()));
         assertThat(ex.getReason()).isEqualTo(TrainerClientLinkException.Reason.TRAINER_NOT_VERIFIED);
     }
+
+    @Test
+    void requestLinkRejectsClientWithActiveTrainer() {
+        TrainerClientLink active = new TrainerClientLink(client.getId(), trainerA.getId(), TrainerClientLinkStatus.ACTIVE);
+        active.setActivatedAt(Instant.now());
+        linkRepository.save(active);
+
+        TrainerClientLinkException ex = assertThrows(TrainerClientLinkException.class,
+                () -> trainerClientLinkService.requestLink(client.getId(), trainerB.getId()));
+
+        assertThat(ex.getReason()).isEqualTo(TrainerClientLinkException.Reason.CLIENT_ALREADY_HAS_ACTIVE_TRAINER);
+        assertThat(linkRepository.findByTrainerUserIdAndStatusOrderByUpdatedAtDesc(trainerB.getId(), TrainerClientLinkStatus.REQUESTED))
+                .isEmpty();
+    }
+
+    @Test
+    void pauseLinkMovesActiveRelationshipToPaused() {
+        TrainerClientLink active = new TrainerClientLink(client.getId(), trainerA.getId(), TrainerClientLinkStatus.ACTIVE);
+        active.setActivatedAt(Instant.now());
+        linkRepository.save(active);
+
+        trainerClientLinkService.pauseLink(trainerA.getId(), client.getId());
+
+        TrainerClientLink paused = linkRepository
+                .findFirstByTrainerUserIdAndClientUserIdAndStatusOrderByUpdatedAtDesc(
+                        trainerA.getId(), client.getId(), TrainerClientLinkStatus.PAUSED)
+                .orElseThrow();
+        assertThat(paused.getPausedAt()).isNotNull();
+        assertThat(linkRepository.existsByTrainerUserIdAndClientUserIdAndStatus(
+                trainerA.getId(), client.getId(), TrainerClientLinkStatus.ACTIVE)).isFalse();
+    }
+
+    @Test
+    void endLinkCanEndPausedRelationship() {
+        TrainerClientLink paused = new TrainerClientLink(client.getId(), trainerA.getId(), TrainerClientLinkStatus.PAUSED);
+        paused.setPausedAt(Instant.now());
+        linkRepository.save(paused);
+
+        trainerClientLinkService.endLink(trainerA.getId(), client.getId());
+
+        TrainerClientLink ended = linkRepository
+                .findFirstByTrainerUserIdAndClientUserIdAndStatusOrderByUpdatedAtDesc(
+                        trainerA.getId(), client.getId(), TrainerClientLinkStatus.ENDED)
+                .orElseThrow();
+        assertThat(ended.getEndedAt()).isNotNull();
+    }
 }

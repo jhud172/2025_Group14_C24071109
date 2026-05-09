@@ -7,6 +7,13 @@
         if (!trigger) return;
 
         event.preventDefault();
-        window.history.back();
+
+        const fallback = trigger.getAttribute("data-history-fallback") || "/";
+        if (window.history.length > 1 && document.referrer) {
+            window.history.back();
+            return;
+        }
+
+        window.location.assign(fallback);
     });
 }());

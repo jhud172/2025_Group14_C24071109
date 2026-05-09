@@ -42305,3 +42305,305 @@ html:not(.dark) .week-day-card:has(.dark\:hover\:text-emerald-400:hover:is(.dark
 .\[\&\.show\]\:opacity-100.show {
     opacity: 1;
 }
+
+.error-page {
+    min-height: min(720px, calc(100vh - 8rem));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.04), rgba(20, 184, 166, 0.06)),
+        #f8fafc;
+}
+
+.error-card {
+    position: relative;
+    width: min(100%, 54rem);
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.36fr) minmax(0, 0.64fr);
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.5rem;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
+}
+
+.error-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-top: 4px solid var(--error-accent, #14b8a6);
+    pointer-events: none;
+}
+
+.error-card--forbidden {
+    --error-accent: #e11d48;
+    --error-surface: #fff1f2;
+}
+
+.error-card--not-found {
+    --error-accent: #d97706;
+    --error-surface: #fffbeb;
+}
+
+.error-card--server {
+    --error-accent: #7c3aed;
+    --error-surface: #f5f3ff;
+}
+
+.error-card--generic {
+    --error-accent: #0891b2;
+    --error-surface: #ecfeff;
+}
+
+.error-status {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 2rem;
+    background: var(--error-surface, #f0fdfa);
+    color: #0f172a;
+}
+
+.error-status__code {
+    font-size: clamp(3.5rem, 9vw, 7.25rem);
+    font-weight: 800;
+    line-height: 0.85;
+    color: var(--error-accent, #14b8a6);
+}
+
+.error-status__label {
+    width: fit-content;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 999px;
+    padding: 0.45rem 0.75rem;
+    background: rgba(255, 255, 255, 0.72);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.error-card__body {
+    padding: clamp(2rem, 5vw, 3.5rem);
+}
+
+.error-eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--error-accent, #14b8a6);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.error-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1;
+}
+
+.error-copy,
+.error-support {
+    margin: 1rem 0 0;
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.error-support {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.error-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.error-button {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    padding: 0.78rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+
+.error-button:hover {
+    transform: translateY(-1px);
+}
+
+.error-button--primary {
+    background: #0f172a;
+    color: #ffffff;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+
+.error-button--primary:hover {
+    background: #111827;
+}
+
+.error-button--secondary {
+    border-color: rgba(20, 184, 166, 0.36);
+    background: rgba(20, 184, 166, 0.1);
+    color: #0f766e;
+}
+
+.error-button--ghost {
+    border-color: rgba(148, 163, 184, 0.42);
+    background: #ffffff;
+    color: #334155;
+}
+
+.error-button--ghost:hover {
+    border-color: rgba(15, 23, 42, 0.24);
+    background: #f8fafc;
+}
+
+.error-link-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.error-link {
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    border-radius: 0.5rem;
+    padding: 0.85rem;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 0.88rem;
+    font-weight: 800;
+    text-align: center;
+    text-decoration: none;
+}
+
+.error-link:hover {
+    border-color: rgba(20, 184, 166, 0.42);
+    color: #0f766e;
+}
+
+.error-mini-panel {
+    margin-top: 1.25rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.88rem;
+}
+
+.error-mini-panel span {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.error-mini-panel code {
+    overflow-wrap: anywhere;
+    color: #be123c;
+    font-size: 0.84rem;
+}
+
+.error-check-list {
+    margin: 0.5rem 0 0;
+    padding-left: 1rem;
+}
+
+.error-check-list li + li {
+    margin-top: 0.35rem;
+}
+
+html.dark .error-page {
+    background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.92)),
+        #020617;
+}
+
+html.dark .error-card {
+    border-color: rgba(148, 163, 184, 0.22);
+    background: #0f172a;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+}
+
+html.dark .error-status {
+    background: rgba(15, 23, 42, 0.76);
+    color: #e2e8f0;
+}
+
+html.dark .error-status__label {
+    border-color: rgba(226, 232, 240, 0.16);
+    background: rgba(15, 23, 42, 0.72);
+    color: #e2e8f0;
+}
+
+html.dark .error-title,
+html.dark .error-mini-panel span {
+    color: #f8fafc;
+}
+
+html.dark .error-copy,
+html.dark .error-support,
+html.dark .error-mini-panel {
+    color: #cbd5e1;
+}
+
+html.dark .error-button--ghost,
+html.dark .error-link,
+html.dark .error-mini-panel {
+    border-color: rgba(148, 163, 184, 0.24);
+    background: rgba(15, 23, 42, 0.72);
+}
+
+html.dark .error-button--ghost,
+html.dark .error-link {
+    color: #e2e8f0;
+}
+
+@media (max-width: 720px) {
+    .error-page {
+        align-items: stretch;
+        min-height: auto;
+        padding: 1rem;
+    }
+
+    .error-card {
+        grid-template-columns: 1fr;
+    }
+
+    .error-status {
+        min-height: 11rem;
+        padding: 1.5rem;
+    }
+
+    .error-card__body {
+        padding: 1.5rem;
+    }
+
+    .error-actions,
+    .error-link-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .error-button,
+    .error-link {
+        width: 100%;
+    }
+}

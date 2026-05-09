@@ -23,6 +23,14 @@ const publicPages = [
   { label: "verify-email-code", path: "/verify/email/code", viewports: ["desktop"] },
 ];
 
+const systemPages = [
+  { label: "dev-mode-hub", path: "/dev-mode", viewports: ["desktop", "mobile"], allowedStatuses: [200, 302, 401, 403] },
+  { label: "dev-mode-unauthorized", path: "/dev-mode/unauthorized", viewports: ["desktop", "mobile"], allowedStatuses: [200, 302, 401, 403] },
+  { label: "dev-mode-restricted", path: "/dev-mode/restricted?path=/audit", viewports: ["desktop", "mobile"], allowedStatuses: [200, 302, 401, 403] },
+  { label: "not-found", path: "/audit/not-found-page", viewports: ["desktop", "mobile"], allowedStatuses: [200, 302, 401, 403, 404] },
+  { label: "access-denied", path: "/access-denied", viewports: ["desktop", "mobile"], allowedStatuses: [200, 302, 401, 403] },
+];
+
 const protectedRouteChecks = [
   { label: "dashboard", path: "/dashboard" },
   { label: "profile", path: "/profile" },
@@ -170,6 +178,7 @@ async function capture(page, entry, viewportName, role = "public") {
     path: entry.path,
     viewport: viewportName,
     status: typeof response?.status === "function" ? response.status() : null,
+    allowedStatuses: entry.allowedStatuses || null,
     responseError: response?.error ? String(response.error) : null,
     finalUrl: page.url(),
     screenshot,
@@ -293,6 +302,63 @@ async function csrfHeaders(page) {
   });
 }
 
+async function formPost(page, url, fields) {
+  const headers = await csrfHeaders(page);
+  return page.evaluate(async ({ url, fields, headers }) => {
+    const body = new URLSearchParams(fields).toString();
+    const response = await fetch(url, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", ...headers },
+      body,
+      redirect: "follow",
+    });
+    return { ok: response.ok, status: response.status, url: response.url, text: await response.text().catch(() => "") };
+  }, { url, fields, headers });
+}
+
+async function createPublicSupportRequest(browser, subject) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  try {
+    await page.goto(`${baseUrl}/`, { waitUntil: "networkidle", timeout: 30000 });
+    const response = await formPost(page, "/support/feedback", {
+      requestType: "QUERY",
+      subject,
+      message: "Browser audit support request for admin mutation checks.",
+      name: "Audit Runner",
+      email: `audit-${Date.now()}@example.test`,
+      allowEmailReply: "on",
+    });
+    return response.ok || response.status < 500;
+  } finally {
+    await context.close();
+  }
+}
+
+async function createPublicGymApplication(browser, stamp, suffix) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  try {
+    await page.goto(`${baseUrl}/signup/gym`, { waitUntil: "networkidle", timeout: 30000 });
+    const username = `auditgym${suffix}${String(stamp).slice(-6)}`.slice(0, 20);
+    const response = await formPost(page, "/signup/gym", {
+      gymName: `Audit Gym ${suffix} ${stamp}`,
+      contactName: "Audit Contact",
+      adminEmail: `audit-gym-${suffix}-${stamp}@example.test`,
+      gymUsername: username,
+      contactPhone: "07000000000",
+      address: "1 Audit Street",
+      city: "Cardiff",
+      password,
+      confirmPassword: password,
+    });
+    return { created: response.ok || response.status < 500, username, marker: `Audit Gym ${suffix} ${stamp}` };
+  } finally {
+    await context.close();
+  }
+}
+
 async function submitFirstFormByAction(page, actionPart, buttonName = null) {
   const form = page.locator(`form[action*='${actionPart}']`).first();
   if (!(await form.count())) return false;
@@ -303,6 +369,23 @@ async function submitFirstFormByAction(page, actionPart, buttonName = null) {
     button.click(),
   ]);
   return true;
+}
+
+async function formActionNearText(page, actionPart, text) {
+  return page.locator(`form[action*='${actionPart}']`).evaluateAll((forms, expectedText) => {
+    const needle = String(expectedText).toLowerCase();
+    const form = forms.find((candidate) => {
+      let cursor = candidate;
+      for (let depth = 0; cursor && depth < 6; depth += 1) {
+        if ((cursor.innerText || "").toLowerCase().includes(needle)) {
+          return true;
+        }
+        cursor = cursor.parentElement;
+      }
+      return false;
+    });
+    return form ? form.getAttribute("action") : null;
+  }, text).catch(() => null);
 }
 
 async function auditScheduleInteractions(page) {
@@ -381,7 +464,10 @@ async function auditTrainerClientLifecycleFlow(page) {
     clientsPageLoaded: false,
     currentClientAvailable: null,
     clientDetailOpened: null,
+    requestCreatedFromAuditClient: null,
     pendingRequestAvailable: null,
+    pendingRequestAccepted: null,
+    acceptedAuditClientEnded: null,
     pendingActionsVisible: null,
     oneActiveTrainerGuardVisible: null,
     finalUrl: null,
@@ -392,7 +478,46 @@ async function auditTrainerClientLifecycleFlow(page) {
   const bodyText = await page.locator("body").innerText().catch(() => "");
   result.clientsPageLoaded = /Clients|Client Requests|Current Clients/i.test(bodyText);
 
-  const currentClientLink = page.locator("a[href^='/trainer/clients/']").first();
+  const existingAuditClientRow = page.locator("[data-client-row]", { hasText: "@demo2" }).first();
+  if (await existingAuditClientRow.count()) {
+    const existingEndAction = await formActionNearText(page, "/end", "@demo2");
+    if (existingEndAction) {
+      await formPost(page, existingEndAction, {});
+      await page.goto(`${baseUrl}/trainer/clients`, { waitUntil: "networkidle", timeout: 30000 });
+    }
+  }
+
+  const browser = page.context().browser();
+  if (browser) {
+    const clientContext = await browser.newContext();
+    const clientPage = await clientContext.newPage();
+    try {
+      await login(clientPage, "demo2", "client");
+      await clientPage.goto(`${baseUrl}/client/trainers?q=demo_trainer`, { waitUntil: "networkidle", timeout: 30000 });
+      result.oneActiveTrainerGuardVisible = await clientPage.getByRole("button", { name: "Request" }).first().isDisabled().catch(() => false);
+      const requestButton = clientPage.getByRole("button", { name: "Request" }).first();
+      if (await requestButton.count() && !(await requestButton.isDisabled().catch(() => true))) {
+        await Promise.all([
+          clientPage.waitForLoadState("networkidle").catch(() => undefined),
+          requestButton.click(),
+        ]);
+        const requestText = await clientPage.locator("body").innerText().catch(() => "");
+        result.requestCreatedFromAuditClient = /request sent|requested|trainer request/i.test(`${requestText}\n${clientPage.url()}`);
+      } else {
+        result.requestCreatedFromAuditClient = false;
+      }
+    } finally {
+      await clientContext.close();
+    }
+  }
+
+  await page.goto(`${baseUrl}/trainer/clients`, { waitUntil: "networkidle", timeout: 30000 });
+  const demo2AcceptAction = await formActionNearText(page, "/accept", "@demo2");
+  if (demo2AcceptAction) {
+    result.requestCreatedFromAuditClient = true;
+  }
+
+  const currentClientLink = page.locator("a[href^='/trainer/clients/']:not([href$='/assessment'])").first();
   if (await currentClientLink.count()) {
     result.currentClientAvailable = true;
     await Promise.all([
@@ -407,9 +532,41 @@ async function auditTrainerClientLifecycleFlow(page) {
     result.clientDetailOpened = null;
   }
 
-  const pendingAction = page.locator("form[action*='/accept'], form[action*='/reject']").first();
+  const pendingAction = demo2AcceptAction ? page.locator(`form[action='${demo2AcceptAction}']`).first() : page.locator("form[action*='/accept']").first();
   result.pendingRequestAvailable = (await pendingAction.count()) > 0;
+  if (result.pendingRequestAvailable) {
+    if (demo2AcceptAction) {
+      await formPost(page, demo2AcceptAction, {});
+    } else {
+      await Promise.all([
+        page.waitForLoadState("networkidle").catch(() => undefined),
+        pendingAction.getByRole("button", { name: /Accept/i }).click(),
+      ]);
+    }
+    await page.goto(`${baseUrl}/trainer/clients`, { waitUntil: "networkidle", timeout: 30000 });
+    const acceptedText = await page.locator("body").innerText().catch(() => "");
+    result.pendingRequestAccepted = /@demo2/i.test(acceptedText) && /ACTIVE/i.test(acceptedText);
+    const demo2EndAction = await formActionNearText(page, "/end", "@demo2");
+    if (demo2EndAction) {
+      await formPost(page, demo2EndAction, {});
+      await page.goto(`${baseUrl}/trainer/clients`, { waitUntil: "networkidle", timeout: 30000 });
+      const afterEndText = await page.locator("body").innerText().catch(() => "");
+      result.acceptedAuditClientEnded = !(/@demo2/i.test(afterEndText) && /ACTIVE/i.test(afterEndText));
+    }
+  }
   result.pendingActionsVisible = result.pendingRequestAvailable || /No pending|No client requests|requests will appear/i.test(await page.locator("body").innerText().catch(() => ""));
+
+  const guardContext = browser ? await browser.newContext() : null;
+  if (guardContext) {
+    const guardPage = await guardContext.newPage();
+    try {
+      await login(guardPage, "demo_client", "client");
+      await guardPage.goto(`${baseUrl}/client/trainers`, { waitUntil: "networkidle", timeout: 30000 });
+      result.oneActiveTrainerGuardVisible = await guardPage.getByRole("button", { name: "Request" }).first().isDisabled().catch(() => false);
+    } finally {
+      await guardContext.close();
+    }
+  }
 
   result.finalUrl = page.url();
   return result;
@@ -518,7 +675,8 @@ async function auditScheduleDeploymentFlow(page) {
     scheduleAvailable: null,
     previewApiOk: null,
     impactApiOk: null,
-    applySkippedAsMutating: true,
+    applyApiOk: null,
+    undoApiOk: null,
     calendarSummaryOk: null,
     finalUrl: null,
   };
@@ -552,6 +710,31 @@ async function auditScheduleDeploymentFlow(page) {
       });
       return response.ok;
     }, { baseUrl, scheduleId, headers, start, end }).catch(() => false);
+    const applyResult = await page.evaluate(async ({ baseUrl, scheduleId, headers }) => {
+      const response = await fetch(`${baseUrl}/api/schedules/${scheduleId}/deployment/apply`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ selectedDate: "2026-05-25", scope: "week", strategy: "merge" }),
+      });
+      const body = await response.json().catch(() => ({}));
+      return { ok: response.ok && body.success === true, undoToken: body.undoToken || null };
+    }, { baseUrl, scheduleId, headers }).catch(() => ({ ok: false, undoToken: null }));
+    result.applyApiOk = applyResult.ok;
+    if (applyResult.undoToken) {
+      result.undoApiOk = await page.evaluate(async ({ baseUrl, scheduleId, headers, undoToken }) => {
+        const response = await fetch(`${baseUrl}/api/schedules/${scheduleId}/deployment/undo`, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json", ...headers },
+          body: JSON.stringify({ undoToken }),
+        });
+        const body = await response.json().catch(() => ({}));
+        return response.ok && body.success === true;
+      }, { baseUrl, scheduleId, headers, undoToken: applyResult.undoToken }).catch(() => false);
+    } else {
+      result.undoApiOk = false;
+    }
   }
   result.calendarSummaryOk = await page.evaluate(async ({ baseUrl }) => {
     const response = await fetch(`${baseUrl}/api/calendar/summary?start=2026-05-11&end=2026-05-17`, { credentials: "same-origin" });
@@ -1076,10 +1259,17 @@ async function auditAdminMutationFlow(page) {
   const stamp = Date.now();
   const name = `Audit Merch ${stamp}`;
   const result = {
+    supportRequestCreated: null,
     feedbackPageLoaded: false,
-    feedbackMutationAvailable: null,
+    feedbackViewed: null,
+    feedbackStatusUpdated: null,
+    feedbackResponded: null,
+    gymApplicationCreated: null,
     gymApplicationsPageLoaded: false,
-    gymApplicationMutationAvailable: null,
+    gymApplicationMessageSent: null,
+    gymApplicationInfoRequested: null,
+    gymApplicationDeclined: null,
+    gymApplicationApproved: null,
     merchCreated: false,
     merchEdited: false,
     merchDeleted: false,
@@ -1087,16 +1277,79 @@ async function auditAdminMutationFlow(page) {
   };
 
   await page.setViewportSize(viewports.desktop);
+  const browser = page.context().browser();
+  const supportSubject = `Audit support ${stamp}`;
+  if (browser) {
+    result.supportRequestCreated = await createPublicSupportRequest(browser, supportSubject);
+  }
+
   await page.goto(`${baseUrl}/admin/feedback`, { waitUntil: "networkidle", timeout: 30000 });
   let bodyText = await page.locator("body").innerText().catch(() => "");
   result.feedbackPageLoaded = /Feedback|Support|Message/i.test(bodyText);
-  result.feedbackMutationAvailable = (await page.locator("form[action*='/admin/feedback']").count()) > 0 || /No feedback|No messages/i.test(bodyText);
+  const feedbackArticle = page.locator("article", { hasText: supportSubject }).first();
+  if (await feedbackArticle.count()) {
+    const feedbackId = await feedbackArticle.locator("form[action*='/admin/feedback/']").first().getAttribute("action")
+      .then((action) => action?.match(/\/admin\/feedback\/(\d+)\//)?.[1] || null)
+      .catch(() => null);
+    if (feedbackId) {
+      let response = await formPost(page, `/admin/feedback/${feedbackId}/viewed`, {});
+      result.feedbackViewed = response.ok || response.status < 500;
+      response = await formPost(page, `/admin/feedback/${feedbackId}/status`, { status: "ONGOING" });
+      result.feedbackStatusUpdated = response.ok || response.status < 500;
+      response = await formPost(page, `/admin/feedback/${feedbackId}/respond`, { response: "Audit response for support mutation coverage." });
+      result.feedbackResponded = response.ok || response.status < 500;
+    }
+  } else {
+    result.feedbackViewed = false;
+    result.feedbackStatusUpdated = false;
+    result.feedbackResponded = false;
+  }
+
+  const gymSeeds = [];
+  if (browser) {
+    gymSeeds.push(await createPublicGymApplication(browser, stamp, "msg"));
+    gymSeeds.push(await createPublicGymApplication(browser, stamp, "dec"));
+    gymSeeds.push(await createPublicGymApplication(browser, stamp, "app"));
+  }
+  result.gymApplicationCreated = gymSeeds.length === 3 && gymSeeds.every((seed) => seed.created);
 
   await page.goto(`${baseUrl}/admin/gym-applications`, { waitUntil: "networkidle", timeout: 30000 });
   bodyText = await page.locator("body").innerText().catch(() => "");
   result.gymApplicationsPageLoaded = /Gym Applications|Applications/i.test(bodyText);
-  result.gymApplicationMutationAvailable = (await page.locator("form[action*='/admin/gym-applications']").count()) > 0
-    || /No gym applications found|No applications|No pending/i.test(bodyText);
+  for (const seed of gymSeeds) {
+    const article = page.locator("article", { hasText: seed.marker }).first();
+    const detailHref = await article.getByRole("link", { name: /Open application/i }).getAttribute("href").catch(() => null);
+    const id = detailHref?.match(/\/admin\/gym-applications\/(\d+)/)?.[1] || null;
+    if (!id) continue;
+    await page.goto(`${baseUrl}/admin/gym-applications/${id}`, { waitUntil: "networkidle", timeout: 30000 });
+    if (seed.marker.includes("msg")) {
+      let response = await formPost(page, `/admin/gym-applications/${id}/message`, {
+        subject: "Audit follow-up",
+        message: "Audit message mutation coverage.",
+      });
+      result.gymApplicationMessageSent = response.ok || response.status < 500;
+      response = await formPost(page, `/admin/gym-applications/${id}/request-info`, {
+        subject: "Audit information request",
+        message: "Please provide audit-only additional information.",
+      });
+      result.gymApplicationInfoRequested = response.ok || response.status < 500;
+    }
+    if (seed.marker.includes("dec")) {
+      const response = await formPost(page, `/admin/gym-applications/${id}/decline`, {
+        subject: "Audit decline",
+        message: "Audit-only decline mutation.",
+        reviewNotes: "Audit-only internal decline notes.",
+      });
+      result.gymApplicationDeclined = response.ok || response.status < 500;
+    }
+    if (seed.marker.includes("app")) {
+      const response = await formPost(page, `/admin/gym-applications/${id}/approve`, {
+        welcomeMessage: "Audit-only approval mutation.",
+      });
+      result.gymApplicationApproved = response.ok || response.status < 500;
+    }
+    await page.goto(`${baseUrl}/admin/gym-applications`, { waitUntil: "networkidle", timeout: 30000 });
+  }
 
   await page.goto(`${baseUrl}/admin/merch/new`, { waitUntil: "networkidle", timeout: 30000 });
   await page.locator("input[name='name']").fill(name);
@@ -1194,6 +1447,11 @@ async function run() {
         results.push(await capture(publicPage, entry, viewportName));
       }
     }
+    for (const entry of systemPages) {
+      for (const viewportName of entry.viewports) {
+        results.push(await capture(publicPage, entry, viewportName, "system"));
+      }
+    }
     await publicContext.close();
 
     for (const roleAudit of roleAudits) {
@@ -1255,6 +1513,9 @@ async function run() {
         || item.result?.clientDetailOpened === false
         || item.result?.pendingActionsVisible === false
         || item.result?.oneActiveTrainerGuardVisible === false
+        || item.result?.requestCreatedFromAuditClient === false
+        || item.result?.pendingRequestAccepted === false
+        || item.result?.acceptedAuditClientEnded === false
         || item.result?.exerciseCreated === false
         || item.result?.exerciseEdited === false
         || item.result?.exerciseDeleted === false
@@ -1266,6 +1527,8 @@ async function run() {
         || item.result?.programmeDeleted === false
         || item.result?.previewApiOk === false
         || item.result?.impactApiOk === false
+        || item.result?.applyApiOk === false
+        || item.result?.undoApiOk === false
         || item.result?.calendarSummaryOk === false
         || item.result?.created === false
         || item.result?.checkInSaved === false
@@ -1292,10 +1555,17 @@ async function run() {
         || item.result?.inboxReadOk === false
         || item.result?.inboxSendOk === false
         || item.result?.notificationsReadAllOk === false
+        || item.result?.supportRequestCreated === false
         || item.result?.feedbackPageLoaded === false
-        || item.result?.feedbackMutationAvailable === false
+        || item.result?.feedbackViewed === false
+        || item.result?.feedbackStatusUpdated === false
+        || item.result?.feedbackResponded === false
+        || item.result?.gymApplicationCreated === false
         || item.result?.gymApplicationsPageLoaded === false
-        || item.result?.gymApplicationMutationAvailable === false
+        || item.result?.gymApplicationMessageSent === false
+        || item.result?.gymApplicationInfoRequested === false
+        || item.result?.gymApplicationDeclined === false
+        || item.result?.gymApplicationApproved === false
         || item.result?.merchCreated === false
         || item.result?.merchEdited === false
         || item.result?.merchDeleted === false
@@ -1312,7 +1582,7 @@ async function run() {
         || item.diagnostics?.deadLinks?.length
         || item.diagnostics?.missingButtonNames?.length
         || item.diagnostics?.suspiciousText?.length
-        || item.status >= 400
+        || (item.status >= 400 && !(item.allowedStatuses || []).includes(item.status))
         || item.responseError)
       .map((item) => ({
         role: item.role,

@@ -23,11 +23,12 @@ First fixed issue:
 Runtime audit pass:
 
 - Added `tools/qa/playwright-local-view-audit.mjs` for repeatable local browser checks against `http://localhost:8081`.
-- Latest run captured `45` public/client/trainer/gym/admin/super-admin page and viewport checks with no active findings.
+- Latest run captured `79` public/client/trainer/gym/admin/super-admin/system page, viewport, and workflow checks with no active findings.
 - Evidence is written to `output/playwright/local-view-audit/results.json`, `summary.json`, and screenshots in the same folder.
 - Fixed a calendar month API failure where `/api/calendar/summary` returned `500` for authenticated browser fetches.
 - Fixed schedule metadata fetch auth resolution for `/api/schedules/...` endpoints used by trainer schedule pages.
 - Added accessible names to icon-only schedule modal close buttons and the global chat send button.
+- Expanded the workflow audit to cover trainer-client request/accept/end cleanup, trainer library CRUD, schedule apply/undo API deployment, vault AI actions, admin feedback/gym-application/merch mutations, async API checks, payment edge states, and system/dev/error page access.
 
 ## View and Interaction Matrix
 
@@ -252,14 +253,21 @@ Runtime audit pass:
 10. P1 fixed: profile payment-card submit and trainer workout custom-exercise close controls now have explicit accessible names.
 11. P1 fixed: second-depth workflows now cover profile update submission, blood-pressure create/edit/delete, vault create/edit/pin/delete, inbox send when a thread exists, and merch checkout availability/simulated-payment locking.
 12. P1 fixed: blood-pressure create/edit/delete forms now include CSRF tokens, and date/time controls render browser-safe `yyyy-MM-dd` / `HH:mm` values instead of locale-formatted values.
-13. P1 fixed: remaining high-risk workflow coverage now includes trainer-client lifecycle visibility/access, trainer library exercise/workout/programme create-edit-delete, schedule deployment preview/impact APIs, vault AI insight/summarise/rewrite handling, blood-pressure JSON API, inbox/notification/calendar APIs, admin merch mutation plus feedback/gym-application moderation availability, and payment success/cancel edge states.
-14. P1 verified: schedule apply/deploy remains non-destructive in the local harness; deployment preview/impact and calendar summary are checked, while applying generated entries is left for seeded/demo-only records or an intercepted browser pass.
-15. P1 next: add focused backend regression tests only when future deeper payment, messaging, health, trainer-client lifecycle, or schedule-deployment testing confirms an application defect rather than harness coverage.
-16. P2: polish lower-risk static pages, dev-mode pages, and error-page CTAs after core flows are stable.
+13. P1 fixed: remaining high-risk workflow coverage now includes trainer-client lifecycle visibility/access, trainer library exercise/workout/programme create-edit-delete, schedule deployment preview/impact/apply/undo APIs, vault AI insight/summarise/rewrite handling, blood-pressure JSON API, inbox/notification/calendar APIs, admin merch mutation plus feedback/gym-application moderation, and payment success/cancel edge states.
+14. P1 verified: schedule apply/deploy now runs against local demo data through the browser harness and immediately undoes generated entries with the deployment undo token.
+15. P1 fixed: focused backend regression coverage now protects trainer-client destructive lifecycle transitions (`requestLink` active-trainer guard, pause, end) and gym application admin mutations (`requestMoreInfo`, `decline`, `approve`) using test data and mocked outbound email/verification side effects.
+16. P1 fixed: schedule deployment apply/undo regression coverage now verifies generated occurrences, applied-schedule records, undo cleanup, and replace-mode restoration using isolated transactional fixtures.
+17. P2 fixed: error-page CTAs now use the correct dashboard/home destinations, shared premium error-state styling, responsive layouts, and a history-back fallback for direct-entry error pages. Dev-mode login-required pages now import their dedicated CSS and use shared dev icon/link patterns.
+18. P1 fixed: gym-application templates no longer use the reserved Thymeleaf `application` variable name; admin list/detail and the public portal use `gymApplication` consistently.
+19. P1 fixed: trainer current-client rows render status/actions defensively from a local `linkStatus`, restoring the visible active-client controls needed for assessment, plan, messaging, pause, and end actions.
+20. P1 fixed: the local browser harness now seeds and uses a verified secondary demo client for safe trainer lifecycle mutation, creates safe support/gym-application records for admin mutation checks, and targets form actions directly for cleanup.
 
 ## Current Static Findings
 
 - Template separation rules currently pass the static inline-code scan.
 - The highest-risk confirmed defect was stale controller template names for admin screens; this has been corrected.
-- The current local browser workflow audit passes with no findings after the P0/P1 fixes above: `69` checks, `0` findings, evidence in `output/playwright/local-view-audit/`.
-- Data-changing form/API coverage now includes representative profile update, goal, check-in, notes, health-record, blood-pressure CRUD and JSON API, vault CRUD and AI actions, inbox UI/API send/read, notification read-all, trainer library CRUD, admin merch create/edit/delete/deactivate, and merch payment edge-state handling. Trainer-client lifecycle and admin moderation are documented with safe availability/access checks; destructive accept/reject/approve/decline actions remain notAvailable unless a seeded demo record is explicitly provided for mutation.
+- The current local browser workflow audit passes with no findings after the P0/P1 fixes above: `79` checks, `0` findings, evidence in `output/playwright/local-view-audit/`.
+- Data-changing form/API coverage now includes representative profile update, goal, check-in, notes, health-record, blood-pressure CRUD and JSON API, vault CRUD and AI actions, inbox UI/API send/read, notification read-all, trainer-client request/accept/end, trainer library CRUD, schedule deployment apply/undo, admin feedback response/status/viewed, gym-application request-info/approve/decline, admin merch create/edit/delete/deactivate, and merch payment edge-state handling.
+- Backend regression coverage exercises destructive trainer-client, gym-application, and schedule deployment mutation paths against isolated transactional test data; the browser harness uses seeded/demo-safe records and cleans up its trainer/schedule mutations.
+- Schedule deployment apply/undo is covered in backend MVC tests with seeded schedule entries, including merge creation and replace restoration paths.
+- System error views now share a dedicated CSS surface and the existing back-navigation JS helper. Dev-mode static pages use their dedicated stylesheet consistently. The templates remain markup-only and no inline scripts/styles were introduced.

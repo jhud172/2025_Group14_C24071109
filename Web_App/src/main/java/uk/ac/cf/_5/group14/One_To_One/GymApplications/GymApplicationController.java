@@ -46,7 +46,7 @@ public class GymApplicationController {
         try {
             GymApplication application = gymApplicationService.getApplication(id);
             model.addAttribute("pageTitle", "Gym Application");
-            model.addAttribute("application", application);
+            model.addAttribute("gymApplication", application);
             model.addAttribute("messages", gymApplicationService.getMessages(id));
             model.addAttribute("openApplicationCount", gymApplicationService.countOpenApplications());
             return "admin-views/admin/gym-application-detail";
@@ -141,7 +141,7 @@ public class GymApplicationController {
             GymApplication application = gymApplicationService.getApplicationByAccessToken(token);
             model.addAttribute("authPageLayout", true);
             model.addAttribute("compactTopContent", true);
-            model.addAttribute("application", application);
+            model.addAttribute("gymApplication", application);
             model.addAttribute("messages", gymApplicationService.getMessages(application.getId()));
             return "public-views/auth/signup-gym-application";
         } catch (Exception ex) {

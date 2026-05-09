@@ -214,6 +214,14 @@ UPDATE users
 SET subscription_status = false
 WHERE username = 'demo2';
 
+UPDATE users
+SET email_verified = TRUE,
+    email_verified_at = CURRENT_TIMESTAMP,
+    phone_number = '7858256918',
+    phone_verified = TRUE,
+    phone_verified_at = CURRENT_TIMESTAMP
+WHERE username = 'demo2';
+
 INSERT INTO platform_subscriptions (user_id, plan, status, current_period_end, cancel_at_period_end)
 SELECT u.id, 'MONTHLY', 'ACTIVE', CURRENT_TIMESTAMP + INTERVAL '30' DAY, FALSE
 FROM users u

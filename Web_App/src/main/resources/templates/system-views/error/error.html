@@ -2,32 +2,28 @@
           th:replace="~{base :: layout('Error', null, ~{::content}, null)}">
 
 <div th:fragment="content">
-    <div class="flex items-center justify-center min-h-[60vh] px-4">
-        <div class="max-w-md w-full bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
-            <div class="p-8 text-center">
-                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-triangle-exclamation text-2xl"></i>
-                </div>
-                
-                <h1 class="text-2xl font-bold text-gray-900 mb-2" th:text="${'Error ' + statusCode}">Error</h1>
-                <p class="text-gray-600 mb-6" th:text="${errorMessage ?: 'An unexpected error occurred. Please try again later.'}">
-                    An error has occurred
+    <section class="error-page" aria-labelledby="error-title">
+        <div class="error-card error-card--generic">
+            <div class="error-status">
+                <span class="error-status__code" th:text="${statusCode ?: 'Error'}">Error</span>
+                <span class="error-status__label">Request failed</span>
+            </div>
+
+            <div class="error-card__body">
+                <p class="error-eyebrow">Page unavailable</p>
+                <h1 id="error-title" class="error-title" th:text="${statusCode != null ? 'Error ' + statusCode : 'Something went wrong'}">Something went wrong</h1>
+                <p class="error-copy" th:text="${errorMessage ?: 'An unexpected error occurred. Please try again later.'}">
+                    An unexpected error occurred. Please try again later.
                 </p>
 
-                <div class="space-y-3">
-                    <a href="/" class="block w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors">
-                        <i class="fas fa-home mr-2"></i>Go to Dashboard
-                    </a>
-                    <button type="button" data-history-back class="block w-full py-3 px-4 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors">
-                        <i class="fas fa-arrow-left mr-2"></i>Go Back
-                    </button>
+                <div class="error-actions">
+                    <a th:href="@{/dashboard}" class="error-button error-button--primary">Dashboard</a>
+                    <a th:href="@{/}" class="error-button error-button--secondary">Home</a>
+                    <button type="button" data-history-back data-history-fallback="/" class="error-button error-button--ghost">Go back</button>
                 </div>
             </div>
-            <div class="bg-gray-50 px-8 py-4 border-t border-gray-100 text-center">
-                <p class="text-xs text-gray-500" th:text="${'Error ' + statusCode}">Error</p>
-            </div>
         </div>
-    </div>
+    </section>
 </div>
 
 </th:block>
