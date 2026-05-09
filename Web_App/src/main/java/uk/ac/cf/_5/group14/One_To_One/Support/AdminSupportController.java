@@ -110,7 +110,7 @@ public class AdminSupportController {
         model.addAttribute("pageTitle", "Admin Feedback Inbox");
         model.addAttribute("feedbackItems", supportRequestRepository.findAllByOrderBySubmittedAtDesc());
         model.addAttribute("statuses", SupportRequestStatus.values());
-        return "admin/feedback";
+        return "admin-views/admin/feedback";
     }
 
     @PostMapping("/admin/feedback/{id}/viewed")

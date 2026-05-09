@@ -78,12 +78,12 @@ public class TrainerScheduleTemplateController {
     }
 
     @GetMapping
-    public ModelAndView index(@RequestParam(value = "system-views/error/error", required = false) String error) {
+    public ModelAndView index(@RequestParam(value = "error", required = false) String error) {
         User trainer = currentTrainerOrThrow();
         ModelAndView mav = new ModelAndView("trainer-views/trainer/templates/index");
         mav.addObject("pageTitle", "Trainer Templates");
         mav.addObject("templates", templateService.listForTrainer(trainer));
-        mav.addObject("system-views/error/error", error);
+        mav.addObject("error", error);
         return mav;
     }
 

@@ -75,6 +75,19 @@ class TemplateRouteContractTest {
     }
 
     @Test
+    void adminControllersReturnExistingAdminViewTemplates() throws IOException {
+        String gymApplicationController = read("src/main/java/uk/ac/cf/_5/group14/One_To_One/GymApplications/GymApplicationController.java");
+        String adminSupportController = read("src/main/java/uk/ac/cf/_5/group14/One_To_One/Support/AdminSupportController.java");
+
+        assertThat(gymApplicationController).contains("return \"admin-views/admin/gym-applications\"");
+        assertThat(gymApplicationController).contains("return \"admin-views/admin/gym-application-detail\"");
+        assertThat(adminSupportController).contains("return \"admin-views/admin/feedback\"");
+        assertThat(gymApplicationController).doesNotContain("return \"admin/gym-applications\"");
+        assertThat(gymApplicationController).doesNotContain("return \"admin/gym-application-detail\"");
+        assertThat(adminSupportController).doesNotContain("return \"admin/feedback\"");
+    }
+
+    @Test
     void scheduleListUsesPostFormsForDestructiveActions() throws IOException {
         String template = read("src/main/resources/templates/trainer-views/schedule/list.html");
 
@@ -83,6 +96,18 @@ class TemplateRouteContractTest {
         assertThat(template).contains("/schedules/' + ${schedule.id} + '/delete");
         assertThat(template).doesNotContain("th:href=\"@{'/schedules/applied/' + ${applied.id} + '/remove'}\"");
         assertThat(template).doesNotContain("th:href=\"@{'/schedules/' + ${schedule.id} + '/delete'}\"");
+    }
+
+    @Test
+    void clientTrainerRoutesAreClientOnlyInSecurityConfig() throws IOException {
+        String securityConfig = read("src/main/java/uk/ac/cf/_5/group14/One_To_One/Security/SecurityConfig.java");
+
+        assertThat(securityConfig).contains(".requestMatchers(\"/client/trainers\", \"/client/trainers/**\").hasRole(\"CLIENT\")");
+        assertThat(securityConfig).contains(".requestMatchers(\"/client/**\").hasRole(\"CLIENT\")");
+        assertThat(securityConfig).contains(".requestMatchers(\"/trainers/**\").hasRole(\"CLIENT\")");
+        assertThat(securityConfig).doesNotContain(".requestMatchers(\"/client/trainers\", \"/client/trainers/**\").hasAnyRole(\"CLIENT\", \"USER\")");
+        assertThat(securityConfig).doesNotContain(".requestMatchers(\"/client/**\").hasAnyRole(\"CLIENT\", \"USER\")");
+        assertThat(securityConfig).doesNotContain(".requestMatchers(\"/trainers/**\").hasAnyRole(\"CLIENT\", \"USER\")");
     }
 
     @Test

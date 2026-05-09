@@ -89,7 +89,7 @@ public class BloodPressureController {
             service.save(reading);
             ra.addFlashAttribute("success", "Reading saved.");
         } catch (IllegalStateException e) {
-            ra.addFlashAttribute("system-views/error/error", e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/health/blood-pressure?range=" + range;
     }
@@ -129,7 +129,7 @@ public class BloodPressureController {
             service.update(id, updated, user);
             ra.addFlashAttribute("success", "Reading updated.");
         } catch (Exception e) {
-            ra.addFlashAttribute("system-views/error/error", "Could not update reading.");
+            ra.addFlashAttribute("error", "Could not update reading.");
         }
         return "redirect:/health/blood-pressure";
     }
@@ -142,7 +142,7 @@ public class BloodPressureController {
             service.delete(id, user);
             ra.addFlashAttribute("success", "Reading deleted.");
         } catch (Exception e) {
-            ra.addFlashAttribute("system-views/error/error", "Could not delete reading.");
+            ra.addFlashAttribute("error", "Could not delete reading.");
         }
         return "redirect:/health/blood-pressure";
     }

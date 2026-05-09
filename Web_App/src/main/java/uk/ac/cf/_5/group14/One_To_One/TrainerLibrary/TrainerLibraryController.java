@@ -85,7 +85,7 @@ public class TrainerLibraryController {
     }
 
     @GetMapping
-    public ModelAndView overview(@RequestParam(value = "system-views/error/error", required = false) String error) {
+    public ModelAndView overview(@RequestParam(value = "error", required = false) String error) {
         Long trainerId = currentTrainerIdOrThrow();
 
         ModelAndView mav = new ModelAndView("trainer-views/trainer/library");
@@ -93,7 +93,7 @@ public class TrainerLibraryController {
         mav.addObject("exerciseCount", trainerLibraryService.listExercises(trainerId).size());
         mav.addObject("workoutCount", trainerLibraryService.listWorkouts(trainerId).size());
         mav.addObject("programmeCount", trainerLibraryService.listProgrammes(trainerId).size());
-        mav.addObject("system-views/error/error", error);
+        mav.addObject("error", error);
         return mav;
     }
 

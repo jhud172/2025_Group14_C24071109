@@ -52,19 +52,22 @@
             <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-slate-100">Log Reading</h2>
                 <form th:action="@{/health/blood-pressure}" method="post" th:object="${quickAdd}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <input type="hidden" name="range" th:value="${range}" />
                     <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                         <!-- Date -->
                         <div>
                             <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Date</label>
-                            <input type="date" th:field="*{readingDate}"
+                            <input type="date" id="readingDate" name="readingDate"
+                                   th:value="*{readingDate != null ? #temporals.format(readingDate, 'yyyy-MM-dd') : ''}"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                             <p th:if="${#fields.hasErrors('readingDate')}" th:errors="*{readingDate}" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <!-- Time -->
                         <div>
                             <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Time <span class="text-slate-400">(optional)</span></label>
-                            <input type="time" th:field="*{readingTime}"
+                            <input type="time" id="readingTime" name="readingTime"
+                                   th:value="*{readingTime != null ? #temporals.format(readingTime, 'HH:mm') : ''}"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                         </div>
                         <!-- Systolic -->
@@ -191,6 +194,7 @@
                                    class="mr-2 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Edit</a>
                                 <form th:action="@{/health/blood-pressure/delete/{id}(id=${r.id})}" method="post" class="inline"
                                       data-confirm="Delete this reading?">
+                                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <button type="submit" class="text-xs text-red-400 hover:text-red-600"
                                             >Delete</button>
                                 </form>

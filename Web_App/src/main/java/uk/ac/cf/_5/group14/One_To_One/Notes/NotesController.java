@@ -235,9 +235,10 @@ public class NotesController {
 
     @DeleteMapping("/api/folders/{id}")
     @ResponseBody
-    public void deleteFolderApi(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<Void> deleteFolderApi(@PathVariable Long id, HttpSession session) {
         User user = authHelper.getAuthenticatedUser(session);
         folderService.deleteFolder(user, id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/api/notes")
@@ -283,9 +284,10 @@ public class NotesController {
 
     @DeleteMapping("/api/notes/{id}")
     @ResponseBody
-    public void deleteNoteApi(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<Void> deleteNoteApi(@PathVariable Long id, HttpSession session) {
         User user = authHelper.getAuthenticatedUser(session);
         noteService.delete(user, id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/export/{id}")

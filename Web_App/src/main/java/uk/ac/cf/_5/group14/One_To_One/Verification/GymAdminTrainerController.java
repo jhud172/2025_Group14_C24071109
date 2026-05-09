@@ -37,7 +37,7 @@ public class GymAdminTrainerController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("system-views/error/error", "You must be associated with a gym");
+            model.addAttribute("error", "You must be associated with a gym");
             return "system-views/error/403";
         }
 
@@ -131,7 +131,7 @@ public class GymAdminTrainerController {
         try {
             request = verificationService.getRequestForGym(id, admin.getGymId());
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("system-views/error/error", "Access denied");
+            model.addAttribute("error", "Access denied");
             return "system-views/error/403";
         }
 

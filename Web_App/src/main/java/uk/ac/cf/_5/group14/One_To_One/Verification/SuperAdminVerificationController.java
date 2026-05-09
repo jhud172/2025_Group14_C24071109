@@ -59,7 +59,7 @@ public class SuperAdminVerificationController {
         try {
             request = verificationService.getRequestById(id);
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("system-views/error/error", "Verification request not found");
+            model.addAttribute("error", "Verification request not found");
             return "system-views/error/404";
         }
         

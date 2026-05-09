@@ -31,7 +31,7 @@ public class GymApplicationController {
 
         model.addAttribute("pageTitle", "Gym Applications");
         model.addAttribute("applications", gymApplicationService.getAllApplications());
-        return "admin/gym-applications";
+        return "admin-views/admin/gym-applications";
     }
 
     @GetMapping("/admin/gym-applications/{id}")
@@ -49,7 +49,7 @@ public class GymApplicationController {
             model.addAttribute("application", application);
             model.addAttribute("messages", gymApplicationService.getMessages(id));
             model.addAttribute("openApplicationCount", gymApplicationService.countOpenApplications());
-            return "admin/gym-application-detail";
+            return "admin-views/admin/gym-application-detail";
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("gymApplicationError", ex.getMessage());
             return "redirect:/admin/gym-applications";

@@ -51,7 +51,7 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("system-views/error/error", "You must be associated with a gym to manage memberships");
+            model.addAttribute("error", "You must be associated with a gym to manage memberships");
             return "system-views/error/403";
         }
         
@@ -115,7 +115,7 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("system-views/error/error", "You must be associated with a gym to create memberships");
+            model.addAttribute("error", "You must be associated with a gym to create memberships");
             return "system-views/error/403";
         }
         
@@ -171,7 +171,7 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("system-views/error/error", "Access denied");
+            model.addAttribute("error", "Access denied");
             return "system-views/error/403";
         }
         
@@ -228,7 +228,7 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("system-views/error/error", "Access denied");
+            model.addAttribute("error", "Access denied");
             return "system-views/error/403";
         }
         
@@ -324,7 +324,7 @@ public class GymAdminMembershipController {
         User admin = getUserFromDetails(userDetails);
         
         if (admin.getGymId() == null) {
-            model.addAttribute("system-views/error/error", "Access denied");
+            model.addAttribute("error", "Access denied");
             return "system-views/error/403";
         }
         
@@ -332,7 +332,7 @@ public class GymAdminMembershipController {
         try {
             product = membershipService.getProductByIdAndGymId(id, admin.getGymId());
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("system-views/error/error", "Access denied");
+            model.addAttribute("error", "Access denied");
             return "system-views/error/403";
         }
 

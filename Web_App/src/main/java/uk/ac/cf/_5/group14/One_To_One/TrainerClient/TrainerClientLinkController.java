@@ -94,7 +94,7 @@ public class TrainerClientLinkController {
     }
 
     @GetMapping("/trainer/clients")
-    public ModelAndView trainerClients(@RequestParam(value = "system-views/error/error", required = false) String error) {
+    public ModelAndView trainerClients(@RequestParam(value = "error", required = false) String error) {
         User trainer = currentUserOrThrow();
         ModelAndView mav = new ModelAndView("trainer-views/trainer/clients");
         mav.addObject("pageTitle", "Trainer Clients");
@@ -115,7 +115,7 @@ public class TrainerClientLinkController {
                 .stream()
                 .collect(Collectors.toMap(User::getId, u -> u));
         mav.addObject("clientsById", clientsById);
-        mav.addObject("system-views/error/error", error);
+        mav.addObject("error", error);
         return mav;
     }
 
@@ -187,7 +187,7 @@ public class TrainerClientLinkController {
     }
 
     @GetMapping("/client/trainers")
-    public ModelAndView myTrainers(@RequestParam(value = "system-views/error/error", required = false) String error,
+    public ModelAndView myTrainers(@RequestParam(value = "error", required = false) String error,
                                    @RequestParam(value = "q", required = false) String q) {
         User client = currentUserOrThrow();
 
@@ -217,7 +217,7 @@ public class TrainerClientLinkController {
 
         mav.addObject("q", q);
         mav.addObject("trainers", trainers);
-        mav.addObject("system-views/error/error", error);
+        mav.addObject("error", error);
         return mav;
     }
 }

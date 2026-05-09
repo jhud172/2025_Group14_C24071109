@@ -35,7 +35,7 @@ public class BloodPressureApiController {
                     "id", saved.getId(),
                     "category", BpCategory.classify(saved.getSystolic(), saved.getDiastolic()).label));
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(Map.of("system-views/error/error", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

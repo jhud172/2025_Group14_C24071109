@@ -1,6 +1,7 @@
 package uk.ac.cf._5.group14.One_To_One.Users;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -15,6 +16,7 @@ public class AuthHelper {
         this.currentUserResolver = null;
     }
 
+    @Autowired
     public AuthHelper(CurrentUserResolver currentUserResolver) {
         this.currentUserResolver = currentUserResolver;
     }

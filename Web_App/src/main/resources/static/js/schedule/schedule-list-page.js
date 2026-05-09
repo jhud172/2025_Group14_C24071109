@@ -212,6 +212,12 @@ function handleTemplateNavigation() {
     }
 }
 
+function getCsrfHeaders() {
+    const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
+    const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+    return token ? { [header]: token } : {};
+}
+
 // Preview Modal Functions
 function showSchedulePreview(button) {
     const scheduleId = button.getAttribute('data-schedule-id');
@@ -316,6 +322,7 @@ async function duplicateSchedule(button) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                ...getCsrfHeaders(),
             },
         });
         
