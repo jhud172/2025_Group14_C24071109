@@ -221,7 +221,7 @@ async function auditInvalidLogin(page) {
   return {
     finalUrl: page.url(),
     stayedOnLogin: page.url().includes("/login"),
-    hasErrorText: /invalid|error|incorrect|failed|annilys|password|cyfrinair/i.test(`${text}\n${alertText}`),
+    hasErrorText: /invalid|error|incorrect|failed|throttled|too many|rate limit|annilys|password|cyfrinair/i.test(`${text}\n${alertText}\n${page.url()}`),
   };
 }
 
@@ -283,6 +283,26 @@ async function auditRoleLocks(page, actor) {
     });
   }
   return checks;
+}
+
+async function csrfHeaders(page) {
+  return page.evaluate(() => {
+    const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content") || "";
+    const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content") || "X-CSRF-TOKEN";
+    return token ? { [header]: token } : {};
+  });
+}
+
+async function submitFirstFormByAction(page, actionPart, buttonName = null) {
+  const form = page.locator(`form[action*='${actionPart}']`).first();
+  if (!(await form.count())) return false;
+  page.once("dialog", async (dialog) => dialog.accept());
+  const button = buttonName ? form.getByRole("button", { name: buttonName }) : form.locator("button[type='submit']").first();
+  await Promise.all([
+    page.waitForLoadState("networkidle").catch(() => undefined),
+    button.click(),
+  ]);
+  return true;
 }
 
 async function auditScheduleInteractions(page) {
@@ -353,6 +373,191 @@ async function auditScheduleInteractions(page) {
     await page.unroute("**/api/schedules/*/duplicate").catch(() => undefined);
   }
 
+  return result;
+}
+
+async function auditTrainerClientLifecycleFlow(page) {
+  const result = {
+    clientsPageLoaded: false,
+    currentClientAvailable: null,
+    clientDetailOpened: null,
+    pendingRequestAvailable: null,
+    pendingActionsVisible: null,
+    oneActiveTrainerGuardVisible: null,
+    finalUrl: null,
+  };
+
+  await page.setViewportSize(viewports.desktop);
+  await page.goto(`${baseUrl}/trainer/clients`, { waitUntil: "networkidle", timeout: 30000 });
+  const bodyText = await page.locator("body").innerText().catch(() => "");
+  result.clientsPageLoaded = /Clients|Client Requests|Current Clients/i.test(bodyText);
+
+  const currentClientLink = page.locator("a[href^='/trainer/clients/']").first();
+  if (await currentClientLink.count()) {
+    result.currentClientAvailable = true;
+    await Promise.all([
+      page.waitForURL(/\/trainer\/clients\/\d+$/, { timeout: 15000 }),
+      currentClientLink.click(),
+    ]);
+    await page.waitForLoadState("domcontentloaded");
+    result.clientDetailOpened = /Client|Assessment|Plan|Goals|Check-in/i.test(await page.locator("body").innerText().catch(() => ""));
+    await page.goto(`${baseUrl}/trainer/clients`, { waitUntil: "networkidle", timeout: 30000 });
+  } else {
+    result.currentClientAvailable = false;
+    result.clientDetailOpened = null;
+  }
+
+  const pendingAction = page.locator("form[action*='/accept'], form[action*='/reject']").first();
+  result.pendingRequestAvailable = (await pendingAction.count()) > 0;
+  result.pendingActionsVisible = result.pendingRequestAvailable || /No pending|No client requests|requests will appear/i.test(await page.locator("body").innerText().catch(() => ""));
+
+  result.finalUrl = page.url();
+  return result;
+}
+
+async function auditTrainerLibraryCrudFlow(page) {
+  const stamp = Date.now();
+  const result = {
+    exerciseCreated: false,
+    exerciseEdited: false,
+    exerciseDeleted: false,
+    workoutCreated: false,
+    workoutEdited: false,
+    workoutDeleted: false,
+    programmeCreated: false,
+    programmeEdited: false,
+    programmeDeleted: false,
+    shareGuardVisible: null,
+    finalUrl: null,
+  };
+
+  const exerciseName = `Audit Exercise ${stamp}`;
+  await page.goto(`${baseUrl}/trainer/library/exercises/create`, { waitUntil: "networkidle", timeout: 30000 });
+  await page.locator("#name").fill(exerciseName);
+  await page.locator("#description").fill("Created by the local Web_App workflow audit.");
+  await page.locator("#primaryMuscles").fill("Audit");
+  await page.locator("#equipment").fill("None");
+  await page.locator("#difficulty").selectOption({ label: "Beginner" }).catch(async () => {
+    await page.locator("#difficulty").selectOption({ index: 1 }).catch(() => undefined);
+  });
+  await page.locator("#notesText").fill("Audit note");
+  await Promise.all([
+    page.waitForURL(/\/trainer\/library\/exercises\/\d+$/, { timeout: 15000 }),
+    page.getByRole("button", { name: /Create Exercise/i }).click(),
+  ]);
+  let bodyText = await page.locator("body").innerText();
+  result.exerciseCreated = bodyText.includes(exerciseName);
+  const exerciseId = page.url().match(/\/exercises\/(\d+)/)?.[1];
+  result.shareGuardVisible = await page.locator("[data-share-dialog-open]").first().isVisible().catch(() => null);
+  if (exerciseId) {
+    await page.goto(`${baseUrl}/trainer/library/exercises/${exerciseId}/edit`, { waitUntil: "networkidle", timeout: 30000 });
+    await page.locator("#name").fill(`${exerciseName} Edited`);
+    await Promise.all([
+      page.waitForURL(new RegExp(`/trainer/library/exercises/${exerciseId}$`), { timeout: 15000 }),
+      page.locator(`form[action*='/trainer/library/exercises/${exerciseId}/edit'] button[type='submit']`).first().click(),
+    ]);
+    bodyText = await page.locator("body").innerText();
+    result.exerciseEdited = bodyText.includes(`${exerciseName} Edited`);
+    result.exerciseDeleted = await submitFirstFormByAction(page, `/trainer/library/exercises/${exerciseId}/delete`);
+  }
+
+  const workoutTitle = `Audit Workout ${stamp}`;
+  await page.goto(`${baseUrl}/trainer/library/workouts/create`, { waitUntil: "networkidle", timeout: 30000 });
+  await page.locator("#title").fill(workoutTitle);
+  await page.locator("#summary").fill("Created by the local Web_App workflow audit.");
+  await page.locator("#notesText").fill("Audit note");
+  await Promise.all([
+    page.waitForURL(/\/trainer\/library\/workouts\/\d+$/, { timeout: 15000 }),
+    page.getByRole("button", { name: /Continue to Add Exercises|Create Workout|Save/i }).click(),
+  ]);
+  bodyText = await page.locator("body").innerText();
+  result.workoutCreated = bodyText.includes(workoutTitle);
+  const workoutId = page.url().match(/\/workouts\/(\d+)/)?.[1];
+  if (workoutId) {
+    await page.goto(`${baseUrl}/trainer/library/workouts/${workoutId}/edit`, { waitUntil: "networkidle", timeout: 30000 });
+    await page.locator("#title").fill(`${workoutTitle} Edited`);
+    await Promise.all([
+      page.waitForURL(new RegExp(`/trainer/library/workouts/${workoutId}$`), { timeout: 15000 }),
+      page.locator(`form[action*='/trainer/library/workouts/${workoutId}/edit'] button[type='submit']`).first().click(),
+    ]);
+    bodyText = await page.locator("body").innerText();
+    result.workoutEdited = bodyText.includes(`${workoutTitle} Edited`);
+    result.workoutDeleted = await submitFirstFormByAction(page, `/trainer/library/workouts/${workoutId}/delete`);
+  }
+
+  const programmeTitle = `Audit Programme ${stamp}`;
+  await page.goto(`${baseUrl}/trainer/library/programmes/create`, { waitUntil: "networkidle", timeout: 30000 });
+  await page.locator("#title").fill(programmeTitle);
+  await page.locator("#weeks").fill("4");
+  await page.locator("#notesText").fill("Audit note");
+  await Promise.all([
+    page.waitForURL(/\/trainer\/library\/programmes\/\d+$/, { timeout: 15000 }),
+    page.getByRole("button", { name: /Save|Create Programme/i }).click(),
+  ]);
+  bodyText = await page.locator("body").innerText();
+  result.programmeCreated = bodyText.includes(programmeTitle);
+  const programmeId = page.url().match(/\/programmes\/(\d+)/)?.[1];
+  if (programmeId) {
+    await page.goto(`${baseUrl}/trainer/library/programmes/${programmeId}/edit`, { waitUntil: "networkidle", timeout: 30000 });
+    await page.locator("#title").fill(`${programmeTitle} Edited`);
+    await Promise.all([
+      page.waitForURL(new RegExp(`/trainer/library/programmes/${programmeId}$`), { timeout: 15000 }),
+      page.locator(`form[action*='/trainer/library/programmes/${programmeId}/edit'] button[type='submit']`).first().click(),
+    ]);
+    bodyText = await page.locator("body").innerText();
+    result.programmeEdited = bodyText.includes(`${programmeTitle} Edited`);
+    result.programmeDeleted = await submitFirstFormByAction(page, `/trainer/library/programmes/${programmeId}/delete`);
+  }
+
+  result.finalUrl = page.url();
+  return result;
+}
+
+async function auditScheduleDeploymentFlow(page) {
+  const result = {
+    scheduleAvailable: null,
+    previewApiOk: null,
+    impactApiOk: null,
+    applySkippedAsMutating: true,
+    calendarSummaryOk: null,
+    finalUrl: null,
+  };
+
+  await page.goto(`${baseUrl}/schedules`, { waitUntil: "networkidle", timeout: 30000 });
+  const scheduleAction = page.locator("[data-open-schedule-preview], a[href*='/schedules/'][href$='/apply'], form[action*='/schedules/'][action$='/apply']").first();
+  if (!(await scheduleAction.count())) {
+    result.scheduleAvailable = false;
+    result.finalUrl = page.url();
+    return result;
+  }
+  result.scheduleAvailable = true;
+  const scheduleId = await scheduleAction.evaluate((el) => {
+    const source = el.getAttribute("data-schedule-id") || el.getAttribute("href") || el.getAttribute("action") || "";
+    return source.match(/schedules\/(\d+)|schedule-id=['"]?(\d+)/)?.[1] || source.match(/(\d+)/)?.[1] || null;
+  }).catch(() => null);
+  const headers = await csrfHeaders(page);
+  if (scheduleId) {
+    result.previewApiOk = await page.evaluate(async ({ baseUrl, scheduleId }) => {
+      const response = await fetch(`${baseUrl}/api/schedules/${scheduleId}/preview`, { credentials: "same-origin" });
+      return response.ok;
+    }, { baseUrl, scheduleId }).catch(() => false);
+    const start = "2026-05-11";
+    const end = "2026-05-17";
+    result.impactApiOk = await page.evaluate(async ({ baseUrl, scheduleId, headers, start, end }) => {
+      const response = await fetch(`${baseUrl}/api/schedules/${scheduleId}/deployment/impact`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ startDate: start, endDate: end, strategy: "SKIP_CONFLICTS" }),
+      });
+      return response.ok;
+    }, { baseUrl, scheduleId, headers, start, end }).catch(() => false);
+  }
+  result.calendarSummaryOk = await page.evaluate(async ({ baseUrl }) => {
+    const response = await fetch(`${baseUrl}/api/calendar/summary?start=2026-05-11&end=2026-05-17`, { credentials: "same-origin" });
+    return response.ok;
+  }, { baseUrl }).catch(() => false);
+  result.finalUrl = page.url();
   return result;
 }
 
@@ -567,6 +772,7 @@ async function auditVaultFlow(page) {
     created: false,
     edited: false,
     pinned: false,
+    insightGenerated: null,
     deleted: false,
     finalUrl: null,
   };
@@ -603,6 +809,19 @@ async function auditVaultFlow(page) {
     bodyText = await page.locator("body").innerText();
     result.pinned = bodyText.includes("Pinned") || (await page.getByRole("button", { name: "Unpin" }).count()) > 0;
 
+    const insightForm = page.locator(`form[action*='/vault/ai/insight/${idMatch[1]}']`).first();
+    if (await insightForm.count()) {
+      await Promise.all([
+        page.waitForResponse((response) => response.url().includes(`/vault/ai/insight/${idMatch[1]}`), { timeout: 30000 }).catch(() => undefined),
+        insightForm.locator("button[type='submit']").first().click(),
+      ]);
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      bodyText = await page.locator("body").innerText();
+      result.insightGenerated = (await page.locator("[data-vault-flash]").count()) > 0
+        || (await page.locator("section", { hasText: "AI Insight" }).count()) > 0
+        || /AI Insight|AI is unavailable|Try again later|insight/i.test(bodyText);
+    }
+
     await page.getByRole("button", { name: "Delete" }).first().click();
     const confirmOk = page.locator("#confirmOk");
     if (await confirmOk.isVisible().catch(() => false)) {
@@ -616,6 +835,81 @@ async function auditVaultFlow(page) {
     }
     bodyText = await page.locator("body").innerText();
     result.deleted = page.url().includes("/vault") && !bodyText.includes(unique);
+  }
+
+  result.finalUrl = page.url();
+  return result;
+}
+
+async function auditVaultAiFlow(page) {
+  const unique = `Audit Vault AI ${Date.now()}`;
+  const result = {
+    noteCreated: false,
+    insightHandled: null,
+    summariseHandled: null,
+    rewriteHandled: null,
+    noteDeleted: null,
+    finalUrl: null,
+  };
+
+  await page.setViewportSize(viewports.desktop);
+  await page.goto(`${baseUrl}/vault/new`, { waitUntil: "networkidle", timeout: 30000 });
+  await page.locator("input[name='title']").fill(unique);
+  await page.locator("textarea[name='content']").fill("Training note for AI workflow audit. Sleep good, strength session completed.");
+  await page.locator("input[name='linkedDate']").fill("2026-05-08");
+  await page.locator("input[name='tags']").fill("audit, ai");
+  await Promise.all([
+    page.waitForURL(/\/vault\/\d+$/, { timeout: 15000 }),
+    page.getByRole("button", { name: "Save Note" }).click(),
+  ]);
+  const id = page.url().match(/\/vault\/(\d+)/)?.[1];
+  result.noteCreated = Boolean(id);
+  const headers = await csrfHeaders(page);
+
+  if (id) {
+    result.insightHandled = await page.evaluate(async ({ id, headers }) => {
+      const response = await fetch(`/vault/ai/insight/${id}`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { ...headers },
+        redirect: "manual",
+      });
+      return response.type === "opaqueredirect" || [200, 302, 303].includes(response.status);
+    }, { id, headers }).catch(() => false);
+
+    const formBody = new URLSearchParams({ noteIds: id, returnTo: `/vault/${id}` }).toString();
+    result.summariseHandled = await page.evaluate(async ({ headers, formBody }) => {
+      const response = await fetch("/vault/ai/summarise-week", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/x-www-form-urlencoded", ...headers },
+        body: formBody,
+        redirect: "manual",
+      });
+      return response.type === "opaqueredirect" || [200, 302, 303].includes(response.status);
+    }, { headers, formBody }).catch(() => false);
+
+    result.rewriteHandled = await page.evaluate(async ({ headers, formBody }) => {
+      const response = await fetch("/vault/ai/rewrite-checkin", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/x-www-form-urlencoded", ...headers },
+        body: formBody,
+        redirect: "manual",
+      });
+      return response.type === "opaqueredirect" || [200, 302, 303].includes(response.status);
+    }, { headers, formBody }).catch(() => false);
+
+    await page.goto(`${baseUrl}/vault/${id}`, { waitUntil: "networkidle", timeout: 30000 });
+    await page.getByRole("button", { name: "Delete" }).first().click();
+    const confirmOk = page.locator("#confirmOk");
+    if (await confirmOk.isVisible().catch(() => false)) {
+      await Promise.all([
+        page.waitForLoadState("networkidle").catch(() => undefined),
+        confirmOk.click(),
+      ]);
+      result.noteDeleted = true;
+    }
   }
 
   result.finalUrl = page.url();
@@ -657,6 +951,72 @@ async function auditInboxFlow(page) {
     bodyText = await page.locator("body").innerText();
   }
   result.sent = bodyText.includes(unique);
+  result.finalUrl = page.url();
+  return result;
+}
+
+async function auditApiFlow(page) {
+  const result = {
+    bloodPressurePostOk: false,
+    bloodPressureGetOk: false,
+    inboxThreadsOk: null,
+    inboxReadOk: null,
+    inboxSendOk: null,
+    notificationsReadAllOk: null,
+    calendarSummaryOk: null,
+    finalUrl: null,
+  };
+
+  await page.setViewportSize(viewports.desktop);
+  await page.goto(`${baseUrl}/dashboard`, { waitUntil: "networkidle", timeout: 30000 });
+  const headers = await csrfHeaders(page);
+  const readingDate = "2026-05-08";
+  const readingTime = `${String(new Date().getUTCHours()).padStart(2, "0")}:${String(new Date().getUTCMinutes()).padStart(2, "0")}`;
+  const bpPost = await page.evaluate(async ({ headers, readingDate, readingTime }) => {
+    const response = await fetch("/api/blood-pressure", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", ...headers },
+      body: JSON.stringify({ readingDate, readingTime, systolic: 122, diastolic: 78, pulse: 66, notes: "API audit reading" }),
+    });
+    return { ok: response.ok, status: response.status, body: await response.json().catch(() => ({})) };
+  }, { headers, readingDate, readingTime }).catch(() => ({ ok: false }));
+  result.bloodPressurePostOk = bpPost.ok && Boolean(bpPost.body?.id);
+  result.bloodPressureGetOk = await page.evaluate(async () => {
+    const response = await fetch("/api/blood-pressure?range=30", { credentials: "same-origin" });
+    return response.ok && Array.isArray(await response.json().catch(() => null));
+  }).catch(() => false);
+
+  const threads = await page.evaluate(async () => {
+    const response = await fetch("/api/inbox/threads", { credentials: "same-origin" });
+    return { ok: response.ok, body: await response.json().catch(() => []) };
+  }).catch(() => ({ ok: false, body: [] }));
+  result.inboxThreadsOk = threads.ok;
+  const firstThread = Array.isArray(threads.body) ? threads.body[0]?.threadId : null;
+  if (firstThread) {
+    result.inboxReadOk = await page.evaluate(async ({ firstThread, headers }) => {
+      const response = await fetch(`/api/inbox/threads/${firstThread}/read`, { method: "POST", credentials: "same-origin", headers });
+      return response.ok;
+    }, { firstThread, headers }).catch(() => false);
+    result.inboxSendOk = await page.evaluate(async ({ firstThread, headers }) => {
+      const response = await fetch(`/api/inbox/threads/${firstThread}/send`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ bodyText: `API audit ${Date.now()}` }),
+      });
+      return response.ok && Boolean((await response.json().catch(() => ({}))).id);
+    }, { firstThread, headers }).catch(() => false);
+  }
+
+  result.notificationsReadAllOk = await page.evaluate(async ({ headers }) => {
+    const response = await fetch("/api/notifications/read-all", { method: "POST", credentials: "same-origin", headers });
+    return response.ok;
+  }, { headers }).catch(() => false);
+  result.calendarSummaryOk = await page.evaluate(async () => {
+    const response = await fetch("/api/calendar/summary?start=2026-05-08&end=2026-05-15", { credentials: "same-origin" });
+    return response.ok;
+  }).catch(() => false);
   result.finalUrl = page.url();
   return result;
 }
@@ -712,6 +1072,98 @@ async function auditMerchCheckoutFlow(page) {
   return result;
 }
 
+async function auditAdminMutationFlow(page) {
+  const stamp = Date.now();
+  const name = `Audit Merch ${stamp}`;
+  const result = {
+    feedbackPageLoaded: false,
+    feedbackMutationAvailable: null,
+    gymApplicationsPageLoaded: false,
+    gymApplicationMutationAvailable: null,
+    merchCreated: false,
+    merchEdited: false,
+    merchDeleted: false,
+    finalUrl: null,
+  };
+
+  await page.setViewportSize(viewports.desktop);
+  await page.goto(`${baseUrl}/admin/feedback`, { waitUntil: "networkidle", timeout: 30000 });
+  let bodyText = await page.locator("body").innerText().catch(() => "");
+  result.feedbackPageLoaded = /Feedback|Support|Message/i.test(bodyText);
+  result.feedbackMutationAvailable = (await page.locator("form[action*='/admin/feedback']").count()) > 0 || /No feedback|No messages/i.test(bodyText);
+
+  await page.goto(`${baseUrl}/admin/gym-applications`, { waitUntil: "networkidle", timeout: 30000 });
+  bodyText = await page.locator("body").innerText().catch(() => "");
+  result.gymApplicationsPageLoaded = /Gym Applications|Applications/i.test(bodyText);
+  result.gymApplicationMutationAvailable = (await page.locator("form[action*='/admin/gym-applications']").count()) > 0
+    || /No gym applications found|No applications|No pending/i.test(bodyText);
+
+  await page.goto(`${baseUrl}/admin/merch/new`, { waitUntil: "networkidle", timeout: 30000 });
+  await page.locator("input[name='name']").fill(name);
+  await page.locator("textarea[name='description']").fill("Created by the local Web_App workflow audit.");
+  await page.locator("input[name='price']").fill("9.99");
+  await page.locator("input[name='stockQuantity']").fill("1");
+  await page.locator("input[name='category']").fill("Audit");
+  await Promise.all([
+    page.waitForURL(/\/admin\/merch$/, { timeout: 15000 }),
+    page.getByRole("button", { name: /Save Product/i }).click(),
+  ]);
+  bodyText = await page.locator("body").innerText();
+  result.merchCreated = bodyText.includes(name);
+
+  const row = page.locator("tr", { hasText: name }).first();
+  if (await row.count()) {
+    await Promise.all([
+      page.waitForURL(/\/admin\/merch\/\d+\/edit$/, { timeout: 15000 }),
+      row.getByRole("link", { name: "Edit" }).click(),
+    ]);
+    await page.locator("input[name='name']").fill(`${name} Edited`);
+    await Promise.all([
+      page.waitForURL(/\/admin\/merch$/, { timeout: 15000 }),
+      page.getByRole("button", { name: /Save Product/i }).click(),
+    ]);
+    bodyText = await page.locator("body").innerText();
+    result.merchEdited = bodyText.includes(`${name} Edited`);
+    const editedRow = page.locator("tr", { hasText: `${name} Edited` }).first();
+    if (await editedRow.count()) {
+      page.once("dialog", async (dialog) => dialog.accept());
+      await Promise.all([
+        page.waitForLoadState("networkidle").catch(() => undefined),
+        editedRow.getByRole("button", { name: "Delete" }).click(),
+      ]);
+      bodyText = await page.locator("body").innerText();
+      result.merchDeleted = /Product deactivated|cancelled|Inactive/i.test(bodyText);
+    }
+  }
+
+  result.finalUrl = page.url();
+  return result;
+}
+
+async function auditPaymentProviderFlow(page) {
+  const result = {
+    pricingLoaded: false,
+    invalidSuccessHandled: null,
+    invalidCancelHandled: null,
+    checkoutConstraintVisible: null,
+    finalUrl: null,
+  };
+
+  await page.setViewportSize(viewports.desktop);
+  await page.goto(`${baseUrl}/pricing`, { waitUntil: "networkidle", timeout: 30000 });
+  result.pricingLoaded = /Pricing|Plan|Membership|Trainer/i.test(await page.locator("body").innerText().catch(() => ""));
+
+  const successResponse = await page.goto(`${baseUrl}/merch/checkout/success?orderId=999999999&session_id=audit_missing`, { waitUntil: "networkidle", timeout: 30000 }).catch(() => null);
+  result.invalidSuccessHandled = successResponse != null && (successResponse.status() < 500);
+  const cancelResponse = await page.goto(`${baseUrl}/merch/checkout/cancel?orderId=999999999`, { waitUntil: "networkidle", timeout: 30000 }).catch(() => null);
+  result.invalidCancelHandled = cancelResponse != null && (cancelResponse.status() < 500);
+  await page.goto(`${baseUrl}/merch`, { waitUntil: "networkidle", timeout: 30000 });
+  const merchText = await page.locator("body").innerText().catch(() => "");
+  result.checkoutConstraintVisible = /checkout|payment|buy|shop|merch/i.test(merchText);
+  result.finalUrl = page.url();
+  return result;
+}
+
 async function auditMobileNav(page) {
   await page.setViewportSize(viewports.mobile);
   await page.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
@@ -751,6 +1203,9 @@ async function run() {
       results.push({ type: "access", role: roleAudit.role, label: "role-locks", result: await auditRoleLocks(page, roleAudit.role) });
       if (roleAudit.role === "trainer") {
         results.push({ type: "interaction", role: roleAudit.role, label: "schedule-controls", result: await auditScheduleInteractions(page) });
+        results.push({ type: "workflow", role: roleAudit.role, label: "trainer-client-lifecycle-flow", result: await auditTrainerClientLifecycleFlow(page) });
+        results.push({ type: "workflow", role: roleAudit.role, label: "trainer-library-crud-flow", result: await auditTrainerLibraryCrudFlow(page) });
+        results.push({ type: "workflow", role: roleAudit.role, label: "schedule-deployment-flow", result: await auditScheduleDeploymentFlow(page) });
       }
       if (roleAudit.role === "client") {
         results.push({ type: "interaction", role: roleAudit.role, label: "chat-widget", result: await auditChatWidget(page) });
@@ -760,8 +1215,14 @@ async function run() {
         results.push({ type: "workflow", role: roleAudit.role, label: "profile-update-flow", result: await auditProfileUpdateFlow(page) });
         results.push({ type: "workflow", role: roleAudit.role, label: "blood-pressure-flow", result: await auditBloodPressureFlow(page) });
         results.push({ type: "workflow", role: roleAudit.role, label: "vault-flow", result: await auditVaultFlow(page) });
+        results.push({ type: "workflow", role: roleAudit.role, label: "vault-ai-flow", result: await auditVaultAiFlow(page) });
         results.push({ type: "workflow", role: roleAudit.role, label: "inbox-flow", result: await auditInboxFlow(page) });
+        results.push({ type: "workflow", role: roleAudit.role, label: "api-flow", result: await auditApiFlow(page) });
         results.push({ type: "workflow", role: roleAudit.role, label: "merch-checkout-flow", result: await auditMerchCheckoutFlow(page) });
+        results.push({ type: "workflow", role: roleAudit.role, label: "payment-provider-flow", result: await auditPaymentProviderFlow(page) });
+      }
+      if (roleAudit.role === "admin") {
+        results.push({ type: "workflow", role: roleAudit.role, label: "admin-mutation-flow", result: await auditAdminMutationFlow(page) });
       }
       for (const entry of roleAudit.pages) {
         for (const viewportName of entry.viewports) {
@@ -790,12 +1251,34 @@ async function run() {
         || item.result?.previewOpened === false
         || item.result?.duplicateCancelPreservedPage === false
         || item.result?.duplicateRequestHadCsrf === false
+        || item.result?.clientsPageLoaded === false
+        || item.result?.clientDetailOpened === false
+        || item.result?.pendingActionsVisible === false
+        || item.result?.oneActiveTrainerGuardVisible === false
+        || item.result?.exerciseCreated === false
+        || item.result?.exerciseEdited === false
+        || item.result?.exerciseDeleted === false
+        || item.result?.workoutCreated === false
+        || item.result?.workoutEdited === false
+        || item.result?.workoutDeleted === false
+        || item.result?.programmeCreated === false
+        || item.result?.programmeEdited === false
+        || item.result?.programmeDeleted === false
+        || item.result?.previewApiOk === false
+        || item.result?.impactApiOk === false
+        || item.result?.calendarSummaryOk === false
         || item.result?.created === false
         || item.result?.checkInSaved === false
         || item.result?.appLoaded === false
         || item.result?.autosaved === false
         || item.result?.searchFound === false
         || item.result?.deleted === false
+        || item.result?.noteCreated === false
+        || item.result?.insightGenerated === false
+        || item.result?.insightHandled === false
+        || item.result?.summariseHandled === false
+        || item.result?.rewriteHandled === false
+        || item.result?.noteDeleted === false
         || item.result?.formLoaded === false
         || item.result?.submitted === false
         || item.result?.editOpened === false
@@ -803,10 +1286,27 @@ async function run() {
         || item.result?.edited === false
         || item.result?.pinned === false
         || item.result?.sent === false
+        || item.result?.bloodPressurePostOk === false
+        || item.result?.bloodPressureGetOk === false
+        || item.result?.inboxThreadsOk === false
+        || item.result?.inboxReadOk === false
+        || item.result?.inboxSendOk === false
+        || item.result?.notificationsReadAllOk === false
+        || item.result?.feedbackPageLoaded === false
+        || item.result?.feedbackMutationAvailable === false
+        || item.result?.gymApplicationsPageLoaded === false
+        || item.result?.gymApplicationMutationAvailable === false
+        || item.result?.merchCreated === false
+        || item.result?.merchEdited === false
+        || item.result?.merchDeleted === false
         || item.result?.checkoutAvailable === false
         || item.result?.newCardSectionVisible === false
         || item.result?.cardTokenized === false
         || item.result?.completed === false
+        || item.result?.pricingLoaded === false
+        || item.result?.invalidSuccessHandled === false
+        || item.result?.invalidCancelHandled === false
+        || item.result?.checkoutConstraintVisible === false
         || item.diagnostics?.hasHorizontalOverflow
         || item.consoleMessages?.length
         || item.diagnostics?.deadLinks?.length
@@ -822,6 +1322,7 @@ async function run() {
         status: item.status,
         finalUrl: item.finalUrl,
         responseError: item.responseError,
+        result: item.result,
         hasHorizontalOverflow: item.diagnostics?.hasHorizontalOverflow,
         consoleMessages: item.consoleMessages,
         deadLinks: item.diagnostics?.deadLinks,

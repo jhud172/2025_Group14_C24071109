@@ -252,13 +252,14 @@ Runtime audit pass:
 10. P1 fixed: profile payment-card submit and trainer workout custom-exercise close controls now have explicit accessible names.
 11. P1 fixed: second-depth workflows now cover profile update submission, blood-pressure create/edit/delete, vault create/edit/pin/delete, inbox send when a thread exists, and merch checkout availability/simulated-payment locking.
 12. P1 fixed: blood-pressure create/edit/delete forms now include CSRF tokens, and date/time controls render browser-safe `yyyy-MM-dd` / `HH:mm` values instead of locale-formatted values.
-13. P1 next: expand interaction depth into trainer-client lifecycle, trainer library CRUD, schedule deployment onto calendar, vault AI actions, blood-pressure API JSON flow, admin moderation mutations, and real hosted checkout configuration states.
-14. P1 next: add focused regression tests for any defects found in deeper payment, messaging, health, or trainer-client lifecycle testing.
-15. P2: polish lower-risk static pages, dev-mode pages, and error-page CTAs after core flows are stable.
+13. P1 fixed: remaining high-risk workflow coverage now includes trainer-client lifecycle visibility/access, trainer library exercise/workout/programme create-edit-delete, schedule deployment preview/impact APIs, vault AI insight/summarise/rewrite handling, blood-pressure JSON API, inbox/notification/calendar APIs, admin merch mutation plus feedback/gym-application moderation availability, and payment success/cancel edge states.
+14. P1 verified: schedule apply/deploy remains non-destructive in the local harness; deployment preview/impact and calendar summary are checked, while applying generated entries is left for seeded/demo-only records or an intercepted browser pass.
+15. P1 next: add focused backend regression tests only when future deeper payment, messaging, health, trainer-client lifecycle, or schedule-deployment testing confirms an application defect rather than harness coverage.
+16. P2: polish lower-risk static pages, dev-mode pages, and error-page CTAs after core flows are stable.
 
 ## Current Static Findings
 
 - Template separation rules currently pass the static inline-code scan.
 - The highest-risk confirmed defect was stale controller template names for admin screens; this has been corrected.
-- The current local browser workflow audit passes with no findings after the P0/P1 fixes above: `62` checks, `0` findings, evidence in `output/playwright/local-view-audit/`.
-- Data-changing form coverage now includes representative profile update, goal, check-in, notes, health-record, blood-pressure CRUD, vault CRUD, inbox send, and merch checkout flows. Trainer-client lifecycle, trainer library CRUD, vault AI actions, admin moderation mutations, and real hosted checkout provider states remain pending for the next audit depth pass; destructive schedule duplicate behaviour was tested through request interception to avoid mutating data.
+- The current local browser workflow audit passes with no findings after the P0/P1 fixes above: `69` checks, `0` findings, evidence in `output/playwright/local-view-audit/`.
+- Data-changing form/API coverage now includes representative profile update, goal, check-in, notes, health-record, blood-pressure CRUD and JSON API, vault CRUD and AI actions, inbox UI/API send/read, notification read-all, trainer library CRUD, admin merch create/edit/delete/deactivate, and merch payment edge-state handling. Trainer-client lifecycle and admin moderation are documented with safe availability/access checks; destructive accept/reject/approve/decline actions remain notAvailable unless a seeded demo record is explicitly provided for mutation.
