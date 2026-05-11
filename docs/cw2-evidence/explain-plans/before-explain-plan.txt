@@ -1,0 +1,34 @@
+---- SQL ----
+RUNSCRIPT FROM 'G:/No OneDrive Work/My Website/Crystal-Productions-OneToOne/2025_Group14_C24071109/src/main/resources/schema.sql'
+(Update count: 207, 211 ms)
+---- SQL ----
+RUNSCRIPT FROM 'G:/No OneDrive Work/My Website/Crystal-Productions-OneToOne/2025_Group14_C24071109/src/main/resources/data/00-auth-demo.sql'
+(Update count: 14, 24 ms)
+---- SQL ----
+RUNSCRIPT FROM 'G:/No OneDrive Work/My Website/Crystal-Productions-OneToOne/2025_Group14_C24071109/src/main/resources/data/01-demo-calendar.sql'
+(Update count: 40, 57 ms)
+---- SQL ----
+EXPLAIN SELECT id, user_id, date, title, time, completed FROM calendar_tasks WHERE user_id = (SELECT id FROM users WHERE username = 'demo') AND date = DATE '2026-01-20' ORDER BY time
+PLAN
+SELECT
+    "id",
+    "user_id",
+    "date",
+    "title",
+    "time",
+    "completed"
+FROM "public"."calendar_tasks"
+    /* public.fk_calendar_tasks_user_INDEX_2: user_id = (SELECT
+        id
+    FROM public.users
+        /* public.uq_users_username_INDEX_6: username = 'demo' */
+    WHERE username = 'demo')
+     */
+WHERE ("date" = DATE '2026-01-20')
+    AND ("user_id" = (SELECT
+    "id"
+FROM "public"."users"
+    /* public.uq_users_username_INDEX_6: username = 'demo' */
+WHERE "username" = 'demo'))
+ORDER BY 5
+(1 row, 7 ms)
