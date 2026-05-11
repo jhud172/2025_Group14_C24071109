@@ -1,70 +1,158 @@
 <!-- Edit workout fragment -->
-<div th:fragment="editWorkout(workout)" class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-    <h3 class="text-2xl font-bold mb-6 text-gray-900 border-b pb-2">Edit Workout</h3>
+<div xmlns:th="http://www.thymeleaf.org"
+     th:fragment="editWorkout(workout)"
+    class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
 
-    <div class="mb-4">
-        <input type="hidden" id="workout-id" th:value="${workout.id}" />
-        <label for="workout-name" class="block text-sm font-semibold text-gray-700 mb-1">Workout Name</label>
-        <input type="text" id="workout-name"
-               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-               th:value="${workout.name}">
-    </div>
+    <input type="hidden" id="workout-id" th:value="${workout.id}"/>
 
-    <div class="mb-6">
-        <label for="workout-notes" class="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
-        <textarea id="workout-notes" name="notes" rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
-                  th:text="${workout.notes}"></textarea>
-    </div>
-
-    <div class="mb-2 text-sm font-medium text-gray-500">Drag exercises here:</div>
-
-    <ul id="workout-list" class="space-y-2 min-h-[200px] max-h-[600px] overflow-auto bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4">
-        <li th:each="exercise : ${workout.exercises}" th:data-id="${exercise.id}"
-            class="p-3 bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:border-blue-300 cursor-move transition group">
-
-            <div class="flex justify-between items-center mb-1">
-                <span class="font-bold text-gray-800 group-hover:text-blue-600" th:text="${exercise.name}">Exercise Name</span>
-                <svg class="w-4 h-4 text-gray-400" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-900">Workout list</h3>
+                <span class="text-xs uppercase tracking-wide text-slate-500">Drag to reorder</span>
             </div>
 
-            <p class="text-sm text-gray-600 line-clamp-2" th:text="${exercise.description}">
-                Description goes here...
-            </p>
-    </ul>
+            <ul id="workout-list"
+                class="min-h-[240px] max-h-[520px] space-y-2 overflow-auto rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4">
 
-    <button id="save-workout-btn"
-            class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md shadow transition duration-200 flex justify-center items-center gap-2 cursor-pointer">
-        <span>Save Workout</span>
-    </button>
+                <li th:each="exercise : ${workout.exercises}"
+                    th:data-id="${exercise.id}"
+                    th:attr="data-name=${exercise.name},data-description=${exercise.description},data-type='exercise'"
+                    class="workout-item group cursor-pointer rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:border-slate-300 hover:shadow-md">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-slate-800 group-hover:text-slate-900" th:text="${exercise.name}">Exercise Name</span>
+                        <span class="text-xs font-semibold uppercase text-slate-400">Exercise</span>
+                    </div>
+                    <p class="line-clamp-2 text-sm text-slate-600" th:text="${exercise.description}">Description goes here...</p>
+                </li>
+
+                <li th:each="exercise : ${workout.customExercises}"
+                    th:data-id="${exercise.id}"
+                    th:attr="data-name=${exercise.name},data-description=${exercise.description},data-howto=${exercise.howTo},data-video=${exercise.videoUrl},data-embed=${customExerciseEmbeds[exercise.id]},data-color=${exercise.colorTag},data-type='custom'"
+                    class="workout-item group cursor-pointer rounded-xl border border-indigo-200 bg-indigo-50/70 p-3 shadow-sm transition hover:border-indigo-300 hover:shadow-md">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-slate-800 group-hover:text-slate-900" th:text="${exercise.name}">Custom</span>
+                        <span class="text-xs font-semibold uppercase text-indigo-500">Custom</span>
+                    </div>
+                    <p class="line-clamp-2 text-sm text-slate-600" th:text="${exercise.description}">Description goes here...</p>
+                </li>
+            </ul>
+        </div>
+
+        <div class="space-y-5">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Workout details</h3>
+
+                <div class="mt-3 space-y-3">
+                    <div>
+                        <label for="workout-name" class="mb-1 block text-sm font-semibold text-slate-700">Workout Name</label>
+                        <input type="text" id="workout-name"
+                               class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                               th:value="${workout.name}">
+                    </div>
+
+                    <div>
+                        <label for="workout-notes" class="mb-1 block text-sm font-semibold text-slate-700">Notes</label>
+                        <textarea id="workout-notes" name="notes" rows="3"
+                                  class="w-full resize-none rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                                  th:text="${workout.notes}"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Selected exercise</h3>
+
+                <div id="selected-exercise-empty" class="mt-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                    Select an exercise from the list to edit details.
+                </div>
+
+                <div id="selected-exercise-panel" class="mt-3 hidden space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p id="selected-exercise-name" class="text-base font-semibold text-slate-900">Exercise</p>
+                            <p id="selected-exercise-type" class="text-xs uppercase tracking-wide text-slate-500">Type</p>
+                        </div>
+                        <button id="selected-exercise-remove" class="text-xs font-semibold text-rose-600">Remove</button>
+                    </div>
+                    <p id="selected-exercise-description" class="text-sm text-slate-600"></p>
+                    <p id="selected-exercise-howto" class="text-sm text-slate-600"></p>
+                    <div id="selected-exercise-video" class="hidden overflow-hidden rounded-xl border border-slate-200"></div>
+                </div>
+            </div>
+
+            <button id="save-workout-btn"
+                    class="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+                <span>Save Workout</span>
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- Create workout fragment -->
+<div xmlns:th="http://www.thymeleaf.org"
+     th:fragment="createWorkout"
+    class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
 
-<div th:fragment="createWorkout" class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-    <h3 class="text-2xl font-bold mb-6 text-gray-900 border-b pb-2">New Workout</h3>
+    <input type="hidden" id="workout-id" value="" />
 
-    <div class="mb-4">
-        <label for="workout-name" class="block text-sm font-semibold text-gray-700 mb-1">Workout Name</label>
-        <input type="text" id="workout-name"
-               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-               placeholder="e.g., Leg Day 1...">
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-900">Workout list</h3>
+                <span class="text-xs uppercase tracking-wide text-slate-500">Drag to reorder</span>
+            </div>
+
+            <ul id="workout-list"
+                class="min-h-[240px] max-h-[520px] space-y-2 overflow-auto rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4"></ul>
+        </div>
+
+        <div class="space-y-5">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Workout details</h3>
+
+                <div class="mt-3 space-y-3">
+                    <div>
+                        <label for="workout-name" class="mb-1 block text-sm font-semibold text-slate-700">Workout Name</label>
+                        <input type="text" id="workout-name"
+                               class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                               placeholder="e.g., Leg Day 1...">
+                    </div>
+
+                    <div>
+                        <label for="workout-notes" class="mb-1 block text-sm font-semibold text-slate-700">Notes</label>
+                        <textarea id="workout-notes" name="notes" rows="3"
+                                  class="w-full resize-none rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                                  placeholder="Add notes..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Selected exercise</h3>
+
+                <div id="selected-exercise-empty" class="mt-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                    Select an exercise from the list to edit details.
+                </div>
+
+                <div id="selected-exercise-panel" class="mt-3 hidden space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p id="selected-exercise-name" class="text-base font-semibold text-slate-900">Exercise</p>
+                            <p id="selected-exercise-type" class="text-xs uppercase tracking-wide text-slate-500">Type</p>
+                        </div>
+                        <button id="selected-exercise-remove" class="text-xs font-semibold text-rose-600">Remove</button>
+                    </div>
+                    <p id="selected-exercise-description" class="text-sm text-slate-600"></p>
+                    <p id="selected-exercise-howto" class="text-sm text-slate-600"></p>
+                    <div id="selected-exercise-video" class="hidden overflow-hidden rounded-xl border border-slate-200"></div>
+                </div>
+            </div>
+
+            <button id="save-workout-btn"
+                    class="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+                <span>Save Workout</span>
+            </button>
+        </div>
     </div>
-
-    <div class="mb-6">
-        <label for="workout-notes" class="block text-sm font-semibold text-gray-700 mb-1">Notes</label>
-        <textarea id="workout-notes" name="notes" rows="3"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
-                  placeholder="Add notes..."></textarea>
-    </div>
-
-    <div class="mb-2 text-sm font-medium text-gray-500">Drag exercises here:</div>
-
-    <ul id="workout-list" class="space-y-2 min-h-[200px] max-h-[600px] overflow-auto bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4">
-    </ul>
-
-    <button id="save-workout-btn"
-            class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md shadow transition duration-200 flex justify-center items-center gap-2 cursor-pointer">
-        <span>Save Workout</span>
-    </button>
 </div>

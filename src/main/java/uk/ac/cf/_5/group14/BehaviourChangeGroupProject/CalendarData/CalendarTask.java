@@ -40,6 +40,15 @@ public class CalendarTask {
     @Column(nullable = false)
     private Boolean completed = false;
 
+    @Column(name = "grace_period_minutes")
+    private Integer gracePeriodMinutes;
+
+    @Transient
+    private boolean inGrace;
+
+    @Transient
+    private boolean late;
+
     @OneToOne
     @JoinColumn(name = "exercise_log_id")
     private ExerciseLog exerciseLog;

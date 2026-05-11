@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExercise;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Exercise;
 
 import java.util.List;
@@ -33,4 +34,12 @@ public class Workout {
             inverseJoinColumns = @JoinColumn(name = "exercise_id")
     )
     private List<Exercise> exercises;
+
+        @ManyToMany
+        @JoinTable(
+            name = "workouts_custom_exercises",
+            joinColumns = @JoinColumn(name = "workout_id"),
+            inverseJoinColumns = @JoinColumn(name = "custom_exercise_id")
+        )
+        private List<CustomExercise> customExercises;
 }

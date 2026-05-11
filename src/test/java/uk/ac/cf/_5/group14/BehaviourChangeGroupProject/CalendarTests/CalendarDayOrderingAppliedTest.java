@@ -1,0 +1,136 @@
+package uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarTests;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.CalendarController;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleOccurrenceService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.WorkoutScheduleService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.Service.WorkoutSessionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskOrderingPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettings;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(CalendarController.class)
+@ActiveProfiles("test")
+class CalendarDayOrderingAppliedTest {
+
+    @Autowired
+    private MockMvc mvc;
+
+    @MockitoBean
+    private CalendarTaskService taskService;
+
+    @MockitoBean
+    private CalendarTaskWarningService taskWarningService;
+
+    @MockitoBean
+    private TaskAiGenerationService taskAiGenerationService;
+
+    @MockitoBean
+    private TaskTemplateService taskTemplateService;
+
+    @MockitoBean
+    private ScheduleService scheduleService;
+
+    @MockitoBean
+    private ScheduleOccurrenceService scheduleOccurrenceService;
+
+    @MockitoBean
+    private WorkoutScheduleService workoutScheduleService;
+
+    @MockitoBean
+    private WorkoutSessionService workoutSessionService;
+
+    @MockitoBean
+    private AuthHelper authHelper;
+
+    @MockitoBean
+    private UserSettingsService userSettingsService;
+
+    @Test
+    void dayViewAppliesAlphabeticalOrderingOnLoad() throws Exception {
+        User sessionUser = new User();
+        sessionUser.setId(1L);
+        LocalDate date = LocalDate.of(2026, 1, 15);
+
+        CalendarTask taskB = new CalendarTask();
+        taskB.setId(2L);
+        taskB.setTitle("B task");
+        taskB.setDate(date);
+        taskB.setTime(LocalTime.of(9, 0));
+        taskB.setExercise(false);
+        taskB.setCompleted(false);
+
+        CalendarTask taskA = new CalendarTask();
+        taskA.setId(1L);
+        taskA.setTitle("A task");
+        taskA.setDate(date);
+        taskA.setTime(LocalTime.of(10, 0));
+        taskA.setExercise(false);
+        taskA.setCompleted(false);
+
+        UserSettings settings = new UserSettings();
+        settings.setCalendarTaskOrdering(CalendarTaskOrderingPreference.ALPHABETICAL);
+        settings.setCalendarTaskLayout(CalendarTaskLayoutPreference.COMBINED_LIST);
+
+        given(authHelper.getAuthenticatedUser()).willReturn(sessionUser);
+        given(userSettingsService.getOrCreate(eq(sessionUser))).willReturn(settings);
+
+        given(taskService.getTasks(eq(sessionUser), eq(date))).willReturn(List.of(taskB, taskA));
+        given(scheduleOccurrenceService.getOccurrencesForUserOnDate(eq(sessionUser), eq(date))).willReturn(Collections.emptyList());
+        given(workoutScheduleService.findByUserAndDayOfWeek(eq(sessionUser), any(Integer.class))).willReturn(Collections.emptyList());
+        given(taskTemplateService.listRecents(eq(sessionUser), eq(6))).willReturn(Collections.emptyList());
+        given(taskTemplateService.listFavourites(eq(sessionUser))).willReturn(Collections.emptyList());
+        given(taskTemplateService.listAll(eq(sessionUser))).willReturn(Collections.emptyList());
+
+        String html = mvc.perform(get("/calendar/day/2026-01-15").sessionAttr("user", sessionUser))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(html.indexOf("A task")).isGreaterThanOrEqualTo(0);
+        assertThat(html.indexOf("B task")).isGreaterThanOrEqualTo(0);
+        assertThat(html.indexOf("A task")).isLessThan(html.indexOf("B task"));
+    }
+
+    @TestConfiguration
+    static class TestSecurityConfig {
+        @Bean
+        SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+            return http
+                    .csrf(csrf -> csrf.disable())
+                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                    .build();
+        }
+    }
+}

@@ -1,23 +1,21 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security;
 
-import org.springframework.core.annotation.Order;
-import org.springframework.core.Ordered;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-
-import javax.sql.DataSource;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.session.InvalidSessionStrategy;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -26,66 +24,110 @@ public class SecurityConfig {
     private static final String[] ENDPOINTS_WHITELIST = {
             "/img/**",
             "/css/**",
+        "/js/**",
+        "/webjars/**",
+        "/favicon.ico",
+        "/static/**",
+            "/uploads/**",
             "/",
+            "/home-public",
+            "/about",
+            "/pricing",
+            "/pricing/**",
+            "/explore",
+            "/u/**",
             "/error/**",
             "/login/**",
             "/access-denied/**",
-            "/signup/**"
+                "/signup/**",
+                "/forgot-password",
+                "/reset-password",
+                    "/policies/**",
+                    "/verify/email"
     };
-
-    @Autowired
-    private DataSource dataSource;
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   LoginThrottleFilter loginThrottleFilter,
+                                                   CustomAuthenticationFailureHandler failureHandler,
+                                                   CustomAuthenticationSuccessHandler successHandler,
+                                                   LogoutHandler logoutHandler,
+                                                   AccessDeniedHandler accessDeniedHandler) throws Exception {
         http
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(ENDPOINTS_WHITELIST).permitAll()
                         .requestMatchers("/confirm-logout").authenticated()
+                .requestMatchers("/trainer/**").hasRole("TRAINER")
+                .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
+                .requestMatchers("/client/**").hasAnyRole("CLIENT", "USER")
+                .requestMatchers("/trainers/**").hasAnyRole("CLIENT", "USER")
+                .requestMatchers("/admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/dashboard").authenticated()
                         .anyRequest().authenticated())
 
                 .formLogin(form -> form.loginPage("/login")
-                        .permitAll()
-                        .failureHandler(authenticationFailureHandler())
-                        .successHandler(authenticationSuccessHandler()))
+                    .permitAll()
+                    .usernameParameter("username")
+                    .passwordParameter("password")
+                    .failureHandler(failureHandler)
+                    .successHandler(successHandler))
 
-                .logout((l) -> l.addLogoutHandler(logoutHandler()))
-                .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler()));
+                .logout((l) -> l
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+                    .addLogoutHandler(logoutHandler)
+                    .logoutSuccessUrl("/")
+                    .invalidateHttpSession(true)
+                    .clearAuthentication(true)
+                    .deleteCookies("JSESSIONID"))
+                .sessionManagement(session -> session
+                    .invalidSessionStrategy(invalidSessionStrategy()))
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(accessDeniedHandler)
+                        .defaultAuthenticationEntryPointFor(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                        new AntPathRequestMatcher("/chat/api")
+                    )
+                    .defaultAuthenticationEntryPointFor(
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                        new AntPathRequestMatcher("/chat/history")
+                    )
+                    .defaultAuthenticationEntryPointFor(
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                        new AntPathRequestMatcher("/chat/clear")
+                        )
+                    .defaultAuthenticationEntryPointFor(
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                        new AntPathRequestMatcher("/chat/conversations")
+                    )
+                    .defaultAuthenticationEntryPointFor(
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                        new AntPathRequestMatcher("/chat/conversations/**")
+                    ));
+
+            http.addFilterBefore(loginThrottleFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-    private AccessDeniedHandler accessDeniedHandler() {
+    @Bean
+    public InvalidSessionStrategy invalidSessionStrategy() {
+        return new CustomInvalidSessionStrategy();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
         return new CustomAccessDeniedHandler();
     }
 
-    private LogoutHandler logoutHandler() {
+    @Bean
+    public LogoutHandler logoutHandler() {
         return new CustomLogoutHandler();
     }
 
-    @Autowired
-    private CustomAuthenticationSuccessHandler successHandler;
-
-    private AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return successHandler;
-    }
-
-    private AuthenticationFailureHandler authenticationFailureHandler() {
-        return new CustomAuthenticationFailureHandler();
-    }
-
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        JdbcDaoImpl userDetailsDao = new JdbcDaoImpl();
-        userDetailsDao.setDataSource(dataSource);
-        userDetailsDao.setUsersByUsernameQuery("SELECT username, password, enabled FROM users WHERE username = ?");
-        userDetailsDao.setAuthoritiesByUsernameQuery("SELECT username, authority FROM user_authorities WHERE username = ?");
-        return userDetailsDao;
-
-    }
-    public SecurityConfig() {
-        System.out.println("!!! SECURITY CONFIG IS LOADING !!!");
-    }
 
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -13,6 +14,8 @@ import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.Use
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreferenceForm;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreferenceService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.HealthDataInput.PhysicalCondition.PhysicalConditionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.ThemePreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
@@ -25,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserPreferenceController.class)
+@ActiveProfiles("test")
 public class UserPreferenceControllerOnlyTest {
 
     @Autowired
@@ -39,6 +43,8 @@ public class UserPreferenceControllerOnlyTest {
     private PhysicalConditionService physicalConditionService;
     @MockitoBean
     private AuthHelper authHelper;
+        @MockitoBean
+        private UserSettingsService userSettingsService;
 
 
     @Test
@@ -57,12 +63,13 @@ public class UserPreferenceControllerOnlyTest {
                         .flashAttr("userPreferenceForm", testForm))
                 .andDo(print())
 
-                // Then they are redirected to the create-workout page.
+                // Then they are redirected back with a success flag.
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/workout")).andReturn();
+                .andExpect(redirectedUrl("/select-preferences?saved=1")).andReturn();
 
         then(userPreferenceService).should().selectPreferences(testUser, testForm);
         then(userPreferenceService).should().selectConditions(testUser, testForm);
+                then(userSettingsService).should().update(testUser, "en", ThemePreference.SYSTEM, false);
     }
 
     @Test

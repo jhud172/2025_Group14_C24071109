@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface CustomExerciseService {
     List<CustomExercise> getCustomExercisesByUser(Long userId);
-    CustomExercise getCustomExerciseById(Long id);
-    void saveCustomExercise(CustomExercise exercise);
+    CustomExercise getCustomExerciseById(Long id, Long userId);
+    CustomExercise saveCustomExercise(CustomExercise exercise);
+    CustomExercise updateCustomExercise(Long userId, Long id, CustomExerciseRequest request);
+    void deleteCustomExercise(Long userId, Long id);
 }

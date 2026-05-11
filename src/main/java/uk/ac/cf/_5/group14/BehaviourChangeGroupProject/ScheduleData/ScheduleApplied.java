@@ -26,4 +26,13 @@ public class ScheduleApplied {
     private User user;
 
     private LocalDate dateApplied;
+
+    @Column(name = "shown_on_calendar", nullable = false)
+    private boolean shownOnCalendar = true;
+
+    @Column(name = "requires_logging", nullable = false)
+    private boolean requiresLogging = false;
+
+    @Column(name = "duration_weeks", nullable = false)
+    private int durationWeeks = 4;
 }

@@ -15,4 +15,6 @@ public interface NoteService {
     Note getNoteForUser(User user, Long noteId);
 
     List<Note> getNotesForFolder(User user, Long folderId, String query);
+
+    List<Note> search(User user, Long folderId, String query);
 }

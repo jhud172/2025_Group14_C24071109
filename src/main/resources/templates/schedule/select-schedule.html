@@ -1,0 +1,27 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+		  th:replace="~{base :: layout('Select Schedule', null, ~{::content}, null)}">
+
+	<div th:fragment="content">
+		<div class="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
+			<h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Select a schedule</h1>
+			<p class="mt-2 text-sm text-slate-700 dark:text-slate-200">Choose a schedule to apply.</p>
+
+			<section class="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
+				<div th:if="${schedules != null and !#lists.isEmpty(schedules)}" class="space-y-3">
+					<a th:each="s : ${schedules}"
+					   th:href="@{'/schedules/' + ${s.id} + '/apply'}"
+					   class="block rounded-xl border border-slate-200 bg-white/70 p-4 shadow-sm hover:border-blue-300 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-800 dark:bg-slate-950/40">
+						<div class="font-semibold text-slate-900 dark:text-slate-100" th:text="${s.name}">Schedule name</div>
+						<div class="mt-1 text-sm text-slate-600 dark:text-slate-300">Apply this schedule to your calendar</div>
+					</a>
+				</div>
+
+				<div th:if="${schedules == null or #lists.isEmpty(schedules)}" class="text-sm text-slate-700 dark:text-slate-200">
+					No schedules available.
+					<a href="/schedules" class="font-semibold text-blue-700 hover:underline dark:text-blue-300">Go to schedules</a>.
+				</div>
+			</section>
+		</div>
+	</div>
+
+</th:block>

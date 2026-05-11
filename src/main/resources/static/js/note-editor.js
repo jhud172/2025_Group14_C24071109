@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const editor = document.getElementById("editor");
     const contentHtml = document.getElementById("contentHtml");
 
+    const colourInput = document.getElementById("noteColour");
+
     const headingSelect = document.getElementById("headingSelect");
     const fontSizeSelect = document.getElementById("fontSizeSelect");
 
@@ -10,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const highlightBtn = document.getElementById("highlightBtn");
     const clearBtn = document.getElementById("clearBtn");
 
-    const initial = (colourInput.value || "slate").toLowerCase();
+    const initial = ((colourInput?.value) || "slate").toLowerCase();
     document.querySelectorAll(".chip[data-note-colour]").forEach(c => {
         if ((c.getAttribute("data-note-colour") || "") === initial) {
             document.querySelectorAll(".chip[data-note-colour]").forEach(x => x.classList.remove("active"));
@@ -19,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // Colour chips
-    const colourInput = document.getElementById("noteColour");
     document.querySelectorAll(".chip[data-note-colour]").forEach(chip => {
         chip.addEventListener("click", () => {
             document.querySelectorAll(".chip[data-note-colour]").forEach(c => c.classList.remove("active"));

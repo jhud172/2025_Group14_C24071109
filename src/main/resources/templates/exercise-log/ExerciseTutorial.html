@@ -1,28 +1,33 @@
-<div th:fragment="styles">
-    <link rel="stylesheet" href="/css/Exercise.css">
-    <link rel="stylesheet" href="/css/navBar.css">
-</div>
+<th:block th:replace="~{base :: layout('Exercise', null, ~{::content}, null)}">
 
-<div th:fragment="content">
-    <section th:class="page_content">
-        <!-- Exercise name from database -->
-        <h2 th:class="title" th:text="${exercise.name}">Data from Exercise Name</h2>
-        <br>
+    <div th:fragment="content">
+        <div class="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
 
-        <!-- Video from database - Show only if videoUrl exists -->
-        <iframe width="960" height="540" th:src="${exercise.videoUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold tracking-tight text-slate-900" th:text="${exercise.name}">Exercise</h1>
+                        <p class="mt-1 text-sm text-slate-600">Technique overview and guidance.</p>
+                    </div>
+                </div>
 
-        <!--     Fallback if no video URL-->
-        <div th:unless="${exercise.videoUrl != null and !#strings.isEmpty(exercise.videoUrl)}" th:class="no-video">
-            <p>No video available for this exercise</p>
+                <div class="mt-6">
+                    <div th:if="${exercise.videoUrl != null and !#strings.isEmpty(exercise.videoUrl)}" class="aspect-video w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                        <iframe class="h-full w-full" th:src="${exercise.videoUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+
+                    <div th:unless="${exercise.videoUrl != null and !#strings.isEmpty(exercise.videoUrl)}" class="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center">
+                        <p class="text-sm font-medium text-slate-900">No video available for this exercise</p>
+                        <p class="mt-1 text-sm text-slate-600">Check back later or ask your coach for alternatives.</p>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <h2 class="text-base font-semibold text-slate-900">Description</h2>
+                    <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700" th:text="${exercise.description}">Exercise description</p>
+                </div>
+            </section>
         </div>
-
-        <!-- Exercise description from database -->
-        <p th:class="exercise_description" th:text="${exercise.description}">this data will come from the database</p>
-
-        <!-- Additional exercise details -->
-        <div th:class="exercise-details"></div>
-    </section>
-</div>
-
-<th:block th:with="pageTitle='Exercise', pageStyles=~{::styles}, content=~{::content}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ${null})}"></th:block>
+    </div>
+</th:block>

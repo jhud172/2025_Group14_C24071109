@@ -44,15 +44,19 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         // mock JDBC calls for role assignment
-        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq("USER")))
-                .thenReturn(1);
+        when(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), anyString()))
+            .thenReturn(1);
 
         userService.saveUser(user);
 
         verify(passwordEncoder).encode("password");
         verify(userRepository).save(user);
 
-        verify(jdbcTemplate).update(contains("INSERT INTO users_roles"), eq("testuser"), eq(1));
+        verify(jdbcTemplate, times(2)).update(
+                contains("INSERT INTO users_roles"),
+                eq("testuser"), eq(1),
+                eq("testuser"), eq(1)
+        );
     }
 
     @Test

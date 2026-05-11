@@ -1,0 +1,79 @@
+@layer components {
+    .navheader {
+        @apply sticky top-0 z-50 w-full border-b border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-50 text-slate-900 shadow-sm
+        dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100;
+
+        /* Single source of truth for navbar text sizing */
+        --nav-text-size: 0.875rem; /* normal (Tailwind text-sm) */
+    }
+
+    .accentstrip {
+        @apply h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500;
+    }
+
+    .navsurface {
+        @apply rounded-2xl border border-slate-300 bg-gradient-to-br from-white via-slate-50 to-white p-1.5 shadow-md ring-1 ring-black/5
+        dark:border-slate-700 dark:from-slate-950 dark:via-slate-950/30 dark:to-slate-950 dark:ring-white/10;
+    }
+
+    .navlink {
+        @apply inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-150
+        hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 hover:shadow-md
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30
+        dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-white dark:focus-visible:ring-emerald-400/30;
+
+        font-size: var(--nav-text-size);
+    }
+
+    .navlink-active {
+        @apply bg-emerald-50 text-slate-900 shadow-sm ring-2 ring-emerald-500/25 hover:bg-emerald-50
+        dark:bg-slate-950 dark:text-white dark:ring-emerald-400/25 dark:hover:bg-slate-950;
+    }
+
+    .navicon {
+        @apply h-4 w-4 shrink-0 opacity-70 transition-opacity group-hover:opacity-90;
+    }
+
+    .navicon-active {
+        @apply opacity-100;
+    }
+
+    .authsurface {
+        @apply flex items-center rounded-2xl border border-slate-200 bg-white/70 p-1.5 shadow-sm
+        dark:border-slate-800 dark:bg-slate-900/40;
+    }
+
+    .authbtn {
+        @apply inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition shadow-sm
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100
+        dark:focus-visible:ring-white/30 dark:focus-visible:ring-offset-slate-900;
+
+        font-size: var(--nav-text-size);
+    }
+}
+
+@layer base {
+    @media (max-width: 1125px) {
+        .navheader {
+            --nav-text-size: 0.8125rem; /* small */
+        }
+    }
+
+    @media (max-width: 365px) {
+        .navheader {
+            --nav-text-size: 0.6875rem; /* quite small */
+        }
+    }
+
+    /* Dropdown menu centering for collapsed navbar */
+    @media (max-width: 1125px) {
+        .navheader [data-mobile-nav] .navlink {
+            justify-content: center;
+            text-align: center;
+        }
+
+        .navheader [data-mobile-links] .navlink {
+            min-width: 8.75rem;
+        }
+    }
+}

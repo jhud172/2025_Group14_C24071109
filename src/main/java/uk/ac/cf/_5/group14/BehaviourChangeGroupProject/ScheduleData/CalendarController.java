@@ -1,34 +1,47 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarning;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionCalculator;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionStatus;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayHealthData.DayHealthService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionResult;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskOrderingPreference;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
-
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
+
+import jakarta.servlet.http.HttpServletRequest;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTask;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarning;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.CalendarTaskWarningService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionCalculator;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyCompletionStatus;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.DailyStreakService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskAiGenerationService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CalendarData.TaskTemplateService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.DayHealthData.DayHealthPersistenceService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.PlatformBilling.PlatformSubscriptionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionResult;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ReflectionData.ReflectionService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskLayoutPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarTaskOrderingPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.CalendarWorkoutOrderingPreference;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.UserSettings.UserSettingsService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
 @Controller
 @RequestMapping("/calendar")
@@ -53,6 +66,12 @@ public class CalendarController {
     private UserSettingsService userSettingsService;
 
     @Autowired
+    private PlatformSubscriptionService platformSubscriptionService;
+
+    @Autowired
+    private Clock clock;
+
+    @Autowired
     private ScheduleService scheduleService;
 
     @Autowired
@@ -74,10 +93,16 @@ public class CalendarController {
     private ObjectProvider<uk.ac.cf._5.group14.BehaviourChangeGroupProject.FocusData.DailyFocusService> dailyFocusServiceProvider;
 
     @Autowired
-    private ObjectProvider<DayHealthService> dayHealthServiceProvider;
+    private ObjectProvider<DayHealthPersistenceService> dayHealthPersistenceServiceProvider;
 
     @Autowired
     private ObjectProvider<ReflectionService> reflectionServiceProvider;
+
+    @Autowired
+    private ObjectProvider<DailyStreakService> dailyStreakServiceProvider;
+
+    @Autowired
+    private ObjectProvider<uk.ac.cf._5.group14.BehaviourChangeGroupProject.ConditionsPreferences.UserPreference.UserPreferenceService> userPreferenceServiceProvider;
 
     @GetMapping("")
     public String calendarView(
@@ -86,10 +111,14 @@ public class CalendarController {
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer week,
             @RequestParam(required = false) Integer weekYear,
+            @RequestParam(required = false) String fragment,
             @SessionAttribute("user") User user,
             Model model
     ) {
         LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
+        boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
+        CalendarTaskLayoutPreference layoutPreference = userSettingsService.getOrCreate(user).getCalendarTaskLayout();
         if ("week".equals(view)) {
             int currentWeekYear = (weekYear != null)
                     ? weekYear
@@ -139,8 +168,14 @@ public class CalendarController {
             model.addAttribute("tasksByDate", tasks);
             model.addAttribute("occurrences", occ);
             model.addAttribute("today", today);
+            model.addAttribute("tomorrow", tomorrow);
+            model.addAttribute("isPremium", isPremium);
+            model.addAttribute("calendarLayout", layoutPreference);
             model.addAttribute("view", "week");
             model.addAttribute("schedules", scheduleService.findByUser(user));
+            if ("weekPane".equals(fragment)) {
+                return "calendar/week :: weekPane";
+            }
             return "calendar/week";
         }
 
@@ -166,6 +201,9 @@ public class CalendarController {
         model.addAttribute("lengthOfMonth", current.lengthOfMonth());
         model.addAttribute("offset", current.getDayOfWeek().getValue());
         model.addAttribute("today", today);
+        model.addAttribute("tomorrow", tomorrow);
+        model.addAttribute("isPremium", isPremium);
+        model.addAttribute("calendarLayout", layoutPreference);
         model.addAttribute("prevMonth", prev.getMonthValue());
         model.addAttribute("prevYear", prev.getYear());
         model.addAttribute("nextMonth", next.getMonthValue());
@@ -174,7 +212,24 @@ public class CalendarController {
         model.addAttribute("occurrences", scheduleOccurrenceService.getOccurrencesForUserInMonth(user, year, month));
         model.addAttribute("schedules", scheduleService.findByUser(user));
         model.addAttribute("view", "month");
+
+        if ("monthPane".equals(fragment)) {
+            return "calendar/month :: monthPane";
+        }
         return "calendar/month";
+    }
+
+    @PostMapping("/preferences")
+    public String updateCalendarPreferences(
+            @SessionAttribute(name = "user") User user,
+            @RequestParam(name = "layout", required = false) CalendarTaskLayoutPreference layout,
+            @RequestParam(name = "redirect", required = false) String redirect
+    ) {
+        userSettingsService.updateCalendarPreferences(user, null, layout);
+        if (redirect != null && redirect.startsWith("/calendar")) {
+            return "redirect:" + redirect;
+        }
+        return "redirect:/calendar";
     }
 
     @GetMapping("/day/{dateStr}")
@@ -196,6 +251,9 @@ public class CalendarController {
             : uk.ac.cf._5.group14.BehaviourChangeGroupProject.FocusData.TimedFocus.defaultFocus();
         model.addAttribute("timedFocus", timedFocus);
 
+        String timeTheme = computeTimeThemeValue(timedFocus != null ? timedFocus.label() : null);
+        model.addAttribute("timeTheme", timeTheme);
+
         String timeOfDayMoodClass = computeTimeOfDayMoodClass(timedFocus != null ? timedFocus.label() : null);
         model.addAttribute("timeOfDayMoodClass", timeOfDayMoodClass);
 
@@ -207,23 +265,6 @@ public class CalendarController {
             }
         }
 
-        List<String> dailyFocusOptions = new java.util.ArrayList<>();
-        if (timedFocus != null && timedFocus.label() != null && !timedFocus.label().isBlank()) {
-            dailyFocusOptions.add(timedFocus.label().trim());
-        }
-        dailyFocusOptions.addAll(List.of(
-            "General",
-            "Recovery",
-            "Nutrition",
-            "Movement",
-            "Sleep",
-            "Consistency"
-        ));
-        dailyFocusOptions = dailyFocusOptions.stream()
-            .filter(s -> s != null && !s.isBlank())
-            .distinct()
-            .toList();
-        model.addAttribute("dailyFocusOptions", dailyFocusOptions);
         List<CalendarTask> tasks = taskService.getTasks(user, date);
 
         CalendarTaskOrderingPreference ordering = CalendarTaskOrderingPreference.CHRONOLOGICAL;
@@ -254,6 +295,13 @@ public class CalendarController {
         model.addAttribute("tasks", tasks);
         model.addAttribute("exerciseTasks", tasks.stream().filter(CalendarTask::getExercise).toList());
         model.addAttribute("otherTasks", tasks.stream().filter(t -> !t.getExercise()).toList());
+
+        List<Long> taskIds = tasks.stream()
+            .map(CalendarTask::getId)
+            .filter(Objects::nonNull)
+            .toList();
+        model.addAttribute("taskWarningsByTaskId", taskWarningService.listWarningsForTasks(taskIds));
+
         model.addAttribute("occurrences",
                 scheduleOccurrenceService.getOccurrencesForUserOnDate(user, date));
 
@@ -266,7 +314,88 @@ public class CalendarController {
                 .orElseGet(() -> workoutSessionService.createIfMissing(user, date, s.getWorkout()));
             sessions.add(ws);
         }
+
+        CalendarWorkoutOrderingPreference workoutOrdering = CalendarWorkoutOrderingPreference.SCHEDULE_ORDER;
+        if (settings != null && settings.getCalendarWorkoutOrdering() != null) {
+            workoutOrdering = settings.getCalendarWorkoutOrdering();
+        }
+        if (workoutOrdering == CalendarWorkoutOrderingPreference.ALPHABETICAL) {
+            sessions = sessions.stream()
+                .sorted(
+                    Comparator.comparing(
+                            (uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.WorkoutSession s) -> {
+                                if (s == null) return "";
+                                if (s.getNameSnapshot() != null) return s.getNameSnapshot().toLowerCase();
+                                if (s.getWorkout() != null && s.getWorkout().getName() != null) return s.getWorkout().getName().toLowerCase();
+                                return "";
+                            }
+                        )
+                )
+                .toList();
+        }
         model.addAttribute("workoutSessions", sessions);
+
+        // Preferences-driven Daily Focus options.
+        boolean hasAnyPreferences = true; // fail-open: keep existing UX if prefs subsystem not available
+        List<String> preferenceFocusOptions = new java.util.ArrayList<>();
+        var userPreferenceService = userPreferenceServiceProvider.getIfAvailable();
+        if (userPreferenceService != null) {
+            var trainingPreferences = userPreferenceService.getUserPreferences(user);
+            if (trainingPreferences != null) {
+                for (var p : trainingPreferences) {
+                    if (p != null && p.getDescription() != null && !p.getDescription().isBlank()) {
+                        preferenceFocusOptions.add(p.getDescription().trim());
+                    }
+                }
+            }
+
+            var physicalConditions = userPreferenceService.getUsersPhysicalConditions(user);
+            if (physicalConditions != null) {
+                for (var c : physicalConditions) {
+                    if (c != null && c.getName() != null && !c.getName().isBlank()) {
+                        preferenceFocusOptions.add(c.getName().trim());
+                    }
+                }
+            }
+
+            hasAnyPreferences = preferenceFocusOptions.stream().anyMatch(s -> s != null && !s.isBlank());
+        }
+        model.addAttribute("hasAnyPreferences", hasAnyPreferences);
+
+        List<String> dailyFocusOptions = new java.util.ArrayList<>();
+        if (timedFocus != null && timedFocus.label() != null && !timedFocus.label().isBlank()) {
+            dailyFocusOptions.add(timedFocus.label().trim());
+        }
+        dailyFocusOptions.addAll(preferenceFocusOptions);
+        if (tasks != null) {
+            for (var task : tasks) {
+                if (task != null && task.getTitle() != null && !task.getTitle().isBlank()) {
+                    dailyFocusOptions.add(task.getTitle().trim());
+                }
+            }
+        }
+        if (sessions != null) {
+            for (var session : sessions) {
+                if (session == null) {
+                    continue;
+                }
+                String workoutName = null;
+                if (session.getNameSnapshot() != null && !session.getNameSnapshot().isBlank()) {
+                    workoutName = session.getNameSnapshot();
+                } else if (session.getWorkout() != null && session.getWorkout().getName() != null && !session.getWorkout().getName().isBlank()) {
+                    workoutName = session.getWorkout().getName();
+                }
+                if (workoutName != null && !workoutName.isBlank()) {
+                    dailyFocusOptions.add(workoutName.trim());
+                }
+            }
+        }
+        dailyFocusOptions.add("Custom focus");
+        dailyFocusOptions = dailyFocusOptions.stream()
+            .filter(s -> s != null && !s.isBlank())
+            .distinct()
+            .toList();
+        model.addAttribute("dailyFocusOptions", dailyFocusOptions);
 
         Map<Long, String> exerciseStateById = new HashMap<>();
         Map<Long, List<uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.ExerciseSession>> orderedExercisesByWorkoutSessionId = new HashMap<>();
@@ -287,7 +416,7 @@ public class CalendarController {
         int totalWorkouts = sessions.size();
         int completedWorkouts = (int) sessions.stream().filter(uk.ac.cf._5.group14.BehaviourChangeGroupProject.StrengthLog.WorkoutSession::isCompleted).count();
 
-        if (dailyFocus == null || dailyFocus.isBlank()) {
+        if ((dailyFocus == null || dailyFocus.isBlank()) && hasAnyPreferences) {
             var dailyFocusAiService = dailyFocusAiServiceProvider.getIfAvailable();
             if (dailyFocusAiService != null) {
                 dailyFocus = dailyFocusAiService.suggestDailyFocus(date, timedFocus.label(), totalTasks, totalWorkouts);
@@ -318,15 +447,32 @@ public class CalendarController {
         model.addAttribute("dayCompletionRemainingWorkouts", remainingWorkouts);
         model.addAttribute("dayCompletionStatus", dayCompletionStatus);
 
-        var dayHealthService = dayHealthServiceProvider.getIfAvailable();
-        if (dayHealthService != null) {
-            String dayHealth = dayHealthService.getDayHealth(user, date);
-            model.addAttribute("dayHealth", dayHealth);
+        var dayHealthPersistenceService = dayHealthPersistenceServiceProvider.getIfAvailable();
+        if (dayHealthPersistenceService != null) {
+            var advice = dayHealthPersistenceService.getSavedAdvice(user, date);
+            if (advice != null && advice.primaryMessage() != null && !advice.primaryMessage().isBlank()) {
+                model.addAttribute("dayHealthPrimary", advice.primaryMessage());
+                model.addAttribute("dayHealthSuggestions", advice.suggestions());
+                model.addAttribute("dayHealthWatchOut", advice.watchOut());
+
+                // Backwards-compatible model attribute (older templates/tests may rely on this)
+                model.addAttribute("dayHealth", advice.primaryMessage());
+            }
         }
 
         model.addAttribute("taskTemplateRecents", taskTemplateService.listRecents(user, 6));
         model.addAttribute("taskTemplateFavourites", taskTemplateService.listFavourites(user));
         model.addAttribute("taskTemplateAll", taskTemplateService.listAll(user));
+
+        var dailyStreakService = dailyStreakServiceProvider.getIfAvailable();
+        if (dailyStreakService != null) {
+            LocalDate streakEnd = date;
+            LocalDate streakStart = date.minusDays(13);
+            model.addAttribute(
+                "dailyStreakDays",
+                dailyStreakService.calculateRange(user, streakStart, streakEnd, LocalDate.now())
+            );
+        }
 
         return "calendar/day";
     }
@@ -342,6 +488,20 @@ public class CalendarController {
             case "evening" -> "bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-950 dark:to-slate-900";
             case "night" -> "bg-gradient-to-b from-slate-100 to-slate-300 dark:from-slate-950 dark:to-slate-900";
             default -> null;
+        };
+    }
+
+    private static String computeTimeThemeValue(String timedFocusLabel) {
+        if (timedFocusLabel == null || timedFocusLabel.isBlank()) {
+            return "midday";
+        }
+
+        return switch (timedFocusLabel.trim().toLowerCase()) {
+            case "morning" -> "morning";
+            case "noon", "midday" -> "midday";
+            case "evening" -> "evening";
+            case "night" -> "night";
+            default -> "midday";
         };
     }
 
@@ -413,13 +573,15 @@ public class CalendarController {
     }
 
     @PostMapping("/day/{dateStr}/daily-focus")
-    public String updateDailyFocus(
+    public Object updateDailyFocus(
             @PathVariable String dateStr,
             @RequestParam(name = "dailyFocus", required = false) String dailyFocus,
-            @SessionAttribute(name = "user", required = false) User user
+            @SessionAttribute(name = "user", required = false) User user,
+            HttpServletRequest request
     ) {
+        boolean isAjax = request != null && "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
         if (dailyFocus == null || dailyFocus.isBlank()) {
-            return "redirect:/calendar/day/" + dateStr;
+            return isAjax ? ResponseEntity.noContent().build() : "redirect:/calendar/day/" + dateStr;
         }
 
         var dailyFocusService = dailyFocusServiceProvider.getIfAvailable();
@@ -428,17 +590,48 @@ public class CalendarController {
             dailyFocusService.setDailyFocus(user, date, dailyFocus);
         }
 
+        if (isAjax) {
+            return ResponseEntity.noContent().build();
+        }
         return "redirect:/calendar/day/" + dateStr + "?dailyFocus=" + java.net.URLEncoder.encode(dailyFocus, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     @PostMapping("/day/{dateStr}/task-preferences")
-    public String updateTaskPreferences(
+    public Object updateTaskPreferences(
             @PathVariable String dateStr,
             @SessionAttribute(name = "user") User user,
             @RequestParam(name = "ordering", required = false) CalendarTaskOrderingPreference ordering,
-            @RequestParam(name = "layout", required = false) CalendarTaskLayoutPreference layout
+            @RequestParam(name = "layout", required = false) CalendarTaskLayoutPreference layout,
+            HttpServletRequest request
     ) {
         userSettingsService.updateCalendarPreferences(user, ordering, layout);
+        boolean isAjax = request != null && "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        return isAjax ? ResponseEntity.noContent().build() : "redirect:/calendar/day/" + dateStr;
+    }
+
+    @PostMapping("/day/{dateStr}/workout-preferences")
+    public Object updateWorkoutPreferences(
+            @PathVariable String dateStr,
+            @SessionAttribute(name = "user") User user,
+            @RequestParam(name = "ordering", required = false) CalendarWorkoutOrderingPreference ordering,
+            HttpServletRequest request
+    ) {
+        userSettingsService.updateWorkoutCalendarPreferences(user, ordering);
+        boolean isAjax = request != null && "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        return isAjax ? ResponseEntity.noContent().build() : "redirect:/calendar/day/" + dateStr;
+    }
+
+    @PostMapping("/day/{dateStr}/day-health/generate")
+    public String generateDayHealthOnce(
+            @PathVariable String dateStr,
+            @SessionAttribute(name = "user", required = false) User user
+    ) {
+        var dayHealthPersistenceService = dayHealthPersistenceServiceProvider.getIfAvailable();
+        if (dayHealthPersistenceService != null && user != null) {
+            LocalDate date = LocalDate.parse(dateStr, DATE_FORMAT);
+            dayHealthPersistenceService.generateOnce(user, date);
+        }
+
         return "redirect:/calendar/day/" + dateStr;
     }
 
@@ -520,6 +713,18 @@ public class CalendarController {
         CalendarTask task = taskService.getTaskById(id);
         if (task == null) return "redirect:/calendar";
         taskService.updateTask(id, user, title, time, notes, exercise);
+        return "redirect:/calendar/day/" + task.getDate();
+    }
+
+    @PostMapping("/task/{id}/delete")
+    public String deleteTask(
+            @PathVariable Long id,
+            @SessionAttribute("user") User user
+    ) {
+        CalendarTask task = taskService.getTaskById(id);
+        if (task == null || task.getDate() == null) return "redirect:/calendar";
+
+        taskService.deleteTask(id, user);
         return "redirect:/calendar/day/" + task.getDate();
     }
 

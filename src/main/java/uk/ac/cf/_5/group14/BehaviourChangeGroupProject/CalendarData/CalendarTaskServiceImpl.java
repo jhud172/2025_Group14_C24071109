@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -14,15 +15,21 @@ import java.util.*;
 public class CalendarTaskServiceImpl implements CalendarTaskService {
 
     @Autowired
-    public CalendarTaskServiceImpl(CalendarTaskRepository repo) {
+    public CalendarTaskServiceImpl(CalendarTaskRepository repo, CalendarTaskWarningService warningService) {
         this.repo = repo;
+        this.warningService = warningService;
     }
 
     private final CalendarTaskRepository repo;
+    private final CalendarTaskWarningService warningService;
 
     @Override
     public CalendarTask getTaskById(Long id) {
-        return repo.findById(id).orElse(null);
+        CalendarTask task = repo.findById(id).orElse(null);
+        if (task != null) {
+            warningService.applyWarningStates(List.of(task), Instant.now());
+        }
+        return task;
     }
 
     @Override
@@ -40,12 +47,40 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
         repo.save(task);
     }
 
+    @Override
+    public void updateGracePeriodMinutes(Long id, User user, Integer gracePeriodMinutes) {
+        CalendarTask task = repo.findById(id).orElse(null);
+        if (task == null || task.getUser() == null || task.getUser().getId() == null) return;
+        if (user == null || user.getId() == null || !task.getUser().getId().equals(user.getId())) return;
+
+        if (gracePeriodMinutes == null || gracePeriodMinutes <= 0) {
+            task.setGracePeriodMinutes(null);
+        } else {
+            task.setGracePeriodMinutes(gracePeriodMinutes);
+        }
+        repo.save(task);
+    }
+
+    @Override
+    public void deleteTask(Long id, User user) {
+        CalendarTask task = repo.findById(id).orElse(null);
+        if (task == null || task.getUser() == null || task.getUser().getId() == null) return;
+        if (user == null || user.getId() == null || !task.getUser().getId().equals(user.getId())) return;
+
+        warningService.deleteWarningsReferencingTask(id);
+        repo.delete(task);
+    }
+
     public void toggleCompleted(Long taskId, User user) {
         CalendarTask task = repo.findById(taskId).orElse(null);
         if (task == null || !task.getUser().getId().equals(user.getId())) return;
 
         task.setCompleted(!task.getCompleted());
         repo.save(task);
+
+        if (Boolean.TRUE.equals(task.getCompleted())) {
+            warningService.onTaskCompleted(task, Instant.now());
+        }
     }
 
     @Override
@@ -64,12 +99,16 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
 
     @Override
     public List<CalendarTask> getTasks(User user, LocalDate date) {
-        return repo.findByUserAndDateOrderByTime(user, date);
+        List<CalendarTask> tasks = repo.findByUserAndDateOrderByTime(user, date);
+        warningService.applyWarningStates(tasks, Instant.now());
+        return tasks;
     }
 
     @Override
     public Map<LocalDate, List<CalendarTask>> getTasksGroupedByDate(User user) {
         List<CalendarTask> allTasks = repo.findByUserOrderByDateAscTimeAsc(user);
+
+        warningService.applyWarningStates(allTasks, Instant.now());
 
         Map<LocalDate, List<CalendarTask>> map = new HashMap<>();
 
@@ -85,6 +124,8 @@ public class CalendarTaskServiceImpl implements CalendarTaskService {
         Map<LocalDate, List<CalendarTask>> map = new HashMap<>();
 
         List<CalendarTask> tasks = repo.findByUserAndDateBetween(user, start, end);
+
+        warningService.applyWarningStates(tasks, Instant.now());
 
         for (CalendarTask task : tasks) {
             map.computeIfAbsent(task.getDate(), d -> new ArrayList<>()).add(task);

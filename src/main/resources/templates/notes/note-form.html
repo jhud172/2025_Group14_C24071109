@@ -1,82 +1,110 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout(${note != null and note.id != null} ? 'Edit Note' : 'New Note', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+
 <div th:fragment="styles">
-    <link rel="stylesheet" href="/css/navBar.css">
-    <link rel="stylesheet" href="/css/notes.css">
 </div>
 
 <div th:fragment="content">
-    <div class="note-form-wrapper">
-        <form th:action="${note != null and note.id != null} ? @{/notes/{id}/edit(id=${note.id})} : @{/notes/folders/{id}/new(id=${folder.id})}"
-              method="post" class="note-form" id="noteForm">
+    <div class="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
+
+        <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900" th:text="${note != null and note.id != null} ? 'Edit Note' : 'New Note'">New Note</h1>
+                    <p class="mt-1 text-sm text-slate-600">Use the toolbar to format your note.</p>
+                </div>
+                <div class="flex gap-2">
+                    <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                       th:if="${folder != null}" th:href="@{/notes/folders/{id}(id=${folder.id})}">Cancel</a>
+                    <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                       th:if="${folder == null}" th:href="@{/notes}">Cancel</a>
+                </div>
+            </div>
+
+            <form th:action="${note != null and note.id != null} ? @{/notes/{id}/edit(id=${note.id})} : @{/notes/folders/{id}/new(id=${folder.id})}"
+                  method="post" id="noteForm" class="mt-6 space-y-6">
 
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
-            <div class="note-form-header">
-                <input class="note-title-input" type="text" name="title" placeholder="Title" maxlength="120" th:value="${note != null ? note.title : ''}" required>
-
-                <div class="note-colour-picker">
-                    <span class="label">Colour</span>
-                    <button type="button" class="chip active" data-note-colour="slate">Slate</button>
-                    <button type="button" class="chip" data-note-colour="purple">Purple</button>
-                    <button type="button" class="chip" data-note-colour="cyan">Cyan</button>
-                    <button type="button" class="chip" data-note-colour="green">Green</button>
-                    <button type="button" class="chip" data-note-colour="pink">Pink</button>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700" for="noteTitle">Title</label>
+                    <input id="noteTitle" type="text" name="title" placeholder="Title" maxlength="120" th:value="${note != null ? note.title : ''}" required
+                           class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
                 </div>
 
-                <input type="hidden" name="noteColour" id="noteColour" value="slate">
-            </div>
+                <div>
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-sm font-medium text-slate-700">Colour</span>
+                        <input type="hidden" name="noteColour" id="noteColour" value="slate">
+                    </div>
 
-            <div class="editor-toolbar" role="toolbar" aria-label="Note formatting toolbar">
-                <button type="button" class="tool" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
-                <button type="button" class="tool" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
-                <button type="button" class="tool" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
-                <span class="tool-sep"></span>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="slate">Slate</button>
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="purple">Purple</button>
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="cyan">Cyan</button>
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="green">Green</button>
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="pink">Pink</button>
+                    </div>
+                </div>
 
-                <select class="tool-select" id="headingSelect" title="Heading style">
-                    <option value="p">Normal</option>
-                    <option value="h1">Heading 1</option>
-                    <option value="h2">Heading 2</option>
-                    <option value="h3">Heading 3</option>
-                    <option value="blockquote">Quote</option>
-                </select>
+                <div class="rounded-lg border border-slate-200 bg-slate-50 p-2" role="toolbar" aria-label="Note formatting toolbar">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
 
-                <select class="tool-select" id="fontSizeSelect" title="Font size">
-                    <option value="2">Small</option>
-                    <option value="3" selected>Normal</option>
-                    <option value="4">Large</option>
-                    <option value="5">XL</option>
-                </select>
+                        <span class="mx-1 h-5 w-px bg-slate-200"></span>
 
-                <span class="tool-sep"></span>
+                        <select class="tool-select rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 shadow-sm" id="headingSelect" title="Heading style">
+                            <option value="p">Normal</option>
+                            <option value="h1">Heading 1</option>
+                            <option value="h2">Heading 2</option>
+                            <option value="h3">Heading 3</option>
+                            <option value="blockquote">Quote</option>
+                        </select>
 
-                <button type="button" class="tool" data-cmd="insertUnorderedList" title="Bullets">• List</button>
-                <button type="button" class="tool" data-cmd="insertOrderedList" title="Numbered">1. List</button>
+                        <select class="tool-select rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 shadow-sm" id="fontSizeSelect" title="Font size">
+                            <option value="2">Small</option>
+                            <option value="3" selected>Normal</option>
+                            <option value="4">Large</option>
+                            <option value="5">XL</option>
+                        </select>
 
-                <span class="tool-sep"></span>
+                        <span class="mx-1 h-5 w-px bg-slate-200"></span>
 
-                <button type="button" class="tool" data-align="left" title="Align left">⟸</button>
-                <button type="button" class="tool" data-align="center" title="Align centre">≡</button>
-                <button type="button" class="tool" data-align="right" title="Align right">⟹</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="insertUnorderedList" title="Bullets">• List</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="insertOrderedList" title="Numbered">1. List</button>
 
-                <span class="tool-sep"></span>
+                        <span class="mx-1 h-5 w-px bg-slate-200"></span>
 
-                <button type="button" class="tool" id="linkBtn" title="Insert link">🔗 Link</button>
-                <button type="button" class="tool" id="highlightBtn" title="Highlight">🖍</button>
-                <button type="button" class="tool" id="clearBtn" title="Clear formatting">Clear</button>
-            </div>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-align="left" title="Align left">⟸</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-align="center" title="Align centre">≡</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-align="right" title="Align right">⟹</button>
 
-            <div class="editor-shell" id="editorShell">
-                <div class="editor" id="editor" contenteditable="true" spellcheck="true" data-placeholder="Write your note…" th:utext="${note != null ? note.content : ''}"></div>
-            </div>
+                        <span class="mx-1 h-5 w-px bg-slate-200"></span>
+
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" id="linkBtn" title="Insert link">🔗 Link</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" id="highlightBtn" title="Highlight">🖍</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" id="clearBtn" title="Clear formatting">Clear</button>
+                    </div>
+                </div>
+
+                <div id="editorShell" class="rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="editor min-h-80 p-4 text-sm leading-6 text-slate-800 focus:outline-none"
+                         id="editor" contenteditable="true" spellcheck="true" data-placeholder="Write your note…"
+                         th:utext="${note != null ? note.content : ''}"
+                         style="white-space: pre-wrap;"></div>
+                </div>
 
             <input type="hidden" name="content" id="contentHtml">
 
-            <div class="form-actions">
-                <button class="primary-btn" type="submit">Save</button>
-                <a class="cancel" th:if="${folder != null}" th:href="@{/notes/folders/{id}(id=${folder.id})}">Cancel</a>
-                <a class="cancel" th:if="${folder == null}" th:href="@{/notes}">Cancel</a>
-            </div>
+                <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
+                    <button class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10" type="submit">Save</button>
+                </div>
 
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -84,4 +112,4 @@
     <script src="/js/note-editor.js" defer></script>
 </div>
 
-<th:block th:with="pageTitle=${note != null and note.id != null} ? 'Edit Note' : 'New Note', pageStyles=~{::styles}, content=~{::content}, pageScripts=~{::pageScripts}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ~{::pageScripts})}"></th:block>
+</th:block>

@@ -1,21 +1,18 @@
 package uk.ac.cf._5.group14.BehaviourChangeGroupProject.Workout;
 
 
-import lombok.AllArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import lombok.AllArgsConstructor;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExercise;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.CustomExerciseData.CustomExerciseRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Exercise;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.ExerciseRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.AuthHelper;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserService;
-
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Service
@@ -24,6 +21,7 @@ public class WorkoutServiceImpl implements WorkoutService {
 
     private final UserService userService;
     private final ExerciseRepository exerciseRepository;
+    private final CustomExerciseRepository customExerciseRepository;
     private final WorkoutRepository workoutRepository;
     private final AuthHelper authHelper;
 
@@ -38,8 +36,15 @@ public class WorkoutServiceImpl implements WorkoutService {
             workout = new Workout();
         }
 
-        List<Exercise> exercises = exerciseRepository.findAllById(dto.getExerciseIds());
+        List<Exercise> exercises = dto.getExerciseIds() == null
+            ? List.of()
+            : toList(exerciseRepository.findAllById(dto.getExerciseIds()));
         workout.setExercises(exercises);
+
+        List<CustomExercise> customExercises = dto.getCustomExerciseIds() == null
+            ? List.of()
+            : toList(customExerciseRepository.findAllById(dto.getCustomExerciseIds()));
+        workout.setCustomExercises(customExercises);
 
         workout.setUserId(userId);
         workout.setName(dto.getName());
@@ -49,7 +54,9 @@ public class WorkoutServiceImpl implements WorkoutService {
     }
 
     public void deleteWorkout(Long workoutId) {
-        workoutRepository.deleteById(workoutId);
+        Long userId = authHelper.getAuthenticatedUser().getId();
+        workoutRepository.findByIdAndUserId(workoutId, userId)
+                .ifPresent(workoutRepository::delete);
     }
 
     public List<Workout> getWorkouts() {
@@ -63,5 +70,13 @@ public class WorkoutServiceImpl implements WorkoutService {
 
         return workoutRepository.findByIdAndUserId(workoutId, userId)
                 .orElseThrow(() -> new RuntimeException("Workout not found or access denied"));
+    }
+
+    private <T> List<T> toList(Iterable<T> items) {
+        List<T> results = new ArrayList<>();
+        for (T item : items) {
+            results.add(item);
+        }
+        return results;
     }
 }

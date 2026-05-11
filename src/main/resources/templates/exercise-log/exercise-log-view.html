@@ -1,19 +1,43 @@
-<div th:fragment="styles">
-    <link rel="stylesheet" href="/css/navBar.css">
-</div>
+<th:block th:replace="~{base :: layout('Exercise Log', null, ~{::content}, null)}">
 
-<div th:fragment="content">
-    <div th:replace="~{fragments/username-logout :: username-logout}"></div>
+    <div th:fragment="content">
+        <div class="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div th:replace="~{fragments/username-logout :: usernameLogout}"></div>
 
-    <h1>Exercise Log Details</h1>
+            <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Exercise Log Details</h1>
+                        <p class="mt-1 text-sm text-slate-600">A full view of the selected log entry.</p>
+                    </div>
+                    <a href="/exercise-log/list" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+                        Back to list
+                    </a>
+                </div>
 
-    <p>Date: <span th:text="${log.date}"></span></p>
-    <p>Mood before: <span th:text="${log.moodBefore}"></span></p>
-    <p>Mood after: <span th:text="${log.moodAfter}"></span></p>
-    <p>Confidence After: <span th:text="${log.confidence}"></span></p>
-    <p>Comments: <span th:text="${log.comments}"></span></p>
-
-    <a href="/exercise-log/list">Back to list</a>
-</div>
-
-<th:block th:with="pageTitle='Exercise Log', pageStyles=~{::styles}, content=~{::content}" th:replace="~{base :: layout(${pageTitle}, ~{::styles}, ~{::content}, ${null})}"></th:block>
+                <dl class="mt-6 divide-y divide-slate-100">
+                    <div class="flex items-center justify-between gap-4 py-3">
+                        <dt class="text-sm font-medium text-slate-700">Date</dt>
+                        <dd class="text-sm text-slate-900" th:text="${log.date}"></dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 py-3">
+                        <dt class="text-sm font-medium text-slate-700">Mood before</dt>
+                        <dd class="text-sm text-slate-900" th:text="${log.moodBefore}"></dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 py-3">
+                        <dt class="text-sm font-medium text-slate-700">Mood after</dt>
+                        <dd class="text-sm text-slate-900" th:text="${log.moodAfter}"></dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 py-3">
+                        <dt class="text-sm font-medium text-slate-700">Confidence after</dt>
+                        <dd class="text-sm text-slate-900" th:text="${log.confidence}"></dd>
+                    </div>
+                    <div class="py-3">
+                        <dt class="text-sm font-medium text-slate-700">Comments</dt>
+                        <dd class="mt-1 whitespace-pre-wrap text-sm text-slate-900" th:text="${log.comments}"></dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</th:block>

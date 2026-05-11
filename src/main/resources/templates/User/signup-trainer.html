@@ -1,0 +1,197 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Trainer Sign Up', null, ~{::content}, null)}">
+
+    <div th:fragment="content" class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
+            <div class="mb-6">
+                <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Create your trainer account</h1>
+                <p class="mt-1 text-sm text-slate-600">Showcase your expertise and connect with clients.</p>
+            </div>
+
+            <form th:action="@{/signup/trainer}" th:object="${signupForm}" method="post" class="space-y-5">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <div th:if="${#fields.hasAnyErrors()}" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
+                    Please correct the highlighted fields below.
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-800">Email Address *</label>
+                    <input
+                        type="email"
+                        id="email"
+                        th:field="*{email}"
+                        required
+                        autocomplete="email"
+                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                        th:classappend="${#fields.hasErrors('email')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                    <div th:if="${#fields.hasErrors('email')}" class="mt-1 text-sm text-rose-700">
+                        <span th:errors="*{email}"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="username" class="block text-sm font-medium text-slate-800">Username *</label>
+                    <input
+                        type="text"
+                        id="username"
+                        th:field="*{username}"
+                        required
+                        autocomplete="username"
+                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                        th:classappend="${#fields.hasErrors('username')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                    <p class="mt-1 text-sm text-slate-600">3–20 characters. Letters, numbers, underscore only.</p>
+                    <div th:if="${#fields.hasErrors('username')}" class="mt-1 text-sm text-rose-700">
+                        <span th:errors="*{username}"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-slate-800">Password *</label>
+                        <input
+                            type="password"
+                            id="password"
+                            th:field="*{password}"
+                            required
+                            autocomplete="new-password"
+                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                            th:classappend="${#fields.hasErrors('password')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                        <p class="mt-1 text-sm text-slate-600">Min 8, with upper, lower, number, and special character.</p>
+                        <div th:if="${#fields.hasErrors('password')}" class="mt-1 text-sm text-rose-700">
+                            <span th:errors="*{password}"></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-slate-800">Confirm Password *</label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            th:field="*{confirmPassword}"
+                            required
+                            autocomplete="new-password"
+                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                            th:classappend="${#fields.hasErrors('confirmPassword')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="mt-1 text-sm text-rose-700">
+                            <span th:errors="*{confirmPassword}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="bio" class="block text-sm font-medium text-slate-800">Short bio *</label>
+                    <textarea
+                        id="bio"
+                        th:field="*{bio}"
+                        required
+                        rows="4"
+                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                        th:classappend="${#fields.hasErrors('bio')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''"></textarea>
+                    <div th:if="${#fields.hasErrors('bio')}" class="mt-1 text-sm text-rose-700">
+                        <span th:errors="*{bio}"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="location" class="block text-sm font-medium text-slate-800">Location *</label>
+                    <input
+                        type="text"
+                        id="location"
+                        th:field="*{location}"
+                        required
+                        autocomplete="address-level2"
+                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                        th:classappend="${#fields.hasErrors('location')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                    <div th:if="${#fields.hasErrors('location')}" class="mt-1 text-sm text-rose-700">
+                        <span th:errors="*{location}"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="instagramUrl" class="block text-sm font-medium text-slate-800">Instagram</label>
+                        <input
+                            type="url"
+                            id="instagramUrl"
+                            th:field="*{instagramUrl}"
+                            placeholder="https://instagram.com/yourprofile"
+                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                            th:classappend="${#fields.hasErrors('instagramUrl')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                        <div th:if="${#fields.hasErrors('instagramUrl')}" class="mt-1 text-sm text-rose-700">
+                            <span th:errors="*{instagramUrl}"></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="tiktokUrl" class="block text-sm font-medium text-slate-800">TikTok</label>
+                        <input
+                            type="url"
+                            id="tiktokUrl"
+                            th:field="*{tiktokUrl}"
+                            placeholder="https://tiktok.com/@yourprofile"
+                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                            th:classappend="${#fields.hasErrors('tiktokUrl')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                        <div th:if="${#fields.hasErrors('tiktokUrl')}" class="mt-1 text-sm text-rose-700">
+                            <span th:errors="*{tiktokUrl}"></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="youtubeUrl" class="block text-sm font-medium text-slate-800">YouTube</label>
+                        <input
+                            type="url"
+                            id="youtubeUrl"
+                            th:field="*{youtubeUrl}"
+                            placeholder="https://youtube.com/@yourchannel"
+                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                            th:classappend="${#fields.hasErrors('youtubeUrl')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                        <div th:if="${#fields.hasErrors('youtubeUrl')}" class="mt-1 text-sm text-rose-700">
+                            <span th:errors="*{youtubeUrl}"></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="linkedInUrl" class="block text-sm font-medium text-slate-800">LinkedIn</label>
+                        <input
+                            type="url"
+                            id="linkedInUrl"
+                            th:field="*{linkedInUrl}"
+                            placeholder="https://linkedin.com/in/yourprofile"
+                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                            th:classappend="${#fields.hasErrors('linkedInUrl')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                        <div th:if="${#fields.hasErrors('linkedInUrl')}" class="mt-1 text-sm text-rose-700">
+                            <span th:errors="*{linkedInUrl}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="websiteUrl" class="block text-sm font-medium text-slate-800">Website</label>
+                    <input
+                        type="url"
+                        id="websiteUrl"
+                        th:field="*{websiteUrl}"
+                        placeholder="https://yourwebsite.com"
+                        class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20"
+                        th:classappend="${#fields.hasErrors('websiteUrl')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''" />
+                    <div th:if="${#fields.hasErrors('websiteUrl')}" class="mt-1 text-sm text-rose-700">
+                        <span th:errors="*{websiteUrl}"></span>
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    class="inline-flex w-full min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                    Sign up as trainer
+                </button>
+
+                <p class="text-center text-sm text-slate-600">
+                    Already have an account?
+                    <a th:href="@{/login}" class="font-semibold text-slate-900 underline underline-offset-4 hover:text-slate-700">Log in</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+</th:block>

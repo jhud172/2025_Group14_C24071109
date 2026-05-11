@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface NoteFolderRepository extends JpaRepository<NoteFolder, Long> {
     List<NoteFolder> findByUserOrderByNameAsc(User user);
     Optional<NoteFolder> findByIdAndUser(Long id, User user);
+    Optional<NoteFolder> findByUserAndNameIgnoreCase(User user, String name);
 }

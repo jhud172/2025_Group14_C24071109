@@ -1,0 +1,44 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="uiShell(pageTitle, roleTheme, content)">
+    <div class="relative min-h-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+        <div th:replace="~{fragments/ui-shell :: pageBg(${roleTheme})}"></div>
+
+        <div class="relative">
+            <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-14">
+                <th:block th:replace="${content}"></th:block>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="pageBg(roleTheme)">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-50 via-white/90 to-slate-50 dark:from-slate-950 dark:via-slate-950/80 dark:to-slate-950"></div>
+
+        <div th:if="${roleTheme} == 'public'" class="absolute -top-48 -right-40 h-[28rem] w-[28rem] rounded-full bg-emerald-500/12 blur-3xl"></div>
+        <div th:if="${roleTheme} == 'public'" class="absolute -bottom-52 -left-40 h-[32rem] w-[32rem] rounded-full bg-sky-500/10 blur-3xl"></div>
+
+        <div th:if="${roleTheme} == 'client'" class="absolute -top-48 -right-40 h-[28rem] w-[28rem] rounded-full bg-indigo-500/12 blur-3xl"></div>
+        <div th:if="${roleTheme} == 'client'" class="absolute -bottom-52 -left-40 h-[32rem] w-[32rem] rounded-full bg-emerald-500/10 blur-3xl"></div>
+
+        <div th:if="${roleTheme} == 'trainer'" class="absolute -top-48 -right-40 h-[28rem] w-[28rem] rounded-full bg-amber-500/12 blur-3xl"></div>
+        <div th:if="${roleTheme} == 'trainer'" class="absolute -bottom-52 -left-40 h-[32rem] w-[32rem] rounded-full bg-rose-500/10 blur-3xl"></div>
+
+        <div th:if="${roleTheme} == 'gym'" class="absolute -top-48 -right-40 h-[28rem] w-[28rem] rounded-full bg-teal-500/12 blur-3xl"></div>
+        <div th:if="${roleTheme} == 'gym'" class="absolute -bottom-52 -left-40 h-[32rem] w-[32rem] rounded-full bg-sky-500/10 blur-3xl"></div>
+
+        <div th:if="${roleTheme} == 'admin'" class="absolute -top-48 -right-40 h-[28rem] w-[28rem] rounded-full bg-violet-500/12 blur-3xl"></div>
+        <div th:if="${roleTheme} == 'admin'" class="absolute -bottom-52 -left-40 h-[32rem] w-[32rem] rounded-full bg-slate-500/10 blur-3xl"></div>
+
+        <div th:if="${roleTheme} == null or #strings.isEmpty(roleTheme)" class="absolute -top-48 -right-40 h-[28rem] w-[28rem] rounded-full bg-slate-400/10 blur-3xl"></div>
+        <div th:if="${roleTheme} == null or #strings.isEmpty(roleTheme)" class="absolute -bottom-52 -left-40 h-[32rem] w-[32rem] rounded-full bg-slate-500/10 blur-3xl"></div>
+    </div>
+</th:block>
+
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="container(content)">
+    <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <th:block th:replace="${content}"></th:block>
+    </div>
+</th:block>

@@ -13,8 +13,12 @@ import org.springframework.web.bind.annotation.*;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.Exercise;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.ExerciseRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ExerciseData.ExerciseService;
-import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.ScheduleData.ScheduleEntryService;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLink;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkRepository;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.TrainerClient.TrainerClientLinkStatus;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.User;
+import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Users.UserRepository;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Workout.Workout;
 import uk.ac.cf._5.group14.BehaviourChangeGroupProject.Workout.WorkoutRepository;
 
@@ -58,13 +62,26 @@ public class ScheduleController {
     @Autowired
     private ScheduleAppliedRepository scheduleAppliedRepository;
 
+    @Autowired
+    private TrainerClientLinkRepository trainerClientLinkRepository;
+
+    @Autowired
+    private uk.ac.cf._5.group14.BehaviourChangeGroupProject.Security.AccessGuard accessGuard;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping("")
     public String listSchedules(@SessionAttribute("user") User user, Model model) {
         List<Schedule> all = scheduleService.findByUser(user);
         List<ScheduleApplied> active = scheduleAppliedRepository.findByUser(user);
+        User trainer = getActiveTrainer(user);
+        List<Schedule> shared = trainer != null ? scheduleService.findByUser(trainer) : List.of();
 
         model.addAttribute("schedules", all);
         model.addAttribute("activeSchedules", active);
+        model.addAttribute("sharedSchedules", shared);
+        model.addAttribute("currentUserId", user.getId());
 
         return "schedule/list";
     }
@@ -133,10 +150,12 @@ public class ScheduleController {
 
 
     @GetMapping("/{id:\\d+}/entries")
-    public String entryForm(@PathVariable Long id, Model model) {
+    public String entryForm(@PathVariable Long id,
+                            @SessionAttribute("user") User user,
+                            Model model) {
 
         Schedule schedule = scheduleService.findById(id);
-        if (schedule == null) {
+        if (!isOwner(user, schedule)) {
             return "redirect:/schedules?notfound";
         }
 
@@ -151,9 +170,13 @@ public class ScheduleController {
     @PostMapping("/{id}/entries")
     public String entrySubmit(
             @PathVariable Long id,
+            @SessionAttribute("user") User user,
             @ModelAttribute ScheduleEntry entry
     ) {
         Schedule schedule = scheduleService.findById(id);
+        if (!isOwner(user, schedule)) {
+            return "redirect:/schedules?error";
+        }
         entry.setSchedule(schedule);
 
         scheduleEntryService.save(entry);
@@ -168,12 +191,18 @@ public class ScheduleController {
             @RequestParam int weeks,
             @SessionAttribute("user") User user
     ) {
-        Schedule schedule = scheduleService.findById(id);
+        Schedule schedule = findAccessibleSchedule(user, id);
+        if (schedule == null) {
+            return "redirect:/schedules?error";
+        }
         List<ScheduleEntry> entries = scheduleEntryService.getEntriesBySchedule(schedule);
         ScheduleApplied applied = new ScheduleApplied();
         applied.setSchedule(schedule);
         applied.setUser(user);
         applied.setDateApplied(startDate);
+        applied.setDurationWeeks(Math.max(1, weeks));
+        applied.setShownOnCalendar(true);
+        applied.setRequiresLogging(false);
         scheduleAppliedRepository.save(applied);
         for (int week = 0; week < weeks; week++) {
             for (ScheduleEntry entry : entries) {
@@ -195,10 +224,79 @@ public class ScheduleController {
     }
 
     @GetMapping("/{id}/apply")
-    public String showApplyForm(@PathVariable Long id, Model model) {
-        Schedule schedule = scheduleService.findById(id);
+    public String showApplyForm(@PathVariable Long id,
+                                @SessionAttribute("user") User user,
+                                Model model) {
+        Schedule schedule = findAccessibleSchedule(user, id);
+        if (schedule == null) {
+            return "redirect:/schedules?error";
+        }
         model.addAttribute("schedule", schedule);
         return "schedule/apply";
+    }
+
+    @PostMapping("/applied/{appliedId}/settings")
+    public String updateAppliedSettings(
+            @PathVariable Long appliedId,
+            @RequestParam(defaultValue = "false") boolean shownOnCalendar,
+            @RequestParam(defaultValue = "false") boolean requiresLogging,
+            @SessionAttribute("user") User user
+    ) {
+        ScheduleApplied applied = scheduleAppliedRepository.findById(appliedId).orElse(null);
+        if (applied == null || !applied.getUser().getId().equals(user.getId())) {
+            return "redirect:/schedules?error";
+        }
+
+        boolean previousShown = applied.isShownOnCalendar();
+        applied.setShownOnCalendar(shownOnCalendar);
+        applied.setRequiresLogging(requiresLogging);
+        if (applied.getDurationWeeks() < 1) {
+            applied.setDurationWeeks(4);
+        }
+        scheduleAppliedRepository.save(applied);
+
+        if (previousShown && !shownOnCalendar) {
+            scheduleOccurrenceRepository.deleteByScheduleIdAndUserId(
+                    applied.getSchedule().getId(),
+                    user.getId()
+            );
+        }
+
+        if (!previousShown && shownOnCalendar) {
+            LocalDate start = applied.getDateApplied() != null ? applied.getDateApplied() : LocalDate.now();
+            LocalDate end = start.plusWeeks(applied.getDurationWeeks()).minusDays(1);
+            scheduleOccurrenceService.generateOccurrencesForSchedule(
+                    applied.getSchedule(),
+                    user,
+                    start,
+                    end,
+                    1
+            );
+        }
+
+        return "redirect:/schedules";
+    }
+
+    @PostMapping("/{id}/update")
+    public String updateSchedule(
+            @PathVariable Long id,
+            @RequestParam String name,
+            @RequestParam(required = false) String description,
+            @SessionAttribute("user") User user
+    ) {
+        Schedule schedule = scheduleService.findById(id);
+        if (!isOwner(user, schedule)) {
+            return "redirect:/schedules?error";
+        }
+        String trimmedName = name == null ? "" : name.trim();
+        if (trimmedName.isBlank()) {
+            return "redirect:/schedules/" + id + "/entries?error";
+        }
+        schedule.setName(trimmedName);
+        String cleanedDescription = description != null ? description.trim() : null;
+        schedule.setDescription(cleanedDescription == null || cleanedDescription.isBlank() ? null : cleanedDescription);
+        scheduleService.save(schedule);
+        return "redirect:/schedules/" + id + "/entries?updated";
     }
 
     @GetMapping("/builder")
@@ -266,6 +364,42 @@ public class ScheduleController {
             case "Sun" -> 7;
             default -> 1;
         };
+    }
+
+    private boolean isOwner(User user, Schedule schedule) {
+        return schedule != null
+                && schedule.getUser() != null
+                && user != null
+                && schedule.getUser().getId().equals(user.getId());
+    }
+
+    private User getActiveTrainer(User user) {
+        if (user == null || user.getId() == null) {
+            return null;
+        }
+        return trainerClientLinkRepository
+                .findFirstByClientUserIdAndStatusOrderByUpdatedAtDesc(user.getId(), TrainerClientLinkStatus.ACTIVE)
+                .map(TrainerClientLink::getTrainerUserId)
+                .flatMap(userRepository::findById)
+                .orElse(null);
+    }
+
+    private boolean isTrainerShared(User user, Schedule schedule) {
+        if (schedule == null || schedule.getUser() == null || user == null) {
+            return false;
+        }
+        return accessGuard.canClientAccessTrainer(user.getId(), schedule.getUser().getId());
+    }
+
+    private Schedule findAccessibleSchedule(User user, Long id) {
+        Schedule schedule = scheduleService.findById(id);
+        if (schedule == null) {
+            return null;
+        }
+        if (isOwner(user, schedule) || isTrainerShared(user, schedule)) {
+            return schedule;
+        }
+        return null;
     }
 
 
