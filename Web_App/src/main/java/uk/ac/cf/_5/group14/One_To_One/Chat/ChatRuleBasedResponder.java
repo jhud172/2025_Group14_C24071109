@@ -8,6 +8,95 @@ public class ChatRuleBasedResponder {
 
     private ChatRuleBasedResponder() {}
 
+    public static String respondPublic(String userMessage) {
+        String msg = userMessage == null ? "" : userMessage.trim();
+        String lower = msg.toLowerCase(Locale.ROOT);
+
+        if (isGreeting(lower)) {
+            return "Hi, I am Charlie. I can explain One To One, help you decide whether it fits you, compare client, trainer, and gym accounts, and point you to the right place to start. What are you trying to do: train, coach clients, or manage a gym?";
+        }
+
+        if (containsAny(lower, "why", "benefit", "worth", "use one to one", "use 1 to one", "use one-to-one", "use 1-to-1", "better than", "different from")) {
+            return "Use One To One if you want training to feel structured rather than scattered. The platform is built around verified trainers, one active trainer relationship per client, in-platform payments, calendars, progress logs, messaging, and Charlie guidance. For clients, that means clearer accountability. For trainers, it means less admin and cleaner client management. For gyms, it means more control over trainer operations and member experience.";
+        }
+
+        if (containsAny(lower, "what is one to one", "what is 1 to one", "what's one to one", "explain one to one", "explain 1 to one")) {
+            return "One To One is a premium fitness coaching platform. Clients can find verified trainers, organise training, track progress, and keep communication in one place. Trainers can manage clients, plans, schedules, and coaching workflows. Gyms can manage trainer operations and premium member experiences.";
+        }
+
+        if (containsAny(lower, "who is it for", "who should use", "is it for me", "beginner", "new to gym", "new to fitness")) {
+            return "One To One is for people who want structure and accountability. It fits beginners who need a safe starting point, regular gym users who want a proper plan, trainers who need a professional client-management workspace, and gyms that want verified trainer operations. If you are unsure where to start, begin as a client and explore trainers. [NAV:/signup/client:Start as client]";
+        }
+
+        if (lower.contains("price") || lower.contains("pricing") || lower.contains("cost") || lower.contains("pro") || lower.contains("premium")) {
+            return "One To One has a public pricing page where you can compare Starter and Pro access. Pro unlocks personalised Charlie guidance, richer training insights, and more coaching support. Use the Pricing button to review the options. [NAV:/pricing:Pricing]";
+        }
+
+        if (lower.contains("trainer") || lower.contains("coach")) {
+            return "Clients use One To One to find verified trainers, keep training organised, and stay accountable. Trainers use it to manage clients, plans, calendars, and coaching communication. Use the Explore trainers button to browse public trainer information. [NAV:/explore:Explore trainers]";
+        }
+
+        if (lower.contains("gym")) {
+            return "Gym accounts are designed for managing trainer operations, memberships, and verified coaching workflows. A gym can oversee trainers while clients still keep a focused one-to-one coaching relationship.";
+        }
+
+        if (containsAny(lower, "client", "member", "customer")) {
+            return "As a client, One To One helps you find a verified trainer, keep your plan organised, use a calendar for training and tasks, log progress, message around coaching, and stay focused on one active trainer relationship at a time. That avoids the usual mix of scattered apps, notes, payments, and messages.";
+        }
+
+        if (containsAny(lower, "payment", "pay", "subscription", "stripe", "money")) {
+            return "Payments are intended to stay inside One To One. That protects the client relationship, gives trainers a cleaner business workflow, and helps gyms or platform admins keep a reliable record of access and subscriptions. You can compare public options on Pricing. [NAV:/pricing:Pricing]";
+        }
+
+        if (containsAny(lower, "safe", "trust", "verified", "privacy", "gdpr", "secure")) {
+            return "The trust model is a core part of One To One: trainers are verified, clients keep one active trainer relationship at a time, payments stay in-platform, and privacy matters because training, health, and account data are sensitive. Charlie can guide users, but account-specific help only becomes personalised after login.";
+        }
+
+        if (containsAny(lower, "charlie", "ai", "assistant", "chatbot")) {
+            return "Charlie is the One To One assistant. On public pages I can explain the platform and help visitors choose the right path. After login, Charlie can use account context such as role, schedule, workouts, and progress to give more specific support.";
+        }
+
+        if (lower.contains("sign up") || lower.contains("signup") || lower.contains("register") || lower.contains("join")) {
+            return "You can create an account as a client, trainer, or gym. Use the Sign up button, then choose the account type that matches how you want to use One To One. [NAV:/signup:Sign up]";
+        }
+
+        if (lower.contains("login") || lower.contains("log in")) {
+            return "Use the Login button to access your account. Once you are signed in, Charlie can use your role and training context to give more specific guidance. [NAV:/login:Login]";
+        }
+
+        if (lower.contains("feature") || lower.contains("what can") || lower.contains("how does") || lower.contains("platform")) {
+            return "One To One is a premium coaching platform for clients, verified trainers, and gyms. It covers trainer discovery, coaching relationships, calendar planning, progress tracking, messaging, payments, and AI guidance through Charlie.";
+        }
+
+        if (lower.contains("workout") || lower.contains("training") || lower.contains("plan")) {
+            return "For training, One To One keeps workouts, calendar tasks, progress logs, and coach communication in one place. Public users can learn how it works, while signed-in clients and trainers get personalised planning and progress context.";
+        }
+
+        return "For that, the most useful way to think about One To One is as a structured coaching workspace rather than just another fitness app. It connects verified trainers, clients, gyms, calendars, progress, messaging, payments, and Charlie guidance around the coaching relationship. If you tell me whether you are a client, trainer, or gym, I can tailor the answer.";
+    }
+
+    private static boolean isGreeting(String lower) {
+        String normalized = lower == null ? "" : lower.replaceAll("[^a-z0-9 ]", "").trim();
+        return normalized.equals("hi")
+                || normalized.equals("hello")
+                || normalized.equals("hey")
+                || normalized.equals("hello charlie")
+                || normalized.equals("hi charlie")
+                || normalized.equals("hey charlie");
+    }
+
+    private static boolean containsAny(String lower, String... terms) {
+        if (lower == null || terms == null) {
+            return false;
+        }
+        for (String term : terms) {
+            if (term != null && !term.isBlank() && lower.contains(term)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static String respond(String userMessage, ChatContext ctx) {
         String msg = userMessage == null ? "" : userMessage.trim();
         String lower = msg.toLowerCase(Locale.ROOT);

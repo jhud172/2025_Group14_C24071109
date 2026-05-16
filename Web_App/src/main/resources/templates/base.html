@@ -27,7 +27,8 @@
     <script th:src="@{/js/core/theme-preload.js(v='20260314')}"></script>
 
     <!-- Core styles (compiled Tailwind + all component styles) -->
-    <link rel="stylesheet" th:href="@{/css/app.css(v='20260408b')}">
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260516d')}">
+    <link rel="stylesheet" th:if="${includeQuickActions}" th:href="@{/css/components/core/platform-panel.css(v='20260516a')}">
 
     <!-- Page-specific styles -->
     <th:block th:if="${pageStyles != null}">
@@ -53,7 +54,7 @@
 </th:block>
 
 <!-- MAIN CONTENT -->
-<main th:class="${authPageLayout == true ? 'auth-page-main pt-2 sm:pt-3' : 'min-h-[calc(100vh-5rem)] ' + (compactTopContent == true ? 'pt-2 sm:pt-3' : 'pt-16')}">
+<main th:class="${authPageLayout == true ? 'auth-page-main pt-2 sm:pt-3' : 'min-h-[calc(100vh-5rem)] ' + (compactTopContent == true ? 'pt-2 sm:pt-3' : 'pt-4 sm:pt-6')}">
     <th:block th:replace="${content}"></th:block>
 </main>
 
@@ -68,6 +69,7 @@
 <!-- QUICK ACTIONS (global, authenticated only) -->
 <th:block th:if="${includeQuickActions}">
     <div th:replace="~{universal-fragments/layout/quick-actions :: quickActionsShelf}"></div>
+    <div th:replace="~{universal-fragments/layout/platform-panel :: platformPanel}"></div>
 </th:block>
 
 <!-- Core scripts -->
@@ -77,6 +79,7 @@
 <script th:src="@{/js/core/back-navigation.js(v='20260320a')}" defer></script>
 <script th:src="@{/js/core/health-chart-toggle.js(v='20260320a')}" defer></script>
 <script th:if="${includeQuickActions}" th:src="@{/js/core/quick-actions.js(v='20260407a')}" defer></script>
+<script th:if="${includeQuickActions}" th:src="@{/js/core/platform-panel.js(v='20260516a')}" defer></script>
 <script th:src="@{/js/core/navbar-premium.js(v='20260316a')}" defer></script>
 <script th:src="@{/js/core/floating-profile-card.js(v='20260316c')}" defer></script>
 <script th:src="@{/js/core/profile-preview.js(v='20260315a')}" defer></script>

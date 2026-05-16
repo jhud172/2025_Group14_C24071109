@@ -4,6 +4,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.ac.cf._5.group14.One_To_One.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.One_To_One.CalendarData.CalendarTaskRepository;
+import uk.ac.cf._5.group14.One_To_One.Config.DatabaseTableAvailability;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,19 +25,27 @@ public class UpcomingTaskNotificationScheduler {
 
     private final CalendarTaskRepository calendarTaskRepository;
     private final NotificationService notificationService;
+    private final DatabaseTableAvailability tableAvailability;
     private final Clock clock;
 
     public UpcomingTaskNotificationScheduler(CalendarTaskRepository calendarTaskRepository,
                                              NotificationService notificationService,
+                                             DatabaseTableAvailability tableAvailability,
                                              Clock clock) {
         this.calendarTaskRepository = calendarTaskRepository;
         this.notificationService = notificationService;
+        this.tableAvailability = tableAvailability;
         this.clock = clock;
     }
 
     @Scheduled(fixedDelay = 60_000)
     public void sendUpcomingTaskNotifications() {
         try {
+            if (!tableAvailability.hasTable("calendar_tasks") || !tableAvailability.hasTable("users")) {
+                log.debug("Skipping upcoming task notification scan until the database schema is ready.");
+                return;
+            }
+
             LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.MINUTES);
             LocalDate date = now.toLocalDate();
             LocalTime from = now.toLocalTime();

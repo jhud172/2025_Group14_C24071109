@@ -27,7 +27,8 @@ nvm use
 
 Optional local overrides:
 
-- copy [`.env.example`](./.env.example) to `.env` if you need to provide mail, SMS, AI, payment, or base-URL settings for local runs
+- copy [`.env.example`](./.env.example) to [`../.env`](../.env) if you need to provide mail, SMS, AI, payment, or base-URL settings for local runs
+- `bootRun` loads the repository-root `.env` first, then falls back to `Web_App/.env` for older local setups
 
 Install frontend dependencies:
 

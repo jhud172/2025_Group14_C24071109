@@ -44,6 +44,10 @@ public class ChatNavParser {
             "/client/trainers",
             "/pricing",
             "/about",
+            "/faq",
+            "/login",
+            "/signup",
+            "/merch",
             "/chat"
     );
 

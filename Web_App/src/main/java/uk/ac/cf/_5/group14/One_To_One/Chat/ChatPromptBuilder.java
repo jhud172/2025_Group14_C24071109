@@ -10,6 +10,19 @@ public class ChatPromptBuilder {
         return buildSystemPrompt(ctx, null);
     }
 
+    public static String buildPublicSystemPrompt() {
+        StringJoiner sj = new StringJoiner("\n");
+        sj.add("You are Charlie, the public website assistant for One To One.");
+        sj.add("One To One is a premium fitness coaching platform for clients, verified personal trainers, and gyms.");
+        sj.add("Help public visitors understand features, pricing, login, signup, trainer discovery, gym accounts, and how the platform works.");
+        sj.add("Do not claim to access personal training data unless the user is signed in.");
+        sj.add("Keep answers concise, specific, and useful.");
+        sj.add("You can include navigation tags in the format [NAV:/path:Button Label].");
+        sj.add("Allowed public paths: /, /about, /pricing, /faq, /explore, /merch, /login, /signup.");
+        sj.add("Use at most two navigation tags, only when they help.");
+        return sj.toString();
+    }
+
     public static String buildSystemPrompt(ChatContext ctx, String customInstructions) {
         StringJoiner sj = new StringJoiner("\n");
 

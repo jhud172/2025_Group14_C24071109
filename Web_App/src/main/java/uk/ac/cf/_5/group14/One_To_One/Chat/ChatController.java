@@ -38,6 +38,7 @@ public class ChatController {
     private static final Logger log = LoggerFactory.getLogger(ChatController.class);
 
     private static final int FREE_DAILY_LIMIT = 15;
+    private static final String AI_UNAVAILABLE_REPLY = "AI is unavailable right now. Try again later.";
 
     private final ChatService chatService;
     private final ChatContextService chatContextService;
@@ -177,17 +178,34 @@ public class ChatController {
 
     @PostMapping("/ask")
     @ResponseBody
-    public ResponseEntity<ChatResponse> ask(@RequestBody ChatRequest request) {
+    public ResponseEntity<Map<String, Object>> ask(@RequestBody ChatRequest request) {
         String message = composePromptMessage(
                 request != null ? request.message() : null,
                 request != null ? request.attachments() : List.of(),
                 false
         );
         if (message.isBlank()) {
-            return ResponseEntity.badRequest().body(new ChatResponse("Message is required."));
+            return ResponseEntity.badRequest().body(Map.of("reply", "Message is required."));
         }
-        ChatResponse response = chatService.chat(message);
-        return ResponseEntity.ok(response);
+        String reply;
+        if (!chatService.isAvailable()) {
+            reply = ChatRuleBasedResponder.respondPublic(message);
+        } else {
+            ChatResponse response = chatService.chat(List.of(
+                    new ChatService.Message("system", ChatPromptBuilder.buildPublicSystemPrompt()),
+                    new ChatService.Message("user", message)
+            ));
+            reply = isUnavailable(response) ? ChatRuleBasedResponder.respondPublic(message) : response.reply();
+        }
+        ChatNavParser.ParseResult navParsed = ChatNavParser.parse(reply);
+        Map<String, Object> result = new HashMap<>();
+        result.put("reply", navParsed.cleanText());
+        if (!navParsed.navActions().isEmpty()) {
+            result.put("navActions", navParsed.navActions().stream()
+                    .map(a -> Map.of("url", a.url(), "label", a.label()))
+                    .collect(Collectors.toList()));
+        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(path = "/history", produces = "application/json")
@@ -316,9 +334,9 @@ public class ChatController {
             }
 
             ChatResponse response = chatService.chat(msgs);
-                String rawReply = response != null && response.reply() != null && !response.reply().isBlank()
-                    ? response.reply()
-                    : "AI is unavailable right now. Try again later.";
+                String rawReply = isUnavailable(response)
+                    ? ChatRuleBasedResponder.respond(message, ctx)
+                    : response.reply();
                 AiNotificationHelper.ExtractedNotification extracted = AiNotificationHelper.extract(rawReply);
                 if (extracted.notificationMessage() != null) {
                 aiNotificationService.notify(user, extracted.notificationMessage());
@@ -465,9 +483,9 @@ public class ChatController {
                     msgs.add(new ChatService.Message(role, coachMessageService.modelContent(m)));
                 }
                 ChatResponse response = chatService.chat(msgs);
-                reply = response != null && response.reply() != null && !response.reply().isBlank()
-                    ? response.reply()
-                    : "AI is unavailable right now. Try again later.";
+                reply = isUnavailable(response)
+                    ? ChatRuleBasedResponder.respond(message, ctx)
+                    : response.reply();
                 }
             } catch (Exception e) {
                 log.warn("Chat API failed; returning fallback reply", e);
@@ -577,6 +595,11 @@ public class ChatController {
 
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+    }
+
+    private boolean isUnavailable(ChatResponse response) {
+        String reply = response != null ? response.reply() : null;
+        return reply == null || reply.isBlank() || AI_UNAVAILABLE_REPLY.equalsIgnoreCase(reply.trim());
     }
 
     private String buildRoleCapabilityInstructions(User user, boolean isPremium) {

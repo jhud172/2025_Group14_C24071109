@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import uk.ac.cf._5.group14.One_To_One.Config.DatabaseTableAvailability;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
 import java.io.IOException;
@@ -24,17 +25,20 @@ public class WorkoutFormFeedbackService {
     private final WorkoutSetLogRepository setLogRepository;
     private final WorkoutSetVideoRepository videoRepository;
     private final AiFormFeedbackRepository feedbackRepository;
+    private final DatabaseTableAvailability tableAvailability;
     private final Path uploadRoot;
 
     public WorkoutFormFeedbackService(WorkoutBuilderService workoutBuilderService,
                                       WorkoutSetLogRepository setLogRepository,
                                       WorkoutSetVideoRepository videoRepository,
                                       AiFormFeedbackRepository feedbackRepository,
+                                      DatabaseTableAvailability tableAvailability,
                                       @Value("${app.storage.workout-video-dir:uploads/workout-videos}") String uploadRoot) {
         this.workoutBuilderService = workoutBuilderService;
         this.setLogRepository = setLogRepository;
         this.videoRepository = videoRepository;
         this.feedbackRepository = feedbackRepository;
+        this.tableAvailability = tableAvailability;
         this.uploadRoot = Paths.get(uploadRoot).toAbsolutePath().normalize();
     }
 
@@ -99,6 +103,10 @@ public class WorkoutFormFeedbackService {
     @Scheduled(fixedDelay = 30_000)
     @Transactional
     public void processPending() {
+        if (!tableAvailability.hasTable("workout_set_videos")) {
+            return;
+        }
+
         List<WorkoutSetVideo> pending = videoRepository.findByStatusOrderByCreatedAtAsc(VideoProcessingStatus.PENDING);
         for (WorkoutSetVideo video : pending) {
             video.setStatus(VideoProcessingStatus.PROCESSING);

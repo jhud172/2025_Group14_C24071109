@@ -3,8 +3,10 @@
     const menu = document.getElementById('siteNavMenu');
     if (!button || !menu) return;
 
-    const mobileNavBreakpoint = window.matchMedia('(max-width: 1248px)');
+    const mobileNavBreakpoint = window.matchMedia('(max-width: 880px)');
     const header = button.closest('.navheader');
+    let lastScrollY = window.scrollY || 0;
+    let ticking = false;
 
     const setOpen = (open) => {
         const nextOpen = mobileNavBreakpoint.matches && open;
@@ -67,6 +69,47 @@
     }
 
     window.addEventListener('resize', syncLayout);
+
+    const setHeaderVisible = (visible) => {
+        if (!header) return;
+        header.classList.toggle('navheader--hidden', !visible);
+    };
+
+    const syncScrollVisibility = () => {
+        if (!header) return;
+        const currentY = Math.max(window.scrollY || 0, 0);
+        const delta = currentY - lastScrollY;
+        const menuOpen = header.classList.contains('navheader--menu-open');
+        const focused = header.contains(document.activeElement);
+
+        if (currentY <= 20 || menuOpen || focused) {
+            setHeaderVisible(true);
+        } else if (Math.abs(delta) > 8) {
+            setHeaderVisible(delta < 0);
+        }
+
+        header.classList.toggle('scrolled', currentY > 12);
+        lastScrollY = currentY;
+        ticking = false;
+    };
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(syncScrollVisibility);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    header?.addEventListener('focusin', () => setHeaderVisible(true));
+    window.addEventListener('wheel', (event) => {
+        if (event.deltaY < -2) setHeaderVisible(true);
+    }, { passive: true });
+    window.addEventListener('keydown', (event) => {
+        if (['ArrowUp', 'PageUp', 'Home'].includes(event.key)) {
+            setHeaderVisible(true);
+        }
+    });
+    syncScrollVisibility();
 
     const mobileQuickActionsToggle = document.getElementById('mobileQuickActionsToggle');
     if (mobileQuickActionsToggle) {

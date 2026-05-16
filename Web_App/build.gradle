@@ -87,7 +87,8 @@ tasks.named('bootRun') {
 			environment 'SPRING_PROFILES_ACTIVE', defaultProfile
 		}
 
-		def envFile = file('.env')
+		def repoRootEnvFile = rootProject.projectDir.toPath().resolve('..').resolve('.env').normalize().toFile()
+		def envFile = repoRootEnvFile.exists() ? repoRootEnvFile : file('.env')
 		if (!envFile.exists()) {
 			return
 		}
@@ -102,9 +103,11 @@ tasks.named('bootRun') {
 			def key = trimmed.substring(0, separator).trim()
 			def value = trimmed.substring(separator + 1).trim()
 
-			if (key.startsWith('SPRING_MAIL_') || key.startsWith('APP_EMAIL_') || key == 'APP_BASE_URL' || key.startsWith('APP_SMS_') || key.startsWith('TWILIO_')) {
-				environment key, value
+			if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+				value = value.substring(1, value.length() - 1)
 			}
+
+			environment key, value
 		}
 	}
 }

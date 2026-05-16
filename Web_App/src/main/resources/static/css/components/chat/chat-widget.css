@@ -64,6 +64,12 @@
     transform: translateY(-2px) scale(0.97);
     @apply transition-all duration-150;
   }
+
+  #chatWidget:has(#chatPanel.open) .chat-fab-premium {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.5rem) scale(0.92);
+  }
   
   .chat-fab-icon {
     @apply relative z-[2] rounded-full;
@@ -768,7 +774,7 @@
   }
 
   .chat-composer-shell {
-    @apply relative border-t border-slate-200/60 bg-white px-3 py-3;
+    @apply relative border-t border-slate-200/60 bg-white px-4 py-4;
     @apply dark:border-slate-700/60 dark:bg-slate-950;
     background-color: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(18px);
@@ -776,16 +782,18 @@
   }
 
   .chat-input-container {
-    @apply gap-3 border-0 px-0 py-0;
+    @apply mx-auto gap-3 border-0 px-0 py-0;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: 3rem minmax(12rem, 1fr) minmax(4.9rem, auto);
     grid-template-areas: "camera message send";
-    align-items: end;
+    align-items: center;
+    max-width: 32rem;
   }
 
   .chat-composer-action {
     grid-area: camera;
-    align-self: end;
+    align-self: center;
+    justify-self: center;
   }
 
   .chat-input-stack {
@@ -802,6 +810,10 @@
     @apply mt-1.5 flex min-h-[1rem] items-center gap-2 px-1;
   }
 
+  .chat-input-meta:has(.chat-input-hint.hidden) {
+    display: none;
+  }
+
   .chat-input-hint {
     @apply text-[11px] text-slate-400;
   }
@@ -809,7 +821,8 @@
   .chat-send-btn-premium {
     grid-area: send;
     min-width: 5.1rem;
-    align-self: end;
+    align-self: center;
+    justify-self: center;
   }
 
   .chat-send-btn__icon {
@@ -1060,20 +1073,20 @@
     }
 
     .chat-input-container {
-      grid-template-columns: minmax(0, 1fr) auto;
-      grid-template-areas:
-        "message camera"
-        "message send";
-      align-items: stretch;
+      grid-template-columns: 2.75rem minmax(0, 1fr) 2.85rem;
+      grid-template-areas: "camera message send";
+      align-items: center;
+      max-width: none;
+      gap: 0.65rem;
     }
 
     .chat-composer-action {
-      align-self: start;
-      justify-self: end;
+      align-self: center;
+      justify-self: center;
     }
 
     .chat-input-premium.chat-input-textarea {
-      min-height: 5rem;
+      min-height: 2.85rem;
       padding-top: 0.9rem;
       padding-bottom: 0.9rem;
     }

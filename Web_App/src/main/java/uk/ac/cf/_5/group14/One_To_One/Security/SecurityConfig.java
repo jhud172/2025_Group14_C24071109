@@ -115,6 +115,7 @@ public class SecurityConfig {
                             // Static assets and public pages: always open
                             .requestMatchers(ENDPOINTS_WHITELIST).permitAll()
                             .requestMatchers("/api/mobile/**").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/chat/ask").permitAll()
                             .requestMatchers("/dashboard/public", "/client/dashboard/public").permitAll()
                             // Leaderboard: keep protected â€” not open in dev mode
                             .requestMatchers("/levels/**").authenticated()
@@ -147,6 +148,7 @@ public class SecurityConfig {
                             request
                             .requestMatchers(ENDPOINTS_WHITELIST).permitAll()
                             .requestMatchers("/api/mobile/**").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/chat/ask").permitAll()
                             .requestMatchers("/dashboard/public", "/client/dashboard/public").permitAll()
                             .requestMatchers("/confirm-logout").authenticated()
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
