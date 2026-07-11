@@ -50,8 +50,10 @@ import uk.ac.cf._5.group14.One_To_One.Users.UserService;
 import uk.ac.cf._5.group14.One_To_One.Config.DevModeProperties;
 
 /**
- * Verifies that the profile route dispatches to the correct view based on the user's role,
- * and redirects to login when no session user is found.
+ * Verifies that the profile route dispatches to the correct view based on the authenticated
+ * user's role: CLIENT → client profile, TRAINER → trainer profile, GYM_ADMIN → gym-admin
+ * profile, PLATFORM_ADMIN/SUPER_ADMIN → redirect to admin dashboard. Also asserts that a
+ * missing session user always redirects to login rather than resolving a fallback demo user.
  */
 @WebMvcTest(ProfileController.class)
 @ActiveProfiles("test")

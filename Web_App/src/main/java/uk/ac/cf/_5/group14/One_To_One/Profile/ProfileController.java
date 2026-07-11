@@ -62,6 +62,7 @@ import uk.ac.cf._5.group14.One_To_One.Users.UserService;
 public class ProfileController {
 
     private static final long MAX_PROFILE_IMAGE_BYTES = 2L * 1024L * 1024L;
+    private static final String DEFAULT_GYM_NAME = "My Gym";
 
     private final AuthHelper authHelper;
     private final UserService userService;
@@ -457,7 +458,7 @@ public class ProfileController {
             return;
         }
         GymProfile profile = gymProfileRepository.findByUserId(userId).orElseGet(() -> {
-            GymProfile p = new GymProfile(userId, "My Gym");
+            GymProfile p = new GymProfile(userId, DEFAULT_GYM_NAME);
             return gymProfileRepository.save(p);
         });
         if (request.getGymName() != null) {

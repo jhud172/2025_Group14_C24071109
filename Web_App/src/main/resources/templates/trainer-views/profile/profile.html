@@ -40,7 +40,7 @@
                 </div>
 
                 <!-- Trainer Code display -->
-                <div th:if="${trainerProfile != null and trainerProfile.trainerCode != null}"
+                <div th:if="${trainerProfile != null and trainerProfile.trainerCode != null and #strings.length(trainerProfile.trainerCode) == 12}"
                      class="w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-center">
                     <p class="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">Trainer Code</p>
                     <div class="flex items-center justify-center gap-2">
@@ -380,20 +380,7 @@
 </div>
 
 <th:block th:fragment="pageScripts">
-    <script>
-        (function () {
-            var btn = document.getElementById('copyTrainerCode');
-            var lbl = document.getElementById('copyTrainerCodeLabel');
-            var val = document.getElementById('trainerCodeVal');
-            if (btn && val) {
-                btn.addEventListener('click', function () {
-                    navigator.clipboard.writeText(val.textContent.trim()).then(function () {
-                        if (lbl) { lbl.textContent = 'Copied!'; setTimeout(function () { lbl.textContent = 'Copy'; }, 2000); }
-                    });
-                });
-            }
-        })();
-    </script>
+    <script th:src="@{/js/profile/copy-code.js}"></script>
 </th:block>
 
 </th:block>

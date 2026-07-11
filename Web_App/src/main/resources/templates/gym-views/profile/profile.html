@@ -308,20 +308,7 @@
 </div>
 
 <th:block th:fragment="pageScripts">
-    <script>
-        (function () {
-            var btn = document.getElementById('copyGymCode');
-            var lbl = document.getElementById('copyGymCodeLabel');
-            var val = document.getElementById('gymCodeVal');
-            if (btn && val) {
-                btn.addEventListener('click', function () {
-                    navigator.clipboard.writeText(val.textContent.trim()).then(function () {
-                        if (lbl) { lbl.textContent = 'Copied!'; setTimeout(function () { lbl.textContent = 'Copy'; }, 2000); }
-                    });
-                });
-            }
-        })();
-    </script>
+    <script th:src="@{/js/profile/copy-code.js}"></script>
 </th:block>
 
 </th:block>
