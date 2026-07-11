@@ -601,6 +601,8 @@ function clearAllWorkouts() {
 // ========================================
 // Version Control (Undo/Reset)
 // ========================================
+const MAX_HISTORY = 50;
+
 function initializeVersionControl() {
     document.getElementById('undoBtn')?.addEventListener('click', undo);
     document.getElementById('resetBtn')?.addEventListener('click', resetToSaved);
@@ -615,6 +617,12 @@ function saveState() {
     }
     
     scheduleState.history.push(state);
+
+    // Cap history to prevent unbounded memory growth on long sessions
+    if (scheduleState.history.length > MAX_HISTORY) {
+        scheduleState.history = scheduleState.history.slice(scheduleState.history.length - MAX_HISTORY);
+    }
+
     scheduleState.historyIndex = scheduleState.history.length - 1;
     
     // Enable/disable undo button

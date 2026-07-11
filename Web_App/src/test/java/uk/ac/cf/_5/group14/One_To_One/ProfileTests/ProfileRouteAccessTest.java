@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -21,6 +22,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -54,6 +58,9 @@ import uk.ac.cf._5.group14.One_To_One.Config.DevModeProperties;
  * user's role: CLIENT → client profile, TRAINER → trainer profile, GYM_ADMIN → gym-admin
  * profile, PLATFORM_ADMIN/SUPER_ADMIN → redirect to admin dashboard. Also asserts that a
  * missing session user always redirects to login rather than resolving a fallback demo user.
+ *
+ * POST coverage verifies that /profile/update correctly delegates to role-specific profile
+ * update helpers and sets the profileUpdated flash attribute on success.
  */
 @WebMvcTest(ProfileController.class)
 @ActiveProfiles("test")
@@ -167,11 +174,58 @@ class ProfileRouteAccessTest {
                 .andExpect(status().is3xxRedirection());
     }
 
+    @Test
+    void trainerProfileUpdatePersistsTrainerFieldsAndSetsFlash() throws Exception {
+        User user = makeUser(2L, Role.TRAINER);
+        TrainerProfile trainerProfile = new TrainerProfile(user.getId());
+        trainerProfile.setBio("Existing bio");
+
+        stubCommonMocks(user);
+        given(trainerProfileService.getOrCreateProfile(eq(user.getId()))).willReturn(trainerProfile);
+        given(trainerProfileService.updateProfile(eq(user.getId()), any())).willReturn(trainerProfile);
+
+        mvc.perform(post("/profile/update")
+                        .param("firstName", "Test")
+                        .param("lastName", "User")
+                        .param("trainerBio", "Updated trainer bio")
+                        .param("specializations", "Strength, Cardio")
+                        .sessionAttr("user", user))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/profile"))
+                .andExpect(flash().attribute("profileUpdated", true));
+
+        verify(trainerProfileService).updateProfile(eq(user.getId()), any());
+    }
+
+    @Test
+    void gymAdminProfileUpdatePersistsGymFieldsAndSetsFlash() throws Exception {
+        User user = makeUser(3L, Role.GYM_ADMIN);
+        uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfile gymProfile =
+                new uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfile(user.getId(), "Test Gym");
+
+        stubCommonMocks(user);
+        given(gymProfileRepository.findByUserId(eq(user.getId()))).willReturn(Optional.of(gymProfile));
+        given(gymProfileService.saveProfile(any())).willReturn(gymProfile);
+
+        mvc.perform(post("/profile/update")
+                        .param("firstName", "Test")
+                        .param("lastName", "User")
+                        .param("gymName", "Updated Gym Name")
+                        .param("gymAddress", "123 High Street")
+                        .sessionAttr("user", user))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/profile"))
+                .andExpect(flash().attribute("profileUpdated", true));
+
+        verify(gymProfileService).saveProfile(any());
+    }
+
     @TestConfiguration
     static class TestSecurityConfig {
         @Bean("testProfileSecurityFilterChain")
         SecurityFilterChain testProfileSecurityFilterChain(HttpSecurity http) throws Exception {
             return http
+                    .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                     .build();
         }

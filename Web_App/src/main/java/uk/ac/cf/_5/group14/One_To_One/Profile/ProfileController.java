@@ -333,17 +333,6 @@ public class ProfileController {
             .collect(Collectors.toList());
     }
 
-    private User resolveDevPreviewUser() {
-        List<String> candidateUsernames = List.of("client_demo", "demo_client", "trainer_demo", "user_demo");
-        for (String username : candidateUsernames) {
-            User candidate = userService.findByUsername(username);
-            if (candidate != null) {
-                return candidate;
-            }
-        }
-        return userRepository.findAll().stream().findFirst().orElse(null);
-    }
-
     @GetMapping("/profile/orders")
     public ModelAndView getOrders() {
         User user = authHelper.getAuthenticatedUser();
