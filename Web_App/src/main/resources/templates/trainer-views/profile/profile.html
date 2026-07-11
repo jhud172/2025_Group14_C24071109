@@ -1,0 +1,399 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Profile', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+
+<div th:fragment="styles">
+    <!-- profile.css is included in app.css via tailwind.css -->
+</div>
+
+<div th:fragment="content">
+    <div id="profile-shell" class="profile-page-layout" data-edit-mode="false">
+
+        <!-- SIDEBAR: PROFILE CARD -->
+        <aside class="profile-sidebar-card"
+               data-profile-theme-scope
+               th:classappend="${userSettings != null and userSettings.profileCardBackStyle != null ? ' profile-card-back-theme--' + #strings.toLowerCase(userSettings.profileCardBackStyle) : ' profile-card-back-theme--glass'}">
+            <div class="flex flex-col items-center text-center gap-4"
+                 th:with="completionScore=${(user != null && user.profileImageUrl != null ? 1 : 0) + (trainerProfile != null && trainerProfile.bio != null && !#strings.isEmpty(trainerProfile.bio) ? 1 : 0) + (user != null && user.emailVerified ? 1 : 0) + (user != null && user.phoneNumber != null && !#strings.isEmpty(user.phoneNumber) ? 1 : 0) + (trainerProfile != null && trainerProfile.specializations != null && !#strings.isEmpty(trainerProfile.specializations) ? 1 : 0)}, completionPercent=${T(java.lang.Math).round((completionScore * 100.0) / 5)}">
+
+                <div class="profile-identity-banner w-full"
+                     data-profile-theme-banner
+                     th:with="banner=${userSettings != null and userSettings.profileBannerTheme != null ? #strings.toLowerCase(userSettings.profileBannerTheme) : 'aurora'}"
+                     th:classappend="${' profile-banner-pill--' + banner}">
+                    <div class="profile-identity-banner__row">
+                        <div class="profile-avatar profile-identity-banner__avatar"
+                             th:with="ring=${userSettings != null and userSettings.profileRingStyle != null ? #strings.toLowerCase(userSettings.profileRingStyle) : 'neon_dual'}"
+                             th:classappend="${' profile-avatar-ring profile-avatar-ring--' + ring}">
+                            <img th:if="${user != null &amp;&amp; user.profileImageUrl != null}"
+                                 th:src="${user.profileImageUrl}" alt="Profile photo"
+                                 class="h-full w-full object-cover" draggable="false"/>
+                            <span th:if="${user == null || user.profileImageUrl == null}"
+                                  class="text-2xl font-bold text-white"
+                                  th:text="${(user != null &amp;&amp; user.firstName != null ? user.firstName.substring(0,1) : '') + (user != null &amp;&amp; user.lastName != null ? user.lastName.substring(0,1) : '')}">TP</span>
+                        </div>
+                        <div class="profile-identity-banner__text text-left">
+                            <h1 class="profile-identity-banner__name"
+                                th:text="${user != null ? user.fullName : 'Profile'}">Profile</h1>
+                            <p class="profile-identity-banner__handle"
+                               th:text="${user != null ? '@' + user.username : '@user'}">@user</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trainer Code display -->
+                <div th:if="${trainerProfile != null and trainerProfile.trainerCode != null}"
+                     class="w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-center">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">Trainer Code</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <span id="trainerCodeVal"
+                              class="font-mono text-lg font-bold tracking-[0.12em] text-emerald-800 dark:text-emerald-200 select-all"
+                              th:text="${#strings.substring(trainerProfile.trainerCode,0,4) + '-' + #strings.substring(trainerProfile.trainerCode,4,8) + '-' + #strings.substring(trainerProfile.trainerCode,8,12)}">XXXX-XXXX-XXXX</span>
+                        <button type="button" id="copyTrainerCode"
+                                class="inline-flex items-center gap-1 rounded-lg border border-emerald-400/60 px-2 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition">
+                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <span id="copyTrainerCodeLabel">Copy</span>
+                        </button>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Share with clients during login</p>
+                </div>
+
+                <!-- Profile completion -->
+                <div class="profile-completion-widget w-full">
+                    <div class="profile-completion-widget__surface">
+                        <div class="profile-completion-widget__header">
+                            <span class="profile-completion-widget__eyebrow">Profile radar</span>
+                            <span class="profile-completion-widget__percent" th:text="${completionPercent + '%'}">0%</span>
+                        </div>
+                        <div class="profile-completion-widget__bar-track">
+                            <div class="profile-completion-widget__bar-fill" th:style="'width:' + ${completionPercent} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick actions -->
+                <div class="w-full">
+                    <p class="mb-2 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account actions</p>
+                    <div class="flex flex-col gap-2">
+                        <a th:href="@{/trainer/profile/edit}"
+                           class="profile-btn-secondary w-full text-center text-sm">
+                            Edit public trainer listing
+                        </a>
+                        <a th:href="@{/dashboard}"
+                           class="profile-btn-secondary w-full text-center text-sm">
+                            Go to dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="profile-main-content">
+
+            <!-- Success / error banner -->
+            <div th:if="${profileUpdated}" class="mb-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-4 text-emerald-800 dark:text-emerald-200">
+                <p>Profile updated successfully.</p>
+            </div>
+            <div th:if="${profileError}" class="mb-4 rounded-xl bg-red-50 dark:bg-red-900/20 p-4 text-red-800 dark:text-red-200">
+                <p th:text="${profileError}"></p>
+            </div>
+
+            <!-- SECTION 1: Trainer details -->
+            <section class="profile-section">
+                <div class="profile-section-header">
+                    <div>
+                        <h2 class="profile-section-title">Trainer Details</h2>
+                        <p class="profile-section-subtitle">Your professional bio, specializations, and session info.</p>
+                    </div>
+                </div>
+
+                <form th:action="@{/profile/update}" method="post" enctype="multipart/form-data" id="trainer-details-form">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <div class="divide-y divide-slate-200/70 dark:divide-slate-800/90">
+                        <!-- Bio -->
+                        <div class="profile-field-row py-4">
+                            <label for="trainerBio" class="profile-field-label">Bio</label>
+                            <div class="profile-field-value">
+                                <textarea id="trainerBio" name="trainerBio" rows="4" maxlength="500"
+                                          class="profile-input w-full"
+                                          placeholder="Tell clients about yourself..."
+                                          th:text="${trainerProfile != null ? trainerProfile.bio : ''}"></textarea>
+                                <p class="mt-1 text-xs text-slate-400">Max 500 characters.</p>
+                            </div>
+                        </div>
+
+                        <!-- Specializations -->
+                        <div class="profile-field-row py-4">
+                            <label for="specializations" class="profile-field-label">Specializations</label>
+                            <div class="profile-field-value">
+                                <input type="text" id="specializations" name="specializations" maxlength="200"
+                                       class="profile-input w-full"
+                                       placeholder="e.g. HIIT, Strength, Nutrition"
+                                       th:value="${trainerProfile != null ? trainerProfile.specializations : ''}"/>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="profile-field-row py-4">
+                            <label for="location" class="profile-field-label">Location</label>
+                            <div class="profile-field-value">
+                                <input type="text" id="location" name="location" maxlength="120"
+                                       class="profile-input w-full"
+                                       placeholder="City, Region"
+                                       th:value="${trainerProfile != null ? trainerProfile.location : ''}"/>
+                            </div>
+                        </div>
+
+                        <!-- Primary Gym -->
+                        <div class="profile-field-row py-4">
+                            <label for="primaryGym" class="profile-field-label">Primary Gym</label>
+                            <div class="profile-field-value">
+                                <input type="text" id="primaryGym" name="primaryGym" maxlength="200"
+                                       class="profile-input w-full"
+                                       placeholder="Gym name (optional)"
+                                       th:value="${trainerProfile != null ? trainerProfile.primaryGym : ''}"/>
+                            </div>
+                        </div>
+
+                        <!-- Price per session -->
+                        <div class="profile-field-row py-4">
+                            <label for="pricePerSession" class="profile-field-label">Price per Session (£)</label>
+                            <div class="profile-field-value">
+                                <input type="number" id="pricePerSession" name="pricePerSession" min="0" max="9999"
+                                       class="profile-input w-full"
+                                       placeholder="e.g. 45"
+                                       th:value="${trainerProfile != null ? trainerProfile.pricePerSession : ''}"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social links -->
+                    <div class="mt-6">
+                        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Social Links</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="showInstagram" name="showInstagram"
+                                       th:checked="${trainerProfile != null and trainerProfile.showInstagram}"
+                                       class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"/>
+                                <label for="showInstagram" class="w-24 text-sm text-slate-600 dark:text-slate-400">Instagram</label>
+                                <input type="url" name="instagramUrl" maxlength="500"
+                                       class="profile-input flex-1"
+                                       placeholder="https://instagram.com/..."
+                                       th:value="${trainerProfile != null ? trainerProfile.instagramUrl : ''}"/>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="showTikTok" name="showTikTok"
+                                       th:checked="${trainerProfile != null and trainerProfile.showTikTok}"
+                                       class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"/>
+                                <label for="showTikTok" class="w-24 text-sm text-slate-600 dark:text-slate-400">TikTok</label>
+                                <input type="url" name="tiktokUrl" maxlength="500"
+                                       class="profile-input flex-1"
+                                       placeholder="https://tiktok.com/..."
+                                       th:value="${trainerProfile != null ? trainerProfile.tiktokUrl : ''}"/>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="showYouTube" name="showYouTube"
+                                       th:checked="${trainerProfile != null and trainerProfile.showYouTube}"
+                                       class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"/>
+                                <label for="showYouTube" class="w-24 text-sm text-slate-600 dark:text-slate-400">YouTube</label>
+                                <input type="url" name="youtubeUrl" maxlength="500"
+                                       class="profile-input flex-1"
+                                       placeholder="https://youtube.com/..."
+                                       th:value="${trainerProfile != null ? trainerProfile.youtubeUrl : ''}"/>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="showLinkedIn" name="showLinkedIn"
+                                       th:checked="${trainerProfile != null and trainerProfile.showLinkedIn}"
+                                       class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"/>
+                                <label for="showLinkedIn" class="w-24 text-sm text-slate-600 dark:text-slate-400">LinkedIn</label>
+                                <input type="url" name="linkedInUrl" maxlength="500"
+                                       class="profile-input flex-1"
+                                       placeholder="https://linkedin.com/..."
+                                       th:value="${trainerProfile != null ? trainerProfile.linkedInUrl : ''}"/>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="showWebsite" name="showWebsite"
+                                       th:checked="${trainerProfile != null and trainerProfile.showWebsite}"
+                                       class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"/>
+                                <label for="showWebsite" class="w-24 text-sm text-slate-600 dark:text-slate-400">Website</label>
+                                <input type="url" name="websiteUrl" maxlength="500"
+                                       class="profile-input flex-1"
+                                       placeholder="https://yoursite.com"
+                                       th:value="${trainerProfile != null ? trainerProfile.websiteUrl : ''}"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" class="profile-btn-primary">Save trainer details</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- SECTION 2: Account settings -->
+            <section class="profile-section mt-6">
+                <div class="profile-section-header">
+                    <div>
+                        <h2 class="profile-section-title">Account Settings</h2>
+                        <p class="profile-section-subtitle">Your name, email, username, and phone number.</p>
+                    </div>
+                </div>
+
+                <form th:action="@{/profile/update}" method="post" enctype="multipart/form-data" id="account-settings-form">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <div class="divide-y divide-slate-200/70 dark:divide-slate-800/90">
+                        <div class="profile-field-row py-4">
+                            <label for="firstName" class="profile-field-label">First Name</label>
+                            <div class="profile-field-value">
+                                <input type="text" id="firstName" name="firstName" maxlength="100"
+                                       class="profile-input w-full"
+                                       th:value="${user != null ? user.firstName : ''}"/>
+                            </div>
+                        </div>
+                        <div class="profile-field-row py-4">
+                            <label for="lastName" class="profile-field-label">Last Name</label>
+                            <div class="profile-field-value">
+                                <input type="text" id="lastName" name="lastName" maxlength="100"
+                                       class="profile-input w-full"
+                                       th:value="${user != null ? user.lastName : ''}"/>
+                            </div>
+                        </div>
+                        <div class="profile-field-row py-4">
+                            <label for="username" class="profile-field-label">Username</label>
+                            <div class="profile-field-value">
+                                <input type="text" id="username" name="username" maxlength="100"
+                                       class="profile-input w-full"
+                                       th:value="${user != null ? user.username : ''}"/>
+                            </div>
+                        </div>
+                        <div class="profile-field-row py-4">
+                            <label for="email" class="profile-field-label">Email</label>
+                            <div class="profile-field-value">
+                                <input type="email" id="email" name="email" maxlength="255"
+                                       class="profile-input w-full"
+                                       th:value="${user != null ? user.email : ''}"/>
+                            </div>
+                        </div>
+                        <div class="profile-field-row py-4">
+                            <label for="phoneNumber" class="profile-field-label">Phone</label>
+                            <div class="profile-field-value">
+                                <input type="tel" id="phoneNumber" name="phoneNumber" maxlength="30"
+                                       class="profile-input w-full"
+                                       th:value="${user != null ? user.phoneNumber : ''}"/>
+                                <input type="hidden" name="phoneCountry" th:value="${user != null and user.phoneCountry != null ? user.phoneCountry : 'GB'}"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button type="submit" class="profile-btn-primary">Save account settings</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- SECTION 3: Profile image -->
+            <section class="profile-section mt-6">
+                <div class="profile-section-header">
+                    <div>
+                        <h2 class="profile-section-title">Profile Image</h2>
+                        <p class="profile-section-subtitle">Upload a photo (PNG, JPG or WebP, max 2 MB).</p>
+                    </div>
+                </div>
+
+                <form th:action="@{/profile/update}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="flex items-center gap-4 py-4">
+                        <div class="h-16 w-16 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center bg-slate-100 dark:bg-slate-800 flex-shrink-0">
+                            <img th:if="${user != null and user.profileImageUrl != null}"
+                                 th:src="${user.profileImageUrl}" alt="Current photo"
+                                 class="h-full w-full object-cover"/>
+                            <span th:if="${user == null or user.profileImageUrl == null}"
+                                  class="text-xl font-bold text-slate-400"
+                                  th:text="${user != null and user.firstName != null ? #strings.toUpperCase(#strings.substring(user.firstName,0,1)) : '?'}">?</span>
+                        </div>
+                        <div class="flex-1">
+                            <input type="file" name="profileImage" accept="image/png,image/jpeg,image/webp"
+                                   class="block w-full text-sm text-slate-500 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900/30 dark:file:text-emerald-300"/>
+                        </div>
+                    </div>
+                    <div th:if="${user != null and user.profileImageUrl != null}" class="flex items-center gap-2 pb-2">
+                        <input type="checkbox" id="removeProfileImage" name="removeProfileImage" value="true"
+                               class="h-4 w-4 rounded border-slate-300 text-red-600 focus:ring-red-500"/>
+                        <label for="removeProfileImage" class="text-sm text-slate-600 dark:text-slate-400">Remove current photo</label>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="profile-btn-primary">Update photo</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- SECTION 4: Data & account -->
+            <section class="profile-section mt-6">
+                <div class="profile-section-header">
+                    <div>
+                        <h2 class="profile-section-title">Data &amp; Account</h2>
+                        <p class="profile-section-subtitle">Export your data or permanently delete your account.</p>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-slate-200/70 dark:divide-slate-800/90">
+                    <!-- Data export -->
+                    <div class="py-4">
+                        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Data Export</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Request a copy of all your account data.</p>
+                        <form th:action="@{/profile/data-export}" method="post">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="profile-btn-secondary text-sm">Request data export</button>
+                        </form>
+                        <ul th:if="${recentExportRequests != null and !#lists.isEmpty(recentExportRequests)}"
+                            class="mt-3 space-y-1 text-xs text-slate-500 dark:text-slate-400">
+                            <li th:each="req : ${recentExportRequests}">
+                                Export requested on <span th:text="${#temporals.format(req.requestedAt, 'dd MMM yyyy')}">date</span>
+                                — <span th:text="${req.status}">PENDING</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Account deletion -->
+                    <div class="py-4">
+                        <h3 class="text-sm font-semibold text-red-600 dark:text-red-400 mb-1">Delete Account</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">This action is permanent and cannot be undone. Type <strong>DELETE</strong> to confirm.</p>
+                        <form th:action="@{/profile/delete}" method="post" class="flex items-center gap-3">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="text" name="confirmText" placeholder="DELETE"
+                                   class="profile-input w-28"
+                                   autocomplete="off"/>
+                            <button type="submit"
+                                    class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500">
+                                Delete account
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</div>
+
+<th:block th:fragment="pageScripts">
+    <script>
+        (function () {
+            var btn = document.getElementById('copyTrainerCode');
+            var lbl = document.getElementById('copyTrainerCodeLabel');
+            var val = document.getElementById('trainerCodeVal');
+            if (btn && val) {
+                btn.addEventListener('click', function () {
+                    navigator.clipboard.writeText(val.textContent.trim()).then(function () {
+                        if (lbl) { lbl.textContent = 'Copied!'; setTimeout(function () { lbl.textContent = 'Copy'; }, 2000); }
+                    });
+                });
+            }
+        })();
+    </script>
+</th:block>
+
+</th:block>

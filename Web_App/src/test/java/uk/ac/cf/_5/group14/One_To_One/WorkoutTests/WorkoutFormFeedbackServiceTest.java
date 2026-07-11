@@ -3,6 +3,7 @@ package uk.ac.cf._5.group14.One_To_One.WorkoutTests;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.web.MockMultipartFile;
+import uk.ac.cf._5.group14.One_To_One.Config.DatabaseTableAvailability;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 import uk.ac.cf._5.group14.One_To_One.Workouts.AiFormFeedbackRepository;
 import uk.ac.cf._5.group14.One_To_One.Workouts.VideoProcessingStatus;
@@ -35,6 +36,7 @@ class WorkoutFormFeedbackServiceTest {
                 mock(WorkoutSetLogRepository.class),
                 mock(WorkoutSetVideoRepository.class),
                 mock(AiFormFeedbackRepository.class),
+                mock(DatabaseTableAvailability.class),
                 tempDir.toString());
 
         User user = new User();
@@ -56,6 +58,7 @@ class WorkoutFormFeedbackServiceTest {
                 setLogRepository,
                 videoRepository,
                 mock(AiFormFeedbackRepository.class),
+                mock(DatabaseTableAvailability.class),
                 tempDir.toString());
 
         User user = new User();

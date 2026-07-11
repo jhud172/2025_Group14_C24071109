@@ -11,6 +11,30 @@ public class ProfileUpdateRequest {
     private String dateOfBirth;
     private boolean removeProfileImage;
 
+    // Trainer-specific fields
+    private String trainerBio;
+    private String specializations;
+    private String location;
+    private String primaryGym;
+    private Integer pricePerSession;
+    private String instagramUrl;
+    private String tiktokUrl;
+    private String youtubeUrl;
+    private String linkedInUrl;
+    private String websiteUrl;
+    private Boolean showInstagram;
+    private Boolean showTikTok;
+    private Boolean showYouTube;
+    private Boolean showLinkedIn;
+    private Boolean showWebsite;
+
+    // Gym admin-specific fields
+    private String gymName;
+    private String gymAddress;
+    private String gymCity;
+    private String gymContactName;
+    private String gymContactPhone;
+
     public String getFirstName() {
         return firstName;
     }
@@ -82,4 +106,66 @@ public class ProfileUpdateRequest {
     public void setRemoveProfileImage(boolean removeProfileImage) {
         this.removeProfileImage = removeProfileImage;
     }
+
+    // Trainer-specific getters/setters
+    public String getTrainerBio() { return trainerBio; }
+    public void setTrainerBio(String trainerBio) { this.trainerBio = trainerBio; }
+
+    public String getSpecializations() { return specializations; }
+    public void setSpecializations(String specializations) { this.specializations = specializations; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public String getPrimaryGym() { return primaryGym; }
+    public void setPrimaryGym(String primaryGym) { this.primaryGym = primaryGym; }
+
+    public Integer getPricePerSession() { return pricePerSession; }
+    public void setPricePerSession(Integer pricePerSession) { this.pricePerSession = pricePerSession; }
+
+    public String getInstagramUrl() { return instagramUrl; }
+    public void setInstagramUrl(String instagramUrl) { this.instagramUrl = instagramUrl; }
+
+    public String getTiktokUrl() { return tiktokUrl; }
+    public void setTiktokUrl(String tiktokUrl) { this.tiktokUrl = tiktokUrl; }
+
+    public String getYoutubeUrl() { return youtubeUrl; }
+    public void setYoutubeUrl(String youtubeUrl) { this.youtubeUrl = youtubeUrl; }
+
+    public String getLinkedInUrl() { return linkedInUrl; }
+    public void setLinkedInUrl(String linkedInUrl) { this.linkedInUrl = linkedInUrl; }
+
+    public String getWebsiteUrl() { return websiteUrl; }
+    public void setWebsiteUrl(String websiteUrl) { this.websiteUrl = websiteUrl; }
+
+    public Boolean getShowInstagram() { return showInstagram; }
+    public void setShowInstagram(Boolean showInstagram) { this.showInstagram = showInstagram; }
+
+    public Boolean getShowTikTok() { return showTikTok; }
+    public void setShowTikTok(Boolean showTikTok) { this.showTikTok = showTikTok; }
+
+    public Boolean getShowYouTube() { return showYouTube; }
+    public void setShowYouTube(Boolean showYouTube) { this.showYouTube = showYouTube; }
+
+    public Boolean getShowLinkedIn() { return showLinkedIn; }
+    public void setShowLinkedIn(Boolean showLinkedIn) { this.showLinkedIn = showLinkedIn; }
+
+    public Boolean getShowWebsite() { return showWebsite; }
+    public void setShowWebsite(Boolean showWebsite) { this.showWebsite = showWebsite; }
+
+    // Gym admin-specific getters/setters
+    public String getGymName() { return gymName; }
+    public void setGymName(String gymName) { this.gymName = gymName; }
+
+    public String getGymAddress() { return gymAddress; }
+    public void setGymAddress(String gymAddress) { this.gymAddress = gymAddress; }
+
+    public String getGymCity() { return gymCity; }
+    public void setGymCity(String gymCity) { this.gymCity = gymCity; }
+
+    public String getGymContactName() { return gymContactName; }
+    public void setGymContactName(String gymContactName) { this.gymContactName = gymContactName; }
+
+    public String getGymContactPhone() { return gymContactPhone; }
+    public void setGymContactPhone(String gymContactPhone) { this.gymContactPhone = gymContactPhone; }
 }
