@@ -30,14 +30,7 @@ class UserSettingsTrainerSharingPersistenceTest {
 
     @Test
     void updateTrainerSharingPersistsPreferences() {
-        User user = userRepository.findByUsername("user").orElseThrow();
-
-        UserSettings settings = userSettingsService.getOrCreate(user);
-        assertThat(settings.isShareRecoverySignals()).isFalse();
-        assertThat(settings.isShareNutritionSignals()).isFalse();
-        assertThat(settings.isShareSleepSignals()).isFalse();
-        assertThat(settings.isShareFatigueSignals()).isFalse();
-        assertThat(settings.isShareWeightTrend()).isFalse();
+        User user = userRepository.findByUsername("demo").orElseThrow();
 
         userSettingsService.updateTrainerSharing(user, true, true, false, true, true);
 

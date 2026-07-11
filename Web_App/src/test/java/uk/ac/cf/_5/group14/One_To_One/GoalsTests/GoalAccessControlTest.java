@@ -28,8 +28,11 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class GoalAccessControlTest {
 
     @Autowired
@@ -71,16 +74,6 @@ class GoalAccessControlTest {
 
     @BeforeEach
     void setup() {
-        goalLinkRepository.deleteAll();
-        goalRepository.deleteAll();
-        scheduleOccurrenceRepository.deleteAll();
-        calendarTaskRepository.deleteAll();
-        trainerClientLinkRepository.deleteAll();
-        workoutRepository.deleteAll();
-        userPreferenceRepository.deleteAll();
-        exerciseRepository.deleteAll();
-        userRepository.deleteAll();
-
         String suffix = UUID.randomUUID().toString().replace("-", "");
 
         clientA = new User("clientA+" + suffix + "@example.com", "Client", "A", "goal_client_a_" + suffix, "password123");

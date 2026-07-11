@@ -32,7 +32,7 @@ class UserSettingsSmartDefaultsPersistenceTest {
 
     @Test
     void updateSmartDefaultsPersistsValues() {
-        User user = userRepository.findByUsername("user").orElseThrow();
+        User user = userRepository.findByUsername("demo").orElseThrow();
 
         userSettingsService.updateSmartDefaults(
                 user,
