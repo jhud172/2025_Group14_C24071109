@@ -270,9 +270,17 @@ public class ProfileController {
         return mav;
     }
 
+    private GymProfile getOrCreateGymProfile(Long userId) {
+        return gymProfileRepository.findByUserId(userId).orElseGet(() -> {
+            GymProfile p = new GymProfile(userId, DEFAULT_GYM_NAME);
+            gymProfileService.saveProfile(p);
+            return gymProfileRepository.findByUserId(userId).orElse(p);
+        });
+    }
+
     private ModelAndView buildGymAdminProfileView(User user) {
         ModelAndView mav = new ModelAndView("gym-views/profile/profile");
-        GymProfile gymProfile = gymProfileRepository.findByUserId(user.getId()).orElse(null);
+        GymProfile gymProfile = getOrCreateGymProfile(user.getId());
         UserSettings settings = userSettingsService.getOrCreate(user);
 
         mav.addObject("user", user);
@@ -372,16 +380,19 @@ public class ProfileController {
 
         if (changed) {
             userRepository.save(user);
-            redirectAttributes.addFlashAttribute("profileUpdated", true);
         }
 
         // Apply role-specific profile updates
         Role role = user.getRole();
         if (role == Role.TRAINER) {
             applyTrainerProfileUpdates(request, user.getId());
-            redirectAttributes.addFlashAttribute("profileUpdated", true);
+            changed = true;
         } else if (role == Role.GYM_ADMIN) {
             applyGymProfileUpdates(request, user.getId());
+            changed = true;
+        }
+
+        if (changed) {
             redirectAttributes.addFlashAttribute("profileUpdated", true);
         }
 
@@ -457,10 +468,7 @@ public class ProfileController {
         if (request == null) {
             return;
         }
-        GymProfile profile = gymProfileRepository.findByUserId(userId).orElseGet(() -> {
-            GymProfile p = new GymProfile(userId, DEFAULT_GYM_NAME);
-            return gymProfileRepository.save(p);
-        });
+        GymProfile profile = getOrCreateGymProfile(userId);
         if (request.getGymName() != null) {
             String trimmed = request.getGymName().trim();
             if (!trimmed.isBlank()) {
