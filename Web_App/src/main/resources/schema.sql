@@ -2407,10 +2407,12 @@ CREATE TABLE IF NOT EXISTS schedule_applied
     duration_weeks    INT     NOT NULL DEFAULT 4,
 
     CONSTRAINT fk_schedule_applied_schedule
-        FOREIGN KEY (schedule_id) REFERENCES schedules (id),
+        FOREIGN KEY (schedule_id) REFERENCES schedules (id)
+            ON DELETE CASCADE,
 
     CONSTRAINT fk_schedule_applied_user
         FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE
 );
 
 -- =========================

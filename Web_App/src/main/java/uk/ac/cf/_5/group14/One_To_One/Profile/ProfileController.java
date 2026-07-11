@@ -32,6 +32,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.ac.cf._5.group14.One_To_One.Config.DevModeProperties;
 import uk.ac.cf._5.group14.One_To_One.DataExport.DataExportRequestService;
 import uk.ac.cf._5.group14.One_To_One.ExerciseLog.ExerciseLogService;
+import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfile;
+import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfileRepository;
+import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfileService;
 import uk.ac.cf._5.group14.One_To_One.HealthConditions.HealthConditionType;
 import uk.ac.cf._5.group14.One_To_One.HealthConditions.UserHealthCondition;
 import uk.ac.cf._5.group14.One_To_One.HealthConditions.UserHealthConditionService;
@@ -43,11 +46,14 @@ import uk.ac.cf._5.group14.One_To_One.PaymentCards.SavedPaymentMethod;
 import uk.ac.cf._5.group14.One_To_One.PaymentCards.SavedPaymentMethodService;
 import uk.ac.cf._5.group14.One_To_One.PlatformBilling.PlatformSubscription;
 import uk.ac.cf._5.group14.One_To_One.PlatformBilling.PlatformSubscriptionService;
+import uk.ac.cf._5.group14.One_To_One.TrainerProfile.TrainerProfile;
+import uk.ac.cf._5.group14.One_To_One.TrainerProfile.TrainerProfileService;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskLayoutPreference;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.ThemePreference;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.UserSettings;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.One_To_One.Users.AuthHelper;
+import uk.ac.cf._5.group14.One_To_One.Users.Role;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
 import uk.ac.cf._5.group14.One_To_One.Users.UserService;
@@ -56,6 +62,7 @@ import uk.ac.cf._5.group14.One_To_One.Users.UserService;
 public class ProfileController {
 
     private static final long MAX_PROFILE_IMAGE_BYTES = 2L * 1024L * 1024L;
+    private static final String DEFAULT_GYM_NAME = "My Gym";
 
     private final AuthHelper authHelper;
     private final UserService userService;
@@ -71,6 +78,9 @@ public class ProfileController {
     private final SavedPaymentMethodService cardService;
     private final MerchOrderService orderService;
     private final DevModeProperties devModeProperties;
+    private final TrainerProfileService trainerProfileService;
+    private final GymProfileService gymProfileService;
+    private final GymProfileRepository gymProfileRepository;
 
 
     public ProfileController(AuthHelper authHelper,
@@ -86,7 +96,10 @@ public class ProfileController {
                              Clock clock,
                              SavedPaymentMethodService cardService,
                              MerchOrderService orderService,
-                             DevModeProperties devModeProperties) {
+                             DevModeProperties devModeProperties,
+                             TrainerProfileService trainerProfileService,
+                             GymProfileService gymProfileService,
+                             GymProfileRepository gymProfileRepository) {
         this.authHelper = authHelper;
         this.userService = userService;
         this.exerciseLogService = exerciseLogService;
@@ -101,21 +114,38 @@ public class ProfileController {
         this.cardService = cardService;
         this.orderService = orderService;
         this.devModeProperties = devModeProperties;
+        this.trainerProfileService = trainerProfileService;
+        this.gymProfileService = gymProfileService;
+        this.gymProfileRepository = gymProfileRepository;
     }
 
     @GetMapping("/profile")
     public ModelAndView getProfile() {
         User user = authHelper.getAuthenticatedUser();
-        boolean devProfilePreview = false;
-
-        if (user == null && devModeProperties.isDevMode()) {
-            user = resolveDevPreviewUser();
-            devProfilePreview = user != null;
-        }
 
         if (user == null) {
             return new ModelAndView("redirect:/login");
         }
+
+        Role role = user.getRole();
+
+        if (role == Role.PLATFORM_ADMIN || role == Role.SUPER_ADMIN) {
+            return new ModelAndView("redirect:/admin/dashboard");
+        }
+
+        if (role == Role.TRAINER) {
+            return buildTrainerProfileView(user);
+        }
+
+        if (role == Role.GYM_ADMIN) {
+            return buildGymAdminProfileView(user);
+        }
+
+        // CLIENT (default)
+        return buildClientProfileView(user);
+    }
+
+    private ModelAndView buildClientProfileView(User user) {
         ModelAndView modelAndView = new ModelAndView("client-views/profile/profile");
         PlatformSubscription platformSubscription = platformSubscriptionService.findByUserId(user.getId()).orElse(null);
         boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
@@ -137,7 +167,6 @@ public class ProfileController {
         modelAndView.addObject("timedConditions", timedConditions);
         modelAndView.addObject("recentExportRequests", dataExportRequestService.getRecentRequests(user));
         modelAndView.addObject("today", LocalDate.now(clock));
-        modelAndView.addObject("devProfilePreview", devProfilePreview);
         modelAndView.addObject("compactTopContent", true);
         modelAndView.addObject("isPremium", isPremium);
         modelAndView.addObject("profileBannerThemes", List.of("NONE", "AURORA", "SUNSET", "OCEAN", "ROSE", "CARBON", "LAGOON", "MEADOW", "MIDNIGHT"));
@@ -228,6 +257,40 @@ public class ProfileController {
         return "redirect:/profile";
     }
 
+    private ModelAndView buildTrainerProfileView(User user) {
+        ModelAndView mav = new ModelAndView("trainer-views/profile/profile");
+        TrainerProfile trainerProfile = trainerProfileService.getOrCreateProfile(user.getId());
+        UserSettings settings = userSettingsService.getOrCreate(user);
+
+        mav.addObject("user", user);
+        mav.addObject("trainerProfile", trainerProfile);
+        mav.addObject("userSettings", settings);
+        mav.addObject("recentExportRequests", dataExportRequestService.getRecentRequests(user));
+        mav.addObject("today", LocalDate.now(clock));
+        return mav;
+    }
+
+    private GymProfile getOrCreateGymProfile(Long userId) {
+        return gymProfileRepository.findByUserId(userId).orElseGet(() -> {
+            GymProfile p = new GymProfile(userId, DEFAULT_GYM_NAME);
+            gymProfileService.saveProfile(p);
+            return gymProfileRepository.findByUserId(userId).orElse(p);
+        });
+    }
+
+    private ModelAndView buildGymAdminProfileView(User user) {
+        ModelAndView mav = new ModelAndView("gym-views/profile/profile");
+        GymProfile gymProfile = getOrCreateGymProfile(user.getId());
+        UserSettings settings = userSettingsService.getOrCreate(user);
+
+        mav.addObject("user", user);
+        mav.addObject("gymProfile", gymProfile);
+        mav.addObject("userSettings", settings);
+        mav.addObject("recentExportRequests", dataExportRequestService.getRecentRequests(user));
+        mav.addObject("today", LocalDate.now(clock));
+        return mav;
+    }
+
     /**
      * Groups a list of orders by their primary product name.
      * This is called from Thymeleaf templates to organize purchases in the purchases drawer.
@@ -270,17 +333,6 @@ public class ProfileController {
             .collect(Collectors.toList());
     }
 
-    private User resolveDevPreviewUser() {
-        List<String> candidateUsernames = List.of("client_demo", "demo_client", "trainer_demo", "user_demo");
-        for (String username : candidateUsernames) {
-            User candidate = userService.findByUsername(username);
-            if (candidate != null) {
-                return candidate;
-            }
-        }
-        return userRepository.findAll().stream().findFirst().orElse(null);
-    }
-
     @GetMapping("/profile/orders")
     public ModelAndView getOrders() {
         User user = authHelper.getAuthenticatedUser();
@@ -317,10 +369,23 @@ public class ProfileController {
 
         if (changed) {
             userRepository.save(user);
+        }
+
+        // Apply role-specific profile updates
+        Role role = user.getRole();
+        if (role == Role.TRAINER) {
+            applyTrainerProfileUpdates(request, user.getId());
+            changed = true;
+        } else if (role == Role.GYM_ADMIN) {
+            applyGymProfileUpdates(request, user.getId());
+            changed = true;
+        }
+
+        if (changed) {
             redirectAttributes.addFlashAttribute("profileUpdated", true);
         }
 
-        if (platformSubscriptionService.isPremium(user.getId(), clock)) {
+        if (role == Role.CLIENT && platformSubscriptionService.isPremium(user.getId(), clock)) {
             userSettingsService.updateProfileCustomizer(
                     user,
                     bannerTheme,
@@ -334,6 +399,88 @@ public class ProfileController {
         }
 
         return "redirect:/profile";
+    }
+
+    private void applyTrainerProfileUpdates(ProfileUpdateRequest request, Long userId) {
+        if (request == null) {
+            return;
+        }
+        TrainerProfile profile = trainerProfileService.getOrCreateProfile(userId);
+        if (request.getTrainerBio() != null) {
+            String trimmed = request.getTrainerBio().trim();
+            profile.setBio(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getSpecializations() != null) {
+            String trimmed = request.getSpecializations().trim();
+            profile.setSpecializations(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getLocation() != null) {
+            String trimmed = request.getLocation().trim();
+            profile.setLocation(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getPrimaryGym() != null) {
+            String trimmed = request.getPrimaryGym().trim();
+            profile.setPrimaryGym(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getPricePerSession() != null) {
+            profile.setPricePerSession(request.getPricePerSession());
+        }
+        if (request.getInstagramUrl() != null) {
+            String trimmed = request.getInstagramUrl().trim();
+            profile.setInstagramUrl(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getTiktokUrl() != null) {
+            String trimmed = request.getTiktokUrl().trim();
+            profile.setTiktokUrl(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getYoutubeUrl() != null) {
+            String trimmed = request.getYoutubeUrl().trim();
+            profile.setYoutubeUrl(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getLinkedInUrl() != null) {
+            String trimmed = request.getLinkedInUrl().trim();
+            profile.setLinkedInUrl(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getWebsiteUrl() != null) {
+            String trimmed = request.getWebsiteUrl().trim();
+            profile.setWebsiteUrl(trimmed.isBlank() ? null : trimmed);
+        }
+        profile.setShowInstagram(Boolean.TRUE.equals(request.getShowInstagram()));
+        profile.setShowTikTok(Boolean.TRUE.equals(request.getShowTikTok()));
+        profile.setShowYouTube(Boolean.TRUE.equals(request.getShowYouTube()));
+        profile.setShowLinkedIn(Boolean.TRUE.equals(request.getShowLinkedIn()));
+        profile.setShowWebsite(Boolean.TRUE.equals(request.getShowWebsite()));
+        trainerProfileService.updateProfile(userId, profile);
+    }
+
+    private void applyGymProfileUpdates(ProfileUpdateRequest request, Long userId) {
+        if (request == null) {
+            return;
+        }
+        GymProfile profile = getOrCreateGymProfile(userId);
+        if (request.getGymName() != null) {
+            String trimmed = request.getGymName().trim();
+            if (!trimmed.isBlank()) {
+                profile.setGymName(trimmed);
+            }
+        }
+        if (request.getGymAddress() != null) {
+            String trimmed = request.getGymAddress().trim();
+            profile.setAddress(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getGymCity() != null) {
+            String trimmed = request.getGymCity().trim();
+            profile.setCity(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getGymContactName() != null) {
+            String trimmed = request.getGymContactName().trim();
+            profile.setContactName(trimmed.isBlank() ? null : trimmed);
+        }
+        if (request.getGymContactPhone() != null) {
+            String trimmed = request.getGymContactPhone().trim();
+            profile.setContactPhone(trimmed.isBlank() ? null : trimmed);
+        }
+        gymProfileService.saveProfile(profile);
     }
 
     private boolean applyBasicProfileUpdates(ProfileUpdateRequest request,

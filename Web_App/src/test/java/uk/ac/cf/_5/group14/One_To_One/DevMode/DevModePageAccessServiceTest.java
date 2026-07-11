@@ -1,5 +1,7 @@
 package uk.ac.cf._5.group14.One_To_One.DevMode;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,9 +33,22 @@ class DevModePageAccessServiceTest {
 
         DevModePageAccessService.DevModeAdminSummary summary = service.buildAdminSummary();
 
-        assertThat(summary.enabledCount()).isEqualTo(14);
+        assertThat(summary.enabledCount()).isEqualTo(15);
         assertThat(summary.disabledCount()).isZero();
-        assertThat(summary.restrictedCount()).isEqualTo(3);
+        assertThat(summary.restrictedCount()).isEqualTo(2);
+    }
+
+    @Test
+    void clientTrainersPageIsEnabledByDefault() {
+        when(settingRepository.findAll()).thenReturn(Collections.emptyList());
+
+        DevModePageAccessService.DevModePageAdminRow clientTrainersRow = service.buildAdminRows()
+                .stream()
+                .filter(row -> "client-trainers".equals(row.key()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("client-trainers page not found"));
+
+        assertThat(clientTrainersRow.currentMode()).isEqualTo("ENABLED");
     }
 
     @Test

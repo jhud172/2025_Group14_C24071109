@@ -24,8 +24,11 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class TrainerScheduleTemplateServiceTest {
 
     @Autowired
@@ -61,15 +64,6 @@ class TrainerScheduleTemplateServiceTest {
 
     @BeforeEach
     void setup() {
-        entryRepository.deleteAll();
-        templateRepository.deleteAll();
-        scheduleOccurrenceRepository.deleteAll();
-        trainerClientLinkRepository.deleteAll();
-        workoutRepository.deleteAll();
-        userPreferenceRepository.deleteAll();
-        exerciseRepository.deleteAll();
-        userRepository.deleteAll();
-
         String suffix = UUID.randomUUID().toString().replace("-", "");
 
         trainer = new User("trainer+" + suffix + "@example.com", "Trainer", "One", "trainer_template_" + suffix, "password123");

@@ -32,7 +32,7 @@ class UserSettingsCalendarLayoutPreferencePersistenceTest {
 
     @Test
     void updateCalendarPreferencesPersistsLayout() {
-        User user = userRepository.findByUsername("user").orElseThrow();
+        User user = userRepository.findByUsername("demo").orElseThrow();
 
         UserSettings settings = userSettingsService.getOrCreate(user);
         assertThat(settings.getCalendarTaskLayout()).isEqualTo(CalendarTaskLayoutPreference.COMBINED_LIST);

@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfile;
+import uk.ac.cf._5.group14.One_To_One.GymProfile.GymProfileRepository;
 import uk.ac.cf._5.group14.One_To_One.Users.Role;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
@@ -36,12 +38,18 @@ class GymAdminMembershipControllerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private GymProfileRepository gymProfileRepository;
+
+    @Autowired
     private GymMembershipProductRepository productRepository;
 
     @Autowired
     private GymMemberSubscriptionRepository subscriptionRepository;
 
-
+    /** Creates a persisted GymProfile for the given user and returns its auto-generated ID. */
+    private Long createGym(User owner, String name) {
+        return gymProfileRepository.save(new GymProfile(owner.getId(), name)).getId();
+    }
 
     @Test
     void listShowsOnlyAdminGymProductsWithPaginationAndCounts() throws Exception {
@@ -49,25 +57,31 @@ class GymAdminMembershipControllerTest {
 
         User admin = new User("admin+" + suffix + "@example.com", "Gym", "Admin", "gym_admin_" + suffix, "password123");
         admin.setRole(Role.GYM_ADMIN);
-        admin.setGymId(10L);
+        admin = userRepository.save(admin);
+        Long gymId = createGym(admin, "Admin Gym");
+        admin.setGymId(gymId);
         admin = userRepository.save(admin);
 
         User member = new User("member+" + suffix + "@example.com", "Member", "One", "gym_member_" + suffix, "password123");
         member.setRole(Role.CLIENT);
         member = userRepository.save(member);
 
-        GymMembershipProduct product1 = new GymMembershipProduct(10L, "Standard", 3000);
+        User otherOwner = new User("other+" + suffix + "@example.com", "Other", "Owner", "gym_other_" + suffix, "password123");
+        otherOwner = userRepository.save(otherOwner);
+        Long otherGymId = createGym(otherOwner, "Other Gym");
+
+        GymMembershipProduct product1 = new GymMembershipProduct(gymId, "Standard", 3000);
         product1 = productRepository.save(product1);
 
-        GymMembershipProduct product2 = new GymMembershipProduct(10L, "Premium", 5000);
+        GymMembershipProduct product2 = new GymMembershipProduct(gymId, "Premium", 5000);
         product2 = productRepository.save(product2);
 
-        GymMembershipProduct otherGymProduct = new GymMembershipProduct(22L, "Other", 2000);
+        GymMembershipProduct otherGymProduct = new GymMembershipProduct(otherGymId, "Other", 2000);
         productRepository.save(otherGymProduct);
 
         GymMemberSubscription subscription = new GymMemberSubscription(
             member.getId(),
-            10L,
+            gymId,
             product2.getId(),
             Instant.now().plus(30, ChronoUnit.DAYS)
         );
@@ -91,10 +105,12 @@ class GymAdminMembershipControllerTest {
 
         User admin = new User("admin2+" + suffix + "@example.com", "Gym", "Admin", "gym_admin2_" + suffix, "password123");
         admin.setRole(Role.GYM_ADMIN);
-        admin.setGymId(55L);
+        admin = userRepository.save(admin);
+        Long gymId = createGym(admin, "Toggle Gym");
+        admin.setGymId(gymId);
         admin = userRepository.save(admin);
 
-        GymMembershipProduct product = new GymMembershipProduct(55L, "Monthly", 2500);
+        GymMembershipProduct product = new GymMembershipProduct(gymId, "Monthly", 2500);
         product = productRepository.save(product);
 
         mockMvc.perform(post("/gym/admin/memberships/" + product.getId() + "/status")
@@ -114,13 +130,15 @@ class GymAdminMembershipControllerTest {
 
         User admin = new User("admin3+" + suffix + "@example.com", "Gym", "Admin", "gym_admin3_" + suffix, "password123");
         admin.setRole(Role.GYM_ADMIN);
-        admin.setGymId(77L);
+        admin = userRepository.save(admin);
+        Long gymId = createGym(admin, "Create Test Gym");
+        admin.setGymId(gymId);
         admin = userRepository.save(admin);
 
         mockMvc.perform(post("/gym/admin/memberships/create")
                 .with(user(admin.getUsername()).roles("GYM_ADMIN"))
                 .with(csrf())
-                .param("gymId", "77")
+                .param("gymId", String.valueOf(gymId))
                 .param("billingPeriod", "MONTHLY"))
             .andExpect(status().isOk())
             .andExpect(view().name("gym-views/gym-admin/memberships/form"))
@@ -133,17 +151,19 @@ class GymAdminMembershipControllerTest {
 
         User admin = new User("admin4+" + suffix + "@example.com", "Gym", "Admin", "gym_admin4_" + suffix, "password123");
         admin.setRole(Role.GYM_ADMIN);
-        admin.setGymId(88L);
+        admin = userRepository.save(admin);
+        Long gymId = createGym(admin, "Edit Test Gym");
+        admin.setGymId(gymId);
         admin = userRepository.save(admin);
 
-        GymMembershipProduct product = new GymMembershipProduct(88L, "Monthly", 2500);
+        GymMembershipProduct product = new GymMembershipProduct(gymId, "Monthly", 2500);
         product = productRepository.save(product);
 
         mockMvc.perform(post("/gym/admin/memberships/" + product.getId() + "/edit")
                 .with(user(admin.getUsername()).roles("GYM_ADMIN"))
                 .with(csrf())
                 .param("id", String.valueOf(product.getId()))
-                .param("gymId", "88")
+                .param("gymId", String.valueOf(gymId))
                 .param("priceCents", String.valueOf(product.getPriceCents()))
                 .param("billingPeriod", "MONTHLY")
                 .param("name", "")
@@ -160,10 +180,16 @@ class GymAdminMembershipControllerTest {
 
         User admin = new User("admin5+" + suffix + "@example.com", "Gym", "Admin", "gym_admin5_" + suffix, "password123");
         admin.setRole(Role.GYM_ADMIN);
-        admin.setGymId(101L);
+        admin = userRepository.save(admin);
+        Long gymId = createGym(admin, "Price History Gym");
+        admin.setGymId(gymId);
         admin = userRepository.save(admin);
 
-        GymMembershipProduct otherProduct = new GymMembershipProduct(202L, "Other", 4000);
+        User otherOwner = new User("other5+" + suffix + "@example.com", "Other", "Owner", "gym_other5_" + suffix, "password123");
+        otherOwner = userRepository.save(otherOwner);
+        Long otherGymId = createGym(otherOwner, "Other Gym 5");
+
+        GymMembershipProduct otherProduct = new GymMembershipProduct(otherGymId, "Other", 4000);
         otherProduct = productRepository.save(otherProduct);
 
         mockMvc.perform(get("/gym/admin/memberships/" + otherProduct.getId() + "/price-history")

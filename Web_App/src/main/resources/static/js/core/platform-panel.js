@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const role = (root.dataset.role || "USER").toUpperCase();
-    const available = actions.filter(action => action.roles.includes(role) || action.roles.includes("USER"));
+    const available = actions.filter(action => action.roles.includes(role));
     const defaultKeys = available.slice(0, 7).map(action => action.key);
     let state = loadState();
 

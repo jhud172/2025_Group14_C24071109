@@ -40,7 +40,7 @@ class LoginIntegrationTest {
                         .with(csrf())
                         .param("loginType", "trainer")
                         .param("username", "trainer_demo")
-                        .param("trainerCode", "TRN1-2034-0056")
+                        .param("trainerCode", "1203-4005-6789")
                         .param("password", "Demo123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(authenticated().withUsername("trainer_demo"));
@@ -52,7 +52,7 @@ class LoginIntegrationTest {
                         .with(csrf())
                         .param("loginType", "gym")
                         .param("username", "gymadmin_demo")
-                        .param("gymSecretCode", "4827-0019-3845-6209")
+                        .param("gymSecretCode", "4827-0019-3845-6202")
                         .param("password", "Demo123!"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(authenticated().withUsername("gymadmin_demo"));

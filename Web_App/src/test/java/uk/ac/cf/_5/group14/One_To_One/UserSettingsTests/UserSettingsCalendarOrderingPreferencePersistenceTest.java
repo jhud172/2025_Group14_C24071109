@@ -31,7 +31,7 @@ class UserSettingsCalendarOrderingPreferencePersistenceTest {
 
     @Test
     void updateCalendarPreferencesPersistsOrdering() {
-        User user = userRepository.findByUsername("user").orElseThrow();
+        User user = userRepository.findByUsername("demo").orElseThrow();
 
         UserSettings settings = userSettingsService.getOrCreate(user);
         assertThat(settings.getCalendarTaskOrdering()).isEqualTo(CalendarTaskOrderingPreference.CHRONOLOGICAL);
