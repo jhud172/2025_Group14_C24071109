@@ -1213,7 +1213,7 @@
                 const meta = document.createElement("p");
                 meta.className = "cd-ambience-graph__meta";
                 meta.textContent = currentGraphMode === "trend"
-                    ? `${point.precipitationProbability}% precipitation`
+                    ? `${point.precipitationProbability}% rain chance`
                     : point.condition;
 
                 column.append(time, spacer, temp, meta);

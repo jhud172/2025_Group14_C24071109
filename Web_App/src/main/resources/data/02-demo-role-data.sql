@@ -311,6 +311,13 @@ SET gym_code = '4827001938456202',
     updated_at = CURRENT_TIMESTAMP - INTERVAL '6' DAY
 WHERE user_id = (SELECT id FROM users WHERE username = 'gymadmin_demo');
 
+-- Link gymadmin_demo's users.gym_id to their gym_profiles row so that
+-- gym admin routes (which check user.getGymId() != null) work correctly.
+UPDATE users
+SET gym_id = (SELECT id FROM gym_profiles WHERE user_id = users.id)
+WHERE username = 'gymadmin_demo'
+  AND EXISTS (SELECT 1 FROM gym_profiles WHERE user_id = users.id);
+
 -- =========================================================================
 -- TRAINER-CLIENT LINK (demo is client of trainer_demo)
 -- =========================================================================

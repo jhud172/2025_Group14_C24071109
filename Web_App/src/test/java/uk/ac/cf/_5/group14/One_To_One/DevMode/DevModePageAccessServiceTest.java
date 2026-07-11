@@ -31,9 +31,9 @@ class DevModePageAccessServiceTest {
 
         DevModePageAccessService.DevModeAdminSummary summary = service.buildAdminSummary();
 
-        assertThat(summary.enabledCount()).isEqualTo(14);
+        assertThat(summary.enabledCount()).isEqualTo(15);
         assertThat(summary.disabledCount()).isZero();
-        assertThat(summary.restrictedCount()).isEqualTo(3);
+        assertThat(summary.restrictedCount()).isEqualTo(2);
     }
 
     @Test

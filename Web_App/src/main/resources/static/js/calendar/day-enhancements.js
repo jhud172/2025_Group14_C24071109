@@ -1799,15 +1799,21 @@
     // ==================== Real-Time SSE Updates ====================
     function initSseUpdates() {
         let eventSource = null;
-        
+        const MAX_SSE_RETRIES = 5;
+        let sseRetryCount = 0;
+
         function connectSse() {
             if (eventSource) {
                 if (eventSource.readyState === 0 || eventSource.readyState === 1) return;
                 eventSource.close();
             }
-            
+
             eventSource = new EventSource("/api/notifications/stream");
-            
+
+            eventSource.addEventListener("open", () => {
+                sseRetryCount = 0;
+            });
+
             eventSource.addEventListener("day-completion-update", (event) => {
                 try {
                     const data = JSON.parse(event.data);
@@ -1816,12 +1822,15 @@
                     console.warn("Failed to parse day-completion-update event", e);
                 }
             });
-            
+
             eventSource.onerror = () => {
                 eventSource.close();
                 eventSource = null;
-                // Reconnect after a short delay
-                setTimeout(connectSse, 5000);
+                if (sseRetryCount < MAX_SSE_RETRIES) {
+                    const delay = Math.pow(2, sseRetryCount) * 2000;
+                    sseRetryCount++;
+                    setTimeout(connectSse, delay);
+                }
             };
         }
         

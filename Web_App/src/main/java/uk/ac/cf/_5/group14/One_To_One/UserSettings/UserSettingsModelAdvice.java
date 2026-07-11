@@ -1,5 +1,9 @@
 package uk.ac.cf._5.group14.One_To_One.UserSettings;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -73,5 +77,45 @@ public class UserSettingsModelAdvice {
         }
 
         return levelService.getProgress(user);
+    }
+
+    /**
+     * Exposes the user's chosen milestone keys as an ordered list so the
+     * navbar profile-preview card can render them without relying on each
+     * individual controller to add the attribute.
+     */
+    @ModelAttribute("selectedMilestones")
+    public List<String> selectedMilestones() {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        if (!(attributes instanceof ServletRequestAttributes servletAttributes)) {
+            return Collections.emptyList();
+        }
+
+        if (UserSettingsRequestSupport.shouldSkip(servletAttributes.getRequest())) {
+            return Collections.emptyList();
+        }
+
+        UserSettings cached = UserSettingsRequestCache.getFromCurrentRequest();
+        UserSettings settings = cached;
+        if (settings == null) {
+            User user = authHelper.getAuthenticatedUser();
+            if (user == null) {
+                return Collections.emptyList();
+            }
+            settings = userSettingsService.getOrCreate(user);
+            UserSettingsRequestCache.setOnCurrentRequest(settings);
+        }
+
+        if (settings == null) {
+            return Collections.emptyList();
+        }
+        String keys = settings.getProfileMilestoneKeys();
+        if (keys == null || keys.isBlank()) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(keys.split(","))
+                .map(String::trim)
+                .filter(k -> !k.isBlank())
+                .toList();
     }
 }

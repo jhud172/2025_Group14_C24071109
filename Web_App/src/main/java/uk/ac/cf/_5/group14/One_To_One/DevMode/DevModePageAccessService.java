@@ -289,7 +289,7 @@ public class DevModePageAccessService {
             new DevModePageDefinition("vault", "Training Vault", "Saved notes and personal vault content.", "/vault", "archive",
                     DevModePageSection.LOGIN_REQUIRED, DevModePageAccessMode.RESTRICTED, List.of("/vault", "/vault/**")),
             new DevModePageDefinition("client-trainers", "Client Trainers", "Trainer matching and request flow for signed-in clients.", "/client/trainers", "users",
-                    DevModePageSection.LOGIN_REQUIRED, DevModePageAccessMode.RESTRICTED, List.of("/client/trainers", "/client/trainers/**"))
+                    DevModePageSection.LOGIN_REQUIRED, DevModePageAccessMode.ENABLED, List.of("/client/trainers", "/client/trainers/**"))
     );
 
     private record DevModePageDefinition(String key,
