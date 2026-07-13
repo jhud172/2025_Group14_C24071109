@@ -8,11 +8,15 @@ window.toggleChatPanel = function() {
     if (isOpen) {
         panel.classList.remove("open");
         panel.setAttribute("aria-hidden", "true");
+        panel.setAttribute("inert", "");
         fab.setAttribute("aria-expanded", "false");
+        fab.setAttribute("aria-label", "Open Charlie");
     } else {
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
+        panel.removeAttribute("inert");
         fab.setAttribute("aria-expanded", "true");
+        fab.setAttribute("aria-label", "Close Charlie");
     }
     console.log("Chat panel toggled via fallback:", !isOpen ? "open" : "closed");
 };
@@ -24,10 +28,10 @@ function initCharlieWidget(config) {
         notificationsUnreadCount, notificationsList, notificationsReadAll, unreadBadge,
         inlineToast, proChatBtn, chatAttachImageBtn, chatComposerTools, chatComposerOptions, chatUseCameraBtn,
         chatUsePhotosBtn, chatCameraInput, chatPhotoInput, chatAttachmentPreviewTray,
-        chatAttachmentCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
+        chatAttachmentCount, chatCharacterCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
         chatMediaLightbox, chatMediaLightboxBackdrop, chatMediaLightboxClose, chatMediaLightboxImage,
         isAuthenticated, isPremium, accountRole, initialWelcomeText, csrfToken, csrfHeader,
-        STORAGE_KEY, LEGACY_STORAGE_KEY, MAX_ATTACHMENTS, MAX_COMPOSER_HEIGHT
+        STORAGE_KEY, LEGACY_STORAGE_KEY, MAX_ATTACHMENTS, MAX_COMPOSER_HEIGHT, MAX_MESSAGE_LENGTH
     } = config;
 
     const state = {
@@ -37,8 +41,10 @@ function initCharlieWidget(config) {
         pendingAttachments: [],
         history: []
     };
+    const overlayManager = window.OneToOneOverlay;
     const canUseInbox = Boolean(isAuthenticated && notificationsToggle2 && notificationsView && notificationsList);
     const composerTooltipLabel = chatAttachImageBtn?.dataset?.tooltip || "";
+    let lightboxReturnFocus = null;
 
     const headers = (json = true) => {
         const next = {};
@@ -109,17 +115,31 @@ function initCharlieWidget(config) {
 
     const openLightbox = (url, label) => {
         if (!chatMediaLightbox || !chatMediaLightboxImage) return;
+        lightboxReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        overlayManager?.open("charlie-media", { group: "modal" });
         chatMediaLightboxImage.src = url;
         chatMediaLightboxImage.alt = label || "Expanded chat attachment";
-        chatMediaLightbox.classList.remove("hidden");
+        chatMediaLightbox.classList.add("is-open");
         chatMediaLightbox.setAttribute("aria-hidden", "false");
+        chatMediaLightbox.removeAttribute("inert");
+        panel.setAttribute("inert", "");
+        panel.dataset.chatLightboxInert = "true";
+        window.requestAnimationFrame(() => chatMediaLightboxClose?.focus());
     };
 
-    const closeLightbox = () => {
+    const closeLightbox = (options = {}) => {
         if (!chatMediaLightbox || !chatMediaLightboxImage) return;
-        chatMediaLightbox.classList.add("hidden");
+        chatMediaLightbox.classList.remove("is-open");
         chatMediaLightbox.setAttribute("aria-hidden", "true");
+        chatMediaLightbox.setAttribute("inert", "");
         chatMediaLightboxImage.src = "";
+        if (panel.dataset.chatLightboxInert === "true") {
+            if (panel.classList.contains("open")) panel.removeAttribute("inert");
+            delete panel.dataset.chatLightboxInert;
+        }
+        if (!options.fromOverlayManager) overlayManager?.release("charlie-media", { group: "modal" });
+        if (options.restoreFocus !== false && lightboxReturnFocus?.isConnected) lightboxReturnFocus.focus();
+        lightboxReturnFocus = null;
     };
 
     const buildGallery = (attachments, pending = false) => {
@@ -286,25 +306,64 @@ function initCharlieWidget(config) {
         input.style.overflowY = input.scrollHeight > MAX_COMPOSER_HEIGHT ? "auto" : "hidden";
     };
 
+    const updateCharacterCount = () => {
+        if (!chatCharacterCount) return input.value.length <= MAX_MESSAGE_LENGTH;
+        const length = input.value.length;
+        const remaining = MAX_MESSAGE_LENGTH - length;
+        const isOver = remaining < 0;
+        const isAtLimit = remaining === 0;
+        const isNearLimit = !isAtLimit && !isOver && length >= Math.floor(MAX_MESSAGE_LENGTH * 0.8);
+
+        chatCharacterCount.textContent = `${length.toLocaleString()} / ${MAX_MESSAGE_LENGTH.toLocaleString()}`;
+        chatCharacterCount.classList.toggle("is-near-limit", isNearLimit);
+        chatCharacterCount.classList.toggle("is-at-limit", isAtLimit);
+        chatCharacterCount.classList.toggle("is-over-limit", isOver);
+        chatCharacterCount.setAttribute("title", isOver
+            ? `${Math.abs(remaining).toLocaleString()} characters over the limit`
+            : `${remaining.toLocaleString()} characters remaining`);
+        input.setAttribute("aria-invalid", isOver ? "true" : "false");
+        return !isOver;
+    };
+
     const updateSendState = () => {
         const hasText = input.value.trim().length > 0;
-        sendBtn.disabled = state.sending || (!hasText && !state.pendingAttachments.length);
+        const isWithinLimit = updateCharacterCount();
+        sendBtn.disabled = state.sending || !isWithinLimit || (!hasText && !state.pendingAttachments.length);
     };
 
     const openPanel = () => {
+        overlayManager?.open("charlie");
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
+        panel.removeAttribute("inert");
         fab.setAttribute("aria-expanded", "true");
+        fab.setAttribute("aria-label", "Close Charlie");
         syncHeaderState();
     };
 
-    const closePanel = () => {
+    const closePanel = (options = {}) => {
+        const focusWasInsidePanel = panel.contains(document.activeElement);
+        if (chatMediaLightbox?.classList.contains("is-open")) {
+            closeLightbox({ restoreFocus: false });
+        }
         panel.classList.remove("open");
         panel.setAttribute("aria-hidden", "true");
+        panel.setAttribute("inert", "");
         fab.setAttribute("aria-expanded", "false");
+        fab.setAttribute("aria-label", "Open Charlie");
         closeComposerOptions();
         closeInlineClearConfirm();
+        if (!options.fromOverlayManager) overlayManager?.release("charlie");
+        if (options.restoreFocus && focusWasInsidePanel) fab.focus();
     };
+
+    overlayManager?.register("charlie", {
+        close: (options) => closePanel({ ...options, fromOverlayManager: true })
+    });
+    overlayManager?.register("charlie-media", {
+        group: "modal",
+        close: (options) => closeLightbox({ ...options, fromOverlayManager: true })
+    });
 
     const renderPendingAttachments = () => {
         if (!chatAttachmentPreviewTray) return;
@@ -499,6 +558,13 @@ function initCharlieWidget(config) {
     const submitMessage = async (event) => {
         event.preventDefault();
         if (state.sending) return;
+        if (input.value.length > MAX_MESSAGE_LENGTH) {
+            const excess = input.value.length - MAX_MESSAGE_LENGTH;
+            showInlineMessage(`Your message is ${excess.toLocaleString()} characters over the ${MAX_MESSAGE_LENGTH.toLocaleString()} character limit.`, "warning");
+            updateSendState();
+            input.focus();
+            return;
+        }
         const text = input.value.trim();
         const queuedAttachments = state.pendingAttachments.slice();
         if (!text && !queuedAttachments.length) {
@@ -543,7 +609,7 @@ function initCharlieWidget(config) {
     };
 
     fab.addEventListener("click", (event) => { event.preventDefault(); window.toggleChatPanel(); });
-    closeBtn.addEventListener("click", closePanel);
+    closeBtn.addEventListener("click", () => closePanel({ restoreFocus: true }));
     clearBtn.addEventListener("click", openInlineClearConfirm);
     clearInlineCancel?.addEventListener("click", closeInlineClearConfirm);
     clearInlineConfirmBtn?.addEventListener("click", async () => {
@@ -573,8 +639,17 @@ function initCharlieWidget(config) {
         closeComposerOptions();
         chatPhotoInput?.click();
     });
-    chatCameraInput?.addEventListener("change", (event) => handleFilesSelected(event.target.files));
-    chatPhotoInput?.addEventListener("change", (event) => handleFilesSelected(event.target.files));
+    const handleFileInputChange = async (event) => {
+        const fileInput = event.currentTarget;
+        try {
+            await handleFilesSelected(fileInput.files);
+        } finally {
+            // Allow choosing the same image again after it has been removed.
+            fileInput.value = "";
+        }
+    };
+    chatCameraInput?.addEventListener("change", handleFileInputChange);
+    chatPhotoInput?.addEventListener("change", handleFileInputChange);
     chatMediaLightboxBackdrop?.addEventListener("click", closeLightbox);
     chatMediaLightboxClose?.addEventListener("click", closeLightbox);
     notifFilterAll?.addEventListener("click", async () => { state.filter = "all"; notifFilterAll.classList.add("active"); notifFilterUnread?.classList.remove("active"); await loadNotifications(); });
@@ -586,8 +661,11 @@ function initCharlieWidget(config) {
     document.addEventListener("click", (event) => {
         if (!chatComposerTools?.contains(event.target)) closeComposerOptions();
     });
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape") { if (!chatMediaLightbox?.classList.contains("hidden")) closeLightbox(); else if (!clearInlineConfirm?.classList.contains("hidden")) closeInlineClearConfirm(); else if (panel.classList.contains("open")) closePanel(); } });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") { if (chatMediaLightbox?.classList.contains("is-open")) closeLightbox(); else if (!clearInlineConfirm?.classList.contains("hidden")) closeInlineClearConfirm(); else if (panel.classList.contains("open")) closePanel({ restoreFocus: true }); } });
 
+    panel.toggleAttribute("inert", !panel.classList.contains("open"));
+    if (panel.classList.contains("open")) overlayManager?.open("charlie");
+    else overlayManager?.release("charlie");
     renderHistory(readHistory());
     setActiveView("chat");
     closeComposerOptions();
@@ -639,6 +717,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatPhotoInput = document.getElementById("chatPhotoInput");
     const chatAttachmentPreviewTray = document.getElementById("chatAttachmentPreviewTray");
     const chatAttachmentCount = document.getElementById("chatAttachmentCount");
+    const chatCharacterCount = document.getElementById("chatCharacterCount");
     const clearInlineConfirm = document.getElementById("chatInlineClearConfirm");
     const clearInlineCancel = document.getElementById("chatClearCancel");
     const clearInlineConfirmBtn = document.getElementById("chatClearConfirm");
@@ -688,6 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const TOAST_DURATION = 5000;
     const MAX_ATTACHMENTS = 5;
     const MAX_COMPOSER_HEIGHT = 160;
+    const MAX_MESSAGE_LENGTH = 1600;
     let notificationsPollTimer = null;
     let eventSource = null;
     let sseRetryCount = 0;
@@ -700,10 +780,10 @@ document.addEventListener("DOMContentLoaded", () => {
         notificationsUnreadCount, notificationsList, notificationsReadAll, unreadBadge,
         inlineToast, proChatBtn, chatAttachImageBtn, chatComposerTools, chatComposerOptions, chatUseCameraBtn,
         chatUsePhotosBtn, chatCameraInput, chatPhotoInput, chatAttachmentPreviewTray,
-        chatAttachmentCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
+        chatAttachmentCount, chatCharacterCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
         chatMediaLightbox, chatMediaLightboxBackdrop, chatMediaLightboxClose, chatMediaLightboxImage,
         isAuthenticated, isPremium, accountRole, initialWelcomeText, csrfToken, csrfHeader,
-        STORAGE_KEY, LEGACY_STORAGE_KEY, MAX_ATTACHMENTS, MAX_COMPOSER_HEIGHT
+        STORAGE_KEY, LEGACY_STORAGE_KEY, MAX_ATTACHMENTS, MAX_COMPOSER_HEIGHT, MAX_MESSAGE_LENGTH
     });
 
     function broadcastNotificationSync(detail) {

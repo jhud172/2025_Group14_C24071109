@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.body.classList.add("has-platform-panel");
 
+    const panel = root.querySelector(".platform-panel");
     const track = document.getElementById("platformPanelTrack");
     const prev = document.getElementById("platformPanelPrev");
     const next = document.getElementById("platformPanelNext");
@@ -14,6 +15,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const status = document.getElementById("platformPanelStatus");
     const placementButtons = customizer ? Array.from(customizer.querySelectorAll("[data-placement]")) : [];
     const storageKey = "oneToOne.platformPanel.v1";
+    const overlayManager = window.OneToOneOverlay;
+
+    function syncPanelReservation() {
+        if (!panel) return;
+        const height = Math.ceil(panel.getBoundingClientRect().height);
+        if (height > 0) {
+            document.body.style.setProperty("--shell-platform-panel-height", `${height}px`);
+        }
+    }
+
+    syncPanelReservation();
+    window.requestAnimationFrame(syncPanelReservation);
+    window.addEventListener("load", syncPanelReservation, { once: true });
+    document.fonts?.ready.then(syncPanelReservation);
+    if (panel && "ResizeObserver" in window) {
+        new ResizeObserver(syncPanelReservation).observe(panel);
+    } else {
+        window.addEventListener("resize", syncPanelReservation, { passive: true });
+    }
 
     const actions = [
         { key: "dashboard", label: "Dashboard", href: "/dashboard", icon: "grid", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] },
@@ -169,18 +189,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function setCustomizer(open) {
+    function setCustomizer(open, options = {}) {
+        const focusWasInsideCustomizer = Boolean(customizer?.contains(document.activeElement));
+        if (open && !options.fromOverlayManager) overlayManager?.open("platform-customizer");
+        if (!open && !options.fromOverlayManager) overlayManager?.release("platform-customizer");
         customizer?.classList.toggle("is-open", open);
         customizer?.setAttribute("aria-hidden", open ? "false" : "true");
+        customizer?.toggleAttribute("inert", !open);
         settings?.setAttribute("aria-expanded", open ? "true" : "false");
+        if (!open && options.restoreFocus && focusWasInsideCustomizer) settings?.focus();
     }
 
     prev?.addEventListener("click", () => track?.scrollBy({ left: -260, behavior: "smooth" }));
     next?.addEventListener("click", () => track?.scrollBy({ left: 260, behavior: "smooth" }));
     settings?.addEventListener("click", () => setCustomizer(!customizer?.classList.contains("is-open")));
-    close?.addEventListener("click", () => setCustomizer(false));
+    close?.addEventListener("click", () => setCustomizer(false, { restoreFocus: true }));
     document.addEventListener("keydown", event => {
-        if (event.key === "Escape") setCustomizer(false);
+        if (event.key === "Escape" && customizer?.classList.contains("is-open")) {
+            setCustomizer(false, { restoreFocus: true });
+        }
     });
     placementButtons.forEach(button => {
         button.addEventListener("click", () => {
@@ -191,6 +218,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    overlayManager?.register("platform-customizer", {
+        close: (options) => setCustomizer(false, { ...options, fromOverlayManager: true })
+    });
+
     renderTrack();
     renderOptions();
+    setCustomizer(false, { fromOverlayManager: true });
 });

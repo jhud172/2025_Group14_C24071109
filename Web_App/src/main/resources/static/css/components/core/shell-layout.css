@@ -1,0 +1,30 @@
+@layer base {
+  :root {
+    --shell-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --shell-platform-panel-height: 0px;
+    --shell-local-dock-height: 0px;
+    --shell-floating-control-gap: clamp(0.65rem, 0.5rem + 0.35vw, 0.95rem);
+  }
+
+  body.has-platform-panel {
+    --shell-platform-panel-height: calc(4.65rem + var(--shell-safe-area-bottom));
+    padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height));
+  }
+
+  @media (max-width: 1030px) {
+    body:has(.cd-dashboard-mobile-dock) {
+      --shell-local-dock-height: 5.1rem;
+      padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height));
+    }
+  }
+
+  @media (max-width: 640px) {
+    body.has-platform-panel {
+      --shell-platform-panel-height: calc(4.35rem + var(--shell-safe-area-bottom));
+    }
+
+    body:has(.cd-dashboard-mobile-dock) {
+      --shell-local-dock-height: 4.55rem;
+    }
+  }
+}

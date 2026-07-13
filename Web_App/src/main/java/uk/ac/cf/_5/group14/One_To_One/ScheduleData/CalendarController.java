@@ -154,8 +154,11 @@ public class CalendarController {
         boolean isPremium = platformSubscriptionService.isPremium(user.getId(), clock);
         UserSettings userSettings = userSettingsService.getOrCreate(user);
         CalendarTaskLayoutPreference layoutPreference = userSettings.getCalendarTaskLayout();
+        boolean calendarLayoutGrouped = layoutPreference == CalendarTaskLayoutPreference.SEPARATED_BY_CATEGORY;
         logger.debug("calendarView: layoutPreference = {}", layoutPreference);
         model.addAttribute("compactTopContent", true);
+        model.addAttribute("calendarLayoutGrouped", calendarLayoutGrouped);
+        model.addAttribute("calendarLayoutLabel", calendarLayoutGrouped ? "Grouped" : "Detailed");
         
         // Determine view based on: explicit parameter, stored preference, or device-based default
         String targetView = view;

@@ -2,7 +2,7 @@
           th:replace="~{base :: layout('Dashboard', null, ~{::content}, null)}">
 
     <div th:fragment="content">
-        <div class="dashboard-enhanced max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="dashboard-enhanced gym-dashboard max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-4">
                     <div>
@@ -67,14 +67,14 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <div class="gym-dashboard-actions">
                     <a th:href="@{/calendar/day/{date}(date=${#temporals.format(summary.today, 'yyyy-MM-dd')})}"
-                       class="btn btn--primary btn--sm text-center">
-                        View Today
+                       class="gym-dashboard-action gym-dashboard-action--primary">
+                         View Today
                     </a>
                     <a th:href="@{/calendar}"
-                       class="btn btn--secondary btn--sm text-center">
-                        Full Calendar
+                       class="gym-dashboard-action gym-dashboard-action--secondary">
+                         Full Calendar
                     </a>
                 </div>
             </div>
@@ -161,7 +161,7 @@
                         <div class="text-xs text-slate-500">Products and billing changes</div>
                     </a>
 
-                    <a th:href="@{/admin/feedback}"
+                    <a href="/home-public#public-feedback-form"
                        class="quick-action-card group">
                         <div class="p-3 rounded-xl bg-slate-400/10 border border-slate-400/30 mb-3 group-hover:bg-slate-400/20 transition-all">
                             <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -169,8 +169,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
-                        <div class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Support Inbox</div>
-                        <div class="text-xs text-slate-500">Feedback and outreach</div>
+                        <div class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">Support</div>
+                        <div class="text-xs text-slate-500">Submit a support request</div>
                     </a>
 
                     <a th:href="@{/inbox}"

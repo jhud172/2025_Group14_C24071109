@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const customCreate = document.getElementById("quickActionsCustomCreate");
     const customLimit = document.getElementById("quickActionsCustomLimit");
     const customLock = document.getElementById("quickActionsCustomLock");
+    const overlayManager = window.OneToOneOverlay;
 
     const csrfToken = document.getElementById("quick_actions_csrf")?.value || null;
     const csrfHeader = document.getElementById("quick_actions_csrf_header")?.value || "X-CSRF-TOKEN";
@@ -55,20 +56,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function syncToggleState(isOpen) {
         shelf?.setAttribute("aria-hidden", isOpen ? "false" : "true");
+        shelf?.toggleAttribute("inert", !isOpen);
         toggleBtn?.setAttribute("aria-expanded", isOpen ? "true" : "false");
         toggleBtn?.setAttribute("aria-label", isOpen ? "Close quick actions" : "Open quick actions");
         toggleBtn?.setAttribute("title", isOpen ? "Close quick actions" : "Open quick actions");
     }
 
     function openShelf() {
+        overlayManager?.open("quick-actions");
         shelf?.classList.add("open");
         syncToggleState(true);
         if (customizeOpen) setCustomizeMode(false);
+        window.requestAnimationFrame(() => closeBtn?.focus());
     }
 
-    function closeShelf() {
+    function closeShelf(options = {}) {
+        const focusWasInsideShelf = Boolean(shelf?.contains(document.activeElement));
         shelf?.classList.remove("open");
         syncToggleState(false);
+        if (!options.fromOverlayManager) overlayManager?.release("quick-actions");
+        if (options.restoreFocus && focusWasInsideShelf) toggleBtn?.focus();
     }
 
     function toggleShelf() {
@@ -80,10 +87,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     toggleBtn?.addEventListener("click", toggleShelf);
-    closeBtn?.addEventListener("click", closeShelf);
+    closeBtn?.addEventListener("click", () => closeShelf({ restoreFocus: true }));
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && shelf?.classList.contains("open")) {
-            closeShelf();
+            closeShelf({ restoreFocus: true });
         }
     });
     document.addEventListener("click", (event) => {
@@ -104,8 +111,12 @@ document.addEventListener("DOMContentLoaded", () => {
         setCustomizeMode(!customizeOpen);
     });
 
+    overlayManager?.register("quick-actions", {
+        close: (options) => closeShelf({ ...options, fromOverlayManager: true })
+    });
+
     setCustomizeMode(false);
-    syncToggleState(false);
+    closeShelf({ fromOverlayManager: true });
 
     function authHeaders() {
         const headers = { "Content-Type": "application/json" };

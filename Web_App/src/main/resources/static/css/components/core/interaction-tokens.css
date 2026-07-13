@@ -1,0 +1,32 @@
+@layer base {
+    :root {
+        /* Motion: one shared rhythm for controls, panels, and page-level changes. */
+        --motion-duration-instant: 120ms;
+        --motion-duration-micro: 180ms;
+        --motion-duration-panel: 300ms;
+        --motion-duration-route: 380ms;
+        --motion-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+        --motion-ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+        --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+        /* Layers: fixed surfaces use these named levels instead of escalation values. */
+        --layer-base: 0;
+        --layer-sticky-navigation: 30;
+        --layer-platform-panel: 40;
+        --layer-dropdown: 50;
+        --layer-modal: 70;
+        --layer-assistant: 80;
+        --layer-assistant-control: 82;
+        --layer-assistant-modal: 88;
+        --layer-critical-toast: 90;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        :root {
+            --motion-duration-instant: 0.01ms;
+            --motion-duration-micro: 0.01ms;
+            --motion-duration-panel: 0.01ms;
+            --motion-duration-route: 0.01ms;
+        }
+    }
+}

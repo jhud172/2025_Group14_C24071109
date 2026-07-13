@@ -1366,9 +1366,23 @@
     }
 
     function init() {
-        if (getDashboardRoot()) {
+        const dashboardRoot = getDashboardRoot();
+        if (dashboardRoot) {
             document.body.classList.add("cd-dashboard-shell-active");
         }
+        const mobileDock = document.querySelector(".cd-dashboard-mobile-dock");
+        const syncDockReservation = () => {
+            if (!mobileDock) return;
+            const styles = window.getComputedStyle(mobileDock);
+            const height = styles.display === "none" ? 0 : Math.ceil(mobileDock.getBoundingClientRect().height);
+            const gap = window.matchMedia("(max-width: 640px)").matches ? 9 : 12;
+            document.body.style.setProperty("--shell-local-dock-height", height > 0 ? `${height + gap}px` : "0px");
+        };
+        syncDockReservation();
+        if (mobileDock && "ResizeObserver" in window) {
+            new ResizeObserver(syncDockReservation).observe(mobileDock);
+        }
+        window.addEventListener("resize", syncDockReservation, { passive: true });
         initDashboardShell();
         initCardRevealAnimations();
         initGoalSlider();

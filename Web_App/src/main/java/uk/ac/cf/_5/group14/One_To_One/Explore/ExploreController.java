@@ -245,6 +245,11 @@ public class ExploreController {
             return profile != null ? profile.getPricePerSession() : null;
         }
 
+        public String getFormattedPricePerSession() {
+            Integer price = getPricePerSession();
+            return price == null ? null : "£" + price + " / session";
+        }
+
         public String getLocation() {
             return profile != null ? profile.getLocation() : null;
         }

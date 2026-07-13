@@ -17,7 +17,7 @@
     <button type="button"
             class="chat-fab-premium"
             id="chatFab"
-            aria-label="Open coach"
+            aria-label="Open Charlie"
             aria-controls="chatPanel"
             aria-expanded="false">
         <span class="chat-fab-pulse-ring" aria-hidden="true"></span>
@@ -35,8 +35,8 @@
          class="fixed bottom-[5rem] right-4 sm:bottom-[6.5rem] sm:right-6 z-50 flex w-[22.5rem] max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-3rem)] flex-col gap-2">
     </div>
 
-    <section id="chatPanel" aria-hidden="true"
-             class="chat-panel-premium">
+    <section id="chatPanel" aria-hidden="true" inert
+              class="chat-panel-premium">
         <header class="chat-header-premium">
             <div class="chat-header-top">
                 <div class="chat-title-section">
@@ -190,11 +190,15 @@
                             <div class="chat-input-stack">
                                 <textarea id="chatInput"
                                           rows="1"
-                                          maxlength="1600"
+                                          aria-describedby="chatCharacterCount"
                                           class="chat-input-premium chat-input-textarea"
                                           th:placeholder="${(#authentication != null and #authentication.authenticated) ? 'Message Charlie...' : 'Ask Charlie about One To One...'}"></textarea>
                                 <div class="chat-input-meta">
                                     <span id="chatAttachmentCount" class="chat-input-hint hidden">0 / 5 photos</span>
+                                    <span id="chatCharacterCount"
+                                          class="chat-character-count"
+                                          aria-live="polite"
+                                          aria-atomic="true">0 / 1,600</span>
                                 </div>
                             </div>
 
@@ -294,7 +298,7 @@
         </div>
     </section>
 
-    <div id="chatMediaLightbox" class="chat-media-lightbox hidden" aria-hidden="true">
+    <div id="chatMediaLightbox" class="chat-media-lightbox" aria-hidden="true" inert>
         <div class="chat-media-lightbox-backdrop" id="chatMediaLightboxBackdrop"></div>
         <div class="chat-media-lightbox-shell" role="dialog" aria-modal="true" aria-label="Full size attached image">
             <button type="button" id="chatMediaLightboxClose" class="chat-media-lightbox-close" aria-label="Close image preview">

@@ -19,7 +19,7 @@
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="calendar-mode-indicator hidden sm:flex">
-                        Week View - <span th:text="${calendarLayout == T(uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY ? 'Grouped' : 'Detailed'}"></span>
+                        Week View - <span th:text="${calendarLayoutLabel}">Detailed</span>
                     </div>
                     <div class="calendar-info-link" aria-label="Calendar layout information">
                         <button type="button" class="calendar-info-link__button" aria-label="Calendar layout settings help">
@@ -151,7 +151,7 @@
                                         <span th:if="${dayModel.today}" class="calendar-week-day-badge rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
                                         <span th:if="${dayModel.tomorrow}" class="calendar-week-day-badge rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
                                     </div>
-                                    <div class="calendar-day-content" th:with="grouped=${calendarLayout == T(uk.ac.cf._5.group14.One_To_One.UserSettings.CalendarTaskLayoutPreference).SEPARATED_BY_CATEGORY}">
+                                    <div class="calendar-day-content" th:with="grouped=${calendarLayoutGrouped}">
                                         <!-- Empty state when no tasks or schedules -->
                                         <div th:if="${tTotal == 0 && sTotal == 0}" class="calendar-empty-state">
                                             <span class="calendar-empty-state-icon"></span>

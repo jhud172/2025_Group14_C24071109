@@ -116,7 +116,8 @@ class GymApplicationServiceTest {
         assertThat(approvedUser.getUsername()).isEqualTo(application.getGymUsername());
         assertThat(approvedUser.isEmailVerified()).isFalse();
 
-        assertThat(gymProfileRepository.findByUserId(approvedUser.getId())).isPresent();
+        var gymProfile = gymProfileRepository.findByUserId(approvedUser.getId()).orElseThrow();
+        assertThat(approvedUser.getGymId()).isEqualTo(gymProfile.getId());
         assertThat(messageRepository.findByApplicationIdOrderByCreatedAtAsc(application.getId()))
                 .anySatisfy(message -> {
                     assertThat(message.getSenderType()).isEqualTo(GymApplicationMessageSender.SYSTEM);

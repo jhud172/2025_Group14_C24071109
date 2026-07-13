@@ -178,6 +178,12 @@ public class GymApplicationService {
         profile.setContactPhone(application.getContactPhone());
         GymProfile savedProfile = gymProfileService.saveProfile(profile);
 
+        // Gym operational routes scope all reads and writes through users.gym_id.
+        // Keep account and profile creation in the same transaction so an approved
+        // gym can never be created without its route-scoping relationship.
+        savedUser.setGymId(savedProfile.getId());
+        savedUser = userRepository.save(savedUser);
+
         application.setStatus(GymApplicationStatus.APPROVED);
         application.setReviewedAt(Instant.now());
         application.setReviewedByUserId(reviewer == null ? null : reviewer.getId());

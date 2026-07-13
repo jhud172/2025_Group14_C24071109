@@ -905,6 +905,13 @@ class CalendarMonthWeekViewDataDisplayTest {
 
         String htmlContent = result.getResponse().getContentAsString();
 
+        assertTrue(htmlContent.contains("calendar-month-grid"),
+                "Rendered response must include the month grid rather than a partial template");
+        assertTrue(htmlContent.contains("/js/calendar/month.js"),
+                "Rendered response must reach the page script block");
+        assertFalse(htmlContent.contains("CalendarTaskLayoutPreference"),
+                "Server-only enum types must not leak into the rendered response");
+
         // Assert: Verify placeholder cells exist
         assertTrue(htmlContent.contains("calendar-day-card--placeholder"),
                 "HTML should contain placeholder cells with class 'calendar-day-card--placeholder'");

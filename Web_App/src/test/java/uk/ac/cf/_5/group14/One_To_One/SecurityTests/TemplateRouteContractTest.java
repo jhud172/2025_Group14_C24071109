@@ -35,8 +35,10 @@ class TemplateRouteContractTest {
         assertThat(template).contains("href=\"/gym/dashboard\"");
         assertThat(template).contains("href=\"/gym/admin/trainers\"");
         assertThat(template).contains("href=\"/gym/admin/memberships\"");
-        assertThat(template).contains("Support Inbox");
+        assertThat(template).contains("href=\"/home-public#public-feedback-form\"");
+        assertThat(template).contains("Submit a support request");
         assertThat(template).contains("Inbox");
+        assertThat(template).doesNotContain("th:href=\"@{/admin/feedback}\"");
         assertThat(template).doesNotContain("href=\"/admin/trainers\"");
         assertThat(template).doesNotContain("href=\"/admin/settings\"");
         assertThat(template).doesNotContain("â†’");
@@ -111,7 +113,7 @@ class TemplateRouteContractTest {
     }
 
     @Test
-    void navbarUsesCanonicalCoachAndRoleSpecificOperationalRoutes() throws IOException {
+    void navbarUsesCanonicalCharlieAndRoleSpecificOperationalRoutes() throws IOException {
         String template = read("src/main/resources/templates/universal-fragments/layout/navbar.html");
 
         assertThat(template).contains("th:href=\"@{/chat}\"");
@@ -120,7 +122,7 @@ class TemplateRouteContractTest {
         assertThat(template).contains("th:href=\"@{/gym/admin/memberships}\"");
         assertThat(template).contains("th:href=\"@{/super-admin/verification/queue}\"");
         assertThat(template).contains("th:href=\"@{/admin/feedback}\"");
-        assertThat(template).contains("aria-label=\"Coach\"");
+        assertThat(template).contains("aria-label=\"Charlie\"");
         assertThat(template).doesNotContain("th:href=\"@{/trainer/messages}\"");
         assertThat(template).doesNotContain("id=\"mobileChatToggle\"");
     }
@@ -162,7 +164,7 @@ class TemplateRouteContractTest {
     void globalChatWidgetUsesCoachWordingAndCleanAsciiText() throws IOException {
         String template = read("src/main/resources/templates/universal-fragments/chat/chat-widget.html");
 
-        assertThat(template).contains("aria-label=\"Open coach\"");
+        assertThat(template).contains("aria-label=\"Open Charlie\"");
         assertThat(template).contains("Log in to use coach");
         assertThat(template).contains("Mark all read");
         assertThat(template).doesNotContain("aria-label=\"Open chat\"");
@@ -170,6 +172,14 @@ class TemplateRouteContractTest {
         assertThat(template).doesNotContain("Ã°Å¸");
         assertThat(template).doesNotContain("Ã¢Å“");
         assertThat(template).doesNotContain("Ã¢â€ ");
+    }
+
+    @Test
+    void trainerDirectoryUsesFormattedPresentationPrice() throws IOException {
+        String template = read("src/main/resources/templates/client-views/explore/index.html");
+
+        assertThat(template).contains("th:text=\"${card.formattedPricePerSession}\"");
+        assertThat(template).doesNotContain("th:text=\"'£' + card.pricePerSession");
     }
 
     private static String read(String relativePath) throws IOException {

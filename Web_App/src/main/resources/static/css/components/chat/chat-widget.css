@@ -3,16 +3,16 @@
 @layer components {
   :root {
     --chat-fab-size: clamp(3.25rem, 2.9rem + 1vw, 4rem);
-    --chat-fab-offset: clamp(0.9rem, 0.6rem + 0.8vw, 1.5rem);
+    --chat-fab-edge-offset: clamp(0.9rem, 0.6rem + 0.8vw, 1.5rem);
   }
 
   /* === FLOATING CHAT BUTTON === */
   .chat-fab-premium {
     /* Position - Fixed bottom-right with consistent margins */
     @apply fixed;
-    z-index: 10001;
-    bottom: var(--chat-fab-offset);
-    right: var(--chat-fab-offset);
+    z-index: var(--layer-assistant-control);
+    bottom: calc(var(--shell-platform-panel-height, 0px) + var(--shell-local-dock-height, 0px) + var(--shell-floating-control-gap, var(--chat-fab-edge-offset)));
+    right: var(--chat-fab-edge-offset);
     
     /* Size - Slightly larger than before */
     height: var(--chat-fab-size);
@@ -31,7 +31,7 @@
     overflow: visible;
     
     /* Smooth transitions */
-    @apply transition-all duration-300 ease-out;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), opacity var(--motion-duration-micro) var(--motion-ease-standard);
     
     /* Dark mode */
     @apply dark:bg-slate-900 dark:border-slate-700/60;
@@ -62,18 +62,32 @@
   .chat-fab-premium:active {
     /* Scale down micro interaction */
     transform: translateY(-2px) scale(0.97);
-    @apply transition-all duration-150;
+    transition-duration: var(--motion-duration-instant);
   }
 
   #chatWidget:has(#chatPanel.open) .chat-fab-premium {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(0.5rem) scale(0.92);
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-2px) scale(0.94);
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow:
+      0 8px 26px rgba(15, 23, 42, 0.14),
+      0 0 0 5px rgba(16, 185, 129, 0.13);
+  }
+
+  #chatWidget:has(#chatPanel.open) .chat-fab-icon {
+    transform: rotate(360deg) scale(0.94);
+  }
+
+  #chatWidget:has(#chatPanel.open) .chat-fab-pulse-ring {
+    animation-duration: 1.45s;
+    border-color: rgba(16, 185, 129, 0.38);
   }
   
   .chat-fab-icon {
     @apply relative z-[2] rounded-full;
     box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+    transition: transform var(--motion-duration-panel) var(--motion-ease-enter), box-shadow var(--motion-duration-panel) var(--motion-ease-standard);
   }
 
   .chat-fab-avatar {
@@ -91,7 +105,7 @@
     @apply bg-emerald-500;
     box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
     @apply opacity-0 transition-opacity duration-200;
-    z-index: 10003;
+    z-index: 2;
   }
   
   .chat-fab-notification-dot.active {
@@ -101,9 +115,10 @@
   /* === CHAT PANEL CONTAINER === */
   .chat-panel-premium {
     /* Position - Bottom-right with proper spacing */
-    @apply fixed z-[9998];
-    bottom: calc(var(--chat-fab-offset) + var(--chat-fab-size) + 0.75rem);
-    right: var(--chat-fab-offset);
+    @apply fixed;
+    z-index: var(--layer-assistant);
+    bottom: calc(var(--shell-platform-panel-height, 0px) + var(--shell-local-dock-height, 0px) + var(--shell-floating-control-gap, var(--chat-fab-edge-offset)) + var(--chat-fab-size) + 0.75rem);
+    right: var(--chat-fab-edge-offset);
     
     /* Size - Reduced max width for readability */
     @apply w-full;
@@ -126,11 +141,12 @@
     
     /* Hide initially */
     @apply opacity-0 pointer-events-none;
+    visibility: hidden;
     transform: translateY(22px) scale(0.22);
     transform-origin: calc(100% - 1.5rem) calc(100% + 4.2rem);
     
     /* Smooth transitions */
-    @apply transition-all duration-300 ease-out;
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-exit), transform var(--motion-duration-panel) var(--motion-ease-exit), visibility 0s linear var(--motion-duration-panel);
     
     /* Dark mode */
     @apply dark:bg-slate-900 dark:border-slate-700/80;
@@ -143,11 +159,13 @@
   .chat-panel-premium.open {
     /* Morph out from FAB and settle */
     @apply opacity-100 pointer-events-auto;
+    visibility: visible;
     transform: translateY(0) scale(1);
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-enter), transform var(--motion-duration-panel) var(--motion-ease-enter), visibility 0s linear 0s;
   }
 
   .chat-fab-unread-badge {
-    z-index: 10020;
+    z-index: 2;
     top: -0.45rem;
     right: -0.45rem;
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 10px 20px rgba(244, 63, 94, 0.4);
@@ -264,7 +282,7 @@
     @apply flex items-center justify-center;
     
     /* Transitions */
-    @apply transition-all duration-200;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
     
     @apply dark:border-slate-700/60 dark:text-slate-400;
@@ -295,7 +313,7 @@
     @apply text-xs font-semibold;
     @apply bg-transparent border-0 rounded-xl;
     @apply text-slate-500 whitespace-nowrap;
-    @apply transition-all duration-200;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), color var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard);
     
     @apply dark:text-slate-400;
   }
@@ -501,7 +519,7 @@
     @apply px-4;
     
     /* Transitions */
-    @apply transition-all duration-200;
+    transition: border-color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), color var(--motion-duration-micro) var(--motion-ease-standard);
     
     /* Remove default focus */
     @apply outline-none;
@@ -530,7 +548,7 @@
     @apply flex items-center justify-center gap-2;
     
     /* Transitions */
-    @apply transition-all duration-200;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard), opacity var(--motion-duration-micro) var(--motion-ease-standard);
     box-shadow: 0 12px 24px -20px rgba(16, 185, 129, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.22);
     
     /* Remove outline */
@@ -630,7 +648,7 @@
     @apply rounded-lg;
     @apply text-xs font-semibold;
     @apply bg-emerald-50 border border-emerald-200/80 text-emerald-700;
-    @apply transition-all duration-200;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard);
     @apply no-underline;
 
     @apply dark:bg-emerald-950/40 dark:border-emerald-800/60 dark:text-emerald-400;
@@ -662,7 +680,7 @@
     @apply rounded-full;
     @apply text-xs font-medium;
     @apply bg-slate-100 border border-slate-200/80 text-slate-600;
-    @apply transition-all duration-200;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard);
     @apply cursor-pointer;
 
     @apply dark:bg-slate-800 dark:border-slate-700/80 dark:text-slate-300;
@@ -679,7 +697,7 @@
   .chat-notif-filter-btn {
     @apply px-3 py-1 text-xs font-medium rounded-full;
     @apply bg-transparent border border-slate-200/60 text-slate-500;
-    @apply transition-all duration-200;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard);
     @apply dark:border-slate-700/60 dark:text-slate-400;
   }
 
@@ -717,7 +735,7 @@
 
   .chat-view-pane {
     @apply absolute inset-0 flex flex-col;
-    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease, visibility 0s linear 220ms;
+    transition: transform var(--motion-duration-panel) var(--motion-ease-enter), opacity var(--motion-duration-micro) var(--motion-ease-standard), visibility 0s linear var(--motion-duration-micro);
     min-height: 0;
     visibility: hidden;
     pointer-events: none;
@@ -807,15 +825,32 @@
   }
 
   .chat-input-meta {
-    @apply mt-1.5 flex min-h-[1rem] items-center gap-2 px-1;
-  }
-
-  .chat-input-meta:has(.chat-input-hint.hidden) {
-    display: none;
+    @apply mt-1.5 flex min-h-[1rem] items-center justify-between gap-2 px-1;
   }
 
   .chat-input-hint {
     @apply text-[11px] text-slate-400;
+  }
+
+  .chat-character-count {
+    @apply ml-auto text-[11px] font-medium text-slate-400 transition-colors duration-200;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chat-character-count.is-near-limit {
+    @apply text-amber-600 dark:text-amber-400;
+  }
+
+  .chat-character-count.is-at-limit {
+    @apply font-semibold text-orange-600 dark:text-orange-400;
+  }
+
+  .chat-character-count.is-over-limit {
+    @apply font-bold text-red-600 dark:text-red-400;
+  }
+
+  .chat-input-premium[aria-invalid="true"] {
+    @apply border-red-400 ring-2 ring-red-100 dark:border-red-500 dark:ring-red-950/50;
   }
 
   .chat-send-btn-premium {
@@ -915,9 +950,18 @@
 
   .chat-attachment-preview-tray {
     @apply mb-3;
+    max-height: 13rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.125rem;
+    scrollbar-gutter: stable;
   }
 
-  .chat-pending-gallery,
+  .chat-pending-gallery {
+    @apply grid gap-2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .chat-attachment-gallery {
     @apply grid gap-2;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -934,12 +978,18 @@
     transform: translateY(-1px);
   }
 
-  .chat-pending-attachment-image,
+  .chat-pending-attachment-image {
+    @apply h-[4.75rem] w-full object-cover;
+  }
+
   .chat-attachment-image {
     @apply h-28 w-full object-cover;
   }
 
-  .chat-pending-attachment-meta,
+  .chat-pending-attachment-meta {
+    @apply flex items-center justify-between gap-1 px-2 py-1.5;
+  }
+
   .chat-attachment-meta {
     @apply flex items-center justify-between gap-2 px-3 py-2;
   }
@@ -953,7 +1003,7 @@
   }
 
   .chat-pending-attachment-remove {
-    @apply absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-white text-[11px] font-bold text-slate-700 shadow-sm;
+    @apply absolute right-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full bg-white text-[10px] font-bold text-slate-700 shadow-sm;
     background-color: rgba(255, 255, 255, 0.9);
   }
 
@@ -1001,7 +1051,19 @@
   }
 
   .chat-media-lightbox {
-    @apply fixed inset-0 z-[10020] grid place-items-center p-4;
+    @apply fixed inset-0 grid place-items-center p-4;
+    z-index: var(--layer-assistant-modal);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-exit), visibility 0s linear var(--motion-duration-micro);
+  }
+
+  .chat-media-lightbox.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-enter), visibility 0s linear 0s;
   }
 
   .chat-media-lightbox-backdrop {
@@ -1011,6 +1073,15 @@
 
   .chat-media-lightbox-shell {
     @apply relative z-10 w-full max-w-4xl;
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.98);
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-exit), transform var(--motion-duration-panel) var(--motion-ease-exit);
+  }
+
+  .chat-media-lightbox.is-open .chat-media-lightbox-shell {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-enter), transform var(--motion-duration-panel) var(--motion-ease-enter);
   }
 
   .chat-media-lightbox-image {
@@ -1119,7 +1190,10 @@
       display: none;
     }
 
-    .chat-pending-gallery,
+    .chat-pending-gallery {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .chat-attachment-gallery {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }

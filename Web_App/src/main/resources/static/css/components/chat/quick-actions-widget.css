@@ -3,15 +3,16 @@
 @layer components {
   :root {
     --qa-fab-size: clamp(3.25rem, 2.9rem + 1vw, 4rem);
-    --qa-fab-offset: clamp(0.9rem, 0.6rem + 0.8vw, 1.5rem);
+    --qa-fab-edge-offset: clamp(0.9rem, 0.6rem + 0.8vw, 1.5rem);
   }
 
   /* === FLOATING ACTION BUTTON === */
   .quick-actions-fab-premium {
     /* Position - Fixed bottom-left */
-    @apply fixed z-[9999];
-    bottom: var(--qa-fab-offset);
-    left: var(--qa-fab-offset);
+    @apply fixed;
+    z-index: var(--layer-assistant-control);
+    bottom: calc(var(--shell-platform-panel-height, 0px) + var(--shell-local-dock-height, 0px) + var(--shell-floating-control-gap, var(--qa-fab-edge-offset)));
+    left: var(--qa-fab-edge-offset);
     
     /* Size - Match chat button */
     height: var(--qa-fab-size);
@@ -30,7 +31,7 @@
     overflow: hidden;
     
     /* Smooth transitions */
-    @apply transition-all duration-300 ease-out;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), opacity var(--motion-duration-micro) var(--motion-ease-standard);
     
     /* Dark mode */
     @apply dark:bg-slate-900 dark:border-slate-700/60;
@@ -52,14 +53,14 @@
   .quick-actions-fab-premium:active {
     /* Scale down micro interaction */
     transform: translateY(-2px) scale(0.97);
-    @apply transition-all duration-150;
+    transition-duration: var(--motion-duration-instant);
   }
   
   .quick-actions-fab-icon {
     @apply absolute inset-0 flex items-center justify-center;
     font-size: clamp(1.2rem, 1rem + 0.45vw, 1.5rem);
     line-height: 1;
-    transition: opacity 180ms ease, transform 220ms ease;
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-standard), transform var(--motion-duration-micro) var(--motion-ease-enter);
   }
 
   .quick-actions-fab-icon--primary {
@@ -85,9 +86,10 @@
   /* === QUICK ACTIONS PANEL CONTAINER === */
   .quick-actions-panel-premium {
     /* Position - Bottom-left, above the toggle button */
-    @apply fixed z-[9998];
-    bottom: calc(var(--qa-fab-offset) + var(--qa-fab-size) + 0.75rem);
-    left: var(--qa-fab-offset);
+    @apply fixed;
+    z-index: var(--layer-assistant);
+    bottom: calc(var(--shell-platform-panel-height, 0px) + var(--shell-local-dock-height, 0px) + var(--shell-floating-control-gap, var(--qa-fab-edge-offset)) + var(--qa-fab-size) + 0.75rem);
+    left: var(--qa-fab-edge-offset);
     
     /* Size - Match chat panel */
     @apply w-full;
@@ -110,10 +112,11 @@
     
     /* Hide initially */
     @apply opacity-0 pointer-events-none;
+    visibility: hidden;
     transform: translateY(12px);
     
     /* Smooth transitions */
-    @apply transition-all duration-300 ease-out;
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-exit), transform var(--motion-duration-panel) var(--motion-ease-exit), visibility 0s linear var(--motion-duration-panel);
     
     /* Dark mode */
     @apply dark:bg-slate-900 dark:border-slate-700/80;
@@ -126,7 +129,9 @@
   .quick-actions-panel-premium.open {
     /* Slide up and fade in */
     @apply opacity-100 pointer-events-auto;
+    visibility: visible;
     transform: translateY(0);
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-enter), transform var(--motion-duration-panel) var(--motion-ease-enter), visibility 0s linear 0s;
   }
   
   /* === HEADER SECTION === */
@@ -203,7 +208,7 @@
     @apply flex items-center justify-center;
     
     /* Transitions */
-    @apply transition-all duration-200;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard);
     
     @apply dark:border-slate-700/60 dark:text-slate-400;
   }
@@ -339,7 +344,7 @@
     @apply px-4;
     
     /* Transitions */
-    @apply transition-all duration-200;
+    transition: border-color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), color var(--motion-duration-micro) var(--motion-ease-standard);
     
     /* Remove default focus */
     @apply outline-none;
@@ -376,7 +381,7 @@
     @apply flex items-center justify-center;
     
     /* Transitions */
-    @apply transition-all duration-200;
+    transition: transform var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), box-shadow var(--motion-duration-micro) var(--motion-ease-standard), opacity var(--motion-duration-micro) var(--motion-ease-standard);
     
     /* Remove outline */
     @apply outline-none;
@@ -443,11 +448,11 @@
   @media (min-width: 641px) and (max-width: 1024px) {
     .quick-actions-fab-premium {
       /* Keep side by side on tablets with proper spacing */
-      left: calc(var(--qa-fab-offset) + var(--qa-fab-size) + 0.9rem);
+      left: calc(var(--qa-fab-edge-offset) + var(--qa-fab-size) + 0.9rem);
     }
 
     .quick-actions-panel-premium {
-      left: var(--qa-fab-offset);
+      left: var(--qa-fab-edge-offset);
       max-width: min(22rem, calc(100vw - 2rem));
     }
   }
@@ -506,7 +511,7 @@
 
   .quick-actions-view-pane {
     @apply absolute inset-0;
-    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease;
+    transition: transform var(--motion-duration-panel) var(--motion-ease-enter), opacity var(--motion-duration-micro) var(--motion-ease-standard);
   }
 
   .quick-actions-view-pane-main {

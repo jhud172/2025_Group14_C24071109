@@ -1903,6 +1903,12 @@ SET gym_code = '4827001938456203',
     updated_at = CURRENT_TIMESTAMP - INTERVAL '4' DAY
 WHERE user_id = (SELECT id FROM users WHERE username = 'demo_gym');
 
+-- Keep the authenticated gym fixture connected to its operational gym record.
+UPDATE users
+SET gym_id = (SELECT id FROM gym_profiles WHERE user_id = users.id)
+WHERE username = 'demo_gym'
+  AND EXISTS (SELECT 1 FROM gym_profiles WHERE user_id = users.id);
+
 INSERT INTO trainer_client_links (client_id, trainer_id, status, requested_at, activated_at, created_at, updated_at,
     coaching_phase, coaching_phase_label, coaching_phase_started_at, coaching_phase_updated_at)
 SELECT
@@ -2644,4 +2650,3 @@ WHERE NOT EXISTS (
     WHERE x.owner_user_id = u.id
       AND x.title = g.title
 );
-

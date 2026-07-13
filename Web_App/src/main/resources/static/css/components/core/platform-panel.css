@@ -1,23 +1,11 @@
 @layer components {
-    .has-platform-panel {
-        padding-bottom: clamp(5.8rem, 9vw, 7rem);
-    }
-
     .platform-panel-root {
         position: fixed;
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 48;
+        z-index: var(--layer-platform-panel);
         pointer-events: none;
-    }
-
-    .has-platform-panel .chat-fab-premium {
-        bottom: calc(clamp(5.8rem, 9vw, 7rem) + 0.85rem);
-    }
-
-    .has-platform-panel .quick-actions-fab-premium {
-        bottom: calc(clamp(5.8rem, 9vw, 7rem) + 5.55rem);
     }
 
     .platform-panel {
@@ -75,7 +63,7 @@
         background: rgba(255, 255, 255, 0.86);
         color: rgb(15, 23, 42);
         box-shadow: 0 10px 26px -22px rgba(15, 23, 42, 0.55);
-        transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        transition: transform var(--motion-duration-micro) var(--motion-ease-standard), border-color var(--motion-duration-micro) var(--motion-ease-standard), background-color var(--motion-duration-micro) var(--motion-ease-standard), color var(--motion-duration-micro) var(--motion-ease-standard);
     }
 
     .platform-panel__action {
@@ -124,7 +112,7 @@
     .platform-panel-customizer {
         position: absolute;
         right: max(0.75rem, env(safe-area-inset-right));
-        bottom: calc(5.55rem + env(safe-area-inset-bottom));
+        bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height) + var(--shell-floating-control-gap));
         width: min(26rem, calc(100vw - 1.5rem));
         max-height: min(34rem, calc(100vh - 8rem));
         display: flex;
@@ -140,13 +128,16 @@
         opacity: 0;
         transform: translateY(0.65rem) scale(0.98);
         pointer-events: none;
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        visibility: hidden;
+        transition: opacity var(--motion-duration-micro) var(--motion-ease-exit), transform var(--motion-duration-panel) var(--motion-ease-exit), visibility 0s linear var(--motion-duration-panel);
     }
 
     .platform-panel-customizer.is-open {
         opacity: 1;
         transform: translateY(0) scale(1);
         pointer-events: auto;
+        visibility: visible;
+        transition: opacity var(--motion-duration-micro) var(--motion-ease-enter), transform var(--motion-duration-panel) var(--motion-ease-enter), visibility 0s linear 0s;
     }
 
     .platform-panel-customizer__header,
@@ -299,10 +290,6 @@
     }
 
     @media (max-width: 720px) {
-        .has-platform-panel {
-            padding-bottom: 6.2rem;
-        }
-
         .platform-panel {
             padding-top: 0.55rem;
         }
@@ -337,7 +324,7 @@
             right: 0.75rem;
             left: 0.75rem;
             width: auto;
-            bottom: calc(5.2rem + env(safe-area-inset-bottom));
+            bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height) + var(--shell-floating-control-gap));
         }
 
         .platform-panel-customizer__list {
@@ -349,12 +336,5 @@
             flex-direction: column;
         }
 
-        .has-platform-panel .chat-fab-premium {
-            bottom: calc(6.2rem + 0.65rem + env(safe-area-inset-bottom));
-        }
-
-        .has-platform-panel .quick-actions-fab-premium {
-            bottom: calc(6.2rem + 4.85rem + env(safe-area-inset-bottom));
-        }
     }
 }

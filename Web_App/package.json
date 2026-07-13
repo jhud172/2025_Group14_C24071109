@@ -7,11 +7,14 @@
     "npm": "11.11.x"
   },
   "scripts": {
-    "build:css": "postcss src/main/resources/static/css/tailwind.css -o src/main/resources/static/css/app.css",
+    "build:css": "npm run build:css:core && npm run build:css:bundles",
+    "build:css:core": "postcss src/main/resources/static/css/tailwind.css -o src/main/resources/static/css/app.css --env production",
+    "build:css:bundles": "postcss \"src/main/resources/static/css/entries/*.css\" --dir src/main/resources/static/css/bundles --env production",
     "watch:css": "postcss src/main/resources/static/css/tailwind.css -o src/main/resources/static/css/app.css -w"
   },
   "devDependencies": {
     "autoprefixer": "^10.5.0",
+    "cssnano": "^7.1.9",
     "postcss": "^8.5.12",
     "postcss-cli": "^11.0.1",
     "postcss-import": "^16.1.0",

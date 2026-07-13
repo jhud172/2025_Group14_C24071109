@@ -2530,10 +2530,66 @@
         z-index: 30;
     }
 
-    @media (min-width: 1031px) {
+    @media (min-width: 1031px) and (max-width: 1538px) {
         .cd-dashboard-shell {
-            grid-template-columns: minmax(15rem, 0.86fr) minmax(0, 1.34fr) minmax(15rem, 0.92fr);
+            grid-template-areas:
+                "main right"
+                "left right";
+            grid-template-columns: minmax(0, 1.6fr) minmax(19rem, 0.72fr);
             gap: 1.1rem;
+        }
+
+        .cd-dashboard-main {
+            grid-area: main;
+        }
+
+        .cd-dashboard-rail--left {
+            grid-area: left;
+        }
+
+        .cd-dashboard-rail--right {
+            grid-area: right;
+            position: sticky;
+            top: 6rem;
+            align-self: start;
+        }
+
+        .cd-dashboard-rail--right .cd-dashboard-rail__panel {
+            max-height: calc(100vh - 6.75rem);
+            overflow: hidden;
+        }
+
+        .cd-dashboard-rail--right .cd-dashboard-rail__content {
+            max-height: calc(100vh - 6.75rem);
+            overflow-y: auto;
+            padding-right: 0.35rem;
+            padding-bottom: 0.25rem;
+            scrollbar-gutter: stable;
+            scrollbar-width: thin;
+        }
+
+        .cd-dashboard-rail--left .cd-dashboard-rail__content {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1539px) {
+        .cd-dashboard-shell {
+            grid-template-areas: "left main right";
+            grid-template-columns: minmax(17.5rem, 0.88fr) minmax(0, 1.44fr) minmax(17rem, 0.94fr);
+            gap: 1.5rem;
+        }
+
+        .cd-dashboard-rail--left {
+            grid-area: left;
+        }
+
+        .cd-dashboard-main {
+            grid-area: main;
+        }
+
+        .cd-dashboard-rail--right {
+            grid-area: right;
         }
 
         .cd-dashboard-rail {
@@ -2555,13 +2611,6 @@
             scrollbar-gutter: stable;
             scrollbar-width: thin;
         }
-    }
-
-    @media (min-width: 1539px) {
-        .cd-dashboard-shell {
-            grid-template-columns: minmax(17.5rem, 0.88fr) minmax(0, 1.44fr) minmax(17rem, 0.94fr);
-            gap: 1.5rem;
-        }
 
         .cd-dashboard-main,
         .cd-dashboard-rail__content {
@@ -2570,22 +2619,17 @@
     }
 
     @media (max-width: 1538px) and (min-width: 1031px) {
-        .cd-dashboard-shell {
-            grid-template-columns: minmax(14rem, 0.8fr) minmax(0, 1.45fr) minmax(14rem, 0.84fr);
-            gap: 0.95rem;
-        }
-
         .cd-dashboard-main,
         .cd-dashboard-rail__content {
             gap: 0.9rem;
         }
 
-        .cd-dashboard-rail {
+        .cd-dashboard-rail--right {
             top: 5.75rem;
         }
 
-        .cd-dashboard-rail__panel,
-        .cd-dashboard-rail__content {
+        .cd-dashboard-rail--right .cd-dashboard-rail__panel,
+        .cd-dashboard-rail--right .cd-dashboard-rail__content {
             max-height: calc(100vh - 6.45rem);
         }
 
@@ -3903,35 +3947,30 @@
         display: none !important;
     }
 
-    @media (min-width: 1031px) {
+    @media (min-width: 1031px) and (max-width: 1538px) {
         .cd-dashboard-shell {
-            grid-template-columns: minmax(14rem, 0.76fr) minmax(0, 1.68fr) minmax(12.5rem, 0.62fr);
-            gap: 1.15rem;
+            grid-template-columns: minmax(0, 1.6fr) minmax(19rem, 0.72fr);
+            gap: 1.1rem;
         }
     }
 
     @media (min-width: 1539px) {
         .cd-dashboard-shell {
-            grid-template-columns: minmax(15.5rem, 0.8fr) minmax(0, 1.82fr) minmax(13.5rem, 0.66fr);
-            gap: 1.45rem;
+            grid-template-columns: minmax(17.5rem, 0.88fr) minmax(0, 1.44fr) minmax(17rem, 0.94fr);
+            gap: 1.5rem;
         }
     }
 
     @media (max-width: 1030px) {
-        body.cd-dashboard-shell-active {
-            --qa-fab-offset: calc(6rem + env(safe-area-inset-bottom, 0px));
-            --chat-fab-offset: calc(6rem + env(safe-area-inset-bottom, 0px));
-        }
-
         .cd-dashboard-page {
-            padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height));
         }
 
         .cd-dashboard-mobile-dock {
             position: fixed;
             left: 0.75rem;
             right: 0.75rem;
-            bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+            bottom: calc(var(--shell-platform-panel-height) + 0.75rem);
             z-index: 70;
             display: grid;
             grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -3967,7 +4006,7 @@
             position: fixed;
             left: 0.5rem;
             right: 0.5rem;
-            bottom: calc(5.45rem + env(safe-area-inset-bottom, 0px));
+            bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height) + 0.35rem);
             z-index: 72;
             opacity: 0;
             pointer-events: none;
@@ -4014,19 +4053,14 @@
     }
 
     @media (max-width: 640px) {
-        body.cd-dashboard-shell-active {
-            --qa-fab-offset: calc(5.3rem + env(safe-area-inset-bottom, 0px));
-            --chat-fab-offset: calc(5.3rem + env(safe-area-inset-bottom, 0px));
-        }
-
         .cd-dashboard-page {
-            padding-bottom: calc(6.35rem + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height));
         }
 
         .cd-dashboard-mobile-dock {
             left: 0.55rem;
             right: 0.55rem;
-            bottom: calc(0.55rem + env(safe-area-inset-bottom, 0px));
+            bottom: calc(var(--shell-platform-panel-height) + 0.55rem);
             gap: 0.35rem;
             padding: 0.38rem;
             border-radius: 1.3rem;
@@ -4044,7 +4078,7 @@
         .cd-dashboard-mobile-dock .cd-dashboard-flyout__panel {
             left: 0.35rem;
             right: 0.35rem;
-            bottom: calc(4.9rem + env(safe-area-inset-bottom, 0px));
+            bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height) + 0.25rem);
         }
 
         .cd-coach-metric,
