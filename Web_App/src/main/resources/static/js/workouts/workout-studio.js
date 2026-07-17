@@ -33,13 +33,25 @@
     // MODE SWITCHING
     // ============================================
     function initModeNavigation() {
-        const tabs = document.querySelectorAll('.studio-mode-tab');
+        const tabs = Array.from(document.querySelectorAll('.studio-mode-tab'));
         const panels = document.querySelectorAll('.studio-mode-panel');
 
-        tabs.forEach(tab => {
+        tabs.forEach((tab, index) => {
             tab.addEventListener('click', () => {
                 const targetMode = tab.dataset.mode;
                 switchMode(targetMode, tabs, panels);
+            });
+            tab.addEventListener('keydown', event => {
+                let nextIndex = null;
+                if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+                if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+                if (event.key === 'Home') nextIndex = 0;
+                if (event.key === 'End') nextIndex = tabs.length - 1;
+                if (nextIndex === null) return;
+                event.preventDefault();
+                const nextTab = tabs[nextIndex];
+                switchMode(nextTab.dataset.mode, tabs, panels);
+                nextTab.focus();
             });
         });
 
@@ -55,16 +67,17 @@
 
         // Update tabs
         tabs.forEach(tab => {
-            if (tab.dataset.mode === targetMode) {
-                tab.classList.add('active');
-            } else {
-                tab.classList.remove('active');
-            }
+            const active = tab.dataset.mode === targetMode;
+            tab.classList.toggle('active', active);
+            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+            tab.tabIndex = active ? 0 : -1;
         });
 
         // Update panels with fade animation
         panels.forEach(panel => {
-            if (panel.dataset.mode === targetMode) {
+            const active = panel.dataset.mode === targetMode;
+            panel.hidden = !active;
+            if (active) {
                 panel.classList.remove('hidden');
                 panel.classList.add('active', 'animate-fade-in');
             } else {
@@ -121,9 +134,11 @@
         if (state.library.activeFilters.has(filterValue)) {
             state.library.activeFilters.delete(filterValue);
             tag.classList.remove('active');
+            tag.setAttribute('aria-pressed', 'false');
         } else {
             state.library.activeFilters.add(filterValue);
             tag.classList.add('active');
+            tag.setAttribute('aria-pressed', 'true');
         }
         
         filterExerciseLibrary();
@@ -499,6 +514,7 @@
     function initCustomExercisePanel() {
         const openBtn = document.querySelector('[data-open-custom-exercise]');
         const closeBtn = document.querySelector('.custom-exercise-close-btn');
+        const cancelBtn = document.querySelector('.custom-exercise-btn-cancel');
         const overlay = document.querySelector('.custom-exercise-overlay');
         const panel = document.querySelector('.custom-exercise-panel');
 
@@ -518,13 +534,37 @@
             closeBtn.addEventListener('click', closeCustomExercisePanel);
         }
 
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closeCustomExercisePanel);
+        }
+
         if (overlay) {
             overlay.addEventListener('click', closeCustomExercisePanel);
         }
 
         document.addEventListener('keydown', event => {
-            if (event.key === 'Escape' && panel?.classList.contains('active')) {
+            if (!panel?.classList.contains('active')) return;
+            if (event.key === 'Escape') {
                 closeCustomExercisePanel();
+                return;
+            }
+            if (event.key === 'Tab') {
+                const focusable = Array.from(panel.querySelectorAll(
+                    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                )).filter(element => !element.closest('[hidden]') && element.getClientRects().length > 0);
+                if (!focusable.length) {
+                    event.preventDefault();
+                    return;
+                }
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
             }
         });
     }
@@ -571,6 +611,8 @@
             type === 'error' ? 'bg-rose-500' :
             'bg-blue-500'
         }`;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
         toast.textContent = message;
         
         document.body.appendChild(toast);

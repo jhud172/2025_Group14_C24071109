@@ -15,7 +15,9 @@
                 No payment attempts have been flagged yet.
             </div>
 
-            <table th:if="${!#lists.isEmpty(attempts)}" class="min-w-full divide-y divide-slate-100 text-sm">
+            <div th:if="${!#lists.isEmpty(attempts)}" class="overflow-x-auto" tabindex="0" aria-label="Flagged payment attempts table">
+            <table class="min-w-[48rem] divide-y divide-slate-100 text-sm">
+                <caption class="sr-only">Flagged off-platform payment attempts</caption>
                 <thead class="bg-slate-50">
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Time</th>
@@ -47,6 +49,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 

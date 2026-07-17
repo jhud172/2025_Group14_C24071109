@@ -71,6 +71,14 @@ Run tests:
 ./gradlew test
 ```
 
+Run the automated browser simulation across public, client, trainer, gym, admin and super-admin profiles:
+
+```bash
+npm run qa:simulate
+```
+
+The simulation starts the local app when needed, exercises feature workflows, checks every configured page against page/element/design/text/accessibility criteria, and writes Markdown, JSON, JUnit and screenshot evidence under `output/playwright/site-simulation`. See [`docs/qa/SITE_SIMULATION_STANDARDS.md`](./docs/qa/SITE_SIMULATION_STANDARDS.md).
+
 Check dependency drift:
 
 ```bash

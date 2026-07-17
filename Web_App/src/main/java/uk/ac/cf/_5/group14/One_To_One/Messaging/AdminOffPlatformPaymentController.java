@@ -64,7 +64,7 @@ public class AdminOffPlatformPaymentController {
                     .ifPresent(user -> usersById.put(user.getId(), user));
         }
 
-        ModelAndView mav = new ModelAndView("admin/off-platform-payments");
+        ModelAndView mav = new ModelAndView("admin-views/admin/off-platform-payments");
         mav.addObject("pageTitle", "Off-Platform Payment Attempts");
         mav.addObject("attempts", attempts);
         mav.addObject("usersById", usersById);

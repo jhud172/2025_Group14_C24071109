@@ -73,6 +73,9 @@ class TemplateRouteContractTest {
         assertThat(template).contains("th:href=\"@{/admin/merch}\"");
         assertThat(template).contains("href=\"#admin-outreach-form\"");
         assertThat(template).contains("href=\"#dev-page-controls\"");
+        assertThat(template).contains("aria-label=${'Access mode for ' + page.title}");
+        assertThat(template).contains("aria-label=${'Save access mode for ' + page.title}");
+        assertThat(template).contains("<caption class=\"sr-only\">Dev Hub page access controls</caption>");
         assertThat(template).doesNotContain("â€¢");
     }
 
@@ -80,13 +83,16 @@ class TemplateRouteContractTest {
     void adminControllersReturnExistingAdminViewTemplates() throws IOException {
         String gymApplicationController = read("src/main/java/uk/ac/cf/_5/group14/One_To_One/GymApplications/GymApplicationController.java");
         String adminSupportController = read("src/main/java/uk/ac/cf/_5/group14/One_To_One/Support/AdminSupportController.java");
+        String paymentController = read("src/main/java/uk/ac/cf/_5/group14/One_To_One/Messaging/AdminOffPlatformPaymentController.java");
 
         assertThat(gymApplicationController).contains("return \"admin-views/admin/gym-applications\"");
         assertThat(gymApplicationController).contains("return \"admin-views/admin/gym-application-detail\"");
         assertThat(adminSupportController).contains("return \"admin-views/admin/feedback\"");
+        assertThat(paymentController).contains("new ModelAndView(\"admin-views/admin/off-platform-payments\")");
         assertThat(gymApplicationController).doesNotContain("return \"admin/gym-applications\"");
         assertThat(gymApplicationController).doesNotContain("return \"admin/gym-application-detail\"");
         assertThat(adminSupportController).doesNotContain("return \"admin/feedback\"");
+        assertThat(paymentController).doesNotContain("new ModelAndView(\"admin/off-platform-payments\")");
     }
 
     @Test

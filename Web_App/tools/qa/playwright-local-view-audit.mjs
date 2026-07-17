@@ -6,6 +6,47 @@ import { chromium } from "../playwright-local/node_modules/playwright/index.mjs"
 const baseUrl = process.env.AUDIT_BASE_URL || "http://localhost:8081";
 const password = process.env.AUDIT_PASSWORD || "Demo123!";
 const outputDir = path.join(process.cwd(), "output", "playwright", "local-view-audit");
+const loginOnlyRoles = new Set(
+  (process.env.AUDIT_LOGIN_ROLES_ONLY || "")
+    .split(",")
+    .map((role) => role.trim())
+    .filter(Boolean),
+);
+
+const roleLoginJourneys = {
+  trainer: {
+    role: "trainer",
+    username: "demo_trainer",
+    usernameSelector: "#username",
+    passwordSelector: "#password",
+    passwordToggleSelector: "#togglePassword",
+    panelSelector: "#emailFields",
+    inactivePanelSelector: "#gymFields",
+    codeGroupSelector: "#trainerCodeField",
+    codeSelectors: ["#trainerCode1", "#trainerCode2", "#trainerCode3"],
+    hiddenCodeSelector: "#trainerCodeFull",
+    validCode: ["2407", "8190", "3465"],
+    invalidCode: ["0000", "0000", "0000"],
+    expectedCodeLength: 12,
+    dashboardPath: "/trainer/dashboard",
+  },
+  gym: {
+    role: "gym",
+    username: "demo_gym",
+    usernameSelector: "#gymUsername",
+    passwordSelector: "#gymPassword",
+    passwordToggleSelector: "#toggleGymPassword",
+    panelSelector: "#gymFields",
+    inactivePanelSelector: "#emailFields",
+    codeGroupSelector: "#gymFields fieldset",
+    codeSelectors: ["#gymSecretCode1", "#gymSecretCode2", "#gymSecretCode3", "#gymSecretCode4"],
+    hiddenCodeSelector: "#gymSecretCodeFull",
+    validCode: ["4827", "0019", "3845", "6203"],
+    invalidCode: ["0000", "0000", "0000", "0000"],
+    expectedCodeLength: 16,
+    dashboardPath: "/gym/dashboard",
+  },
+};
 
 const viewports = {
   desktop: { width: 1440, height: 1200 },
@@ -257,6 +298,204 @@ async function auditLoginInteractions(page) {
       });
     }
   }
+  return result;
+}
+
+async function fillRoleLogin(page, journey, code = journey.validCode) {
+  await page.locator(journey.usernameSelector).fill(journey.username);
+  for (let index = 0; index < journey.codeSelectors.length; index += 1) {
+    await page.locator(journey.codeSelectors[index]).fill(code[index] || "");
+  }
+  await page.locator(journey.passwordSelector).fill(password);
+}
+
+async function inspectRoleLoginState(page, journey) {
+  return page.evaluate((selectors) => {
+    const roleButton = document.querySelector(`[data-role="${selectors.role}"]`);
+    const username = document.querySelector(selectors.usernameSelector);
+    const passwordField = document.querySelector(selectors.passwordSelector);
+    const activePanel = document.querySelector(selectors.panelSelector);
+    const inactivePanel = document.querySelector(selectors.inactivePanelSelector);
+    const codeGroup = document.querySelector(selectors.codeGroupSelector);
+    const codeInputs = selectors.codeSelectors.map((selector) => document.querySelector(selector));
+    const hiddenCode = document.querySelector(selectors.hiddenCodeSelector);
+    const isUnavailable = (element) => Boolean(element?.hidden || element?.hasAttribute("inert") || element?.getAttribute("aria-hidden") === "true");
+    return {
+      selectedRole: document.querySelector("#loginType")?.value || null,
+      roleTabSelected: roleButton?.getAttribute("aria-selected") === "true",
+      activePanelAvailable: Boolean(activePanel) && !isUnavailable(activePanel),
+      inactivePanelUnavailable: Boolean(inactivePanel) && isUnavailable(inactivePanel),
+      usernameName: username?.getAttribute("name") || null,
+      passwordName: passwordField?.getAttribute("name") || null,
+      codeGroupInvalid: codeGroup?.getAttribute("aria-invalid") === "true",
+      codeInputsInvalid: codeInputs.filter(Boolean).every((input) => input.getAttribute("aria-invalid") === "true"),
+      hiddenCode: hiddenCode?.value || "",
+    };
+  }, journey);
+}
+
+function trackLoginRuntime(page) {
+  const diagnostics = { consoleErrors: [], pageErrors: [], serverErrors: [] };
+  page.on("console", (message) => {
+    if (message.type() === "error") diagnostics.consoleErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => diagnostics.pageErrors.push(String(error)));
+  page.on("response", (response) => {
+    if (response.url().startsWith(baseUrl) && response.status() >= 500) {
+      diagnostics.serverErrors.push({ status: response.status(), url: response.url() });
+    }
+  });
+  return diagnostics;
+}
+
+async function auditRoleLoginJourney(browser, journey) {
+  const result = {
+    role: journey.role,
+    completed: false,
+    criteria: {},
+    invalidAttempt: {},
+    successfulAttempt: {},
+    logout: {},
+    runtime: {},
+  };
+
+  const invalidContext = await browser.newContext();
+  const invalidPage = await invalidContext.newPage();
+  const invalidRuntime = trackLoginRuntime(invalidPage);
+  try {
+    await invalidPage.setViewportSize(viewports.desktop);
+    await invalidPage.goto(`${baseUrl}/login?role=${journey.role}`, { waitUntil: "networkidle", timeout: 30000 });
+
+    const initialState = await inspectRoleLoginState(invalidPage, journey);
+    result.criteria.rolePreselected = initialState.selectedRole === journey.role && initialState.roleTabSelected;
+    result.criteria.correctPanelExposed = initialState.activePanelAvailable && initialState.inactivePanelUnavailable;
+    result.criteria.correctFormFieldNames = initialState.usernameName === "username" && initialState.passwordName === "password";
+
+    const passwordField = invalidPage.locator(journey.passwordSelector);
+    const passwordToggle = invalidPage.locator(journey.passwordToggleSelector);
+    await passwordField.fill(password);
+    const passwordTypeBefore = await passwordField.getAttribute("type");
+    await passwordToggle.click();
+    const passwordTypeVisible = await passwordField.getAttribute("type");
+    await passwordToggle.click();
+    const passwordTypeRestored = await passwordField.getAttribute("type");
+    result.criteria.passwordToggleWorks = passwordTypeBefore === "password"
+      && passwordTypeVisible === "text"
+      && passwordTypeRestored === "password";
+
+    await invalidPage.locator(journey.usernameSelector).fill(journey.username);
+    await invalidPage.locator(journey.codeSelectors[0]).fill(journey.invalidCode[0]);
+    await invalidPage.locator("#loginForm button[type='submit']").click();
+    await invalidPage.waitForTimeout(250);
+    const incompleteState = await inspectRoleLoginState(invalidPage, journey);
+    const validationMessage = await invalidPage.locator(journey.codeSelectors[0]).evaluate((input) => input.validationMessage);
+    result.criteria.incompleteCodeBlocked = invalidPage.url().includes("/login")
+      && incompleteState.hiddenCode.length < journey.expectedCodeLength
+      && Boolean(validationMessage);
+
+    for (let index = 0; index < journey.codeSelectors.length; index += 1) {
+      await invalidPage.locator(journey.codeSelectors[index]).fill(journey.invalidCode[index]);
+    }
+    const composedCode = await invalidPage.locator(journey.hiddenCodeSelector).inputValue();
+    result.criteria.segmentedCodeComposed = composedCode === journey.invalidCode.join("");
+
+    await Promise.all([
+      invalidPage.waitForURL((url) => url.pathname === "/login" && url.searchParams.get("error") != null, { timeout: 30000 }),
+      invalidPage.locator("#loginForm button[type='submit']").click(),
+    ]);
+    await invalidPage.waitForLoadState("networkidle");
+    const invalidState = await inspectRoleLoginState(invalidPage, journey);
+    const errorText = await invalidPage.locator("#loginError").innerText().catch(() => "");
+    result.invalidAttempt = {
+      rejected: invalidPage.url().includes("/login") && invalidPage.url().includes("error="),
+      roleRetained: invalidState.selectedRole === journey.role && invalidState.roleTabSelected,
+      usernameRetained: await invalidPage.locator(journey.usernameSelector).inputValue() === journey.username,
+      errorDisplayed: /could not verify|invalid|incorrect|failed/i.test(errorText),
+      codeMarkedInvalid: invalidState.codeGroupInvalid || invalidState.codeInputsInvalid,
+      finalUrl: invalidPage.url(),
+    };
+  } finally {
+    await invalidContext.close();
+  }
+
+  const successContext = await browser.newContext();
+  const successPage = await successContext.newPage();
+  const successRuntime = trackLoginRuntime(successPage);
+  try {
+    await successPage.setViewportSize(viewports.desktop);
+    await successPage.goto(`${baseUrl}/login?role=${journey.role}`, { waitUntil: "networkidle", timeout: 30000 });
+    await fillRoleLogin(successPage, journey);
+    await Promise.all([
+      successPage.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30000 }),
+      successPage.locator("#loginForm button[type='submit']").click(),
+    ]);
+    await successPage.waitForLoadState("networkidle");
+
+    const postLoginUrl = successPage.url();
+    const acceptedRedirect = new URL(postLoginUrl).pathname === journey.dashboardPath
+      || new URL(postLoginUrl).pathname === "/tutorial";
+    if (new URL(postLoginUrl).pathname === "/tutorial") {
+      await successPage.goto(`${baseUrl}${journey.dashboardPath}`, { waitUntil: "networkidle", timeout: 30000 });
+    }
+    const dashboardText = await successPage.locator("body").innerText().catch(() => "");
+    result.successfulAttempt = {
+      accepted: acceptedRedirect,
+      dashboardReached: new URL(successPage.url()).pathname === journey.dashboardPath,
+      dashboardRendered: Boolean(dashboardText.trim()) && !/log in to your account/i.test(dashboardText),
+      initialRedirect: postLoginUrl,
+      dashboardUrl: successPage.url(),
+    };
+
+    await successPage.reload({ waitUntil: "networkidle", timeout: 30000 });
+    result.successfulAttempt.sessionPersisted = new URL(successPage.url()).pathname === journey.dashboardPath;
+
+    const logoutForms = successPage.locator("form[action='/logout'], form[action$='/logout']");
+    const logoutFormCount = await logoutForms.count();
+    result.logout.logoutActionAvailable = logoutFormCount > 0;
+    if (logoutFormCount > 0) {
+      const logoutResponse = await formPost(successPage, "/logout", {});
+      result.logout.response = {
+        ok: logoutResponse.ok,
+        status: logoutResponse.status,
+        url: logoutResponse.url,
+      };
+    }
+    result.logout.signedOut = result.logout.response?.ok === true
+      && new URL(result.logout.response.url).pathname === "/";
+
+    await successPage.goto(`${baseUrl}${journey.dashboardPath}`, { waitUntil: "networkidle", timeout: 30000 });
+    result.logout.protectedRouteBlocked = new URL(successPage.url()).pathname === "/login";
+    result.logout.finalUrl = successPage.url();
+  } finally {
+    await successContext.close();
+  }
+
+  result.runtime = {
+    consoleErrors: [...invalidRuntime.consoleErrors, ...successRuntime.consoleErrors],
+    pageErrors: [...invalidRuntime.pageErrors, ...successRuntime.pageErrors],
+    serverErrors: [...invalidRuntime.serverErrors, ...successRuntime.serverErrors],
+  };
+  result.runtime.clean = result.runtime.consoleErrors.length === 0
+    && result.runtime.pageErrors.length === 0
+    && result.runtime.serverErrors.length === 0;
+
+  const requiredChecks = [
+    ...Object.values(result.criteria),
+    result.invalidAttempt.rejected,
+    result.invalidAttempt.roleRetained,
+    result.invalidAttempt.usernameRetained,
+    result.invalidAttempt.errorDisplayed,
+    result.invalidAttempt.codeMarkedInvalid,
+    result.successfulAttempt.accepted,
+    result.successfulAttempt.dashboardReached,
+    result.successfulAttempt.dashboardRendered,
+    result.successfulAttempt.sessionPersisted,
+    result.logout.logoutActionAvailable,
+    result.logout.signedOut,
+    result.logout.protectedRouteBlocked,
+    result.runtime.clean,
+  ];
+  result.completed = requiredChecks.every((check) => check === true);
   return result;
 }
 
@@ -1430,26 +1669,71 @@ async function auditMobileNav(page) {
   return { before, after, url: page.url() };
 }
 
+async function runAuditStep(results, descriptor, audit) {
+  try {
+    const entry = { ...descriptor, result: await audit() };
+    results.push(entry);
+    return entry;
+  } catch (error) {
+    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    const entry = {
+      ...descriptor,
+      error: message,
+      result: { completed: false, error: message },
+    };
+    results.push(entry);
+    console.error(`[site-simulation] ${descriptor.role || "public"}/${descriptor.label} failed: ${message}`);
+    return entry;
+  }
+}
+
+async function runCaptureStep(results, descriptor, audit) {
+  try {
+    results.push(await audit());
+  } catch (error) {
+    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    results.push({ ...descriptor, error: message, result: { completed: false, error: message } });
+    console.error(`[site-simulation] ${descriptor.role || "public"}/${descriptor.label}/${descriptor.viewport} capture failed: ${message}`);
+  }
+}
+
 async function run() {
   await ensureDir(outputDir);
   const browser = await chromium.launch({ headless: true });
   const results = [];
 
   try {
+    const selectedLoginJourneys = Object.values(roleLoginJourneys)
+      .filter((journey) => loginOnlyRoles.size === 0 || loginOnlyRoles.has(journey.role));
+    for (const journey of selectedLoginJourneys) {
+      await runAuditStep(
+        results,
+        { type: "workflow", role: journey.role, label: `${journey.role}-complete-login-flow` },
+        () => auditRoleLoginJourney(browser, journey),
+      );
+    }
+
+    if (loginOnlyRoles.size > 0) {
+      const unknownRoles = [...loginOnlyRoles].filter((role) => !roleLoginJourneys[role]);
+      if (unknownRoles.length > 0) {
+        throw new Error(`Unknown login role(s): ${unknownRoles.join(", ")}. Use trainer, gym, or both.`);
+      }
+    } else {
+
     const publicContext = await browser.newContext();
     const publicPage = await publicContext.newPage();
-    results.push({ type: "interaction", label: "invalid-login", result: await auditInvalidLogin(publicPage) });
-    results.push({ type: "interaction", label: "login-controls", result: await auditLoginInteractions(publicPage) });
-    results.push({ type: "interaction", label: "mobile-nav", result: await auditMobileNav(publicPage) });
-    results.push({ type: "access", label: "unauthenticated-protected-routes", result: await auditProtectedRoutes(publicPage) });
+    await runAuditStep(results, { type: "interaction", label: "invalid-login" }, () => auditInvalidLogin(publicPage));
+    await runAuditStep(results, { type: "interaction", label: "login-controls" }, () => auditLoginInteractions(publicPage));
+    await runAuditStep(results, { type: "interaction", label: "mobile-nav" }, () => auditMobileNav(publicPage));
+    await runAuditStep(results, { type: "access", label: "unauthenticated-protected-routes" }, () => auditProtectedRoutes(publicPage));
     for (const entry of publicPages) {
       for (const viewportName of entry.viewports) {
-        results.push(await capture(publicPage, entry, viewportName));
+        await runCaptureStep(results, { type: "page", role: "public", label: entry.label, path: entry.path, viewport: viewportName }, () => capture(publicPage, entry, viewportName));
       }
     }
     for (const entry of systemPages) {
       for (const viewportName of entry.viewports) {
-        results.push(await capture(publicPage, entry, viewportName, "system"));
+        await runCaptureStep(results, { type: "page", role: "system", label: entry.label, path: entry.path, viewport: viewportName }, () => capture(publicPage, entry, viewportName, "system"));
       }
     }
     await publicContext.close();
@@ -1457,37 +1741,38 @@ async function run() {
     for (const roleAudit of roleAudits) {
       const context = await browser.newContext();
       const page = await context.newPage();
-      results.push({ type: "login", role: roleAudit.role, result: await login(page, roleAudit.username, roleAudit.role) });
-      results.push({ type: "access", role: roleAudit.role, label: "role-locks", result: await auditRoleLocks(page, roleAudit.role) });
+      await runAuditStep(results, { type: "login", role: roleAudit.role, label: "login" }, () => login(page, roleAudit.username, roleAudit.role));
+      await runAuditStep(results, { type: "access", role: roleAudit.role, label: "role-locks" }, () => auditRoleLocks(page, roleAudit.role));
       if (roleAudit.role === "trainer") {
-        results.push({ type: "interaction", role: roleAudit.role, label: "schedule-controls", result: await auditScheduleInteractions(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "trainer-client-lifecycle-flow", result: await auditTrainerClientLifecycleFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "trainer-library-crud-flow", result: await auditTrainerLibraryCrudFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "schedule-deployment-flow", result: await auditScheduleDeploymentFlow(page) });
+        await runAuditStep(results, { type: "interaction", role: roleAudit.role, label: "schedule-controls" }, () => auditScheduleInteractions(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "trainer-client-lifecycle-flow" }, () => auditTrainerClientLifecycleFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "trainer-library-crud-flow" }, () => auditTrainerLibraryCrudFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "schedule-deployment-flow" }, () => auditScheduleDeploymentFlow(page));
       }
       if (roleAudit.role === "client") {
-        results.push({ type: "interaction", role: roleAudit.role, label: "chat-widget", result: await auditChatWidget(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "goal-data-flow", result: await auditGoalDataFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "notes-data-flow", result: await auditNotesDataFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "health-record-data-flow", result: await auditHealthRecordDataFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "profile-update-flow", result: await auditProfileUpdateFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "blood-pressure-flow", result: await auditBloodPressureFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "vault-flow", result: await auditVaultFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "vault-ai-flow", result: await auditVaultAiFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "inbox-flow", result: await auditInboxFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "api-flow", result: await auditApiFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "merch-checkout-flow", result: await auditMerchCheckoutFlow(page) });
-        results.push({ type: "workflow", role: roleAudit.role, label: "payment-provider-flow", result: await auditPaymentProviderFlow(page) });
+        await runAuditStep(results, { type: "interaction", role: roleAudit.role, label: "chat-widget" }, () => auditChatWidget(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "goal-data-flow" }, () => auditGoalDataFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "notes-data-flow" }, () => auditNotesDataFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "health-record-data-flow" }, () => auditHealthRecordDataFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "profile-update-flow" }, () => auditProfileUpdateFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "blood-pressure-flow" }, () => auditBloodPressureFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "vault-flow" }, () => auditVaultFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "vault-ai-flow" }, () => auditVaultAiFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "inbox-flow" }, () => auditInboxFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "api-flow" }, () => auditApiFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "merch-checkout-flow" }, () => auditMerchCheckoutFlow(page));
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "payment-provider-flow" }, () => auditPaymentProviderFlow(page));
       }
       if (roleAudit.role === "admin") {
-        results.push({ type: "workflow", role: roleAudit.role, label: "admin-mutation-flow", result: await auditAdminMutationFlow(page) });
+        await runAuditStep(results, { type: "workflow", role: roleAudit.role, label: "admin-mutation-flow" }, () => auditAdminMutationFlow(page));
       }
       for (const entry of roleAudit.pages) {
         for (const viewportName of entry.viewports) {
-          results.push(await capture(page, entry, viewportName, roleAudit.role));
+          await runCaptureStep(results, { type: "page", role: roleAudit.role, label: entry.label, path: entry.path, viewport: viewportName }, () => capture(page, entry, viewportName, roleAudit.role));
         }
       }
       await context.close();
+    }
     }
   } finally {
     await browser.close();
@@ -1498,7 +1783,8 @@ async function run() {
     baseUrl,
     resultCount: results.length,
     findings: results
-      .filter((item) => item.result?.stayedOnLogin === false
+      .filter((item) => item.error
+        || item.result?.stayedOnLogin === false
         || item.result?.hasErrorText === false
         || item.result?.passwordToggleWorked === false
         || item.result?.after === false
@@ -1592,6 +1878,7 @@ async function run() {
         status: item.status,
         finalUrl: item.finalUrl,
         responseError: item.responseError,
+        error: item.error,
         result: item.result,
         hasHorizontalOverflow: item.diagnostics?.hasHorizontalOverflow,
         consoleMessages: item.consoleMessages,
@@ -1605,6 +1892,9 @@ async function run() {
   await fs.writeFile(path.join(outputDir, "results.json"), JSON.stringify(results, null, 2), "utf8");
   await fs.writeFile(path.join(outputDir, "summary.json"), JSON.stringify(summary, null, 2), "utf8");
   console.log(JSON.stringify(summary, null, 2));
+  if (process.env.AUDIT_FAIL_ON_WORKFLOW_FINDING === "1" && summary.findings.length) {
+    process.exitCode = 2;
+  }
 }
 
 run().catch((error) => {

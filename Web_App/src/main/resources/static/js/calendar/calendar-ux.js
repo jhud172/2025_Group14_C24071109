@@ -986,6 +986,7 @@ function initCalendarUx() {
     function openScheduleDrawer() {
         if (!scheduleDrawer) return;
         lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        scheduleDrawer.removeAttribute("inert");
         scheduleDrawer.classList.add("open");
         scheduleDrawer.setAttribute("aria-hidden", "false");
         document.body.classList.add("calendar-schedule-open");
@@ -1000,12 +1001,22 @@ function initCalendarUx() {
         if (selectedScheduleId && previewEnabled) {
             activateSchedule(selectedScheduleId, true).catch((error) => console.error(error));
         }
+        const focusDrawerWhenVisible = () => {
+            if (!scheduleDrawer.classList.contains("open")) return;
+            if (window.getComputedStyle(scheduleDrawer).visibility !== "visible") {
+                window.requestAnimationFrame(focusDrawerWhenVisible);
+                return;
+            }
+            scheduleDrawer.querySelector("[data-drawer-close]")?.focus();
+        };
+        window.requestAnimationFrame(focusDrawerWhenVisible);
     }
 
     function closeScheduleDrawer(options = {}) {
         if (!scheduleDrawer) return;
         scheduleDrawer.classList.remove("open");
         scheduleDrawer.setAttribute("aria-hidden", "true");
+        scheduleDrawer.setAttribute("inert", "");
         document.body.classList.remove("calendar-schedule-open");
         document.body.style.overflow = "";
         if (!options.keepPreview) {
@@ -1030,8 +1041,28 @@ function initCalendarUx() {
     scheduleDrawer?.querySelector("[data-drawer-close]")?.addEventListener("click", closeScheduleDrawer);
 
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && scheduleDrawer?.classList.contains("open")) {
+        if (!scheduleDrawer?.classList.contains("open")) return;
+        if (e.key === "Escape") {
             closeScheduleDrawer();
+            return;
+        }
+        if (e.key === "Tab") {
+            const focusable = Array.from(scheduleDrawer.querySelectorAll(
+                'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )).filter((element) => !element.closest("[hidden]") && element.getClientRects().length > 0);
+            if (!focusable.length) {
+                e.preventDefault();
+                return;
+            }
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
         }
     });
 

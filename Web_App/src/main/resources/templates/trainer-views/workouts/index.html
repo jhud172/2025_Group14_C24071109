@@ -6,26 +6,29 @@
     <div th:fragment="content">
         <div class="workout-studio role-surface" th:attr="data-role-surface=${roleSurface.roleKey}" aria-label="Workout Studio">
             <!-- Mode Navigation -->
-            <nav class="studio-mode-nav">
-                <div class="studio-mode-tab active" data-mode="my-workouts">
+            <div class="studio-mode-nav" role="tablist" aria-label="Workout studio views">
+                <button type="button" id="studio-tab-my-workouts" class="studio-mode-tab active" data-mode="my-workouts"
+                        role="tab" aria-selected="true" aria-controls="studio-panel-my-workouts" tabindex="0">
                     <svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                     My Workouts
-                </div>
-                <div class="studio-mode-tab" data-mode="library">
+                </button>
+                <button type="button" id="studio-tab-library" class="studio-mode-tab" data-mode="library"
+                        role="tab" aria-selected="false" aria-controls="studio-panel-library" tabindex="-1">
                     <svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
                     Exercise Library
-                </div>
-                <div class="studio-mode-tab" data-mode="builder">
+                </button>
+                <button type="button" id="studio-tab-builder" class="studio-mode-tab" data-mode="builder"
+                        role="tab" aria-selected="false" aria-controls="studio-panel-builder" tabindex="-1">
                     <svg class="mode-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
                     Builder
-                </div>
-            </nav>
+                </button>
+            </div>
 
             <div th:if="${!roleSurface.coachingToolsPrimary}" class="role-surface__notice mb-6">
                 This is a personal account tool. It does not publish workouts to gym members or change platform content.
@@ -33,7 +36,8 @@
             </div>
 
             <!-- MY WORKOUTS MODE -->
-            <div class="studio-mode-panel active" data-mode="my-workouts">
+            <div class="studio-mode-panel active" id="studio-panel-my-workouts" data-mode="my-workouts"
+                 role="tabpanel" aria-labelledby="studio-tab-my-workouts">
                 <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 class="text-3xl font-bold text-slate-900" th:text="${roleSurface.workoutHeading}">My workouts</h1>
@@ -118,7 +122,8 @@
             </div>
 
             <!-- EXERCISE LIBRARY MODE -->
-            <div class="studio-mode-panel" data-mode="library">
+            <div class="studio-mode-panel" id="studio-panel-library" data-mode="library"
+                 role="tabpanel" aria-labelledby="studio-tab-library" hidden>
                 <div class="mb-6">
                     <h1 class="text-3xl font-bold text-slate-900">Exercise Library</h1>
                     <p class="mt-1 text-sm text-slate-600">Browse and search exercises to build your workouts</p>
@@ -131,20 +136,21 @@
                             <svg class="library-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
-                            <input type="text" class="library-search-input" placeholder="Search exercises by name or muscle group...">
+                            <label class="sr-only" for="exercise-library-search">Search the exercise library</label>
+                            <input id="exercise-library-search" type="text" class="library-search-input" placeholder="Search exercises by name or muscle group...">
                         </div>
                         
                         <!-- Filters -->
                         <div class="library-filters">
-                            <div class="library-filter-tag" data-filter="chest">Chest</div>
-                            <div class="library-filter-tag" data-filter="back">Back</div>
-                            <div class="library-filter-tag" data-filter="shoulders">Shoulders</div>
-                            <div class="library-filter-tag" data-filter="legs">Legs</div>
-                            <div class="library-filter-tag" data-filter="arms">Arms</div>
-                            <div class="library-filter-tag" data-filter="core">Core</div>
-                            <div class="library-filter-tag" data-filter="1">Beginner</div>
-                            <div class="library-filter-tag" data-filter="2">Intermediate</div>
-                            <div class="library-filter-tag" data-filter="3">Advanced</div>
+                            <button type="button" class="library-filter-tag" data-filter="chest" aria-pressed="false">Chest</button>
+                            <button type="button" class="library-filter-tag" data-filter="back" aria-pressed="false">Back</button>
+                            <button type="button" class="library-filter-tag" data-filter="shoulders" aria-pressed="false">Shoulders</button>
+                            <button type="button" class="library-filter-tag" data-filter="legs" aria-pressed="false">Legs</button>
+                            <button type="button" class="library-filter-tag" data-filter="arms" aria-pressed="false">Arms</button>
+                            <button type="button" class="library-filter-tag" data-filter="core" aria-pressed="false">Core</button>
+                            <button type="button" class="library-filter-tag" data-filter="1" aria-pressed="false">Beginner</button>
+                            <button type="button" class="library-filter-tag" data-filter="2" aria-pressed="false">Intermediate</button>
+                            <button type="button" class="library-filter-tag" data-filter="3" aria-pressed="false">Advanced</button>
                         </div>
                     </div>
 
@@ -159,7 +165,8 @@
             </div>
 
             <!-- BUILDER MODE (using existing edit page structure) -->
-            <div class="studio-mode-panel" data-mode="builder">
+            <div class="studio-mode-panel" id="studio-panel-builder" data-mode="builder"
+                 role="tabpanel" aria-labelledby="studio-tab-builder" hidden>
                 <div class="mb-6 flex items-center justify-between">
                     <div>
                         <h1 class="text-3xl font-bold text-slate-900">Workout Builder</h1>
@@ -330,12 +337,12 @@
             <div class="custom-exercise-body">
                 <form class="custom-exercise-form">
                     <div class="custom-exercise-form-group">
-                        <label class="custom-exercise-label">Exercise Name</label>
-                        <input type="text" class="custom-exercise-input" placeholder="Barbell Squat">
+                        <label class="custom-exercise-label" for="custom-exercise-name">Exercise name</label>
+                        <input id="custom-exercise-name" type="text" class="custom-exercise-input" placeholder="Barbell Squat">
                     </div>
                     <div class="custom-exercise-form-group">
-                        <label class="custom-exercise-label">Category</label>
-                        <select class="custom-exercise-select">
+                        <label class="custom-exercise-label" for="custom-exercise-category">Category</label>
+                        <select id="custom-exercise-category" class="custom-exercise-select">
                             <option value="">Select category</option>
                             <option value="Chest">Chest</option>
                             <option value="Back">Back</option>
@@ -346,21 +353,21 @@
                         </select>
                     </div>
                     <div class="custom-exercise-form-group">
-                        <label class="custom-exercise-label">Description</label>
-                        <textarea class="custom-exercise-textarea" rows="3" placeholder="Brief description of the exercise"></textarea>
+                        <label class="custom-exercise-label" for="custom-exercise-description">Description</label>
+                        <textarea id="custom-exercise-description" class="custom-exercise-textarea" rows="3" placeholder="Brief description of the exercise"></textarea>
                     </div>
                     <div class="custom-exercise-form-group">
-                        <label class="custom-exercise-label">How To</label>
-                        <textarea class="custom-exercise-textarea" rows="4" placeholder="Step-by-step instructions"></textarea>
+                        <label class="custom-exercise-label" for="custom-exercise-how-to">How to</label>
+                        <textarea id="custom-exercise-how-to" class="custom-exercise-textarea" rows="4" placeholder="Step-by-step instructions"></textarea>
                     </div>
                     <div class="custom-exercise-form-group">
-                        <label class="custom-exercise-label">Video URL (YouTube)</label>
-                        <input type="url" class="custom-exercise-input" placeholder="https://youtube.com/watch?v=...">
+                        <label class="custom-exercise-label" for="custom-exercise-video-url">Video URL (YouTube)</label>
+                        <input id="custom-exercise-video-url" type="url" class="custom-exercise-input" placeholder="https://youtube.com/watch?v=...">
                     </div>
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div class="custom-exercise-form-group">
-                            <label class="custom-exercise-label">Equipment</label>
-                            <select class="custom-exercise-select">
+                            <label class="custom-exercise-label" for="custom-exercise-equipment">Equipment</label>
+                            <select id="custom-exercise-equipment" class="custom-exercise-select">
                                 <option value="Bodyweight">Bodyweight</option>
                                 <option value="Barbell">Barbell</option>
                                 <option value="Dumbbell">Dumbbell</option>
@@ -371,8 +378,8 @@
                             </select>
                         </div>
                         <div class="custom-exercise-form-group">
-                            <label class="custom-exercise-label">Difficulty</label>
-                            <select class="custom-exercise-select">
+                            <label class="custom-exercise-label" for="custom-exercise-difficulty">Difficulty</label>
+                            <select id="custom-exercise-difficulty" class="custom-exercise-select">
                                 <option value="1">Beginner</option>
                                 <option value="2">Intermediate</option>
                                 <option value="3">Advanced</option>
@@ -392,6 +399,6 @@
     </div>
 
     <div th:fragment="pageScripts">
-        <script src="/js/workouts/workout-studio.js" defer></script>
+        <script th:src="@{/js/workouts/workout-studio.js(v=${assetVersion})}" defer></script>
     </div>
 </th:block>

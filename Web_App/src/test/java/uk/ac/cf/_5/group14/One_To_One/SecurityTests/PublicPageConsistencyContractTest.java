@@ -62,7 +62,11 @@ class PublicPageConsistencyContractTest {
         assertThat(script)
                 .contains("IntersectionObserver")
                 .contains("prefers-reduced-motion")
-                .contains("observer.unobserve");
+                .contains("observer.unobserve")
+                .contains("requestAnimationFrame")
+                .contains("window.addEventListener('scroll', queueRevealCheck, { passive: true })")
+                .contains("document.addEventListener('focusin', revealFocusedSection)")
+                .contains("section.scrollIntoView({ block: 'nearest', behavior: 'auto' })");
         assertThat(home).contains("/js/public/public-sections.js(v=${assetVersion})");
         assertThat(about).contains("/js/public/public-sections.js(v=${assetVersion})");
         assertThat(faq).contains("/js/public/public-sections.js(v=${assetVersion})");

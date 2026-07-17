@@ -185,11 +185,12 @@
                 </div>
             </div>
 
-            <div th:if="${devPageAccessSuccess}" class="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200" th:text="${devPageAccessSuccess}">Saved.</div>
-            <div th:if="${devPageAccessError}" class="mt-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200" th:text="${devPageAccessError}">Error.</div>
+            <div th:if="${devPageAccessSuccess}" role="status" class="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200" th:text="${devPageAccessSuccess}">Saved.</div>
+            <div th:if="${devPageAccessError}" role="alert" class="mt-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200" th:text="${devPageAccessError}">Error.</div>
 
             <div class="dashboard-table-wrap mt-5">
                 <table class="dashboard-table">
+                    <caption class="sr-only">Dev Hub page access controls</caption>
                     <thead>
                         <tr class="border-b border-slate-200 text-left dark:border-slate-700">
                             <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Page</th>
@@ -221,7 +222,7 @@
                                     <select name="mode"
                                             class="dashboard-field min-w-[11rem]"
                                             data-dev-page-select
-                                            th:attr="data-initial=${page.currentMode}">
+                                            th:attr="data-initial=${page.currentMode},aria-label=${'Access mode for ' + page.title}">
                                         <option th:each="mode : ${devPageModes}"
                                                 th:value="${mode.name()}"
                                                 th:text="${#strings.capitalize(#strings.toLowerCase(mode.name()))}"
@@ -229,8 +230,9 @@
                                     </select>
                                     <button type="submit"
                                             class="dashboard-action dashboard-action--primary disabled:cursor-not-allowed disabled:opacity-50"
-                                            data-dev-page-submit
-                                            disabled>
+                                             data-dev-page-submit
+                                             th:attr="aria-label=${'Save access mode for ' + page.title}"
+                                             disabled>
                                         Save
                                     </button>
                                 </form>

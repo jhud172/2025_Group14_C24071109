@@ -78,6 +78,52 @@ class DashboardConsistencyContractTest {
                 .contains("Open goals");
     }
 
+    @Test
+    void clientDashboardRevealKeepsContentAvailableToScrollFocusAndReducedMotion() throws IOException {
+        String script = read("src/main/resources/static/js/dashboard/client-dashboard-page.js");
+        String stylesheet = read("src/main/resources/static/css/components/dashboard/client-dashboard-refresh.css");
+
+        assertThat(script)
+                .contains("window.addEventListener(\"scroll\", queueRevealCheck")
+                .contains("page.addEventListener(\"focusin\", revealFocusedCard)")
+                .contains("card.scrollIntoView({ block: \"nearest\", behavior: \"auto\" })")
+                .contains("revealReachedCards();");
+        assertThat(stylesheet)
+                .contains("@media (prefers-reduced-motion: reduce)")
+                .contains(".cd-inview-reveal")
+                .contains("opacity: 1 !important")
+                .contains("transform: none !important");
+    }
+
+    @Test
+    void clientDashboardStartsWithAReleaseQaHeadingAndReflowsAtHighZoom() throws IOException {
+        String template = read("src/main/resources/templates/client-views/dashboard/fragments/client-dashboard-shell.html");
+        String stylesheet = read("src/main/resources/static/css/components/dashboard/client-dashboard-refresh.css");
+
+        assertThat(template)
+                .contains("<h1 class=\"sr-only\">Client dashboard</h1>");
+        assertThat(stylesheet)
+                .contains("@media (max-width: 360px)")
+                .contains(".cd-primary-actions,")
+                .contains(".cd-coach-spotlight__metrics,")
+                .contains("grid-template-columns: minmax(0, 1fr)")
+                .contains(".cd-inline-link")
+                .contains("min-width: 45px")
+                .contains("min-height: 45px")
+                .contains("overflow-wrap: anywhere");
+    }
+
+    @Test
+    void dashboardTourKeepsAVisibleFocusIndicatorWhenTheTrapWraps() throws IOException {
+        String stylesheet = read("src/main/resources/static/css/components/tutorial/site-tour.css");
+
+        assertThat(stylesheet)
+                .contains(".site-tour__button:focus,")
+                .contains(".site-tour__skip:focus,")
+                .contains("outline: 3px solid var(--tour-accent-soft)")
+                .contains("outline-offset: 2px");
+    }
+
     private static void assertDashboard(String relativePath, String roleClass) throws IOException {
         assertThat(read("src/main/resources/templates/" + relativePath))
                 .contains("app-dashboard")

@@ -1,8 +1,8 @@
 # One To One — full-site UX, motion and visual-quality audit
 
-**Audit date:** 13 July 2026; implementation status updated 15 July 2026
+**Audit date:** 13 July 2026; implementation status updated 17 July 2026
 **Environment:** local Spring application at `http://localhost:8081`  
-**Status:** audit complete; Phase 0, Phase 1 and website stabilisation are complete; Phase 2 is in progress
+**Status:** audit complete; Phase 0, Phase 1, website stabilisation and Phase 2 are complete; Phase 3 browser/automated and available Windows UI release QA is complete, with audible screen-reader and physical-device confirmation remaining
 
 ## Completion snapshot
 
@@ -12,7 +12,7 @@
 | Authenticated roles | Complete | Client, trainer, gym admin and platform admin journeys checked. |
 | Shared product surfaces | Complete | Inbox, workouts, goals, calendar, profile, Charlie and platform navigation checked. |
 | Responsive and motion | Complete | Desktop and 390 × 844 mobile states, overlay timing, overflow and layout transitions checked. |
-| Source and automated verification | Complete | Template/CSS/JS inventory, route checks, root-cause tracing and current 483-test Gradle run completed. |
+| Source and automated verification | Complete | Template/CSS/JS inventory, route checks, root-cause tracing and current 495-test Gradle run completed. |
 | Phase 0 implementation | Complete | Release-blocking calendar, gym, pricing, dashboard and authenticated mobile-layer defects repaired; 456 tests pass. |
 | Phase 1 continuity | Complete | One shared overlay owner, named motion/layer tokens and explicit high-risk transitions implemented; 461 tests pass. |
 | Phase 1 performance and shell continuity | Complete | Core CSS reduced by about 83%, feature styles load by route, fixed surfaces share measured reservations, and gzip/cache revalidation is verified; 467 tests pass. |
@@ -20,9 +20,90 @@
 | Phase 2 role-aware authentication/onboarding | Complete | Semantic role panels, grouped recovery, destination enforcement and role-specific onboarding implemented; 472 tests pass. |
 | Phase 2 four-role dashboard consistency | Complete | Shared typography, measured contrast, action hierarchy and useful empty states applied across client, trainer, gym-admin and platform-admin dashboards; 477 tests pass. |
 | Phase 2 role-aware shared surfaces | Complete | Inbox, support, shared-tool intent, platform actions and useful recovery states now match client, trainer, gym-admin and platform-admin roles; 483 tests pass. |
-| Assistive technology and physical devices | Release QA required | Screen-reader output, real touch devices, GPU performance, 200%/400% zoom and measured contrast require dedicated hardware/tool passes. |
+| Phase 2 concise public journeys | Complete | Home, About, Pricing and FAQ are shorter, share one restrained transition hierarchy and preserve their routes, SEO-facing titles and functional actions; 486 tests pass. |
+| Phase 3 public accessibility baseline | Complete | Public keyboard/focus behaviour, mobile-menu focus return, FAQ controls, reduced motion and 200% reflow equivalent pass in the browser. |
+| Phase 3 authentication and role-dashboard baseline | Complete | Login tabs, onboarding focus, client reveal availability and all four dashboards pass representative keyboard, reduced-motion, 390 px and 200% reflow checks. |
+| Phase 3 shared operational baseline | Complete | Calendar, inbox, workouts, goals, support and platform-admin operations pass keyboard/overlay, reduced-motion, 200% and initial 400% CSS-viewport checks. |
+| Assistive-technology browser evidence | Complete | Accessibility-tree structure/names, validation recovery, representative native high zoom, cross-role 400%-equivalent reflow, forced colours and critical 44 px targets pass. |
+| Audible screen reader and physical devices | Human gate required | Narrator's Windows UI tree and visible scan order were exercised, but audio cannot be heard or judged here; NVDA is not installed, and real touch/GPU behaviour still needs human/device confirmation. |
 
-**Next implementation step:** continue Phase 2 by shortening long public pages and standardising section transitions with the existing motion tokens.
+**Next implementation step:** complete the final supervised Phase 3 gate with audible Narrator/NVDA output and a physical touch device, repairing only reproduced defects.
+
+## Phase 3 verification update — final supervised gate attempted
+
+Completed on 17 July 2026:
+
+- Launched Windows Narrator against the real Chrome sign-up window. Windows UI Automation exposed the banner, main landmark, ordered account-type H1, named Client/Trainer/Gym links and footer navigation; Narrator's visible scan highlight advanced through the links in the expected order. Narrator was exited after the check.
+- Re-ran the critical client, trainer, gym-admin and platform-admin journeys at **390 × 844**. The checked routes retained one H1, one main landmark, no page-level horizontal overflow and no unnamed visible controls.
+- Repaired reproduced target-size defects in the authenticated brand, client dashboard actions, trainer inbox, gym applications and platform feedback. The shortest final client inline action measures **45 × 45 px** after reveal.
+- Explicitly labelled platform feedback status/reply controls and versioned the shared inbox controller URL so browser caches receive the corrected action classes.
+- Reverified the calendar drawer and Workout Studio custom-exercise panel for initial focus, Tab/Shift+Tab containment, Escape close, `inert`/`aria-hidden` restoration and opener focus return.
+- Reverified forced colours and reduced motion on the populated Dev Hub table: its caption, four column headers and 18 rows including the header remain available, with a visible **3 px** keyboard focus outline.
+- Rebuilt production CSS, passed `node --check` for seven changed controllers and completed **495 tests: 495 passed, 0 failed, 0 skipped**. The final delivery token is **`20260717p17`** and HTTP 200 remains available on port 8081 using local H2.
+- Phase 3 is **not formally closed**. Audible Narrator output cannot be captured or judged in this environment, NVDA is not installed, and no physical touch device is exposed. Spoken reading/validation/live announcements and real-device touch/reflow/fixed-control clearance remain the final human gate.
+
+## Phase 3 verification update — assistive-technology and high-zoom browser QA complete
+
+Completed on 17 July 2026:
+
+- Checked login/sign-up, client, trainer, gym-admin and platform-admin dashboards, calendar, inbox, workouts, goals, support and the populated Dev Hub table through Chromium's accessibility tree. Verified page landmarks/headings, visible control names, role-aware support headings and live status/error regions.
+- Exercised native Chrome **200% and 400% zoom** on representative login/client journeys and repeated cross-role reflow at a **310 px CSS viewport**. The final login card stays within 16–284 px of a 300 px layout viewport; the repaired client dashboard reports 300/300 px at the document and 268/268 px for both shell and main content.
+- Repaired the missing client-dashboard H1, narrow primary-action decoration overflow, coach identity wrapping, undersized dashboard flyout and Workout Studio custom-exercise controls.
+- Raised authentication links/tabs/password controls, shared compact profile actions, calendar controls, workout tabs, inbox notification actions, guest navigation and mobile footer links to true **44 × 44 px** minimum targets. The final 390 × 844 login scan returns no undersized visible controls.
+- Verified keyboard-only error recovery: empty login submits focus `username` and expose “Please fill out this field”; empty support submission focuses its first invalid required select. Login role tabs retain roving Arrow/Home/End behaviour.
+- Verified Windows forced colours together with reduced motion on the 17-row platform-admin Dev Hub table. The caption and four headers remain available and keyboard interaction gives the focused select a **3 px** system-colour outline.
+- Rebuilt production CSS, passed `node --check` for login, calendar, client dashboard, goals, inbox, public-section and workout controllers, and completed **494 tests: 494 passed, 0 failed, 0 skipped**. The final delivery token is **`20260717p15`** and the application returns HTTP 200 on port 8081 using local H2.
+- Evidence screenshots are in `Web_App/output/playwright/`, including the final mobile login, client 400%-equivalent dashboard, populated admin table and forced-colours table.
+- Limitation: NVDA is not installed. Windows Narrator is installed but its audible output cannot be captured or meaningfully judged by the automated session. Spoken labels, reading order and live announcements remain the final supervised manual gate; this result does not claim an audible screen-reader pass.
+
+## Phase 3 verification update — shared operational baseline complete
+
+Completed on 17 July 2026:
+
+- Browser-checked calendar month/week, inbox/list/thread, workout management, goals and support at **1280 × 900**, **640 px**, **390 × 844** and **320 px**. The 640 px and 320 px CSS viewports represent 200% and initial 400% reflow equivalents from a 1280 px desktop layout; no checked route developed page-level horizontal overflow.
+- Added one H1 to calendar month/week and repaired the schedule drawer with labelled modal semantics, closed-state `inert`, visibility-aware initial focus, Tab/Shift+Tab containment, Escape close and trigger return. The same behaviour passes with reduced motion active.
+- Converted goal timeframes and Workout Studio modes to roving tabs with Arrow Left/Right and Home/End. Exercise filters are now buttons with `aria-pressed`, and the exercise-library search has an accessible label.
+- Linked the custom-exercise fields to visible labels, completed its focus trap and Cancel behaviour, and exposed workout feedback with status/alert live semantics.
+- Narrowed the mobile inbox Send action so Quick Actions and Charlie no longer cover it at **390 × 844**.
+- Added unique names and captions to platform-admin operational controls, status/alert semantics to save feedback, and an independently scrollable payment-attempt table.
+- Corrected the stale off-platform-payment view path. `/admin/off-platform-payments` now returns HTTP 200 instead of the verified 500; dashboard, gym applications and feedback also returned HTTP 200 across the checked widths.
+- Support validation correctly moved focus to the first invalid required control; no support repair was required.
+- Versioned calendar, goals and workout scripts with the shared cache token **`20260717p10`** so changed interaction controllers cannot be mixed with old templates.
+- Rebuilt production CSS, passed JavaScript syntax checks and completed the full Gradle suite: **490 tests, 490 passed, 0 failed, 0 skipped**.
+- Checked browser consoles were error-free. Reduced-motion checks collapsed animation/transition durations to `0.01 ms` without hiding content.
+- Phase 3 remains in progress: real screen-reader output, browser-native zoom, forced colours, physical touch devices and throttled performance remain release-QA work.
+
+## Phase 3 verification update — public, authentication and dashboard baselines complete
+
+Started on 17 July 2026:
+
+- Checked public keyboard order and visible focus on desktop Home.
+- Verified the 390 × 844 mobile menu opens with Enter, moves focus through its links, closes with Escape and restores focus to the navigation trigger.
+- Verified FAQ search filtering and disclosure expansion from the keyboard with a visible 3 px focus indicator.
+- Verified reduced-motion rendering on Home, About, Pricing and FAQ; all sections remain visible and motion durations collapse to `0.01 ms`.
+- Verified the 200% desktop reflow equivalent at a 640 px CSS viewport on all four routes with no horizontal overflow.
+- Repaired public section motion so rapid scrolling and keyboard focus cannot leave skipped sections visually hidden.
+- Browser-checked login and sign-up presentation at desktop and **390 × 844**, then verified login reflow at a **640 px CSS viewport** and reduced motion.
+- Corrected the login role tabs so Arrow Left/Right and Home/End move focus, selection, `tabindex` and panel labelling together.
+- Browser-checked client, trainer, gym-admin and platform-admin dashboards at **1280 × 900**, **390 × 844** and the **640 px** 200% reflow equivalent with no horizontal overflow.
+- Repaired the client dashboard's viewport reveals so rapid scroll, direct keyboard focus and reduced-motion users never lose later content to an unreached observer threshold.
+- Ensured the dashboard tour's focus trap retains a visible 3 px focus indicator when it wraps.
+- Representative authenticated reduced-motion checks reported zero animated main-content elements; browser consoles remained free of errors after the repaired paths were retested.
+- Added `LoginPageAccessibilityContractTest` and expanded `DashboardConsistencyContractTest`; cache-safe delivery advanced to **`20260717p6`**.
+- Full Gradle suite: **489 tests, 489 passed, 0 failed, 0 skipped**.
+- This earlier checkpoint is superseded by the shared operational baseline above; real screen-reader output, browser-native 400% zoom, physical touch devices and performance throttling remain incomplete.
+
+## Phase 2 implementation update — fourth workstream complete
+
+Completed on 17 July 2026:
+
+- Reduced Home, About and Pricing to focused four-stage journeys and kept FAQ centred on search, five common answers and support recovery.
+- Standardised public headings, proof/detail rows, action hierarchy and final calls to action without adding a new design system.
+- Reused existing route-duration/easing tokens for restrained section reveals and retained an explicit reduced-motion fallback.
+- Preserved pricing checkout and subscription branches, public destinations, page titles, British English and responsive behaviour.
+- Added `PublicPageConsistencyContractTest` and advanced the cache-safe delivery token to **`20260717p4`**.
+- Rebuilt production CSS and browser-checked Home, About, Pricing and FAQ at **1280 × 900** and **390 × 844** with no horizontal overflow.
+- Full Gradle suite: **486 tests, 486 passed, 0 failed, 0 skipped**.
 
 ## Phase 2 implementation update — third workstream complete
 
@@ -584,27 +665,29 @@ Use `cubic-bezier(0.22, 1, 0.36, 1)` for entrances and a faster ease-in for exit
 - **Complete:** make authentication and onboarding role-aware.
 - **Complete for client, trainer, gym-admin and platform-admin dashboards:** apply shared typography, measured contrast, action hierarchy and useful empty-state standards.
 - **Complete:** make shared inbox, support and tool copy role-aware.
-- Extend the completed standards to remaining shared and public surfaces as those workstreams are addressed.
-- Shorten public pages and standardise section transitions.
-- **Exit:** all roles share the same visual/recovery language.
+- **Complete:** extend the completed standards to the remaining shared and public surfaces.
+- **Complete:** shorten public pages and standardise section transitions.
+- **Exit met:** all roles and public journeys share the intended visual/recovery language.
 
 ### Phase 3 — polish and verification
 
 - Add purposeful calendar/page/list transitions using tokens.
-- Run keyboard, screen-reader and reduced-motion passes.
+- **Public, authentication, four-role dashboard and shared operational baselines complete:** keyboard/focus, reduced motion and 200% reflow equivalents pass; shared operations also pass an initial 400% CSS-viewport equivalent.
+- **Complete for browser/automated QA:** accessibility-tree output, representative native 200%/400% zoom, cross-role 400%-equivalent reflow, forced colours, keyboard validation recovery and critical 44 × 44 px targets.
+- **Next:** supervised audible Narrator/NVDA and physical touch-device confirmation across critical journeys.
 - Run regression at 390, 768, 1024, 1280, 1366, 1440, 1536 and 1920 px.
-- Test throttled CPU/network and 200% zoom.
+- **Representative native 200%/400% and cross-role CSS-viewport baselines complete; remaining:** audible assistive technology, physical-device and throttled CPU/network testing.
 - **Exit:** no clipping, gaps, fixed-layer collisions, inaccessible hidden content or motion-related context loss.
 
 ## Accessibility caveat
 
-Screenshots can reveal hierarchy, contrast concerns and clipping, but do **not** prove WCAG conformance. Release QA still needs keyboard navigation, focus order/trapping, screen-reader announcements, 200%/400% zoom, measured contrast, touch targets, reduced motion and axe/Lighthouse checks. Hidden role panels and closed Charlie content need particular attention.
+Screenshots and accessibility-tree output can reveal hierarchy, names, contrast concerns and clipping, but do **not** prove WCAG conformance. The public, authentication, four-role dashboard, shared operational and browser release-QA baselines are complete, including representative native high zoom, forced colours and critical touch targets. Release QA still needs supervised audible screen-reader announcements, a physical touch device, wider measured contrast and axe/Lighthouse checks. Closed Charlie content and destructive production-like table actions still need particular care.
 
 ## Audit limits and closure
 
 The audit itself is complete. No remaining repository or browser access blocker prevented representative coverage of the public, client, trainer, gym-admin, platform-admin and shared experiences. The remaining work is implementation and release validation, not additional discovery.
 
-Not fully verifiable in this local pass: live payment completion, external email/verification delivery, destructive production-like admin operations, real assistive-technology output, physical-device GPU/touch behaviour and measured 200%/400% zoom. These are explicitly assigned to Phase 3 release QA.
+Not fully verifiable in this local pass: live payment completion, external email/verification delivery, destructive production-like admin operations, audible assistive-technology output, physical-device GPU/touch behaviour and exhaustive native zoom on every route. These remain explicit release gates.
 
 ## Definition of done
 

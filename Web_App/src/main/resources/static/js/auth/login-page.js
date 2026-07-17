@@ -412,17 +412,22 @@
         option.addEventListener("click", () => activateRole(option.dataset.role, true));
         option.addEventListener("keydown", (event) => {
             const currentIndex = roleIndexMap[option.dataset.role];
+            let nextRole = null;
 
             if (event.key === "ArrowRight") {
-                event.preventDefault();
-                activateRole(roles[(currentIndex + 1) % roles.length], true);
-                return;
+                nextRole = roles[(currentIndex + 1) % roles.length];
+            } else if (event.key === "ArrowLeft") {
+                nextRole = roles[(currentIndex - 1 + roles.length) % roles.length];
+            } else if (event.key === "Home") {
+                nextRole = roles[0];
+            } else if (event.key === "End") {
+                nextRole = roles[roles.length - 1];
             }
 
-            if (event.key === "ArrowLeft") {
-                event.preventDefault();
-                activateRole(roles[(currentIndex - 1 + roles.length) % roles.length], true);
-            }
+            if (!nextRole) return;
+            event.preventDefault();
+            activateRole(nextRole, true);
+            Array.from(roleOptions).find((roleOption) => roleOption.dataset.role === nextRole)?.focus();
         });
     });
 

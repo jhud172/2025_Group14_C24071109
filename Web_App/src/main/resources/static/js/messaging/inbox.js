@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isUnread) {
             const markRead = document.createElement("button");
             markRead.type = "button";
-            markRead.className = "text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200";
+            markRead.className = "inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200";
             markRead.textContent = "Mark read";
             markRead.addEventListener("click", async (e) => {
                 e.stopPropagation();
@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (notification.ctaUrl) {
             const cta = document.createElement("a");
             cta.href = notification.ctaUrl;
-            cta.className = "inline-flex w-fit items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200";
+            cta.className = "inline-flex min-h-11 w-fit items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200";
             cta.textContent = "Open";
             cta.addEventListener("click", async (e) => {
                 e.stopPropagation();

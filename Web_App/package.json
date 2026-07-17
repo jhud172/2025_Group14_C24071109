@@ -10,7 +10,13 @@
     "build:css": "npm run build:css:core && npm run build:css:bundles",
     "build:css:core": "postcss src/main/resources/static/css/tailwind.css -o src/main/resources/static/css/app.css --env production",
     "build:css:bundles": "postcss \"src/main/resources/static/css/entries/*.css\" --dir src/main/resources/static/css/bundles --env production",
-    "watch:css": "postcss src/main/resources/static/css/tailwind.css -o src/main/resources/static/css/app.css -w"
+    "watch:css": "postcss src/main/resources/static/css/tailwind.css -o src/main/resources/static/css/app.css -w",
+    "qa:simulate": "node tools/qa/run-site-simulation.mjs",
+    "qa:simulate:standards": "node tools/qa/run-site-simulation.mjs --skip-workflows",
+    "qa:simulate:ci": "node tools/qa/run-site-simulation.mjs --fail-on major",
+    "qa:login:roles": "node tools/qa/run-site-simulation.mjs --login-only --roles trainer,gym --fail-on major",
+    "qa:login:trainer": "node tools/qa/run-site-simulation.mjs --login-only --roles trainer --fail-on major",
+    "qa:login:gym": "node tools/qa/run-site-simulation.mjs --login-only --roles gym --fail-on major"
   },
   "devDependencies": {
     "autoprefixer": "^10.5.0",

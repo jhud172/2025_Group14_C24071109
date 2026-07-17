@@ -7,7 +7,7 @@
     <input type="hidden" id="inbox_csrf" th:value="${_csrf != null ? _csrf.token : ''}" />
     <input type="hidden" id="inbox_csrf_header" th:value="${_csrf != null ? _csrf.headerName : ''}" />
 
-        <div class="role-surface role-surface__page" id="inboxThreadRoot"
+        <div class="role-surface role-surface__page inbox-thread-surface" id="inboxThreadRoot"
             th:attr="data-thread-id=${conversationId}, data-current-user-id=${currentUserId}, data-role-surface=${roleSurface.roleKey}">
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
@@ -118,5 +118,5 @@
 </th:block>
 
 <th:block th:fragment="scripts">
-    <script src="/js/messaging/inbox.js" defer></script>
+    <script th:src="@{/js/messaging/inbox.js(v=${uiCssVersion})}" defer></script>
 </th:block>

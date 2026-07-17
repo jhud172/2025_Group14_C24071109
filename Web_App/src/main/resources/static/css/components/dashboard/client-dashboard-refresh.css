@@ -159,8 +159,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 2.35rem;
-        height: 2.35rem;
+        width: 2.75rem;
+        height: 2.75rem;
         flex-shrink: 0;
         border-radius: 999px;
         border: 1px solid rgba(15, 23, 42, 0.1);
@@ -252,7 +252,9 @@
     }
 
     .cd-inline-link {
-        @apply text-sm font-bold text-emerald-700 transition-colors duration-200;
+        @apply inline-flex items-center justify-center text-sm font-bold text-emerald-700 transition-colors duration-200;
+        min-width: 45px;
+        min-height: 45px;
     }
 
     .cd-inline-link:hover,
@@ -597,7 +599,7 @@
     }
 
     .cd-segmented__button {
-        @apply rounded-full px-4 py-2 text-sm font-black text-slate-600 transition-all duration-200;
+        @apply min-h-11 rounded-full px-4 py-2 text-sm font-black text-slate-600 transition-all duration-200;
     }
 
     .cd-segmented__button.is-active {
@@ -1376,7 +1378,7 @@
     }
 
     .cd-info-pop__button {
-        @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-black text-slate-700 transition-all duration-200;
+        @apply inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-black text-slate-700 transition-all duration-200;
         box-shadow: 0 10px 18px rgba(15, 23, 42, 0.04);
     }
 
@@ -1575,6 +1577,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        min-height: 2.75rem;
         padding: 0.15rem;
         border-radius: 999px;
         background: rgba(15, 23, 42, 0.06);
@@ -3423,6 +3426,49 @@
         }
     }
 
+    @media (max-width: 360px) {
+        .cd-primary-actions,
+        .cd-coach-spotlight__metrics,
+        .cd-profile-pulse__stats,
+        .cd-coach-spotlight__insights {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .cd-primary-cta {
+            min-height: auto;
+            overflow: hidden;
+        }
+
+        .cd-coach-spotlight__banner .profile-identity-banner__row {
+            gap: 0.5rem;
+        }
+
+        .cd-coach-spotlight__banner .profile-identity-banner__avatar {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .cd-coach-spotlight__banner .profile-identity-banner__name-row {
+            flex-wrap: wrap;
+        }
+
+        .cd-coach-spotlight__banner .profile-identity-banner__name,
+        .cd-coach-spotlight__banner .profile-identity-banner__handle {
+            overflow-wrap: anywhere;
+        }
+
+        .cd-coach-metric__label,
+        .cd-coach-metric__value,
+        .cd-coach-metric__meta {
+            overflow-wrap: anywhere;
+        }
+
+        .cd-info-pop__panel {
+            right: -0.25rem;
+            width: calc(100vw - 2.5rem);
+        }
+    }
+
     html.dark .cd-panel,
     html.dark .cd-rail-card,
     html.dark .cd-action-card,
@@ -4113,6 +4159,12 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
+        .cd-inview-reveal {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+        }
+
         .cd-panel,
         .cd-rail-card,
         .cd-link-tile,

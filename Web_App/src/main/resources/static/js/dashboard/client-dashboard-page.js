@@ -178,18 +178,60 @@
             return;
         }
 
+        let revealCheckQueued = false;
+
+        const reveal = (card) => {
+            card.classList.add("is-visible");
+            observer.unobserve(card);
+        };
+
+        const stopRevealChecksWhenComplete = () => {
+            if (cards.some((card) => !card.classList.contains("is-visible"))) return;
+            window.removeEventListener("scroll", queueRevealCheck);
+            window.removeEventListener("resize", queueRevealCheck);
+            page.removeEventListener("focusin", revealFocusedCard);
+        };
+
+        const revealReachedCards = () => {
+            revealCheckQueued = false;
+            cards.forEach((card) => {
+                if (card.classList.contains("is-visible")) return;
+                if (card.getBoundingClientRect().top > window.innerHeight * 0.92) return;
+                reveal(card);
+            });
+            stopRevealChecksWhenComplete();
+        };
+
+        function queueRevealCheck() {
+            if (revealCheckQueued) return;
+            revealCheckQueued = true;
+            window.requestAnimationFrame(revealReachedCards);
+        }
+
+        function revealFocusedCard(event) {
+            const card = event.target.closest(".cd-inview-reveal");
+            if (!card || card.classList.contains("is-visible")) return;
+            reveal(card);
+            card.scrollIntoView({ block: "nearest", behavior: "auto" });
+            stopRevealChecksWhenComplete();
+        }
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (!entry.isIntersecting) return;
-                entry.target.classList.add("is-visible");
-                observer.unobserve(entry.target);
+                reveal(entry.target);
             });
+            stopRevealChecksWhenComplete();
         }, {
             threshold: 0.12,
             rootMargin: "0px 0px -10% 0px"
         });
 
         cards.forEach((card) => observer.observe(card));
+        window.addEventListener("scroll", queueRevealCheck, { passive: true });
+        window.addEventListener("resize", queueRevealCheck);
+        page.addEventListener("focusin", revealFocusedCard);
+        revealReachedCards();
     }
 
     function getDashboardTimeDisplayFormat() {
