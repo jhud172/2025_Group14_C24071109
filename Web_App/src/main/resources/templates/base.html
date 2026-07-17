@@ -6,7 +6,8 @@
              data-lang=${userSettings != null && userSettings.language != null ? userSettings.language : 'en'},
              data-theme=${userSettings != null && userSettings.theme != null ? userSettings.theme.toString().toLowerCase() : 'light'},
              data-colorblind=${userSettings != null && userSettings.colorBlindMode ? 'on' : 'off'}"
-    th:with="authUser=${@authHelper.getAuthenticatedUser()},
+    th:with="assetVersion=${uiCssVersion != null and !#strings.isEmpty(uiCssVersion) ? uiCssVersion : '20260717p1'},
+             authUser=${@authHelper.getAuthenticatedUser()},
              includeNavbar=${@environment.getProperty('app.ui.includeNavbar') != 'false'},
              includeGlobalChatbot=${@environment.getProperty('app.ui.includeChatbot') != 'false' and disableGlobalChatbot != true and disableGlobalChatbot != 'true'},
              includeQuickActions=${#authentication != null and #authentication.authenticated and #authentication.principal != 'anonymousUser'}"
@@ -28,13 +29,15 @@
     <script th:src="@{/js/core/overlay-manager.js(v='20260713a')}"></script>
 
     <!-- Core styles stay small; shell and route bundles load only when their UI is present. -->
-    <link rel="stylesheet" th:href="@{/css/app.css(v=${uiCssVersion})}">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=${assetVersion})}">
     <link rel="stylesheet" th:if="${includeGlobalChatbot}"
-          th:href="@{/css/bundles/assistant.css(v=${uiCssVersion})}">
+          th:href="@{/css/bundles/assistant.css(v='20260715f')}">
     <link rel="stylesheet" th:if="${includeQuickActions}"
-          th:href="@{/css/bundles/authenticated-shell.css(v=${uiCssVersion})}">
+          th:href="@{/css/bundles/authenticated-shell.css(v=${assetVersion})}">
+    <link rel="stylesheet" th:if="${includeQuickActions}"
+          th:href="@{/css/bundles/tutorial.css(v=${assetVersion})}">
     <link rel="stylesheet" th:each="styleBundle : ${uiStyleBundles}"
-          th:href="${styleBundle + '?v=' + uiCssVersion}">
+          th:href="${styleBundle + '?v=' + assetVersion}">
 
     <!-- Page-specific styles -->
     <th:block th:if="${pageStyles != null}">
@@ -76,19 +79,21 @@
 <th:block th:if="${includeQuickActions}">
     <div th:replace="~{universal-fragments/layout/quick-actions :: quickActionsShelf}"></div>
     <div th:replace="~{universal-fragments/layout/platform-panel :: platformPanel}"></div>
+    <div th:replace="~{universal-fragments/tutorial/site-tour :: siteTour}"></div>
 </th:block>
 
 <!-- Core scripts -->
-<script th:if="${includeGlobalChatbot}" th:src="@{/js/chat/chat.js(v='20260713d')}" defer></script>
+<script th:if="${includeGlobalChatbot}" th:src="@{/js/chat/chat.js(v='20260715e')}" defer></script>
 <script th:src="@{/js/core/form-auto-submit.js(v='20260320a')}" defer></script>
 <script th:src="@{/js/core/confirm-action.js(v='20260320a')}" defer></script>
 <script th:src="@{/js/core/back-navigation.js(v='20260320a')}" defer></script>
 <script th:src="@{/js/core/health-chart-toggle.js(v='20260320a')}" defer></script>
 <script th:if="${includeQuickActions}" th:src="@{/js/core/quick-actions.js(v='20260713b')}" defer></script>
-<script th:if="${includeQuickActions}" th:src="@{/js/core/platform-panel.js(v=${uiCssVersion})}" defer></script>
+<script th:if="${includeQuickActions}" th:src="@{/js/core/platform-panel.js(v=${assetVersion})}" defer></script>
+<script th:if="${includeQuickActions}" th:src="@{/js/public/site-tour.js(v=${assetVersion})}" defer></script>
 <script th:src="@{/js/core/navbar-premium.js(v='20260316a')}" defer></script>
-<script th:src="@{/js/core/floating-profile-card.js(v='20260316c')}" defer></script>
-<script th:src="@{/js/core/profile-preview.js(v='20260315a')}" defer></script>
+<script th:src="@{/js/core/floating-profile-card.js(v=${assetVersion})}" defer></script>
+<script th:src="@{/js/core/profile-preview.js(v=${assetVersion})}" defer></script>
 
 <!-- Page-specific scripts -->
 <th:block th:if="${pageScripts != null}">
@@ -96,7 +101,7 @@
 </th:block>
 
 <!-- Global AI button loading handler -->
-<script src="/js/core/ai-loading.js" defer></script>
+<script th:src="@{/js/core/ai-loading.js(v=${assetVersion})}" defer></script>
 
 </body>
 </html>

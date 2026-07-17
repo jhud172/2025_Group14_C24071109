@@ -1,6 +1,8 @@
 package uk.ac.cf._5.group14.One_To_One.Support;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -19,6 +21,12 @@ public class PublicSupportController {
         this.authHelper = authHelper;
     }
 
+    @GetMapping("/support")
+    public String support(Model model) {
+        model.addAttribute("authUser", authHelper.getAuthenticatedUser());
+        return "shared-views/support/index";
+    }
+
     @PostMapping("/support/feedback")
     public String submitFeedback(@RequestParam("requestType") String requestType,
                                  @RequestParam("subject") String subject,
@@ -33,7 +41,7 @@ public class PublicSupportController {
             type = SupportRequestType.valueOf(requestType.trim().toUpperCase());
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("feedbackError", "Choose a valid support type.");
-            return "redirect:/";
+            return "redirect:/support";
         }
 
         String cleanSubject = subject == null ? "" : subject.trim();
@@ -44,21 +52,21 @@ public class PublicSupportController {
 
         if (cleanSubject.isBlank() || cleanSubject.length() > 180) {
             redirectAttributes.addFlashAttribute("feedbackError", "Subject is required and must be under 180 characters.");
-            return "redirect:/";
+            return "redirect:/support";
         }
         if (cleanMessage.isBlank() || cleanMessage.length() > 5000) {
             redirectAttributes.addFlashAttribute("feedbackError", "Message is required and must be under 5000 characters.");
-            return "redirect:/";
+            return "redirect:/support";
         }
 
         if (canReply && (cleanEmail.isBlank() || !cleanEmail.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$"))) {
             redirectAttributes.addFlashAttribute("feedbackError", "Add a valid email if you'd like a response.");
-            return "redirect:/";
+            return "redirect:/support";
         }
 
         if (type == SupportRequestType.QUERY && !canReply) {
             redirectAttributes.addFlashAttribute("feedbackError", "For queries, tick the box to allow an email response.");
-            return "redirect:/";
+            return "redirect:/support";
         }
 
         User user = authHelper.getAuthenticatedUser();
@@ -79,6 +87,6 @@ public class PublicSupportController {
 
         supportRequestRepository.save(row);
         redirectAttributes.addFlashAttribute("feedbackSuccess", "Thanks. Your support request was submitted.");
-        return "redirect:/";
+        return "redirect:/support";
     }
 }

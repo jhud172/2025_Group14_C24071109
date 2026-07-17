@@ -51,6 +51,7 @@ public class SecurityConfig {
             "/pricing/**",
             "/explore",
             "/merch",
+            "/support",
             "/support/feedback",
             "/u/**",
             "/error/**",

@@ -68,6 +68,14 @@
             trigger.setAttribute("aria-expanded", open ? "true" : "false");
         }
 
+        root.querySelectorAll("[data-profile-preview-toggle]").forEach((toggle) => {
+            if (!(toggle instanceof HTMLElement)) {
+                return;
+            }
+            toggle.setAttribute("aria-expanded", open ? "true" : "false");
+            toggle.setAttribute("aria-label", open ? "Close profile menu" : "Open profile menu");
+        });
+
         if (panel instanceof HTMLElement) {
             panel.setAttribute("aria-hidden", open ? "false" : "true");
         }
@@ -102,6 +110,11 @@
         const toggle = () => setPreviewOpen(root, !root.classList.contains(OPEN_CLASS));
         const togglePreservingScroll = () => {
             const scrollTop = window.scrollY;
+            document.querySelectorAll("[data-profile-preview].is-open").forEach((openRoot) => {
+                if (openRoot !== root) {
+                    setPreviewOpen(openRoot, false);
+                }
+            });
             toggle();
             window.requestAnimationFrame(() => {
                 if (Math.abs(window.scrollY - scrollTop) > 1) {
@@ -127,6 +140,17 @@
             }
             event.preventDefault();
             togglePreservingScroll();
+        });
+
+        root.querySelectorAll("[data-profile-preview-toggle]").forEach((toggleButton) => {
+            if (!(toggleButton instanceof HTMLElement)) {
+                return;
+            }
+            toggleButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                togglePreservingScroll();
+            });
         });
 
         if (root.dataset.profilePreviewHover === "true") {

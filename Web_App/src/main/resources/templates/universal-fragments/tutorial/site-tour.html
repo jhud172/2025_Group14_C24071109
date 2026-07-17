@@ -1,0 +1,61 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+          th:fragment="siteTour">
+    <div id="siteTour"
+         class="site-tour"
+         hidden
+         aria-hidden="true"
+         th:attr="data-complete-url=@{/tutorial/complete}">
+        <span hidden data-site-tour-role="ADMIN" sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')"></span>
+        <span hidden data-site-tour-role="GYM" sec:authorize="hasRole('GYM_ADMIN') and !hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')"></span>
+        <span hidden data-site-tour-role="TRAINER" sec:authorize="hasRole('TRAINER') and !hasAnyRole('GYM_ADMIN','PLATFORM_ADMIN','SUPER_ADMIN')"></span>
+        <span hidden data-site-tour-role="CLIENT" sec:authorize="hasAnyRole('CLIENT','USER') and !hasAnyRole('TRAINER','GYM_ADMIN','PLATFORM_ADMIN','SUPER_ADMIN')"></span>
+
+        <div id="siteTourSpotlight" class="site-tour__spotlight" aria-hidden="true">
+            <svg class="site-tour__scribble" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <rect class="site-tour__scribble-path" x="3.5" y="4.5" width="93" height="91" rx="18"></rect>
+                <rect class="site-tour__scribble-path site-tour__scribble-path--echo" x="5.5" y="2.8" width="90" height="94" rx="20"></rect>
+            </svg>
+        </div>
+
+        <svg class="site-tour__connector" aria-hidden="true">
+            <path id="siteTourConnectorPath" class="site-tour__connector-path"></path>
+            <circle id="siteTourConnectorDot" class="site-tour__connector-dot" r="5"></circle>
+        </svg>
+
+        <section id="siteTourBubble"
+                 class="site-tour__bubble"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="siteTourTitle"
+                 aria-describedby="siteTourCopy"
+                 tabindex="-1">
+            <div class="site-tour__progress-track" aria-hidden="true">
+                <span id="siteTourProgress" class="site-tour__progress-bar"></span>
+            </div>
+            <div class="site-tour__body">
+                <div class="site-tour__topline">
+                    <span id="siteTourStep" class="site-tour__step">Step 1 of 1</span>
+                    <button id="siteTourSkip" type="button" class="site-tour__skip">Skip tour</button>
+                </div>
+                <div id="siteTourPage" class="site-tour__page">Dashboard</div>
+                <h2 id="siteTourTitle" class="site-tour__title"></h2>
+                <p id="siteTourCopy" class="site-tour__copy"></p>
+                <p id="siteTourHint" class="site-tour__hint"></p>
+
+                <div class="site-tour__footer">
+                    <span class="site-tour__keyboard" aria-hidden="true">← → to move · Esc to skip</span>
+                    <div class="site-tour__actions">
+                        <button id="siteTourBack" type="button" class="site-tour__button site-tour__button--back">Back</button>
+                        <button id="siteTourNext" type="button" class="site-tour__button site-tour__button--next">Next page</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <form id="siteTourCompleteForm" th:action="@{/tutorial/complete}" method="post" hidden>
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        </form>
+        <p id="siteTourAnnouncement" class="sr-only" aria-live="polite"></p>
+    </div>
+</th:block>

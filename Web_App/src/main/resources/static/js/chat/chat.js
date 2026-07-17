@@ -45,6 +45,7 @@ function initCharlieWidget(config) {
     const canUseInbox = Boolean(isAuthenticated && notificationsToggle2 && notificationsView && notificationsList);
     const composerTooltipLabel = chatAttachImageBtn?.dataset?.tooltip || "";
     let lightboxReturnFocus = null;
+    let clearConfirmReturnFocus = null;
 
     const headers = (json = true) => {
         const next = {};
@@ -261,7 +262,7 @@ function initCharlieWidget(config) {
         notificationsToggle2?.setAttribute("aria-pressed", state.view === "inbox" ? "true" : "false");
         if (state.view === "inbox") {
             closeComposerOptions();
-            closeInlineClearConfirm();
+            closeInlineClearConfirm({ restoreFocus: false });
         }
         syncHeaderState();
     };
@@ -291,13 +292,29 @@ function initCharlieWidget(config) {
     };
 
     const openInlineClearConfirm = () => {
+        if (!clearInlineConfirm) return;
+        clearConfirmReturnFocus = document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : clearBtn;
         panelContent.dataset.clearConfirm = "true";
-        clearInlineConfirm?.classList.remove("hidden");
+        clearInlineConfirm.classList.add("is-open");
+        clearInlineConfirm.setAttribute("aria-hidden", "false");
+        clearInlineConfirm.removeAttribute("inert");
+        clearBtn?.setAttribute("aria-expanded", "true");
+        window.requestAnimationFrame(() => clearInlineCancel?.focus());
     };
 
-    const closeInlineClearConfirm = () => {
+    const closeInlineClearConfirm = (options = {}) => {
+        const wasOpen = clearInlineConfirm?.classList.contains("is-open");
         panelContent.dataset.clearConfirm = "false";
-        clearInlineConfirm?.classList.add("hidden");
+        clearInlineConfirm?.classList.remove("is-open");
+        clearInlineConfirm?.setAttribute("aria-hidden", "true");
+        clearInlineConfirm?.setAttribute("inert", "");
+        clearBtn?.setAttribute("aria-expanded", "false");
+        if (options.restoreFocus !== false && wasOpen && clearConfirmReturnFocus?.isConnected) {
+            clearConfirmReturnFocus.focus();
+        }
+        clearConfirmReturnFocus = null;
     };
 
     const autoResizeInput = () => {
@@ -352,7 +369,7 @@ function initCharlieWidget(config) {
         fab.setAttribute("aria-expanded", "false");
         fab.setAttribute("aria-label", "Open Charlie");
         closeComposerOptions();
-        closeInlineClearConfirm();
+        closeInlineClearConfirm({ restoreFocus: false });
         if (!options.fromOverlayManager) overlayManager?.release("charlie");
         if (options.restoreFocus && focusWasInsidePanel) fab.focus();
     };
@@ -611,7 +628,7 @@ function initCharlieWidget(config) {
     fab.addEventListener("click", (event) => { event.preventDefault(); window.toggleChatPanel(); });
     closeBtn.addEventListener("click", () => closePanel({ restoreFocus: true }));
     clearBtn.addEventListener("click", openInlineClearConfirm);
-    clearInlineCancel?.addEventListener("click", closeInlineClearConfirm);
+    clearInlineCancel?.addEventListener("click", () => closeInlineClearConfirm({ restoreFocus: true }));
     clearInlineConfirmBtn?.addEventListener("click", async () => {
         closeInlineClearConfirm();
         localStorage.removeItem(STORAGE_KEY);
@@ -661,7 +678,7 @@ function initCharlieWidget(config) {
     document.addEventListener("click", (event) => {
         if (!chatComposerTools?.contains(event.target)) closeComposerOptions();
     });
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape") { if (chatMediaLightbox?.classList.contains("is-open")) closeLightbox(); else if (!clearInlineConfirm?.classList.contains("hidden")) closeInlineClearConfirm(); else if (panel.classList.contains("open")) closePanel({ restoreFocus: true }); } });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") { if (chatMediaLightbox?.classList.contains("is-open")) closeLightbox(); else if (clearInlineConfirm?.classList.contains("is-open")) closeInlineClearConfirm({ restoreFocus: true }); else if (panel.classList.contains("open")) closePanel({ restoreFocus: true }); } });
 
     panel.toggleAttribute("inert", !panel.classList.contains("open"));
     if (panel.classList.contains("open")) overlayManager?.open("charlie");

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import uk.ac.cf._5.group14.One_To_One.Config.DevModeProperties;
 import uk.ac.cf._5.group14.One_To_One.GymApplications.GymApplication;
@@ -264,6 +265,8 @@ public class UserController {
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "expired", required = false) String expired,
                                 @RequestParam(value = "role", required = false) String role,
+                                @RequestParam(value = "error", required = false) String error,
+                                HttpSession session,
                                 Model model) {
         if (isAuthenticatedUser()) {
             return "redirect:/dashboard";
@@ -273,10 +276,27 @@ public class UserController {
             return "redirect:/?expired=1";
         }
 
-        // Pass pre-selected role to template (validated to known roles only)
-        if (role != null && (role.equals("client") || role.equals("trainer") || role.equals("gym"))) {
-            model.addAttribute("preselectedRole", role);
+        // Pass a validated role so the server-rendered form is correct before JavaScript runs.
+        String selectedRole = role != null && (role.equals("client") || role.equals("trainer") || role.equals("gym"))
+                ? role
+                : "client";
+        model.addAttribute("preselectedRole", selectedRole);
+        model.addAttribute("signupPath", switch (selectedRole) {
+            case "trainer" -> "/signup/trainer";
+            case "gym" -> "/signup/gym";
+            default -> "/signup/client";
+        });
+
+        Object previousIdentifier = session.getAttribute(
+                uk.ac.cf._5.group14.One_To_One.Security.CustomAuthenticationFailureHandler.LOGIN_IDENTIFIER_SESSION_ATTRIBUTE
+        );
+        session.removeAttribute(
+                uk.ac.cf._5.group14.One_To_One.Security.CustomAuthenticationFailureHandler.LOGIN_IDENTIFIER_SESSION_ATTRIBUTE
+        );
+        if (error != null && previousIdentifier instanceof String identifier && !identifier.isBlank()) {
+            model.addAttribute("loginIdentifier", identifier);
         }
+        model.addAttribute("loginError", error);
         
         // In dev mode, keep the normal login form and layer the dev alert onto it.
         if (devModeProperties.isDevMode()) {
@@ -297,6 +317,7 @@ public class UserController {
     private void applyAuthLayout(Model model) {
         model.addAttribute("authPageLayout", true);
         model.addAttribute("compactTopContent", true);
+        model.addAttribute("disableGlobalChatbot", true);
     }
 
     private boolean isAuthenticatedUser() {

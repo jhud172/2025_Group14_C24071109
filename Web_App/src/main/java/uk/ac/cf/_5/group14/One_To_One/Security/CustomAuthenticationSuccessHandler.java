@@ -77,19 +77,35 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             if (redirectUrl != null && isStaticAssetUrl(redirectUrl)) {
                 requestCache.removeRequest(request, response);
                 clearAuthenticationAttributes(request);
-                getRedirectStrategy().sendRedirect(request, response, "/");
+                getRedirectStrategy().sendRedirect(request, response, dashboardPath(user));
                 return;
             }
 
             if (redirectUrl != null && isChatApiUrl(redirectUrl)) {
                 requestCache.removeRequest(request, response);
                 clearAuthenticationAttributes(request);
-                getRedirectStrategy().sendRedirect(request, response, "/");
+                getRedirectStrategy().sendRedirect(request, response, dashboardPath(user));
                 return;
             }
+
+            super.onAuthenticationSuccess(request, response, authentication);
+            return;
         }
 
-        super.onAuthenticationSuccess(request, response, authentication);
+        clearAuthenticationAttributes(request);
+        getRedirectStrategy().sendRedirect(request, response, dashboardPath(user));
+    }
+
+    private static String dashboardPath(User user) {
+        if (user == null || user.getRole() == null) {
+            return "/dashboard";
+        }
+        return switch (user.getRole()) {
+            case TRAINER -> "/trainer/dashboard";
+            case GYM_ADMIN -> "/gym/dashboard";
+            case PLATFORM_ADMIN, SUPER_ADMIN -> "/admin/dashboard";
+            default -> "/dashboard";
+        };
     }
 
     private static boolean isSafeRedirect(String next) {

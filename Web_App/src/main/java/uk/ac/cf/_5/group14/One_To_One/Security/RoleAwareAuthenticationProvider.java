@@ -60,6 +60,7 @@ public class RoleAwareAuthenticationProvider implements AuthenticationProvider {
             ? loginRequestDetails
             : new LoginRequestDetails(null, null, null);
 
+        validateSelectedRole(user, details.getLoginType());
         validateRoleSpecificCredentials(user, identifier, details);
 
         UserDetails principal = org.springframework.security.core.userdetails.User.builder()
@@ -120,6 +121,23 @@ public class RoleAwareAuthenticationProvider implements AuthenticationProvider {
                 || !expectedGymSecretCode.equals(submittedGymSecretCode)) {
                 throw new BadCredentialsException("Invalid gym credentials");
             }
+        }
+    }
+
+    private void validateSelectedRole(User user, String submittedLoginType) {
+        String loginType = submittedLoginType == null ? "client" : submittedLoginType.trim().toLowerCase();
+        boolean matches = switch (loginType) {
+            case "trainer" -> user.getRole() == Role.TRAINER;
+            case "gym" -> user.getRole() == Role.GYM_ADMIN;
+            case "client" -> user.getRole() == null
+                    || user.getRole() == Role.CLIENT
+                    || user.getRole() == Role.PLATFORM_ADMIN
+                    || user.getRole() == Role.SUPER_ADMIN;
+            default -> false;
+        };
+
+        if (!matches) {
+            throw new BadCredentialsException("Invalid credentials for selected account type");
         }
     }
 

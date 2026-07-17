@@ -35,7 +35,7 @@ class TemplateRouteContractTest {
         assertThat(template).contains("href=\"/gym/dashboard\"");
         assertThat(template).contains("href=\"/gym/admin/trainers\"");
         assertThat(template).contains("href=\"/gym/admin/memberships\"");
-        assertThat(template).contains("href=\"/home-public#public-feedback-form\"");
+        assertThat(template).contains("href=\"/support\"");
         assertThat(template).contains("Submit a support request");
         assertThat(template).contains("Inbox");
         assertThat(template).doesNotContain("th:href=\"@{/admin/feedback}\"");
@@ -180,6 +180,46 @@ class TemplateRouteContractTest {
 
         assertThat(template).contains("th:text=\"${card.formattedPricePerSession}\"");
         assertThat(template).doesNotContain("th:text=\"'£' + card.pricePerSession");
+    }
+
+    @Test
+    void publicEntryRoutesDeclareTheirCriticalVersionedAssets() throws IOException {
+        String base = read("src/main/resources/templates/base.html");
+        String about = read("src/main/resources/templates/public-views/public/about.html");
+        String login = read("src/main/resources/templates/public-views/auth/login.html");
+        String signupChoice = read("src/main/resources/templates/public-views/auth/signup-choice.html");
+        String signupClient = read("src/main/resources/templates/public-views/auth/signup-client.html");
+        String signupTrainer = read("src/main/resources/templates/public-views/auth/signup-trainer.html");
+        String signupGym = read("src/main/resources/templates/public-views/auth/signup-gym.html");
+
+        assertThat(base).contains("assetVersion=${uiCssVersion != null");
+        assertThat(about).contains("/css/bundles/content.css(v=${assetVersion})");
+        assertThat(login).contains("/css/bundles/auth.css(v=${assetVersion})");
+        assertThat(signupChoice).contains("/css/bundles/auth.css(v=${assetVersion})");
+
+        assertThat(signupClient)
+                .contains("/css/bundles/auth.css(v=${assetVersion})")
+                .contains("/js/auth/signup-client-page.js(v=${assetVersion})");
+        assertThat(signupTrainer)
+                .contains("/css/bundles/auth.css(v=${assetVersion})")
+                .contains("/js/auth/signup-trainer-page.js(v=${assetVersion})");
+        assertThat(signupGym)
+                .contains("/css/bundles/auth.css(v=${assetVersion})")
+                .contains("/js/auth/signup-gym-page.js(v=${assetVersion})");
+    }
+
+    @Test
+    void publicFooterKeepsNavigationCompactAndActionFocused() throws IOException {
+        String footer = read("src/main/resources/templates/universal-fragments/layout/footer.html");
+
+        assertThat(footer)
+                .contains("Train with purpose. Coach with clarity.")
+                .contains("aria-label=\"Footer navigation\"")
+                .contains("th:href=\"@{/signup}\"")
+                .contains("aria-label=\"Legal\"")
+                .doesNotContain("footer-role-card")
+                .doesNotContain("footer-spotlight")
+                .doesNotContain("footer-brand-description");
     }
 
     private static String read(String relativePath) throws IOException {

@@ -1,388 +1,138 @@
-﻿<th:block xmlns:th="http://www.thymeleaf.org"
+<th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout('Pricing', null, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="content" class="pricing-page"
+    <div th:fragment="content" class="pricing-page public-journey"
          th:with="sub=${platformSubscription},
                   isInfinite=${sub != null and sub.plan.name() == 'INFINITE'},
                   isActive=${sub != null and (sub.status.name() == 'ACTIVE' or sub.status.name() == 'EXPIRES')},
                   isExpired=${sub != null and sub.status.name() == 'CANCELLED'}">
 
         <div class="mx-auto w-full max-w-5xl px-4 pt-6 sm:px-6 lg:px-8">
-            <div th:if="${pricingSuccess}" class="mb-4 rounded-2xl border border-emerald-300/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200" th:text="${pricingSuccess}">Platform Premium is now active.</div>
-            <div th:if="${pricingError}" class="mb-4 rounded-2xl border border-red-300/40 bg-red-500/10 px-4 py-3 text-sm text-red-200" th:text="${pricingError}">Subscription checkout error.</div>
-            <div th:if="${!paymentProviderConfigured}" class="mb-4 rounded-2xl border border-amber-300/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            <div th:if="${pricingSuccess}" class="mb-4 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900" role="status" th:text="${pricingSuccess}">Platform Premium is now active.</div>
+            <div th:if="${pricingError}" class="mb-4 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert" th:text="${pricingError}">Subscription checkout error.</div>
+            <div th:if="${!paymentProviderConfigured}" class="mb-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
                 Secure subscription checkout is not configured yet. Pricing is visible, but hosted payment is unavailable in this environment.
             </div>
         </div>
 
-        <!-- Ambient scanline -->
-        <div class="scanline" aria-hidden="true"></div>
+        <header class="public-section public-section--muted" data-public-hero>
+            <div class="public-section__inner public-section__inner--narrow text-center">
+                <p class="public-eyebrow">Platform Premium</p>
+                <h1 class="public-title">More insight. The same focused training journey.</h1>
+                <p class="public-copy mx-auto">Premium adds deeper dashboards, weekly insight and priority support without changing your core coaching relationship.</p>
+            </div>
+        </header>
 
-        <!-- HERO -->
-        <section class="pricing-hero text-center px-4">
-            <div class="pricing-hero-grid" aria-hidden="true"></div>
-            <div class="relative z-10 max-w-3xl mx-auto">
-                <span class="inline-flex items-center gap-2 mb-4 feature-pill border-neon-cyan/40 bg-neon-cyan/10 text-neon-cyan">
-                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                    Platform Premium
-                </span>
-                <h1 class="text-4xl sm:text-5xl font-extrabold gradient-text mb-4 leading-tight">
-                    Level Up Your<br>Fitness Journey
-                </h1>
-                <p class="text-slate-400 text-lg max-w-xl mx-auto leading-relaxed">
-                    Unlock advanced dashboards, real-time insights, and priority support - everything you need to crush your goals faster.
-                </p>
+        <section class="public-section" data-public-section aria-labelledby="pricing-plans-heading">
+            <div class="public-section__inner">
+                <div class="public-section__header public-section__header--centred">
+                    <p class="public-eyebrow">Choose a plan</p>
+                    <h2 id="pricing-plans-heading" class="public-heading">Monthly flexibility or yearly value.</h2>
+                    <p class="public-copy mx-auto">Both paid plans include the same Premium features. Only the billing period changes.</p>
+                </div>
+
+                <div th:if="${isInfinite}" class="pricing-surface-success mb-8 rounded-2xl p-5">
+                    <p class="font-bold text-emerald-900 text-lg">Premium active</p>
+                    <p class="text-sm text-slate-700 mt-1">You have lifetime access to every Platform Premium feature.</p>
+                </div>
+
+                <div th:if="${isExpired}" class="pricing-surface-danger mb-8 rounded-2xl p-5">
+                    <p class="font-bold text-red-800 text-lg">Subscription ended</p>
+                    <p class="text-sm text-slate-700 mt-1">Reactivate below to restore Premium features.</p>
+                </div>
+
+                <div th:if="${isActive and !isInfinite}" class="pricing-surface-success-soft mb-8 rounded-2xl p-5">
+                    <p class="font-bold text-emerald-900 text-lg">Premium active</p>
+                    <p class="text-sm text-slate-700 mt-1">Manage your active subscription from your <a th:href="@{/profile}" class="font-semibold text-emerald-800 underline">profile</a>.</p>
+                </div>
+
+                <div class="grid gap-8 md:grid-cols-2">
+                    <article th:each="plan : ${plans}" class="plan-card" th:classappend="${plan.plan.name() == 'YEARLY'} ? ' featured' : ''">
+                        <span th:if="${plan.plan.name() == 'YEARLY'}" class="plan-badge-recommended">Best value</span>
+
+                        <div th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}"
+                             class="absolute top-4 right-4 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">
+                            Active
+                        </div>
+
+                        <div class="flex items-start justify-between gap-3 mb-1">
+                            <h3 class="text-xl font-bold text-slate-900" th:text="${plan.displayName}">Monthly</h3>
+                            <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800" th:text="${plan.badge}">Plan</span>
+                        </div>
+
+                        <div class="mt-3 mb-1">
+                            <span class="price-display" th:classappend="${plan.plan.name() == 'MONTHLY'} ? ' cyan' : ''" th:text="${plan.priceLabel}">&#163;12 / month</span>
+                        </div>
+                        <p th:if="${plan.plan.name() == 'YEARLY'}" class="text-xs text-slate-600 mb-4">Equivalent to &#163;9 per month, billed annually.</p>
+                        <p th:if="${plan.plan.name() == 'MONTHLY'}" class="text-xs text-slate-600 mb-4">Billed monthly. Cancel at any time.</p>
+
+                        <div class="pricing-divider-emerald h-px mb-4"></div>
+
+                        <ul class="space-y-2.5 text-sm text-slate-700 mb-6">
+                            <li th:each="benefit : ${plan.benefits}" class="flex items-start gap-2.5">
+                                <svg class="h-5 w-5 mt-0.5 flex-shrink-0 text-emerald-700" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span th:text="${benefit}">Feature</span>
+                            </li>
+                        </ul>
+
+                        <th:block th:if="${sub == null or (isExpired and sub.plan.name() != plan.plan.name())}">
+                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full" th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">Get started</a>
+                        </th:block>
+                        <th:block th:if="${isExpired and sub.plan.name() == plan.plan.name()}">
+                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full btn--primary">Reactivate now</a>
+                        </th:block>
+                        <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}">
+                            <a th:href="@{/profile}" class="btn w-full btn--ghost">Manage subscription</a>
+                        </th:block>
+                        <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() != plan.plan.name()}">
+                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full" th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">Switch to this plan</a>
+                        </th:block>
+                        <th:block th:if="${isInfinite}">
+                            <span class="btn w-full btn--ghost inline-flex items-center justify-center opacity-60">Included in lifetime</span>
+                        </th:block>
+                    </article>
+                </div>
             </div>
         </section>
 
-        <div class="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
-
-            <!-- STATUS BANNERS -->
-            <!-- Lifetime -->
-            <div th:if="${isInfinite}"
-                 class="pricing-surface-success mb-10 rounded-2xl p-5 flex items-center gap-4">
-                <div class="pricing-surface-success-icon flex-shrink-0 p-3 rounded-xl">
-                    <svg class="h-7 w-7 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636C16.948 4.22 15.026 3.25 13 3.25s-3.948.97-5.364 2.386L5.636 7.636m12.728 0 2 2m-2-2-2 2M5.636 7.636l-2 2m2-2 2 2M7.636 18.364C9.052 19.78 10.974 20.75 13 20.75s3.948-.97 5.364-2.386l2-2m-14.728 0-2-2m2 2 2-2"/>
-                    </svg>
+        <section class="public-section public-section--muted" data-public-section aria-labelledby="pricing-includes-heading">
+            <div class="public-section__inner">
+                <div class="public-section__header">
+                    <p class="public-eyebrow">Included with Premium</p>
+                    <h2 id="pricing-includes-heading" class="public-heading">Three upgrades, one clear purpose.</h2>
                 </div>
-                <div>
-                    <p class="font-bold text-neon-green text-lg">Premium Active</p>
-                    <p class="text-sm text-slate-400 mt-0.5">You have lifetime access to every Platform Premium feature - no renewal, no limits.</p>
-                </div>
-            </div>
-
-            <!-- Cancelled -->
-            <div th:if="${isExpired}"
-                 class="pricing-surface-danger mb-10 rounded-2xl p-5 flex items-center gap-4">
-                <div class="pricing-surface-danger-icon flex-shrink-0 p-3 rounded-xl">
-                    <svg class="h-7 w-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <p class="font-bold text-red-400 text-lg">Subscription Ended</p>
-                    <p class="text-sm text-slate-400 mt-0.5">Your premium access has lapsed. Reactivate below to regain all features instantly.</p>
+                <div class="public-proof-list">
+                    <article class="public-proof">
+                        <h3 class="public-proof__title">Deeper progress insight</h3>
+                        <p class="public-proof__copy">Premium dashboards, richer analytics and weekly summaries make patterns easier to see.</p>
+                    </article>
+                    <article class="public-proof">
+                        <h3 class="public-proof__title">Priority guidance</h3>
+                        <p class="public-proof__copy">Receive priority Charlie access and faster support handling when you need help.</p>
+                    </article>
+                    <article class="public-proof">
+                        <h3 class="public-proof__title">Trainer collaboration</h3>
+                        <p class="public-proof__copy">Share clearer progress signals with your trainer to support useful programme decisions.</p>
+                    </article>
                 </div>
             </div>
+        </section>
 
-            <!-- Active -->
-            <div th:if="${isActive and !isInfinite}"
-                 class="pricing-surface-success-soft mb-10 rounded-2xl p-5 flex items-center gap-4">
-                <div class="pricing-surface-success-icon-soft flex-shrink-0 p-3 rounded-xl">
-                    <svg class="h-7 w-7 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <div class="flex-1">
-                    <p class="font-bold text-neon-green text-lg">Lifetime Premium Active</p>
-                    <p class="text-sm text-slate-400 mt-0.5">Your subscription is active. <a th:href="@{/profile}" class="text-neon-cyan underline">Manage in your profile &#8594;</a></p>
+        <section class="public-section public-section--accent" data-public-section aria-labelledby="pricing-help-heading">
+            <div class="public-section__inner public-section__inner--narrow">
+                <p class="public-eyebrow">Before you subscribe</p>
+                <h2 id="pricing-help-heading" class="public-heading">Check the details or ask us first.</h2>
+                <p class="public-copy">Platform Premium is separate from gym membership and renews until cancelled. Subscription controls remain available from your profile.</p>
+                <div class="public-actions">
+                    <a th:href="@{/faq}" class="public-action public-action--inverse">Read common questions</a>
+                    <a th:href="@{/support}" class="public-action public-action--inverse-secondary">Contact support</a>
                 </div>
             </div>
-
-            <!-- PLAN CARDS -->
-            <div class="mt-4 grid gap-8 md:grid-cols-2">
-                <div th:each="plan : ${plans}"
-                     class="plan-card"
-                     th:classappend="${plan.plan.name() == 'YEARLY'} ? ' featured' : ''">
-
-                    <!-- Recommended badge -->
-                    <span th:if="${plan.plan.name() == 'YEARLY'}" class="plan-badge-recommended">&#9733; Best Value</span>
-
-                    <!-- Active indicator -->
-                    <div th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}"
-                         class="absolute top-4 right-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-900/30 px-3 py-1 text-xs font-bold text-emerald-300">
-                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        Active
-                    </div>
-
-                    <!-- Plan header -->
-                    <div class="flex items-start justify-between gap-3 mb-1">
-                        <h2 class="text-xl font-bold"
-                            th:classappend="${plan.plan.name() == 'YEARLY'} ? 'text-neon-green' : 'text-neon-cyan'"
-                            th:text="${plan.displayName}">Monthly</h2>
-                        <span class="rounded-full px-3 py-1 text-xs font-semibold border mt-0.5"
-                              th:classappend="${plan.plan.name() == 'YEARLY'} ? 'bg-neon-green/10 border-neon-green/40 text-neon-green' : 'bg-neon-cyan/10 border-neon-cyan/40 text-neon-cyan'"
-                              th:text="${plan.badge}">Badge</span>
-                    </div>
-
-                    <!-- Price -->
-                    <div class="mt-3 mb-1">
-                        <span class="price-display"
-                              th:classappend="${plan.plan.name() == 'MONTHLY'} ? ' cyan' : ''"
-                              th:text="${plan.priceLabel}">&#163;12 / month</span>
-                    </div>
-                    <!-- Note: savings text is kept consistent with plan prices defined in PricingController -->
-                    <p th:if="${plan.plan.name() == 'YEARLY'}" class="text-xs text-slate-500 mb-4">Equivalent to &#163;9 / month - billed annually</p>
-                    <p th:if="${plan.plan.name() == 'MONTHLY'}" class="text-xs text-slate-500 mb-4">Billed monthly - cancel anytime</p>
-
-                    <!-- Divider -->
-                    <div class="pricing-divider-emerald h-px mb-4"></div>
-
-                    <!-- Benefits -->
-                    <ul class="space-y-2.5 text-sm text-slate-300 mb-6">
-                        <li th:each="benefit : ${plan.benefits}" class="flex items-start gap-2.5">
-                            <svg class="h-5 w-5 mt-0.5 flex-shrink-0"
-                                 th:classappend="${plan.plan.name() == 'YEARLY'} ? 'text-neon-purple' : 'text-neon-cyan'"
-                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span th:text="${benefit}">Feature</span>
-                        </li>
-                    </ul>
-
-                    <!-- CTAs -->
-                    <th:block th:if="${sub == null or (isExpired and sub.plan.name() != plan.plan.name())}">
-                        <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
-                           class="btn w-full"
-                           th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">
-                            Get Started
-                        </a>
-                    </th:block>
-                    <th:block th:if="${isExpired and sub.plan.name() == plan.plan.name()}">
-                        <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
-                           class="btn w-full btn--primary">
-                            Reactivate Now
-                        </a>
-                    </th:block>
-                    <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}">
-                        <a th:href="@{/profile}" class="btn w-full btn--ghost">
-                            Manage Subscription &#8594;
-                        </a>
-                    </th:block>
-                    <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() != plan.plan.name()}">
-                        <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
-                           class="btn w-full"
-                           th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">
-                            Switch to This Plan
-                        </a>
-                    </th:block>
-                    <th:block th:if="${isInfinite}">
-                        <span class="btn w-full btn--ghost inline-flex items-center justify-center gap-1.5 opacity-50 cursor-default">
-                            &#8734; Included in Lifetime
-                        </span>
-                    </th:block>
-                </div>
-            </div>
-
-            <!-- PREMIUM FEATURES SHOWCASE -->
-            <section class="mt-20">
-                <div class="text-center mb-10">
-                    <h2 class="text-2xl sm:text-3xl font-bold gradient-text">Everything Premium Unlocks</h2>
-                    <p class="mt-2 text-slate-400 text-sm">A deep-dive into what you get with a Premium subscription.</p>
-                </div>
-                <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    <!-- Feature 1 -->
-                    <div class="card-neon card--cyan p-5 flex gap-4 items-start">
-                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
-                            <svg class="h-6 w-6 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-slate-900 text-sm">Advanced Analytics</h3>
-                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Deep-dive into your performance trends with interactive charts, weekly summaries, and predictive goal insights.</p>
-                        </div>
-                    </div>
-                    <!-- Feature 2 -->
-                    <div class="card-neon card--purple p-5 flex gap-4 items-start">
-                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
-                            <svg class="h-6 w-6 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-slate-900 text-sm">Priority AI Coach</h3>
-                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Get premium-tier AI coaching responses, personalised workout recommendations, and faster response times.</p>
-                        </div>
-                    </div>
-                    <!-- Feature 3 -->
-                    <div class="card-neon card--green p-5 flex gap-4 items-start">
-                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
-                            <svg class="h-6 w-6 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-slate-900 text-sm">Premium Dashboards</h3>
-                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Unlock exclusive client and trainer dashboards with XP tracking, streak visualisers, and health score displays.</p>
-                        </div>
-                    </div>
-                    <!-- Feature 4 -->
-                    <div class="card-neon card--cyan p-5 flex gap-4 items-start">
-                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
-                            <svg class="h-6 w-6 text-neon-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-slate-900 text-sm">Weekly Insights</h3>
-                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Receive personalised weekly reports covering progress, nutrition adherence, and recovery recommendations.</p>
-                        </div>
-                    </div>
-                    <!-- Feature 5 -->
-                    <div class="card-neon card--purple p-5 flex gap-4 items-start">
-                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
-                            <svg class="h-6 w-6 text-neon-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-slate-900 text-sm">Trainer Collaboration</h3>
-                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Share your premium data directly with your trainer for richer collaborative sessions and tailored plan adjustments.</p>
-                        </div>
-                    </div>
-                    <!-- Feature 6 -->
-                    <div class="card-neon card--green p-5 flex gap-4 items-start">
-                        <div class="pricing-feature-icon-surface p-2.5 rounded-xl flex-shrink-0">
-                            <svg class="h-6 w-6 text-neon-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-slate-900 text-sm">Priority Support</h3>
-                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Skip the queue. Premium members receive priority handling for all support tickets and in-app chat assistance.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- FEATURE COMPARISON TABLE -->
-            <section class="mt-20">
-                <div class="text-center mb-10">
-                    <h2 class="text-2xl sm:text-3xl font-bold gradient-text">Compare Plans</h2>
-                    <p class="mt-2 text-slate-400 text-sm">See exactly what's included at every level.</p>
-                </div>
-                <div class="feature-table-wrap">
-                    <table class="feature-table">
-                        <thead>
-                            <tr>
-                                <th class="text-left text-slate-300">Feature</th>
-                                <th class="text-neon-cyan">Free</th>
-                                <th class="text-neon-cyan">Monthly</th>
-                                <th class="text-neon-green">Yearly <span class="text-[10px] align-middle ml-1 bg-neon-green/10 border border-neon-green/40 text-neon-green px-1.5 py-0.5 rounded-full">Best</span></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Basic dashboard</td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                            </tr>
-                            <tr>
-                                <td>Workout &amp; nutrition logging</td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                            </tr>
-                            <tr>
-                                <td>Goal tracking</td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                            </tr>
-                            <tr>
-                                <td>Premium dashboards</td>
-                                <td><svg class="h-5 w-5 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                            </tr>
-                            <tr>
-                                <td>Advanced analytics &amp; charts</td>
-                                <td><svg class="h-5 w-5 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                            </tr>
-                            <tr>
-                                <td>Weekly insights reports</td>
-                                <td><svg class="h-5 w-5 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                            </tr>
-                            <tr>
-                                <td>Priority AI coaching</td>
-                                <td><svg class="h-5 w-5 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                            </tr>
-                            <tr>
-                                <td>Priority support</td>
-                                <td><svg class="h-5 w-5 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                            </tr>
-                            <tr>
-                                <td>Exclusive yearly savings (2 months free)</td>
-                                <td><svg class="h-5 w-5 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></td>
-                                <td><svg class="h-5 w-5 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></td>
-                                <td><svg class="h-5 w-5 text-neon-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- FAQ -->
-            <section class="mt-20">
-                <div class="text-center mb-10">
-                    <h2 class="text-2xl sm:text-3xl font-bold gradient-text">Frequently Asked Questions</h2>
-                </div>
-                <div class="max-w-2xl mx-auto space-y-3">
-
-                    <details class="faq-item card-neon card--cyan group">
-                        <summary class="flex items-center justify-between gap-3 cursor-pointer py-1">
-                            <span class="font-semibold text-slate-100 text-sm">What is Platform Premium?</span>
-                            <svg class="faq-chevron h-4 w-4 text-neon-cyan flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">Platform Premium is our subscription tier that unlocks advanced features across One To One - including premium dashboards, in-depth analytics, weekly insights, and priority support. It is separate from any gym membership you may hold.</p>
-                    </details>
-
-                    <details class="faq-item card-neon card--cyan group">
-                        <summary class="flex items-center justify-between gap-3 cursor-pointer py-1">
-                            <span class="font-semibold text-slate-100 text-sm">Can I cancel at any time?</span>
-                            <svg class="faq-chevron h-4 w-4 text-neon-cyan flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">Yes. You can cancel your subscription at any time. Your Premium access continues until the end of your current billing period. No partial refunds are issued for unused time.</p>
-                    </details>
-
-                    <details class="faq-item card-neon card--cyan group">
-                        <summary class="flex items-center justify-between gap-3 cursor-pointer py-1">
-                            <span class="font-semibold text-slate-100 text-sm">Is there a free trial?</span>
-                            <svg class="faq-chevron h-4 w-4 text-neon-cyan flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">We don't currently offer a free trial, but all core features of One To One are available for free. Premium simply supercharges your experience with deeper data and priority access.</p>
-                    </details>
-
-                    <details class="faq-item card-neon card--cyan group">
-                        <summary class="flex items-center justify-between gap-3 cursor-pointer py-1">
-                            <span class="font-semibold text-slate-100 text-sm">What's the difference between Monthly and Yearly?</span>
-                            <svg class="faq-chevron h-4 w-4 text-neon-cyan flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">Both plans include the exact same features. The Yearly plan is billed annually at a discounted rate - saving you the equivalent of two months compared to paying monthly. If you're committed to your fitness journey, Yearly is the better deal.</p>
-                    </details>
-
-                    <details class="faq-item card-neon card--cyan group">
-                        <summary class="flex items-center justify-between gap-3 cursor-pointer py-1">
-                            <span class="font-semibold text-slate-100 text-sm">How does this relate to my gym membership?</span>
-                            <svg class="faq-chevron h-4 w-4 text-neon-cyan flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">Platform Premium is entirely separate from your gym membership. Your gym membership covers access to the physical gym facilities and services. Platform Premium enhances your One To One app experience.</p>
-                    </details>
-
-                    <details class="faq-item card-neon card--cyan group">
-                        <summary class="flex items-center justify-between gap-3 cursor-pointer py-1">
-                            <span class="font-semibold text-slate-100 text-sm">Can I switch between Monthly and Yearly?</span>
-                            <svg class="faq-chevron h-4 w-4 text-neon-cyan flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="mt-3 text-sm text-slate-400 leading-relaxed">Yes, you can switch plans. Simply select a different plan from this page. The new billing cycle will begin after your current period ends.</p>
-                    </details>
-
-                </div>
-            </section>
-
-            <!-- BOTTOM NOTE -->
-            <div class="pricing-feature-panel mt-16 rounded-2xl p-6 flex items-start gap-4 text-center justify-center">
-                <svg class="h-5 w-5 text-neon-cyan flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <p class="text-sm text-slate-400">Platform Premium is independent of any gym memberships. Subscriptions auto-renew unless cancelled. You can cancel at any time from your <a th:href="@{/profile}" class="text-emerald-700 underline">profile page</a>.</p>
-            </div>
-
-        </div><!-- end max-w-6xl -->
-    </div><!-- end content -->
-
-    <div th:fragment="pageScripts">
-        <script th:src="@{/js/public/pricing-page.js}"></script>
+        </section>
     </div>
 
+    <div th:fragment="pageScripts">
+        <script th:src="@{/js/public/pricing-page.js(v=${assetVersion})}" defer></script>
+        <script th:src="@{/js/public/public-sections.js(v=${assetVersion})}" defer></script>
+    </div>
 </th:block>
-

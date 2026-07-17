@@ -4,7 +4,7 @@
     <div th:fragment="styles"></div>
 
     <div th:fragment="content">
-        <main class="workout-studio" role="main" aria-label="Workout Studio">
+        <div class="workout-studio role-surface" th:attr="data-role-surface=${roleSurface.roleKey}" aria-label="Workout Studio">
             <!-- Mode Navigation -->
             <nav class="studio-mode-nav">
                 <div class="studio-mode-tab active" data-mode="my-workouts">
@@ -27,20 +27,25 @@
                 </div>
             </nav>
 
+            <div th:if="${!roleSurface.coachingToolsPrimary}" class="role-surface__notice mb-6">
+                This is a personal account tool. It does not publish workouts to gym members or change platform content.
+                <a th:href="${roleSurface.dashboardPath}" class="font-semibold underline">Return to your operational dashboard</a>.
+            </div>
+
             <!-- MY WORKOUTS MODE -->
             <div class="studio-mode-panel active" data-mode="my-workouts">
-                <div class="mb-6 flex items-center justify-between">
+                <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 class="text-3xl font-bold text-slate-900">My Workouts</h1>
-                        <p class="mt-1 text-sm text-slate-600">Your personal workout templates</p>
+                        <h1 class="text-3xl font-bold text-slate-900" th:text="${roleSurface.workoutHeading}">My workouts</h1>
+                        <p class="mt-1 text-sm text-slate-600" th:text="${roleSurface.workoutCopy}">Your workout templates</p>
                     </div>
-                    <button class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-600"
+                    <button class="role-surface__action role-surface__action--primary"
                             type="button"
                             data-open-builder>
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Create New
+                        <span th:text="${roleSurface.workoutCreateLabel}">Create workout</span>
                     </button>
                 </div>
 
@@ -100,14 +105,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
                     <h3 class="workout-empty-title">No workouts yet</h3>
-                    <p class="workout-empty-description">Create your first workout template to get started</p>
-                    <button class="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-emerald-600"
+                    <p class="workout-empty-description" th:text="${roleSurface.workoutEmptyCopy}">Create your first workout template.</p>
+                    <button class="role-surface__action role-surface__action--primary mt-4"
                             type="button"
                             data-open-builder>
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Create Workout
+                        <span th:text="${roleSurface.workoutCreateLabel}">Create workout</span>
                     </button>
                 </div>
             </div>
@@ -307,14 +312,14 @@
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
 
         <!-- Custom Exercise Panel (Slide-in) -->
-        <div class="custom-exercise-overlay"></div>
-        <div class="custom-exercise-panel">
+        <div class="custom-exercise-overlay" aria-hidden="true"></div>
+        <div class="custom-exercise-panel" role="dialog" aria-modal="true" aria-labelledby="custom-exercise-title" aria-hidden="true" inert>
             <div class="custom-exercise-header">
                 <div class="custom-exercise-header-content">
-                    <h2 class="custom-exercise-title">Create Custom Exercise</h2>
+                    <h2 class="custom-exercise-title" id="custom-exercise-title">Create Custom Exercise</h2>
                     <button class="custom-exercise-close-btn" type="button" aria-label="Close custom exercise panel">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

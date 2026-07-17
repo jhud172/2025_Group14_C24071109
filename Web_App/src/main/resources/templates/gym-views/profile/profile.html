@@ -16,6 +16,7 @@
                  th:with="completionScore=${(user != null && user.profileImageUrl != null ? 1 : 0) + (gymProfile != null && gymProfile.gymName != null && !#strings.isEmpty(gymProfile.gymName) ? 1 : 0) + (user != null && user.emailVerified ? 1 : 0) + (gymProfile != null && gymProfile.address != null && !#strings.isEmpty(gymProfile.address) ? 1 : 0) + (gymProfile != null && gymProfile.contactPhone != null && !#strings.isEmpty(gymProfile.contactPhone) ? 1 : 0)}, completionPercent=${T(java.lang.Math).round((completionScore * 100.0) / 5)}">
 
                 <div class="profile-identity-banner w-full"
+                     data-site-tour="profile"
                      data-profile-theme-banner
                      th:with="banner=${userSettings != null and userSettings.profileBannerTheme != null ? #strings.toLowerCase(userSettings.profileBannerTheme) : 'aurora'}"
                      th:classappend="${' profile-banner-pill--' + banner}">

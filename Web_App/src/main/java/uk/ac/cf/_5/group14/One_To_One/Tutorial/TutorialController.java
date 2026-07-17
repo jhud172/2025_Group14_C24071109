@@ -2,10 +2,10 @@ package uk.ac.cf._5.group14.One_To_One.Tutorial;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpSession;
 import uk.ac.cf._5.group14.One_To_One.Security.SecurityUtils;
@@ -26,7 +26,9 @@ public class TutorialController {
     }
 
     @GetMapping
-    public String showTutorial(Authentication authentication, Model model, HttpSession session) {
+    public String showTutorial(Authentication authentication,
+                               HttpSession session,
+                               @RequestParam(name = "restart", defaultValue = "false") boolean restart) {
         User user = authHelper.getAuthenticatedUser(session);
         if (user == null && authentication != null) {
             user = userService.findByUsername(authentication.getName());
@@ -35,15 +37,12 @@ public class TutorialController {
             return "redirect:/login";
         }
 
-        // If they have already seen the tutorial, send them to their dashboard
-        if (user.isHasSeenTutorial()) {
+        // Completed users can replay explicitly without resetting completion.
+        if (user.isHasSeenTutorial() && !restart) {
             return dashboardRedirect(authentication);
         }
 
-        String role = resolveRole(authentication);
-        model.addAttribute("tutorialRole", role);
-        model.addAttribute("user", user);
-        return "shared-views/tutorial/tutorial";
+        return "redirect:" + dashboardPath(authentication) + "?tour=start";
     }
 
     @PostMapping("/complete")
@@ -63,21 +62,15 @@ public class TutorialController {
 
     // -------------------------------------------------------------------------
 
-    private String resolveRole(Authentication authentication) {
-        if (SecurityUtils.hasRole(authentication, "GYM_ADMIN")) {
-            return "GYM";
-        }
-        if (SecurityUtils.hasRole(authentication, "TRAINER")) {
-            return "TRAINER";
-        }
-        return "CLIENT";
-    }
-
     private String dashboardRedirect(Authentication authentication) {
         return "redirect:" + dashboardPath(authentication);
     }
 
     private String dashboardPath(Authentication authentication) {
+        if (SecurityUtils.hasRole(authentication, "PLATFORM_ADMIN")
+                || SecurityUtils.hasRole(authentication, "SUPER_ADMIN")) {
+            return "/admin/dashboard";
+        }
         if (SecurityUtils.hasRole(authentication, "GYM_ADMIN")) {
             return "/gym/dashboard";
         }

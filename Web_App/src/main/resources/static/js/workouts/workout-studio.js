@@ -27,6 +27,7 @@
             exercises: []
         }
     };
+    let customExerciseOpener = null;
 
     // ============================================
     // MODE SWITCHING
@@ -503,8 +504,13 @@
 
         if (openBtn) {
             openBtn.addEventListener('click', () => {
+                customExerciseOpener = document.activeElement;
                 overlay?.classList.add('active');
                 panel?.classList.add('active');
+                overlay?.setAttribute('aria-hidden', 'false');
+                panel?.setAttribute('aria-hidden', 'false');
+                panel?.removeAttribute('inert');
+                closeBtn?.focus();
             });
         }
 
@@ -515,6 +521,12 @@
         if (overlay) {
             overlay.addEventListener('click', closeCustomExercisePanel);
         }
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && panel?.classList.contains('active')) {
+                closeCustomExercisePanel();
+            }
+        });
     }
 
     function closeCustomExercisePanel() {
@@ -523,6 +535,12 @@
         
         overlay?.classList.remove('active');
         panel?.classList.remove('active');
+        overlay?.setAttribute('aria-hidden', 'true');
+        panel?.setAttribute('aria-hidden', 'true');
+        panel?.setAttribute('inert', '');
+        if (customExerciseOpener instanceof HTMLElement) {
+            customExerciseOpener.focus();
+        }
     }
 
     // ============================================

@@ -10,27 +10,30 @@
                 <p class="auth-subheading">Submit your gym details for review. We only create the live gym admin account after approval.</p>
             </div>
 
-            <form th:action="@{/signup/gym}" th:object="${signupForm}" method="post" class="space-y-5">
+            <form th:action="@{/signup/gym}" th:object="${signupForm}" method="post" class="auth-form">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                 <div th:if="${#fields.hasAnyErrors()}" class="auth-alert auth-alert--error" role="alert">
                     Please correct the highlighted fields below.
                 </div>
 
-                <div>
+                <div class="auth-form-grid">
+                <div class="auth-field">
                     <label for="gymName" class="auth-field__label">Gym name *</label>
                     <input
                         type="text"
                         id="gymName"
                         th:field="*{gymName}"
                         required
+                        autocomplete="organization"
+                        placeholder="Your gym name"
                         class="auth-field__input" />
-                    <div th:if="${#fields.hasErrors('gymName')}" class="mt-1 text-sm text-red-600">
+                    <div th:if="${#fields.hasErrors('gymName')}" class="auth-field__error">
                         <span th:errors="*{gymName}"></span>
                     </div>
                 </div>
 
-                <div>
+                <div class="auth-field">
                     <label for="contactName" class="auth-field__label">Primary contact name *</label>
                     <input
                         type="text"
@@ -38,13 +41,16 @@
                         th:field="*{contactName}"
                         required
                         autocomplete="name"
+                        placeholder="Full name"
                         class="auth-field__input" />
-                    <div th:if="${#fields.hasErrors('contactName')}" class="mt-1 text-sm text-red-600">
+                    <div th:if="${#fields.hasErrors('contactName')}" class="auth-field__error">
                         <span th:errors="*{contactName}"></span>
                     </div>
                 </div>
+                </div>
 
-                <div>
+                <div class="auth-form-grid">
+                <div class="auth-field">
                     <label for="adminEmail" class="auth-field__label">Admin email *</label>
                     <input
                         type="email"
@@ -52,13 +58,14 @@
                         th:field="*{adminEmail}"
                         required
                         autocomplete="email"
+                        placeholder="admin@example.com"
                         class="auth-field__input" />
-                    <div th:if="${#fields.hasErrors('adminEmail')}" class="mt-1 text-sm text-red-600">
+                    <div th:if="${#fields.hasErrors('adminEmail')}" class="auth-field__error">
                         <span th:errors="*{adminEmail}"></span>
                     </div>
                 </div>
 
-                <div>
+                <div class="auth-field">
                     <label for="gymUsername" class="auth-field__label">Gym username *</label>
                     <input
                         type="text"
@@ -66,14 +73,16 @@
                         th:field="*{gymUsername}"
                         required
                         autocomplete="username"
+                        placeholder="Choose a gym username"
                         class="auth-field__input" />
-                    <p class="mt-1 text-xs text-gray-500">3-20 characters. Letters, numbers, underscore only.</p>
-                    <div th:if="${#fields.hasErrors('gymUsername')}" class="mt-1 text-sm text-red-600">
+                    <p class="auth-field__hint">3–20 characters. Letters, numbers and underscores only.</p>
+                    <div th:if="${#fields.hasErrors('gymUsername')}" class="auth-field__error">
                         <span th:errors="*{gymUsername}"></span>
                     </div>
                 </div>
+                </div>
 
-                <div>
+                <div class="auth-field">
                     <label for="contactPhone" class="auth-field__label">Contact phone *</label>
                     <input
                         type="tel"
@@ -81,14 +90,15 @@
                         th:field="*{contactPhone}"
                         required
                         autocomplete="tel"
+                        placeholder="Contact phone number"
                         class="auth-field__input" />
-                    <div th:if="${#fields.hasErrors('contactPhone')}" class="mt-1 text-sm text-red-600">
+                    <div th:if="${#fields.hasErrors('contactPhone')}" class="auth-field__error">
                         <span th:errors="*{contactPhone}"></span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
+                <div class="auth-form-grid">
+                    <div class="auth-field">
                         <label for="address" class="auth-field__label">Street address *</label>
                         <input
                             type="text"
@@ -97,12 +107,12 @@
                             required
                             autocomplete="street-address"
                             class="auth-field__input" />
-                        <div th:if="${#fields.hasErrors('address')}" class="mt-1 text-sm text-red-600">
+                        <div th:if="${#fields.hasErrors('address')}" class="auth-field__error">
                             <span th:errors="*{address}"></span>
                         </div>
                     </div>
 
-                    <div>
+                    <div class="auth-field">
                         <label for="city" class="auth-field__label">City *</label>
                         <input
                             type="text"
@@ -111,14 +121,14 @@
                             required
                             autocomplete="address-level2"
                             class="auth-field__input" />
-                        <div th:if="${#fields.hasErrors('city')}" class="mt-1 text-sm text-red-600">
+                        <div th:if="${#fields.hasErrors('city')}" class="auth-field__error">
                             <span th:errors="*{city}"></span>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
+                <div class="auth-form-grid">
+                    <div class="auth-field">
                         <label for="password" class="auth-field__label">Password *</label>
                         <div class="auth-field__input-wrapper">
                             <input
@@ -135,14 +145,14 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">Min 8, with upper, lower, number, and special character.</p>
-                        <div th:if="${#fields.hasErrors('password')}" class="mt-1 text-sm text-red-600">
+                        <p class="auth-field__hint">At least 8 characters, including upper and lower case, a number and a special character.</p>
+                        <div th:if="${#fields.hasErrors('password')}" class="auth-field__error">
                             <span th:errors="*{password}"></span>
                         </div>
                     </div>
 
-                    <div>
-                        <label for="confirmPassword" class="auth-field__label">Confirm Password *</label>
+                    <div class="auth-field">
+                        <label for="confirmPassword" class="auth-field__label">Confirm password *</label>
                         <div class="auth-field__input-wrapper">
                             <input
                                 type="password"
@@ -158,7 +168,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="mt-1 text-sm text-red-600">
+                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="auth-field__error">
                             <span th:errors="*{confirmPassword}"></span>
                         </div>
                     </div>
@@ -185,11 +195,11 @@
     </div>
 
     <th:block th:fragment="pageStyles">
-        <!-- auth.css is now included in app.css via tailwind.css -->
+        <link rel="stylesheet" th:href="@{/css/bundles/auth.css(v=${assetVersion})}">
     </th:block>
 
     <th:block th:fragment="pageScripts">
-    <script th:src="@{/js/auth/signup-gym-page.js}"></script>
+    <script th:src="@{/js/auth/signup-gym-page.js(v=${assetVersion})}" defer></script>
     </th:block>
 
 </th:block>

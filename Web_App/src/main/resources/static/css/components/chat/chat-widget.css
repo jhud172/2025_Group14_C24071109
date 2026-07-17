@@ -714,6 +714,13 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .chat-inline-clear-confirm,
+  .chat-inline-clear-card {
+    transition: none !important;
+  }
+}
+
 @layer components {
   .chat-icon-btn-premium {
     @apply relative;
@@ -1011,12 +1018,36 @@
     @apply absolute inset-0 z-20 grid place-items-center p-4;
     background: rgba(248, 250, 252, 0.45);
     backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-exit),
+                visibility 0s linear var(--motion-duration-micro);
+  }
+
+  .chat-inline-clear-confirm.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-enter),
+                visibility 0s linear 0s;
   }
 
   .chat-inline-clear-card {
     @apply w-full max-w-sm rounded-3xl border border-slate-200/80 bg-white p-5 shadow-2xl;
     @apply dark:border-slate-700/70 dark:bg-slate-950;
     background-color: rgba(255, 255, 255, 0.95);
+    opacity: 0;
+    transform: translateY(0.6rem) scale(0.98);
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-exit),
+                transform var(--motion-duration-panel) var(--motion-ease-exit);
+  }
+
+  .chat-inline-clear-confirm.is-open .chat-inline-clear-card {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity var(--motion-duration-micro) var(--motion-ease-enter),
+                transform var(--motion-duration-panel) var(--motion-ease-enter);
   }
 
   .chat-inline-clear-header {

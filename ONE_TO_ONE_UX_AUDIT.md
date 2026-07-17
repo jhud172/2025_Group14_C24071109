@@ -1,8 +1,8 @@
 # One To One — full-site UX, motion and visual-quality audit
 
-**Audit date:** 13 July 2026  
+**Audit date:** 13 July 2026; implementation status updated 15 July 2026
 **Environment:** local Spring application at `http://localhost:8081`  
-**Status:** audit complete; Phase 0 stability and Phase 1 shared foundations complete and verified
+**Status:** audit complete; Phase 0, Phase 1 and website stabilisation are complete; Phase 2 is in progress
 
 ## Completion snapshot
 
@@ -12,13 +12,73 @@
 | Authenticated roles | Complete | Client, trainer, gym admin and platform admin journeys checked. |
 | Shared product surfaces | Complete | Inbox, workouts, goals, calendar, profile, Charlie and platform navigation checked. |
 | Responsive and motion | Complete | Desktop and 390 × 844 mobile states, overlay timing, overflow and layout transitions checked. |
-| Source and automated verification | Complete | Template/CSS/JS inventory, route checks, root-cause tracing and current 467-test Gradle run completed. |
+| Source and automated verification | Complete | Template/CSS/JS inventory, route checks, root-cause tracing and current 483-test Gradle run completed. |
 | Phase 0 implementation | Complete | Release-blocking calendar, gym, pricing, dashboard and authenticated mobile-layer defects repaired; 456 tests pass. |
 | Phase 1 continuity | Complete | One shared overlay owner, named motion/layer tokens and explicit high-risk transitions implemented; 461 tests pass. |
 | Phase 1 performance and shell continuity | Complete | Core CSS reduced by about 83%, feature styles load by route, fixed surfaces share measured reservations, and gzip/cache revalidation is verified; 467 tests pass. |
+| Website test and local-startup stabilisation | Complete | Eight failing tests repaired, H2 fixture identities corrected, and local `bootRun` verified against the root `.env`; 467 tests pass and localhost returns HTTP 200. |
+| Phase 2 role-aware authentication/onboarding | Complete | Semantic role panels, grouped recovery, destination enforcement and role-specific onboarding implemented; 472 tests pass. |
+| Phase 2 four-role dashboard consistency | Complete | Shared typography, measured contrast, action hierarchy and useful empty states applied across client, trainer, gym-admin and platform-admin dashboards; 477 tests pass. |
+| Phase 2 role-aware shared surfaces | Complete | Inbox, support, shared-tool intent, platform actions and useful recovery states now match client, trainer, gym-admin and platform-admin roles; 483 tests pass. |
 | Assistive technology and physical devices | Release QA required | Screen-reader output, real touch devices, GPU performance, 200%/400% zoom and measured contrast require dedicated hardware/tool passes. |
 
-**Next implementation step:** Phase 2 surface consistency — make auth/onboarding role-aware, standardize typography/contrast/action/empty-state patterns, and shorten public-page transitions.
+**Next implementation step:** continue Phase 2 by shortening long public pages and standardising section transitions with the existing motion tokens.
+
+## Phase 2 implementation update — third workstream complete
+
+Completed on 15 July 2026:
+
+- Added a server-side role-surface model covering client, trainer, gym-admin, platform-admin/super-admin and signed-out support contexts.
+- Updated the shared inbox and thread so headings, notification guidance, composer prompts, dashboard links and empty-state actions match the active role.
+- Added a dedicated `/support` page and corrected gym support navigation; platform admins retain a distinct operational support inbox with a useful empty state.
+- Restricted platform-panel defaults to role-valid actions and destinations, with saved selections scoped by role.
+- Clarified workout and goal intent for coaching versus operational accounts and repaired the hidden custom-exercise dialog's inert, Escape and focus-return behaviour.
+- Added shared role-surface CSS with 44 px actions, explicit focus/hover states, explicit transition properties and a reduced-motion path.
+- Added `RoleAwareSharedSurfaceContractTest` and updated route contracts.
+- Rebuilt production CSS. Full Gradle suite: **483 tests, 483 passed, 0 failed, 0 skipped**.
+- Browser-checked client inbox, trainer workout studio, gym support and platform-admin support inbox at **1280 × 900** and **390 × 844**, including each role's action tray.
+- Current delivery token: **`20260715p8`**.
+
+## Phase 2 implementation update — second workstream complete
+
+Completed on 15 July 2026:
+
+- Introduced a shared `.app-dashboard` contract for page and section typography, measured text colours, surfaces, metrics, focus rings, action hierarchy, fields, tables and empty-state recovery.
+- Applied the contract to the client, trainer, gym-admin and platform-admin dashboards without changing their route or workflow behaviour.
+- Measured normal-text contrast against the intended surfaces: the lowest ratio is **4.76:1** in light mode and **6.92:1** in dark mode; title, body and accent combinations range up to **17.85:1**.
+- Standardised visible dashboard actions to at least 44 px. Client chip links use a 45 px CSS minimum so transformed panels still measure at or above 44 px in the browser.
+- Added role-specific empty explanations and recovery actions; restored the client milestone state expected by the dashboard contract.
+- Added `DashboardConsistencyContractTest` coverage for contrast calculations, all four role wrappers, hierarchy/action tokens, reduced motion and useful zero-data copy.
+- Rebuilt production CSS and browser-checked client, trainer, gym-admin and platform-admin dashboards at **1280 × 900** and **390 × 844**. Each verified route retained one main landmark and no horizontal overflow.
+- Full Gradle suite: **477 tests, 477 passed, 0 failed, 0 skipped**.
+- Current delivery token: **`20260715p5d`**.
+
+## Phase 2 implementation update — first workstream complete
+
+Completed on 15 July 2026:
+
+- Client, trainer and gym login states now render the correct controls and sign-up route on the server; inactive panels are `hidden`, `inert` and excluded from assistive navigation.
+- Trainer/gym access codes have grouped legends, labelled segments, preserved identifiers, role-specific recovery copy and focused invalid-state feedback.
+- Authentication now rejects selected-role/account-role mismatches without revealing account information.
+- Returning clients, trainers, gym administrators and platform administrators reach their correct dashboards; valid saved requests remain supported.
+- Platform administrators now receive admin onboarding and complete it to the admin dashboard.
+- Tutorial artwork uses a consistent inline SVG family with stable, reduced-motion-aware transitions.
+- Charlie is intentionally absent from focused authentication/sign-up layouts, preventing the mobile credential collision found during browser QA.
+- Desktop client/trainer/gym states and the 390 × 844 gym state were browser-checked; the mobile page has no horizontal overflow.
+- Changed CSS and JavaScript use cache token `20260715p2a`.
+- Focused role-flow tests: **10 tests, 10 passed**.
+- Full Gradle suite: **472 tests, 472 passed, 0 failed, 0 skipped**.
+
+## Website stabilisation update — complete
+
+Completed on 14 July 2026:
+
+- Updated stale trainer and gym access codes in the deterministic test fixture.
+- Reset generated H2 IDs after fixed-ID seed rows, removing primary-key collisions in goals and trainer schedule-template tests.
+- Isolated `local` and `test` profiles from production database variables in `.env` while preserving Render/PostgreSQL startup handling.
+- Focused regression set: **13 tests, 13 passed**.
+- Full Gradle suite: **467 tests, 467 passed, 0 failed, 0 skipped**.
+- Local runtime: **HTTP 200** on port 8081 using profile `local` and in-memory H2.
 
 ## Phase 0 implementation update — complete
 
@@ -147,7 +207,7 @@ This is a full-site system audit with representative journey coverage, not a cla
 
 ![Signup choice](C:/Users/marty/.codex/visualizations/2026/07/13/019f5c66-fb99-74e1-b853-e9626f32fc6f/site-ux-audit/05-signup-choice-desktop.png)
 
-**Health: Amber.**
+**Health: Good; role-drift findings implemented and verified.**
 
 - Both pages are clear and easy to scan.
 - Black rectangular seams appear at shell edges in several states. The base body is dark while light page layers include transparent gaps.
@@ -348,11 +408,11 @@ This is a full-site system audit with representative journey coverage, not a cla
 
 **Health: Amber.**
 
-- Empty-state layouts are visually calm and coherent.
-- Inbox copy assumes trainer/client even for gym admins; the gym role can reach workout/goal tooling without clear role intent.
-- Hidden workout modal fields remain in the DOM semantics, the archived-goal checkbox wraps awkwardly, and the fixed panel overlaps lower content.
-- **Fix:** make copy/actions role-aware, use `hidden`/`inert` for closed modals and replace checkbox wrapping with a stable labelled control row.
-- **Add:** explicit gym role acceptance criteria for shared tools and empty-state actions that lead to the next valid task.
+- Inbox, support, workout and goal copy/actions now resolve from the active account role.
+- Gym and platform-admin action trays no longer advertise client/trainer workout, goal or messaging destinations as operational tools.
+- The custom-exercise panel is inert and hidden to interaction until opened, closes with Escape and restores focus.
+- Inbox and support empty states now route each role to its next valid task; the archived-goal control uses its stable labelled row.
+- Representative desktop and 390 × 844 role journeys have passed browser review; physical-device and assistive-technology checks remain in Phase 3.
 
 ### 19. Global calendar response — confirmed cross-role failure
 
@@ -442,7 +502,7 @@ This is a full-site system audit with representative journey coverage, not a cla
 
 - **Role-aware auth/onboarding and shared copy**
   - Hide inactive fields semantically, improve grouped errors and route each role correctly.
-  - Make inbox, support and shared-tool language match the active role.
+- **Implemented:** make inbox, support and shared-tool language match the active role.
 
 - **Accessibility contract**
   - Remove focusable controls from `aria-hidden` regions and increase small hit targets.
@@ -521,9 +581,11 @@ Use `cubic-bezier(0.22, 1, 0.36, 1)` for entrances and a faster ease-in for exit
 
 ### Phase 2 — surface consistency
 
-- Make auth/onboarding and shared copy role-aware.
-- Apply typography, contrast, action and empty-state standards.
-- Shorten public pages and standardize section transitions.
+- **Complete:** make authentication and onboarding role-aware.
+- **Complete for client, trainer, gym-admin and platform-admin dashboards:** apply shared typography, measured contrast, action hierarchy and useful empty-state standards.
+- **Complete:** make shared inbox, support and tool copy role-aware.
+- Extend the completed standards to remaining shared and public surfaces as those workstreams are addressed.
+- Shorten public pages and standardise section transitions.
 - **Exit:** all roles share the same visual/recovery language.
 
 ### Phase 3 — polish and verification

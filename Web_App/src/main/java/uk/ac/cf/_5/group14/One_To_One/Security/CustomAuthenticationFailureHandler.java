@@ -22,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
+    public static final String LOGIN_IDENTIFIER_SESSION_ATTRIBUTE = "AUTH_LOGIN_IDENTIFIER";
+
     @Autowired(required = false)
     private LoginAttemptService loginAttemptService;
 
@@ -33,7 +35,13 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        log.warn("Authentication failure for {} on {}", request.getParameter("username"), request.getRequestURI());
+        String identifier = normalizeIdentifier(request.getParameter("username"));
+        String loginRole = normalizeLoginRole(request.getParameter("loginType"));
+        log.warn("Authentication failure for {} on {}", identifier, request.getRequestURI());
+
+        if (identifier != null) {
+            request.getSession(true).setAttribute(LOGIN_IDENTIFIER_SESSION_ATTRIBUTE, identifier);
+        }
 
         // Record failed attempts for basic throttling.
         if (loginAttemptService != null) {
@@ -42,7 +50,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
         // Prevent user enumeration: do not distinguish "user not found" vs "wrong password".
         if (exception instanceof DisabledException) {
-            User user = resolveUser(request.getParameter("username"));
+            User user = resolveUser(identifier);
             if (user != null && !user.isEmailVerified()) {
                 long cooldownRemaining = emailVerificationService.getResendCooldownRemainingSeconds(user);
                 if (cooldownRemaining > 0) {
@@ -57,16 +65,38 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 }
                 return;
             }
-            response.sendRedirect("/login?error=disabled");
+            response.sendRedirect(buildLoginRedirect("disabled", loginRole));
             return;
         }
 
         if (exception instanceof LockedException) {
-            response.sendRedirect("/login?error=locked");
+            response.sendRedirect(buildLoginRedirect("locked", loginRole));
             return;
         }
 
-        response.sendRedirect("/login?error=invalid");
+        response.sendRedirect(buildLoginRedirect("invalid", loginRole));
+    }
+
+    private String normalizeIdentifier(String identifier) {
+        if (identifier == null || identifier.isBlank()) {
+            return null;
+        }
+        String trimmed = identifier.trim();
+        return trimmed.length() <= 100 ? trimmed : trimmed.substring(0, 100);
+    }
+
+    private String normalizeLoginRole(String role) {
+        if ("trainer".equalsIgnoreCase(role)) {
+            return "trainer";
+        }
+        if ("gym".equalsIgnoreCase(role)) {
+            return "gym";
+        }
+        return "client";
+    }
+
+    private String buildLoginRedirect(String error, String role) {
+        return "/login?error=" + error + "&role=" + role;
     }
 
     private User resolveUser(String identifier) {

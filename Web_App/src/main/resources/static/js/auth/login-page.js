@@ -20,6 +20,8 @@
     const eyeIcon = document.getElementById("eyeIcon");
     const toggleGymPassword = document.getElementById("toggleGymPassword");
     const gymEyeIcon = document.getElementById("gymEyeIcon");
+    const roleSignupLink = document.getElementById("roleSignupLink");
+    const loginError = document.getElementById("loginError");
     const trainerCodeFull = document.getElementById("trainerCodeFull");
     const gymSecretCodeFull = document.getElementById("gymSecretCodeFull");
     const trainerCodeInputs = [
@@ -54,6 +56,12 @@
         trainer: pageRoot && pageRoot.dataset.trainerHint ? pageRoot.dataset.trainerHint : "Login with email, password, and trainer code.",
         gym: pageRoot && pageRoot.dataset.gymHint ? pageRoot.dataset.gymHint : "Login with your gym username, gym secret code, and password."
     };
+    const signupUrls = {
+        client: pageRoot && pageRoot.dataset.clientSignupUrl ? pageRoot.dataset.clientSignupUrl : "/signup/client",
+        trainer: pageRoot && pageRoot.dataset.trainerSignupUrl ? pageRoot.dataset.trainerSignupUrl : "/signup/trainer",
+        gym: pageRoot && pageRoot.dataset.gymSignupUrl ? pageRoot.dataset.gymSignupUrl : "/signup/gym"
+    };
+    const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let activeRole = null;
     let hintSwapTimer = null;
 
@@ -83,7 +91,22 @@
     }
 
     function getActivePanel() {
-        return emailFields.classList.contains("auth-fields-block--active") ? emailFields : gymFields;
+        return emailFields.hidden ? gymFields : emailFields;
+    }
+
+    function setRegionAvailable(region, available) {
+        if (!region) {
+            return;
+        }
+        region.hidden = !available;
+        region.setAttribute("aria-hidden", available ? "false" : "true");
+        if (available) {
+            region.removeAttribute("inert");
+            region.inert = false;
+        } else {
+            region.setAttribute("inert", "");
+            region.inert = true;
+        }
     }
 
     function setStageHeight(immediate) {
@@ -172,7 +195,7 @@
             setPanelOffset(nextPanel, 0);
             nextPanel.classList.add("auth-fields-block--active");
             nextPanel.classList.remove("auth-fields-block--inactive");
-            nextPanel.setAttribute("aria-hidden", "false");
+            setRegionAvailable(nextPanel, true);
             setStageHeight(!animate);
             return;
         }
@@ -180,41 +203,35 @@
         setPanelOffset(currentPanel, leavingOffset);
         setPanelOffset(nextPanel, enteringOffset);
 
-        if (!animate) {
-            currentPanel.classList.remove("auth-fields-block--active");
-            currentPanel.classList.add("auth-fields-block--inactive");
-            currentPanel.setAttribute("aria-hidden", "true");
+        authPanelStage.style.height = currentPanel.offsetHeight + "px";
+        currentPanel.classList.remove("auth-fields-block--active");
+        currentPanel.classList.add("auth-fields-block--inactive");
+        setRegionAvailable(currentPanel, false);
 
+        nextPanel.classList.remove("auth-fields-block--active");
+        nextPanel.classList.add("auth-fields-block--inactive");
+        setRegionAvailable(nextPanel, true);
+        authPanelStage.style.height = nextPanel.offsetHeight + "px";
+
+        if (!animate || prefersReducedMotion) {
             nextPanel.classList.remove("auth-fields-block--inactive");
             nextPanel.classList.add("auth-fields-block--active");
-            nextPanel.setAttribute("aria-hidden", "false");
             setPanelOffset(nextPanel, 0);
             setStageHeight(true);
             return;
         }
 
-        authPanelStage.style.height = currentPanel.offsetHeight + "px";
-        nextPanel.classList.remove("auth-fields-block--inactive");
-        nextPanel.setAttribute("aria-hidden", "false");
-
         window.requestAnimationFrame(() => {
-            currentPanel.classList.remove("auth-fields-block--active");
-            currentPanel.classList.add("auth-fields-block--inactive");
-            currentPanel.setAttribute("aria-hidden", "true");
-
+            nextPanel.classList.remove("auth-fields-block--inactive");
             nextPanel.classList.add("auth-fields-block--active");
-            authPanelStage.style.height = nextPanel.offsetHeight + "px";
-
-            window.requestAnimationFrame(() => {
-                setPanelOffset(nextPanel, 0);
-            });
+            setPanelOffset(nextPanel, 0);
         });
     }
 
     function setTrainerCodeVisible(visible) {
+        setRegionAvailable(trainerCodeField, visible);
         trainerCodeField.classList.toggle("auth-inline-section--expanded", visible);
         trainerCodeField.classList.toggle("auth-inline-section--collapsed", !visible);
-        trainerCodeField.setAttribute("aria-hidden", visible ? "false" : "true");
     }
 
     function setSocialAuthRole(role) {
@@ -228,7 +245,7 @@
         panels.forEach((panel) => {
             const isActive = panel.getAttribute("data-social-role") === role;
             panel.classList.toggle("social-auth-panel--active", isActive);
-            panel.setAttribute("aria-hidden", isActive ? "false" : "true");
+            setRegionAvailable(panel, isActive);
             matched = matched || isActive;
         });
 
@@ -356,6 +373,11 @@
         updateHint(resolvedRole, shouldAnimate);
         persistRole(resolvedRole);
         setSocialAuthRole(resolvedRole);
+        if (roleSignupLink) {
+            roleSignupLink.href = signupUrls[resolvedRole];
+        }
+
+        emailFields.setAttribute("aria-labelledby", resolvedRole === "trainer" ? "loginRoleTrainer" : "loginRoleClient");
 
         if (resolvedRole === "gym") {
             switchPanels(targetPanel, roleIndexMap[resolvedRole] - roleIndexMap[previousRole], shouldAnimate);
@@ -429,6 +451,7 @@
         togglePassword.addEventListener("click", () => {
             const visible = passwordInput.getAttribute("type") === "password";
             passwordInput.setAttribute("type", visible ? "text" : "password");
+            togglePassword.setAttribute("aria-label", visible ? "Hide password" : "Show password");
             setPasswordIcon(eyeIcon, visible);
         });
     }
@@ -437,12 +460,24 @@
         toggleGymPassword.addEventListener("click", () => {
             const visible = gymPasswordInput.getAttribute("type") === "password";
             gymPasswordInput.setAttribute("type", visible ? "text" : "password");
+            toggleGymPassword.setAttribute("aria-label", visible ? "Hide gym password" : "Show gym password");
             setPasswordIcon(gymEyeIcon, visible);
         });
     }
 
     bindSegmentedCodeInputs(trainerCodeInputs, trainerCodeFull, sanitizeTrainerSegment, normalizeTrainerCode);
     bindSegmentedCodeInputs(gymSecretCodeInputs, gymSecretCodeFull, sanitizeGymSecretSegment, normalizeGymSecretCode);
+
+    const serverError = pageRoot ? pageRoot.dataset.loginError : "";
+    if (serverError) {
+        const invalidGroup = activeRole === "trainer" ? trainerCodeInputs : activeRole === "gym" ? gymSecretCodeInputs : [];
+        if (serverError === "invalid" && invalidGroup.length > 0) {
+            invalidGroup.forEach((input) => input.setAttribute("aria-invalid", "true"));
+            window.setTimeout(() => invalidGroup[0].focus(), 0);
+        } else if (loginError) {
+            window.setTimeout(() => loginError.focus(), 0);
+        }
+    }
 
     loginForm.addEventListener("submit", (event) => {
         clearSegmentValidation(trainerCodeInputs);

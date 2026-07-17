@@ -1,0 +1,96 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:replace="~{base :: layout('Support', ~{::styles}, ~{::content}, ~{::scripts})}">
+
+    <div th:fragment="styles"></div>
+
+    <div th:fragment="content">
+        <div class="role-surface role-surface__page" th:attr="data-role-surface=${roleSurface.roleKey}">
+            <header class="role-surface__header">
+                <div class="px-6 py-6 sm:px-8">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <p class="role-surface__eyebrow" th:text="${roleSurface.roleLabel + ' workspace'}">Support</p>
+                            <h1 class="role-surface__title" th:text="${roleSurface.supportHeading}">Contact support</h1>
+                            <p class="role-surface__copy" th:text="${roleSurface.supportCopy}">Tell us what you need help with.</p>
+                        </div>
+                        <a th:href="${roleSurface.dashboardPath}" class="role-surface__action role-surface__action--secondary"
+                           th:text="${roleSurface.roleKey == 'guest' ? 'Back to home' : 'Back to dashboard'}">Back</a>
+                    </div>
+                </div>
+            </header>
+
+            <div th:if="${feedbackSuccess}" class="role-surface__notice" role="status" th:text="${feedbackSuccess}"></div>
+            <div th:if="${feedbackError}" class="role-surface__notice" role="alert" th:text="${feedbackError}"></div>
+
+            <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
+                <section class="role-surface__surface" aria-labelledby="support-form-heading">
+                    <form th:action="@{/support/feedback}" method="post" class="role-surface__form" id="support-form">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <div>
+                            <h2 id="support-form-heading" class="text-lg font-semibold text-slate-900 dark:text-slate-100">What can we help with?</h2>
+                            <p class="role-surface__copy">Include the page or action involved and what you expected to happen.</p>
+                        </div>
+
+                        <div th:if="${authUser != null}" class="role-surface__notice">
+                            Sending as <strong th:text="${authUser.firstName + ' ' + authUser.lastName}">Account holder</strong>.
+                        </div>
+
+                        <div th:if="${authUser == null}" class="grid gap-4 sm:grid-cols-2">
+                            <div class="role-surface__field">
+                                <label for="support-name">Name</label>
+                                <input id="support-name" name="name" type="text" autocomplete="name">
+                            </div>
+                            <div class="role-surface__field">
+                                <label for="support-email">Email</label>
+                                <input id="support-email" name="email" type="email" autocomplete="email">
+                            </div>
+                        </div>
+
+                        <div class="role-surface__field">
+                            <label for="support-type">Support type</label>
+                            <select id="support-type" name="requestType" required>
+                                <option value="">Choose a support type</option>
+                                <option value="QUERY">Question or account help</option>
+                                <option value="IMPROVEMENT">Product improvement</option>
+                                <option value="BUG">Something is not working</option>
+                                <option value="ERROR">Error message</option>
+                            </select>
+                        </div>
+
+                        <div class="role-surface__field">
+                            <label for="support-subject">Subject</label>
+                            <input id="support-subject" name="subject" type="text" maxlength="180" required
+                                   placeholder="A short summary of what you need">
+                        </div>
+
+                        <div class="role-surface__field">
+                            <label for="support-message">Details</label>
+                            <textarea id="support-message" name="message" maxlength="5000" required
+                                      placeholder="Tell us what happened, where it happened and what you have already tried"></textarea>
+                        </div>
+
+                        <label class="flex min-h-11 items-start gap-3 text-sm text-slate-700 dark:text-slate-200">
+                            <input type="checkbox" name="allowEmailReply" class="mt-1 h-5 w-5 shrink-0">
+                            <span>Allow the support team to reply by email. This is required for a question.</span>
+                        </label>
+
+                        <div>
+                            <button type="submit" class="role-surface__action role-surface__action--primary"
+                                    th:text="${roleSurface.supportSubmitLabel}">Send support request</button>
+                        </div>
+                    </form>
+                </section>
+
+                <aside class="role-surface__surface role-surface__empty" aria-labelledby="support-next-heading">
+                    <h2 id="support-next-heading" class="role-surface__empty-title">Before you send</h2>
+                    <p class="role-surface__empty-copy">Do not include passwords, payment card details or other sensitive information.</p>
+                    <a th:href="@{/faq}" class="role-surface__action role-surface__action--secondary">Check common questions</a>
+                    <a th:if="${roleSurface.roleKey == 'platform-admin'}" th:href="@{/admin/feedback}"
+                       class="role-surface__action role-surface__action--secondary mt-3">Open support inbox</a>
+                </aside>
+            </div>
+        </div>
+    </div>
+
+    <div th:fragment="scripts"></div>
+</th:block>

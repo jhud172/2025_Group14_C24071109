@@ -1,0 +1,551 @@
+@layer components {
+    /*
+     * Shared Phase 2 dashboard contract.
+     * Light-mode text ratios on white: title 17.85:1, body 14.63:1,
+     * muted 7.58:1, subtle 4.76:1 and accent 5.48:1.
+     * Dark-mode text ratios on #111827 range from 6.92:1 to 16.96:1.
+     */
+    .app-dashboard {
+        --dashboard-title: #0f172a;
+        --dashboard-text: #1e293b;
+        --dashboard-muted: #475569;
+        --dashboard-subtle: #64748b;
+        --dashboard-accent: #047857;
+        --dashboard-accent-strong: #065f46;
+        --dashboard-blue: #1d4ed8;
+        --dashboard-surface: #ffffff;
+        --dashboard-surface-subtle: #f8fafc;
+        --dashboard-border: #cbd5e1;
+        --dashboard-control-border: #64748b;
+        --dashboard-focus: #0f766e;
+        color: var(--dashboard-text);
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    html.dark .app-dashboard {
+        --dashboard-title: #f8fafc;
+        --dashboard-text: #e2e8f0;
+        --dashboard-muted: #cbd5e1;
+        --dashboard-subtle: #94a3b8;
+        --dashboard-accent: #6ee7b7;
+        --dashboard-accent-strong: #a7f3d0;
+        --dashboard-blue: #93c5fd;
+        --dashboard-surface: #111827;
+        --dashboard-surface-subtle: #0f172a;
+        --dashboard-border: #475569;
+        --dashboard-control-border: #64748b;
+        --dashboard-focus: #5eead4;
+    }
+
+    .app-dashboard :where(a, button, input, select, textarea):focus-visible {
+        outline: 3px solid var(--dashboard-focus);
+        outline-offset: 3px;
+    }
+
+    .dashboard-page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-page-title {
+        margin: 0;
+        color: var(--dashboard-title);
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        font-weight: 750;
+        letter-spacing: -0.035em;
+        line-height: 1.08;
+    }
+
+    .dashboard-page-title__prefix {
+        color: var(--dashboard-muted);
+        font-weight: 650;
+    }
+
+    .dashboard-page-title__accent {
+        color: var(--dashboard-accent);
+    }
+
+    .dashboard-page-subtitle {
+        max-width: 44rem;
+        margin-top: 0.65rem;
+        color: var(--dashboard-muted);
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .dashboard-status {
+        display: inline-flex;
+        min-height: 44px;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 0.6rem;
+        border: 1px solid color-mix(in srgb, var(--dashboard-accent) 55%, transparent);
+        border-radius: 999px;
+        padding: 0.6rem 0.9rem;
+        background: color-mix(in srgb, var(--dashboard-accent) 12%, var(--dashboard-surface));
+        color: var(--dashboard-accent-strong);
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+
+    .dashboard-status__dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 999px;
+        background: currentColor;
+    }
+
+    .dashboard-section-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .dashboard-section-title {
+        margin: 0;
+        color: var(--dashboard-title);
+        font-size: clamp(1.25rem, 2vw, 1.5rem);
+        font-weight: 720;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+    }
+
+    .dashboard-section-meta,
+    .dashboard-section-copy {
+        margin-top: 0.35rem;
+        color: var(--dashboard-muted);
+        font-size: 0.875rem;
+        line-height: 1.55;
+    }
+
+    .dashboard-surface,
+    .app-dashboard .card-neon {
+        border: 1px solid var(--dashboard-border);
+        border-radius: 1rem;
+        background: var(--dashboard-surface);
+        box-shadow: 0 18px 42px -34px rgba(15, 23, 42, 0.45);
+    }
+
+    .dashboard-surface {
+        padding: clamp(1.1rem, 2vw, 1.5rem);
+    }
+
+    .dashboard-surface--featured,
+    .app-dashboard .card-neon.dashboard-surface--featured {
+        border-color: color-mix(in srgb, var(--dashboard-accent) 38%, var(--dashboard-border));
+        background: linear-gradient(145deg,
+            color-mix(in srgb, var(--dashboard-accent) 6%, var(--dashboard-surface)),
+            var(--dashboard-surface) 48%);
+    }
+
+    .app-dashboard .stat-pulse-card,
+    .dashboard-metric {
+        border: 1px solid var(--dashboard-border);
+        border-radius: 0.9rem;
+        background: var(--dashboard-surface-subtle);
+        box-shadow: none;
+        color: var(--dashboard-text);
+        transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .app-dashboard .stat-pulse-card:hover,
+    .app-dashboard .stat-pulse-card:focus-within,
+    .dashboard-metric:hover,
+    .dashboard-metric:focus-within {
+        border-color: color-mix(in srgb, var(--dashboard-accent) 58%, var(--dashboard-border));
+        box-shadow: 0 16px 30px -26px rgba(15, 23, 42, 0.65);
+        transform: translateY(-1px);
+    }
+
+    .dashboard-metric__label {
+        color: var(--dashboard-muted) !important;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.065em;
+        line-height: 1.35;
+        text-transform: uppercase;
+    }
+
+    .dashboard-metric__value {
+        color: var(--dashboard-accent-strong) !important;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.035em;
+    }
+
+    .dashboard-inline-action {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        border-radius: 0.7rem;
+        padding: 0.45rem 0.65rem;
+        color: var(--dashboard-accent-strong) !important;
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background-color 160ms ease, color 160ms ease;
+    }
+
+    .dashboard-inline-action:hover {
+        background: color-mix(in srgb, var(--dashboard-accent) 12%, transparent);
+    }
+
+    .dashboard-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .dashboard-action,
+    .app-dashboard .btn {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid transparent;
+        border-radius: 0.75rem;
+        padding: 0.7rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        line-height: 1.25;
+        text-align: center;
+        text-decoration: none;
+        transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .dashboard-action:hover,
+    .app-dashboard .btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .dashboard-action--primary,
+    .app-dashboard .btn--primary,
+    .app-dashboard .gym-dashboard-action--primary {
+        border-color: #047857;
+        background: #047857;
+        color: #ffffff;
+        box-shadow: 0 12px 24px -18px rgba(4, 120, 87, 0.8);
+    }
+
+    .dashboard-action--primary:hover,
+    .app-dashboard .btn--primary:hover,
+    .app-dashboard .gym-dashboard-action--primary:hover {
+        border-color: #065f46;
+        background: #065f46;
+    }
+
+    .dashboard-action--secondary,
+    .app-dashboard .btn--secondary,
+    .app-dashboard .gym-dashboard-action--secondary {
+        border-color: var(--dashboard-control-border);
+        background: var(--dashboard-surface);
+        color: var(--dashboard-title);
+    }
+
+    .dashboard-action--secondary:hover,
+    .app-dashboard .btn--secondary:hover,
+    .app-dashboard .gym-dashboard-action--secondary:hover {
+        border-color: var(--dashboard-accent);
+        background: color-mix(in srgb, var(--dashboard-accent) 8%, var(--dashboard-surface));
+    }
+
+    .dashboard-day,
+    .app-dashboard .week-day-card {
+        border: 1px solid var(--dashboard-border);
+        background: var(--dashboard-surface);
+        box-shadow: none;
+        color: var(--dashboard-text);
+        transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .dashboard-day:hover,
+    .app-dashboard .week-day-card:hover {
+        border-color: var(--dashboard-accent);
+        background: color-mix(in srgb, var(--dashboard-accent) 7%, var(--dashboard-surface));
+        box-shadow: 0 14px 28px -25px rgba(15, 23, 42, 0.75);
+        transform: translateY(-2px);
+    }
+
+    .dashboard-shortcuts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+        gap: 0.75rem;
+    }
+
+    .dashboard-shortcut,
+    .app-dashboard .quick-action-card {
+        display: flex;
+        min-height: 8.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        border: 1px solid var(--dashboard-border);
+        border-radius: 0.9rem;
+        padding: 1rem;
+        background: var(--dashboard-surface);
+        color: var(--dashboard-text);
+        text-align: left;
+        text-decoration: none;
+        transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .dashboard-shortcut:hover,
+    .app-dashboard .quick-action-card:hover {
+        border-color: var(--dashboard-accent);
+        background: color-mix(in srgb, var(--dashboard-accent) 7%, var(--dashboard-surface));
+        box-shadow: 0 14px 28px -25px rgba(15, 23, 42, 0.75);
+        transform: translateY(-2px);
+    }
+
+    .dashboard-shortcut--primary {
+        border-color: color-mix(in srgb, var(--dashboard-accent) 62%, var(--dashboard-border));
+        background: color-mix(in srgb, var(--dashboard-accent) 9%, var(--dashboard-surface));
+    }
+
+    .dashboard-shortcut__title,
+    .app-dashboard .quick-action-card > .text-sm {
+        color: var(--dashboard-title) !important;
+        font-size: 0.875rem;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .dashboard-shortcut__copy,
+    .app-dashboard .quick-action-card > .text-xs {
+        margin-top: 0.25rem;
+        color: var(--dashboard-muted) !important;
+        font-size: 0.75rem;
+        line-height: 1.5;
+    }
+
+    .dashboard-empty-state,
+    .app-dashboard .cd-empty-state {
+        border: 1px dashed var(--dashboard-control-border);
+        border-radius: 0.9rem;
+        padding: 1.1rem;
+        background: var(--dashboard-surface-subtle);
+        text-align: left;
+    }
+
+    .dashboard-empty-state__title,
+    .app-dashboard .cd-empty-state__title {
+        margin: 0;
+        color: var(--dashboard-title);
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .dashboard-empty-state__copy,
+    .app-dashboard .cd-empty-state__copy,
+    .dashboard-empty-note,
+    .app-dashboard .cd-empty-note {
+        color: var(--dashboard-muted) !important;
+        font-size: 0.875rem;
+        line-height: 1.55;
+    }
+
+    .dashboard-empty-state__copy {
+        margin: 0.35rem 0 0;
+    }
+
+    .dashboard-empty-state__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin-top: 0.9rem;
+    }
+
+    .app-dashboard .cd-kicker {
+        color: var(--dashboard-accent-strong);
+        font-size: 0.6875rem;
+        font-weight: 800;
+        letter-spacing: 0.15em;
+    }
+
+    .app-dashboard :where(.cd-panel__title, .cd-rail-card__title, .cd-empty-state__title) {
+        color: var(--dashboard-title);
+        font-weight: 750;
+        letter-spacing: -0.015em;
+    }
+
+    .app-dashboard :where(.cd-panel__copy, .cd-rail-card__copy, .cd-empty-state__copy, .cd-link-tile__text) {
+        color: var(--dashboard-muted);
+    }
+
+    .app-dashboard .cd-button-chip {
+        display: inline-flex;
+        min-height: 45px;
+        align-items: center;
+        justify-content: center;
+        border-color: var(--dashboard-control-border);
+        border-radius: 0.75rem;
+        background: var(--dashboard-surface);
+        color: var(--dashboard-title);
+        transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .app-dashboard .cd-button-chip:hover {
+        border-color: var(--dashboard-accent);
+        background: color-mix(in srgb, var(--dashboard-accent) 8%, var(--dashboard-surface));
+        color: var(--dashboard-accent-strong);
+        transform: translateY(-1px);
+    }
+
+    .app-dashboard .cd-button-chip--solid {
+        border-color: #047857;
+        background: #047857;
+        color: #ffffff;
+    }
+
+    .app-dashboard .cd-button-chip--solid:hover {
+        border-color: #065f46;
+        background: #065f46;
+        color: #ffffff;
+    }
+
+    .app-dashboard :where(.cd-link-tile, .cd-action-card, .cd-primary-cta) {
+        border-color: var(--dashboard-border);
+        transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .dashboard-field {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid var(--dashboard-control-border) !important;
+        border-radius: 0.75rem;
+        padding: 0.65rem 0.8rem;
+        background: var(--dashboard-surface) !important;
+        color: var(--dashboard-title) !important;
+    }
+
+    textarea.dashboard-field {
+        min-height: 7.5rem;
+        resize: vertical;
+    }
+
+    .dashboard-table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--dashboard-border);
+        border-radius: 0.85rem;
+    }
+
+    .dashboard-table {
+        width: 100%;
+        min-width: 38rem;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    .dashboard-table th {
+        background: var(--dashboard-surface-subtle);
+        color: var(--dashboard-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.055em;
+        text-transform: uppercase;
+    }
+
+    .dashboard-table :where(th, td) {
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid var(--dashboard-border);
+        text-align: left;
+    }
+
+    .dashboard-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    html:not(.dark) .app-dashboard .text-slate-400,
+    html:not(.dark) .app-dashboard .text-slate-500 {
+        color: #475569;
+    }
+
+    html:not(.dark) .app-dashboard .text-slate-600 {
+        color: #334155;
+    }
+
+    html:not(.dark) .app-dashboard .text-emerald-400,
+    html:not(.dark) .app-dashboard .text-emerald-600 {
+        color: #047857;
+    }
+
+    html:not(.dark) .app-dashboard .text-blue-400,
+    html:not(.dark) .app-dashboard .text-blue-600 {
+        color: #1d4ed8;
+    }
+
+    html.dark .app-dashboard .text-slate-400,
+    html.dark .app-dashboard .text-slate-500 {
+        color: #cbd5e1;
+    }
+
+    html.dark .app-dashboard .text-emerald-400,
+    html.dark .app-dashboard .text-emerald-600 {
+        color: #6ee7b7;
+    }
+
+    html.dark .app-dashboard .text-blue-400,
+    html.dark .app-dashboard .text-blue-600 {
+        color: #93c5fd;
+    }
+
+    @media (max-width: 640px) {
+        .dashboard-page-header,
+        .dashboard-section-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .dashboard-page-header {
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-page-title {
+            font-size: clamp(1.8rem, 9vw, 2.25rem);
+        }
+
+        .dashboard-status {
+            align-self: flex-start;
+        }
+
+        .dashboard-actions,
+        .gym-dashboard-actions {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .dashboard-action,
+        .app-dashboard .btn,
+        .app-dashboard .gym-dashboard-action {
+            width: 100%;
+        }
+
+        .dashboard-shortcuts {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .dashboard-shortcut,
+        .app-dashboard .quick-action-card {
+            min-height: auto;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .app-dashboard,
+        .app-dashboard *,
+        .app-dashboard *::before,
+        .app-dashboard *::after {
+            scroll-behavior: auto !important;
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}

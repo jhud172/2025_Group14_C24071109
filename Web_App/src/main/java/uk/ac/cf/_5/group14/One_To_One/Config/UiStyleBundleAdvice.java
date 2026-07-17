@@ -10,10 +10,10 @@ import java.util.List;
 @ControllerAdvice
 public class UiStyleBundleAdvice {
 
-    static final String CSS_VERSION = "20260713p1b";
+    static final String CSS_VERSION = "20260717p1";
 
     private static final List<String> AUTH_PATHS = List.of(
-            "/login", "/signup", "/forgot-password", "/reset-password"
+            "/forgot-password", "/reset-password"
     );
     private static final List<String> PROFILE_PATHS = List.of(
             "/profile", "/u", "/trainer/profile"
@@ -27,7 +27,7 @@ public class UiStyleBundleAdvice {
             "/trainer/templates", "/client/assigned-plan", "/client/plan"
     );
     private static final List<String> CONTENT_PATHS = List.of(
-            "/about", "/faq", "/pricing", "/notes", "/vault", "/merch",
+            "/faq", "/pricing", "/notes", "/vault", "/merch",
             "/admin/merch", "/chat", "/chatv2", "/inbox"
     );
 

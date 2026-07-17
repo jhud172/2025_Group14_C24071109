@@ -29,6 +29,7 @@ Optional local overrides:
 
 - copy [`.env.example`](./.env.example) to [`../.env`](../.env) if you need to provide mail, SMS, AI, payment, or base-URL settings for local runs
 - `bootRun` loads the repository-root `.env` first, then falls back to `Web_App/.env` for older local setups
+- database keys in `.env` are ignored when the active profile is `local` or `test`, so production PostgreSQL settings cannot replace the embedded H2 datasource
 
 Install frontend dependencies:
 
@@ -53,6 +54,8 @@ Default local behavior:
 - Spring profile: `local`
 - URL: `http://localhost:8081`
 - database: H2 in memory
+
+The application also ignores an inherited `DATABASE_URL` for explicit `local` and `test` profiles. Render and other non-embedded profiles retain PostgreSQL URL normalisation.
 
 ## Useful Commands
 

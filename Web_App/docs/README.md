@@ -44,6 +44,8 @@ Use these files first:
 
 By default, `bootRun` uses the `local` Spring profile if no profile is set.
 
+For `local` and `test`, database variables from the root `.env` are not forwarded and an inherited `DATABASE_URL` is ignored by application startup. This keeps local runs on H2 even when the same `.env` contains production PostgreSQL settings.
+
 ## Local Runtime Behavior
 
 The `local` profile currently uses:
@@ -81,6 +83,8 @@ Run the full test suite:
 ```bash
 ./gradlew test
 ```
+
+Latest verified result (14 July 2026): **467 tests passed, 0 failed, 0 skipped**.
 
 Useful targeted checks:
 
@@ -179,12 +183,9 @@ If the public site lives at `https://crystal-production.com`, `APP_BASE_URL` sho
 
 ## `.env` Notes
 
-`bootRun` reads a limited set of keys from the root `.env` file before launching the app. In the current Gradle setup, that forwarding is focused on:
+`bootRun` reads application overrides from the root `.env` file before launching the app, falling back to `Web_App/.env` for older setups. When the effective profile is `local` or `test`, it deliberately skips PostgreSQL/database keys such as `DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD` and the `PG*` connection variables. Mail, base-URL, SMS/Twilio, AI and payment overrides remain available locally.
 
-- mail settings
-- selected app email settings
-- `APP_BASE_URL`
-- SMS / Twilio settings
+For Render or another non-embedded profile, database variables are still forwarded and PostgreSQL-style URLs are normalised at application startup.
 
 `DEV_MODE` is also read separately by `DevModeProperties` from the environment or `.env`.
 

@@ -1,11 +1,13 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout('Login', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
-    <th:block th:fragment="pageStyles"></th:block>
+    <th:block th:fragment="pageStyles">
+        <link rel="stylesheet" th:href="@{/css/bundles/auth.css(v=${assetVersion})}">
+    </th:block>
 
     <div th:fragment="content"
          class="auth-container auth-container--login animate-fade-in"
-         th:attr="data-login-server-role=${preselectedRole},data-client-hint=#{auth.login.clientHint},data-trainer-hint=#{auth.login.trainerHint},data-gym-hint=#{auth.login.gymHint}">
+         th:attr="data-login-server-role=${preselectedRole},data-login-error=${loginError},data-client-hint=#{auth.login.clientHint},data-trainer-hint=#{auth.login.trainerHint},data-gym-hint=#{auth.login.gymHint},data-client-signup-url=@{/signup/client},data-trainer-signup-url=@{/signup/trainer},data-gym-signup-url=@{/signup/gym}">
 
         <div class="auth-card auth-card--login">
             <div class="auth-accent-bar"></div>
@@ -33,25 +35,34 @@
             <div class="mb-6">
                 <div class="role-slider" id="roleSlider" role="tablist" aria-label="Login type">
                     <span class="role-slider__indicator" aria-hidden="true"></span>
-                    <button type="button" class="role-slider__option active" data-role="client" data-index="0" role="tab" aria-selected="true" th:text="#{auth.role.client}">Client</button>
-                    <button type="button" class="role-slider__option" data-role="trainer" data-index="1" role="tab" aria-selected="false" th:text="#{auth.role.trainer}">Trainer</button>
-                    <button type="button" class="role-slider__option" data-role="gym" data-index="2" role="tab" aria-selected="false" th:text="#{auth.role.gym}">Gym</button>
+                    <button type="button" id="loginRoleClient" class="role-slider__option" th:classappend="${preselectedRole == 'client'} ? ' active' : ''" data-role="client" data-index="0" role="tab" aria-controls="emailFields" th:attr="aria-selected=${preselectedRole == 'client'}" th:text="#{auth.role.client}">Client</button>
+                    <button type="button" id="loginRoleTrainer" class="role-slider__option" th:classappend="${preselectedRole == 'trainer'} ? ' active' : ''" data-role="trainer" data-index="1" role="tab" aria-controls="emailFields" th:attr="aria-selected=${preselectedRole == 'trainer'}" th:text="#{auth.role.trainer}">Trainer</button>
+                    <button type="button" id="loginRoleGym" class="role-slider__option" th:classappend="${preselectedRole == 'gym'} ? ' active' : ''" data-role="gym" data-index="2" role="tab" aria-controls="gymFields" th:attr="aria-selected=${preselectedRole == 'gym'}" th:text="#{auth.role.gym}">Gym</button>
                 </div>
-                <p class="role-hint mt-3 text-xs text-gray-500 text-center" id="roleHint" th:text="#{auth.login.clientHint}">Login with your email and password.</p>
+                <p class="role-hint mt-3 text-xs text-gray-500 text-center" id="roleHint" th:switch="${preselectedRole}">
+                    <span th:case="'trainer'" th:text="#{auth.login.trainerHint}">Login with email, password, and trainer code.</span>
+                    <span th:case="'gym'" th:text="#{auth.login.gymHint}">Login with your gym username, gym secret code, and password.</span>
+                    <span th:case="*" th:text="#{auth.login.clientHint}">Login with your email and password.</span>
+                </p>
             </div>
 
             <div th:if="${success}" class="auth-alert auth-alert--success" role="alert">
                 <span th:text="${success}"></span>
             </div>
 
-            <div th:if="${param.error}" class="auth-alert auth-alert--error" role="alert">
-                <span th:switch="${param.error[0]}">
+            <div th:if="${loginError != null}" id="loginError" class="auth-alert auth-alert--error auth-alert--stacked" role="alert" aria-live="assertive" tabindex="-1">
+                <span th:switch="${loginError}">
                     <span th:case="'disabled'" th:text="#{auth.error.disabled}">Account disabled. Contact support.</span>
                     <span th:case="'locked'" th:text="#{auth.error.locked}">Too many attempts. Try again later.</span>
                     <span th:case="'throttled'" th:text="#{auth.error.throttled}">Too many attempts. Try again later.</span>
                     <span th:case="'social'">Social sign-in could not be completed. Check the selected account type and provider configuration.</span>
-                    <span th:case="*" th:text="#{auth.error.invalid}">Invalid username or password.</span>
+                    <span th:case="*">
+                        <span th:if="${preselectedRole == 'trainer'}" th:text="#{auth.error.invalid.trainer}">We could not verify that trainer credential combination.</span>
+                        <span th:if="${preselectedRole == 'gym'}" th:text="#{auth.error.invalid.gym}">We could not verify that gym credential combination.</span>
+                        <span th:if="${preselectedRole == 'client'}" th:text="#{auth.error.invalid.client}">We could not verify that client credential combination.</span>
+                    </span>
                 </span>
+                <span class="auth-alert__recovery" th:text="#{auth.error.recovery}">Check each field and try again, or reset your password.</span>
             </div>
 
             <div th:if="${param.logout}" class="auth-alert auth-alert--success" role="alert">
@@ -71,34 +82,37 @@
             </div>
 
             <div id="socialAuthPanels" th:if="${socialProviders != null and !#lists.isEmpty(socialProviders)}" class="social-auth-panels">
-                <section class="social-auth-panel social-auth-panel--active" data-social-role="client">
+                <section class="social-auth-panel" th:classappend="${preselectedRole == 'client'} ? ' social-auth-panel--active' : ''" data-social-role="client" th:hidden="${preselectedRole != 'client'}" th:attr="aria-hidden=${preselectedRole != 'client'},inert=${preselectedRole != 'client'} ? 'inert' : null">
                     <th:block th:replace="~{public-views/auth/fragments/social-auth-buttons :: buttons('client', ${socialProviders})}"></th:block>
                 </section>
-                <section class="social-auth-panel" data-social-role="trainer" aria-hidden="true">
+                <section class="social-auth-panel" th:classappend="${preselectedRole == 'trainer'} ? ' social-auth-panel--active' : ''" data-social-role="trainer" th:hidden="${preselectedRole != 'trainer'}" th:attr="aria-hidden=${preselectedRole != 'trainer'},inert=${preselectedRole != 'trainer'} ? 'inert' : null">
                     <th:block th:replace="~{public-views/auth/fragments/social-auth-buttons :: buttons('trainer', ${socialProviders})}"></th:block>
                 </section>
             </div>
 
-            <form th:action="@{/login}" method="post" class="space-y-4" id="loginForm">
+            <form th:action="@{/login}" method="post" class="auth-form auth-form--login" id="loginForm">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <input type="hidden" name="next" th:if="${param.next}" th:value="${param.next}" />
-                <input type="hidden" name="loginType" id="loginType" value="client" />
+                <input type="hidden" name="loginType" id="loginType" th:value="${preselectedRole}" />
 
                 <div class="auth-panel-stage" id="authPanelStage">
-                    <div id="emailFields" class="auth-fields-block auth-fields-block--active" aria-hidden="false">
+                    <div id="emailFields" class="auth-fields-block" th:classappend="${preselectedRole != 'gym'} ? ' auth-fields-block--active' : ' auth-fields-block--inactive'" role="tabpanel" th:hidden="${preselectedRole == 'gym'}" th:attr="aria-hidden=${preselectedRole == 'gym'},inert=${preselectedRole == 'gym'} ? 'inert' : null,aria-labelledby=${preselectedRole == 'trainer'} ? 'loginRoleTrainer' : 'loginRoleClient'">
                         <div>
                             <label for="username" class="auth-field__label" th:text="#{auth.login.username}">Email or username</label>
                             <input
                                 type="text"
                                 id="username"
                                 name="username"
+                                th:attr="name=${preselectedRole != 'gym'} ? 'username' : null"
                                 required
                                 autocomplete="username"
+                                placeholder="Enter your email or username"
+                                th:value="${loginIdentifier}"
                                 class="auth-field__input" />
                         </div>
 
-                        <div id="trainerCodeField" class="auth-inline-section auth-inline-section--collapsed mt-4" aria-hidden="true">
-                            <label for="trainerCode" class="auth-field__label">Trainer Code</label>
+                        <fieldset id="trainerCodeField" class="auth-inline-section mt-4" th:classappend="${preselectedRole == 'trainer'} ? ' auth-inline-section--expanded' : ' auth-inline-section--collapsed'" th:hidden="${preselectedRole != 'trainer'}" th:attr="aria-hidden=${preselectedRole != 'trainer'},inert=${preselectedRole != 'trainer'} ? 'inert' : null,aria-invalid=${loginError == 'invalid' and preselectedRole == 'trainer'},aria-describedby=${loginError == 'invalid' and preselectedRole == 'trainer'} ? 'trainerCodeHint loginError' : 'trainerCodeHint'">
+                            <legend class="auth-field__label">Trainer code</legend>
                             <div class="code-input-group code-input-group--trainer">
                                 <input
                                     type="text"
@@ -106,6 +120,7 @@
                                     maxlength="4"
                                     placeholder="****"
                                     class="code-input-part"
+                                    aria-label="Trainer code segment 1 of 3"
                                     autocomplete="off" />
                                 <span class="code-input-separator">-</span>
                                 <input
@@ -114,6 +129,7 @@
                                     maxlength="4"
                                     placeholder="****"
                                     class="code-input-part"
+                                    aria-label="Trainer code segment 2 of 3"
                                     autocomplete="off" />
                                 <span class="code-input-separator">-</span>
                                 <input
@@ -122,11 +138,12 @@
                                     maxlength="4"
                                     placeholder="****"
                                     class="code-input-part"
+                                    aria-label="Trainer code segment 3 of 3"
                                     autocomplete="off" />
                             </div>
                             <input type="hidden" name="trainerCode" id="trainerCodeFull" />
-                            <p class="mt-2 text-xs text-gray-500 text-center">Enter your 12-character trainer authorization code</p>
-                        </div>
+                            <p id="trainerCodeHint" class="mt-2 text-xs text-gray-500 text-center">Enter or paste your 12-character trainer authorisation code.</p>
+                        </fieldset>
 
                         <div class="mt-4">
                             <div class="flex items-center justify-between mb-2">
@@ -135,13 +152,14 @@
                             </div>
                             <div class="auth-field__input-wrapper">
                                 <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
+                                type="password"
+                                id="password"
+                                name="password"
+                                th:attr="name=${preselectedRole != 'gym'} ? 'password' : null"
                                     required
                                     autocomplete="current-password"
                                     class="auth-field__input auth-field__input--with-icon" />
-                                <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                                <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">
                                     <svg class="h-5 w-5" id="eyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -151,20 +169,23 @@
                         </div>
                     </div>
 
-                    <div id="gymFields" class="auth-fields-block auth-fields-block--inactive space-y-4" aria-hidden="true">
+                    <div id="gymFields" class="auth-fields-block space-y-4" th:classappend="${preselectedRole == 'gym'} ? ' auth-fields-block--active' : ' auth-fields-block--inactive'" role="tabpanel" aria-labelledby="loginRoleGym" th:hidden="${preselectedRole != 'gym'}" th:attr="aria-hidden=${preselectedRole != 'gym'},inert=${preselectedRole != 'gym'} ? 'inert' : null">
                         <div>
-                            <label for="gymUsername" class="auth-field__label">Gym Username</label>
+                            <label for="gymUsername" class="auth-field__label">Gym username</label>
                             <input
                                 type="text"
                                 id="gymUsername"
                                 name="gymUsername"
+                                th:attr="name=${preselectedRole == 'gym'} ? 'username' : null"
+                                required
                                 placeholder="Enter your gym username"
+                                th:value="${loginIdentifier}"
                                 class="auth-field__input"
                                 autocomplete="username" />
                         </div>
 
-                        <div>
-                            <label for="gymSecretCode1" class="auth-field__label">Gym Secret Code</label>
+                        <fieldset class="auth-code-fieldset" th:attr="aria-invalid=${loginError == 'invalid' and preselectedRole == 'gym'},aria-describedby=${loginError == 'invalid' and preselectedRole == 'gym'} ? 'gymCodeHint loginError' : 'gymCodeHint'">
+                            <legend class="auth-field__label">Gym secret code</legend>
                             <div class="code-input-group code-input-group--gym">
                                 <input
                                     type="text"
@@ -173,6 +194,7 @@
                                     placeholder="****"
                                     inputmode="numeric"
                                     class="code-input-part"
+                                    aria-label="Gym secret code segment 1 of 4"
                                     autocomplete="one-time-code" />
                                 <span class="code-input-separator">-</span>
                                 <input
@@ -182,6 +204,7 @@
                                     placeholder="****"
                                     inputmode="numeric"
                                     class="code-input-part"
+                                    aria-label="Gym secret code segment 2 of 4"
                                     autocomplete="off" />
                                 <span class="code-input-separator">-</span>
                                 <input
@@ -191,6 +214,7 @@
                                     placeholder="****"
                                     inputmode="numeric"
                                     class="code-input-part"
+                                    aria-label="Gym secret code segment 3 of 4"
                                     autocomplete="off" />
                                 <span class="code-input-separator">-</span>
                                 <input
@@ -200,15 +224,16 @@
                                     placeholder="****"
                                     inputmode="numeric"
                                     class="code-input-part"
+                                    aria-label="Gym secret code segment 4 of 4"
                                     autocomplete="off" />
                             </div>
                             <input type="hidden" name="gymSecretCode" id="gymSecretCodeFull" />
-                            <p class="mt-2 text-xs text-gray-500 text-center">Enter your 16-digit gym secret code</p>
-                        </div>
+                            <p id="gymCodeHint" class="mt-2 text-xs text-gray-500 text-center">Enter or paste your 16-digit gym secret code.</p>
+                        </fieldset>
 
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <label for="gymPassword" class="auth-field__label !mb-0">Gym Password</label>
+                                <label for="gymPassword" class="auth-field__label !mb-0">Gym password</label>
                                 <a th:href="@{/forgot-password}" class="text-xs font-semibold auth-link" th:text="#{auth.login.forgot}">Forgot password?</a>
                             </div>
                             <div class="auth-field__input-wrapper">
@@ -216,9 +241,11 @@
                                     type="password"
                                     id="gymPassword"
                                     name="gymPass"
+                                    th:attr="name=${preselectedRole == 'gym'} ? 'password' : null"
+                                    required
                                     autocomplete="current-password"
                                     class="auth-field__input auth-field__input--with-icon" />
-                                <button type="button" class="password-toggle" id="toggleGymPassword" aria-label="Toggle password visibility">
+                                <button type="button" class="password-toggle" id="toggleGymPassword" aria-label="Show gym password">
                                     <svg class="h-5 w-5" id="gymEyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -238,14 +265,14 @@
 
                 <p class="text-center text-sm text-gray-600">
                     <span th:text="#{auth.login.noAccount}">Don't have an account?</span>
-                    <a th:href="@{/signup}" class="auth-link" th:text="#{auth.login.signup}">Sign up</a>
+                    <a id="roleSignupLink" th:href="${signupPath}" class="auth-link" th:text="#{auth.login.signup}">Sign up</a>
                 </p>
             </form>
         </div>
     </div>
 
     <th:block th:fragment="pageScripts">
-        <script th:src="@{/js/auth/login-page.js}"></script>
+        <script th:src="@{/js/auth/login-page.js(v=${assetVersion})}" defer></script>
     </th:block>
 
 </th:block>

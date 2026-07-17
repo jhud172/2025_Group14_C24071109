@@ -394,7 +394,7 @@
         <th:block th:replace="~{client-views/dashboard/fragments/client-dashboard-shell :: coachSpotlight('trainer-premium-tooltip-main')}"></th:block>
 
         <section aria-label="Action hub" class="cd-panel cd-action-hub" data-action-hub>
-            <div class="cd-panel__header cd-panel__header--split">
+            <div class="cd-panel__header cd-panel__header--split" data-site-tour="client-dashboard">
                 <div class="cd-action-hub__intro">
                     <div class="cd-section-head">
                         <p class="cd-kicker">Action Hub</p>
@@ -847,6 +847,25 @@
                         <div class="cd-identity-stat">
                             <span class="cd-identity-stat__value" th:text="${profileRail.level}">1</span>
                             <span class="cd-identity-stat__label">level</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="cd-profile-card__section">
+                    <p class="cd-kicker">Milestones</p>
+                    <div th:if="${profileRail.milestones != null and !#lists.isEmpty(profileRail.milestones)}"
+                         class="cd-chip-row"
+                         aria-label="Displayed profile milestones">
+                        <span th:each="milestone : ${profileRail.milestones}"
+                              class="cd-stat-chip"
+                              th:text="${milestone}">Milestone</span>
+                    </div>
+                    <div th:if="${profileRail.milestones == null or #lists.isEmpty(profileRail.milestones)}"
+                         class="cd-empty-state cd-empty-state--subtle">
+                        <p class="cd-empty-state__title">No Milestones Displayed</p>
+                        <p class="cd-empty-state__copy">Choose which earned milestones appear here from your profile preferences.</p>
+                        <div class="dashboard-empty-state__actions">
+                            <a th:href="@{/preferences/edit}" class="cd-button-chip">Choose milestones</a>
                         </div>
                     </div>
                 </section>

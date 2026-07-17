@@ -2,54 +2,58 @@
           th:replace="~{base :: layout('Client Sign Up', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
-        <div class="auth-card">
+        <div class="auth-card auth-card--signup-compact">
             <div class="auth-accent-bar"></div>
 
             <div class="mb-6 mt-4 text-center">
                 <h1 class="auth-heading">Create your client account</h1>
-                <p class="auth-subheading">Personalize your profile and start booking trainers.</p>
+                <p class="auth-subheading">Personalise your profile and start booking trainers.</p>
             </div>
 
             <th:block th:replace="~{public-views/auth/fragments/social-auth-buttons :: buttons('client', ${socialProviders})}"></th:block>
 
-            <form th:action="@{/signup/client}" th:object="${signupForm}" method="post" class="space-y-5">
+            <form th:action="@{/signup/client}" th:object="${signupForm}" method="post" class="auth-form">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                 <div th:if="${#fields.hasAnyErrors()}" class="auth-alert auth-alert--error" role="alert">
                     Please correct the highlighted fields below.
                 </div>
 
-                <div>
-                    <label for="email" class="auth-field__label">Email Address *</label>
-                    <input
-                        type="email"
-                        id="email"
-                        th:field="*{email}"
-                        required
-                        autocomplete="email"
-                        class="auth-field__input" />
-                    <div th:if="${#fields.hasErrors('email')}" class="mt-1 text-sm text-red-600">
-                        <span th:errors="*{email}"></span>
+                <div class="auth-form-grid">
+                    <div class="auth-field">
+                        <label for="email" class="auth-field__label">Email address *</label>
+                        <input
+                            type="email"
+                            id="email"
+                            th:field="*{email}"
+                            required
+                            autocomplete="email"
+                            placeholder="you@example.com"
+                            class="auth-field__input" />
+                        <div th:if="${#fields.hasErrors('email')}" class="auth-field__error">
+                            <span th:errors="*{email}"></span>
+                        </div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="username" class="auth-field__label">Username *</label>
+                        <input
+                            type="text"
+                            id="username"
+                            th:field="*{username}"
+                            required
+                            autocomplete="username"
+                            placeholder="Choose a username"
+                            class="auth-field__input" />
+                        <p class="auth-field__hint">3–20 characters. Letters, numbers and underscores only.</p>
+                        <div th:if="${#fields.hasErrors('username')}" class="auth-field__error">
+                            <span th:errors="*{username}"></span>
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <label for="username" class="auth-field__label">Username *</label>
-                    <input
-                        type="text"
-                        id="username"
-                        th:field="*{username}"
-                        required
-                        autocomplete="username"
-                        class="auth-field__input" />
-                    <p class="mt-1 text-xs text-gray-500">3–20 characters. Letters, numbers, underscore only.</p>
-                    <div th:if="${#fields.hasErrors('username')}" class="mt-1 text-sm text-red-600">
-                        <span th:errors="*{username}"></span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
+                <div class="auth-form-grid">
+                    <div class="auth-field">
                         <label for="password" class="auth-field__label">Password *</label>
                         <div class="auth-field__input-wrapper">
                             <input
@@ -66,14 +70,14 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">Min 8, with upper, lower, number, and special character.</p>
-                        <div th:if="${#fields.hasErrors('password')}" class="mt-1 text-sm text-red-600">
+                        <p class="auth-field__hint">At least 8 characters, including upper and lower case, a number and a special character.</p>
+                        <div th:if="${#fields.hasErrors('password')}" class="auth-field__error">
                             <span th:errors="*{password}"></span>
                         </div>
                     </div>
 
-                    <div>
-                        <label for="confirmPassword" class="auth-field__label">Confirm Password *</label>
+                    <div class="auth-field">
+                        <label for="confirmPassword" class="auth-field__label">Confirm password *</label>
                         <div class="auth-field__input-wrapper">
                             <input
                                 type="password"
@@ -89,7 +93,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="mt-1 text-sm text-red-600">
+                        <div th:if="${#fields.hasErrors('confirmPassword')}" class="auth-field__error">
                             <span th:errors="*{confirmPassword}"></span>
                         </div>
                     </div>
@@ -116,11 +120,11 @@
     </div>
 
     <th:block th:fragment="pageStyles">
-        <!-- auth.css is now included in app.css via tailwind.css -->
+        <link rel="stylesheet" th:href="@{/css/bundles/auth.css(v=${assetVersion})}">
     </th:block>
 
     <th:block th:fragment="pageScripts">
-    <script th:src="@{/js/auth/signup-client-page.js}"></script>
+    <script th:src="@{/js/auth/signup-client-page.js(v=${assetVersion})}" defer></script>
     </th:block>
 
 </th:block>

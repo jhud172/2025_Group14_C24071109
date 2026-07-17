@@ -9,12 +9,18 @@
         <section class="goal-shell">
             <div class="goal-head">
                 <div>
-                    <p class="goal-kicker">Goals</p>
-                    <h1 class="goal-title">Goal tracker</h1>
+                    <p class="goal-kicker" th:text="${roleSurface.roleLabel + ' workspace'}">Goals</p>
+                    <h1 class="goal-title" th:text="${roleSurface.goalsHeading}">Goal tracker</h1>
                     <p class="goal-copy" th:if="${client != null}" th:text="${'Viewing goals for ' + client.fullName}"></p>
-                    <p class="goal-copy">Keep weekly wins, monthly momentum, and longer targets visible in one place.</p>
+                    <p class="goal-copy" th:text="${roleSurface.goalsCopy}">Keep your targets visible.</p>
                 </div>
-                <a th:href="@{/goals/create(clientId=${clientId})}" class="goal-primary-btn">Create goal</a>
+                <a th:href="${clientId != null ? '/goals/create?clientId=' + clientId : roleSurface.goalsPrimaryPath}"
+                   class="goal-primary-btn" th:text="${clientId != null ? 'Create client goal' : roleSurface.goalsPrimaryLabel}">Create goal</a>
+            </div>
+
+            <div th:if="${!roleSurface.coachingToolsPrimary}" class="role-surface__notice">
+                This is a personal account tool and does not set gym or platform targets.
+                <a th:href="${roleSurface.dashboardPath}" class="font-semibold underline">Return to your operational dashboard</a>.
             </div>
 
             <div class="goal-top-grid">
@@ -101,7 +107,8 @@
                         </a>
                     </div>
                     <div class="goal-empty" th:if="${#lists.isEmpty(goals) or #lists.isEmpty(goals.?[timeframe != null and timeframe.name() == 'WEEK'])}">
-                        No week goals yet. Add one for short-horizon accountability.
+                        <p th:text="${roleSurface.goalsEmptyCopy}">No week goals yet.</p>
+                        <a th:href="${roleSurface.goalsPrimaryPath}" class="goal-secondary-btn" th:text="${roleSurface.goalsPrimaryLabel}">Continue</a>
                     </div>
                 </div>
 
@@ -129,7 +136,8 @@
                         </a>
                     </div>
                     <div class="goal-empty" th:if="${#lists.isEmpty(goals) or #lists.isEmpty(goals.?[timeframe != null and timeframe.name() == 'MONTH'])}">
-                        No month goals yet. Add one to keep the wider arc visible.
+                        <p th:text="${roleSurface.goalsEmptyCopy}">No month goals yet.</p>
+                        <a th:href="${roleSurface.goalsPrimaryPath}" class="goal-secondary-btn" th:text="${roleSurface.goalsPrimaryLabel}">Continue</a>
                     </div>
                 </div>
 
@@ -162,7 +170,8 @@
                         </a>
                     </div>
                     <div class="goal-empty" th:if="${#lists.isEmpty(goals) or #lists.isEmpty(goals.?[timeframe == null or timeframe.name() == 'TARGET'])}">
-                        No targets yet. Add a target for a longer-term finish line.
+                        <p th:text="${roleSurface.goalsEmptyCopy}">No targets yet.</p>
+                        <a th:href="${roleSurface.goalsPrimaryPath}" class="goal-secondary-btn" th:text="${roleSurface.goalsPrimaryLabel}">Continue</a>
                     </div>
                 </div>
             </section>

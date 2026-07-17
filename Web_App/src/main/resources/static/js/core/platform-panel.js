@@ -14,7 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const options = document.getElementById("platformPanelOptions");
     const status = document.getElementById("platformPanelStatus");
     const placementButtons = customizer ? Array.from(customizer.querySelectorAll("[data-placement]")) : [];
-    const storageKey = "oneToOne.platformPanel.v1";
+    const role = (root.dataset.role || "USER").toUpperCase();
+    const storageKey = `oneToOne.platformPanel.v2.${role}`;
     const overlayManager = window.OneToOneOverlay;
 
     function syncPanelReservation() {
@@ -36,17 +37,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const actions = [
-        { key: "dashboard", label: "Dashboard", href: "/dashboard", icon: "grid", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] },
-        { key: "calendar", label: "Calendar", href: "/calendar", icon: "calendar", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] },
+        { key: "client-dashboard", label: "My dashboard", href: "/dashboard", icon: "grid", roles: ["USER", "CLIENT"] },
+        { key: "trainer-dashboard", label: "Trainer dashboard", href: "/trainer/dashboard", icon: "grid", roles: ["TRAINER"] },
+        { key: "gym-dashboard", label: "Gym dashboard", href: "/gym/dashboard", icon: "grid", roles: ["GYM_ADMIN"] },
+        { key: "admin-dashboard", label: "Platform operations", href: "/admin/dashboard", icon: "grid", roles: ["PLATFORM_ADMIN", "SUPER_ADMIN"] },
+        { key: "calendar", label: "Calendar", href: "/calendar", icon: "calendar", roles: ["USER", "CLIENT", "TRAINER"] },
         { key: "charlie", label: "Charlie", href: "#charlie", icon: "spark", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] },
-        { key: "actions", label: "Action Hub", href: "#actions", icon: "bolt", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] },
-        { key: "workouts", label: "Workouts", href: "/workouts", icon: "dumbbell", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] },
-        { key: "goals", label: "Goals", href: "/goals", icon: "target", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] },
-        { key: "messages", label: "Messages", href: "/inbox", icon: "message", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] },
-        { key: "trainer", label: "My Trainer", href: "/client/my-trainer", icon: "user", roles: ["USER", "CLIENT"] },
+        { key: "actions", label: "Action Hub", href: "#actions", icon: "bolt", roles: ["USER", "CLIENT", "TRAINER"] },
+        { key: "client-workouts", label: "My workouts", href: "/workout-management", icon: "dumbbell", roles: ["USER", "CLIENT"] },
+        { key: "trainer-workouts", label: "Workout studio", href: "/workouts", icon: "dumbbell", roles: ["TRAINER"] },
+        { key: "client-goals", label: "My goals", href: "/goals", icon: "target", roles: ["USER", "CLIENT"] },
+        { key: "trainer-goals", label: "Client goals", href: "/trainer/clients", icon: "target", roles: ["TRAINER"] },
+        { key: "messages", label: "Coaching inbox", href: "/inbox", icon: "message", roles: ["USER", "CLIENT"] },
+        { key: "client-messages", label: "Client inbox", href: "/inbox", icon: "message", roles: ["TRAINER"] },
+        { key: "trainer", label: "My trainer", href: "/client/my-trainer", icon: "user", roles: ["USER", "CLIENT"] },
         { key: "clients", label: "Clients", href: "/trainer/clients", icon: "users", roles: ["TRAINER"] },
-        { key: "gym", label: "Gym", href: "/gym/dashboard", icon: "building", roles: ["GYM_ADMIN"] },
-        { key: "shop", label: "Shop", href: "/merch", icon: "bag", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] },
+        { key: "gym-trainers", label: "Trainers", href: "/gym/admin/trainers", icon: "users", roles: ["GYM_ADMIN"] },
+        { key: "gym-memberships", label: "Memberships", href: "/gym/admin/memberships", icon: "building", roles: ["GYM_ADMIN"] },
+        { key: "gym-support", label: "Gym support", href: "/support", icon: "message", roles: ["GYM_ADMIN"] },
+        { key: "support-inbox", label: "Support inbox", href: "/admin/feedback", icon: "message", roles: ["PLATFORM_ADMIN", "SUPER_ADMIN"] },
+        { key: "gym-applications", label: "Gym applications", href: "/admin/gym-applications", icon: "building", roles: ["PLATFORM_ADMIN", "SUPER_ADMIN"] },
+        { key: "merch-admin", label: "Merch operations", href: "/admin/merch", icon: "bag", roles: ["PLATFORM_ADMIN", "SUPER_ADMIN"] },
+        { key: "shop", label: "Shop", href: "/merch", icon: "bag", roles: ["USER", "CLIENT", "TRAINER"] },
         { key: "profile", label: "Profile", href: "/profile", icon: "profile", roles: ["USER", "CLIENT", "TRAINER", "GYM_ADMIN", "PLATFORM_ADMIN", "SUPER_ADMIN"] }
     ];
 
@@ -65,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
         profile: "<path d='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 8a8 8 0 0 0-16 0' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round'/>"
     };
 
-    const role = (root.dataset.role || "USER").toUpperCase();
     const available = actions.filter(action => action.roles.includes(role));
     const defaultKeys = available.slice(0, 7).map(action => action.key);
     let state = loadState();

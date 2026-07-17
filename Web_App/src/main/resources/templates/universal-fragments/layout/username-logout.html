@@ -19,12 +19,11 @@
                  class="floating-profile-card"
                  data-floating-profile
                  data-profile-preview
-                 data-profile-preview-hover="true"
+                 data-profile-preview-hover="false"
                  data-profile-theme-scope
                  th:with="bannerTheme=${navSettings != null and navSettings.profileBannerTheme != null ? #strings.toLowerCase(navSettings.profileBannerTheme) : 'aurora'},
                           ringTheme=${navSettings != null and navSettings.profileRingStyle != null ? #strings.toLowerCase(navSettings.profileRingStyle) : 'neon_dual'},
-                          cardBackTheme=${navSettings != null and navSettings.profileCardBackStyle != null ? #strings.toLowerCase(navSettings.profileCardBackStyle) : 'glass'},
-                          selectedMilestones=${navSettings != null and navSettings.profileMilestoneKeys != null and !#strings.isEmpty(navSettings.profileMilestoneKeys) ? #strings.arraySplit(navSettings.profileMilestoneKeys, ',') : null}"
+                          cardBackTheme=${navSettings != null and navSettings.profileCardBackStyle != null ? #strings.toLowerCase(navSettings.profileCardBackStyle) : 'glass'}"
                  th:attr="data-profile-name-color=${navSettings != null ? navSettings.profileTextColor : null},
                           data-profile-copy-color=${navSettings != null ? navSettings.profileBioTextColor : null}"
                  aria-label="User profile card">
@@ -100,14 +99,16 @@
                         </div>
                     </div>
 
-                    <form th:action="@{/logout}" method="post" class="floating-profile-card__logout m-0">
-                        <input type="hidden" th:if="${_csrf != null}"
-                               th:name="${_csrf.parameterName}"
-                               th:value="${_csrf.token}"/>
-                        <button type="submit" class="floating-profile-card__logout-btn">
-                            Logout
-                        </button>
-                    </form>
+                    <button type="button"
+                            class="floating-profile-card__toggle"
+                            data-profile-preview-toggle
+                            aria-label="Open profile menu"
+                            aria-expanded="false"
+                            aria-controls="floating-profile-card-panel">
+                        <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m6 8 4 4 4-4"/>
+                        </svg>
+                    </button>
                 </header>
 
                 <div id="floating-profile-card-panel"
@@ -115,48 +116,110 @@
                      data-floating-content
                      data-profile-preview-panel
                      th:classappend="${' profile-card-back-theme--' + cardBackTheme}"
+                     role="dialog"
+                     aria-labelledby="floating-profile-card-panel-name"
                      aria-hidden="true">
-                    <section class="floating-profile-card__section">
-                        <p class="floating-profile-card__section-title profile-preview-copy">Bio</p>
-                        <div class="profile-preview-bio-block profile-preview-bio-block--compact"
-                             data-profile-bio-block
-                             data-bio-scroll-height="160">
-                            <p id="floating-profile-card-bio"
-                               class="floating-profile-card__bio profile-preview-copy"
-                               data-profile-bio
-                               th:text="${authUser != null and authUser.bio != null and !#strings.isEmpty(authUser.bio) ? authUser.bio : 'No bio yet.'}">No bio yet.</p>
-                            <button type="button"
-                                    class="profile-preview-bio__toggle"
-                                    data-profile-bio-toggle
-                                    hidden
-                                    aria-hidden="true"
-                                    aria-expanded="false">Read more</button>
-                        </div>
+                    <div class="floating-profile-card__pointer" aria-hidden="true"></div>
+
+                    <section class="floating-profile-card__summary"
+                             data-profile-theme-banner
+                             th:classappend="${' profile-banner-pill--' + bannerTheme}">
+                        <span class="floating-profile-card__summary-avatar profile-avatar-ring"
+                              th:classappend="${' profile-avatar-ring--' + ringTheme}">
+                            <img th:if="${authUser != null and authUser.profileImageUrl != null and !#strings.isEmpty(authUser.profileImageUrl)}"
+                                 th:src="${authUser.profileImageUrl}"
+                                 alt=""
+                                 class="h-full w-full object-cover" />
+                            <span th:if="${authUser == null or authUser.profileImageUrl == null or #strings.isEmpty(authUser.profileImageUrl)}"
+                                  th:text="${avatarInitials}">U</span>
+                        </span>
+                        <span class="floating-profile-card__summary-copy">
+                            <strong id="floating-profile-card-panel-name"
+                                    class="floating-profile-card__summary-name profile-preview-name"
+                                    th:text="${displayName}">Profile</strong>
+                            <span class="floating-profile-card__summary-handle profile-preview-copy"
+                                  th:text="${authUser != null and authUser.username != null and !#strings.isEmpty(authUser.username) ? '@' + authUser.username : 'Your account'}">@username</span>
+                        </span>
+                        <span class="floating-profile-card__membership"
+                              th:classappend="${isPremium ? ' is-premium' : ''}"
+                              th:text="${isPremium ? 'Premium' : (authUser != null and authUser.role != null ? #strings.capitalize(#strings.toLowerCase(#strings.replace(authUser.role.name(), '_', ' '))) : 'Member')}">Member</span>
                     </section>
 
-                    <section class="floating-profile-card__section floating-profile-card__stats"
-                             th:with="pointsVal=${navProgress != null ? navProgress.points : 0}, levelVal=${navProgress != null ? navProgress.level : 1}">
-                        <p class="floating-profile-card__section-title profile-preview-copy">Points + Level</p>
-                        <p class="floating-profile-card__stats-value profile-preview-copy"><span th:text="${pointsVal}">0</span> points | Level <span th:text="${levelVal}">1</span></p>
-                    </section>
+                    <div class="floating-profile-card__body">
+                        <section class="floating-profile-card__section">
+                            <p class="floating-profile-card__section-title">About</p>
+                            <div class="profile-preview-bio-block profile-preview-bio-block--compact"
+                                 data-profile-bio-block
+                                 data-bio-collapsed-lines="3">
+                                <p id="floating-profile-card-bio"
+                                   class="floating-profile-card__bio profile-preview-copy"
+                                   data-profile-bio
+                                   th:text="${authUser != null and authUser.bio != null and !#strings.isEmpty(authUser.bio) ? authUser.bio : 'Add a short bio so people know more about you.'}">Add a short bio so people know more about you.</p>
+                                <button type="button"
+                                        class="profile-preview-bio__toggle"
+                                        data-profile-bio-toggle
+                                        hidden
+                                        aria-hidden="true"
+                                        aria-expanded="false">Show more</button>
+                            </div>
+                        </section>
 
-                    <section class="floating-profile-card__section">
-                        <p class="floating-profile-card__section-title profile-preview-copy">Milestones</p>
-                        <div class="profile-preview-milestone-grid profile-preview-milestone-grid--compact">
-                            <span class="profile-preview-milestone is-achieved"
-                                  th:each="mk,iter : ${selectedMilestones}"
-                                  th:if="${iter.index < 3}">
-                                <span class="profile-preview-milestone__status">Achieved</span>
-                                <span class="profile-preview-milestone__title"
-                                      th:text="${mk == 'FIRST_WORKOUT' ? 'First workout logged' : (mk == 'TEN_WORKOUTS' ? '10 workouts' : (mk == 'LEVEL_5' ? 'Reached Level 5' : (mk == 'LEVEL_10' ? 'Reached Level 10' : (mk == 'VERIFIED_EMAIL' ? 'Verified email' : (mk == 'VERIFIED_PHONE' ? 'Verified phone' : (mk == 'PREMIUM_MEMBER' ? 'Premium member' : #strings.replace(mk, '_', ' ')))))))}">Milestone</span>
-                            </span>
-                            <span class="profile-preview-milestone profile-preview-milestone--empty"
-                                  th:if="${selectedMilestones == null or #arrays.length(selectedMilestones) == 0}">
-                                <span class="profile-preview-milestone__status">Milestones</span>
-                                <span class="profile-preview-milestone__title">No Milestones Displayed</span>
-                            </span>
+                        <dl class="floating-profile-card__stats"
+                            th:with="pointsVal=${navProgress != null ? navProgress.points : 0}, levelVal=${navProgress != null ? navProgress.level : 1}">
+                            <div class="floating-profile-card__stat">
+                                <dt>Points</dt>
+                                <dd th:text="${pointsVal}">0</dd>
+                            </div>
+                            <div class="floating-profile-card__stat">
+                                <dt>Level</dt>
+                                <dd th:text="${levelVal}">1</dd>
+                            </div>
+                        </dl>
+
+                        <section class="floating-profile-card__section">
+                            <div class="floating-profile-card__section-heading">
+                                <p class="floating-profile-card__section-title">Featured milestones</p>
+                                <span th:if="${selectedMilestones != null and !#lists.isEmpty(selectedMilestones)}"
+                                      th:text="${#lists.size(selectedMilestones)}">0</span>
+                            </div>
+                            <div class="profile-preview-milestone-grid profile-preview-milestone-grid--compact">
+                                <span class="profile-preview-milestone is-achieved"
+                                      th:each="mk : ${selectedMilestones}">
+                                    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 10 3 3 7-7"/></svg>
+                                    <span class="profile-preview-milestone__title"
+                                          th:text="${mk == 'FIRST_WORKOUT' ? 'First workout' : (mk == 'TEN_WORKOUTS' ? '10 workouts' : (mk == 'LEVEL_5' ? 'Level 5' : (mk == 'LEVEL_10' ? 'Level 10' : (mk == 'VERIFIED_EMAIL' ? 'Verified email' : (mk == 'VERIFIED_PHONE' ? 'Verified phone' : (mk == 'PREMIUM_MEMBER' ? 'Premium member' : #strings.capitalize(#strings.toLowerCase(#strings.replace(mk, '_', ' ')))))))))}">Milestone</span>
+                                </span>
+                                <span class="profile-preview-milestone profile-preview-milestone--empty"
+                                      th:if="${selectedMilestones == null or #lists.isEmpty(selectedMilestones)}">
+                                    Choose milestones from your profile customiser.
+                                </span>
+                            </div>
+                        </section>
+
+                        <div class="floating-profile-card__actions">
+                            <a th:href="@{/profile}" class="floating-profile-card__action floating-profile-card__action--primary">
+                                View profile
+                                <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 10h12M12 6l4 4-4 4"/></svg>
+                            </a>
+                            <a th:href="@{/tutorial(restart=true)}"
+                               data-site-tour-replay
+                               class="floating-profile-card__action"
+                               aria-label="Replay website tour">
+                                <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10a7 7 0 1 0 2.3-5.2"/><path d="M3 3v5h5"/></svg>
+                                Tour
+                            </a>
                         </div>
-                    </section>
+
+                        <form th:action="@{/logout}" method="post" class="floating-profile-card__panel-logout">
+                            <input type="hidden" th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}"/>
+                            <button type="submit">
+                                <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4H4v12h4M12 7l3 3-3 3M6 10h9"/></svg>
+                                Sign out
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </section>
@@ -164,7 +227,13 @@
 
     <a sec:authorize="!isAuthenticated()"
        th:href="@{/login}"
-       class="nav-login-cta inline-flex h-9 items-center justify-center rounded-lg px-4 text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/20 transition-colors duration-200 shadow-sm">
-        Login
+       class="nav-login-cta">
+        <span class="nav-login-cta__label">Login</span>
+        <span class="nav-login-cta__icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.5 10h10"/>
+                <path d="m11 6.5 3.5 3.5-3.5 3.5"/>
+            </svg>
+        </span>
     </a>
 </div>

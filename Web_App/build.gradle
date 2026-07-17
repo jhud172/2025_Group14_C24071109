@@ -82,9 +82,27 @@ compileTestJava {
 
 tasks.named('bootRun') {
 	doFirst {
-		if (!System.getenv('SPRING_PROFILES_ACTIVE') && !System.getProperty('spring.profiles.active')) {
-			def defaultProfile = System.getenv('RENDER') == 'true' ? 'render' : 'local'
-			environment 'SPRING_PROFILES_ACTIVE', defaultProfile
+		def systemProfile = System.getProperty('spring.profiles.active')
+		def environmentProfile = System.getenv('SPRING_PROFILES_ACTIVE')
+		def effectiveProfile = systemProfile ?: environmentProfile ?: (System.getenv('RENDER') == 'true' ? 'render' : 'local')
+		if (!environmentProfile) {
+			environment 'SPRING_PROFILES_ACTIVE', effectiveProfile
+		}
+
+		def localDatabaseKeys = [
+				'DATABASE_URL',
+				'DATABASE_USER',
+				'DATABASE_PASSWORD',
+				'DATABASE_DRIVER',
+				'PGHOST',
+				'PGPORT',
+				'PGDATABASE',
+				'PGUSER',
+				'PGPASSWORD',
+				'PGSSLMODE'
+		] as Set
+		def usesLocalDatabase = effectiveProfile.split(',').any { profile ->
+			profile.trim() in ['local', 'test']
 		}
 
 		def repoRootEnvFile = rootProject.projectDir.toPath().resolve('..').resolve('.env').normalize().toFile()
@@ -102,6 +120,9 @@ tasks.named('bootRun') {
 			def separator = trimmed.indexOf('=')
 			def key = trimmed.substring(0, separator).trim()
 			def value = trimmed.substring(separator + 1).trim()
+			if (usesLocalDatabase && key in localDatabaseKeys) {
+				return
+			}
 
 			if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
 				value = value.substring(1, value.length() - 1)

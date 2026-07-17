@@ -1,0 +1,26 @@
+@layer components {
+    .profile-avatar-ring--ufo_beam {
+        --ring-core: rgba(167, 139, 250, 0.96);
+        --ring-glow: rgba(129, 140, 248, 0.52);
+        --ring-spark-a: rgba(216, 180, 254, 0.84);
+        --ring-spark-b: rgba(110, 231, 183, 0.82);
+        --ring-spin-dur: 8.6s;
+        --ring-pulse-dur: 2.3s;
+        --ring-sparkle-dur: 2.6s;
+    }
+
+    .profile-avatar-ring--ufo_beam::before {
+        border-top-color: rgba(221, 214, 254, 0.98);
+        border-right-color: rgba(167, 139, 250, 0.72);
+        border-left-color: rgba(52, 211, 153, 0.68);
+        filter: drop-shadow(0 0 0.62rem rgba(167, 139, 250, 0.62));
+    }
+
+    .profile-avatar-ring--ufo_beam::after {
+        inset: -0.56rem;
+        background:
+            radial-gradient(ellipse at 50% 0%, rgba(237, 233, 254, 0.96) 0 12%, rgba(167, 139, 250, 0.55) 18%, transparent 34%),
+            conic-gradient(from 160deg at 50% 8%, transparent 0 8%, rgba(110, 231, 183, 0.38) 10% 18%, transparent 20% 100%);
+        animation: ring-sparkle 2.15s ease-in-out infinite;
+    }
+}

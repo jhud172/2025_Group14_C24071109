@@ -26,6 +26,14 @@
     /* Auth card with enhanced design */
     .auth-card {
         @apply relative w-full rounded-[2rem] bg-white p-8 sm:p-10;
+        --auth-field-bg: rgba(248, 250, 252, 0.92);
+        --auth-field-bg-hover: #ffffff;
+        --auth-field-border: rgba(148, 163, 184, 0.52);
+        --auth-field-border-hover: rgba(100, 116, 139, 0.7);
+        --auth-field-text: #1e293b;
+        --auth-field-placeholder: #94a3b8;
+        --auth-field-focus: #059669;
+        --auth-field-ring: rgba(16, 185, 129, 0.14);
         max-width: 24rem;
         padding-top: clamp(2.8rem, 5vw, 3.2rem);
         border: 1px solid rgba(226, 232, 240, 0.6);
@@ -41,6 +49,10 @@
 
     .auth-container--wide .auth-card {
         max-width: 56rem;
+    }
+
+    .auth-container--wide .auth-card--signup-compact {
+        max-width: 44rem;
     }
 
     .auth-card--login {
@@ -178,27 +190,134 @@
         transform: translateY(-50%) scale(0.95);
     }
 
-    /* Auth form fields with floating labels */
+    /* Shared form rhythm keeps every role visually consistent. */
+    .auth-form {
+        display: grid;
+        gap: 1.25rem;
+    }
+
+    .auth-form--login {
+        gap: 1rem;
+    }
+
+    .auth-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.1rem;
+        align-items: start;
+    }
+
+    .auth-field {
+        min-width: 0;
+    }
+
+    .auth-field__hint,
+    .auth-field__error {
+        margin-top: 0.45rem;
+        font-size: 0.75rem;
+        line-height: 1.45;
+    }
+
+    .auth-field__hint {
+        color: #64748b;
+    }
+
+    .auth-field__error {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    /* Auth form fields */
     .auth-field__label {
-        @apply block text-sm font-medium text-gray-700 mb-2 transition-all duration-300;
+        @apply block text-sm font-semibold text-gray-700 mb-2;
         letter-spacing: 0.01em;
     }
 
-    .auth-field__input {
-        @apply w-full rounded-xl border-2 border-gray-300 bg-white px-4 py-3.5 text-gray-900
-        placeholder:text-gray-400 transition-all duration-300
-        focus-visible:outline-none focus-visible:border-emerald-500
-        hover:border-gray-400;
+    .auth-field__input,
+    .code-input-part {
+        width: 100%;
+        min-height: 3.5rem;
+        border: 1px solid var(--auth-field-border);
+        border-radius: 0.9rem;
+        background: var(--auth-field-bg);
+        color: var(--auth-field-text);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.86),
+            0 1px 2px rgba(15, 23, 42, 0.03);
+        appearance: none;
+        caret-color: var(--auth-field-focus);
+        transition:
+            border-color 0.2s ease,
+            background-color 0.2s ease,
+            box-shadow 0.24s ease,
+            transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .auth-field__input:focus {
-        @apply bg-white border-emerald-500;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    .auth-field__input {
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        line-height: 1.4;
+    }
+
+    textarea.auth-field__input {
+        min-height: 8rem;
+        resize: vertical;
+    }
+
+    .auth-field__input::placeholder,
+    .code-input-part::placeholder {
+        color: var(--auth-field-placeholder);
+        opacity: 1;
+    }
+
+    .auth-field__input:hover:not(:focus),
+    .code-input-part:hover:not(:focus) {
+        border-color: var(--auth-field-border-hover);
+        background: var(--auth-field-bg-hover);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.9),
+            0 5px 12px -10px rgba(15, 23, 42, 0.35);
+    }
+
+    .auth-field__input:focus,
+    .code-input-part:focus {
+        outline: none;
+        border-color: var(--auth-field-focus);
+        background: var(--auth-field-bg-hover);
+        box-shadow:
+            0 0 0 4px var(--auth-field-ring),
+            0 10px 20px -16px rgba(5, 150, 105, 0.55);
         transform: translateY(-1px);
     }
 
-    .auth-field__input:hover:not(:focus) {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    .auth-field__input[aria-invalid="true"],
+    .code-input-part[aria-invalid="true"] {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .auth-field__input:disabled,
+    .code-input-part:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+
+    /* Prevent browser autofill from introducing a role-specific colour. */
+    .auth-field__input:-webkit-autofill,
+    .auth-field__input:-webkit-autofill:hover,
+    .auth-field__input:-webkit-autofill:focus,
+    .code-input-part:-webkit-autofill,
+    .code-input-part:-webkit-autofill:hover,
+    .code-input-part:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--auth-field-text);
+        caret-color: var(--auth-field-focus);
+        box-shadow: inset 0 0 0 1000px var(--auth-field-bg-hover), 0 0 0 4px transparent;
+        transition: background-color 9999s ease-out 0s;
+    }
+
+    .auth-field__input:-webkit-autofill:focus,
+    .code-input-part:-webkit-autofill:focus {
+        box-shadow: inset 0 0 0 1000px var(--auth-field-bg-hover), 0 0 0 4px var(--auth-field-ring);
     }
 
     /* Input with icon */
@@ -231,15 +350,13 @@
     }
 
     .code-input-part {
-        @apply w-full min-w-0 text-center font-mono text-lg tracking-[0.22em] rounded-xl border-2 border-gray-300 bg-white px-3 py-3.5 text-gray-900
-        placeholder:text-gray-400 transition-all duration-300
-        focus-visible:outline-none focus-visible:border-emerald-500
-        hover:border-gray-400;
-    }
-
-    .code-input-part:focus {
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-        transform: translateY(-1px) scale(1.02);
+        min-width: 0;
+        padding: 0.875rem 0.65rem;
+        text-align: center;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 1rem;
+        font-weight: 650;
+        letter-spacing: 0.16em;
     }
 
     .code-input-separator {
@@ -331,6 +448,14 @@
     .auth-alert--info {
         @apply border-blue-500/40 bg-blue-50 text-blue-700;
         box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+    }
+
+    .auth-alert__recovery {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: 0.78rem;
+        line-height: 1.45;
+        opacity: 0.84;
     }
 
     .auth-alert--dev {
@@ -608,6 +733,14 @@
     }
 
     html.dark .auth-card {
+        --auth-field-bg: rgba(15, 23, 42, 0.72);
+        --auth-field-bg-hover: rgba(15, 23, 42, 0.94);
+        --auth-field-border: rgba(100, 116, 139, 0.7);
+        --auth-field-border-hover: rgba(148, 163, 184, 0.78);
+        --auth-field-text: #f8fafc;
+        --auth-field-placeholder: #64748b;
+        --auth-field-focus: #34d399;
+        --auth-field-ring: rgba(52, 211, 153, 0.16);
         border-color: rgba(51, 65, 85, 0.95);
         background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.94) 100%);
         box-shadow: 
@@ -652,20 +785,12 @@
         @apply text-gray-300;
     }
 
-    html.dark .auth-field__input,
-    html.dark .code-input-part {
-        @apply border-gray-600 bg-gray-700 text-white placeholder:text-gray-500;
+    html.dark .auth-field__hint {
+        color: #94a3b8;
     }
 
-    html.dark .auth-field__input:focus,
-    html.dark .code-input-part:focus {
-        @apply bg-gray-700 border-emerald-500;
-        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
-    }
-
-    html.dark .auth-field__input:hover,
-    html.dark .code-input-part:hover {
-        @apply border-gray-500;
+    html.dark .auth-field__error {
+        color: #fca5a5;
     }
 
     html.dark .password-toggle {
@@ -806,6 +931,9 @@
     }
 
     .auth-inline-section {
+        min-width: 0;
+        border: 0;
+        padding: 0;
         overflow: hidden;
         max-height: 0;
         opacity: 0;
@@ -825,6 +953,30 @@
         transform: translateY(0);
         margin-top: 1rem !important;
         pointer-events: auto;
+    }
+
+    .auth-code-fieldset {
+        min-width: 0;
+        margin: 0;
+        border: 0;
+        padding: 0;
+    }
+
+    .auth-inline-section[aria-invalid="true"] .code-input-part,
+    .auth-code-fieldset[aria-invalid="true"] .code-input-part {
+        border-color: rgba(220, 38, 38, 0.72);
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.12);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .role-slider__indicator,
+        .role-slider__option,
+        .role-hint,
+        .auth-panel-stage,
+        .auth-fields-block,
+        .auth-inline-section {
+            transition-duration: 0.01ms !important;
+        }
     }
 
     .auth-actions-row {
@@ -848,6 +1000,10 @@
             max-width: min(32rem, 100%);
             padding-left: 1.4rem;
             padding-right: 1.4rem;
+        }
+
+        .auth-form-grid {
+            grid-template-columns: minmax(0, 1fr);
         }
 
         .code-input-group {

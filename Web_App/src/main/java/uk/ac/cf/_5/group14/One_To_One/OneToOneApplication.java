@@ -35,6 +35,11 @@ public class OneToOneApplication {
 	}
 
 	private static void applyRenderDatabaseUrlFallback() {
+		if (usesEmbeddedDatabaseProfile()) {
+			System.setProperty("app.datasource.url-origin", "embedded profile configuration");
+			return;
+		}
+
 		String rawDatabaseUrl = System.getenv("DATABASE_URL");
 		if (hasText(rawDatabaseUrl)) {
 			String normalizedDatabaseUrl = normalizeJdbcPostgresUrl(rawDatabaseUrl);
@@ -58,6 +63,23 @@ public class OneToOneApplication {
 			return;
 		}
 
+	}
+
+	private static boolean usesEmbeddedDatabaseProfile() {
+		String activeProfiles = System.getProperty("spring.profiles.active");
+		if (!hasText(activeProfiles)) {
+			activeProfiles = System.getenv("SPRING_PROFILES_ACTIVE");
+		}
+		if (!hasText(activeProfiles)) {
+			return false;
+		}
+
+		for (String profile : activeProfiles.split(",")) {
+			if ("local".equalsIgnoreCase(profile.trim()) || "test".equalsIgnoreCase(profile.trim())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static boolean hasText(String value) {

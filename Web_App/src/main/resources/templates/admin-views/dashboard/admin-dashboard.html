@@ -2,71 +2,77 @@
           xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
           th:replace="~{base :: layout('Admin Dashboard', null, ~{::content}, null)}">
 
-    <div th:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div>
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100">Platform Operations</h1>
-            <p class="mt-2 text-slate-600 dark:text-slate-300">Run support, merchandise, waitlist communication, and dev-mode controls from one operational cockpit.</p>
+    <div th:fragment="content" class="app-dashboard app-dashboard--admin max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <header class="dashboard-page-header">
+            <div>
+                <h1 class="dashboard-page-title">Platform Operations</h1>
+                <p class="dashboard-page-subtitle">Review support, applications and waitlist activity, then move into the operational task that needs attention.</p>
+            </div>
+            <div class="dashboard-status" aria-label="Platform operations workspace active">
+                <span class="dashboard-status__dot" aria-hidden="true"></span>
+                <span>Admin workspace</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" data-site-tour="admin-dashboard">
+            <div class="dashboard-metric p-4">
+                <p class="dashboard-metric__label">Unread feedback</p>
+                <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${feedbackUnreadCount}">0</p>
+            </div>
+            <div class="dashboard-metric p-4">
+                <p class="dashboard-metric__label">New tickets</p>
+                <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${feedbackNewCount}">0</p>
+            </div>
+            <div class="dashboard-metric p-4">
+                <p class="dashboard-metric__label">Ongoing issues</p>
+                <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${feedbackOngoingCount}">0</p>
+            </div>
+            <div class="dashboard-metric p-4">
+                <p class="dashboard-metric__label">Waitlist signups</p>
+                <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${waitlistCount}">0</p>
+            </div>
+            <div sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')" class="dashboard-metric p-4">
+                <p class="dashboard-metric__label">Open gym applications</p>
+                <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${gymApplicationCount}">0</p>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
-                <p class="text-xs uppercase tracking-wide text-slate-500">Unread feedback</p>
-                <p class="mt-2 text-3xl font-bold text-emerald-600" th:text="${feedbackUnreadCount}">0</p>
-            </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
-                <p class="text-xs uppercase tracking-wide text-slate-500">New tickets</p>
-                <p class="mt-2 text-3xl font-bold text-blue-600" th:text="${feedbackNewCount}">0</p>
-            </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
-                <p class="text-xs uppercase tracking-wide text-slate-500">Ongoing issues</p>
-                <p class="mt-2 text-3xl font-bold text-amber-600" th:text="${feedbackOngoingCount}">0</p>
-            </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
-                <p class="text-xs uppercase tracking-wide text-slate-500">Waitlist signups</p>
-                <p class="mt-2 text-3xl font-bold text-violet-600" th:text="${waitlistCount}">0</p>
-            </div>
-            <div sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')" class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/40">
-                <p class="text-xs uppercase tracking-wide text-slate-500">Open gym applications</p>
-                <p class="mt-2 text-3xl font-bold text-rose-600" th:text="${gymApplicationCount}">0</p>
-            </div>
-        </div>
-
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
-            <div class="flex items-center justify-between gap-4 mb-4">
+        <section class="dashboard-surface">
+            <div class="dashboard-section-header">
                 <div>
-                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Operations Shortcuts</h2>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Jump straight into the highest-traffic platform admin actions.</p>
+                    <h2 class="dashboard-section-title">Operations shortcuts</h2>
+                    <p class="dashboard-section-copy">Open the most frequently used platform administration tools.</p>
                 </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-                <a th:href="@{/admin/feedback}" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-emerald-300 hover:bg-emerald-50/60 dark:border-slate-700 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/20">
-                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Support inbox</div>
-                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Triage feedback and keep issues moving.</div>
+            <div class="dashboard-shortcuts">
+                <a th:href="@{/admin/feedback}" class="dashboard-shortcut dashboard-shortcut--primary">
+                    <div class="dashboard-shortcut__title">Support inbox</div>
+                    <div class="dashboard-shortcut__copy">Triage feedback and keep issues moving.</div>
                 </a>
-                <a sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')" th:href="@{/admin/gym-applications}" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-rose-300 hover:bg-rose-50/60 dark:border-slate-700 dark:hover:border-rose-700 dark:hover:bg-rose-950/20">
-                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Gym applications</div>
-                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Review new gym onboarding requests before accounts go live.</div>
+                <a sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')" th:href="@{/admin/gym-applications}" class="dashboard-shortcut">
+                    <div class="dashboard-shortcut__title">Gym applications</div>
+                    <div class="dashboard-shortcut__copy">Review new gym onboarding requests before accounts go live.</div>
                 </a>
-                <a th:href="@{/admin/merch}" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-blue-300 hover:bg-blue-50/60 dark:border-slate-700 dark:hover:border-blue-700 dark:hover:bg-blue-950/20">
-                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Merch controls</div>
-                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Review products, stock, and storefront copy.</div>
+                <a th:href="@{/admin/merch}" class="dashboard-shortcut">
+                    <div class="dashboard-shortcut__title">Merch controls</div>
+                    <div class="dashboard-shortcut__copy">Review products, stock and storefront copy.</div>
                 </a>
-                <a href="#admin-outreach-form" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-amber-300 hover:bg-amber-50/60 dark:border-slate-700 dark:hover:border-amber-700 dark:hover:bg-amber-950/20">
-                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Outreach composer</div>
-                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Send updates to users or the waitlist from this page.</div>
+                <a href="#admin-outreach-form" class="dashboard-shortcut">
+                    <div class="dashboard-shortcut__title">Outreach composer</div>
+                    <div class="dashboard-shortcut__copy">Send updates to users or the waitlist from this page.</div>
                 </a>
-                <a href="#dev-page-controls" class="rounded-2xl border border-slate-200 px-4 py-4 transition hover:border-violet-300 hover:bg-violet-50/60 dark:border-slate-700 dark:hover:border-violet-700 dark:hover:bg-violet-950/20">
-                    <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Dev hub controls</div>
-                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">Adjust page visibility and route access modes.</div>
+                <a href="#dev-page-controls" class="dashboard-shortcut">
+                    <div class="dashboard-shortcut__title">Dev Hub controls</div>
+                    <div class="dashboard-shortcut__copy">Adjust page visibility and route access modes.</div>
                 </a>
             </div>
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+            <section class="dashboard-surface">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Support Inbox</h2>
-                    <a th:href="@{/admin/feedback}" class="text-sm font-semibold text-emerald-600 hover:text-emerald-500">Open full inbox</a>
+                    <h2 class="dashboard-section-title">Support inbox</h2>
+                    <a th:href="@{/admin/feedback}" class="dashboard-inline-action">Open full inbox <span aria-hidden="true">&rarr;</span></a>
                 </div>
                 <div class="space-y-3" th:if="${latestFeedback != null and !#lists.isEmpty(latestFeedback)}">
                     <div th:each="item : ${latestFeedback}" class="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
@@ -77,19 +83,25 @@
                         <p class="mt-1 text-xs text-slate-500" th:text="${item.requestType} + ' | ' + ${#temporals.format(item.submittedAt, 'yyyy-MM-dd HH:mm')}">Type</p>
                     </div>
                 </div>
-                <p th:if="${latestFeedback == null or #lists.isEmpty(latestFeedback)}" class="text-sm text-slate-500">No feedback submitted yet.</p>
+                <div th:if="${latestFeedback == null or #lists.isEmpty(latestFeedback)}" class="dashboard-empty-state">
+                    <h3 class="dashboard-empty-state__title">No support requests waiting</h3>
+                    <p class="dashboard-empty-state__copy">New requests will appear here. You can use outreach to send a proactive platform update.</p>
+                    <div class="dashboard-empty-state__actions">
+                        <a href="#admin-outreach-form" class="dashboard-action dashboard-action--secondary">Compose an update</a>
+                    </div>
+                </div>
             </section>
 
-            <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
-                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Admin Outreach Email</h2>
+            <section class="dashboard-surface">
+                <h2 class="dashboard-section-title mb-4">Admin outreach email</h2>
                 <div th:if="${adminOutreachSuccess}" class="mb-3 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-800" th:text="${adminOutreachSuccess}">Sent.</div>
                 <div th:if="${adminOutreachError}" class="mb-3 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-800" th:text="${adminOutreachError}">Error.</div>
                 <form th:action="@{/admin/outreach/send}" method="post" class="space-y-3" id="admin-outreach-form">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Audience</label>
-                        <select name="audience" id="outreach-audience" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">
+                        <label for="outreach-audience" class="dashboard-metric__label block mb-1">Audience</label>
+                        <select name="audience" id="outreach-audience" class="dashboard-field">
                             <option value="ALL_USERS">All platform users</option>
                             <option value="WAITLIST">All waitlist signups</option>
                             <option value="SPECIFIC">One specific email</option>
@@ -97,29 +109,36 @@
                     </div>
 
                     <div id="specific-email-wrap" class="hidden">
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Recipient email</label>
-                        <input type="email" name="specificEmail" id="specific-email" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" />
+                        <label for="specific-email" class="dashboard-metric__label block mb-1">Recipient email</label>
+                        <input type="email" name="specificEmail" id="specific-email" class="dashboard-field" />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Subject</label>
-                        <input type="text" name="subject" maxlength="180" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm" />
+                        <label for="outreach-subject" class="dashboard-metric__label block mb-1">Subject</label>
+                        <input type="text" name="subject" id="outreach-subject" maxlength="180" required class="dashboard-field" />
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Message</label>
-                        <textarea name="message" rows="5" maxlength="5000" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"></textarea>
+                        <label for="outreach-message" class="dashboard-metric__label block mb-1">Message</label>
+                        <textarea name="message" id="outreach-message" rows="5" maxlength="5000" required class="dashboard-field"></textarea>
                     </div>
 
-                    <button type="submit" class="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">Send message</button>
+                    <button type="submit" class="dashboard-action dashboard-action--primary">Send message</button>
                 </form>
             </section>
         </div>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Dev Go-Live Waitlist</h2>
-            <div class="overflow-auto">
-                <table class="min-w-full text-sm">
+        <section class="dashboard-surface">
+            <h2 class="dashboard-section-title mb-4">Dev go-live waitlist</h2>
+            <div th:if="${waitlistEntries == null or #lists.isEmpty(waitlistEntries)}" class="dashboard-empty-state">
+                <h3 class="dashboard-empty-state__title">No waitlist signups yet</h3>
+                <p class="dashboard-empty-state__copy">New confirmed and unconfirmed signups will appear here when people join the development waitlist.</p>
+                <div class="dashboard-empty-state__actions">
+                    <a href="#admin-outreach-form" class="dashboard-action dashboard-action--secondary">Prepare an outreach message</a>
+                </div>
+            </div>
+            <div th:if="${waitlistEntries != null and !#lists.isEmpty(waitlistEntries)}" class="dashboard-table-wrap">
+                <table class="dashboard-table">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-700 text-left">
                             <th class="py-2 pr-4">Email</th>
@@ -142,25 +161,25 @@
             </div>
         </section>
 
-        <section id="dev-page-controls" class="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900/40">
+        <section id="dev-page-controls" class="dashboard-surface">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Dev Hub Page Controls</h2>
-                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                    <h2 class="dashboard-section-title">Dev Hub page controls</h2>
+                    <p class="dashboard-section-copy">
                         Control which Dev Hub routes stay enabled, which are disabled, and which are shown as restricted during development.
                     </p>
                 </div>
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 dark:border-emerald-900/40 dark:bg-emerald-950/20">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Enabled</p>
+                    <div class="dashboard-metric px-4 py-3">
+                        <p class="dashboard-metric__label">Enabled</p>
                         <p class="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-200" th:text="${devPageSummary.enabledCount}">0</p>
                     </div>
-                    <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">Disabled</p>
+                    <div class="dashboard-metric px-4 py-3">
+                        <p class="dashboard-metric__label">Disabled</p>
                         <p class="mt-1 text-2xl font-bold text-amber-700 dark:text-amber-200" th:text="${devPageSummary.disabledCount}">0</p>
                     </div>
-                    <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 dark:border-rose-900/40 dark:bg-rose-950/20">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">Restricted</p>
+                    <div class="dashboard-metric px-4 py-3">
+                        <p class="dashboard-metric__label">Restricted</p>
                         <p class="mt-1 text-2xl font-bold text-rose-700 dark:text-rose-200" th:text="${devPageSummary.restrictedCount}">0</p>
                     </div>
                 </div>
@@ -169,8 +188,8 @@
             <div th:if="${devPageAccessSuccess}" class="mt-4 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-200" th:text="${devPageAccessSuccess}">Saved.</div>
             <div th:if="${devPageAccessError}" class="mt-4 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-200" th:text="${devPageAccessError}">Error.</div>
 
-            <div class="mt-5 overflow-auto">
-                <table class="min-w-full text-sm">
+            <div class="dashboard-table-wrap mt-5">
+                <table class="dashboard-table">
                     <thead>
                         <tr class="border-b border-slate-200 text-left dark:border-slate-700">
                             <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Page</th>
@@ -200,7 +219,7 @@
                                       data-dev-page-form>
                                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <select name="mode"
-                                            class="min-w-[11rem] rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                                            class="dashboard-field min-w-[11rem]"
                                             data-dev-page-select
                                             th:attr="data-initial=${page.currentMode}">
                                         <option th:each="mode : ${devPageModes}"
@@ -209,7 +228,7 @@
                                                 th:selected="${mode.name() == page.currentMode}">Enabled</option>
                                     </select>
                                     <button type="submit"
-                                            class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                                            class="dashboard-action dashboard-action--primary disabled:cursor-not-allowed disabled:opacity-50"
                                             data-dev-page-submit
                                             disabled>
                                         Save
@@ -222,6 +241,6 @@
             </div>
         </section>
 
-        <script th:src="@{/js/admin/admin-dashboard-page.js(v='20260315a')}"></script>
+        <script th:src="@{/js/admin/admin-dashboard-page.js(v=${uiCssVersion})}"></script>
     </div>
 </th:block>
