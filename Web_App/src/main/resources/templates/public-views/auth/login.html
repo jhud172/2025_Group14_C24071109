@@ -90,7 +90,7 @@
                 </section>
             </div>
 
-            <form th:action="@{/login}" method="post" class="auth-form auth-form--login" id="loginForm">
+            <form th:action="@{/login}" method="post" class="auth-form auth-form--login" id="loginForm" novalidate>
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <input type="hidden" name="next" th:if="${param.next}" th:value="${param.next}" />
                 <input type="hidden" name="loginType" id="loginType" th:value="${preselectedRole}" />
@@ -106,7 +106,6 @@
                                 th:attr="name=${preselectedRole != 'gym'} ? 'username' : null"
                                 required
                                 autocomplete="username"
-                                placeholder="Enter your email or username"
                                 th:value="${loginIdentifier}"
                                 class="auth-field__input" />
                         </div>
@@ -178,7 +177,6 @@
                                 name="gymUsername"
                                 th:attr="name=${preselectedRole == 'gym'} ? 'username' : null"
                                 required
-                                placeholder="Enter your gym username"
                                 th:value="${loginIdentifier}"
                                 class="auth-field__input"
                                 autocomplete="username" />
@@ -255,6 +253,8 @@
                         </div>
                     </div>
                 </div>
+
+                <p id="loginValidationError" class="auth-field__error" hidden></p>
 
                 <button type="submit" class="auth-btn auth-btn--primary">
                     <span th:text="#{auth.login.submit}">Log in</span>

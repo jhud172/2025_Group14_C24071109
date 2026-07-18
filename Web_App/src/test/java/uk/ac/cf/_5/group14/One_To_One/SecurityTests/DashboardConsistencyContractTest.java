@@ -114,12 +114,14 @@ class DashboardConsistencyContractTest {
     }
 
     @Test
-    void dashboardTourKeepsAVisibleFocusIndicatorWhenTheTrapWraps() throws IOException {
+    void dashboardTourKeepsAVisibleFocusIndicatorAndTouchSizedSkipAction() throws IOException {
         String stylesheet = read("src/main/resources/static/css/components/tutorial/site-tour.css");
 
         assertThat(stylesheet)
                 .contains(".site-tour__button:focus,")
                 .contains(".site-tour__skip:focus,")
+                .contains("min-width: 2.75rem")
+                .contains("min-height: 2.75rem")
                 .contains("outline: 3px solid var(--tour-accent-soft)")
                 .contains("outline-offset: 2px");
     }

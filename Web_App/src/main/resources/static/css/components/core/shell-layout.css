@@ -4,17 +4,18 @@
     --shell-platform-panel-height: 0px;
     --shell-local-dock-height: 0px;
     --shell-floating-control-gap: clamp(0.65rem, 0.5rem + 0.35vw, 0.95rem);
+    --shell-floating-control-clearance: calc(3.25rem + var(--shell-floating-control-gap));
   }
 
   body.has-platform-panel {
     --shell-platform-panel-height: calc(4.65rem + var(--shell-safe-area-bottom));
-    padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height));
+    padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height) + var(--shell-floating-control-clearance));
   }
 
   @media (max-width: 1030px) {
     body:has(.cd-dashboard-mobile-dock) {
       --shell-local-dock-height: 5.1rem;
-      padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height));
+      padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height) + var(--shell-floating-control-clearance));
     }
   }
 

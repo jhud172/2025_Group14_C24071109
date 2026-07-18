@@ -82,7 +82,8 @@ class ShellPerformanceContractTest {
                 .contains("--shell-platform-panel-height")
                 .contains("--shell-local-dock-height")
                 .contains("--shell-floating-control-gap")
-                .contains("padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height))");
+                .contains("--shell-floating-control-clearance")
+                .contains("padding-bottom: calc(var(--shell-platform-panel-height) + var(--shell-local-dock-height) + var(--shell-floating-control-clearance))");
         assertThat(chat).contains("bottom: calc(var(--shell-platform-panel-height");
         assertThat(quickActions).contains("bottom: calc(var(--shell-platform-panel-height");
         assertThat(dashboard)

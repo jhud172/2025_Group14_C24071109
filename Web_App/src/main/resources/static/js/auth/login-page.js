@@ -22,6 +22,7 @@
     const gymEyeIcon = document.getElementById("gymEyeIcon");
     const roleSignupLink = document.getElementById("roleSignupLink");
     const loginError = document.getElementById("loginError");
+    const loginValidationError = document.getElementById("loginValidationError");
     const trainerCodeFull = document.getElementById("trainerCodeFull");
     const gymSecretCodeFull = document.getElementById("gymSecretCodeFull");
     const trainerCodeInputs = [
@@ -275,16 +276,64 @@
         hiddenInput.value = inputs.map((input) => sanitizer(input.value)).join("");
     }
 
-    function clearSegmentValidation(inputs) {
-        inputs.forEach((input) => input.setCustomValidity(""));
+    function removeDescription(input, descriptionId) {
+        if (!input) {
+            return;
+        }
+
+        const descriptionIds = (input.getAttribute("aria-describedby") || "")
+            .split(/\s+/)
+            .filter((id) => id && id !== descriptionId);
+
+        if (descriptionIds.length > 0) {
+            input.setAttribute("aria-describedby", descriptionIds.join(" "));
+        } else {
+            input.removeAttribute("aria-describedby");
+        }
     }
 
-    function focusFirstIncomplete(inputs) {
+    function clearLoginValidation() {
+        const controls = [
+            usernameInput,
+            passwordInput,
+            gymUsernameInput,
+            gymPasswordInput,
+            ...trainerCodeInputs,
+            ...gymSecretCodeInputs
+        ].filter(Boolean);
+
+        controls.forEach((input) => {
+            input.removeAttribute("aria-invalid");
+            removeDescription(input, "loginValidationError");
+        });
+
+        if (loginValidationError) {
+            loginValidationError.textContent = "";
+            loginValidationError.hidden = true;
+        }
+    }
+
+    function showLoginValidation(input, message) {
+        if (!input || !loginValidationError) {
+            return;
+        }
+
+        clearLoginValidation();
+        loginValidationError.textContent = message;
+        loginValidationError.hidden = false;
+        input.setAttribute("aria-invalid", "true");
+
+        const descriptionIds = new Set((input.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
+        descriptionIds.add("loginValidationError");
+        input.setAttribute("aria-describedby", Array.from(descriptionIds).join(" "));
+        input.focus();
+    }
+
+    function focusFirstIncomplete(inputs, message) {
         const firstIncomplete = inputs.find((input) => input.value.length < 4) || inputs[0];
         if (firstIncomplete) {
-            firstIncomplete.focus();
+            showLoginValidation(firstIncomplete, message);
             firstIncomplete.select();
-            firstIncomplete.reportValidity();
         }
     }
 
@@ -296,13 +345,11 @@
         updateSegmentedCode(inputs, hiddenInput, sanitizer);
         const isComplete = hiddenInput.value.length === expectedLength && inputs.every((input) => sanitizer(input.value).length === 4);
 
-        clearSegmentValidation(inputs);
         if (isComplete) {
             return true;
         }
 
-        inputs[0].setCustomValidity(message);
-        focusFirstIncomplete(inputs);
+        focusFirstIncomplete(inputs, message);
         return false;
     }
 
@@ -310,7 +357,9 @@
         inputs.forEach((input, index) => {
             input.addEventListener("input", () => {
                 input.value = sanitizer(input.value);
-                clearSegmentValidation(inputs);
+                if (input.getAttribute("aria-invalid") === "true") {
+                    clearLoginValidation();
+                }
                 updateSegmentedCode(inputs, hiddenInput, sanitizer);
 
                 if (input.value.length === 4 && index < inputs.length - 1) {
@@ -337,7 +386,7 @@
                 inputs.forEach((segmentInput, segmentIndex) => {
                     segmentInput.value = normalized.slice(segmentIndex * 4, (segmentIndex + 1) * 4);
                 });
-                clearSegmentValidation(inputs);
+                clearLoginValidation();
                 updateSegmentedCode(inputs, hiddenInput, sanitizer);
 
                 const lastFilledIndex = Math.min(Math.ceil(normalized.length / 4) - 1, inputs.length - 1);
@@ -369,6 +418,7 @@
         const targetPanel = panels[resolvedRole];
 
         setSliderState(resolvedRole);
+        clearLoginValidation();
         loginTypeInput.value = resolvedRole;
         updateHint(resolvedRole, shouldAnimate);
         persistRole(resolvedRole);
@@ -473,6 +523,14 @@
     bindSegmentedCodeInputs(trainerCodeInputs, trainerCodeFull, sanitizeTrainerSegment, normalizeTrainerCode);
     bindSegmentedCodeInputs(gymSecretCodeInputs, gymSecretCodeFull, sanitizeGymSecretSegment, normalizeGymSecretCode);
 
+    [usernameInput, passwordInput, gymUsernameInput, gymPasswordInput].filter(Boolean).forEach((input) => {
+        input.addEventListener("input", () => {
+            if (input.getAttribute("aria-invalid") === "true" && input.value.trim()) {
+                clearLoginValidation();
+            }
+        });
+    });
+
     const serverError = pageRoot ? pageRoot.dataset.loginError : "";
     if (serverError) {
         const invalidGroup = activeRole === "trainer" ? trainerCodeInputs : activeRole === "gym" ? gymSecretCodeInputs : [];
@@ -485,8 +543,24 @@
     }
 
     loginForm.addEventListener("submit", (event) => {
-        clearSegmentValidation(trainerCodeInputs);
-        clearSegmentValidation(gymSecretCodeInputs);
+        clearLoginValidation();
+
+        const requiredFields = activeRole === "gym"
+            ? [
+                { input: gymUsernameInput, message: "Enter your gym username." },
+                { input: gymPasswordInput, message: "Enter your gym password." }
+            ]
+            : [
+                { input: usernameInput, message: "Enter your email or username." },
+                { input: passwordInput, message: "Enter your password." }
+            ];
+        const missingField = requiredFields.find(({ input }) => input && !input.value.trim());
+
+        if (missingField) {
+            event.preventDefault();
+            showLoginValidation(missingField.input, missingField.message);
+            return;
+        }
 
         if (activeRole === "trainer" && !validateSegmentedCode(
             trainerCodeInputs,

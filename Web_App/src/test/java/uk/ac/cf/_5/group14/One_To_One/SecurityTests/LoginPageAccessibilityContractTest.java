@@ -53,4 +53,22 @@ class LoginPageAccessibilityContractTest {
                 .contains("min-width: 2.75rem")
                 .contains("min-height: 2.75rem");
     }
+
+    @Test
+    void loginValidationUsesOneFocusLinkedCrossBrowserMessage() throws IOException {
+        String template = Files.readString(Path.of("src/main/resources/templates/public-views/auth/login.html"));
+        String script = Files.readString(Path.of("src/main/resources/static/js/auth/login-page.js"));
+
+        assertThat(template)
+                .contains("id=\"loginForm\" novalidate")
+                .contains("id=\"loginValidationError\"")
+                .doesNotContain("placeholder=\"Enter your email or username\"")
+                .doesNotContain("placeholder=\"Enter your gym username\"");
+        assertThat(script)
+                .contains("showLoginValidation(missingField.input, missingField.message)")
+                .contains("input.setAttribute(\"aria-invalid\", \"true\")")
+                .contains("descriptionIds.add(\"loginValidationError\")")
+                .doesNotContain("reportValidity()")
+                .doesNotContain("setCustomValidity(");
+    }
 }

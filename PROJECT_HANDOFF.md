@@ -1,10 +1,10 @@
 # One To One — project handoff and continuation point
 
-**Last updated:** 17 July 2026
+**Last updated:** 18 July 2026
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
 **Current branch:** `main`  
-**Current phase:** Phase 2 complete; Phase 3 browser/automated and available Windows UI accessibility release QA complete, with audible screen-reader and physical-device confirmation remaining
+**Current phase:** Phase 2 complete; Phase 3 browser/automated and remote touch-emulation release QA complete, with the wider audible screen-reader journey and physical-device confirmation remaining
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
@@ -26,7 +26,7 @@ Do not clone a fresh copy on the new device and assume this work will be present
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Verify the CSS build and Gradle tests, start the application at localhost:8081, then complete the supervised Phase 3 audible screen-reader and physical-device release gate documented in the next step.
+> Read `PROJECT_HANDOFF.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Verify the CSS build and Gradle tests, start the application at localhost:8081, then resume the remaining supervised Phase 3 audible screen-reader journey and physical-device release gate documented in the next step. The login validation announcement already has a human-confirmed pass; do not repeat completed browser or remote touch-emulation work unless a regression is reproduced.
 
 ## Current verified status
 
@@ -42,9 +42,9 @@ Use this prompt after opening the repository on the new device:
 - Phase 3 now covers the public routes, login/sign-up presentation and the client, trainer, gym-admin and platform-admin dashboard baselines for keyboard/focus behaviour, reduced motion and 200% reflow.
 - Phase 3 now also covers calendar, inbox, workouts, goals, support and platform-admin operations for keyboard/focus behaviour, overlay trapping/return, accessible names, live feedback, reduced motion, 200% reflow and an initial 400% CSS-viewport equivalent.
 - Phase 3 browser release QA now also covers Chromium's accessibility tree, native 200%/400% zoom on representative login/client journeys, 400%-equivalent cross-role reflow, Windows forced colours, keyboard-only validation recovery and 44 × 44 px targets on critical controls.
-- Latest full Gradle result: **495 tests passed, 0 failed, 0 skipped**.
+- Latest full Gradle result: **496 tests passed, 0 failed, 0 skipped**.
 - Latest local runtime proof: **HTTP 200** at `http://localhost:8081`, active profile `local`, datasource `jdbc:h2:mem:localdb`.
-- Latest CSS/JS version token: **`20260717p17`**.
+- Latest CSS/JS version token: **`20260718p20`**.
 - Core CSS is **212,420 bytes / 207.4 KiB**, approximately 83% smaller than the previous monolithic core.
 - Core CSS transfers at approximately **34 KiB with gzip**.
 - Static CSS caching, gzip compression, `Last-Modified` and `304 Not Modified` revalidation were verified.
@@ -59,6 +59,8 @@ Use this prompt after opening the repository on the new device:
 - Authentication and all four role dashboards passed at **1280 × 900**, **390 × 844** and a **640 px CSS viewport** 200% reflow equivalent with no horizontal overflow; representative reduced-motion checks reported no remaining main-content animations.
 - Calendar month/week, inbox/list/thread, workout management, goals and support passed at **1280 × 900**, **640 px**, **390 × 844** and a **320 px CSS viewport** initial 400% equivalent with one H1, one main landmark and no page-level horizontal overflow.
 - Platform-admin dashboard, gym applications, off-platform payments and feedback returned HTTP 200 and reflowed at the same four widths; the previous off-platform-payment 500 is repaired.
+- The 18 July remote continuation human-confirmed one concise Narrator login-validation announcement, then deferred the remaining audible journey until James is back at the computer. Chrome, Edge and WebKit mobile/touch emulation covered the critical four-role routes while he was remote.
+- The remote continuation repaired the reproduced duplicate login validation announcement, the 32 px onboarding-tour Skip action and Charlie overlap on the final trainer/gym dashboard Inbox card. The final tour action is 44 px high and the repaired cards have zero fixed-control overlap.
 
 ## User experience direction to preserve
 
@@ -204,6 +206,17 @@ Keep these already implemented homepage and Charlie requirements intact:
 - Rebuilt production CSS, syntax-checked seven JavaScript controllers and completed **495 tests: 495 passed, 0 failed, 0 skipped**. Cache-safe delivery is **`20260717p17`**, HTTP 200 remains available on port 8081, and the active local database is H2.
 - Phase 3 is **not formally closed**: this environment cannot hear or assess Narrator speech, NVDA is not installed, and no physical touch device is exposed. Audible landmark/label/validation/live-announcement confirmation and representative real-device touch/reflow/fixed-control clearance remain the final human gate.
 
+### Phase 3 — remote continuation and reproduced-defect repairs
+
+- Continued the human gate on **18 July 2026**. Windows Narrator was started with the correct system toggle, **Ctrl + Windows key + Enter**. The user reproduced duplicate login validation speech caused by overlapping visible-label, placeholder and browser-native validation output.
+- Replaced browser-native login validation with one explicit focus-linked message, removed the duplicate username placeholders and retained the correct textbox role announcement. The user retested the empty login submit with Narrator and confirmed **PASS**. This is the only newly completed audible result; the wider Narrator/NVDA journey was explicitly deferred until the user is back at the computer.
+- Because the user was working remotely, used real Chrome, Edge and WebKit browser sessions as the strongest available touch substitute at **390 × 844**. Login validation, role dashboards, calendar, inbox, workouts, goals, support and representative gym/platform operational pages retained one H1, one main landmark, named controls and no page-level horizontal overflow.
+- Reproduced and repaired a **32 px** onboarding-tour Skip action. It now computes to a **44 px** minimum in all four role sessions and retains labelled modal semantics.
+- Reproduced Charlie covering roughly **50 × 38 px** of the final trainer and gym dashboard Inbox card at maximum scroll. The shared shell now reserves the floating-control height plus its existing gap; both final cards end above Charlie with **zero overlap**.
+- Rechecked the critical routes at **1280 × 900** after explicitly completing the demo onboarding tour. Every requested URL returned HTTP 200, loaded **`20260718p20`**, retained one role-appropriate H1 and main landmark, and had no unnamed visible controls or horizontal overflow.
+- Rebuilt production CSS, passed `node --check` for the seven relevant JavaScript controllers and completed **496 tests: 496 passed, 0 failed, 0 skipped**. HTTP 200 remains available on port 8081 using local H2.
+- Phase 3 remains **not formally closed**. Real physical-device touch/GPU behaviour and the remaining audible landmarks, headings, names, live announcements and modal/drawer focus output still require short human confirmation when the user is back at the computer.
+
 ## Important implementation files
 
 ### Project evidence and handoff
@@ -305,7 +318,7 @@ node --check src/main/resources/static/js/dashboard/client-dashboard-page.js
 
 Continue **Phase 3 — polish and verification**.
 
-The immediate next workstream is the remaining human portion of the final Phase 3 release gate: audible screen-reader output and physical touch-device confirmation across critical end-to-end journeys. Repository, automated, browser and available Windows UI evidence is complete.
+The immediate next workstream is the remaining human portion of the final Phase 3 release gate: continue audible screen-reader output after the already-passed login validation check, then confirm representative journeys on a physical touch device. Repository, automated, desktop and remote touch-emulation evidence is complete.
 
 Priority order:
 
@@ -317,7 +330,7 @@ Priority order:
 6. **Complete baseline:** authentication and all four role dashboards, including repaired login tabs, tour focus visibility and client reveal availability.
 7. **Complete baseline:** calendar, inbox, workouts, goals, support and platform-admin operational tables, including focus containment/return, accessible naming, reduced motion and 200%/initial 400% reflow equivalents.
 8. **Complete for browser/automated QA:** Chromium accessibility-tree review, representative browser-native 200%/400% zoom, cross-role 400%-equivalent reflow, Windows forced colours, validation recovery and critical 44 × 44 px targets.
-9. **Browser/Windows UI portion complete; human confirmation next:** listen to Windows Narrator output (and NVDA if installed) and confirm representative journeys on a physical touch device; repair only defects reproduced in that gate.
+9. **Remote/browser portion complete; human confirmation next:** continue Windows Narrator output (and NVDA if installed) from landmarks/headings after the passed login validation check, then confirm representative journeys on a physical touch device; repair only defects reproduced in that gate.
 
 Phase 2 exit condition is met: role and public surfaces now share the intended visual, action, recovery and motion language without reintroducing overlay collisions or broad public transitions.
 
@@ -325,8 +338,8 @@ Phase 2 exit condition is met: role and public surfaces now share the intended v
 
 These checks were not claimed as complete and remain scheduled for Phase 3:
 
-- Physical touch devices and GPU performance.
-- Audible screen-reader output and whole-site reading order beyond the completed browser accessibility-tree evidence.
+- Physical touch devices and GPU performance; Chrome, Edge and WebKit touch emulation is complete but is not a hardware pass.
+- Audible screen-reader output and whole-site reading order beyond the completed browser accessibility-tree evidence and human-confirmed login validation announcement.
 - Whole-site measured colour contrast outside the completed dashboard token set.
 - Browser-native zoom beyond the representative login/client checks and cross-role CSS-viewport reflow evidence.
 - Throttled CPU and network testing.

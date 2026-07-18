@@ -1,8 +1,8 @@
 # One To One — full-site UX, motion and visual-quality audit
 
-**Audit date:** 13 July 2026; implementation status updated 17 July 2026
+**Audit date:** 13 July 2026; implementation status updated 18 July 2026
 **Environment:** local Spring application at `http://localhost:8081`  
-**Status:** audit complete; Phase 0, Phase 1, website stabilisation and Phase 2 are complete; Phase 3 browser/automated and available Windows UI release QA is complete, with audible screen-reader and physical-device confirmation remaining
+**Status:** audit complete; Phase 0, Phase 1, website stabilisation and Phase 2 are complete; Phase 3 browser/automated and remote touch-emulation release QA is complete, with the wider audible screen-reader journey and physical-device confirmation remaining
 
 ## Completion snapshot
 
@@ -12,7 +12,7 @@
 | Authenticated roles | Complete | Client, trainer, gym admin and platform admin journeys checked. |
 | Shared product surfaces | Complete | Inbox, workouts, goals, calendar, profile, Charlie and platform navigation checked. |
 | Responsive and motion | Complete | Desktop and 390 × 844 mobile states, overlay timing, overflow and layout transitions checked. |
-| Source and automated verification | Complete | Template/CSS/JS inventory, route checks, root-cause tracing and current 495-test Gradle run completed. |
+| Source and automated verification | Complete | Template/CSS/JS inventory, route checks, root-cause tracing and current 496-test Gradle run completed. |
 | Phase 0 implementation | Complete | Release-blocking calendar, gym, pricing, dashboard and authenticated mobile-layer defects repaired; 456 tests pass. |
 | Phase 1 continuity | Complete | One shared overlay owner, named motion/layer tokens and explicit high-risk transitions implemented; 461 tests pass. |
 | Phase 1 performance and shell continuity | Complete | Core CSS reduced by about 83%, feature styles load by route, fixed surfaces share measured reservations, and gzip/cache revalidation is verified; 467 tests pass. |
@@ -25,9 +25,22 @@
 | Phase 3 authentication and role-dashboard baseline | Complete | Login tabs, onboarding focus, client reveal availability and all four dashboards pass representative keyboard, reduced-motion, 390 px and 200% reflow checks. |
 | Phase 3 shared operational baseline | Complete | Calendar, inbox, workouts, goals, support and platform-admin operations pass keyboard/overlay, reduced-motion, 200% and initial 400% CSS-viewport checks. |
 | Assistive-technology browser evidence | Complete | Accessibility-tree structure/names, validation recovery, representative native high zoom, cross-role 400%-equivalent reflow, forced colours and critical 44 px targets pass. |
-| Audible screen reader and physical devices | Human gate required | Narrator's Windows UI tree and visible scan order were exercised, but audio cannot be heard or judged here; NVDA is not installed, and real touch/GPU behaviour still needs human/device confirmation. |
+| Audible screen reader and physical devices | Human gate required | The repaired login validation announcement has a human-confirmed Narrator pass. The wider audible journey was deferred while the user is remote; NVDA is not installed and real touch/GPU behaviour still needs physical-device confirmation. |
 
-**Next implementation step:** complete the final supervised Phase 3 gate with audible Narrator/NVDA output and a physical touch device, repairing only reproduced defects.
+**Next implementation step:** resume the final supervised Phase 3 gate from audible landmarks/headings and complete representative physical-device checks, repairing only reproduced defects.
+
+## Phase 3 verification update — remote continuation complete
+
+Completed on 18 July 2026:
+
+- Corrected the Narrator instructions to use the Windows system toggle, **Ctrl + Windows key + Enter**. The user reproduced login validation speaking near-identical field content more than once.
+- Removed duplicate username placeholders and replaced browser-native login validation with one explicit message linked to the focused invalid field through `aria-invalid` and `aria-describedby`. The user repeated the empty-submit check with Narrator and confirmed **PASS**. The remaining audible journey was then explicitly deferred until the user is back at the computer.
+- Used real Chrome, Edge and WebKit sessions at **390 × 844** as a remote touch substitute. Across login, the four role dashboards, calendar, inbox, workouts, goals, support and representative operational pages, the checked routes retained one H1 and main landmark, named controls, reflow without page overflow and touch-sized layout targets.
+- Reproduced the onboarding-tour Skip action at **32 px** high and raised it to a true **44 px** minimum. Its dialog remains modal and linked to its title and description.
+- Reproduced the fixed Charlie button covering roughly **50 × 38 px** of the final trainer and gym dashboard Inbox cards. Extended the shared shell reservation using the existing floating-control gap; both cards now clear Charlie with zero measured overlap.
+- Rechecked all requested role routes at **1280 × 900**. Every route returned HTTP 200 at its expected URL, loaded **`20260718p20`**, exposed one role-appropriate H1 and main landmark, and had no unnamed visible controls or horizontal overflow.
+- Rebuilt production CSS, passed `node --check` for seven relevant controllers and completed **496 tests: 496 passed, 0 failed, 0 skipped**. Port 8081 remains available using local H2.
+- Phase 3 is **not formally closed**: mobile/touch emulation is not a physical-device pass, and only login validation has new audible human confirmation. Audible landmarks/headings/names/live announcements/modal behaviour and representative real-device touch/reflow/fixed-control clearance remain the final gate.
 
 ## Phase 3 verification update — final supervised gate attempted
 
@@ -674,14 +687,14 @@ Use `cubic-bezier(0.22, 1, 0.36, 1)` for entrances and a faster ease-in for exit
 - Add purposeful calendar/page/list transitions using tokens.
 - **Public, authentication, four-role dashboard and shared operational baselines complete:** keyboard/focus, reduced motion and 200% reflow equivalents pass; shared operations also pass an initial 400% CSS-viewport equivalent.
 - **Complete for browser/automated QA:** accessibility-tree output, representative native 200%/400% zoom, cross-role 400%-equivalent reflow, forced colours, keyboard validation recovery and critical 44 × 44 px targets.
-- **Next:** supervised audible Narrator/NVDA and physical touch-device confirmation across critical journeys.
+- **Next:** resume supervised audible Narrator/NVDA after the passed login validation check, then complete physical touch-device confirmation across representative critical journeys.
 - Run regression at 390, 768, 1024, 1280, 1366, 1440, 1536 and 1920 px.
 - **Representative native 200%/400% and cross-role CSS-viewport baselines complete; remaining:** audible assistive technology, physical-device and throttled CPU/network testing.
 - **Exit:** no clipping, gaps, fixed-layer collisions, inaccessible hidden content or motion-related context loss.
 
 ## Accessibility caveat
 
-Screenshots and accessibility-tree output can reveal hierarchy, names, contrast concerns and clipping, but do **not** prove WCAG conformance. The public, authentication, four-role dashboard, shared operational and browser release-QA baselines are complete, including representative native high zoom, forced colours and critical touch targets. Release QA still needs supervised audible screen-reader announcements, a physical touch device, wider measured contrast and axe/Lighthouse checks. Closed Charlie content and destructive production-like table actions still need particular care.
+Screenshots, accessibility-tree output and touch emulation can reveal hierarchy, names, contrast concerns, clipping and responsive defects, but do **not** prove WCAG conformance or physical-device behaviour. The public, authentication, four-role dashboard, shared operational and browser release-QA baselines are complete, including representative native high zoom, forced colours and critical touch targets. Login validation now has a human-confirmed Narrator pass; release QA still needs the wider supervised audible journey, a physical touch device, wider measured contrast and axe/Lighthouse checks. Closed Charlie content and destructive production-like table actions still need particular care.
 
 ## Audit limits and closure
 
