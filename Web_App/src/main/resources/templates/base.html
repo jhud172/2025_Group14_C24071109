@@ -6,7 +6,7 @@
              data-lang=${userSettings != null && userSettings.language != null ? userSettings.language : 'en'},
              data-theme=${userSettings != null && userSettings.theme != null ? userSettings.theme.toString().toLowerCase() : 'light'},
              data-colorblind=${userSettings != null && userSettings.colorBlindMode ? 'on' : 'off'}"
-    th:with="assetVersion=${uiCssVersion != null and !#strings.isEmpty(uiCssVersion) ? uiCssVersion : '20260718p20'},
+    th:with="assetVersion=${uiCssVersion != null and !#strings.isEmpty(uiCssVersion) ? uiCssVersion : '20260719p21'},
              authUser=${@authHelper.getAuthenticatedUser()},
              includeNavbar=${@environment.getProperty('app.ui.includeNavbar') != 'false'},
              includeGlobalChatbot=${@environment.getProperty('app.ui.includeChatbot') != 'false' and disableGlobalChatbot != true and disableGlobalChatbot != 'true'},
@@ -15,6 +15,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          th:content="${pageDescription} ?: 'One To One connects clients with verified personal trainers through structured programmes, secure payments and visible progress.'">
+    <meta name="theme-color" content="#07120e">
+    <meta property="og:site_name" content="One To One">
+    <meta property="og:type" content="website">
+    <meta property="og:title" th:content="${pageTitle} ?: 'One To One'">
+    <meta property="og:description"
+          th:content="${pageDescription} ?: 'Verified personal training, connected programmes and visible progress.'">
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <meta name="_csrf_param" th:if="${_csrf != null}" th:content="${_csrf.parameterName}">
@@ -63,7 +71,7 @@
 </th:block>
 
 <!-- MAIN CONTENT -->
-<main th:class="${authPageLayout == true ? 'auth-page-main pt-2 sm:pt-3' : 'min-h-[calc(100vh-5rem)] ' + (compactTopContent == true ? 'pt-2 sm:pt-3' : 'pt-4 sm:pt-6')}">
+<main id="main-content" th:class="${authPageLayout == true ? 'auth-page-main pt-2 sm:pt-3' : 'min-h-[calc(100vh-5rem)] ' + (compactTopContent == true ? 'pt-2 sm:pt-3' : 'pt-4 sm:pt-6')}">
     <th:block th:replace="${content}"></th:block>
 </main>
 

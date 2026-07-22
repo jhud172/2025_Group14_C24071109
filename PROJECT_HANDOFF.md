@@ -1,6 +1,6 @@
 # One To One — project handoff and continuation point
 
-**Last updated:** 18 July 2026
+**Last updated:** 19 July 2026
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
 **Current branch:** `main`  
@@ -216,6 +216,14 @@ Keep these already implemented homepage and Charlie requirements intact:
 - Rechecked the critical routes at **1280 × 900** after explicitly completing the demo onboarding tour. Every requested URL returned HTTP 200, loaded **`20260718p20`**, retained one role-appropriate H1 and main landmark, and had no unnamed visible controls or horizontal overflow.
 - Rebuilt production CSS, passed `node --check` for the seven relevant JavaScript controllers and completed **496 tests: 496 passed, 0 failed, 0 skipped**. HTTP 200 remains available on port 8081 using local H2.
 - Phase 3 remains **not formally closed**. Real physical-device touch/GPU behaviour and the remaining audible landmarks, headings, names, live announcements and modal/drawer focus output still require short human confirmation when the user is back at the computer.
+
+### Phase 3 — human gate resumed remotely
+
+- Resumed the supervised gate on **19 July 2026** from the already-passed login validation announcement. With Narrator scan mode, the user confirmed **PASS** for the login page's “Welcome back” level-one heading.
+- The following main-landmark announcement check was skipped at the user's request, and the remaining Narrator/NVDA checks remain pending rather than failed.
+- Offered the first physical website check through the verified LAN login URL, covering portrait reflow and the Client/Trainer/Gym touch targets. The user confirmed they were remote and could not access the physical-device gate; no physical result or defect was recorded.
+- Restarted the local H2 application after the previous process ended overnight. HTTP 200 and **`20260718p20`** are again live on port 8081.
+- Phase 3 remains **not formally closed**. The next human session should resume with either the skipped main-landmark announcement or the first physical login reflow/touch check, depending on which testing environment is available.
 
 ## Important implementation files
 

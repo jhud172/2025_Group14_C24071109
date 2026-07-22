@@ -1,6 +1,6 @@
 # One To One — full-site UX, motion and visual-quality audit
 
-**Audit date:** 13 July 2026; implementation status updated 18 July 2026
+**Audit date:** 13 July 2026; implementation status updated 19 July 2026
 **Environment:** local Spring application at `http://localhost:8081`  
 **Status:** audit complete; Phase 0, Phase 1, website stabilisation and Phase 2 are complete; Phase 3 browser/automated and remote touch-emulation release QA is complete, with the wider audible screen-reader journey and physical-device confirmation remaining
 
@@ -28,6 +28,16 @@
 | Audible screen reader and physical devices | Human gate required | The repaired login validation announcement has a human-confirmed Narrator pass. The wider audible journey was deferred while the user is remote; NVDA is not installed and real touch/GPU behaviour still needs physical-device confirmation. |
 
 **Next implementation step:** resume the final supervised Phase 3 gate from audible landmarks/headings and complete representative physical-device checks, repairing only reproduced defects.
+
+## Phase 3 verification update — human gate resumed remotely
+
+Recorded on 19 July 2026:
+
+- Resumed after the completed Narrator login-validation check. The user confirmed **PASS** when scan-mode level-one navigation announced the login page's “Welcome back” H1.
+- The next main-landmark check was skipped at the user's request. No defect was reported; the remaining audible landmark, name, live-announcement and modal/drawer checks stay pending.
+- Prepared the verified LAN login URL for the first real-device portrait reflow and touch-target check. The user confirmed they were remote, so the physical-device gate could not be performed and remains ungraded.
+- Restarted the local H2 application after the previous process ended. Port 8081 again returns HTTP 200 with **`20260718p20`**.
+- Phase 3 remains **not formally closed** because the skipped audible coverage and genuine physical-device confirmation are still required.
 
 ## Phase 3 verification update — remote continuation complete
 

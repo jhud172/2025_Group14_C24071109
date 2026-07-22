@@ -73,6 +73,26 @@ class PublicPageConsistencyContractTest {
         assertThat(pricing).contains("/js/public/public-sections.js(v=${assetVersion})");
     }
 
+    @Test
+    void homeInteractivePreviewsRemainAccessibleAndSeparated() throws IOException {
+        String home = read("src/main/resources/templates/public-views/home/public.html");
+        String css = read("src/main/resources/static/css/components/misc/home-public.css");
+        String script = read("src/main/resources/static/js/public/public-page.js");
+
+        assertThat(home)
+                .contains("role=\"tablist\"")
+                .contains("data-preview-tab=\"today\"")
+                .contains("data-workspace-tab=\"client\"")
+                .contains("aria-controls=\"workspace-client\"")
+                .doesNotContain("<style", "style=\"");
+        assertThat(css)
+                .contains(".workspace-panel[hidden]")
+                .contains("prefers-reduced-motion");
+        assertThat(script)
+                .contains("ArrowLeft", "ArrowRight", "aria-selected")
+                .contains("prefers-reduced-motion");
+    }
+
     private static int count(String source, String needle) {
         return (source.length() - source.replace(needle, "").length()) / needle.length();
     }

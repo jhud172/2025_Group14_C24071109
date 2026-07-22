@@ -79,6 +79,7 @@ public class HomePageController {
         if (user == null) {
             ModelAndView mav = new ModelAndView("public-views/home/public");
             mav.addObject("isDevMode", devModeProperties.isDevMode());
+            mav.addObject("pageDescription", "Find a verified personal trainer, follow a structured programme and keep coaching, workouts and progress connected with One To One.");
             return mav;
         }
         

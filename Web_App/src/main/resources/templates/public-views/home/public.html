@@ -1,74 +1,143 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout('Home', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout('One To One | Verified personal training', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <th:block th:fragment="pageStyles">
-        <link rel="stylesheet" th:href="@{/css/components/misc/home-public.css(v=${assetVersion})}">
         <link rel="stylesheet" th:href="@{/css/components/misc/public-sections.css(v=${assetVersion})}">
+        <link rel="stylesheet" th:href="@{/css/components/misc/home-public.css(v=${assetVersion})}">
     </th:block>
 
-    <div th:fragment="content" class="public-journey overflow-x-hidden">
+    <div th:fragment="content" class="public-journey home-experience overflow-x-hidden">
+        <a href="#home-main" class="home-skip-link">Skip to main content</a>
         <th:block th:replace="~{universal-fragments/dev/dev-mode :: homeGuestNotice}"></th:block>
 
-        <div id="opening-overlay" sec:authorize="!isAuthenticated()">
-            <div class="relative flex flex-col items-center justify-center">
-                <div class="bloom-effect"></div>
-                <div class="logo-reveal-group relative z-10 flex flex-col items-center gap-6">
-                    <img th:src="@{/img/brand/logo.png}" alt="One To One" class="h-28 w-auto drop-shadow-2xl" />
-                    <p class="brand-line text-xs font-bold tracking-[0.3em] text-slate-500 uppercase">One To One</p>
-                </div>
+        <div id="opening-overlay" sec:authorize="!isAuthenticated()" aria-hidden="true">
+            <div class="opening-mark">
+                <span class="opening-mark__halo"></span>
+                <img th:src="@{/img/brand/logo.png}" alt="" class="opening-mark__logo">
+                <p>Built for better coaching</p>
             </div>
         </div>
 
-        <section class="public-section public-section--muted overflow-hidden" data-public-hero>
-            <div class="public-section__inner grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
-                <div>
-                    <img th:src="@{/img/brand/logo.png}" alt="One To One" class="h-14 w-auto mb-7" />
-                    <p class="public-eyebrow">Verified coaching. Visible progress.</p>
-                    <h1 class="public-title">Train with purpose.<br><span class="text-emerald-700">Coach with clarity.</span></h1>
-                    <p class="public-copy">Find a verified trainer, follow a structured programme and keep workouts, messages and progress in one trusted place.</p>
-                    <div class="public-actions">
-                        <a th:href="@{/signup}" class="public-action public-action--primary">Start as a client</a>
-                        <a th:href="@{/explore}" class="public-action public-action--secondary">Explore trainers</a>
+        <section id="home-main" class="home-hero" data-public-hero aria-labelledby="home-hero-title">
+            <div class="home-hero__atmosphere" aria-hidden="true">
+                <span class="home-hero__grid"></span>
+                <span class="home-hero__glow home-hero__glow--one"></span>
+                <span class="home-hero__glow home-hero__glow--two"></span>
+            </div>
+
+            <div class="home-shell home-hero__layout">
+                <div class="home-hero__copy">
+                    <p class="home-kicker"><span></span> Verified coaches. One connected plan.</p>
+                    <h1 id="home-hero-title">The place where <em>progress</em> gets personal.</h1>
+                    <p class="home-hero__lead">Find a verified personal trainer and turn expert guidance into a programme you can see, follow and build on.</p>
+
+                    <div class="home-actions" aria-label="Get started">
+                        <a th:href="@{/signup}" class="home-button home-button--primary">
+                            <span>Start your journey</span>
+                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg>
+                        </a>
+                        <a th:href="@{/explore}" class="home-button home-button--ghost">
+                            <span>Explore trainers</span>
+                            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>
+                        </a>
                     </div>
-                    <div class="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-600">
-                        <a href="#roles" class="font-semibold hover:text-emerald-700">For trainers</a>
-                        <a href="#roles" class="font-semibold hover:text-emerald-700">For gyms</a>
-                        <a th:href="@{/support}" class="font-semibold hover:text-emerald-700">Support</a>
+
+                    <div class="home-trust" aria-label="Platform commitments">
+                        <span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 3 3 7-7"/></svg> UK verified trainers</span>
+                        <span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8 16 5v4.6c0 3.8-2.5 6.3-6 7.6-3.5-1.3-6-3.8-6-7.6V5l6-2.2Z"/></svg> Protected payments</span>
                     </div>
                 </div>
 
-                <div class="relative" aria-label="A preview of the One To One training workspace">
-                    <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-xl shadow-slate-900/10">
-                        <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-                            <div>
-                                <p class="text-xs font-bold uppercase tracking-widest text-emerald-700">Today</p>
-                                <p class="mt-1 text-lg font-bold text-slate-900">Strength programme</p>
-                            </div>
-                            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">On track</span>
+                <div class="home-hero__visual" data-home-depth>
+                    <div class="brand-object" data-brand-object tabindex="0" aria-label="Interactive One To One brand mark">
+                        <span class="brand-object__orbit brand-object__orbit--outer" aria-hidden="true"></span>
+                        <span class="brand-object__orbit brand-object__orbit--inner" aria-hidden="true"></span>
+                        <span class="brand-object__flare" aria-hidden="true"></span>
+                        <span class="brand-object__layer brand-object__layer--shadow" aria-hidden="true"></span>
+                        <span class="brand-object__layer brand-object__layer--back" aria-hidden="true"></span>
+                        <img th:src="@{/img/brand/logo.png}" alt="One To One" class="brand-object__logo">
+                        <span class="brand-object__shine" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="coach-signal coach-signal--verified">
+                        <span class="coach-signal__icon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 3 3 7-7"/></svg></span>
+                        <span><strong>Coach verified</strong><small>Credentials reviewed</small></span>
+                    </div>
+                    <div class="coach-signal coach-signal--live">
+                        <span class="coach-signal__pulse"></span>
+                        <span><strong>Plan updated</strong><small>Just now</small></span>
+                    </div>
+                </div>
+            </div>
+
+            <a href="#platform-preview" class="home-scroll-cue" aria-label="Discover the platform">
+                <span>See how it works</span><i aria-hidden="true"></i>
+            </a>
+        </section>
+
+        <section id="platform-preview" class="home-product" data-public-section aria-labelledby="home-product-title">
+            <div class="home-shell">
+                <div class="home-section-intro home-section-intro--split">
+                    <div>
+                        <p class="home-kicker home-kicker--dark"><span></span> Your programme, alive</p>
+                        <h2 id="home-product-title">A plan that moves when you do.</h2>
+                    </div>
+                    <p>Sessions, coach feedback and measurable progress stay connected—so every workout has context and every next step is clear.</p>
+                </div>
+
+                <div class="product-stage" data-product-stage>
+                    <div class="product-stage__topbar">
+                        <div class="product-stage__identity">
+                            <span class="product-stage__monogram">11</span>
+                            <span><strong>Performance space</strong><small>Strength foundation · Week 4</small></span>
                         </div>
-                        <div class="grid gap-3 py-5 sm:grid-cols-3">
-                            <div class="rounded-xl bg-slate-50 p-4">
-                                <p class="text-xs text-slate-600">Sessions</p>
-                                <p class="mt-1 text-2xl font-bold text-slate-900">3</p>
-                            </div>
-                            <div class="rounded-xl bg-slate-50 p-4">
-                                <p class="text-xs text-slate-600">Streak</p>
-                                <p class="mt-1 text-2xl font-bold text-slate-900">12 days</p>
-                            </div>
-                            <div class="rounded-xl bg-emerald-50 p-4">
-                                <p class="text-xs text-emerald-800">Next</p>
-                                <p class="mt-1 text-sm font-bold text-emerald-950">Lower body</p>
-                            </div>
+                        <div class="product-tabs" role="tablist" aria-label="Programme preview range">
+                            <button type="button" class="is-active" role="tab" aria-selected="true" aria-controls="preview-today" id="preview-tab-today" data-preview-tab="today">Today</button>
+                            <button type="button" role="tab" aria-selected="false" aria-controls="preview-week" id="preview-tab-week" data-preview-tab="week" tabindex="-1">Week</button>
+                            <button type="button" role="tab" aria-selected="false" aria-controls="preview-progress" id="preview-tab-progress" data-preview-tab="progress" tabindex="-1">Progress</button>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex min-h-12 items-center justify-between rounded-xl border border-slate-200 px-4">
-                                <span class="text-sm font-semibold text-slate-800">Warm-up and mobility</span>
-                                <span class="text-sm font-bold text-emerald-700">Done</span>
+                        <span class="product-stage__status"><i></i> Synced with coach</span>
+                    </div>
+
+                    <div class="product-stage__body">
+                        <aside class="product-rail" aria-label="Preview navigation">
+                            <span class="is-active"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h5v5H3zM12 3h5v5h-5zM3 12h5v5H3zM12 12h5v5h-5z"/></svg><b>Overview</b></span>
+                            <span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3v14M16 3v14M4 6h12M4 14h12"/></svg><b>Programme</b></span>
+                            <span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16V9M8 16V5M13 16v-3M18 16V2"/></svg><b>Progress</b></span>
+                            <span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v10H8l-4 3v-3H3z"/></svg><b>Coach</b></span>
+                        </aside>
+
+                        <div class="product-panels">
+                            <div id="preview-today" class="product-panel is-active" role="tabpanel" aria-labelledby="preview-tab-today" data-preview-panel="today">
+                                <div class="product-panel__heading">
+                                    <div><p>Sunday · Session 12</p><h3>Lower strength</h3></div>
+                                    <div class="readiness"><span>Readiness</span><strong>86<small>%</small></strong></div>
+                                </div>
+                                <div class="session-progress"><span></span></div>
+                                <ol class="exercise-list">
+                                    <li class="is-complete"><span class="exercise-list__state"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 3 3 7-7"/></svg></span><span><strong>Movement preparation</strong><small>8 minutes · completed</small></span><b>08:14</b></li>
+                                    <li class="is-current"><span class="exercise-list__index">02</span><span><strong>Back squat</strong><small>4 sets · 6 reps · RPE 7</small></span><b>In progress</b></li>
+                                    <li><span class="exercise-list__index">03</span><span><strong>Romanian deadlift</strong><small>3 sets · 8 reps</small></span><b>Up next</b></li>
+                                </ol>
+                                <button type="button" class="session-control" data-session-control aria-pressed="false"><span class="session-control__icon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 5 7 5-7 5z"/></svg></span><span data-session-label>Continue session</span><small>32 min remaining</small></button>
                             </div>
-                            <div class="flex min-h-12 items-center justify-between rounded-xl border border-emerald-300 bg-emerald-50 px-4">
-                                <span class="text-sm font-semibold text-slate-900">Main workout</span>
-                                <span class="text-sm font-bold text-emerald-800">Open</span>
+
+                            <div id="preview-week" class="product-panel" role="tabpanel" aria-labelledby="preview-tab-week" data-preview-panel="week" hidden>
+                                <div class="product-panel__heading"><div><p>15–21 July</p><h3>Your training week</h3></div><div class="readiness"><span>Adherence</span><strong>92<small>%</small></strong></div></div>
+                                <div class="week-grid" aria-label="Weekly programme overview">
+                                    <span class="is-complete"><small>Mon</small><b>Upper</b><i></i></span><span><small>Tue</small><b>Recover</b><i></i></span><span class="is-complete"><small>Wed</small><b>Lower</b><i></i></span><span><small>Thu</small><b>Mobility</b><i></i></span><span class="is-current"><small>Fri</small><b>Full body</b><i></i></span><span><small>Sat</small><b>Rest</b><i></i></span><span><small>Sun</small><b>Condition</b><i></i></span>
+                                </div>
+                                <div class="coach-note"><span class="coach-note__avatar">AM</span><p><strong>Coach Alex</strong>“Your consistency is building. Keep Friday controlled and leave one rep in reserve.”</p><span>2h ago</span></div>
+                            </div>
+
+                            <div id="preview-progress" class="product-panel" role="tabpanel" aria-labelledby="preview-tab-progress" data-preview-panel="progress" hidden>
+                                <div class="product-panel__heading"><div><p>Last 8 weeks</p><h3>Strength trend</h3></div><div class="readiness"><span>Change</span><strong>+14<small>%</small></strong></div></div>
+                                <div class="progress-chart" aria-label="Strength trend increased by fourteen percent over eight weeks">
+                                    <div class="progress-chart__labels"><span>100</span><span>75</span><span>50</span></div>
+                                    <svg viewBox="0 0 640 190" role="img" aria-hidden="true" preserveAspectRatio="none"><defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34d399" stop-opacity=".35"/><stop offset="1" stop-color="#34d399" stop-opacity="0"/></linearGradient></defs><path class="progress-chart__area" d="M0 165 C70 156,90 142,145 148 S240 132,290 116 S374 126,430 89 S532 80,640 33 L640 190 L0 190Z"/><path class="progress-chart__line" d="M0 165 C70 156,90 142,145 148 S240 132,290 116 S374 126,430 89 S532 80,640 33"/></svg>
+                                </div>
+                                <div class="progress-stats"><span><small>Sessions</small><strong>21</strong></span><span><small>Volume</small><strong>+18%</strong></span><span><small>Best streak</small><strong>12 days</strong></span></div>
                             </div>
                         </div>
                     </div>
@@ -76,67 +145,63 @@
             </div>
         </section>
 
-        <section class="public-section" data-public-section aria-labelledby="home-standard-heading">
-            <div class="public-section__inner">
-                <div class="public-section__header">
-                    <p class="public-eyebrow">The standard</p>
-                    <h2 id="home-standard-heading" class="public-heading">The essentials of coaching, connected.</h2>
-                    <p class="public-copy">Less time chasing scattered updates. More time acting on the next useful step.</p>
+        <section class="home-standard" data-public-section aria-labelledby="home-standard-title">
+            <div class="home-shell home-standard__layout">
+                <div class="home-standard__statement">
+                    <p class="home-kicker"><span></span> The One To One standard</p>
+                    <h2 id="home-standard-title">Trust is built into every rep.</h2>
+                    <p>Real coaching needs more than a profile and a promise. The platform connects professional trust, shared context and accountable action.</p>
+                    <a th:href="@{/about}" class="home-text-link">Why One To One <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg></a>
                 </div>
-                <div class="public-proof-list">
-                    <article class="public-proof">
-                        <h3 class="public-proof__title">Verified expertise</h3>
-                        <p class="public-proof__copy">Trainer credentials and professional details are reviewed before approval.</p>
+
+                <div class="standard-principles">
+                    <article data-standard-item>
+                        <span>01</span><div><h3>Verified before visible</h3><p>Trainer credentials and professional details are reviewed before they can coach through the platform.</p></div>
                     </article>
-                    <article class="public-proof">
-                        <h3 class="public-proof__title">One coaching record</h3>
-                        <p class="public-proof__copy">Programmes, sessions, goals and messages stay part of the same journey.</p>
+                    <article data-standard-item>
+                        <span>02</span><div><h3>One shared coaching record</h3><p>Programmes, sessions, goals and conversations stay connected instead of disappearing across separate apps.</p></div>
                     </article>
-                    <article class="public-proof">
-                        <h3 class="public-proof__title">Clear accountability</h3>
-                        <p class="public-proof__copy">Both client and trainer can see what happened and what needs attention next.</p>
+                    <article data-standard-item>
+                        <span>03</span><div><h3>Progress both sides can see</h3><p>Clients know what comes next. Coaches know where attention is needed. Accountability becomes useful, not noisy.</p></div>
                     </article>
                 </div>
             </div>
         </section>
 
-        <section id="roles" class="public-section public-section--muted" data-public-section aria-labelledby="home-roles-heading">
-            <div class="public-section__inner">
-                <div class="public-section__header public-section__header--centred">
-                    <p class="public-eyebrow">Choose your workspace</p>
-                    <h2 id="home-roles-heading" class="public-heading">One platform, focused by role.</h2>
+        <section id="roles" class="home-workspaces" data-public-section aria-labelledby="home-workspaces-title">
+            <div class="home-shell">
+                <div class="home-section-intro home-section-intro--centred">
+                    <p class="home-kicker home-kicker--dark"><span></span> One platform. Your perspective.</p>
+                    <h2 id="home-workspaces-title">Built around the way you work.</h2>
+                    <p>Move between the views below to see how One To One focuses the same connected system for each role.</p>
                 </div>
-                <div class="public-role-grid">
-                    <article class="public-role">
-                        <span class="public-role__label">Clients</span>
-                        <h3 class="public-role__title">Build consistent progress.</h3>
-                        <p class="public-role__copy">Compare trainers, follow programmes and keep goals, sessions and guidance visible.</p>
-                        <a th:href="@{/signup}" class="public-action public-action--primary">Start as a client</a>
-                    </article>
-                    <article class="public-role">
-                        <span class="public-role__label">Trainers</span>
-                        <h3 class="public-role__title">Coach from one clear system.</h3>
-                        <p class="public-role__copy">Manage client programmes, schedules, messages and progress without scattered tools.</p>
-                        <a th:href="@{/signup?role=trainer}" class="public-action public-action--secondary">Become a trainer</a>
-                    </article>
-                    <article class="public-role">
-                        <span class="public-role__label">Gyms</span>
-                        <h3 class="public-role__title">Support trainer operations.</h3>
-                        <p class="public-role__copy">Manage trainers and memberships from a dedicated gym administration workspace.</p>
-                        <a th:href="@{/signup?role=gym}" class="public-action public-action--secondary">Partner as a gym</a>
-                    </article>
-                </div>
-            </div>
-        </section>
 
-        <section class="public-section public-section--accent" data-public-section aria-labelledby="home-cta-heading">
-            <div class="public-section__inner public-section__inner--narrow">
-                <p class="public-eyebrow">Your next step</p>
-                <h2 id="home-cta-heading" class="public-heading">Choose support that fits the way you train.</h2>
-                <p class="public-copy">Create an account now or explore verified trainer profiles before you commit.</p>
-                <div class="public-actions">
-                    <a th:href="@{/signup}" class="public-action public-action--inverse">Create an account</a>
-                    <a th:href="@{/explore}" class="public-action public-action--inverse-secondary">Explore trainers</a>
+                <div class="workspace-selector" data-workspace-selector>
+                    <div class="workspace-tabs" role="tablist" aria-label="Choose a workspace">
+                        <button type="button" class="is-active" role="tab" aria-selected="true" aria-controls="workspace-client" id="workspace-tab-client" data-workspace-tab="client"><span>01</span> Client</button>
+                        <button type="button" role="tab" aria-selected="false" aria-controls="workspace-trainer" id="workspace-tab-trainer" data-workspace-tab="trainer" tabindex="-1"><span>02</span> Trainer</button>
+                        <button type="button" role="tab" aria-selected="false" aria-controls="workspace-gym" id="workspace-tab-gym" data-workspace-tab="gym" tabindex="-1"><span>03</span> Gym</button>
+                    </div>
+
+                    <div id="workspace-client" class="workspace-panel is-active" role="tabpanel" aria-labelledby="workspace-tab-client" data-workspace-panel="client">
+                        <div class="workspace-panel__copy"><span class="workspace-panel__number">01 / Client</span><h3>Know exactly what to do next.</h3><p>Find the right trainer, follow a programme made for you and keep your progress visible between sessions.</p><ul><li>Verified trainer discovery</li><li>Guided workouts and goals</li><li>Direct coaching feedback</li></ul><a th:href="@{/signup}" class="home-button home-button--dark">Start as a client <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg></a></div>
+                        <div class="workspace-panel__visual workspace-panel__visual--client" aria-hidden="true"><div class="workspace-mobile"><span class="workspace-mobile__bar"></span><p>Good morning, Maya</p><h4>Today’s focus</h4><div class="workspace-mobile__session"><small>Strength · 45 min</small><strong>Lower foundation</strong><i><b></b></i></div><div class="workspace-mobile__row"><span>Weekly goal</span><b>3 / 4</b></div><div class="workspace-mobile__row"><span>Coach message</span><b>1 new</b></div></div></div>
+                    </div>
+
+                    <div id="workspace-trainer" class="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-trainer" data-workspace-panel="trainer" hidden>
+                        <div class="workspace-panel__copy"><span class="workspace-panel__number">02 / Trainer</span><h3>Coach people, not spreadsheets.</h3><p>Plan training, review progress and manage client conversations from one calm, professional workspace.</p><ul><li>Client programme management</li><li>Progress and adherence signals</li><li>Scheduling and secure payments</li></ul><a th:href="@{/signup?role=trainer}" class="home-button home-button--dark">Become a trainer <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg></a></div>
+                        <div class="workspace-panel__visual workspace-panel__visual--trainer" aria-hidden="true"><div class="trainer-board"><div><small>Active clients</small><strong>18</strong><span>3 need attention</span></div><ol><li><i>MH</i><span><b>Maya H.</b><small>92% adherence</small></span><em>On track</em></li><li><i>JL</i><span><b>Jordan L.</b><small>Check-in due</small></span><em>Review</em></li><li><i>SA</i><span><b>Sam A.</b><small>Programme week 6</small></span><em>On track</em></li></ol></div></div>
+                    </div>
+
+                    <div id="workspace-gym" class="workspace-panel" role="tabpanel" aria-labelledby="workspace-tab-gym" data-workspace-panel="gym" hidden>
+                        <div class="workspace-panel__copy"><span class="workspace-panel__number">03 / Gym</span><h3>Run a stronger coaching floor.</h3><p>Give trainers a connected operating system while keeping memberships, standards and performance in view.</p><ul><li>Trainer operations overview</li><li>Membership administration</li><li>Verified team management</li></ul><a th:href="@{/signup?role=gym}" class="home-button home-button--dark">Partner as a gym <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg></a></div>
+                        <div class="workspace-panel__visual workspace-panel__visual--gym" aria-hidden="true"><div class="gym-board"><span><small>Trainer capacity</small><strong>84%</strong><i><b></b></i></span><span><small>Active members</small><strong>426</strong><em>+8.4%</em></span><div><b>Coaching activity</b><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+                    </div>
+                </div>
+
+                <div class="home-final">
+                    <div><p class="home-kicker"><span></span> Make the next session count</p><h2>Better coaching starts with one clear connection.</h2></div>
+                    <div><p>Explore verified trainers or create your account and build a plan around the person you are now.</p><div class="home-actions"><a th:href="@{/explore}" class="home-button home-button--light">Find your trainer <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg></a><a th:href="@{/support}" class="home-text-link home-text-link--light">Questions? Get support</a></div></div>
                 </div>
             </div>
         </section>
