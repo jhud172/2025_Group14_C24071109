@@ -4,7 +4,7 @@
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
 **Current branch:** `James/phase4-staging-readiness`
-**Current phase:** Phase 4 recovery gate passed; provider sandbox credentials are the remaining P0 blockers
+**Current phase:** Phase 4 upload/storage acceptance; real provider credentials are deferred to the final pre-launch gate
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
@@ -21,7 +21,7 @@ present before continuing on another device.
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 from the remaining provider NO-GO blockers. The isolated Render restore drill has passed and its temporary database has been deleted. Replace only the invalid staging sandbox configuration: a valid non-delivering SMTP test-inbox host/credentials, valid Twilio test Account SID/auth token, and a valid Stripe `sk_test_...` key plus a new staging-only test webhook secret. Redeploy staging, then prove verification/password-reset email, Twilio magic-number OTP, and Stripe checkout/subscription/cancellation/failure/retry/duplicate-webhook lifecycles. Do not use real recipients, make real charges, alter production webhooks, or access the existing `public` data.
+> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 with the remaining upload/storage acceptance: chat images, merchandise images and workout-form videos, including create/read/delete, durable-disk redeploy persistence, ownership isolation and explicit multipart limits. The provider variables intentionally remain invalid placeholders and their real sandbox lifecycle is deferred until the final pre-launch gate. Do not use real recipients, make real charges, alter production webhooks, or access the existing `public` data.
 
 ## Current verified status
 
@@ -326,6 +326,14 @@ Keep these already implemented homepage and Charlie requirements intact:
 - Production remains **NO-GO** until valid non-delivering SMTP sandbox,
   Twilio test and Stripe test-mode credentials are installed and their live
   staging lifecycles pass.
+- James directed the real provider credential work to remain deferred until
+  the final pre-launch gate. With the relevant SMTP, Twilio and Stripe
+  environment values set to the intentional invalid placeholder `"2bd"`, a
+  focused **19-test / 6-suite** provider and payment safety run passed with
+  zero failures. The live evidence remains the expected safe outcome: SMTP
+  cannot resolve the placeholder host, Twilio returns authentication error
+  20003, Stripe returns HTTP 401, and no message, Checkout Session,
+  subscription, charge or local cancellation success is created.
 
 ## Important implementation files
 
@@ -431,19 +439,21 @@ node --check src/main/resources/static/js/dashboard/client-dashboard-page.js
 
 ## Next implementation step
 
-Continue **Phase 4 — final sandbox provider clearance**.
+Continue **Phase 4 — remaining upload/storage acceptance**.
 
 The isolated Render service, schema boundary, clean and forward migrations,
-durable upload, logical export, application rollback, isolated restore and
-final local automated gates are complete. Only provider proof remains at P0.
+profile-upload durability, logical export, application rollback, isolated
+restore and automated gates are complete. Real provider proof remains a
+mandatory final pre-launch gate but is intentionally deferred.
 
 Priority order:
 
-1. Replace the invalid staging SMTP host/credentials with a non-delivering test inbox and prove verification, password recovery, link origin and controlled failure.
-2. Replace the invalid Twilio test Account SID/auth token; keep the documented test sender and prove magic-number success/failure, OTP expiry, attempt limits and single use.
-3. Replace the invalid Stripe key with a valid `sk_test_...` key and create a staging-only test webhook secret; prove checkout, subscription, failure, retry, provider-first cancellation, replay and duplicate behaviour.
-4. Resolve readiness monitoring, provider observability, scheduler ownership, sessions/rate limiting and privileged audit ownership.
-5. Rerun the complete **520-test** baseline and `npm run qa:release` against the final provider-enabled staging release candidate.
+1. Prove chat-image create/read/delete, ownership isolation and persistence across a staging redeploy.
+2. Prove merchandise-image create/read/delete and persistence across a staging redeploy.
+3. Prove workout-form video create/read/delete, ownership isolation and persistence across a staging redeploy.
+4. Align explicit global multipart request/file limits with the largest accepted upload and add rejection coverage.
+5. Continue readiness monitoring, scheduler ownership, sessions/rate limiting and privileged audit ownership.
+6. At the final pre-launch gate, replace the invalid provider placeholders and prove the deferred SMTP, Twilio and Stripe lifecycles.
 
 ## Phase 4 gates still required
 

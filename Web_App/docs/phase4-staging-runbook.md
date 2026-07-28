@@ -128,6 +128,13 @@ the live staging process. Safe provider probes produced these results:
 Do not claim a provider pass until those invalid staging-only values are
 replaced and a new deployment completes the lifecycles below.
 
+James has deferred that replacement until the final pre-launch gate. Until
+then, `"2bd"` is treated as an intentional invalid placeholder, never as a
+credential. A focused 19-test provider/payment safety run passed with those
+placeholder environment values and confirmed fail-closed application
+behaviour. Do not repeatedly call the external providers while this deliberate
+placeholder state remains active.
+
 ## Provider activation order
 
 Activate one provider at a time and return it to its safe state before moving

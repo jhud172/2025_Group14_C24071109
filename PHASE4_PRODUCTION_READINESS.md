@@ -309,8 +309,8 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | Closed | Production demo seed removal and clean PostgreSQL provisioning | Flyway V1 created the staging schema with zero users; no demo seed ran | Backend/security |
 | P1 | Profile upload persistence passes; three upload types and deletion remain | Chat/merch/video upload-read-redeploy-delete proof and multipart-limit decision | Platform/backend |
 | Closed | Isolated staging service and disk | Live Starter service, dedicated schema and 1 GB persistent disk with providers disabled | Platform |
-| P0 | Stripe test key/webhook secret are invalid; live lifecycle is unproved | Valid `sk_test_...` key and staging-only endpoint secret; checkout, renewal, cancellation, failure, retry, duplicate and replay evidence | Payments/backend |
-| P0 | SMTP host and Twilio test credentials are invalid | Non-delivering SMTP inbox and valid Twilio test credentials; delivery/failure/OTP evidence | Platform/backend |
+| Deferred P0 | Stripe test key/webhook secret are intentional invalid placeholders; live lifecycle is unproved | At the final pre-launch gate, install a valid `sk_test_...` key and staging-only endpoint secret; prove checkout, renewal, cancellation, failure, retry, duplicate and replay | Payments/backend |
+| Deferred P0 | SMTP host and Twilio test credentials are intentional invalid placeholders | At the final pre-launch gate, install a non-delivering SMTP inbox and valid Twilio test credentials; prove delivery/failure/OTP behaviour | Platform/backend |
 | Closed | Isolated restore and restored Flyway validation | Temporary recovery database validated V1–V4, fixtures and table count, then deleted | Platform/database |
 | Closed | Stripe repairs and Flyway V5 deployment | Commit `f99024cf`; live deploy `dep-d9kgqgh42hec73doqmkg`; six migration records and V5 ledger table validated | Backend/payments |
 | P1 | Render manifest omits email, SMS, OAuth, storage and card-encryption configuration | Complete secret/config manifest with owner and rotation process | Platform/security |
@@ -363,6 +363,14 @@ returned authentication error 20003, and Stripe returned HTTP 401 for an
 invalid API key. The application provider paths are therefore reached, but no
 delivery or Stripe lifecycle pass is claimed.
 
+James directed these real sandbox credentials to remain deferred until the
+final pre-launch gate. A deterministic focused run with the relevant SMTP,
+Twilio and Stripe environment values set to the intentional placeholder
+`"2bd"` passed **19 tests across 6 suites** with zero failures. Together with
+the live probes, the accepted simulation result is fail-closed: no email or
+SMS delivery, no Stripe object or charge, no subscription activation and no
+local cancellation success after provider rejection.
+
 James separately approved one temporary Basic-256mb Render recovery database
 with 1 GB storage at **US$6.30/month**, prorated by the second. The isolated
 restore passed and the exact recovery database was deleted immediately after
@@ -373,10 +381,10 @@ and disk are live. The schema boundary, migrations, profile-upload persistence,
 logical export, application rollback and current-code automated gates pass.
 Execute the remaining work in order:
 
-1. replace the invalid SMTP host/credentials and prove test-inbox verification and password recovery;
-2. replace the invalid Twilio test SID/token and prove magic-number OTP behaviour;
-3. replace the invalid Stripe key/webhook secret and prove the complete test-mode lifecycle;
-4. finish the remaining upload-boundary, monitoring and operational-ownership gates;
-5. rerun the full gate against the provider-enabled staging release candidate.
+1. finish chat, merchandise and workout-video create/read/delete, ownership and redeploy-persistence acceptance;
+2. set and cover explicit multipart file/request limits;
+3. finish readiness monitoring and operational-ownership gates;
+4. replace the invalid provider placeholders only at the final pre-launch gate and prove the complete live sandbox lifecycles;
+5. rerun the full gate against that provider-enabled release candidate.
 
 Any real provider charge, refund, production data read/write, production webhook change or destructive database operation still requires James’s explicit approval.
