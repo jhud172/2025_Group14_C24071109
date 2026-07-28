@@ -2819,7 +2819,7 @@ CREATE TABLE IF NOT EXISTS saved_payment_methods
     id                          BIGSERIAL PRIMARY KEY,
     user_id                     BIGINT       NOT NULL,
     card_holder_name            VARCHAR(200) NOT NULL,
-    last_four                   CHAR(4)      NOT NULL,
+    last_four                   VARCHAR(4)   NOT NULL,
     brand                       VARCHAR(50)  NOT NULL,
     expiry_month                SMALLINT     NOT NULL,
     expiry_year                 SMALLINT     NOT NULL,
