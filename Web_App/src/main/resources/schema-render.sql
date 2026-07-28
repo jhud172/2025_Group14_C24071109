@@ -2326,6 +2326,8 @@ CREATE TABLE IF NOT EXISTS chat_threads
 (
     id         BIGSERIAL PRIMARY KEY,
     user_id    BIGINT       NOT NULL,
+    chat_type  VARCHAR(32)  NOT NULL DEFAULT 'AI_PERSONAL',
+    peer_user_id BIGINT      NULL,
     folder_id  BIGINT       NULL,
     title      VARCHAR(160) NOT NULL,
     color_hex  VARCHAR(10)  NOT NULL,

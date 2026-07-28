@@ -18,6 +18,8 @@ class ProductionReadinessContractTest {
     void renderUsesVersionedMigrationsWithoutAutomaticDemoData() throws IOException {
         String renderProperties = Files.readString(RESOURCES.resolve("application-render.properties"));
         Path baselineMigration = RESOURCES.resolve("db/migration/postgresql/V1__baseline_schema.sql");
+        Path chatThreadMigration =
+                RESOURCES.resolve("db/migration/postgresql/V2__add_chat_thread_type_and_peer.sql");
 
         assertThat(renderProperties)
                 .contains("spring.sql.init.mode=never")
@@ -34,6 +36,11 @@ class ProductionReadinessContractTest {
                 .contains("CREATE TABLE")
                 .doesNotContain("Demo123!")
                 .doesNotContain("demo_admin");
+        assertThat(chatThreadMigration).isRegularFile();
+        assertThat(Files.readString(chatThreadMigration))
+                .contains("ALTER TABLE chat_threads")
+                .contains("ADD COLUMN chat_type VARCHAR(32) NOT NULL DEFAULT 'AI_PERSONAL'")
+                .contains("ADD COLUMN peer_user_id BIGINT NULL");
         assertThat(RESOURCES.resolve("render-data.sql")).doesNotExist();
     }
 

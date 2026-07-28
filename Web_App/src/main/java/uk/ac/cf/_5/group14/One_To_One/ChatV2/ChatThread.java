@@ -22,7 +22,7 @@ public class ChatThread {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "chat_type", nullable = false)
+    @Column(name = "chat_type", nullable = false, length = 32)
     private ChatType type = ChatType.AI_PERSONAL;
 
     @Column(name = "peer_user_id")

@@ -1,0 +1,3 @@
+ALTER TABLE chat_threads
+    ADD COLUMN chat_type VARCHAR(32) NOT NULL DEFAULT 'AI_PERSONAL',
+    ADD COLUMN peer_user_id BIGINT NULL;
