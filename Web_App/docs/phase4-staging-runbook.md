@@ -2,10 +2,10 @@
 
 ## Status
 
-This is a design and execution checklist. `render-staging.yaml` has not been
-applied. A separate Hobby workspace named `One To One Staging` was created,
-but it has no resources or payment card. No provider credential, webhook or
-production service was changed.
+The staging execution is active. The reference `render-staging.yaml` was not
+applied as a Blueprint; the service was configured manually in the existing
+`one-to-one` Render environment after James directed reuse of the current
+database. No provider credential, webhook or production service was changed.
 
 A read-only inspection of the existing `1to-one` PostgreSQL 18 instance found
 that it is available in Oregon on Basic-256mb with 15 GB storage and contains
@@ -18,6 +18,14 @@ The exact pre-deployment `public` fingerprint retained on 28 July 2026 is:
 profile, 4 platform subscriptions, 7 mobile authentication tokens and 1
 waitlist email. Recheck these counts immediately after schema creation and
 after every migration drill.
+
+Current resources:
+
+- web service `one-to-one-staging-jhuds` (`srv-d9kct35aeets73ant7k0`);
+- Starter compute with automatic deploys disabled;
+- 1 GB disk `dsk-d9kct35aeets73ant8ag` mounted at `/var/data/uploads`;
+- PostgreSQL schema `one_to_one_staging` on `1to-one`;
+- live application commit `50a2be4597db48e87857ec02793da213e33cef89`.
 
 ## Isolation boundary
 
@@ -91,6 +99,19 @@ Approval of the base staging cost does not authorise:
    initializer ran.
 7. Confirm the four upload directories survive a controlled staging redeploy.
 
+Execution result on 28 July 2026:
+
+- V1 created the isolated schema with zero users and no production demo seed;
+- V2–V4 repaired only incompatibilities reproduced by real PostgreSQL
+  validation;
+- `flyway_schema_history` has five successful rows: schema creation and V1–V4;
+- the synthetic staging client is the only staging user;
+- the `public` aggregate fingerprint remained unchanged;
+- the profile upload survived redeploy and rollback with identical size and
+  SHA-256;
+- deployment rollback reached live without a schema downgrade;
+- SMTP, Twilio, Stripe, AI and OAuth remain disabled/unconfigured.
+
 ## Provider activation order
 
 Activate one provider at a time and return it to its safe state before moving
@@ -159,6 +180,21 @@ Flyway Community migrations are forward-only. A failed schema change is
 repaired with a new forward migration. Database rollback means restoring an
 approved backup into a new empty database and switching only the staging
 service after validation.
+
+Current evidence:
+
+- Render created the complete logical export at 17:28 BST on 28 July 2026 and
+  retains it for seven days.
+- The archive was not downloaded or restored because it contains the existing
+  out-of-scope `public` schema.
+- Render PITR creates a separate billable PostgreSQL instance. Starting it
+  remains blocked until James explicitly approves that temporary cost.
+- The application rollback portion passed by rolling back to the previous
+  successful `50a2be4` artifact. Login returned HTTP 200, Flyway remained at
+  V4, the staging client remained present and the persisted upload hash was
+  unchanged.
+- The rollback is an application proof only; it is not a database restore
+  proof.
 
 ## Evidence to retain
 

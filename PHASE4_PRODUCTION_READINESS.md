@@ -2,8 +2,8 @@
 
 **Assessment date:** 28 July 2026
 **Decision:** **NO-GO for production launch**
-**Safe test environment:** isolated local Spring `local` profile, disposable H2, ports 8091–8094
-**External effects:** Stripe simulation only, email disabled/no-op, SMS console-only, AI disabled
+**Safe test environment:** isolated local H2 plus `one-to-one-staging-jhuds` using only PostgreSQL schema `one_to_one_staging`
+**External effects:** Stripe simulation only, email disabled/no-op, SMS console-only, AI/OAuth disabled
 
 ## Executive result
 
@@ -15,24 +15,28 @@ The code-level Phase 4 transactional checks completed without using production d
 4. The seeded `PLATFORM_ADMIN` could see but could not enter the trainer-verification queue.
 5. An empty SMTP host still selected `SmtpEmailService` instead of the documented no-op provider.
 
-The final local P0-hardening automated result is:
+The final post-staging automated result is:
 
 - CSS production build: passed.
-- Gradle: **512 tests passed, 0 failed, 0 skipped** across 128 suites.
+- Gradle: **513 tests passed, 0 failed, 0 skipped** across 129 suites.
 - Responsive release matrix: **88/88 passed**.
 - Axe: **22/22 passed** with no serious or critical finding.
 - Slow 4G/4× CPU journeys: **6/6 passed**.
 - Lighthouse journeys: **6/6 passed** with no threshold finding.
 
-The shared-password production seed has now been removed, Flyway V1 is in place
-and configurable upload serving is repaired. This does not make the application
-production-ready: the unapplied staging design, durable-storage redeploy proof,
-clean PostgreSQL migration, provider lifecycles and recovery drill remain
-blocking.
+The shared-password production seed is removed. The isolated Render staging
+service, Flyway V1–V4, durable upload redeploy/rollback proof and a seven-day
+Render logical export now pass. This does not make the application
+production-ready: SMTP, Twilio and Stripe sandbox lifecycles remain unproved,
+and an isolated database restore requires separate approval for Render's
+billable recovery instance.
 
 ## Safety boundary used
 
-The existing app on port 8081 and all production/provider data were left untouched. The transactional run used separate JAR processes and:
+The local transactional run used separate JAR processes. The Render staging run
+used only a dedicated schema and synthetic `.example.invalid` identity. The
+production service and provider integrations were left untouched. The safety
+boundary was:
 
 - in-memory H2;
 - Stripe’s application simulation sentinel, not a Stripe API key;
@@ -43,7 +47,10 @@ The existing app on port 8081 and all production/provider data were left untouch
 - test-only upload directories under ignored `Web_App/output/`;
 - reserved `.example.test` email addresses.
 
-No charge, refund, subscription mutation, real email, real SMS, OAuth account, production upload or production database row was created.
+No charge, refund, production subscription mutation, real email, real SMS,
+OAuth account, production upload or production database row was created. Only
+aggregate baseline counts were rechecked; no production row content was
+retrieved.
 
 ## Direct software dependencies
 
@@ -226,9 +233,12 @@ Generated URLs use public `/uploads/**` routes. `WebConfig` now maps profile,
 chat, merchandise and workout-video routes to their matching configured
 directories.
 
-The unapplied `render-staging.yaml` proposal attaches a 1 GB persistent disk at
-`/var/data/uploads` and points all four directories under it. Persistence still
-requires proof across a real staging redeploy, so production remains blocked.
+The live staging service has a 1 GB persistent disk at `/var/data/uploads` and
+points all four directories under it. A profile image remained HTTP 200 with
+the same 139,305-byte size and SHA-256
+`054f1b7337602ac967057876fe0f166b9ce9a7d9ba8d80498f22a391605a738f`
+after a controlled redeploy and application rollback. Chat, merchandise and
+workout-video create/delete boundaries still need representative acceptance.
 
 Spring’s global multipart limits are not explicitly configured, so they must be aligned with the larger application-specific limits before upload acceptance can be considered proved.
 
@@ -242,10 +252,10 @@ Spring’s global multipart limits are not explicitly configured, so they must b
 | Local/test store | In-memory H2 |
 | HTTP sessions | In-process/default servlet sessions |
 | Login attempt counters | In-process map |
-| Uploads | Configurable filesystem directories; durable staging disk designed but unapplied |
+| Uploads | Configurable filesystem directories on the live 1 GB staging disk; profile redeploy and rollback persistence proved |
 | Queue/cache | None |
-| Backup/restore | Versioned runbook added; execution still pending staging |
-| Schema migration | Flyway PostgreSQL V1 baseline; clean/upgrade proof pending staging |
+| Backup/restore | Render logical export completed and retained seven days; isolated restore pending billable recovery-instance approval |
+| Schema migration | Flyway V1 clean provisioning and forward upgrades through V4 proved on PostgreSQL 18 |
 
 The production demo seed and its shared credentials have been removed. Local and
 test H2 fixtures remain available only to the local/test profiles.
@@ -274,20 +284,24 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | Empty mail host selected SMTP | Added explicit `app.email.provider` contract, default `none` | `EmailProviderConfigurationTest` |
 | Render boot loaded shared-password demo users | Removed `render-data.sql`; disabled Render SQL initialisation; added Flyway V1 | `ProductionReadinessContractTest` |
 | Configured upload roots were not served | Added one resource mapping per configured upload boundary | `ProductionReadinessContractTest` |
-| Flyway activated inside H2 test slices | Explicitly disabled Flyway in local/test configuration | Full 512-test suite |
+| Flyway activated inside H2 test slices | Explicitly disabled Flyway in local/test configuration | Full 513-test suite |
 | Reused database would target populated `public` schema | Added validated JDBC, Flyway and Hibernate staging-schema boundary | `OneToOneApplicationDatabaseSchemaTest` and `ProductionReadinessContractTest` |
+| Legacy and V2 chat entities both owned `chat_messages` with incompatible mappings | Removed the unused legacy persistence path and asserted unique explicit table ownership | `ProductionReadinessContractTest` |
+| Real PostgreSQL validation required missing chat-thread fields | Added Flyway V2 for `chat_type` and `peer_user_id` | Migration contract coverage plus live boot |
+| Seven health-record columns used PostgreSQL types incompatible with Hibernate | Added Flyway V3 with the required integer/double-precision types | Migration contract coverage plus live boot |
+| `saved_payment_methods.last_four` used fixed-width `CHAR(4)` | Added Flyway V4 converting it to `VARCHAR(4)` | Migration contract coverage plus live boot |
 
 ## Launch blockers
 
 | Priority | Blocker | Exit evidence | Suggested owner |
 | --- | --- | --- | --- |
-| P0 | Production demo seed removed locally; clean PostgreSQL provisioning is not yet proved | Apply Flyway V1 to the dedicated staging schema and verify zero users without changing `public` | Backend/security |
-| P0 | Durable upload disk is designed but unapplied | Approved staging disk; upload/read/redeploy/delete proof | Platform/backend |
-| P0 | Staging is designed but not provisioned | Approved staging service/disk using the dedicated `one_to_one_staging` schema and staging-only secrets | Platform |
+| Closed | Production demo seed removal and clean PostgreSQL provisioning | Flyway V1 created the staging schema with zero users; no demo seed ran | Backend/security |
+| P1 | Profile upload persistence passes; three upload types and deletion remain | Chat/merch/video upload-read-redeploy-delete proof and multipart-limit decision | Platform/backend |
+| Closed | Isolated staging service and disk | Live Starter service, dedicated schema and 1 GB persistent disk with providers disabled | Platform |
 | P0 | Stripe’s real test-mode lifecycle has not been exercised | Test-mode checkout, renewal, cancellation, failure, retry, duplicate and replay evidence | Payments/backend |
 | P0 | Email and SMS delivery/recovery are unproved | SMTP test inbox and Twilio test-number journeys with delivery/failure evidence | Platform/backend |
-| P0 | No verified database backup/restore or rollback drill | Timestamped backup, restore into clean environment and deployment rollback evidence | Platform/database |
-| P0 | Flyway V1 exists but clean PostgreSQL, upgrade and recovery paths are unproved | Clean/upgrade/restore/rollback staging evidence | Backend/database |
+| P0 | Logical export and app rollback pass; isolated restore is not authorised | Explicitly approve a temporary billable recovery database, restore and validate before deletion/suspension | Platform/database |
+| P0 | Clean and forward Flyway paths pass; restored-database validation is pending | Validate V1–V4 and fixture integrity in the approved recovery instance | Backend/database |
 | P1 | Render manifest omits email, SMS, OAuth, storage and card-encryption configuration | Complete secret/config manifest with owner and rotation process | Platform/security |
 | P1 | Saved-card encryption key is ephemeral when unconfigured | Persistent rotated secret configured and restart-decryption test | Security/backend |
 | P1 | Provider actions have no durable queue/delivery state but UI says “queued” | Delivery-state model or accurate synchronous wording plus retry policy | Backend/product |
@@ -313,37 +327,35 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 ### Required before GO
 
 - [x] Remove production demo accounts/shared credentials.
-- [ ] Provision staging with a dedicated database schema and prove `public` is unchanged.
+- [x] Provision staging with a dedicated database schema and prove `public` is unchanged.
 - [ ] Configure and prove Stripe test mode, including webhook retries and duplicates.
 - [ ] Configure and prove SMTP test delivery and failure handling.
 - [ ] Configure and prove Twilio test delivery and failure handling.
 - [ ] Prove Google/Microsoft/Apple OAuth only for providers intended at launch.
-- [ ] Replace or persist local uploads and prove redeploy recovery.
+- [x] Persist profile uploads and prove redeploy/rollback recovery.
 - [ ] Configure a persistent card-encryption key and prove restart compatibility.
 - [x] Adopt versioned production database migrations.
-- [ ] Prove Flyway clean provisioning and forward upgrade on staging PostgreSQL.
-- [ ] Complete backup, restore and rollback drills.
+- [x] Prove Flyway clean provisioning and forward upgrade on staging PostgreSQL.
+- [ ] Complete the isolated database restore; logical export and application rollback pass.
 - [ ] Configure readiness/liveness monitoring and alert ownership.
 - [ ] Resolve multi-instance scheduler, session and login-throttle ownership.
 - [ ] Confirm audit logging, retention, privacy and incident-response expectations.
-- [ ] Re-run the full gate against the final staging release candidate.
+- [x] Re-run the full local gate against the current staging code revision.
 
 The decision remains **NO-GO** until every P0 item and any launch-applicable P1 item has an owner, evidence and sign-off.
 
 ## Next safe work package
 
-The original **US$13.55/month** ceiling was approved. James subsequently
-directed staging to reuse the existing `1to-one` PostgreSQL instance. Create
-the approximately **US$7.25/month incremental** staging web service and disk,
-using only the `one_to_one_staging` schema and sandbox/test credentials. Then
-execute, in order:
+The approved approximately **US$7.25/month incremental** staging web service
+and disk are live. The schema boundary, migrations, profile-upload persistence,
+logical export, application rollback and current-code automated gates pass.
+Execute the remaining work in order:
 
-1. production-schema migration and clean seed without demo admin credentials;
-2. upload persistence across a redeploy;
-3. SMTP test-inbox verification and password recovery;
-4. Twilio test-number verification;
-5. Stripe test-mode subscription and merch lifecycle, including retries and duplicate webhooks;
-6. backup/restore and deployment rollback;
-7. final full release gate on the staging release candidate.
+1. SMTP test-inbox verification and password recovery;
+2. Twilio test-number verification;
+3. Stripe test-mode subscription and merch lifecycle, including retries and duplicate webhooks;
+4. explicitly approve and run an isolated billable database recovery/restore;
+5. finish the remaining upload-boundary, monitoring and operational-ownership gates;
+6. rerun the full gate against the provider-enabled staging release candidate.
 
 Any real provider charge, refund, production data read/write, production webhook change or destructive database operation still requires James’s explicit approval.

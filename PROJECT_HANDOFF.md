@@ -3,8 +3,8 @@
 **Last updated:** 28 July 2026
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
-**Current branch:** `main`  
-**Current phase:** Phase 4 staging provisioning approved; schema-isolated service and durable disk are next
+**Current branch:** `James/phase4-staging-readiness`
+**Current phase:** Phase 4 staging infrastructure and local gates proved; provider sandboxes and an approved isolated database restore are next
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
@@ -26,7 +26,7 @@ Do not clone a fresh copy on the new device and assume this work will be present
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 from the NO-GO blockers: provision the approved staging service and durable disk, reuse the existing `1to-one` PostgreSQL instance only through the dedicated `one_to_one_staging` schema, and configure only sandbox/test provider credentials. Do not read or mutate the existing `public` schema, make a real charge or refund, send a real provider message, or change a production webhook without my explicit approval. Reproduce failures before editing and rerun the full Gradle and release-gate suites after confirmed repairs.
+> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 from the remaining NO-GO blockers. The `one-to-one-staging-jhuds` Render service, 1 GB disk, `one_to_one_staging` schema, Flyway V1–V4, logical export, durable-upload redeploy proof and application rollback drill are complete. Securely configure sandbox-only SMTP, Twilio and Stripe credentials, then prove their required lifecycles without real recipients, charges or production webhook changes. Separately obtain explicit approval before creating the billable Render recovery database needed for an isolated restore drill. Do not access or mutate the existing `public` data. Reproduce failures before editing and rerun the full Gradle and release-gate suites after confirmed repairs.
 
 ## Current verified status
 
@@ -45,7 +45,7 @@ Use this prompt after opening the repository on the new device:
 - James has confirmed that the Phase 3 human release gate passed, closing the remaining audible screen-reader and real-touch-device checks.
 - The final automated release gate covers public, login, client, trainer, gym and admin journeys: **88 responsive cases passed**, **22 Axe cases passed with zero serious/critical violations**, six cold-cache Slow 4G/4× CPU journeys passed, and six Lighthouse journeys passed.
 - Final Lighthouse scores are: public **97/100/100/100**, login **98/100/100/100**, client **86/100/100**, trainer **92/100/100**, gym **92/100/100** and admin **94/100/100** for performance/accessibility/best practices, with SEO included for public/login.
-- Latest full Gradle result: **512 tests passed, 0 failed, 0 skipped** across 128 suites.
+- Latest full Gradle result: **513 tests passed, 0 failed, 0 skipped** across 129 suites.
 - Latest local runtime proof: **HTTP 200** at `http://localhost:8081`, active profile `local`, datasource `jdbc:h2:mem:localdb`.
 - Latest CSS/JS version token: **`20260727p23`**.
 - Core CSS is **212,420 bytes / 207.4 KiB**, approximately 83% smaller than the previous monolithic core.
@@ -272,13 +272,25 @@ Keep these already implemented homepage and Charlie requirements intact:
 - Production CSS rebuilt successfully. The final local release gate on port 8094 passed **88 responsive cases**, **22 Axe cases**, **6 throttled-performance journeys** and **6 Lighthouse journeys** with zero findings.
 - No Render service/database/disk, real charge, real message, provider credential or webhook was changed. A read-only inventory confirmed that the existing database's `public` schema is populated, so staging is prohibited from targeting it. The production decision remains **NO-GO** until the schema boundary, external providers, upload persistence, PostgreSQL migration and recovery drills pass.
 
+### Phase 4 — isolated Render staging and migration proof
+
+- Created the approved `one-to-one-staging-jhuds` Starter web service (`srv-d9kct35aeets73ant7k0`) in the existing `one-to-one` Render environment. Automatic deploys are disabled. A 1 GB persistent disk (`dsk-d9kct35aeets73ant8ag`) is mounted at `/var/data/uploads`. Incremental minimum cost is approximately **US$7.25/month**.
+- Reused PostgreSQL `1to-one` only through `one_to_one_staging`. The first clean boot applied Flyway V1 with zero users and no demo seed. Controlled forward upgrades then applied V2–V4. The current staging state is one synthetic client, five successful Flyway history rows including schema creation, current version **4**, and one durable profile-upload reference.
+- Reproduced four PostgreSQL/Hibernate defects during real staging boots and repaired only those failures: conflicting legacy/V2 `chat_messages` ownership, missing `chat_threads.chat_type` and `peer_user_id`, incompatible health-record numeric types, and `saved_payment_methods.last_four` being fixed-width instead of variable-width. Mapping/migration contract coverage was added.
+- Deployed commit `50a2be4597db48e87857ec02793da213e33cef89`. Deployments `dep-d9kd8e5g1s2s73fsq100` and `dep-d9kdebrm8hqs73c7rlhg` reached live. A later rollback to the earlier successful artifact also reached live without a database downgrade.
+- Created and verified a staging-only client through sign-up, verification and login while email remained disabled. No real message was sent. A profile upload returned HTTP 200 before and after redeploy and rollback with the same **139,305-byte** size and SHA-256 `054f1b7337602ac967057876fe0f166b9ce9a7d9ba8d80498f22a391605a738f`.
+- The `public` fingerprint remained exactly unchanged after schema creation, migrations, the synthetic transaction, redeploy and rollback: 6 users, 12 user-role links, 42 support requests, 2 trainer profiles, 1 gym profile, 4 platform subscriptions, 7 mobile authentication tokens and 1 waitlist email.
+- Render completed an on-demand logical export at **28 July 2026 17:28 BST** and retains it for seven days. It was not downloaded because it includes the out-of-scope `public` schema. Render PITR always creates a separate billable database, so no restore was started without explicit approval.
+- The final local verification passed: production CSS build; **513/513 Gradle tests** across 129 suites; **88/88 responsive cases**; **22/22 Axe cases**; **6/6 throttled journeys**; and **6/6 Lighthouse journeys**, with zero findings.
+- No Stripe, SMTP or Twilio credential is configured. No real charge, refund, email, SMS, production webhook or production-service setting was changed. The decision remains **NO-GO** pending provider sandbox lifecycle proof, an approved isolated restore, and the remaining operational P1 decisions.
+
 ## Important implementation files
 
 ### Project evidence and handoff
 
 - `PROJECT_HANDOFF.md` — this continuation point.
 - `PHASE4_PRODUCTION_READINESS.md` — external-boundary inventory, transactional evidence, launch blockers and go/no-go checklist.
-- `render-staging.yaml` — unapplied isolated staging Blueprint proposal.
+- `render-staging.yaml` — staging Blueprint reference; the live service was configured manually in Render.
 - `Web_App/docs/phase4-staging-runbook.md` — approval boundary, provider test plan and recovery/rollback procedure.
 - `ONE_TO_ONE_UX_AUDIT.md` — complete audit, priorities and phase plan.
 - `Web_App/AGENTS.md` — repository-specific working instructions.
@@ -376,25 +388,28 @@ node --check src/main/resources/static/js/dashboard/client-dashboard-page.js
 
 ## Next implementation step
 
-Continue **Phase 4 — staging and launch-blocker clearance**.
+Continue **Phase 4 — sandbox provider and recovery clearance**.
 
-The read-only inventory, isolated local transactions, confirmed repairs and automated release gates are complete. The next priority is to establish the safe external boundary needed for real integration proof.
+The isolated Render service, schema boundary, clean and forward migrations,
+durable upload, logical export, application rollback and final local automated
+gates are complete. The next priority is sandbox provider proof, followed by an
+explicitly approved isolated database restore.
 
 Priority order:
 
-1. Preserve the approved cost ceiling and confirm the existing `public` schema row counts before and after every staging database drill.
-2. Create the staging web service and disk in `My Workspace` without editing the production service.
-3. Prove Flyway V1 creates an empty `one_to_one_staging` schema, the existing `public` schema is unchanged, and uploads survive a staging redeploy.
-4. Configure SMTP/Twilio/Stripe sandbox credentials only, then prove delivery, failures, retries and duplicate webhook handling.
-5. Complete logical backup/restore and application rollback. Obtain separate approval before any billable Render PITR recovery instance.
-6. Rerun the complete 512-test baseline and `npm run qa:release` against the final staging release candidate.
+1. Securely add a non-delivering SMTP test inbox to staging and prove verification, password recovery, link origin and controlled failure.
+2. Securely add Twilio test credentials and magic numbers; prove success/failure, OTP expiry, attempt limits and single use.
+3. Securely add Stripe test-mode credentials and a new staging-only webhook; prove checkout, subscription, failure, cancellation, replay and duplicate behaviour.
+4. Obtain explicit approval for a temporary billable PostgreSQL recovery instance, restore into it, validate the staging schema and delete or suspend it after evidence is retained.
+5. Resolve readiness monitoring, provider observability, scheduler ownership, sessions/rate limiting and privileged audit ownership.
+6. Rerun the complete **513-test** baseline and `npm run qa:release` against the final provider-enabled staging release candidate.
 
 ## Phase 4 gates still required
 
 - Stripe test-mode payment completion, renewal, cancellation, failure, retry and duplicate webhook delivery.
 - External SMTP/Twilio sandbox verification and password-recovery delivery.
-- Durable upload/storage limits, validation, redeploy recovery and deletion.
-- Production-like PostgreSQL migration, backup, restore and rollback proof.
+- Remaining upload-boundary acceptance for chat, merchandise and workout video, including deletion and explicit multipart limits.
+- Isolated PostgreSQL restore proof; clean/forward migrations, logical export and application rollback already pass.
 - Health monitoring, provider observability, privileged audit and operational ownership.
 
 ## Rules for future updates to this file
