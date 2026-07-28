@@ -3,26 +3,36 @@
 ## Status
 
 This is a design and execution checklist. `render-staging.yaml` has not been
-applied. No Render resource, provider credential or webhook was changed while
-preparing it.
+applied. A separate Hobby workspace named `One To One Staging` was created,
+but it has no resources or payment card. No provider credential, webhook or
+production service was changed.
 
-A read-only Render account check on 28 July 2026 found one existing workspace
-(`My Workspace`) and no dedicated staging workspace. The staging workspace
-therefore has to be created as a new boundary after approval; the existing
-workspace will not be selected or modified for this work.
+A read-only inspection of the existing `1to-one` PostgreSQL 18 instance found
+that it is available in Oregon on Basic-256mb with 15 GB storage and contains
+existing application records. James then directed staging to reuse that
+instance. Staging must therefore use a new `one_to_one_staging` schema; the
+existing `public` schema is out of scope.
+
+The exact pre-deployment `public` fingerprint retained on 28 July 2026 is:
+6 users, 12 user-role links, 42 support requests, 2 trainer profiles, 1 gym
+profile, 4 platform subscriptions, 7 mobile authentication tokens and 1
+waitlist email. Recheck these counts immediately after schema creation and
+after every migration drill.
 
 ## Isolation boundary
 
-Create a dedicated **Hobby workspace** named `one-to-one-staging`, separate
-from the workspace that contains production. Apply `render-staging.yaml` only
-inside that workspace.
+Create the staging web service in `My Workspace`, in Oregon, so it can use the
+existing database's private connection. Set
+`APP_DATABASE_SCHEMA=one_to_one_staging`. The application appends that schema
+as PostgreSQL's `currentSchema` and configures both Flyway and Hibernate to use
+it. Never set staging to `public`.
 
-The staging workspace must have:
+The staging service must have:
 
 - no production environment group;
-- no production database, disk, secret, domain or webhook;
-- one staging web service and one fresh staging PostgreSQL database;
-- PostgreSQL external access blocked with `ipAllowList: []`;
+- no production secret, domain or webhook;
+- no reads or writes to the existing `public` schema;
+- one staging web service using only the `one_to_one_staging` schema;
 - automatic deploys disabled;
 - a 1 GB persistent disk mounted at `/var/data/uploads`;
 - email, SMS, AI and OAuth disabled at the first boot;
@@ -44,10 +54,9 @@ Pricing inspected on 28 July 2026:
 | Resource | Selected size | Expected monthly cost |
 | --- | --- | ---: |
 | Web service | Starter, 512 MB | US$7.00 |
-| PostgreSQL compute | Basic-256mb | approximately US$6.00 |
-| PostgreSQL storage | 1 GB at US$0.30/GB | US$0.30 |
+| Existing PostgreSQL | Reused; no new instance | US$0.00 incremental |
 | Persistent upload disk | 1 GB at US$0.25/GB | US$0.25 |
-| **Expected minimum** | | **approximately US$13.55/month** |
+| **Expected incremental minimum** | | **approximately US$7.25/month** |
 
 Usage is prorated by the second. Bandwidth above the Hobby allowance and any
 provider usage are extra. A Render point-in-time recovery creates a second
@@ -56,8 +65,9 @@ before that drill.
 
 ## Approval boundary
 
-Do not create the workspace, service, database, disk, recovery database or
-provider endpoints until James explicitly approves the cost and creation.
+James approved the original US$13.55/month ceiling and later directed reuse of
+the existing database. Do not create the service, disk, recovery database or
+provider endpoints outside that approved ceiling.
 
 Approval of the base staging cost does not authorise:
 
@@ -71,12 +81,14 @@ Approval of the base staging cost does not authorise:
 
 1. Confirm the Git revision to deploy has passed the complete Gradle and web
    release-gate suites.
-2. Create or select the dedicated `one-to-one-staging` Hobby workspace.
-3. Review `render-staging.yaml` and confirm its service/database names do not
-   match any production resource.
-4. Apply the Blueprint to that staging workspace only.
-5. Confirm PostgreSQL reports zero application users after Flyway V1.
-6. Confirm `flyway_schema_history` contains V1 and no SQL initializer ran.
+2. Select `My Workspace` without editing the production `One_To_One` service.
+3. Review `render-staging.yaml`, confirm `APP_DATABASE_SCHEMA` is
+   `one_to_one_staging`, and securely link the existing `1to-one` database.
+4. Apply the staging service and 1 GB disk without changing the database's
+   `public` schema or production service.
+5. Confirm the staging schema reports zero application users after Flyway V1.
+6. Confirm `one_to_one_staging.flyway_schema_history` contains V1 and no SQL
+   initializer ran.
 7. Confirm the four upload directories survive a controlled staging redeploy.
 
 ## Provider activation order
@@ -126,11 +138,13 @@ Prove:
 
 ## Backup, restore and rollback drill
 
-Use only the staging database and staging upload disk.
+Use only the `one_to_one_staging` schema and staging upload disk. A
+schema-scoped logical dump is mandatory; a whole-instance restore would include
+the existing `public` data and is not authorised.
 
 1. Create labelled staging fixture records and one upload in every boundary.
-2. Export a logical PostgreSQL backup.
-3. Restore it into an empty local PostgreSQL 17 database or a separately
+2. Export a logical PostgreSQL backup restricted to `one_to_one_staging`.
+3. Restore it into an empty local PostgreSQL 18 database or a separately
    approved temporary staging recovery database.
 4. Compare Flyway version, table counts, labelled fixture records and
    referential-integrity checks.
@@ -150,7 +164,7 @@ service after validation.
 
 - exact Git commit and Render deploy IDs;
 - redacted environment-variable names, never values;
-- Flyway history and empty-user baseline;
+- staging-schema Flyway history and empty-user baseline;
 - provider request IDs in test mode;
 - webhook event IDs and duplicate-handling result;
 - database export/restore checks;

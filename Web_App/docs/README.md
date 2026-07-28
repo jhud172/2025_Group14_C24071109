@@ -107,7 +107,7 @@ Useful targeted checks:
 - profile: `render`
 - port: `8080` unless Render overrides `PORT`
 - database: PostgreSQL
-- SQL init: `schema-render.sql` plus `render-data.sql`
+- schema management: versioned Flyway migrations; Spring SQL initialisation disabled
 - Docker image entry point: [`Dockerfile`](../Dockerfile)
 - repo-level Blueprint: [`../../render.yaml`](../../render.yaml)
 
@@ -117,7 +117,12 @@ The Dockerfile already sets:
 
 If Render starts the app with `./gradlew bootRun`, the Gradle task now detects Render's default `RENDER=true` environment variable and uses the `render` Spring profile instead of the local H2 profile.
 
-The application also normalizes PostgreSQL-style `DATABASE_URL` values at startup in [`src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java`](../src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java).
+The application also normalises PostgreSQL-style `DATABASE_URL` values at
+startup in
+[`src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java`](../src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java).
+When `APP_DATABASE_SCHEMA` is set, it is validated and applied consistently to
+the JDBC connection, Flyway and Hibernate. Staging uses
+`one_to_one_staging`; production must not share that schema.
 
 ## Render And Cloudflare Deployment Notes
 
@@ -145,6 +150,7 @@ Minimum environment variables for a working Render deployment:
 - `DATABASE_USER`
 - `DATABASE_PASSWORD`
 - `APP_BASE_URL`
+- `APP_DATABASE_SCHEMA` when a deployment must use a non-`public` schema
 
 Commonly needed production variables by feature:
 

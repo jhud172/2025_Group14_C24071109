@@ -1,13 +1,13 @@
 # UNAPPLIED STAGING BLUEPRINT
-# Apply only to a dedicated One To One staging Render workspace after the
-# repository owner has approved the quoted billable cost. Do not sync this
-# Blueprint to the workspace that owns production resources.
+# Reuses the existing My Workspace PostgreSQL instance only through a dedicated
+# staging schema. Database credentials must be linked securely in Render and
+# must never be committed. Do not point APP_DATABASE_SCHEMA at public.
 services:
   - type: web
     name: one-to-one-staging-jhuds
     runtime: docker
     plan: starter
-    region: frankfurt
+    region: oregon
     branch: James/phase4-staging-readiness
     dockerfilePath: ./Web_App/Dockerfile
     dockerContext: ./Web_App
@@ -23,17 +23,13 @@ services:
       - key: APP_BASE_URL
         value: https://one-to-one-staging-jhuds.onrender.com
       - key: DATABASE_URL
-        fromDatabase:
-          name: one-to-one-staging-db
-          property: connectionString
+        sync: false
       - key: DATABASE_USER
-        fromDatabase:
-          name: one-to-one-staging-db
-          property: user
+        sync: false
       - key: DATABASE_PASSWORD
-        fromDatabase:
-          name: one-to-one-staging-db
-          property: password
+        sync: false
+      - key: APP_DATABASE_SCHEMA
+        value: one_to_one_staging
       - key: DATABASE_DRIVER
         value: org.postgresql.Driver
       - key: PGSSLMODE
@@ -70,14 +66,3 @@ services:
         value: "false"
       - key: APP_OAUTH_APPLE_LOGIN_ACTIVE
         value: "false"
-
-databases:
-  - name: one-to-one-staging-db
-    plan: basic-256mb
-    region: frankfurt
-    postgresMajorVersion: "17"
-    databaseName: one_to_one_staging
-    user: one_to_one_staging
-    diskSizeGB: 1
-    storageAutoscalingEnabled: false
-    ipAllowList: []

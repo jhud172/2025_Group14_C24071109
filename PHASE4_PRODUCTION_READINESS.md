@@ -18,7 +18,7 @@ The code-level Phase 4 transactional checks completed without using production d
 The final local P0-hardening automated result is:
 
 - CSS production build: passed.
-- Gradle: **508 tests passed, 0 failed, 0 skipped** across 127 suites.
+- Gradle: **512 tests passed, 0 failed, 0 skipped** across 128 suites.
 - Responsive release matrix: **88/88 passed**.
 - Axe: **22/22 passed** with no serious or critical finding.
 - Slow 4G/4× CPU journeys: **6/6 passed**.
@@ -274,15 +274,16 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | Empty mail host selected SMTP | Added explicit `app.email.provider` contract, default `none` | `EmailProviderConfigurationTest` |
 | Render boot loaded shared-password demo users | Removed `render-data.sql`; disabled Render SQL initialisation; added Flyway V1 | `ProductionReadinessContractTest` |
 | Configured upload roots were not served | Added one resource mapping per configured upload boundary | `ProductionReadinessContractTest` |
-| Flyway activated inside H2 test slices | Explicitly disabled Flyway in local/test configuration | Full 508-test suite |
+| Flyway activated inside H2 test slices | Explicitly disabled Flyway in local/test configuration | Full 512-test suite |
+| Reused database would target populated `public` schema | Added validated JDBC, Flyway and Hibernate staging-schema boundary | `OneToOneApplicationDatabaseSchemaTest` and `ProductionReadinessContractTest` |
 
 ## Launch blockers
 
 | Priority | Blocker | Exit evidence | Suggested owner |
 | --- | --- | --- | --- |
-| P0 | Production demo seed removed locally; clean PostgreSQL provisioning is not yet proved | Apply Flyway V1 to a fresh staging database and verify zero users | Backend/security |
+| P0 | Production demo seed removed locally; clean PostgreSQL provisioning is not yet proved | Apply Flyway V1 to the dedicated staging schema and verify zero users without changing `public` | Backend/security |
 | P0 | Durable upload disk is designed but unapplied | Approved staging disk; upload/read/redeploy/delete proof | Platform/backend |
-| P0 | Isolated staging is designed but not provisioned | Explicit cost approval, then separate staging workspace/service/database/secrets | Platform |
+| P0 | Staging is designed but not provisioned | Approved staging service/disk using the dedicated `one_to_one_staging` schema and staging-only secrets | Platform |
 | P0 | Stripe’s real test-mode lifecycle has not been exercised | Test-mode checkout, renewal, cancellation, failure, retry, duplicate and replay evidence | Payments/backend |
 | P0 | Email and SMS delivery/recovery are unproved | SMTP test inbox and Twilio test-number journeys with delivery/failure evidence | Platform/backend |
 | P0 | No verified database backup/restore or rollback drill | Timestamped backup, restore into clean environment and deployment rollback evidence | Platform/database |
@@ -312,7 +313,7 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 ### Required before GO
 
 - [x] Remove production demo accounts/shared credentials.
-- [ ] Provision isolated staging and a separate staging database.
+- [ ] Provision staging with a dedicated database schema and prove `public` is unchanged.
 - [ ] Configure and prove Stripe test mode, including webhook retries and duplicates.
 - [ ] Configure and prove SMTP test delivery and failure handling.
 - [ ] Configure and prove Twilio test delivery and failure handling.
@@ -331,10 +332,11 @@ The decision remains **NO-GO** until every P0 item and any launch-applicable P1 
 
 ## Next safe work package
 
-Obtain explicit approval for the approximately **US$13.55/month** minimum
-Render staging cost, then create the isolated staging deployment with a fresh
-non-production PostgreSQL database and durable storage. Configure only provider
-sandbox/test credentials. Then execute, in order:
+The original **US$13.55/month** ceiling was approved. James subsequently
+directed staging to reuse the existing `1to-one` PostgreSQL instance. Create
+the approximately **US$7.25/month incremental** staging web service and disk,
+using only the `one_to_one_staging` schema and sandbox/test credentials. Then
+execute, in order:
 
 1. production-schema migration and clean seed without demo admin credentials;
 2. upload persistence across a redeploy;

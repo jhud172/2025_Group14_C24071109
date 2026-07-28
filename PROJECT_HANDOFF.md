@@ -4,7 +4,7 @@
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
 **Current branch:** `main`  
-**Current phase:** Phase 4 local P0 hardening complete; explicit cost approval is required before isolated staging provisioning
+**Current phase:** Phase 4 staging provisioning approved; schema-isolated service and durable disk are next
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
@@ -26,7 +26,7 @@ Do not clone a fresh copy on the new device and assume this work will be present
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 from the NO-GO blockers: create a strictly isolated staging service and fresh non-production PostgreSQL database, remove the production demo-account seed, implement durable uploads, and configure only sandbox/test provider credentials. Do not make a charge, refund, production-data change or production webhook change without my explicit approval. Reproduce failures before editing and rerun the full Gradle and release-gate suites after confirmed repairs.
+> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 from the NO-GO blockers: provision the approved staging service and durable disk, reuse the existing `1to-one` PostgreSQL instance only through the dedicated `one_to_one_staging` schema, and configure only sandbox/test provider credentials. Do not read or mutate the existing `public` schema, make a real charge or refund, send a real provider message, or change a production webhook without my explicit approval. Reproduce failures before editing and rerun the full Gradle and release-gate suites after confirmed repairs.
 
 ## Current verified status
 
@@ -45,7 +45,7 @@ Use this prompt after opening the repository on the new device:
 - James has confirmed that the Phase 3 human release gate passed, closing the remaining audible screen-reader and real-touch-device checks.
 - The final automated release gate covers public, login, client, trainer, gym and admin journeys: **88 responsive cases passed**, **22 Axe cases passed with zero serious/critical violations**, six cold-cache Slow 4G/4× CPU journeys passed, and six Lighthouse journeys passed.
 - Final Lighthouse scores are: public **97/100/100/100**, login **98/100/100/100**, client **86/100/100**, trainer **92/100/100**, gym **92/100/100** and admin **94/100/100** for performance/accessibility/best practices, with SEO included for public/login.
-- Latest full Gradle result: **508 tests passed, 0 failed, 0 skipped** across 127 suites.
+- Latest full Gradle result: **512 tests passed, 0 failed, 0 skipped** across 128 suites.
 - Latest local runtime proof: **HTTP 200** at `http://localhost:8081`, active profile `local`, datasource `jdbc:h2:mem:localdb`.
 - Latest CSS/JS version token: **`20260727p23`**.
 - Core CSS is **212,420 bytes / 207.4 KiB**, approximately 83% smaller than the previous monolithic core.
@@ -265,11 +265,12 @@ Keep these already implemented homepage and Charlie requirements intact:
 - Reproduced the Render profile's automatic `render-data.sql` execution and removed the production demo seed, including the shared-password platform-admin account.
 - Added Flyway's PostgreSQL module and `V1__baseline_schema.sql`; Render now disables Spring SQL initialisation, validates the schema through JPA and uses a versioned migration history. Local/test H2 explicitly keeps Flyway disabled.
 - Reproduced the mismatch between configurable upload directories and the fixed `file:uploads/` resource root. Each public upload route now serves from its matching configured storage directory.
-- Added the unapplied `render-staging.yaml` proposal and `Web_App/docs/phase4-staging-runbook.md`. The design uses a dedicated staging Hobby workspace, Starter web service, fresh Basic-256mb PostgreSQL 17 database with public database access blocked, and a 1 GB persistent upload disk. Automatic deploys and all external providers are disabled initially.
-- Inspected current Render pricing. The minimum durable staging design is approximately **US$13.55/month**: US$7 web compute, approximately US$6 database compute, US$0.30 database storage and US$0.25 persistent-disk storage, before usage overages. No resource was created.
-- The first full run reproduced one Flyway/H2 test-profile collision. Explicit test-profile isolation repaired the root cause; the final result is **508 passed, 0 failed, 0 skipped** across 127 suites.
+- Added the unapplied `render-staging.yaml` proposal and `Web_App/docs/phase4-staging-runbook.md`. After James directed reuse of the existing populated `1to-one` PostgreSQL instance, the design was revised to isolate staging in the `one_to_one_staging` schema. Flyway, Hibernate and the JDBC `currentSchema` now share that explicit boundary. The Starter web service remains separate, uses a 1 GB persistent upload disk, disables automatic deploys and starts with all external providers disabled.
+- Captured an exact read-only `public` baseline before staging: 6 users, 12 user-role links, 42 support requests, 2 trainer profiles, 1 gym profile, 4 platform subscriptions, 7 mobile authentication tokens and 1 waitlist email. These counts must remain unchanged by staging provisioning and migration drills.
+- Inspected current Render pricing. James approved the original **US$13.55/month** ceiling. Reusing the existing database reduces the expected incremental minimum to approximately **US$7.25/month**: US$7 web compute and US$0.25 persistent-disk storage, before usage overages. The empty `One To One Staging` Hobby workspace was created, but no service, database or disk was created there.
+- The first full run reproduced one Flyway/H2 test-profile collision. Explicit test-profile isolation repaired the root cause. Four database-schema boundary tests were then added; the final result is **512 passed, 0 failed, 0 skipped** across 128 suites.
 - Production CSS rebuilt successfully. The final local release gate on port 8094 passed **88 responsive cases**, **22 Axe cases**, **6 throttled-performance journeys** and **6 Lighthouse journeys** with zero findings.
-- No Render workspace/service/database/disk, production data, real charge, real message, provider credential or webhook was accessed or changed. The production decision remains **NO-GO** until James approves staging cost and the external provider, upload persistence, PostgreSQL migration and recovery drills pass there.
+- No Render service/database/disk, real charge, real message, provider credential or webhook was changed. A read-only inventory confirmed that the existing database's `public` schema is populated, so staging is prohibited from targeting it. The production decision remains **NO-GO** until the schema boundary, external providers, upload persistence, PostgreSQL migration and recovery drills pass.
 
 ## Important implementation files
 
@@ -381,12 +382,12 @@ The read-only inventory, isolated local transactions, confirmed repairs and auto
 
 Priority order:
 
-1. Obtain James's explicit approval for the approximately **US$13.55/month** minimum staging cost.
-2. Create a dedicated staging Render workspace and apply the reviewed staging Blueprint there only.
-3. Prove the fresh PostgreSQL Flyway V1 result contains no demo users and that uploads survive a staging redeploy.
+1. Preserve the approved cost ceiling and confirm the existing `public` schema row counts before and after every staging database drill.
+2. Create the staging web service and disk in `My Workspace` without editing the production service.
+3. Prove Flyway V1 creates an empty `one_to_one_staging` schema, the existing `public` schema is unchanged, and uploads survive a staging redeploy.
 4. Configure SMTP/Twilio/Stripe sandbox credentials only, then prove delivery, failures, retries and duplicate webhook handling.
 5. Complete logical backup/restore and application rollback. Obtain separate approval before any billable Render PITR recovery instance.
-6. Rerun the complete 508-test baseline and `npm run qa:release` against the final staging release candidate.
+6. Rerun the complete 512-test baseline and `npm run qa:release` against the final staging release candidate.
 
 ## Phase 4 gates still required
 

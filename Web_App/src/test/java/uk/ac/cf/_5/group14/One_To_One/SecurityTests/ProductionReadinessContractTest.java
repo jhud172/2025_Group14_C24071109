@@ -23,6 +23,10 @@ class ProductionReadinessContractTest {
                 .contains("spring.sql.init.mode=never")
                 .contains("spring.flyway.enabled=true")
                 .contains("spring.flyway.locations=classpath:db/migration/postgresql")
+                .contains("spring.jpa.properties.hibernate.default_schema=${APP_DATABASE_SCHEMA:public}")
+                .contains("spring.flyway.default-schema=${APP_DATABASE_SCHEMA:public}")
+                .contains("spring.flyway.schemas=${APP_DATABASE_SCHEMA:public}")
+                .contains("spring.flyway.create-schemas=true")
                 .contains("spring.flyway.baseline-on-migrate=true")
                 .doesNotContain("render-data.sql");
         assertThat(baselineMigration).isRegularFile();
@@ -47,26 +51,26 @@ class ProductionReadinessContractTest {
     }
 
     @Test
-    void stagingBlueprintIsIsolatedDurableAndSafeByDefault() throws IOException {
+    void stagingBlueprintUsesDedicatedSchemaDurableStorageAndSafeProviders() throws IOException {
         Path blueprintPath = Path.of("../render-staging.yaml");
         String blueprint = Files.readString(blueprintPath);
         Map<?, ?> parsed = new Yaml().load(blueprint);
 
         assertThat(parsed.containsKey("services")).isTrue();
-        assertThat(parsed.containsKey("databases")).isTrue();
+        assertThat(parsed.containsKey("databases")).isFalse();
         assertThat(blueprint)
                 .contains("name: one-to-one-staging-jhuds")
-                .contains("name: one-to-one-staging-db")
                 .contains("plan: starter")
-                .contains("plan: basic-256mb")
+                .contains("region: oregon")
                 .contains("branch: James/phase4-staging-readiness")
                 .contains("mountPath: /var/data/uploads")
-                .contains("ipAllowList: []")
                 .contains("autoDeploy: false")
+                .containsPattern("key: APP_DATABASE_SCHEMA\\R\\s+value: one_to_one_staging")
                 .containsPattern("key: APP_EMAIL_PROVIDER\\R\\s+value: none")
                 .containsPattern("key: APP_SMS_PROVIDER\\R\\s+value: console")
                 .containsPattern("key: STRIPE_SECRET_KEY\\R\\s+value: \"\"")
-                .doesNotContain("sync: false")
+                .containsPattern("key: DATABASE_URL\\R\\s+sync: false")
+                .doesNotContain("APP_DATABASE_SCHEMA: public")
                 .doesNotContain("one-to-one-web");
     }
 }

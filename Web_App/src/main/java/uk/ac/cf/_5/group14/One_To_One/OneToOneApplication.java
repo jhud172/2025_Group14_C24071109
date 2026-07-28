@@ -1,6 +1,8 @@
 package uk.ac.cf._5.group14.One_To_One;
 
 import java.net.URI;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class OneToOneApplication {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OneToOneApplication.class);
+	private static final Pattern CURRENT_SCHEMA_PARAMETER = Pattern.compile("(?:[?&])currentSchema=([^&]*)");
 
 	public static void main(String[] args) {
 		applyRenderDatabaseUrlFallback();
@@ -42,7 +45,7 @@ public class OneToOneApplication {
 
 		String rawDatabaseUrl = System.getenv("DATABASE_URL");
 		if (hasText(rawDatabaseUrl)) {
-			String normalizedDatabaseUrl = normalizeJdbcPostgresUrl(rawDatabaseUrl);
+			String normalizedDatabaseUrl = applyConfiguredDatabaseSchema(normalizeJdbcPostgresUrl(rawDatabaseUrl));
 			System.setProperty("DATABASE_URL", normalizedDatabaseUrl);
 			System.setProperty("spring.datasource.url", normalizedDatabaseUrl);
 			applyDriverClassForUrl(normalizedDatabaseUrl);
@@ -54,7 +57,7 @@ public class OneToOneApplication {
 
 		String explicitDatasourceUrl = System.getProperty("spring.datasource.url");
 		if (hasText(explicitDatasourceUrl)) {
-			String normalizedExplicitUrl = normalizeJdbcPostgresUrl(explicitDatasourceUrl);
+			String normalizedExplicitUrl = applyConfiguredDatabaseSchema(normalizeJdbcPostgresUrl(explicitDatasourceUrl));
 			System.setProperty("spring.datasource.url", normalizedExplicitUrl);
 			applyDriverClassForUrl(normalizedExplicitUrl);
 			System.setProperty("app.datasource.url-origin", normalizedExplicitUrl.equals(explicitDatasourceUrl)
@@ -84,6 +87,31 @@ public class OneToOneApplication {
 
 	private static boolean hasText(String value) {
 		return value != null && !value.isBlank();
+	}
+
+	private static String applyConfiguredDatabaseSchema(String jdbcUrl) {
+		return applyDatabaseSchema(jdbcUrl, System.getenv("APP_DATABASE_SCHEMA"));
+	}
+
+	static String applyDatabaseSchema(String jdbcUrl, String databaseSchema) {
+		if (!hasText(databaseSchema) || !jdbcUrl.startsWith("jdbc:postgresql://")) {
+			return jdbcUrl;
+		}
+
+		if (!databaseSchema.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+			throw new IllegalArgumentException("APP_DATABASE_SCHEMA must be a valid PostgreSQL identifier");
+		}
+
+		Matcher currentSchema = CURRENT_SCHEMA_PARAMETER.matcher(jdbcUrl);
+		if (currentSchema.find()) {
+			if (!databaseSchema.equals(currentSchema.group(1))) {
+				throw new IllegalArgumentException(
+						"APP_DATABASE_SCHEMA conflicts with DATABASE_URL currentSchema");
+			}
+			return jdbcUrl;
+		}
+
+		return jdbcUrl + (jdbcUrl.contains("?") ? "&" : "?") + "currentSchema=" + databaseSchema;
 	}
 
 	private static String normalizeJdbcPostgresUrl(String jdbcUrl) {
