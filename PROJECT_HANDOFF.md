@@ -319,6 +319,10 @@ Keep these already implemented homepage and Charlie requirements intact:
   Lighthouse scores are public **93/100/100/100**, login
   **98/100/100/100**, client **83/100/100**, trainer **91/100/100**, gym
   **89/100/100** and admin **94/100/100**.
+- Commit `f99024cf` was pushed and Render deploy
+  `dep-d9kgqgh42hec73doqmkg` reached live. Startup validated six Flyway
+  history entries, applied V5 successfully to `one_to_one_staging`, and served
+  the public homepage normally.
 - Production remains **NO-GO** until valid non-delivering SMTP sandbox,
   Twilio test and Stripe test-mode credentials are installed and their live
   staging lifecycles pass.
@@ -446,7 +450,6 @@ Priority order:
 - Stripe test-mode payment completion, renewal, cancellation, failure, retry and duplicate webhook delivery.
 - External SMTP/Twilio sandbox verification and password-recovery delivery.
 - Remaining upload-boundary acceptance for chat, merchandise and workout video, including deletion and explicit multipart limits.
-- Deploy and validate Flyway V5 on staging; the isolated V1–V4 recovery proof, logical export and application rollback pass.
 - Health monitoring, provider observability, privileged audit and operational ownership.
 
 ## Rules for future updates to this file

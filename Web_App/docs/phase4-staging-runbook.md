@@ -26,8 +26,8 @@ Current resources:
 - Starter compute with automatic deploys disabled;
 - 1 GB disk `dsk-d9kct35aeets73ant8ag` mounted at `/var/data/uploads`;
 - PostgreSQL schema `one_to_one_staging` on `1to-one`;
-- latest provider-config deployment before the current candidate:
-  `3d0c8e8c`, deploy `dep-d9kgeblbedkc739oe3g0`.
+- live application commit `f99024cf`, deploy
+  `dep-d9kgqgh42hec73doqmkg`.
 
 ## Isolation boundary
 
@@ -235,9 +235,11 @@ cancellation provider-first. Before deployment it passed:
 - **88/88 responsive**, **22/22 Axe**, **6/6 throttled** and **6/6
   Lighthouse** release-gate cases with zero findings.
 
-After deploying this candidate, verify Flyway V5 is successful before
-repeating provider tests. The existing staging runtime remains at V4 until
-that deployment is live.
+Render deploy `dep-d9kgqgh42hec73doqmkg` reached live. Startup validated six
+Flyway history entries and successfully advanced `one_to_one_staging` from V4
+to V5. The `stripe_webhook_events` table exists and the public homepage
+responds normally. Repeat provider tests only after the invalid staging
+sandbox values are replaced.
 
 ## Evidence to retain
 

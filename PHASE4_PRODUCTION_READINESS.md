@@ -259,7 +259,7 @@ Spring’s global multipart limits are not explicitly configured, so they must b
 | Uploads | Configurable filesystem directories on the live 1 GB staging disk; profile redeploy and rollback persistence proved |
 | Queue/cache | None |
 | Backup/restore | Logical export and isolated temporary recovery-database validation passed; the temporary database was deleted after evidence was retained |
-| Schema migration | Flyway V1 clean provisioning and forward upgrades through V4 proved on PostgreSQL 18; V5 event-ledger migration passes integration coverage and awaits staging deployment |
+| Schema migration | Flyway V1 clean provisioning and forward upgrades through V4 proved on PostgreSQL 18; V5 event-ledger migration is live and validated on staging |
 
 The production demo seed and its shared credentials have been removed. Local and
 test H2 fixtures remain available only to the local/test profiles.
@@ -312,7 +312,7 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | P0 | Stripe test key/webhook secret are invalid; live lifecycle is unproved | Valid `sk_test_...` key and staging-only endpoint secret; checkout, renewal, cancellation, failure, retry, duplicate and replay evidence | Payments/backend |
 | P0 | SMTP host and Twilio test credentials are invalid | Non-delivering SMTP inbox and valid Twilio test credentials; delivery/failure/OTP evidence | Platform/backend |
 | Closed | Isolated restore and restored Flyway validation | Temporary recovery database validated V1–V4, fixtures and table count, then deleted | Platform/database |
-| P0 | Stripe repairs and Flyway V5 are not yet live on staging | Deploy current branch, verify V5 and rerun provider lifecycle against the repaired build | Backend/payments |
+| Closed | Stripe repairs and Flyway V5 deployment | Commit `f99024cf`; live deploy `dep-d9kgqgh42hec73doqmkg`; six migration records and V5 ledger table validated | Backend/payments |
 | P1 | Render manifest omits email, SMS, OAuth, storage and card-encryption configuration | Complete secret/config manifest with owner and rotation process | Platform/security |
 | P1 | Saved-card encryption key is ephemeral when unconfigured | Persistent rotated secret configured and restart-decryption test | Security/backend |
 | P1 | Provider actions have no durable queue/delivery state but UI says “queued” | Delivery-state model or accurate synchronous wording plus retry policy | Backend/product |
