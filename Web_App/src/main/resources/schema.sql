@@ -61,6 +61,7 @@ DROP TABLE IF EXISTS goal_check_ins CASCADE;
 DROP TABLE IF EXISTS goal_links CASCADE;
 DROP TABLE IF EXISTS goals CASCADE;
 DROP TABLE IF EXISTS platform_subscriptions CASCADE;
+DROP TABLE IF EXISTS stripe_webhook_events CASCADE;
 DROP TABLE IF EXISTS gym_subscriptions CASCADE;
 DROP TABLE IF EXISTS password_reset_tokens CASCADE;
 DROP TABLE IF EXISTS email_verification_tokens CASCADE;
@@ -219,6 +220,16 @@ CREATE TABLE IF NOT EXISTS platform_subscriptions
 
 CREATE INDEX IF NOT EXISTS idx_platform_subscriptions_user
     ON platform_subscriptions (user_id);
+
+CREATE TABLE IF NOT EXISTS stripe_webhook_events
+(
+    event_id      VARCHAR(255) PRIMARY KEY,
+    event_type    VARCHAR(120) NOT NULL,
+    processed_at  TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_stripe_webhook_events_processed_at
+    ON stripe_webhook_events (processed_at);
 
 -- =========================
 -- GYM SUBSCRIPTIONS (PLATFORM VIEW)

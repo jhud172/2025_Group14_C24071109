@@ -5,7 +5,8 @@
 The staging execution is active. The reference `render-staging.yaml` was not
 applied as a Blueprint; the service was configured manually in the existing
 `one-to-one` Render environment after James directed reuse of the current
-database. No provider credential, webhook or production service was changed.
+database. Only staging sandbox variables were changed; no production provider
+credential, webhook or service was changed.
 
 A read-only inspection of the existing `1to-one` PostgreSQL 18 instance found
 that it is available in Oregon on Basic-256mb with 15 GB storage and contains
@@ -25,7 +26,8 @@ Current resources:
 - Starter compute with automatic deploys disabled;
 - 1 GB disk `dsk-d9kct35aeets73ant8ag` mounted at `/var/data/uploads`;
 - PostgreSQL schema `one_to_one_staging` on `1to-one`;
-- live application commit `50a2be4597db48e87857ec02793da213e33cef89`.
+- latest provider-config deployment before the current candidate:
+  `3d0c8e8c`, deploy `dep-d9kgeblbedkc739oe3g0`.
 
 ## Isolation boundary
 
@@ -67,9 +69,9 @@ Pricing inspected on 28 July 2026:
 | **Expected incremental minimum** | | **approximately US$7.25/month** |
 
 Usage is prorated by the second. Bandwidth above the Hobby allowance and any
-provider usage are extra. A Render point-in-time recovery creates a second
-billable database temporarily and therefore needs a separate cost approval
-before that drill.
+provider usage are extra. James separately approved one Basic-256mb/1 GB
+recovery database at US$6.30/month, prorated by the second. It was deleted
+after validation.
 
 ## Approval boundary
 
@@ -83,7 +85,7 @@ Approval of the base staging cost does not authorise:
 - production credentials;
 - a real payment, refund, email or SMS;
 - a production Stripe webhook change;
-- a billable point-in-time recovery database.
+- another billable point-in-time recovery database.
 
 ## First deployment
 
@@ -110,14 +112,21 @@ Execution result on 28 July 2026:
 - the profile upload survived redeploy and rollback with identical size and
   SHA-256;
 - deployment rollback reached live without a schema downgrade;
-- SMTP, Twilio, Stripe, AI and OAuth remain disabled/unconfigured.
+- AI and OAuth remain disabled/unconfigured.
 
-A follow-up inspection before the provider lifecycle drill confirmed that the
-live service still has `APP_EMAIL_PROVIDER=none` and
-`APP_SMS_PROVIDER=console`. No `SPRING_MAIL_*`, `TWILIO_*`,
-`STRIPE_SECRET_KEY` or `STRIPE_WEBHOOK_SECRET` variables, secret files or
-linked environment groups are present. Do not claim a provider pass until
-those staging-only values exist and a new deployment is live.
+A follow-up deployment loaded the SMTP, Twilio and Stripe variable names into
+the live staging process. Safe provider probes produced these results:
+
+- SMTP selected correctly, but the configured host is invalid; verification
+  and password-reset delivery did not reach a test inbox;
+- the missing Twilio sender was repaired with the documented magic sender,
+  after which Twilio returned authentication error 20003 for the configured
+  test SID/token; no SMS was sent;
+- Stripe checkout reached Stripe but returned HTTP 401 for an invalid test
+  key; no Checkout Session, subscription or charge was created.
+
+Do not claim a provider pass until those invalid staging-only values are
+replaced and a new deployment completes the lifecycles below.
 
 ## Provider activation order
 
@@ -194,18 +203,41 @@ Current evidence:
   retains it for seven days.
 - The archive was not downloaded or restored because it contains the existing
   out-of-scope `public` schema.
-- Render PITR creates a separate billable PostgreSQL instance. Starting it
-  remains blocked until James explicitly approves that temporary cost.
+- James explicitly approved a temporary Basic-256mb/1 GB recovery instance at
+  US$6.30/month, prorated by the second.
+- Recovery database `one-to-one-phase4-recovery-20260728`
+  (`dpg-d9kgb35aeets73aupr70-a`) reached available. Validation was restricted
+  to the isolated `one_to_one_staging` boundary and confirmed successful schema
+  creation plus Flyway V1–V4, 122 base tables, one expected synthetic user and
+  one profile-upload reference. No `public` row query was made.
+- The exact recovery database was deleted immediately after validation. Only
+  source database `dpg-d73tqedactks7385ism0-a` remains available, stopping
+  further recovery-instance charges.
 - The application rollback portion passed by rolling back to the previous
   successful `50a2be4` artifact. Login returned HTTP 200, Flyway remained at
   V4, the staging client remained present and the persisted upload hash was
   unchanged.
 - The rollback is an application proof only; it is not a database restore
   proof.
-- The Render recovery customisation form prices the lowest selectable
-  Basic-256mb plus 1 GB storage instance at **US$6.30/month**, billed and
-  prorated by the second. Copying the source's 15 GB storage would cost
-  **US$10.50/month**. Neither option was created.
+- The approved recovery resource existed only for the drill. Render bills the
+  **US$6.30/month** configuration by the second; the final invoiced fraction is
+  determined by Render.
+
+## Current candidate validation
+
+The current source candidate adds Flyway V5 for a persistent Stripe webhook
+event ledger, handles invoice payment failure/recovery and makes subscription
+cancellation provider-first. Before deployment it passed:
+
+- `npm run build:css`;
+- `bootJar`;
+- **520/520 Gradle tests** across 131 suites;
+- **88/88 responsive**, **22/22 Axe**, **6/6 throttled** and **6/6
+  Lighthouse** release-gate cases with zero findings.
+
+After deploying this candidate, verify Flyway V5 is successful before
+repeating provider tests. The existing staging runtime remains at V4 until
+that deployment is live.
 
 ## Evidence to retain
 

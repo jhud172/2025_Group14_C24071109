@@ -8,6 +8,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.ac.cf._5.group14.One_To_One.Payments.PaymentProviderService;
 import uk.ac.cf._5.group14.One_To_One.Payments.PaymentSubscriptionVerification;
 import uk.ac.cf._5.group14.One_To_One.Payments.StripeWebhookHandlingResult;
+import uk.ac.cf._5.group14.One_To_One.Payments.StripeWebhookEventStore;
 import uk.ac.cf._5.group14.One_To_One.Payments.StripeWebhookService;
 import uk.ac.cf._5.group14.One_To_One.PlatformBilling.PlatformSubscriptionService;
 
@@ -18,6 +19,7 @@ import java.time.Clock;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,11 +32,15 @@ class StripeWebhookServiceTest {
     @Mock
     private PaymentProviderService paymentProviderService;
 
+    @Mock
+    private StripeWebhookEventStore eventStore;
+
     @Test
     void handleWebhook_activatesSubscriptionOnCompletedCheckoutSession() throws Exception {
         StripeWebhookService service = new StripeWebhookService(
                 platformSubscriptionService,
                 paymentProviderService,
+                eventStore,
                 Clock.systemUTC());
         ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
 
@@ -74,6 +80,7 @@ class StripeWebhookServiceTest {
         StripeWebhookService service = new StripeWebhookService(
                 platformSubscriptionService,
                 paymentProviderService,
+                eventStore,
                 Clock.systemUTC());
         ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
 
@@ -102,10 +109,96 @@ class StripeWebhookServiceTest {
     }
 
     @Test
+    void handleWebhook_processesTheSameStripeEventOnlyOnce() throws Exception {
+        StripeWebhookService service = new StripeWebhookService(
+                platformSubscriptionService,
+                paymentProviderService,
+                eventStore,
+                Clock.systemUTC());
+        ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
+
+        String payload = """
+                {
+                  "id": "evt_duplicate_1",
+                  "type": "customer.subscription.updated",
+                  "data": {
+                    "object": {
+                      "id": "sub_1",
+                      "status": "active",
+                      "cancel_at_period_end": false,
+                      "current_period_end": 1777248000
+                    }
+                  }
+                }
+                """;
+        String timestamp = currentTimestamp();
+        String signature = signature("whsec_test", payload, timestamp);
+        when(eventStore.hasProcessed("evt_duplicate_1")).thenReturn(false, true);
+
+        StripeWebhookHandlingResult first = service.handleWebhook(payload, signature);
+        StripeWebhookHandlingResult duplicate = service.handleWebhook(payload, signature);
+
+        assertThat(first.accepted()).isTrue();
+        assertThat(duplicate.accepted()).isTrue();
+        assertThat(duplicate.message()).containsIgnoringCase("duplicate");
+        verify(platformSubscriptionService, times(1)).syncProviderSubscription(
+                "sub_1",
+                Instant.ofEpochSecond(1777248000L),
+                false,
+                true);
+    }
+
+    @Test
+    void handleWebhook_appliesPaymentFailureAndSuccessfulRetry() throws Exception {
+        StripeWebhookService service = new StripeWebhookService(
+                platformSubscriptionService,
+                paymentProviderService,
+                eventStore,
+                Clock.systemUTC());
+        ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
+
+        String failedPayload = """
+                {
+                  "id": "evt_invoice_failed_1",
+                  "type": "invoice.payment_failed",
+                  "data": {
+                    "object": {
+                      "subscription": "sub_1"
+                    }
+                  }
+                }
+                """;
+        String succeededPayload = """
+                {
+                  "id": "evt_invoice_succeeded_1",
+                  "type": "invoice.payment_succeeded",
+                  "data": {
+                    "object": {
+                      "subscription": "sub_1"
+                    }
+                  }
+                }
+                """;
+
+        StripeWebhookHandlingResult failed = service.handleWebhook(
+                failedPayload,
+                signature("whsec_test", failedPayload, currentTimestamp()));
+        StripeWebhookHandlingResult retried = service.handleWebhook(
+                succeededPayload,
+                signature("whsec_test", succeededPayload, currentTimestamp()));
+
+        assertThat(failed.accepted()).isTrue();
+        assertThat(retried.accepted()).isTrue();
+        verify(platformSubscriptionService).markPaymentFailed("sub_1");
+        verify(platformSubscriptionService).markPaymentRecovered("sub_1");
+    }
+
+    @Test
     void handleWebhook_rejectsInvalidSignature() {
         StripeWebhookService service = new StripeWebhookService(
                 platformSubscriptionService,
                 paymentProviderService,
+                eventStore,
                 Clock.systemUTC());
         ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
 
@@ -120,6 +213,7 @@ class StripeWebhookServiceTest {
         StripeWebhookService service = new StripeWebhookService(
                 platformSubscriptionService,
                 paymentProviderService,
+                eventStore,
                 Clock.systemUTC());
         ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
         String payload = "{\"type\":\"sandbox.replay\"}";

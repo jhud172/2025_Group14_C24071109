@@ -3,7 +3,7 @@
 **Assessment date:** 28 July 2026
 **Decision:** **NO-GO for production launch**
 **Safe test environment:** isolated local H2 plus `one-to-one-staging-jhuds` using only PostgreSQL schema `one_to_one_staging`
-**External effects:** Stripe simulation only, email disabled/no-op, SMS console-only, AI/OAuth disabled
+**External effects:** staging-only sandbox requests; no delivered message, Stripe object, charge, production webhook change or production-data mutation
 
 ## Executive result
 
@@ -15,21 +15,22 @@ The code-level Phase 4 transactional checks completed without using production d
 4. The seeded `PLATFORM_ADMIN` could see but could not enter the trainer-verification queue.
 5. An empty SMTP host still selected `SmtpEmailService` instead of the documented no-op provider.
 
-The final post-staging automated result is:
+The final post-repair automated result is:
 
 - CSS production build: passed.
-- Gradle: **513 tests passed, 0 failed, 0 skipped** across 129 suites.
+- Gradle: **520 tests passed, 0 failed, 0 skipped** across 131 suites.
 - Responsive release matrix: **88/88 passed**.
 - Axe: **22/22 passed** with no serious or critical finding.
 - Slow 4G/4× CPU journeys: **6/6 passed**.
 - Lighthouse journeys: **6/6 passed** with no threshold finding.
 
 The shared-password production seed is removed. The isolated Render staging
-service, Flyway V1–V4, durable upload redeploy/rollback proof and a seven-day
-Render logical export now pass. This does not make the application
-production-ready: SMTP, Twilio and Stripe sandbox lifecycles remain unproved,
-and an isolated database restore requires separate approval for Render's
-billable recovery instance.
+service, Flyway V1–V4, durable upload redeploy/rollback proof, seven-day Render
+logical export and isolated recovery-database validation now pass. The
+temporary recovery instance was deleted after validation. This does not make
+the application production-ready: the configured SMTP host, Twilio test
+credentials and Stripe test key are invalid, so their required live sandbox
+lifecycles remain unproved.
 
 ## Safety boundary used
 
@@ -39,10 +40,10 @@ production service and provider integrations were left untouched. The safety
 boundary was:
 
 - in-memory H2;
-- Stripe’s application simulation sentinel, not a Stripe API key;
-- a disabled Stripe webhook secret for the live reachability probe;
-- `APP_EMAIL_PROVIDER=none`;
-- `APP_SMS_PROVIDER=console`;
+- Stripe’s application simulation sentinel for local journeys and a
+  staging-only test configuration for the live probe;
+- a staging-only synthetic identity and Twilio magic test numbers;
+- a non-real `.example.invalid` email recipient;
 - AI disabled;
 - test-only upload directories under ignored `Web_App/output/`;
 - reserved `.example.test` email addresses.
@@ -71,9 +72,9 @@ Transitive Java and npm packages resolve through Gradle/Maven Central and `packa
 
 | Service | Purpose | Integration | Current safe result |
 | --- | --- | --- | --- |
-| Stripe | Platform subscriptions and merch checkout | Direct OkHttp calls to Stripe `/v1`; inbound HMAC webhook | Application simulation passed; real Stripe test-mode lifecycle not run |
-| SMTP | Verification, password reset, trainer status, price changes and admin outreach | Spring `JavaMailSender` | Explicit `none` provider selects no-op; real sandbox delivery not run |
-| Twilio | Phone verification SMS | Direct OkHttp Messages API | Console provider only; real test number not used |
+| Stripe | Platform subscriptions and merch checkout | Direct OkHttp calls to Stripe `/v1`; inbound HMAC webhook | Live staging request reached Stripe but returned HTTP 401 for an invalid configured key; no object or charge created |
+| SMTP | Verification, password reset, trainer status, price changes and admin outreach | Spring `JavaMailSender` | SMTP selected after redeploy, but the configured host is invalid; no test-inbox delivery |
+| Twilio | Phone verification SMS | Direct OkHttp Messages API | Missing sender was repaired with the documented test sender; live test request then returned Twilio 20003 for invalid test credentials; no SMS sent |
 | OpenAI | Charlie assistant responses | Direct OkHttp Chat Completions call | Disabled for this assessment |
 | Google | OAuth/OIDC login | Spring Security OAuth client | Disabled/unconfigured in sandbox |
 | Microsoft Entra/Graph | OAuth/OIDC login and userinfo | Issuer discovery, token endpoints and Graph OIDC userinfo | Disabled/unconfigured in sandbox |
@@ -198,7 +199,10 @@ Remaining provider evidence is still required for:
 - provider retry behaviour;
 - event observability and reconciliation.
 
-There is no persisted Stripe event-ID ledger, so provider event-level deduplication has not been proved.
+Flyway V5 adds a persistent Stripe event-ID ledger. Unit/integration coverage
+now proves duplicate suppression, invoice payment failure/recovery transitions
+and provider-first subscription cancellation. Live provider confirmation
+remains blocked by the invalid Stripe test key and webhook secret.
 
 ### Outbound callbacks
 
@@ -254,8 +258,8 @@ Spring’s global multipart limits are not explicitly configured, so they must b
 | Login attempt counters | In-process map |
 | Uploads | Configurable filesystem directories on the live 1 GB staging disk; profile redeploy and rollback persistence proved |
 | Queue/cache | None |
-| Backup/restore | Render logical export completed and retained seven days; isolated restore pending billable recovery-instance approval |
-| Schema migration | Flyway V1 clean provisioning and forward upgrades through V4 proved on PostgreSQL 18 |
+| Backup/restore | Logical export and isolated temporary recovery-database validation passed; the temporary database was deleted after evidence was retained |
+| Schema migration | Flyway V1 clean provisioning and forward upgrades through V4 proved on PostgreSQL 18; V5 event-ledger migration passes integration coverage and awaits staging deployment |
 
 The production demo seed and its shared credentials have been removed. Local and
 test H2 fixtures remain available only to the local/test profiles.
@@ -270,6 +274,10 @@ test H2 fixtures remain available only to the local/test profiles.
 | Platform admin | Open the verification queue and approve the gym-submitted trainer | Pending moved to Approved; trainer marked verified |
 | Stripe webhook | POST without browser CSRF while provider is disabled | Controller reached; controlled 503 returned |
 | Email selection | Start contexts with `none` and `smtp` providers | Correct implementation selected in both cases |
+| SMTP live staging | Trigger password recovery for a synthetic `.example.invalid` identity | SMTP selected; invalid host reproduced; no delivery |
+| Twilio live staging | Request an OTP with documented test numbers | Missing sender reproduced and repaired; Twilio then rejected invalid test credentials with 20003; no SMS |
+| Stripe live staging | Start subscription checkout with staging-only configuration | Stripe returned HTTP 401 for invalid key; no Checkout Session, subscription or charge |
+| Database recovery | Restore to temporary Basic-256mb/1 GB recovery database | Available; schema creation and Flyway V1–V4 successful, 122 tables and labelled staging fixtures validated; instance deleted |
 
 Provider delivery was intentionally not claimed. The approval UI says “Notification queued”, but the current implementation has no durable notification queue or delivery-status record.
 
@@ -290,6 +298,9 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | Real PostgreSQL validation required missing chat-thread fields | Added Flyway V2 for `chat_type` and `peer_user_id` | Migration contract coverage plus live boot |
 | Seven health-record columns used PostgreSQL types incompatible with Hibernate | Added Flyway V3 with the required integer/double-precision types | Migration contract coverage plus live boot |
 | `saved_payment_methods.last_four` used fixed-width `CHAR(4)` | Added Flyway V4 converting it to `VARCHAR(4)` | Migration contract coverage plus live boot |
+| Duplicate Stripe event IDs were processed more than once | Added a persistent event-ID ledger and record-after-success handling | `StripeWebhookServiceTest` and `StripeWebhookEventStoreIntegrationTest` |
+| Stripe invoice failure/recovery events were ignored | Added `PAST_DUE` transition and recovery to the intended active/expiring state | `StripeWebhookServiceTest` and `PlatformSubscriptionServiceTest` |
+| Subscription cancellation changed only local state | Send cancellation to Stripe first and commit local state only after provider success | `PlatformSubscriptionControllerTest` |
 
 ## Launch blockers
 
@@ -298,10 +309,10 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | Closed | Production demo seed removal and clean PostgreSQL provisioning | Flyway V1 created the staging schema with zero users; no demo seed ran | Backend/security |
 | P1 | Profile upload persistence passes; three upload types and deletion remain | Chat/merch/video upload-read-redeploy-delete proof and multipart-limit decision | Platform/backend |
 | Closed | Isolated staging service and disk | Live Starter service, dedicated schema and 1 GB persistent disk with providers disabled | Platform |
-| P0 | Stripe’s real test-mode lifecycle has not been exercised | Test-mode checkout, renewal, cancellation, failure, retry, duplicate and replay evidence | Payments/backend |
-| P0 | Email and SMS delivery/recovery are unproved | SMTP test inbox and Twilio test-number journeys with delivery/failure evidence | Platform/backend |
-| P0 | Logical export and app rollback pass; isolated restore is not authorised | Explicitly approve a temporary billable recovery database, restore and validate before deletion/suspension | Platform/database |
-| P0 | Clean and forward Flyway paths pass; restored-database validation is pending | Validate V1–V4 and fixture integrity in the approved recovery instance | Backend/database |
+| P0 | Stripe test key/webhook secret are invalid; live lifecycle is unproved | Valid `sk_test_...` key and staging-only endpoint secret; checkout, renewal, cancellation, failure, retry, duplicate and replay evidence | Payments/backend |
+| P0 | SMTP host and Twilio test credentials are invalid | Non-delivering SMTP inbox and valid Twilio test credentials; delivery/failure/OTP evidence | Platform/backend |
+| Closed | Isolated restore and restored Flyway validation | Temporary recovery database validated V1–V4, fixtures and table count, then deleted | Platform/database |
+| P0 | Stripe repairs and Flyway V5 are not yet live on staging | Deploy current branch, verify V5 and rerun provider lifecycle against the repaired build | Backend/payments |
 | P1 | Render manifest omits email, SMS, OAuth, storage and card-encryption configuration | Complete secret/config manifest with owner and rotation process | Platform/security |
 | P1 | Saved-card encryption key is ephemeral when unconfigured | Persistent rotated secret configured and restart-decryption test | Security/backend |
 | P1 | Provider actions have no durable queue/delivery state but UI says “queued” | Delivery-state model or accurate synchronous wording plus retry policy | Backend/product |
@@ -336,7 +347,7 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 - [ ] Configure a persistent card-encryption key and prove restart compatibility.
 - [x] Adopt versioned production database migrations.
 - [x] Prove Flyway clean provisioning and forward upgrade on staging PostgreSQL.
-- [ ] Complete the isolated database restore; logical export and application rollback pass.
+- [x] Complete the isolated database restore; logical export and application rollback pass.
 - [ ] Configure readiness/liveness monitoring and alert ownership.
 - [ ] Resolve multi-instance scheduler, session and login-throttle ownership.
 - [ ] Confirm audit logging, retention, privacy and incident-response expectations.
@@ -346,28 +357,26 @@ The decision remains **NO-GO** until every P0 item and any launch-applicable P1 
 
 ## Next safe work package
 
-The live service was rechecked before the provider drill. It still has
-`APP_EMAIL_PROVIDER=none` and `APP_SMS_PROVIDER=console`; none of the required
-SMTP, Twilio or Stripe credential keys, secret files or environment groups is
-present. The provider lifecycle gate is therefore blocked by configuration,
-not recorded as failed application behaviour.
+Provider variables were loaded by a new live staging deployment. Safe requests
+then reproduced configuration failures: the SMTP host is invalid, Twilio
+returned authentication error 20003, and Stripe returned HTTP 401 for an
+invalid API key. The application provider paths are therefore reached, but no
+delivery or Stripe lifecycle pass is claimed.
 
-Render's recovery form was inspected without creating a resource. The lowest
-selectable temporary recovery database is Basic-256mb (**US$6/month**) with
-1 GB storage (**US$0.30/month**), totalling **US$6.30/month**, billed and
-prorated by the second. Copying the source's 15 GB storage would total
-**US$10.50/month**. Creating either option still requires explicit approval.
+James separately approved one temporary Basic-256mb Render recovery database
+with 1 GB storage at **US$6.30/month**, prorated by the second. The isolated
+restore passed and the exact recovery database was deleted immediately after
+validation. Only the original source database remains available.
 
 The approved approximately **US$7.25/month incremental** staging web service
 and disk are live. The schema boundary, migrations, profile-upload persistence,
 logical export, application rollback and current-code automated gates pass.
 Execute the remaining work in order:
 
-1. SMTP test-inbox verification and password recovery;
-2. Twilio test-number verification;
-3. Stripe test-mode subscription and merch lifecycle, including retries and duplicate webhooks;
-4. explicitly approve and run an isolated billable database recovery/restore;
-5. finish the remaining upload-boundary, monitoring and operational-ownership gates;
-6. rerun the full gate against the provider-enabled staging release candidate.
+1. replace the invalid SMTP host/credentials and prove test-inbox verification and password recovery;
+2. replace the invalid Twilio test SID/token and prove magic-number OTP behaviour;
+3. replace the invalid Stripe key/webhook secret and prove the complete test-mode lifecycle;
+4. finish the remaining upload-boundary, monitoring and operational-ownership gates;
+5. rerun the full gate against the provider-enabled staging release candidate.
 
 Any real provider charge, refund, production data read/write, production webhook change or destructive database operation still requires James’s explicit approval.

@@ -4,29 +4,24 @@
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
 **Current branch:** `James/phase4-staging-readiness`
-**Current phase:** Phase 4 staging infrastructure and local gates proved; provider sandboxes and an approved isolated database restore are next
+**Current phase:** Phase 4 recovery gate passed; provider sandbox credentials are the remaining P0 blockers
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
 
 This file is the durable reference point for continuing the One To One project on another device or in a new Codex session. Read this file first, then read `ONE_TO_ONE_UX_AUDIT.md` for the full evidence, defect inventory and phased plan.
 
-## Critical transfer warning
+## Transfer status
 
-The current working tree contains modified and untracked implementation files. They are **not committed at the time of this handoff**. A Markdown file alone will not transfer those changes to another device.
-
-Before changing devices, preserve the whole working tree by doing one of the following:
-
-1. Review, commit and push all intended project changes to the remote repository.
-2. Copy the complete repository folder, including untracked files, to the new device.
-
-Do not clone a fresh copy on the new device and assume this work will be present until the changes have been committed and pushed.
+The Phase 4 provider/recovery implementation and this handoff belong on
+`James/phase4-staging-readiness`. Confirm that the latest branch revision is
+present before continuing on another device.
 
 ## Resume prompt for a new Codex session
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 from the remaining NO-GO blockers. The `one-to-one-staging-jhuds` Render service, 1 GB disk, `one_to_one_staging` schema, Flyway V1–V4, logical export, durable-upload redeploy proof and application rollback drill are complete. Securely configure sandbox-only SMTP, Twilio and Stripe credentials, then prove their required lifecycles without real recipients, charges or production webhook changes. Separately obtain explicit approval before creating the billable Render recovery database needed for an isolated restore drill. Do not access or mutate the existing `public` data. Reproduce failures before editing and rerun the full Gradle and release-gate suites after confirmed repairs.
+> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 from the remaining provider NO-GO blockers. The isolated Render restore drill has passed and its temporary database has been deleted. Replace only the invalid staging sandbox configuration: a valid non-delivering SMTP test-inbox host/credentials, valid Twilio test Account SID/auth token, and a valid Stripe `sk_test_...` key plus a new staging-only test webhook secret. Redeploy staging, then prove verification/password-reset email, Twilio magic-number OTP, and Stripe checkout/subscription/cancellation/failure/retry/duplicate-webhook lifecycles. Do not use real recipients, make real charges, alter production webhooks, or access the existing `public` data.
 
 ## Current verified status
 
@@ -45,7 +40,7 @@ Use this prompt after opening the repository on the new device:
 - James has confirmed that the Phase 3 human release gate passed, closing the remaining audible screen-reader and real-touch-device checks.
 - The final automated release gate covers public, login, client, trainer, gym and admin journeys: **88 responsive cases passed**, **22 Axe cases passed with zero serious/critical violations**, six cold-cache Slow 4G/4× CPU journeys passed, and six Lighthouse journeys passed.
 - Final Lighthouse scores are: public **97/100/100/100**, login **98/100/100/100**, client **86/100/100**, trainer **92/100/100**, gym **92/100/100** and admin **94/100/100** for performance/accessibility/best practices, with SEO included for public/login.
-- Latest full Gradle result: **513 tests passed, 0 failed, 0 skipped** across 129 suites.
+- Latest full Gradle result: **520 tests passed, 0 failed, 0 skipped** across 131 suites.
 - Latest local runtime proof: **HTTP 200** at `http://localhost:8081`, active profile `local`, datasource `jdbc:h2:mem:localdb`.
 - Latest CSS/JS version token: **`20260727p23`**.
 - Core CSS is **212,420 bytes / 207.4 KiB**, approximately 83% smaller than the previous monolithic core.
@@ -286,6 +281,48 @@ Keep these already implemented homepage and Charlie requirements intact:
 - A follow-up provider-lifecycle attempt on 28 July 2026 rechecked the live Render environment rather than trusting the handoff assertion. `APP_EMAIL_PROVIDER` was still `none`, `APP_SMS_PROVIDER` was still `console`, and no `SPRING_MAIL_*`, `TWILIO_*`, `STRIPE_SECRET_KEY` or `STRIPE_WEBHOOK_SECRET` keys, secret files or linked environment groups existed on `one-to-one-staging-jhuds`. No provider request was made and no lifecycle pass is claimed.
 - The Render recovery customisation screen confirmed the lowest selectable recovery configuration as Basic-256mb at **US$6/month** plus 1 GB storage at **US$0.30/month**, for an exact **US$6.30/month**, billed and prorated by the second. The default copied 15 GB storage configuration would be **US$10.50/month**. The form was inspected only; `Create Database` was not activated.
 
+### Phase 4 — provider and recovery continuation
+
+- Forced a staging-only redeploy after provider variables were added and
+  confirmed that the new process selected SMTP and Twilio rather than the
+  previous no-op/console implementations.
+- SMTP verification and password-reset delivery both remain blocked because
+  the configured staging mail host is invalid. The password-reset page
+  correctly retained its generic anti-enumeration response, but no test-inbox
+  delivery occurred.
+- Added the documented Twilio test sender to staging after reproducing the
+  missing-sender failure. The request then reached Twilio and returned
+  authentication error 20003, proving that the configured test Account
+  SID/auth token is invalid. No SMS was sent.
+- Stripe checkout reached Stripe in test configuration and returned HTTP 401
+  for an invalid API key. No Checkout Session, subscription or charge was
+  created, and no production webhook was touched.
+- Reproduced three Stripe lifecycle defects in tests before editing: duplicate
+  event IDs were processed twice, invoice failure/recovery events were ignored,
+  and cancellation changed only the local database. Added a persistent webhook
+  event ledger (Flyway V5), payment failure/recovery state transitions and
+  provider-first cancellation so local state is not committed after a provider
+  failure.
+- With James's separate approval, created temporary recovery database
+  `one-to-one-phase4-recovery-20260728`
+  (`dpg-d9kgb35aeets73aupr70-a`) at the approved Basic-256mb/1 GB
+  **US$6.30/month prorated-by-the-second** configuration. The isolated restore
+  reached available, reported successful schema creation and Flyway V1–V4,
+  122 base tables, one expected synthetic user and one profile-upload
+  reference. No `public` row query was made.
+- Deleted the exact temporary recovery database immediately after validation
+  and confirmed that only the original source database remains available,
+  stopping further recovery-instance charges.
+- Final verification passed: `npm run build:css`, `bootJar`, **520/520 Gradle
+  tests** across 131 suites, **88/88 responsive**, **22/22 Axe**, **6/6
+  throttled** and **6/6 Lighthouse** cases with zero findings. Latest
+  Lighthouse scores are public **93/100/100/100**, login
+  **98/100/100/100**, client **83/100/100**, trainer **91/100/100**, gym
+  **89/100/100** and admin **94/100/100**.
+- Production remains **NO-GO** until valid non-delivering SMTP sandbox,
+  Twilio test and Stripe test-mode credentials are installed and their live
+  staging lifecycles pass.
+
 ## Important implementation files
 
 ### Project evidence and handoff
@@ -390,28 +427,26 @@ node --check src/main/resources/static/js/dashboard/client-dashboard-page.js
 
 ## Next implementation step
 
-Continue **Phase 4 — sandbox provider and recovery clearance**.
+Continue **Phase 4 — final sandbox provider clearance**.
 
 The isolated Render service, schema boundary, clean and forward migrations,
-durable upload, logical export, application rollback and final local automated
-gates are complete. The next priority is sandbox provider proof, followed by an
-explicitly approved isolated database restore.
+durable upload, logical export, application rollback, isolated restore and
+final local automated gates are complete. Only provider proof remains at P0.
 
 Priority order:
 
-1. Securely add a non-delivering SMTP test inbox to staging and prove verification, password recovery, link origin and controlled failure.
-2. Securely add Twilio test credentials and magic numbers; prove success/failure, OTP expiry, attempt limits and single use.
-3. Securely add Stripe test-mode credentials and a new staging-only webhook; prove checkout, subscription, failure, cancellation, replay and duplicate behaviour.
-4. Obtain explicit approval for a temporary billable PostgreSQL recovery instance, restore into it, validate the staging schema and delete or suspend it after evidence is retained.
-5. Resolve readiness monitoring, provider observability, scheduler ownership, sessions/rate limiting and privileged audit ownership.
-6. Rerun the complete **513-test** baseline and `npm run qa:release` against the final provider-enabled staging release candidate.
+1. Replace the invalid staging SMTP host/credentials with a non-delivering test inbox and prove verification, password recovery, link origin and controlled failure.
+2. Replace the invalid Twilio test Account SID/auth token; keep the documented test sender and prove magic-number success/failure, OTP expiry, attempt limits and single use.
+3. Replace the invalid Stripe key with a valid `sk_test_...` key and create a staging-only test webhook secret; prove checkout, subscription, failure, retry, provider-first cancellation, replay and duplicate behaviour.
+4. Resolve readiness monitoring, provider observability, scheduler ownership, sessions/rate limiting and privileged audit ownership.
+5. Rerun the complete **520-test** baseline and `npm run qa:release` against the final provider-enabled staging release candidate.
 
 ## Phase 4 gates still required
 
 - Stripe test-mode payment completion, renewal, cancellation, failure, retry and duplicate webhook delivery.
 - External SMTP/Twilio sandbox verification and password-recovery delivery.
 - Remaining upload-boundary acceptance for chat, merchandise and workout video, including deletion and explicit multipart limits.
-- Isolated PostgreSQL restore proof; clean/forward migrations, logical export and application rollback already pass.
+- Deploy and validate Flyway V5 on staging; the isolated V1–V4 recovery proof, logical export and application rollback pass.
 - Health monitoring, provider observability, privileged audit and operational ownership.
 
 ## Rules for future updates to this file

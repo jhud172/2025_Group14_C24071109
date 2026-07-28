@@ -132,6 +132,60 @@ public class StripePaymentProviderService implements PaymentProviderService {
         }
     }
 
+    @Override
+    public PaymentSubscriptionUpdate updateSubscriptionCancellation(String subscriptionId, boolean cancelAtPeriodEnd) {
+        ensureConfigured();
+        if (subscriptionId == null || subscriptionId.isBlank()) {
+            return new PaymentSubscriptionUpdate(false, cancelAtPeriodEnd, null, "Missing subscription id.");
+        }
+        if (isSimulationMode() || subscriptionId.startsWith("sim-")) {
+            return new PaymentSubscriptionUpdate(
+                    true,
+                    cancelAtPeriodEnd,
+                    null,
+                    "Simulated subscription updated.");
+        }
+
+        Request request = new Request.Builder()
+                .url(STRIPE_API_BASE + "/subscriptions/" + subscriptionId.trim())
+                .post(new FormBody.Builder()
+                        .add("cancel_at_period_end", String.valueOf(cancelAtPeriodEnd))
+                        .build())
+                .addHeader("Authorization", "Bearer " + normalizedSecretKey())
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            String body = response.body() != null ? response.body().string() : "{}";
+            if (!response.isSuccessful()) {
+                log.warn("Stripe subscription cancellation update failed with status {} body={}", response.code(), body);
+                return new PaymentSubscriptionUpdate(
+                        false,
+                        cancelAtPeriodEnd,
+                        null,
+                        "Subscription could not be updated with Stripe.");
+            }
+
+            JsonNode subscription = mapper.readTree(body);
+            boolean providerCancelAtPeriodEnd = subscription.path("cancel_at_period_end").asBoolean(cancelAtPeriodEnd);
+            long epochSeconds = subscription.path("current_period_end").asLong(0L);
+            Instant periodEnd = epochSeconds > 0L ? Instant.ofEpochSecond(epochSeconds) : null;
+            return new PaymentSubscriptionUpdate(
+                    true,
+                    providerCancelAtPeriodEnd,
+                    periodEnd,
+                    providerCancelAtPeriodEnd
+                            ? "Subscription will cancel at the end of the billing period."
+                            : "Subscription cancellation was reversed.");
+        } catch (IOException e) {
+            log.warn("Stripe subscription cancellation update failed", e);
+            return new PaymentSubscriptionUpdate(
+                    false,
+                    cancelAtPeriodEnd,
+                    null,
+                    "Subscription could not be updated with Stripe.");
+        }
+    }
+
     private Instant fetchCurrentPeriodEnd(String subscriptionId) throws IOException {
         Request request = new Request.Builder()
                 .url(STRIPE_API_BASE + "/subscriptions/" + subscriptionId)

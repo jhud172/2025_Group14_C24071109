@@ -27,6 +27,7 @@ public class StripeWebhookService {
     private final ObjectMapper mapper = new ObjectMapper();
     private final PlatformSubscriptionService platformSubscriptionService;
     private final PaymentProviderService paymentProviderService;
+    private final StripeWebhookEventStore eventStore;
     private final Clock clock;
 
     @Value("${app.payments.stripe.webhook-secret:}")
@@ -34,9 +35,11 @@ public class StripeWebhookService {
 
     public StripeWebhookService(PlatformSubscriptionService platformSubscriptionService,
                                 PaymentProviderService paymentProviderService,
+                                StripeWebhookEventStore eventStore,
                                 Clock clock) {
         this.platformSubscriptionService = platformSubscriptionService;
         this.paymentProviderService = paymentProviderService;
+        this.eventStore = eventStore;
         this.clock = clock;
     }
 
@@ -45,7 +48,7 @@ public class StripeWebhookService {
         return !normalized.isBlank() && !"false".equalsIgnoreCase(normalized);
     }
 
-    public StripeWebhookHandlingResult handleWebhook(String payload, String signatureHeader) {
+    public synchronized StripeWebhookHandlingResult handleWebhook(String payload, String signatureHeader) {
         if (!isConfigured()) {
             return new StripeWebhookHandlingResult(false, "Stripe webhook secret is not configured.");
         }
@@ -55,15 +58,25 @@ public class StripeWebhookService {
 
         try {
             JsonNode root = mapper.readTree(payload == null ? "{}" : payload);
+            String eventId = root.path("id").asText("");
             String type = root.path("type").asText("");
+            if (!eventId.isBlank() && eventStore.hasProcessed(eventId)) {
+                return new StripeWebhookHandlingResult(true, "Duplicate Stripe event ignored.");
+            }
             JsonNode object = root.path("data").path("object");
 
-            return switch (type) {
+            StripeWebhookHandlingResult result = switch (type) {
                 case "checkout.session.completed" -> handleCheckoutSessionCompleted(object);
                 case "customer.subscription.updated" -> handleSubscriptionUpdated(object);
                 case "customer.subscription.deleted" -> handleSubscriptionDeleted(object);
+                case "invoice.payment_failed" -> handleInvoicePaymentFailed(object);
+                case "invoice.payment_succeeded" -> handleInvoicePaymentSucceeded(object);
                 default -> new StripeWebhookHandlingResult(true, "Ignored event type: " + type);
             };
+            if (result.accepted() && !eventId.isBlank()) {
+                eventStore.recordProcessed(eventId, type);
+            }
+            return result;
         } catch (Exception e) {
             log.warn("Stripe webhook handling failed", e);
             return new StripeWebhookHandlingResult(false, "Webhook payload could not be processed.");
@@ -114,6 +127,32 @@ public class StripeWebhookService {
         Instant currentPeriodEnd = parseEpochSeconds(object.path("current_period_end").asLong(0L));
         platformSubscriptionService.cancelByProviderSubscriptionId(subscriptionId, currentPeriodEnd);
         return new StripeWebhookHandlingResult(true, "Platform subscription cancellation applied.");
+    }
+
+    private StripeWebhookHandlingResult handleInvoicePaymentFailed(JsonNode object) {
+        String subscriptionId = invoiceSubscriptionId(object);
+        if (subscriptionId.isBlank()) {
+            return new StripeWebhookHandlingResult(false, "Stripe invoice subscription id is missing.");
+        }
+        platformSubscriptionService.markPaymentFailed(subscriptionId);
+        return new StripeWebhookHandlingResult(true, "Platform subscription marked past due.");
+    }
+
+    private StripeWebhookHandlingResult handleInvoicePaymentSucceeded(JsonNode object) {
+        String subscriptionId = invoiceSubscriptionId(object);
+        if (subscriptionId.isBlank()) {
+            return new StripeWebhookHandlingResult(false, "Stripe invoice subscription id is missing.");
+        }
+        platformSubscriptionService.markPaymentRecovered(subscriptionId);
+        return new StripeWebhookHandlingResult(true, "Platform subscription payment recovery applied.");
+    }
+
+    private String invoiceSubscriptionId(JsonNode object) {
+        String direct = object.path("subscription").asText("");
+        if (!direct.isBlank()) {
+            return direct;
+        }
+        return object.path("parent").path("subscription_details").path("subscription").asText("");
     }
 
     private boolean verifySignature(String payload, String signatureHeader) {

@@ -24,6 +24,8 @@ class ProductionReadinessContractTest {
                 RESOURCES.resolve("db/migration/postgresql/V3__align_health_record_numeric_types.sql");
         Path savedPaymentMigration =
                 RESOURCES.resolve("db/migration/postgresql/V4__align_saved_payment_last_four_type.sql");
+        Path stripeWebhookLedgerMigration =
+                RESOURCES.resolve("db/migration/postgresql/V5__add_stripe_webhook_event_ledger.sql");
 
         assertThat(renderProperties)
                 .contains("spring.sql.init.mode=never")
@@ -54,6 +56,11 @@ class ProductionReadinessContractTest {
         assertThat(Files.readString(savedPaymentMigration))
                 .contains("ALTER TABLE saved_payment_methods")
                 .contains("ALTER COLUMN last_four TYPE VARCHAR(4)");
+        assertThat(stripeWebhookLedgerMigration).isRegularFile();
+        assertThat(Files.readString(stripeWebhookLedgerMigration))
+                .contains("CREATE TABLE IF NOT EXISTS stripe_webhook_events")
+                .contains("event_id")
+                .contains("PRIMARY KEY");
         assertThat(RESOURCES.resolve("render-data.sql")).doesNotExist();
     }
 

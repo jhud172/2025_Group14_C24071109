@@ -14,4 +14,6 @@ public interface PaymentProviderService {
     PaymentCheckoutSession createCheckoutSession(User user, PlatformPlan plan, String successUrl, String cancelUrl);
 
     PaymentSubscriptionVerification verifyCheckoutSession(String sessionId);
+
+    PaymentSubscriptionUpdate updateSubscriptionCancellation(String subscriptionId, boolean cancelAtPeriodEnd);
 }
