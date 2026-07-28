@@ -159,9 +159,18 @@ class RoleAwareSharedSurfaceContractTest {
         String goals = read("src/main/resources/templates/client-views/goals/index.html");
         String goalsScript = read("src/main/resources/static/js/goals/goal-pages.js");
 
-        assertThat(month).contains("<h1 class=\"sr-only\">Calendar month view</h1>");
+        assertThat(month)
+                .contains("<h1 class=\"sr-only\">Calendar month view</h1>")
+                .contains("class=\"calendar-singular-list\"")
+                .contains("tabindex=\"0\"")
+                .contains("id=\"sticker-tooltip\"")
+                .contains("aria-hidden=\"true\" hidden")
+                .contains("/js/calendar/month.js(v=${assetVersion})");
         assertThat(week)
                 .contains("<h1 class=\"sr-only\">Calendar week view</h1>")
+                .contains("class=\"calendar-singular-list\"")
+                .contains("tabindex=\"0\"")
+                .contains("/js/calendar/week.js(v=${assetVersion})")
                 .contains("/js/calendar/calendar-ux.js(v=${assetVersion})");
         assertThat(drawer)
                 .contains("role=\"dialog\" aria-modal=\"true\"")

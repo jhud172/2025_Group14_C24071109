@@ -123,24 +123,26 @@
             });
         };
 
-        trigger.addEventListener("click", (event) => {
-            if (event.target instanceof Element && event.target.closest(INTERACTIVE_SELECTOR)) {
-                return;
-            }
-            event.preventDefault();
-            togglePreservingScroll();
-        });
-
-        trigger.addEventListener("keydown", (event) => {
-            if (event.key !== "Enter" && event.key !== " ") {
-                if (event.key === "Escape") {
-                    setPreviewOpen(root, false);
+        if (!trigger.matches("[data-profile-preview-toggle]")) {
+            trigger.addEventListener("click", (event) => {
+                if (event.target instanceof Element && event.target.closest(INTERACTIVE_SELECTOR)) {
+                    return;
                 }
-                return;
-            }
-            event.preventDefault();
-            togglePreservingScroll();
-        });
+                event.preventDefault();
+                togglePreservingScroll();
+            });
+
+            trigger.addEventListener("keydown", (event) => {
+                if (event.key !== "Enter" && event.key !== " ") {
+                    if (event.key === "Escape") {
+                        setPreviewOpen(root, false);
+                    }
+                    return;
+                }
+                event.preventDefault();
+                togglePreservingScroll();
+            });
+        }
 
         root.querySelectorAll("[data-profile-preview-toggle]").forEach((toggleButton) => {
             if (!(toggleButton instanceof HTMLElement)) {

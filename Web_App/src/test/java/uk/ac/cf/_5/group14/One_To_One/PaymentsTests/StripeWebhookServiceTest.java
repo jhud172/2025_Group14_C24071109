@@ -14,6 +14,7 @@ import uk.ac.cf._5.group14.One_To_One.PlatformBilling.PlatformSubscriptionServic
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +32,10 @@ class StripeWebhookServiceTest {
 
     @Test
     void handleWebhook_activatesSubscriptionOnCompletedCheckoutSession() throws Exception {
-        StripeWebhookService service = new StripeWebhookService(platformSubscriptionService, paymentProviderService);
+        StripeWebhookService service = new StripeWebhookService(
+                platformSubscriptionService,
+                paymentProviderService,
+                Clock.systemUTC());
         ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
 
         String payload = """
@@ -54,7 +58,7 @@ class StripeWebhookServiceTest {
         when(paymentProviderService.verifyCheckoutSession("cs_test_123"))
                 .thenReturn(new PaymentSubscriptionVerification(true, "Stripe", "cus_1", "sub_1", Instant.parse("2026-04-27T00:00:00Z"), "Subscription activated."));
 
-        StripeWebhookHandlingResult result = service.handleWebhook(payload, signature("whsec_test", payload, "1711490400"));
+        StripeWebhookHandlingResult result = service.handleWebhook(payload, signature("whsec_test", payload, currentTimestamp()));
 
         assertThat(result.accepted()).isTrue();
         verify(platformSubscriptionService).activateSubscription(
@@ -67,7 +71,10 @@ class StripeWebhookServiceTest {
 
     @Test
     void handleWebhook_syncsExistingSubscriptionFromProviderUpdate() throws Exception {
-        StripeWebhookService service = new StripeWebhookService(platformSubscriptionService, paymentProviderService);
+        StripeWebhookService service = new StripeWebhookService(
+                platformSubscriptionService,
+                paymentProviderService,
+                Clock.systemUTC());
         ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
 
         String payload = """
@@ -84,7 +91,7 @@ class StripeWebhookServiceTest {
                 }
                 """;
 
-        StripeWebhookHandlingResult result = service.handleWebhook(payload, signature("whsec_test", payload, "1711490400"));
+        StripeWebhookHandlingResult result = service.handleWebhook(payload, signature("whsec_test", payload, currentTimestamp()));
 
         assertThat(result.accepted()).isTrue();
         verify(platformSubscriptionService).syncProviderSubscription(
@@ -96,13 +103,38 @@ class StripeWebhookServiceTest {
 
     @Test
     void handleWebhook_rejectsInvalidSignature() {
-        StripeWebhookService service = new StripeWebhookService(platformSubscriptionService, paymentProviderService);
+        StripeWebhookService service = new StripeWebhookService(
+                platformSubscriptionService,
+                paymentProviderService,
+                Clock.systemUTC());
         ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
 
         StripeWebhookHandlingResult result = service.handleWebhook("{\"type\":\"checkout.session.completed\"}", "t=1,v1=invalid");
 
         assertThat(result.accepted()).isFalse();
         assertThat(result.message()).contains("signature");
+    }
+
+    @Test
+    void handleWebhook_rejectsAValidButStaleSignature() throws Exception {
+        StripeWebhookService service = new StripeWebhookService(
+                platformSubscriptionService,
+                paymentProviderService,
+                Clock.systemUTC());
+        ReflectionTestUtils.setField(service, "webhookSecret", "whsec_test");
+        String payload = "{\"type\":\"sandbox.replay\"}";
+        String staleTimestamp = String.valueOf(Instant.now().minusSeconds(301).getEpochSecond());
+
+        StripeWebhookHandlingResult result = service.handleWebhook(
+                payload,
+                signature("whsec_test", payload, staleTimestamp));
+
+        assertThat(result.accepted()).isFalse();
+        assertThat(result.message()).contains("signature");
+    }
+
+    private String currentTimestamp() {
+        return String.valueOf(Instant.now().getEpochSecond());
     }
 
     private String signature(String secret, String payload, String timestamp) throws Exception {

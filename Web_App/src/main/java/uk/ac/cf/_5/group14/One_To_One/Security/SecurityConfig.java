@@ -123,7 +123,7 @@ public class SecurityConfig {
                             // Trainers area: keep role requirements
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
-                            .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
+                            .requestMatchers("/super-admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/client/trainers", "/client/trainers/**").hasRole("CLIENT")
                             .requestMatchers("/inbox", "/inbox/**", "/messages/**", "/client/messages", "/client/messages/**").authenticated()
                             .requestMatchers("/chat", "/chat/**", "/chatv2/**").authenticated()
@@ -154,7 +154,7 @@ public class SecurityConfig {
                             .requestMatchers("/confirm-logout").authenticated()
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
-                            .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
+                            .requestMatchers("/super-admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
                             .requestMatchers("/client/**").hasRole("CLIENT")
                             .requestMatchers("/trainers/**").hasRole("CLIENT")
                             .requestMatchers("/admin/gym-applications", "/admin/gym-applications/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")
@@ -181,7 +181,9 @@ public class SecurityConfig {
                     .failureHandler(failureHandler)
                     .successHandler(successHandler));
 
-            http.csrf(csrf -> csrf.ignoringRequestMatchers("/api/mobile/**"));
+            http.csrf(csrf -> csrf.ignoringRequestMatchers(
+                    "/api/mobile/**",
+                    "/pricing/webhook/stripe"));
 
             if (clientRegistrationRepositoryProvider.getIfAvailable() != null && socialAuthAvailabilityService.hasEnabledProviders()) {
                 http.oauth2Login(oauth -> oauth

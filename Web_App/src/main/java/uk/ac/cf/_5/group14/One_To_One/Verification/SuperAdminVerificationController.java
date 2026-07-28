@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 @Controller
 @RequestMapping("/super-admin/verification")
-@PreAuthorize("hasRole('SUPER_ADMIN')")
+@PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'SUPER_ADMIN')")
 @RequiredArgsConstructor
 public class SuperAdminVerificationController {
     

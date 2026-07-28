@@ -20,7 +20,7 @@ import uk.ac.cf._5.group14.One_To_One.Users.User;
 @Service
 @Primary
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "spring.mail", name = "host")
+@ConditionalOnProperty(prefix = "app.email", name = "provider", havingValue = "smtp")
 public class SmtpEmailService implements EmailService {
 
     private static final DateTimeFormatter DATE_FORMATTER =

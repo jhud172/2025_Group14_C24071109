@@ -164,7 +164,11 @@
                                             <span class="calendar-empty-state-icon"></span>
                                         </div>
                                         <!-- Detailed mode (COMBINED_LIST) -->
-                                        <div th:if="${!grouped}" class="calendar-singular-list">
+                                        <div th:if="${!grouped}"
+                                             class="calendar-singular-list"
+                                             role="group"
+                                             tabindex="0"
+                                             th:attr="aria-label=${'Scheduled items for ' + dayModel.isoDate}">
                                                <div th:each="task,iter : ${tasks}"
                                                    th:if="${iter.index < 4 && task != null}"
                                                  class="calendar-item"
@@ -290,13 +294,13 @@
     </div>
 
     <!-- Sticker tooltip (populated by JS) -->
-    <div id="sticker-tooltip" class="sticker-tooltip" role="tooltip" aria-live="polite"></div>
+    <div id="sticker-tooltip" class="sticker-tooltip" role="tooltip" aria-live="polite" aria-hidden="true" hidden></div>
 
     <!-- Schedule Drawer Fragment -->
     <div th:replace="~{shared-views/calendar/fragments/schedule-drawer-month :: scheduleDrawer}"></div>
 
 <div th:fragment="pageScripts">
-    <script src="/js/calendar/month.js"></script>
+    <script th:src="@{/js/calendar/month.js(v=${assetVersion})}"></script>
     <script th:src="@{/js/calendar/calendar-ux.js(v=${assetVersion})}"></script>
 </div>
 

@@ -1,10 +1,10 @@
 # One To One — project handoff and continuation point
 
-**Last updated:** 19 July 2026
+**Last updated:** 28 July 2026
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
 **Current branch:** `main`  
-**Current phase:** Phase 2 complete; Phase 3 browser/automated and remote touch-emulation release QA complete, with the wider audible screen-reader journey and physical-device confirmation remaining
+**Current phase:** Phase 4 local P0 hardening complete; explicit cost approval is required before isolated staging provisioning
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
@@ -26,7 +26,7 @@ Do not clone a fresh copy on the new device and assume this work will be present
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Verify the CSS build and Gradle tests, start the application at localhost:8081, then resume the remaining supervised Phase 3 audible screen-reader journey and physical-device release gate documented in the next step. The login validation announcement already has a human-confirmed pass; do not repeat completed browser or remote touch-emulation work unless a regression is reproduced.
+> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 from the NO-GO blockers: create a strictly isolated staging service and fresh non-production PostgreSQL database, remove the production demo-account seed, implement durable uploads, and configure only sandbox/test provider credentials. Do not make a charge, refund, production-data change or production webhook change without my explicit approval. Reproduce failures before editing and rerun the full Gradle and release-gate suites after confirmed repairs.
 
 ## Current verified status
 
@@ -42,9 +42,12 @@ Use this prompt after opening the repository on the new device:
 - Phase 3 now covers the public routes, login/sign-up presentation and the client, trainer, gym-admin and platform-admin dashboard baselines for keyboard/focus behaviour, reduced motion and 200% reflow.
 - Phase 3 now also covers calendar, inbox, workouts, goals, support and platform-admin operations for keyboard/focus behaviour, overlay trapping/return, accessible names, live feedback, reduced motion, 200% reflow and an initial 400% CSS-viewport equivalent.
 - Phase 3 browser release QA now also covers Chromium's accessibility tree, native 200%/400% zoom on representative login/client journeys, 400%-equivalent cross-role reflow, Windows forced colours, keyboard-only validation recovery and 44 × 44 px targets on critical controls.
-- Latest full Gradle result: **496 tests passed, 0 failed, 0 skipped**.
+- James has confirmed that the Phase 3 human release gate passed, closing the remaining audible screen-reader and real-touch-device checks.
+- The final automated release gate covers public, login, client, trainer, gym and admin journeys: **88 responsive cases passed**, **22 Axe cases passed with zero serious/critical violations**, six cold-cache Slow 4G/4× CPU journeys passed, and six Lighthouse journeys passed.
+- Final Lighthouse scores are: public **97/100/100/100**, login **98/100/100/100**, client **86/100/100**, trainer **92/100/100**, gym **92/100/100** and admin **94/100/100** for performance/accessibility/best practices, with SEO included for public/login.
+- Latest full Gradle result: **508 tests passed, 0 failed, 0 skipped** across 127 suites.
 - Latest local runtime proof: **HTTP 200** at `http://localhost:8081`, active profile `local`, datasource `jdbc:h2:mem:localdb`.
-- Latest CSS/JS version token: **`20260718p20`**.
+- Latest CSS/JS version token: **`20260727p23`**.
 - Core CSS is **212,420 bytes / 207.4 KiB**, approximately 83% smaller than the previous monolithic core.
 - Core CSS transfers at approximately **34 KiB with gzip**.
 - Static CSS caching, gzip compression, `Last-Modified` and `304 Not Modified` revalidation were verified.
@@ -225,11 +228,57 @@ Keep these already implemented homepage and Charlie requirements intact:
 - Restarted the local H2 application after the previous process ended overnight. HTTP 200 and **`20260718p20`** are again live on port 8081.
 - Phase 3 remains **not formally closed**. The next human session should resume with either the skipped main-landmark announcement or the first physical login reflow/touch check, depending on which testing environment is available.
 
+### Phase 3 — supervised gate resumed locally
+
+- Resumed on **27 July 2026** from the human-confirmed login-validation result. Narrator's visible scan cursor reached the page landmark and the Home H1 in the expected order, but this environment cannot hear or assess the spoken output, so those observations are not recorded as audible passes.
+- Verified Charlie's Escape path closes the panel and restores focus to its `Open Charlie` trigger. The onboarding tour visibly trapped Tab focus between its actions; a password-manager extension interfered with the post-close browser focus observation, so extension focus was not treated as an application defect.
+- Reproduced two calendar live-announcement defects in both month and week views: `Jump to today` announced `Jumped to selected date`, and temporarily disabling the jump controls dropped keyboard focus onto the document body.
+- Repaired the two calendar controllers so the polite live region now announces `Jumped to today` and focus returns to the activated jump control. A fresh Chromium context verified the final month and week results.
+- Reproduced stale delivery of the repaired calendar controllers because their script tags lacked the shared asset token. Month and week now use the versioned script contract, covered by `RoleAwareSharedSurfaceContractTest`, and the shared token is **`20260727p22`**.
+- Windows reports the NVIDIA GeForce RTX 3070 Ti and Intel UHD Graphics 770 as healthy. No HID touchscreen/digitiser is exposed, Android device tooling is unavailable, and NVDA is not installed; no physical touch or NVDA pass is claimed.
+- JavaScript syntax checks passed and the complete Gradle suite finished with **497 tests: 497 passed, 0 failed, 0 skipped**. The local app remains available on port 8081 with the `local` profile and H2.
+- A supplementary all-role standards matrix generated a partial report before exceeding its ten-minute runner limit. It was stopped and is not counted as a pass or failure; the previously completed cross-role browser evidence remains the baseline.
+- Phase 3 remains **not formally closed**. James must still listen to the remaining Narrator announcements and run the representative client, trainer, gym and admin journeys on a physical touchscreen device.
+
+### Phase 3 — performance, accessibility and responsive release gate complete
+
+- James confirmed that the preceding human release gate passed; Phase 3 is now formally complete.
+- Added `tools/qa/playwright-release-gate.mjs` and `npm run qa:release` for repeatable responsive, Axe, cold-cache throttled-performance and Lighthouse checks across representative public, login, client, trainer, gym and admin journeys.
+- Repaired only reproduced defects: invalid disclosure ARIA, focusable content inside hidden dashboard panels, incomplete tab semantics, an empty tooltip, scroll-region focus, two sub-AA emerald treatments, a distorted mobile logo, automatic geolocation prompting and segmented-code paste cancellation.
+- Reduced the two demo profile assets responsible for the cold-load regression from **3.50 MB to 133 KB** and **3.44 MB to 128 KB**; the shared nav logo fell from **118 KB to 24 KB**.
+- The final cold-cache Slow 4G/4× CPU medians are FCP **868–1,228 ms**, LCP **1,100–1,948 ms**, load **1,065–2,315 ms** and CLS **0–0.001**. Gym load fell from **18.1 s to 1.86 s**.
+- Final automated results: **88/88 responsive cases**, **22/22 Axe cases**, **6/6 throttled journeys**, **6/6 Lighthouse journeys** and **499/499 Gradle tests** passed. The app remains live on port 8081 using local H2.
+
+### Phase 4 — inventory and isolated transactional integration
+
+- Completed a read-only inventory of direct Java/npm dependencies, deployment configuration, environment variables, provider endpoints, callback/webhook routes, scheduled jobs, uploads, storage, sessions and production data stores. The durable evidence is in `PHASE4_PRODUCTION_READINESS.md`.
+- Ran all transaction checks in isolated local JAR processes with disposable H2. Stripe used the application simulation path, email was disabled/no-op, SMS was console-only and AI was disabled. No charge, refund, real provider message, production upload or production-data mutation occurred.
+- Completed representative client simulated-merch, trainer conversation/message, gym trainer-invite and platform-admin trainer-approval journeys.
+- Reproduced and repaired five defects: webhook CSRF interception, unlimited signed-webhook age, a trainer Message GET/POST mismatch, platform-admin denial from the trainer-verification queue, and empty-host SMTP selection.
+- Added integration/contract coverage for each repaired boundary. The full suite now reports **505 tests passed, 0 failed, 0 skipped** across 126 suites.
+- Rebuilt production CSS and ran the final-code release gate against an isolated server: **88 responsive cases**, **22 Axe cases**, **6 Slow 4G/4× CPU journeys** and **6 Lighthouse journeys** passed with zero findings.
+- Final Phase 4 Lighthouse scores are public **94/100/100/100**, login **98/100/100/100**, client **85/100/100**, trainer **90/100/100**, gym **91/100/100** and admin **93/100/100** for performance/accessibility/best practices, with SEO included for public/login.
+- The production decision is **NO-GO**. P0 blockers are the known shared-password production demo seed, ephemeral uploads, absence of an isolated staging/provider boundary, unproved real Stripe test-mode and email/SMS lifecycles, and missing migration/backup/restore/rollback evidence.
+
+### Phase 4 — local P0 hardening and staging design
+
+- Reproduced the Render profile's automatic `render-data.sql` execution and removed the production demo seed, including the shared-password platform-admin account.
+- Added Flyway's PostgreSQL module and `V1__baseline_schema.sql`; Render now disables Spring SQL initialisation, validates the schema through JPA and uses a versioned migration history. Local/test H2 explicitly keeps Flyway disabled.
+- Reproduced the mismatch between configurable upload directories and the fixed `file:uploads/` resource root. Each public upload route now serves from its matching configured storage directory.
+- Added the unapplied `render-staging.yaml` proposal and `Web_App/docs/phase4-staging-runbook.md`. The design uses a dedicated staging Hobby workspace, Starter web service, fresh Basic-256mb PostgreSQL 17 database with public database access blocked, and a 1 GB persistent upload disk. Automatic deploys and all external providers are disabled initially.
+- Inspected current Render pricing. The minimum durable staging design is approximately **US$13.55/month**: US$7 web compute, approximately US$6 database compute, US$0.30 database storage and US$0.25 persistent-disk storage, before usage overages. No resource was created.
+- The first full run reproduced one Flyway/H2 test-profile collision. Explicit test-profile isolation repaired the root cause; the final result is **508 passed, 0 failed, 0 skipped** across 127 suites.
+- Production CSS rebuilt successfully. The final local release gate on port 8094 passed **88 responsive cases**, **22 Axe cases**, **6 throttled-performance journeys** and **6 Lighthouse journeys** with zero findings.
+- No Render workspace/service/database/disk, production data, real charge, real message, provider credential or webhook was accessed or changed. The production decision remains **NO-GO** until James approves staging cost and the external provider, upload persistence, PostgreSQL migration and recovery drills pass there.
+
 ## Important implementation files
 
 ### Project evidence and handoff
 
 - `PROJECT_HANDOFF.md` — this continuation point.
+- `PHASE4_PRODUCTION_READINESS.md` — external-boundary inventory, transactional evidence, launch blockers and go/no-go checklist.
+- `render-staging.yaml` — unapplied isolated staging Blueprint proposal.
+- `Web_App/docs/phase4-staging-runbook.md` — approval boundary, provider test plan and recovery/rollback procedure.
 - `ONE_TO_ONE_UX_AUDIT.md` — complete audit, priorities and phase plan.
 - `Web_App/AGENTS.md` — repository-specific working instructions.
 
@@ -248,6 +297,7 @@ Keep these already implemented homepage and Charlie requirements intact:
 - `Web_App/src/main/resources/static/css/entries/`
 - `Web_App/src/main/resources/static/css/bundles/`
 - `Web_App/src/main/resources/static/css/app.css`
+- `Web_App/tools/qa/playwright-release-gate.mjs`
 
 ### Shell ownership and fixed surfaces
 
@@ -304,6 +354,7 @@ npm ci
 npm run build:css
 .\gradlew.bat test --no-daemon
 .\gradlew.bat bootRun
+npm run qa:release
 ```
 
 Then open:
@@ -324,35 +375,26 @@ node --check src/main/resources/static/js/dashboard/client-dashboard-page.js
 
 ## Next implementation step
 
-Continue **Phase 3 — polish and verification**.
+Continue **Phase 4 — staging and launch-blocker clearance**.
 
-The immediate next workstream is the remaining human portion of the final Phase 3 release gate: continue audible screen-reader output after the already-passed login validation check, then confirm representative journeys on a physical touch device. Repository, automated, desktop and remote touch-emulation evidence is complete.
+The read-only inventory, isolated local transactions, confirmed repairs and automated release gates are complete. The next priority is to establish the safe external boundary needed for real integration proof.
 
 Priority order:
 
-1. **Complete:** make authentication and onboarding role-aware, including field visibility, grouped errors and destination routing.
-2. **Complete for the four role dashboards:** standardise typography, measured contrast, action hierarchy and useful empty states.
-3. **Complete:** make shared inbox, support and tool copy/actions/empty states match the active role.
-4. **Complete:** shorten long public pages and standardise section transitions using the existing motion tokens.
-5. **Complete baseline:** keyboard order, focus return, reduced motion and 200% reflow verification on public routes.
-6. **Complete baseline:** authentication and all four role dashboards, including repaired login tabs, tour focus visibility and client reveal availability.
-7. **Complete baseline:** calendar, inbox, workouts, goals, support and platform-admin operational tables, including focus containment/return, accessible naming, reduced motion and 200%/initial 400% reflow equivalents.
-8. **Complete for browser/automated QA:** Chromium accessibility-tree review, representative browser-native 200%/400% zoom, cross-role 400%-equivalent reflow, Windows forced colours, validation recovery and critical 44 × 44 px targets.
-9. **Remote/browser portion complete; human confirmation next:** continue Windows Narrator output (and NVDA if installed) from landmarks/headings after the passed login validation check, then confirm representative journeys on a physical touch device; repair only defects reproduced in that gate.
+1. Obtain James's explicit approval for the approximately **US$13.55/month** minimum staging cost.
+2. Create a dedicated staging Render workspace and apply the reviewed staging Blueprint there only.
+3. Prove the fresh PostgreSQL Flyway V1 result contains no demo users and that uploads survive a staging redeploy.
+4. Configure SMTP/Twilio/Stripe sandbox credentials only, then prove delivery, failures, retries and duplicate webhook handling.
+5. Complete logical backup/restore and application rollback. Obtain separate approval before any billable Render PITR recovery instance.
+6. Rerun the complete 508-test baseline and `npm run qa:release` against the final staging release candidate.
 
-Phase 2 exit condition is met: role and public surfaces now share the intended visual, action, recovery and motion language without reintroducing overlay collisions or broad public transitions.
+## Phase 4 gates still required
 
-## Remaining release QA
-
-These checks were not claimed as complete and remain scheduled for Phase 3:
-
-- Physical touch devices and GPU performance; Chrome, Edge and WebKit touch emulation is complete but is not a hardware pass.
-- Audible screen-reader output and whole-site reading order beyond the completed browser accessibility-tree evidence and human-confirmed login validation announcement.
-- Whole-site measured colour contrast outside the completed dashboard token set.
-- Browser-native zoom beyond the representative login/client checks and cross-role CSS-viewport reflow evidence.
-- Throttled CPU and network testing.
-- Supervised confirmation of spoken validation/live announcements; browser focus recovery and live-region semantics are complete.
-- Responsive regression at 390, 768, 1024, 1280, 1366, 1440, 1536 and 1920 px.
+- Stripe test-mode payment completion, renewal, cancellation, failure, retry and duplicate webhook delivery.
+- External SMTP/Twilio sandbox verification and password-recovery delivery.
+- Durable upload/storage limits, validation, redeploy recovery and deletion.
+- Production-like PostgreSQL migration, backup, restore and rollback proof.
+- Health monitoring, provider observability, privileged audit and operational ownership.
 
 ## Rules for future updates to this file
 

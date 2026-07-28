@@ -100,6 +100,13 @@ class RoleDashboardAccessTest {
     }
 
     @Test
+    void platformAdminRoleCanAccessVerificationQueue() throws Exception {
+        mockMvc.perform(get("/super-admin/verification/queue")
+                        .with(platformAdmin()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void superAdminRoleCanAccessVerificationQueue() throws Exception {
         mockMvc.perform(get("/super-admin/verification/queue")
                         .with(superAdmin()))

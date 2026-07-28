@@ -375,7 +375,6 @@
             });
 
             input.addEventListener("paste", (event) => {
-                event.preventDefault();
                 const pasted = fullSanitizer((event.clipboardData || window.clipboardData).getData("text"));
                 if (!pasted) {
                     return;
@@ -383,16 +382,18 @@
 
                 const sliceLength = inputs.length * 4;
                 const normalized = pasted.slice(0, sliceLength);
-                inputs.forEach((segmentInput, segmentIndex) => {
-                    segmentInput.value = normalized.slice(segmentIndex * 4, (segmentIndex + 1) * 4);
-                });
-                clearLoginValidation();
-                updateSegmentedCode(inputs, hiddenInput, sanitizer);
+                window.setTimeout(() => {
+                    inputs.forEach((segmentInput, segmentIndex) => {
+                        segmentInput.value = normalized.slice(segmentIndex * 4, (segmentIndex + 1) * 4);
+                    });
+                    clearLoginValidation();
+                    updateSegmentedCode(inputs, hiddenInput, sanitizer);
 
-                const lastFilledIndex = Math.min(Math.ceil(normalized.length / 4) - 1, inputs.length - 1);
-                if (lastFilledIndex >= 0) {
-                    inputs[lastFilledIndex].focus();
-                }
+                    const lastFilledIndex = Math.min(Math.ceil(normalized.length / 4) - 1, inputs.length - 1);
+                    if (lastFilledIndex >= 0) {
+                        inputs[lastFilledIndex].focus();
+                    }
+                }, 0);
             });
         });
     }

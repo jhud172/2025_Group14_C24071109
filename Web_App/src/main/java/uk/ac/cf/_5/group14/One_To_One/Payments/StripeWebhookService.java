@@ -13,6 +13,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,18 +22,22 @@ import java.util.Map;
 public class StripeWebhookService {
 
     private static final Logger log = LoggerFactory.getLogger(StripeWebhookService.class);
+    private static final long SIGNATURE_TOLERANCE_SECONDS = 300L;
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final PlatformSubscriptionService platformSubscriptionService;
     private final PaymentProviderService paymentProviderService;
+    private final Clock clock;
 
     @Value("${app.payments.stripe.webhook-secret:}")
     private String webhookSecret;
 
     public StripeWebhookService(PlatformSubscriptionService platformSubscriptionService,
-                                PaymentProviderService paymentProviderService) {
+                                PaymentProviderService paymentProviderService,
+                                Clock clock) {
         this.platformSubscriptionService = platformSubscriptionService;
         this.paymentProviderService = paymentProviderService;
+        this.clock = clock;
     }
 
     public boolean isConfigured() {
@@ -116,6 +121,19 @@ public class StripeWebhookService {
         String timestamp = values.get("t");
         String expectedSignature = values.get("v1");
         if (timestamp == null || expectedSignature == null) {
+            return false;
+        }
+
+        long timestampSeconds;
+        try {
+            timestampSeconds = Long.parseLong(timestamp);
+        } catch (NumberFormatException ex) {
+            return false;
+        }
+
+        long nowSeconds = Instant.now(clock).getEpochSecond();
+        if (timestampSeconds < nowSeconds - SIGNATURE_TOLERANCE_SECONDS
+                || timestampSeconds > nowSeconds + SIGNATURE_TOLERANCE_SECONDS) {
             return false;
         }
 

@@ -559,6 +559,9 @@
 
     async function runJumpAction(action) {
         if (jumpActionInProgress) return;
+        const focusedControl = jumpControls.includes(document.activeElement)
+            ? document.activeElement
+            : null;
         jumpActionInProgress = true;
         setJumpControlsDisabled(true);
         try {
@@ -569,6 +572,9 @@
         } finally {
             setJumpControlsDisabled(false);
             jumpActionInProgress = false;
+            if (focusedControl?.isConnected) {
+                focusedControl.focus();
+            }
         }
     }
 
@@ -653,7 +659,7 @@
         }) || null;
     }
 
-    async function jumpToDate(dateIso) {
+    async function jumpToDate(dateIso, successMessage = 'Jumped to selected date.') {
         const parsed = parseIsoDateInput(dateIso);
         if (!parsed) {
             setJumpStatus('Please enter a valid date.', 'error');
@@ -675,7 +681,7 @@
             setJumpStatus('No day card found for that date.', 'error');
             return;
         }
-        setJumpStatus('Jumped to selected date.', 'success');
+        setJumpStatus(successMessage, 'success');
     }
 
     async function jumpToNextWorkout() {
@@ -710,7 +716,7 @@
     }
 
     jumpTodayBtn?.addEventListener('click', () => {
-        runJumpAction(() => jumpToDate(toLocalIsoDate(new Date())));
+        runJumpAction(() => jumpToDate(toLocalIsoDate(new Date()), 'Jumped to today.'));
     });
 
     jumpDateBtn?.addEventListener('click', () => {
@@ -1360,6 +1366,7 @@
         const targetCount = document.getElementById('sticker-target-count');
         const tooltip = document.getElementById('sticker-tooltip');
         const insightsEl = document.getElementById('motivation-insights');
+        let activeTooltipBadge = null;
 
         if (!planningPanel || !stickerPanel || !stickerGrid) return;
 
@@ -1571,6 +1578,11 @@
         // ---- Tooltip logic ----
         function showTooltip(badge) {
             if (!tooltip) return;
+            if (activeTooltipBadge && activeTooltipBadge !== badge) {
+                activeTooltipBadge.removeAttribute('aria-describedby');
+            }
+            activeTooltipBadge = badge;
+            badge.setAttribute('aria-describedby', 'sticker-tooltip');
             const name = badge.dataset.stickerName || 'Workout';
             const date = badge.dataset.stickerDate || '';
             const formattedDate = date ? new Date(date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
@@ -1579,6 +1591,8 @@
                 (formattedDate ? '<div class="sticker-tooltip-meta">' + formattedDate + '</div>' : '') +
                 '<div class="sticker-tooltip-meta" style="margin-top:0.25rem">Workout completed \uD83D\uDCAA</div>';
 
+            tooltip.hidden = false;
+            tooltip.setAttribute('aria-hidden', 'false');
             const rect = badge.getBoundingClientRect();
             const tw = 220;
             let left = rect.right + 10;
@@ -1595,7 +1609,13 @@
         }
 
         function hideTooltip() {
-            if (tooltip) tooltip.classList.remove('visible');
+            activeTooltipBadge?.removeAttribute('aria-describedby');
+            activeTooltipBadge = null;
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+                tooltip.setAttribute('aria-hidden', 'true');
+                tooltip.hidden = true;
+            }
         }
 
         // ---- Event delegation for sticker grid ----
@@ -1606,6 +1626,13 @@
         stickerGrid.addEventListener('mouseout', function(e) {
             if (!e.target.closest('.sticker-badge[data-sticker-name]')) return;
             hideTooltip();
+        });
+        stickerGrid.addEventListener('focusin', function(e) {
+            const badge = e.target.closest('.sticker-badge[data-sticker-name]');
+            if (badge) showTooltip(badge);
+        });
+        stickerGrid.addEventListener('focusout', function(e) {
+            if (e.target.closest('.sticker-badge[data-sticker-name]')) hideTooltip();
         });
         // Touch/tap for mobile
         stickerGrid.addEventListener('click', function(e) {

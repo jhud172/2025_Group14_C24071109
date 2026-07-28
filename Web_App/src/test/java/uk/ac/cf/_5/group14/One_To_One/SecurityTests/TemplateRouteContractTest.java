@@ -65,6 +65,21 @@ class TemplateRouteContractTest {
     }
 
     @Test
+    void trainerClientMessageActionsUseTheInboxPostContract() throws IOException {
+        String clients = read("src/main/resources/templates/trainer-views/trainer/clients.html");
+        String activeClients = read("src/main/resources/templates/trainer-views/trainer/active-clients.html");
+
+        assertThat(clients)
+                .contains("th:action=\"@{/inbox/start/{id}(id=${link.clientUserId})}\"")
+                .contains("method=\"post\"")
+                .doesNotContain("th:href=\"@{/inbox/start/{id}(id=${link.clientUserId})}\"");
+        assertThat(activeClients)
+                .contains("th:action=\"@{/inbox/start/{id}(id=${link.clientUserId})}\"")
+                .contains("method=\"post\"")
+                .doesNotContain("th:href=\"@{/inbox/start/{id}(id=${link.clientUserId})}\"");
+    }
+
+    @Test
     void adminDashboardUsesCleanOperationalMetadata() throws IOException {
         String template = read("src/main/resources/templates/admin-views/dashboard/admin-dashboard.html");
 
