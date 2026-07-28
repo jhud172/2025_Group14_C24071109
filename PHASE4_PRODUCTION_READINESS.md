@@ -346,6 +346,18 @@ The decision remains **NO-GO** until every P0 item and any launch-applicable P1 
 
 ## Next safe work package
 
+The live service was rechecked before the provider drill. It still has
+`APP_EMAIL_PROVIDER=none` and `APP_SMS_PROVIDER=console`; none of the required
+SMTP, Twilio or Stripe credential keys, secret files or environment groups is
+present. The provider lifecycle gate is therefore blocked by configuration,
+not recorded as failed application behaviour.
+
+Render's recovery form was inspected without creating a resource. The lowest
+selectable temporary recovery database is Basic-256mb (**US$6/month**) with
+1 GB storage (**US$0.30/month**), totalling **US$6.30/month**, billed and
+prorated by the second. Copying the source's 15 GB storage would total
+**US$10.50/month**. Creating either option still requires explicit approval.
+
 The approved approximately **US$7.25/month incremental** staging web service
 and disk are live. The schema boundary, migrations, profile-upload persistence,
 logical export, application rollback and current-code automated gates pass.

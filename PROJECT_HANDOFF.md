@@ -283,6 +283,8 @@ Keep these already implemented homepage and Charlie requirements intact:
 - Render completed an on-demand logical export at **28 July 2026 17:28 BST** and retains it for seven days. It was not downloaded because it includes the out-of-scope `public` schema. Render PITR always creates a separate billable database, so no restore was started without explicit approval.
 - The final local verification passed: production CSS build; **513/513 Gradle tests** across 129 suites; **88/88 responsive cases**; **22/22 Axe cases**; **6/6 throttled journeys**; and **6/6 Lighthouse journeys**, with zero findings.
 - No Stripe, SMTP or Twilio credential is configured. No real charge, refund, email, SMS, production webhook or production-service setting was changed. The decision remains **NO-GO** pending provider sandbox lifecycle proof, an approved isolated restore, and the remaining operational P1 decisions.
+- A follow-up provider-lifecycle attempt on 28 July 2026 rechecked the live Render environment rather than trusting the handoff assertion. `APP_EMAIL_PROVIDER` was still `none`, `APP_SMS_PROVIDER` was still `console`, and no `SPRING_MAIL_*`, `TWILIO_*`, `STRIPE_SECRET_KEY` or `STRIPE_WEBHOOK_SECRET` keys, secret files or linked environment groups existed on `one-to-one-staging-jhuds`. No provider request was made and no lifecycle pass is claimed.
+- The Render recovery customisation screen confirmed the lowest selectable recovery configuration as Basic-256mb at **US$6/month** plus 1 GB storage at **US$0.30/month**, for an exact **US$6.30/month**, billed and prorated by the second. The default copied 15 GB storage configuration would be **US$10.50/month**. The form was inspected only; `Create Database` was not activated.
 
 ## Important implementation files
 

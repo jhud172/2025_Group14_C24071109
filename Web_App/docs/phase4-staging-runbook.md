@@ -112,6 +112,13 @@ Execution result on 28 July 2026:
 - deployment rollback reached live without a schema downgrade;
 - SMTP, Twilio, Stripe, AI and OAuth remain disabled/unconfigured.
 
+A follow-up inspection before the provider lifecycle drill confirmed that the
+live service still has `APP_EMAIL_PROVIDER=none` and
+`APP_SMS_PROVIDER=console`. No `SPRING_MAIL_*`, `TWILIO_*`,
+`STRIPE_SECRET_KEY` or `STRIPE_WEBHOOK_SECRET` variables, secret files or
+linked environment groups are present. Do not claim a provider pass until
+those staging-only values exist and a new deployment is live.
+
 ## Provider activation order
 
 Activate one provider at a time and return it to its safe state before moving
@@ -195,6 +202,10 @@ Current evidence:
   unchanged.
 - The rollback is an application proof only; it is not a database restore
   proof.
+- The Render recovery customisation form prices the lowest selectable
+  Basic-256mb plus 1 GB storage instance at **US$6.30/month**, billed and
+  prorated by the second. Copying the source's 15 GB storage would cost
+  **US$10.50/month**. Neither option was created.
 
 ## Evidence to retain
 
