@@ -20,6 +20,8 @@ class ProductionReadinessContractTest {
         Path baselineMigration = RESOURCES.resolve("db/migration/postgresql/V1__baseline_schema.sql");
         Path chatThreadMigration =
                 RESOURCES.resolve("db/migration/postgresql/V2__add_chat_thread_type_and_peer.sql");
+        Path healthRecordMigration =
+                RESOURCES.resolve("db/migration/postgresql/V3__align_health_record_numeric_types.sql");
 
         assertThat(renderProperties)
                 .contains("spring.sql.init.mode=never")
@@ -41,6 +43,11 @@ class ProductionReadinessContractTest {
                 .contains("ALTER TABLE chat_threads")
                 .contains("ADD COLUMN chat_type VARCHAR(32) NOT NULL DEFAULT 'AI_PERSONAL'")
                 .contains("ADD COLUMN peer_user_id BIGINT NULL");
+        assertThat(healthRecordMigration).isRegularFile();
+        assertThat(Files.readString(healthRecordMigration))
+                .contains("ALTER TABLE health_records")
+                .contains("ALTER COLUMN bmi TYPE DOUBLE PRECISION")
+                .contains("ALTER COLUMN systolic_blood_pressure TYPE INTEGER");
         assertThat(RESOURCES.resolve("render-data.sql")).doesNotExist();
     }
 

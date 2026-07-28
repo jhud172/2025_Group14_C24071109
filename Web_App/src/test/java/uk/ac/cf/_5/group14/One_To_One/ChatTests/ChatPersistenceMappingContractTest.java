@@ -7,6 +7,8 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,20 +17,25 @@ class ChatPersistenceMappingContractTest {
     private static final String APPLICATION_PACKAGE = "uk.ac.cf._5.group14.One_To_One";
 
     @Test
-    void chatMessagesTableHasOneEntityOwner() {
+    void explicitlyMappedTablesHaveOneEntityOwner() {
         ClassPathScanningCandidateComponentProvider scanner =
                 new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
 
-        List<Class<?>> tableOwners = scanner.findCandidateComponents(APPLICATION_PACKAGE).stream()
+        List<Class<?>> entities = scanner.findCandidateComponents(APPLICATION_PACKAGE).stream()
                 .<Class<?>>map(candidate -> loadClass(candidate.getBeanClassName()))
-                .filter(type -> {
-                    Table table = type.getAnnotation(Table.class);
-                    return table != null && "chat_messages".equals(table.name());
-                })
                 .toList();
 
-        assertThat(tableOwners)
+        Map<String, List<Class<?>>> ownersByTable = entities.stream()
+                .filter(type -> type.isAnnotationPresent(Table.class))
+                .collect(Collectors.groupingBy(type -> type.getAnnotation(Table.class).name()));
+
+        assertThat(ownersByTable)
+                .allSatisfy((table, owners) ->
+                        assertThat(owners)
+                                .as("entity owners for table %s", table)
+                                .hasSize(1));
+        assertThat(ownersByTable.get("chat_messages"))
                 .containsExactly(uk.ac.cf._5.group14.One_To_One.ChatV2.ChatMessage.class);
     }
 
