@@ -4,7 +4,7 @@
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
 **Current branch:** `James/phase4-staging-readiness`
-**Current phase:** Phase 4 operational readiness; upload/storage acceptance is complete and real provider credentials remain deferred to the final pre-launch gate
+**Current phase:** Phase 4 operational readiness; health, shared runtime state and privileged audit controls are complete, while real provider credentials remain deferred to the final pre-launch gate
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
@@ -21,7 +21,7 @@ present before continuing on another device.
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md`, `Web_App/docs/phase4-staging-runbook.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 operational readiness by adding an authentication-safe readiness/liveness boundary and configuring the existing Render staging health check, then establish monitoring/alert ownership. Reproduce failures before editing and continue with scheduler ownership, process-local sessions/login throttling and privileged audit retention. Keep the SMTP, Twilio and Stripe values at the intentional `"2bd"` placeholders until the final pre-launch gate. Do not use real recipients, make real charges, alter production webhooks, or access the existing `public` data.
+> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md`, `Web_App/docs/phase4-staging-runbook.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 with the remaining launch-applicable P1 controls: configure a persistent saved-card encryption key and prove restart decryption, complete the secret/configuration ownership and rotation manifest, decide the provider delivery-state/wording contract, add a required CI release gate and decide whether launch requires two Render instances. Keep the SMTP, Twilio and Stripe values at the intentional `"2bd"` placeholders until the final pre-launch provider gate. Do not use real recipients, make real charges, alter production webhooks, create billable resources or access the existing `public` data without explicit approval.
 
 ## Current verified status
 
@@ -40,7 +40,7 @@ Use this prompt after opening the repository on the new device:
 - James has confirmed that the Phase 3 human release gate passed, closing the remaining audible screen-reader and real-touch-device checks.
 - The final automated release gate covers public, login, client, trainer, gym and admin journeys: **88 responsive cases passed**, **22 Axe cases passed with zero serious/critical violations**, six cold-cache Slow 4G/4× CPU journeys passed, and six Lighthouse journeys passed.
 - Final Lighthouse scores are: public **97/100/100/100**, login **98/100/100/100**, client **86/100/100**, trainer **92/100/100**, gym **92/100/100** and admin **94/100/100** for performance/accessibility/best practices, with SEO included for public/login.
-- Latest full Gradle result: **544 tests passed, 0 failed, 0 skipped** across 135 suites.
+- Latest full Gradle result: **557 tests passed, 0 failed, 0 skipped** across 143 suites.
 - Latest local runtime proof: **HTTP 200** at `http://localhost:8081`, active profile `local`, datasource `jdbc:h2:mem:localdb`.
 - Latest CSS/JS version token: **`20260727p23`**.
 - Core CSS is **212,420 bytes / 207.4 KiB**, approximately 83% smaller than the previous monolithic core.
@@ -383,6 +383,56 @@ Keep these already implemented homepage and Charlie requirements intact:
   was added. The `"2bd"` provider placeholders and production service/webhooks
   were unchanged.
 
+### Phase 4 — operational health, shared state and audit ownership
+
+- Reproduced that aggregate Actuator health, readiness and liveness all
+  returned HTTP 401 and that Render was using `/login` as its health check.
+  Added status-only public `/actuator/health/liveness` and
+  `/actuator/health/readiness` contracts; aggregate `/actuator/health` remains
+  protected. Readiness includes application availability, PostgreSQL and disk
+  checks without exposing component details.
+- Configured the existing staging service health path to
+  `/actuator/health/readiness`. Live probes return HTTP 200 with
+  `{"status":"UP"}`, while aggregate health remains HTTP 401.
+- Reproduced that a valid authenticated session and login-attempt counters were
+  lost on application restart. Replaced both with PostgreSQL-backed state:
+  Spring Session JDBC uses `SESSION` cookies and the login throttle stores only
+  SHA-256 identity/network keys in `login_attempts`.
+- Reproduced restart behaviour twice. The same synthetic authenticated session
+  returned the client dashboard after both redeploys, and a staged throttle
+  remained effective after restart. Raw usernames and source addresses are not
+  retained in the throttle table.
+- Added database-owned leases for every scheduled job. A job now fails closed
+  when ownership cannot be acquired, preventing concurrent execution after
+  horizontal scale-out.
+- Added retained audit events for mutating `/admin/`, `/super-admin/` and
+  `/gym/` actions. Evidence records actor, roles, path, method, response,
+  result, timestamp, request ID and a hashed source address; request bodies and
+  query strings are excluded. Retention is 180 days.
+- A live staging denial probe reproduced that an `/access-denied` redirect was
+  initially classified as successful. Commit `b79f79bb` repairs that exact
+  outcome and adds regression coverage.
+- The subsequent full-suite run exposed that Spring could not bind the
+  scheduler annotation when a real scheduled proxy fired. Commit `1fabec8e`
+  resolves the annotation from the concrete target method, fails closed if it
+  cannot be resolved and adds real AOP proxy coverage. Final Render deploy
+  `dep-d9kvft2d0e5s73egun20` contains both fixes.
+- Flyway V6 creates the Spring Session, login-throttle, scheduler-lease and
+  privileged-audit tables. Validation was restricted to
+  `one_to_one_staging`; no `public` row or production provider configuration
+  was accessed.
+- James is the interim staging monitor, incident commander and privileged-audit
+  access owner until named primary and backup production owners are assigned.
+  Render workspace failure notifications are active. The response procedure is
+  documented in the staging runbook.
+- The service still has one Starter instance. A controlled redeploy produced a
+  brief HTTP 502 during handover, so a zero-downtime launch requires either an
+  explicitly accepted maintenance window or approval for at least two
+  instances. No billable scale change was made.
+- `npm ci` reported zero vulnerabilities. The workstation used Node 24.18/npm
+  11.14 rather than the repository-pinned Node 22.22/npm 11.11; the release
+  gate passed, but CI should use the pinned toolchain.
+
 ## Important implementation files
 
 ### Project evidence and handoff
@@ -487,27 +537,31 @@ node --check src/main/resources/static/js/dashboard/client-dashboard-page.js
 
 ## Next implementation step
 
-Continue **Phase 4 — operational readiness and ownership**.
+Continue **Phase 4 — remaining launch controls**.
 
 The isolated Render service, schema boundary, clean and forward migrations,
 all four upload boundaries, logical export, application rollback, isolated
-restore and automated gates are complete. Real provider proof remains a
-mandatory final pre-launch gate but is intentionally deferred.
+restore, authentication-safe health checks, shared sessions/throttles,
+scheduled-job ownership, privileged audit retention and automated gates are
+complete. Real provider proof remains a mandatory final pre-launch gate but is
+intentionally deferred.
 
 Priority order:
 
-1. Reproduce the current protected-health failure, add a minimal
-   authentication-safe readiness/liveness contract and configure the existing
-   Render staging health-check path.
-2. Define alert destinations, incident ownership and a safe provider
-   observability contract without activating the placeholder providers.
-3. Resolve scheduled-job ownership for the current single-instance deployment
-   and document the multi-instance locking/idempotency requirement.
-4. Resolve process-local HTTP sessions and login throttling for the intended
-   launch topology.
-5. Define privileged-action audit coverage, retention, access and
-   incident-response ownership.
-6. At the final pre-launch gate, replace the invalid provider placeholders and
+1. Configure a persistent saved-card encryption key in isolated staging and
+   prove that encrypted values remain decryptable across a restart.
+2. Complete the environment/secret manifest with an owner, rotation procedure,
+   expiry/revocation path and log-redaction check for every launch value.
+3. Resolve the provider delivery contract: add durable delivery/retry state or
+   replace the inaccurate “queued” wording with synchronous status.
+4. Make the full test and release-gate suites required CI checks before any
+   deploy, and document the forward-migration rollback decision.
+5. Decide whether production accepts a documented maintenance handover or
+   requires two Render instances for zero-downtime deployment. Scaling is
+   billable and requires explicit approval.
+6. Assign named primary and backup production monitoring/security incident
+   owners; James remains the interim staging owner only.
+7. At the final pre-launch gate, replace the invalid provider placeholders and
    prove the deferred SMTP, Twilio and Stripe lifecycles, then rerun every
    release gate.
 
@@ -515,7 +569,9 @@ Priority order:
 
 - Stripe test-mode payment completion, renewal, cancellation, failure, retry and duplicate webhook delivery.
 - External SMTP/Twilio sandbox verification and password-recovery delivery.
-- Health monitoring, provider observability, privileged audit and operational ownership.
+- Persistent saved-card encryption and restart-decryption proof.
+- Provider delivery observability, required CI, production topology and named
+  primary/backup incident ownership.
 
 ## Rules for future updates to this file
 

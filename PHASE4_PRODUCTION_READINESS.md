@@ -1,6 +1,6 @@
 # One To One — Phase 4 production-readiness inventory
 
-**Assessment date:** 28 July 2026
+**Assessment date:** 29 July 2026
 **Decision:** **NO-GO for production launch**
 **Safe test environment:** isolated local H2 plus `one-to-one-staging-jhuds` using only PostgreSQL schema `one_to_one_staging`
 **External effects:** staging-only sandbox requests; no delivered message, Stripe object, charge, production webhook change or production-data mutation
@@ -15,10 +15,12 @@ The code-level Phase 4 transactional checks completed without using production d
 4. The seeded `PLATFORM_ADMIN` could see but could not enter the trainer-verification queue.
 5. An empty SMTP host still selected `SmtpEmailService` instead of the documented no-op provider.
 
-The final post-repair automated result is:
+The current operational-readiness candidate additionally closes the health,
+shared-session/throttle, scheduled-job ownership and privileged-audit gaps. The
+final post-repair automated result is:
 
 - CSS production build: passed.
-- Gradle: **544 tests passed, 0 failed, 0 skipped** across 135 suites.
+- Gradle: **557 tests passed, 0 failed, 0 skipped** across 143 suites.
 - Responsive release matrix: **88/88 passed**.
 - Axe: **22/22 passed** with no serious or critical finding.
 - Slow 4G/4× CPU journeys: **6/6 passed**.
@@ -84,7 +86,9 @@ Transitive Java and npm packages resolve through Gradle/Maven Central and `packa
 | YouTube/Vimeo | Approved workout-video embeds | Browser iframe URL generation | No upload or provider mutation |
 | Unsplash | Demo merch fallback images | Browser image request | Demo fallback only |
 
-No Redis, external cache, message broker, job queue, object store, CDN upload service or dedicated session store is configured.
+No Redis, external cache, message broker, job queue, object store, CDN upload
+service or separate session infrastructure is configured. HTTP sessions use the
+isolated PostgreSQL schema through Spring Session JDBC.
 
 ## Environment and property inventory
 
@@ -212,7 +216,11 @@ remains blocked by the invalid Stripe test key and webhook secret.
 
 ## Scheduled jobs
 
-All jobs run inside each web application process. There is no distributed scheduler lock.
+All jobs run inside each web application process and acquire a PostgreSQL lease
+from `scheduled_job_locks` before doing work. The lease acquisition is atomic,
+has an expiry selected for the job's maximum expected duration and fails closed
+when database ownership cannot be established. This removes duplicate
+multi-instance execution; job-level business idempotency remains desirable.
 
 | Job | Schedule | Boundary |
 | --- | --- | --- |
@@ -222,7 +230,9 @@ All jobs run inside each web application process. There is no distributed schedu
 | Timed health-condition follow-up | Daily at 02:15 server-local time | Reads sensitive health-condition data and writes notifications |
 | Pending merch-order expiry | Fixed delay, 15 minutes; two-hour TTL | Cancels abandoned pending orders and restores stock |
 
-Scaling beyond one process can run the same job concurrently. Time zone, idempotency and multi-instance ownership need explicit production decisions.
+The five business jobs and the operational-retention job are covered by an
+annotation ownership contract. Time zone and production alert thresholds still
+need an explicit launch decision.
 
 ## Upload and storage boundaries
 
@@ -263,12 +273,12 @@ byte rejection and aggregate multipart rejection above 25 MiB.
 | Production schema | Flyway `V1__baseline_schema.sql`; SQL initialisation disabled |
 | Production seed | None; `render-data.sql` removed |
 | Local/test store | In-memory H2 |
-| HTTP sessions | In-process/default servlet sessions |
-| Login attempt counters | In-process map |
+| HTTP sessions | Spring Session JDBC in `spring_session` and `spring_session_attributes`; 30-minute expiry |
+| Login attempt counters | PostgreSQL `login_attempts`; hashed username/network key, atomic update and two-day stale-record retention |
 | Uploads | Configurable filesystem directories on the live 1 GB staging disk; all four boundaries passed create/read/delete and redeploy persistence, with owner checks on chat/video |
 | Queue/cache | None |
 | Backup/restore | Logical export and isolated temporary recovery-database validation passed; the temporary database was deleted after evidence was retained |
-| Schema migration | Flyway V1 clean provisioning and forward upgrades through V4 proved on PostgreSQL 18; V5 event-ledger migration is live and validated on staging |
+| Schema migration | Flyway V1 clean provisioning and forward upgrades through V6 proved on PostgreSQL 18; V5 adds the provider event ledger and V6 adds operational state/audit tables |
 
 The production demo seed and its shared credentials have been removed. Local and
 test H2 fixtures remain available only to the local/test profiles.
@@ -315,6 +325,12 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | Merchandise deletion/replacement orphaned durable images | Remove only unreferenced files, retain order snapshots and clean failed saves | `MerchProductServiceImplTest` |
 | Workout video size/deletion lifecycle was unbounded | Enforce 8 MiB, clean failed persistence and add owner-scoped delete | `WorkoutFormFeedbackServiceTest` plus staging acceptance |
 | Multipart transport rejection returned no useful response | Set 8 MB/25 MB limits and bounded swallowing; return safe JSON 413 | `MultipartUploadRejectionIntegrationTest` and `MultipartUploadLimitsContractTest` |
+| Actuator probes were protected and Render checked `/login` | Added status-only liveness/readiness endpoints, retained aggregate-health authentication and configured Render readiness | `HealthEndpointSecurityIntegrationTest` plus live HTTP proof |
+| Sessions and login throttles were lost on restart | Added Spring Session JDBC and a hashed PostgreSQL login-attempt store | `SessionPersistenceIntegrationTest`, `LoginAttemptServiceTest` plus two staging restart proofs |
+| Scheduled jobs had no cross-instance ownership | Added database leases and fail-closed method interception to every scheduled job | `ScheduledJobLeaseServiceTest` and `ScheduledJobOwnershipContractTest` |
+| Spring could not bind the lease annotation when a real scheduled proxy fired | Resolve the annotation from the concrete target method and fail closed if it is absent | `ScheduledJobLeaseAspectTest` real-proxy coverage |
+| Privileged mutations had no retained security evidence | Added privacy-bounded audit events, 180-day retention and operational ownership | `PrivilegedAuditFilterTest`, `PrivilegedAuditServiceTest` and live staging probe |
+| An access-denied redirect was classified as audit success | Treat `/login` and `/access-denied` security redirects as failed privileged outcomes | `PrivilegedAuditFilterTest` plus live denial replay |
 
 ## Launch blockers
 
@@ -327,14 +343,16 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | Deferred P0 | SMTP host and Twilio test credentials are intentional invalid placeholders | At the final pre-launch gate, install a non-delivering SMTP inbox and valid Twilio test credentials; prove delivery/failure/OTP behaviour | Platform/backend |
 | Closed | Isolated restore and restored Flyway validation | Temporary recovery database validated V1–V4, fixtures and table count, then deleted | Platform/database |
 | Closed | Stripe repairs and Flyway V5 deployment | Commit `f99024cf`; live deploy `dep-d9kgqgh42hec73doqmkg`; six migration records and V5 ledger table validated | Backend/payments |
+| Closed | Authentication-safe health and Render health path | Status-only liveness/readiness return 200; aggregate health stays 401; Render checks readiness | Platform |
+| Closed | Scheduled-job multi-instance ownership | All scheduled jobs use PostgreSQL leases and fail closed without ownership | Platform/backend |
+| Closed | Process-local sessions and login throttles | JDBC session and hashed throttle state both survived controlled staging restarts | Platform/security |
+| Closed | Privileged-action audit and retention | Mutations retained without body/query content; security denials fail; 180-day purge and interim owner documented | Security/product |
 | P1 | Render manifest omits email, SMS, OAuth, storage and card-encryption configuration | Complete secret/config manifest with owner and rotation process | Platform/security |
 | P1 | Saved-card encryption key is ephemeral when unconfigured | Persistent rotated secret configured and restart-decryption test | Security/backend |
 | P1 | Provider actions have no durable queue/delivery state but UI says “queued” | Delivery-state model or accurate synchronous wording plus retry policy | Backend/product |
-| P1 | Scheduled jobs have no multi-instance lock | Single-instance guarantee or distributed-lock/idempotency proof | Platform/backend |
-| P1 | HTTP sessions and login throttles are process-local | Sticky/single-instance decision or shared session/rate-limit store | Platform/security |
-| P1 | Actuator health returned 401 and Render has no configured health-check path | Auth-safe readiness endpoint and hosting health-check configuration | Platform |
 | P1 | Docker build explicitly skips tests and deploys automatically | CI-required green gate before deploy; reviewed rollback path | Platform |
-| P1 | Admin/provider auditing is partial | Audit requirements, retention and privileged-action evidence | Security/product |
+| P1 | Staging has one web instance and briefly returned 502 during redeploy | Accept a maintenance handover or approve two-instance zero-downtime topology | Platform/product |
+| P1 | Production monitoring/security owners are not named | Assign primary and backup owners; James is interim staging owner only | Product/platform |
 | P2 | External weather/geocoding, image and video dependencies need privacy/availability review | CSP/privacy/failure-mode review and documented fallback | Front-end/legal |
 
 ## Go/no-go checklist
@@ -366,9 +384,11 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 - [x] Adopt versioned production database migrations.
 - [x] Prove Flyway clean provisioning and forward upgrade on staging PostgreSQL.
 - [x] Complete the isolated database restore; logical export and application rollback pass.
-- [ ] Configure readiness/liveness monitoring and alert ownership.
-- [ ] Resolve multi-instance scheduler, session and login-throttle ownership.
-- [ ] Confirm audit logging, retention, privacy and incident-response expectations.
+- [x] Configure readiness/liveness monitoring and staging alert ownership.
+- [x] Resolve multi-instance scheduler, session and login-throttle ownership.
+- [x] Confirm audit logging, retention, privacy and staging incident-response expectations.
+- [ ] Assign named primary and backup production monitoring/security owners.
+- [ ] Decide maintenance-handover versus two-instance production deployment.
 - [x] Re-run the full local gate against the current staging code revision.
 
 The decision remains **NO-GO** until every P0 item and any launch-applicable P1 item has an owner, evidence and sign-off.
@@ -396,19 +416,19 @@ validation. Only the original source database remains available.
 
 The approved approximately **US$7.25/month incremental** staging web service
 and disk are live. The schema boundary, migrations, all four upload boundaries,
-logical export, application rollback and current-code automated gates pass.
+logical export, application rollback, operational state and current-code
+automated gates pass.
 Execute the remaining work in order:
 
-1. add an authentication-safe readiness/liveness boundary, configure the
-   existing Render staging health-check path and assign alert ownership;
-2. document the single-instance scheduler decision and the locking/idempotency
-   requirement before any scale-out;
-3. resolve process-local HTTP sessions and login throttling for the intended
-   launch topology;
-4. complete privileged audit, retention, access and incident-response
-   ownership;
-5. replace the invalid provider placeholders only at the final pre-launch gate
+1. configure a persistent saved-card encryption key and prove restart
+   decryption;
+2. complete the secret/configuration ownership and rotation manifest;
+3. resolve provider delivery state or correct the synchronous UI wording;
+4. make the full test/release gate mandatory CI and decide the one- versus
+   two-instance launch topology;
+5. assign named primary and backup production monitoring/security owners;
+6. replace the invalid provider placeholders only at the final pre-launch gate
    and prove the complete live sandbox lifecycles;
-6. rerun the full gate against that provider-enabled release candidate.
+7. rerun the full gate against that provider-enabled release candidate.
 
 Any real provider charge, refund, production data read/write, production webhook change or destructive database operation still requires James’s explicit approval.

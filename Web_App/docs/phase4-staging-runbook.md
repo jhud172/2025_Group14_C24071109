@@ -26,8 +26,8 @@ Current resources:
 - Starter compute with automatic deploys disabled;
 - 1 GB disk `dsk-d9kct35aeets73ant8ag` mounted at `/var/data/uploads`;
 - PostgreSQL schema `one_to_one_staging` on `1to-one`;
-- live application commit `f99024cf`, deploy
-  `dep-d9kgqgh42hec73doqmkg`.
+- live application commit `1fabec8e`, deploy
+  `dep-d9kvft2d0e5s73egun20`.
 
 ## Isolation boundary
 
@@ -254,24 +254,79 @@ Current evidence:
   **US$6.30/month** configuration by the second; the final invoiced fraction is
   determined by Render.
 
+## Operational health, monitoring and incident ownership
+
+Render checks `/actuator/health/readiness`. The application also exposes
+`/actuator/health/liveness`; each public probe returns status only and never
+component details. Aggregate `/actuator/health` remains authenticated.
+Readiness includes application availability, database connectivity and disk
+space.
+
+The staging workspace uses its existing “failure notifications only” policy.
+Until named production owners are assigned:
+
+- **monitor and incident commander:** James, as workspace/service owner;
+- **privileged-audit access owner:** James;
+- **application response:** inspect Render event, deploy and runtime logs, then
+  readiness, PostgreSQL availability and disk usage;
+- **recovery decision:** roll back the application to the last known-good
+  artifact for a code regression; never reverse a Flyway migration;
+- **schema failure:** repair with a new forward migration, or restore the
+  approved schema-scoped backup to a new isolated database;
+- **security incident:** preserve the matching privileged audit rows under
+  restricted access, record the request ID/time window, rotate affected
+  staging credentials and escalate before changing any production value.
+
+Privileged audit retains mutating `/admin/`, `/super-admin/` and `/gym/`
+evidence for 180 days. It records actor, authorities, path, method, result,
+response status, request ID, timestamp and a hashed source address. Request
+bodies, query strings, raw IP addresses, credentials and tokens are excluded.
+The scheduled retention job uses the same PostgreSQL lease ownership contract
+as the five business jobs.
+
+Production GO still requires named primary and backup monitoring/security
+owners plus a tested notification destination. James is the interim staging
+owner, not an automatic long-term production assignment.
+
+## Restart and scaling acceptance
+
+Flyway V6 creates Spring Session JDBC, hashed login-attempt state,
+scheduled-job leases and privileged audit. Two controlled staging restarts
+proved that one synthetic authenticated session remained valid and that a
+pre-existing throttle continued to reject attempts after restart. Every
+scheduled job is lease-protected and fails closed when database ownership is
+unavailable.
+
+The Starter service currently has one instance. A controlled redeploy briefly
+returned HTTP 502 during handover. This is a topology constraint, not an
+application-health failure: production must either accept a documented
+maintenance handover or obtain explicit billable approval for at least two
+instances. No scale or other billable resource was created during this phase.
+
 ## Current candidate validation
 
-The current source candidate retains the live Flyway V5 provider lifecycle
-work and completes chat, merchandise and workout-video storage acceptance.
+The current source candidate retains the storage/provider work and adds Flyway
+V6 operational controls, authentication-safe health, shared sessions/throttles,
+scheduled-job ownership and privileged audit.
 Before deployment it passed:
 
 - `npm ci` with zero reported vulnerabilities;
+- local execution used Node 24.18/npm 11.14 rather than the pinned Node
+  22.22/npm 11.11; CI must use the pinned toolchain;
 - `npm run build:css`;
 - `bootJar`;
-- **31/31 focused storage tests**;
-- **544/544 Gradle tests** across 135 suites;
+- **557/557 Gradle tests** across 143 suites;
 - **88/88 responsive**, **22/22 Axe**, **6/6 throttled** and **6/6
   Lighthouse** release-gate cases with zero findings.
 
-Render deploy `dep-d9kst0rl550s73f6kdmg` reached live at commit `7c4fce55`.
-All three retained fixture hashes matched after the redeploy, private ownership
-responses matched the required 200/401/404 policy, and all application deletion
-journeys removed their durable files. The labelled fixtures were cleaned.
+Render deploy `dep-d9kvft2d0e5s73egun20` reached live at commit `1fabec8e`.
+Live liveness/readiness returned 200/UP, aggregate health remained 401, session
+and throttle state survived restart, and a valid client request to a privileged
+route was retained as a failed 302 `/access-denied` outcome. The labelled
+synthetic account was deleted through its own authenticated account-deletion
+journey, and the matching JDBC session count was confirmed as zero. Short-lived
+hashed throttle state follows its configured expiry and the denial audit rows
+are intentionally retained under the 180-day evidence policy.
 Repeat provider tests only after the invalid staging sandbox values are
 replaced at the final pre-launch gate.
 
