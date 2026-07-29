@@ -50,12 +50,12 @@ The staging service must have:
 
 The four upload routes map to subdirectories of the same durable mount:
 
-| Public route | Staging storage directory |
-| --- | --- |
-| `/uploads/profile/**` | `/var/data/uploads/profile` |
-| `/uploads/chat/**` | `/var/data/uploads/chat` |
-| `/uploads/merch/**` | `/var/data/uploads/merch` |
-| `/uploads/workout-videos/**` | `/var/data/uploads/workout-videos` |
+| Application route | Staging storage directory | Read policy |
+| --- | --- | --- |
+| `/uploads/profile/**` | `/var/data/uploads/profile` | Public |
+| `/uploads/chat/**` | `/var/data/uploads/chat` | Authenticated owner only |
+| `/uploads/merch/**` | `/var/data/uploads/merch` | Public |
+| `/uploads/workout-videos/**` | `/var/data/uploads/workout-videos` | Authenticated owner only |
 
 ## Expected minimum Render cost
 
@@ -134,6 +134,30 @@ credential. A focused 19-test provider/payment safety run passed with those
 placeholder environment values and confirmed fail-closed application
 behaviour. Do not repeatedly call the external providers while this deliberate
 placeholder state remains active.
+
+Storage acceptance completed on 29 July 2026 with labelled, synthetic
+`one_to_one_staging` fixtures only:
+
+- current live code before the repair returned 200 for owner, peer and
+  anonymous reads of both a chat image and workout video, reproducing their
+  public-read defect;
+- commit `7c4fce55` and deploy `dep-d9kst0rl550s73f6kdmg` replaced those static
+  reads with owner-scoped access;
+- the chat and merchandise files retained their 23,044-byte size and SHA-256
+  `d08fc3b55a4a7d1c50c77f8929cd7ac0ca69656652f9bab9fc19f11510fa613a`
+  after redeploy;
+- the workout video retained its 24-byte size and SHA-256
+  `c8c5af84ac765d911a9ab05bc9a19d15d0b1bc5cf0654eff4469ce536410654e`;
+- after deploy, owner chat/video reads returned 200, peer reads returned 404,
+  anonymous reads returned 401, and public merchandise read returned 200;
+- application deletion removed every fixture file and subsequent reads
+  returned 404; the labelled users, workout and merchandise rows were then
+  deleted, leaving zero labelled rows;
+- multipart limits are 8 MB per file, 25 MB per request and 32 MB bounded
+  Tomcat swallow; embedded-server tests cover exact-limit acceptance and both
+  file/request rejection;
+- no `public` row, provider variable, production webhook or production service
+  was accessed or changed.
 
 ## Provider activation order
 
@@ -232,21 +256,24 @@ Current evidence:
 
 ## Current candidate validation
 
-The current source candidate adds Flyway V5 for a persistent Stripe webhook
-event ledger, handles invoice payment failure/recovery and makes subscription
-cancellation provider-first. Before deployment it passed:
+The current source candidate retains the live Flyway V5 provider lifecycle
+work and completes chat, merchandise and workout-video storage acceptance.
+Before deployment it passed:
 
+- `npm ci` with zero reported vulnerabilities;
 - `npm run build:css`;
 - `bootJar`;
-- **520/520 Gradle tests** across 131 suites;
+- **31/31 focused storage tests**;
+- **544/544 Gradle tests** across 135 suites;
 - **88/88 responsive**, **22/22 Axe**, **6/6 throttled** and **6/6
   Lighthouse** release-gate cases with zero findings.
 
-Render deploy `dep-d9kgqgh42hec73doqmkg` reached live. Startup validated six
-Flyway history entries and successfully advanced `one_to_one_staging` from V4
-to V5. The `stripe_webhook_events` table exists and the public homepage
-responds normally. Repeat provider tests only after the invalid staging
-sandbox values are replaced.
+Render deploy `dep-d9kst0rl550s73f6kdmg` reached live at commit `7c4fce55`.
+All three retained fixture hashes matched after the redeploy, private ownership
+responses matched the required 200/401/404 policy, and all application deletion
+journeys removed their durable files. The labelled fixtures were cleaned.
+Repeat provider tests only after the invalid staging sandbox values are
+replaced at the final pre-launch gate.
 
 ## Evidence to retain
 

@@ -18,7 +18,7 @@ The code-level Phase 4 transactional checks completed without using production d
 The final post-repair automated result is:
 
 - CSS production build: passed.
-- Gradle: **520 tests passed, 0 failed, 0 skipped** across 131 suites.
+- Gradle: **544 tests passed, 0 failed, 0 skipped** across 135 suites.
 - Responsive release matrix: **88/88 passed**.
 - Axe: **22/22 passed** with no serious or critical finding.
 - Slow 4G/4× CPU journeys: **6/6 passed**.
@@ -231,20 +231,29 @@ Scaling beyond one process can run the same job concurrently. Time zone, idempot
 | Profile image | 2 MiB limit; decoded and sanitised image | Local filesystem |
 | Chat image | Up to five files, 4 MiB each; decoded and re-encoded | Local filesystem |
 | Merch image | 5 MiB limit; sanitised image | Local filesystem |
-| Workout form video | MP4/WebM signature check; no explicit service-level byte limit | Local filesystem |
+| Workout form video | 8 MiB limit plus MP4/WebM signature check | Local filesystem |
 
-Generated URLs use public `/uploads/**` routes. `WebConfig` now maps profile,
-chat, merchandise and workout-video routes to their matching configured
-directories.
+Profile and merchandise images use public `/uploads/**` resource routes. Chat
+images and workout videos are served through authenticated controller routes:
+owners receive the file with `Cache-Control: no-store`, anonymous requests
+receive 401 and unrelated authenticated owners receive 404.
 
 The live staging service has a 1 GB persistent disk at `/var/data/uploads` and
 points all four directories under it. A profile image remained HTTP 200 with
 the same 139,305-byte size and SHA-256
 `054f1b7337602ac967057876fe0f166b9ce9a7d9ba8d80498f22a391605a738f`
-after a controlled redeploy and application rollback. Chat, merchandise and
-workout-video create/delete boundaries still need representative acceptance.
+after a controlled redeploy and application rollback. Synthetic chat and
+merchandise images remained 23,044 bytes with SHA-256
+`d08fc3b55a4a7d1c50c77f8929cd7ac0ca69656652f9bab9fc19f11510fa613a`;
+the synthetic workout video remained 24 bytes with SHA-256
+`c8c5af84ac765d911a9ab05bc9a19d15d0b1bc5cf0654eff4469ce536410654e`
+after deploy `dep-d9kst0rl550s73f6kdmg`. Each application deletion removed its
+file and the labelled staging rows were cleaned afterwards.
 
-Spring’s global multipart limits are not explicitly configured, so they must be aligned with the larger application-specific limits before upload acceptance can be considered proved.
+Spring's multipart transport limits are explicitly 8 MB per file and 25 MB per
+request. Tomcat's bounded 32 MB swallow limit permits a structured 413 JSON
+response. Embedded-server coverage proves exact 8 MiB acceptance, 8 MiB + 1
+byte rejection and aggregate multipart rejection above 25 MiB.
 
 ## Data stores, sessions and recovery
 
@@ -256,7 +265,7 @@ Spring’s global multipart limits are not explicitly configured, so they must b
 | Local/test store | In-memory H2 |
 | HTTP sessions | In-process/default servlet sessions |
 | Login attempt counters | In-process map |
-| Uploads | Configurable filesystem directories on the live 1 GB staging disk; profile redeploy and rollback persistence proved |
+| Uploads | Configurable filesystem directories on the live 1 GB staging disk; all four boundaries passed create/read/delete and redeploy persistence, with owner checks on chat/video |
 | Queue/cache | None |
 | Backup/restore | Logical export and isolated temporary recovery-database validation passed; the temporary database was deleted after evidence was retained |
 | Schema migration | Flyway V1 clean provisioning and forward upgrades through V4 proved on PostgreSQL 18; V5 event-ledger migration is live and validated on staging |
@@ -301,13 +310,18 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | Duplicate Stripe event IDs were processed more than once | Added a persistent event-ID ledger and record-after-success handling | `StripeWebhookServiceTest` and `StripeWebhookEventStoreIntegrationTest` |
 | Stripe invoice failure/recovery events were ignored | Added `PAST_DUE` transition and recovery to the intended active/expiring state | `StripeWebhookServiceTest` and `PlatformSubscriptionServiceTest` |
 | Subscription cancellation changed only local state | Send cancellation to Stripe first and commit local state only after provider success | `PlatformSubscriptionControllerTest` |
+| Chat images and workout videos were publicly readable | Replaced their static mappings with authenticated owner-scoped reads | `PrivateUploadAccessIntegrationTest` plus staging owner/peer/anonymous acceptance |
+| Chat batches over five files were silently truncated and partial failures left files | Reject the complete batch and remove earlier writes on failure | `ChatImageStorageServiceTest` |
+| Merchandise deletion/replacement orphaned durable images | Remove only unreferenced files, retain order snapshots and clean failed saves | `MerchProductServiceImplTest` |
+| Workout video size/deletion lifecycle was unbounded | Enforce 8 MiB, clean failed persistence and add owner-scoped delete | `WorkoutFormFeedbackServiceTest` plus staging acceptance |
+| Multipart transport rejection returned no useful response | Set 8 MB/25 MB limits and bounded swallowing; return safe JSON 413 | `MultipartUploadRejectionIntegrationTest` and `MultipartUploadLimitsContractTest` |
 
 ## Launch blockers
 
 | Priority | Blocker | Exit evidence | Suggested owner |
 | --- | --- | --- | --- |
 | Closed | Production demo seed removal and clean PostgreSQL provisioning | Flyway V1 created the staging schema with zero users; no demo seed ran | Backend/security |
-| P1 | Profile upload persistence passes; three upload types and deletion remain | Chat/merch/video upload-read-redeploy-delete proof and multipart-limit decision | Platform/backend |
+| Closed | Upload persistence, ownership, deletion and multipart limits | All four boundaries passed; commit `7c4fce55`, live deploy `dep-d9kst0rl550s73f6kdmg`, 31 focused storage tests | Platform/backend |
 | Closed | Isolated staging service and disk | Live Starter service, dedicated schema and 1 GB persistent disk with providers disabled | Platform |
 | Deferred P0 | Stripe test key/webhook secret are intentional invalid placeholders; live lifecycle is unproved | At the final pre-launch gate, install a valid `sk_test_...` key and staging-only endpoint secret; prove checkout, renewal, cancellation, failure, retry, duplicate and replay | Payments/backend |
 | Deferred P0 | SMTP host and Twilio test credentials are intentional invalid placeholders | At the final pre-launch gate, install a non-delivering SMTP inbox and valid Twilio test credentials; prove delivery/failure/OTP behaviour | Platform/backend |
@@ -344,6 +358,10 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 - [ ] Configure and prove Twilio test delivery and failure handling.
 - [ ] Prove Google/Microsoft/Apple OAuth only for providers intended at launch.
 - [x] Persist profile uploads and prove redeploy/rollback recovery.
+- [x] Prove chat-image create/read/delete, owner isolation and redeploy persistence.
+- [x] Prove merchandise-image create/read/delete and redeploy persistence.
+- [x] Prove workout-video create/read/delete, owner isolation and redeploy persistence.
+- [x] Set explicit multipart file/request limits and prove rejection at the real server boundary.
 - [ ] Configure a persistent card-encryption key and prove restart compatibility.
 - [x] Adopt versioned production database migrations.
 - [x] Prove Flyway clean provisioning and forward upgrade on staging PostgreSQL.
@@ -377,14 +395,20 @@ restore passed and the exact recovery database was deleted immediately after
 validation. Only the original source database remains available.
 
 The approved approximately **US$7.25/month incremental** staging web service
-and disk are live. The schema boundary, migrations, profile-upload persistence,
+and disk are live. The schema boundary, migrations, all four upload boundaries,
 logical export, application rollback and current-code automated gates pass.
 Execute the remaining work in order:
 
-1. finish chat, merchandise and workout-video create/read/delete, ownership and redeploy-persistence acceptance;
-2. set and cover explicit multipart file/request limits;
-3. finish readiness monitoring and operational-ownership gates;
-4. replace the invalid provider placeholders only at the final pre-launch gate and prove the complete live sandbox lifecycles;
-5. rerun the full gate against that provider-enabled release candidate.
+1. add an authentication-safe readiness/liveness boundary, configure the
+   existing Render staging health-check path and assign alert ownership;
+2. document the single-instance scheduler decision and the locking/idempotency
+   requirement before any scale-out;
+3. resolve process-local HTTP sessions and login throttling for the intended
+   launch topology;
+4. complete privileged audit, retention, access and incident-response
+   ownership;
+5. replace the invalid provider placeholders only at the final pre-launch gate
+   and prove the complete live sandbox lifecycles;
+6. rerun the full gate against that provider-enabled release candidate.
 
 Any real provider charge, refund, production data read/write, production webhook change or destructive database operation still requires James’s explicit approval.

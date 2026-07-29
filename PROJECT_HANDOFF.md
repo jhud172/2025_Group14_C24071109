@@ -1,10 +1,10 @@
 # One To One — project handoff and continuation point
 
-**Last updated:** 28 July 2026
+**Last updated:** 29 July 2026
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
 **Current branch:** `James/phase4-staging-readiness`
-**Current phase:** Phase 4 upload/storage acceptance; real provider credentials are deferred to the final pre-launch gate
+**Current phase:** Phase 4 operational readiness; upload/storage acceptance is complete and real provider credentials remain deferred to the final pre-launch gate
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
@@ -21,7 +21,7 @@ present before continuing on another device.
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 with the remaining upload/storage acceptance: chat images, merchandise images and workout-form videos, including create/read/delete, durable-disk redeploy persistence, ownership isolation and explicit multipart limits. The provider variables intentionally remain invalid placeholders and their real sandbox lifecycle is deferred until the final pre-launch gate. Do not use real recipients, make real charges, alter production webhooks, or access the existing `public` data.
+> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md`, `Web_App/docs/phase4-staging-runbook.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 operational readiness by adding an authentication-safe readiness/liveness boundary and configuring the existing Render staging health check, then establish monitoring/alert ownership. Reproduce failures before editing and continue with scheduler ownership, process-local sessions/login throttling and privileged audit retention. Keep the SMTP, Twilio and Stripe values at the intentional `"2bd"` placeholders until the final pre-launch gate. Do not use real recipients, make real charges, alter production webhooks, or access the existing `public` data.
 
 ## Current verified status
 
@@ -40,7 +40,7 @@ Use this prompt after opening the repository on the new device:
 - James has confirmed that the Phase 3 human release gate passed, closing the remaining audible screen-reader and real-touch-device checks.
 - The final automated release gate covers public, login, client, trainer, gym and admin journeys: **88 responsive cases passed**, **22 Axe cases passed with zero serious/critical violations**, six cold-cache Slow 4G/4× CPU journeys passed, and six Lighthouse journeys passed.
 - Final Lighthouse scores are: public **97/100/100/100**, login **98/100/100/100**, client **86/100/100**, trainer **92/100/100**, gym **92/100/100** and admin **94/100/100** for performance/accessibility/best practices, with SEO included for public/login.
-- Latest full Gradle result: **520 tests passed, 0 failed, 0 skipped** across 131 suites.
+- Latest full Gradle result: **544 tests passed, 0 failed, 0 skipped** across 135 suites.
 - Latest local runtime proof: **HTTP 200** at `http://localhost:8081`, active profile `local`, datasource `jdbc:h2:mem:localdb`.
 - Latest CSS/JS version token: **`20260727p23`**.
 - Core CSS is **212,420 bytes / 207.4 KiB**, approximately 83% smaller than the previous monolithic core.
@@ -335,6 +335,54 @@ Keep these already implemented homepage and Charlie requirements intact:
   20003, Stripe returns HTTP 401, and no message, Checkout Session,
   subscription, charge or local cancellation success is created.
 
+### Phase 4 — chat, merchandise and workout storage acceptance
+
+- Reproduced on the live isolated staging service that chat images and workout
+  videos were served as public static resources: the owner, an unrelated
+  authenticated client and an anonymous request all received HTTP 200. The
+  merchandise image remained intentionally public.
+- Repaired only the reproduced private-read defect. Chat and workout files now
+  pass through authenticated owner checks, return HTTP 401 to anonymous
+  requests and HTTP 404 to another owner, and use `Cache-Control: no-store`.
+  Profile and merchandise image routes remain public.
+- Chat upload now rejects more than five files rather than silently truncating,
+  rejects files over 4 MiB, removes partial writes after failure and refuses a
+  stored attachment URL owned by another user. Clearing a conversation removes
+  only that owner's durable chat files.
+- Merchandise replacement/deactivation now removes an unreferenced stored
+  image, retains images referenced by order snapshots and removes a newly
+  written file when repository persistence fails.
+- Workout form video upload now enforces an 8 MiB limit, retains the MP4/WebM
+  signature checks, removes a written file after persistence failure and
+  exposes an owner-scoped deletion journey in the workout player.
+- The global multipart transport limit is explicitly **8 MB per file** and
+  **25 MB per request**, with a bounded **32 MB Tomcat swallow limit** so
+  rejected clients receive structured HTTP 413 JSON. Real embedded-Tomcat
+  coverage proves 8 MiB acceptance, 8 MiB + 1 byte rejection and aggregate
+  request rejection above 25 MiB.
+- Synthetic staging fixtures were created only in `one_to_one_staging`. Before
+  deploy, chat and merchandise images were both 23,044 bytes with SHA-256
+  `d08fc3b55a4a7d1c50c77f8929cd7ac0ca69656652f9bab9fc19f11510fa613a`;
+  the synthetic workout video was 24 bytes with SHA-256
+  `c8c5af84ac765d911a9ab05bc9a19d15d0b1bc5cf0654eff4469ce536410654e`.
+- Commit `7c4fce55` was pushed and Render deploy
+  `dep-d9kst0rl550s73f6kdmg` reached live. All three files retained identical
+  sizes and hashes after the redeploy. Owner reads returned 200, unrelated
+  chat/workout reads returned 404, anonymous chat/workout reads returned 401,
+  and anonymous merchandise read returned 200.
+- Application deletion passed for all three boundaries; every durable fixture
+  subsequently returned 404 and workout latest returned `NONE`. The three
+  labelled users, workout template and merchandise product were then removed
+  from the staging schema, with zero labelled rows remaining.
+- Final verification passed: `npm ci`, `npm run build:css`, `bootJar`,
+  **544/544 Gradle tests** across 135 suites, **88/88 responsive**, **22/22
+  Axe**, **6/6 throttled-performance** and **6/6 Lighthouse** journeys, with
+  zero release-gate findings.
+- No `public` row was queried or changed during this work. The existing service,
+  PostgreSQL instance, staging schema and disk were reused; no resource cost
+  was added. The `"2bd"` provider placeholders and production service/webhooks
+  were unchanged.
+
 ## Important implementation files
 
 ### Project evidence and handoff
@@ -439,27 +487,34 @@ node --check src/main/resources/static/js/dashboard/client-dashboard-page.js
 
 ## Next implementation step
 
-Continue **Phase 4 — remaining upload/storage acceptance**.
+Continue **Phase 4 — operational readiness and ownership**.
 
 The isolated Render service, schema boundary, clean and forward migrations,
-profile-upload durability, logical export, application rollback, isolated
+all four upload boundaries, logical export, application rollback, isolated
 restore and automated gates are complete. Real provider proof remains a
 mandatory final pre-launch gate but is intentionally deferred.
 
 Priority order:
 
-1. Prove chat-image create/read/delete, ownership isolation and persistence across a staging redeploy.
-2. Prove merchandise-image create/read/delete and persistence across a staging redeploy.
-3. Prove workout-form video create/read/delete, ownership isolation and persistence across a staging redeploy.
-4. Align explicit global multipart request/file limits with the largest accepted upload and add rejection coverage.
-5. Continue readiness monitoring, scheduler ownership, sessions/rate limiting and privileged audit ownership.
-6. At the final pre-launch gate, replace the invalid provider placeholders and prove the deferred SMTP, Twilio and Stripe lifecycles.
+1. Reproduce the current protected-health failure, add a minimal
+   authentication-safe readiness/liveness contract and configure the existing
+   Render staging health-check path.
+2. Define alert destinations, incident ownership and a safe provider
+   observability contract without activating the placeholder providers.
+3. Resolve scheduled-job ownership for the current single-instance deployment
+   and document the multi-instance locking/idempotency requirement.
+4. Resolve process-local HTTP sessions and login throttling for the intended
+   launch topology.
+5. Define privileged-action audit coverage, retention, access and
+   incident-response ownership.
+6. At the final pre-launch gate, replace the invalid provider placeholders and
+   prove the deferred SMTP, Twilio and Stripe lifecycles, then rerun every
+   release gate.
 
 ## Phase 4 gates still required
 
 - Stripe test-mode payment completion, renewal, cancellation, failure, retry and duplicate webhook delivery.
 - External SMTP/Twilio sandbox verification and password-recovery delivery.
-- Remaining upload-boundary acceptance for chat, merchandise and workout video, including deletion and explicit multipart limits.
 - Health monitoring, provider observability, privileged audit and operational ownership.
 
 ## Rules for future updates to this file
