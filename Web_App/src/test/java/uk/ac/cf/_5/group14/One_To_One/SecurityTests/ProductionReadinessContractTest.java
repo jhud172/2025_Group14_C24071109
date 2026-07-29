@@ -68,13 +68,22 @@ class ProductionReadinessContractTest {
     void uploadServingUsesEveryConfiguredStorageBoundary() throws IOException {
         String webConfig = Files.readString(Path.of(
                 "src/main/java/uk/ac/cf/_5/group14/One_To_One/Security/WebConfig.java"));
+        String privateUploadController = Files.readString(Path.of(
+                "src/main/java/uk/ac/cf/_5/group14/One_To_One/Security/PrivateUploadController.java"));
+        String applicationProperties = Files.readString(RESOURCES.resolve("application.properties"));
 
         assertThat(webConfig)
                 .contains("${app.storage.profile-dir:uploads/profile}")
-                .contains("${app.storage.chat-dir:uploads/chat}")
                 .contains("${app.storage.merch-dir:uploads/merch}")
-                .contains("${app.storage.workout-video-dir:uploads/workout-videos}")
+                .doesNotContain("addResourceHandler(\"/uploads/chat/**\")")
+                .doesNotContain("addResourceHandler(\"/uploads/workout-videos/**\")")
                 .doesNotContain(".addResourceLocations(\"file:uploads/\")");
+        assertThat(privateUploadController)
+                .contains("@GetMapping(\"/uploads/chat/{filename:.+}\")")
+                .contains("@GetMapping(\"/uploads/workout-videos/user-{ownerUserId}/session-{sessionId}/{filename:.+}\")");
+        assertThat(applicationProperties)
+                .contains("${APP_STORAGE_CHAT_DIR:uploads/chat}")
+                .contains("${APP_STORAGE_WORKOUT_VIDEO_DIR:uploads/workout-videos}");
     }
 
     @Test

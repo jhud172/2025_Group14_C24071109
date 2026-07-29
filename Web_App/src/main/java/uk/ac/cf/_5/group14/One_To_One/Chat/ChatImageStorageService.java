@@ -37,45 +37,60 @@ public class ChatImageStorageService {
 
         List<MultipartFile> validFiles = files.stream()
                 .filter(file -> file != null && !file.isEmpty())
-                .limit(MAX_FILES)
                 .toList();
+        if (validFiles.size() > MAX_FILES) {
+            throw new IllegalArgumentException("You can upload up to 5 chat images at a time.");
+        }
 
         List<ChatAttachmentPayload> attachments = new ArrayList<>();
+        List<Path> storedPaths = new ArrayList<>();
         Files.createDirectories(uploadRoot);
 
-        for (MultipartFile file : validFiles) {
-            if (file.getSize() > MAX_BYTES) {
-                throw new IllegalArgumentException("Each chat image must be 4MB or smaller.");
+        try {
+            for (MultipartFile file : validFiles) {
+                if (file.getSize() > MAX_BYTES) {
+                    throw new IllegalArgumentException("Each chat image must be 4MB or smaller.");
+                }
+
+                byte[] uploadedBytes = file.getBytes();
+                BufferedImage decoded = ImageIO.read(new ByteArrayInputStream(uploadedBytes));
+                if (decoded == null || decoded.getWidth() <= 0 || decoded.getHeight() <= 0) {
+                    throw new IllegalArgumentException("Unsupported image data. Use PNG, JPG, or WEBP.");
+                }
+
+                SanitizedImage sanitized = sanitizeImage(decoded);
+                String uniqueSuffix = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+                String filename = "chat-" + userId + "-" + System.currentTimeMillis() + "-" + uniqueSuffix + sanitized.extension();
+                Path target = uploadRoot.resolve(filename).normalize();
+
+                if (!target.startsWith(uploadRoot)) {
+                    throw new IOException("Invalid target upload path.");
+                }
+
+                Files.write(target, sanitized.bytes());
+                storedPaths.add(target);
+                attachments.add(new ChatAttachmentPayload(
+                        "/uploads/chat/" + filename,
+                        safeFileName(file.getOriginalFilename(), filename),
+                        sanitized.contentType()
+                ));
             }
-
-            byte[] uploadedBytes = file.getBytes();
-            BufferedImage decoded = ImageIO.read(new ByteArrayInputStream(uploadedBytes));
-            if (decoded == null || decoded.getWidth() <= 0 || decoded.getHeight() <= 0) {
-                throw new IllegalArgumentException("Unsupported image data. Use PNG, JPG, or WEBP.");
+        } catch (IOException | RuntimeException failure) {
+            for (Path storedPath : storedPaths) {
+                try {
+                    Files.deleteIfExists(storedPath);
+                } catch (IOException ignored) {
+                    // Preserve the original upload failure.
+                }
             }
-
-            SanitizedImage sanitized = sanitizeImage(decoded);
-            String uniqueSuffix = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
-            String filename = "chat-" + userId + "-" + System.currentTimeMillis() + "-" + uniqueSuffix + sanitized.extension();
-            Path target = uploadRoot.resolve(filename).normalize();
-
-            if (!target.startsWith(uploadRoot)) {
-                throw new IOException("Invalid target upload path.");
-            }
-
-            Files.write(target, sanitized.bytes());
-            attachments.add(new ChatAttachmentPayload(
-                    "/uploads/chat/" + filename,
-                    safeFileName(file.getOriginalFilename(), filename),
-                    sanitized.contentType()
-            ));
+            throw failure;
         }
 
         return attachments;
     }
 
-    public boolean deleteChatImage(String imageUrl) throws IOException {
-        if (!isChatUploadUrl(imageUrl)) {
+    public boolean deleteChatImage(String imageUrl, Long ownerUserId) throws IOException {
+        if (!isChatUploadUrlForUser(imageUrl, ownerUserId)) {
             return false;
         }
 
@@ -97,6 +112,26 @@ public class ChatImageStorageService {
         }
         String fileName = normalized.substring("/uploads/chat/".length());
         return !fileName.contains("..") && !fileName.contains("/") && !fileName.contains("\\");
+    }
+
+    public boolean isChatUploadUrlForUser(String url, Long ownerUserId) {
+        if (ownerUserId == null || !isChatUploadUrl(url)) {
+            return false;
+        }
+        String fileName = url.trim().substring("/uploads/chat/".length());
+        return fileName.startsWith("chat-" + ownerUserId + "-");
+    }
+
+    public Path resolveOwnedChatImage(String fileName, Long ownerUserId) {
+        String imageUrl = "/uploads/chat/" + (fileName == null ? "" : fileName);
+        if (!isChatUploadUrlForUser(imageUrl, ownerUserId)) {
+            throw new IllegalArgumentException("Chat image not found");
+        }
+        Path target = uploadRoot.resolve(fileName).normalize();
+        if (!target.startsWith(uploadRoot)) {
+            throw new IllegalArgumentException("Chat image not found");
+        }
+        return target;
     }
 
     private SanitizedImage sanitizeImage(BufferedImage decoded) throws IOException {

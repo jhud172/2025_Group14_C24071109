@@ -236,7 +236,6 @@ public class ChatController {
         User user = requireUser(principal);
         List<MultipartFile> safeFiles = files == null ? List.of() : files.stream()
                 .filter(file -> file != null && !file.isEmpty())
-                .limit(5)
                 .toList();
 
         if (safeFiles.isEmpty()) {
@@ -272,12 +271,15 @@ public class ChatController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> api(@RequestBody ChatRequest request, Principal principal) {
         String message = request != null ? request.message() : null;
-        List<ChatAttachmentPayload> attachments = sanitizeStoredAttachments(request != null ? request.attachments() : List.of());
+        User user = requireUser(principal);
+        List<ChatAttachmentPayload> attachments = sanitizeStoredAttachments(
+                request != null ? request.attachments() : List.of(),
+                user.getId()
+        );
         if ((message == null || message.isBlank()) && attachments.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.<String, Object>of("reply", "Message is required."));
         }
 
-        User user = requireUser(principal);
         CoachConversation conversation = coachConversationService
                 .findLatest(user.getId())
                 .orElseGet(() -> coachConversationService.create(user.getId()));
@@ -530,13 +532,16 @@ public class ChatController {
             );
             }
 
-            private List<ChatAttachmentPayload> sanitizeStoredAttachments(List<ChatAttachmentPayload> attachments) {
+            private List<ChatAttachmentPayload> sanitizeStoredAttachments(
+                List<ChatAttachmentPayload> attachments,
+                Long ownerUserId
+            ) {
             if (attachments == null || attachments.isEmpty()) {
                 return List.of();
             }
             return attachments.stream()
                 .filter(attachment -> attachment != null && attachment.url() != null && !attachment.url().isBlank())
-                .filter(attachment -> chatImageStorageService.isChatUploadUrl(attachment.url()))
+                .filter(attachment -> chatImageStorageService.isChatUploadUrlForUser(attachment.url(), ownerUserId))
                 .limit(5)
                 .map(attachment -> new ChatAttachmentPayload(
                     attachment.url().trim(),

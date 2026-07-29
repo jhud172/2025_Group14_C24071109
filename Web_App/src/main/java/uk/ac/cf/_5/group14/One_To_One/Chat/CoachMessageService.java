@@ -58,7 +58,7 @@ public class CoachMessageService {
         CoachMessage msg = new CoachMessage();
         msg.setConversation(conversation);
         msg.setRole(role);
-        msg.setContent(encode(content, attachments));
+        msg.setContent(encode(content, attachments, conversation != null ? conversation.getUserId() : null));
         return repository.save(msg);
     }
 
@@ -100,7 +100,7 @@ public class CoachMessageService {
             for (ChatAttachmentPayload attachment : attachments(message)) {
                 if (attachment != null && attachment.url() != null) {
                     try {
-                        chatImageStorageService.deleteChatImage(attachment.url());
+                        chatImageStorageService.deleteChatImage(attachment.url(), conversation.getUserId());
                     } catch (IOException ignored) {
                         // best-effort cleanup
                     }
@@ -110,9 +110,9 @@ public class CoachMessageService {
         repository.deleteByConversation(conversation);
     }
 
-    private String encode(String content, List<ChatAttachmentPayload> attachments) {
+    private String encode(String content, List<ChatAttachmentPayload> attachments, Long ownerUserId) {
         String text = content == null ? "" : content.trim();
-        List<ChatAttachmentPayload> safeAttachments = sanitizeAttachments(attachments);
+        List<ChatAttachmentPayload> safeAttachments = sanitizeAttachments(attachments, ownerUserId);
         if (safeAttachments.isEmpty()) {
             return text;
         }
@@ -143,20 +143,23 @@ public class CoachMessageService {
         try {
             String json = new String(Base64.getDecoder().decode(encoded), StandardCharsets.UTF_8);
             List<ChatAttachmentPayload> attachments = objectMapper.readValue(json, ATTACHMENT_LIST_TYPE);
-            return new ParsedMessage(text, sanitizeAttachments(attachments));
+            Long ownerUserId = message != null && message.getConversation() != null
+                    ? message.getConversation().getUserId()
+                    : null;
+            return new ParsedMessage(text, sanitizeAttachments(attachments, ownerUserId));
         } catch (Exception ignored) {
             return new ParsedMessage(text, List.of());
         }
     }
 
-    private List<ChatAttachmentPayload> sanitizeAttachments(List<ChatAttachmentPayload> attachments) {
+    private List<ChatAttachmentPayload> sanitizeAttachments(List<ChatAttachmentPayload> attachments, Long ownerUserId) {
         if (attachments == null || attachments.isEmpty()) {
             return List.of();
         }
 
         return attachments.stream()
                 .filter(attachment -> attachment != null && attachment.url() != null && !attachment.url().isBlank())
-                .filter(attachment -> chatImageStorageService.isChatUploadUrl(attachment.url()))
+                .filter(attachment -> chatImageStorageService.isChatUploadUrlForUser(attachment.url(), ownerUserId))
                 .limit(5)
                 .map(attachment -> new ChatAttachmentPayload(
                         attachment.url().trim(),

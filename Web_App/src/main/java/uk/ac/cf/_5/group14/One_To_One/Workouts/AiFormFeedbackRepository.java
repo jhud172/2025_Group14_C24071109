@@ -7,4 +7,6 @@ import java.util.Optional;
 public interface AiFormFeedbackRepository extends JpaRepository<AiFormFeedback, Long> {
 
     Optional<AiFormFeedback> findByVideo(WorkoutSetVideo video);
+
+    void deleteByVideo(WorkoutSetVideo video);
 }

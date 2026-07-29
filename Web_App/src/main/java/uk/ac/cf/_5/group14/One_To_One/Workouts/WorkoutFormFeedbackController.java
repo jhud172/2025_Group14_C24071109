@@ -46,8 +46,30 @@ public class WorkoutFormFeedbackController {
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
-        WorkoutSetVideo video = feedbackService.getLatestVideo(user, sessionId, setId);
-        AiFormFeedback feedback = feedbackService.getFeedback(video);
-        return ResponseEntity.ok(feedbackService.buildFeedbackPayload(video, feedback));
+        try {
+            WorkoutSetVideo video = feedbackService.getLatestVideo(user, sessionId, setId);
+            AiFormFeedback feedback = feedbackService.getFeedback(video);
+            return ResponseEntity.ok(feedbackService.buildFeedbackPayload(video, feedback));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/studio/{sessionId}/sets/{setId}/video/{videoId}")
+    public ResponseEntity<?> delete(@PathVariable Long sessionId,
+                                    @PathVariable Long setId,
+                                    @PathVariable Long videoId) {
+        User user = authHelper.getAuthenticatedUser();
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        try {
+            feedbackService.deleteVideo(user, sessionId, setId, videoId);
+            return ResponseEntity.ok(Map.of("deleted", true));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException ex) {
+            return ResponseEntity.status(500).body(Map.of("message", "Unable to remove video"));
+        }
     }
 }

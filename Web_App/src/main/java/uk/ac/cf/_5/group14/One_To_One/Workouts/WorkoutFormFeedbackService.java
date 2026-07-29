@@ -21,6 +21,8 @@ import java.util.Map;
 @Service
 public class WorkoutFormFeedbackService {
 
+    private static final long MAX_VIDEO_BYTES = 8L * 1024L * 1024L;
+
     private final WorkoutBuilderService workoutBuilderService;
     private final WorkoutSetLogRepository setLogRepository;
     private final WorkoutSetVideoRepository videoRepository;
@@ -50,6 +52,9 @@ public class WorkoutFormFeedbackService {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("No file uploaded");
         }
+        if (file.getSize() > MAX_VIDEO_BYTES) {
+            throw new IllegalArgumentException("Workout video must be 8MB or smaller.");
+        }
 
         VideoFormat videoFormat = detectVideoFormat(file);
         if (videoFormat == null) {
@@ -76,7 +81,12 @@ public class WorkoutFormFeedbackService {
         video.setSetLog(setLog);
         video.setStatus(VideoProcessingStatus.PENDING);
         video.setPath("/uploads/workout-videos/user-" + user.getId() + "/session-" + sessionId + "/" + filename);
-        return videoRepository.save(video);
+        try {
+            return videoRepository.save(video);
+        } catch (RuntimeException failure) {
+            Files.deleteIfExists(target);
+            throw failure;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -98,6 +108,34 @@ public class WorkoutFormFeedbackService {
             return null;
         }
         return feedbackRepository.findByVideo(video).orElse(null);
+    }
+
+    @Transactional(rollbackFor = IOException.class)
+    public void deleteVideo(User user, Long sessionId, Long setId, Long videoId) throws IOException {
+        if (user == null || user.getId() == null) {
+            throw new IllegalArgumentException("User not authenticated");
+        }
+        WorkoutSession session = workoutBuilderService.getSession(user, sessionId);
+        WorkoutSetLog setLog = setLogRepository.findByIdAndSession(setId, session)
+                .orElseThrow(() -> new IllegalArgumentException("Set not found"));
+        WorkoutSetVideo video = videoRepository.findByIdAndSetLog(videoId, setLog)
+                .orElseThrow(() -> new IllegalArgumentException("Video not found"));
+
+        Path storedFile = resolveOwnedVideoPath(video.getPath(), user.getId(), sessionId);
+        feedbackRepository.deleteByVideo(video);
+        videoRepository.delete(video);
+        Files.deleteIfExists(storedFile);
+    }
+
+    @Transactional(readOnly = true)
+    public Path resolveOwnedVideo(User user, Long ownerUserId, Long sessionId, String filename) {
+        if (user == null || user.getId() == null || !user.getId().equals(ownerUserId)) {
+            throw new IllegalArgumentException("Video not found");
+        }
+        workoutBuilderService.getSession(user, sessionId);
+        String videoUrl = "/uploads/workout-videos/user-" + ownerUserId
+                + "/session-" + sessionId + "/" + (filename == null ? "" : filename);
+        return resolveOwnedVideoPath(videoUrl, ownerUserId, sessionId);
     }
 
     @Scheduled(fixedDelay = 30_000)
@@ -131,10 +169,16 @@ public class WorkoutFormFeedbackService {
             return Map.of("status", "NONE");
         }
         if (feedback == null) {
-            return Map.of("status", video.getStatus().name());
+            return Map.of(
+                    "status", video.getStatus().name(),
+                    "videoId", video.getId(),
+                    "videoUrl", video.getPath()
+            );
         }
         return Map.of(
                 "status", video.getStatus().name(),
+                "videoId", video.getId(),
+                "videoUrl", video.getPath(),
                 "feedback", Map.of(
                         "repCount", feedback.getRepCount(),
                         "tempo", feedback.getTempo(),
@@ -142,6 +186,23 @@ public class WorkoutFormFeedbackService {
                         "confidence", feedback.getConfidence()
                 )
         );
+    }
+
+    private Path resolveOwnedVideoPath(String videoUrl, Long userId, Long sessionId) {
+        String prefix = "/uploads/workout-videos/user-" + userId + "/session-" + sessionId + "/";
+        if (videoUrl == null || !videoUrl.startsWith(prefix)) {
+            throw new IllegalArgumentException("Invalid video path");
+        }
+        String filename = videoUrl.substring(prefix.length());
+        if (filename.isBlank() || filename.contains("/") || filename.contains("\\") || filename.contains("..")) {
+            throw new IllegalArgumentException("Invalid video path");
+        }
+        Path sessionUploadRoot = uploadRoot.resolve("user-" + userId).resolve("session-" + sessionId).normalize();
+        Path storedFile = sessionUploadRoot.resolve(filename).normalize();
+        if (!storedFile.startsWith(sessionUploadRoot)) {
+            throw new IllegalArgumentException("Invalid video path");
+        }
+        return storedFile;
     }
 
     private VideoFormat detectVideoFormat(MultipartFile file) throws IOException {
