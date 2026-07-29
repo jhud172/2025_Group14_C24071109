@@ -1,6 +1,13 @@
 package uk.ac.cf._5.group14.One_To_One.Security;
 
-public class LoginRequestDetails {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class LoginRequestDetails implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final String loginType;
     private final String trainerCode;
     private final String gymSecretCode;

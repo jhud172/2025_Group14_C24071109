@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.ac.cf._5.group14.One_To_One.Config.DatabaseTableAvailability;
+import uk.ac.cf._5.group14.One_To_One.Operations.ExclusiveScheduledJob;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
 import java.io.IOException;
@@ -139,6 +140,7 @@ public class WorkoutFormFeedbackService {
     }
 
     @Scheduled(fixedDelay = 30_000)
+    @ExclusiveScheduledJob(value = "workout-form-feedback", lockAtMostFor = "PT20M")
     @Transactional
     public void processPending() {
         if (!tableAvailability.hasTable("workout_set_videos")) {

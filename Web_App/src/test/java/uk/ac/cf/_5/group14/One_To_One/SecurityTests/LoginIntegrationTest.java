@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mock.web.MockHttpSession;
+import jakarta.servlet.http.Cookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,11 +127,12 @@ class LoginIntegrationTest {
                 .andExpect(unauthenticated())
                 .andReturn();
 
-        MockHttpSession session = (MockHttpSession) failedLogin.getRequest().getSession(false);
+        Cookie sessionCookie = failedLogin.getResponse().getCookie("SESSION");
+        assertThat(sessionCookie).isNotNull();
         String html = mockMvc.perform(get("/login")
                         .param("error", "invalid")
                         .param("role", "gym")
-                        .session(session))
+                        .cookie(sessionCookie))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("gym username, secret code and password combination")))
                 .andReturn()

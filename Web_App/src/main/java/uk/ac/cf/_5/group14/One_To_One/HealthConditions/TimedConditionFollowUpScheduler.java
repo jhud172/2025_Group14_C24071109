@@ -4,6 +4,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.cf._5.group14.One_To_One.Inbox.SystemInboxNotificationService;
+import uk.ac.cf._5.group14.One_To_One.Operations.ExclusiveScheduledJob;
 import uk.ac.cf._5.group14.One_To_One.PlatformBilling.PlatformSubscriptionService;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
@@ -31,6 +32,7 @@ public class TimedConditionFollowUpScheduler {
     }
 
     @Scheduled(cron = "0 15 2 * * *")
+    @ExclusiveScheduledJob(value = "timed-condition-follow-ups", lockAtMostFor = "PT30M")
     @Transactional
     public void sendTimedConditionFollowUps() {
         LocalDate today = LocalDate.now(clock);
