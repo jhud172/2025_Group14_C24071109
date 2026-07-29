@@ -52,6 +52,7 @@ class PrivilegedAuditServiceTest {
                 "POST",
                 "/admin/feedback/7/resolve",
                 204,
+                true,
                 "192.0.2.44");
 
         Map<String, Object> row = jdbcTemplate.queryForMap("SELECT * FROM privileged_audit_events");

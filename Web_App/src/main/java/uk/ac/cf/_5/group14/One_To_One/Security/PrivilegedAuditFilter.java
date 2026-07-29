@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -68,6 +70,9 @@ public class PrivilegedAuditFilter extends OncePerRequestFilter {
             int status = failedWithException && response.getStatus() < 400
                     ? HttpServletResponse.SC_INTERNAL_SERVER_ERROR
                     : response.getStatus();
+            boolean succeeded = !failedWithException
+                    && status < 400
+                    && !isSecurityRedirect(response.getHeader("Location"));
             auditService.record(
                     requestId,
                     actor,
@@ -75,7 +80,20 @@ public class PrivilegedAuditFilter extends OncePerRequestFilter {
                     request.getMethod(),
                     request.getRequestURI(),
                     status,
+                    succeeded,
                     request.getRemoteAddr());
+        }
+    }
+
+    private static boolean isSecurityRedirect(String location) {
+        if (location == null || location.isBlank()) {
+            return false;
+        }
+        try {
+            String path = new URI(location).getPath();
+            return "/access-denied".equals(path) || "/login".equals(path);
+        } catch (URISyntaxException ex) {
+            return false;
         }
     }
 }

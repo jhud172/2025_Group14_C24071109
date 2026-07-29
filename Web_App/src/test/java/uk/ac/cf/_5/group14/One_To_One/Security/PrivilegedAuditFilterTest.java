@@ -48,7 +48,37 @@ class PrivilegedAuditFilterTest {
                 org.mockito.ArgumentMatchers.eq("DELETE"),
                 org.mockito.ArgumentMatchers.eq("/admin/users/42"),
                 org.mockito.ArgumentMatchers.eq(204),
+                org.mockito.ArgumentMatchers.eq(true),
                 org.mockito.ArgumentMatchers.eq("192.0.2.30"));
+    }
+
+    @Test
+    void recordsSecurityRedirectAsFailedOutcome() throws Exception {
+        PrivilegedAuditService auditService = mock(PrivilegedAuditService.class);
+        PrivilegedAuditFilter filter = new PrivilegedAuditFilter(auditService);
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "client",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_CLIENT"))));
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/users/42");
+        request.setRemoteAddr("192.0.2.31");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = (servletRequest, servletResponse) ->
+                ((MockHttpServletResponse) servletResponse).sendRedirect(
+                        "https://example.test/access-denied");
+
+        filter.doFilter(request, response, chain);
+
+        verify(auditService).record(
+                anyString(),
+                org.mockito.ArgumentMatchers.eq("client"),
+                org.mockito.ArgumentMatchers.eq("ROLE_CLIENT"),
+                org.mockito.ArgumentMatchers.eq("POST"),
+                org.mockito.ArgumentMatchers.eq("/admin/users/42"),
+                org.mockito.ArgumentMatchers.eq(302),
+                org.mockito.ArgumentMatchers.eq(false),
+                org.mockito.ArgumentMatchers.eq("192.0.2.31"));
     }
 
     @Test
@@ -74,6 +104,7 @@ class PrivilegedAuditFilterTest {
                 anyString(),
                 anyString(),
                 org.mockito.ArgumentMatchers.anyInt(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
                 anyString());
     }
 }

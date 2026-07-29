@@ -27,6 +27,7 @@ public class PrivilegedAuditService {
             String method,
             String path,
             int status,
+            boolean succeeded,
             String sourceIp) {
         try {
             jdbcTemplate.update(
@@ -43,7 +44,7 @@ public class PrivilegedAuditService {
                     bounded(method, 10),
                     bounded(path, 500),
                     status,
-                    status < 400,
+                    succeeded,
                     SecurityFingerprint.sha256(sourceIp));
         } catch (RuntimeException ex) {
             log.error("Failed to retain privileged-action audit event {}", requestId, ex);
