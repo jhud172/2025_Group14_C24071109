@@ -336,6 +336,31 @@ immediately and is not tracked; it does not claim queued or confirmed delivery.
 | Privileged mutations had no retained security evidence | Added privacy-bounded audit events, 180-day retention and operational ownership | `PrivilegedAuditFilterTest`, `PrivilegedAuditServiceTest` and live staging probe |
 | An access-denied redirect was classified as audit success | Treat `/login` and `/access-denied` security redirects as failed privileged outcomes | `PrivilegedAuditFilterTest` plus live denial replay |
 
+## Production topology comparison
+
+The 29 July 2026 read-only Render inspection confirms that the isolated
+reference is one Oregon Starter instance with a 1 GB disk. Render prohibits
+multiple instances while that disk is attached and disables zero-downtime
+deploys for disk-backed services.
+
+| Decision | Technical contract | Exact current Render increment | Decision status |
+| --- | --- | ---: | --- |
+| Single-instance maintenance handover | Retain one Starter and the 1 GB disk; use maintenance mode, readiness, a recorded rollback artifact and named primary/backup sign-off for every production deploy | **US$0.00/month** (current web/disk baseline remains US$7.25/month) | Recommended for initial launch; awaiting James's sign-off |
+| Two-instance zero-downtime topology | First replace all four local upload boundaries with shared object storage, detach the disk, then run two manually scaled Starter instances | **US$6.75/month net Render increase** (US$14.00 rather than US$7.25), plus unquoted external object-storage usage | Awaiting provider selection, exact external quote and separate billable approval |
+
+The second Starter instance itself adds US$7.00/month, billed by the second;
+removing the 1 GB Render disk after a successful storage migration subtracts
+US$0.25/month. Render does not provide S3-style object storage, so the total
+two-instance cost cannot be represented as exact until a shared provider,
+region and usage envelope are selected. No scale, disk, storage-provider or
+production configuration change was made.
+
+The complete operational procedure and approval boundary are recorded in
+`Web_App/docs/phase4-staging-runbook.md`. Production monitoring/security
+assignments remain deliberately unrecorded until James supplies a named primary
+and backup; the manifest does not authorise treating the interim staging owner
+as the production assignment.
+
 ## Launch blockers
 
 | Priority | Blocker | Exit evidence | Suggested owner |
@@ -355,7 +380,7 @@ immediately and is not tracked; it does not claim queued or confirmed delivery.
 | Closed | Persistent saved-card encryption and restart continuity | Render fails closed without the key; V7 marker and saved token decrypted after controlled restart | Security/backend |
 | Closed | Provider UI claimed a queue that does not exist | Admin wording now states synchronous attempt and untracked delivery | Backend/product |
 | Closed | Release suite was not a required CI check | GitHub Actions release gate passed and strict `Release gate` is required on `main` | Platform |
-| P1 | Staging has one web instance and briefly returned 502 during redeploy | Accept a maintenance handover or approve two-instance zero-downtime topology | Platform/product |
+| P1 | Production topology is not signed off | Sign off the documented US$0 incremental maintenance handover, or select/quote shared object storage and separately approve the US$6.75/month net Render increase before a two-instance change | Platform/product |
 | P1 | Production monitoring/security owners are not named | Assign primary and backup owners; James is interim staging owner only | Product/platform |
 | P2 | External weather/geocoding, image and video dependencies need privacy/availability review | CSP/privacy/failure-mode review and documented fallback | Front-end/legal |
 

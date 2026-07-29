@@ -440,6 +440,16 @@ Keep these already implemented homepage and Charlie requirements intact:
   brief HTTP 502 during handover, so a zero-downtime launch requires either an
   explicitly accepted maintenance window or approval for at least two
   instances. No billable scale change was made.
+- A 29 July 2026 read-only Render inspection confirmed the exact live
+  reference: one Oregon Starter instance, one 1 GB persistent disk and one
+  configured readiness path. Render prohibits scaling a disk-backed service
+  and disables its zero-downtime deploys. The production comparison is now
+  documented: retaining the single-instance maintenance handover adds
+  **US$0.00/month**, while two stateless Starter instances are
+  **US$14.00/month**, a net **US$6.75/month Render increase** after removing
+  the current US$0.25 disk. Shared object storage must be selected, quoted and
+  approved separately before the two-instance design is technically possible.
+  No resource or production setting was changed.
 - `npm ci` reported zero vulnerabilities. The workstation used Node 24.18/npm
   11.14 rather than the repository-pinned Node 22.22/npm 11.11; the release
   gate passed, but CI should use the pinned toolchain.
@@ -559,11 +569,14 @@ intentionally deferred.
 
 Priority order:
 
-1. Decide whether production accepts a documented maintenance handover or
-   requires two Render instances for zero-downtime deployment. Scaling is
-   billable and requires explicit approval.
-2. Assign named primary and backup production monitoring/security incident
-   owners; James remains the interim staging owner only.
+1. James must explicitly sign off either the documented single-instance
+   maintenance handover (**US$0.00/month incremental**) or the two-instance
+   direction. The latter needs a separately selected/quoted shared object
+   store before approval of the exact **US$6.75/month net Render increase** and
+   any external-provider charge.
+2. James must provide the named primary and backup production
+   monitoring/security incident owners; the manifest intentionally keeps both
+   unassigned and James remains the interim staging owner only.
 3. At the final pre-launch gate, replace the invalid provider placeholders and
    prove the deferred SMTP, Twilio and Stripe lifecycles, then rerun every
    release gate.

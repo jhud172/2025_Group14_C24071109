@@ -303,6 +303,92 @@ application-health failure: production must either accept a documented
 maintenance handover or obtain explicit billable approval for at least two
 instances. No scale or other billable resource was created during this phase.
 
+## Production topology decision record
+
+Status on 29 July 2026: **awaiting James's explicit topology decision and
+production-owner assignments; no Render configuration was changed**.
+
+The live staging reference was inspected read-only. It is one Oregon Starter
+instance with the authenticated readiness path
+`/actuator/health/readiness` and a 1 GB persistent disk mounted at
+`/var/data/uploads`. Render's current platform contract is decisive:
+
+- a service with a persistent disk cannot run more than one instance;
+- the disk disables zero-downtime deploys because Render must stop the current
+  instance before attaching the disk to its replacement;
+- manually scaled instances are billed independently and prorated by the
+  second;
+- a stateless Render service supports zero-downtime replacement even at one
+  configured instance, while two instances also reduce node/instance-failure
+  exposure.
+
+Current July 2026 Render pricing is US$7.00/month for each Starter instance
+and US$0.25/GB/month for a persistent disk. The exact Render-only comparison
+against the current one-instance/disk reference is:
+
+| Option | Render topology | Monthly Render web/disk cost | Increment from current |
+| --- | --- | ---: | ---: |
+| A — controlled maintenance handover | 1 × Starter plus existing 1 GB disk | US$7.25 | **US$0.00** |
+| B — two-instance stateless service | 2 × Starter, no attached Render disk | US$14.00 | **US$6.75** |
+
+Option B cannot be enabled safely by changing the instance slider. Chat,
+merchandise, profile and workout-video uploads must first move from the
+instance disk to a selected shared object-storage provider, with ownership,
+deletion, persistence, backup and rollback acceptance repeated. Render does
+not supply S3-style object storage. The provider's storage, request and egress
+charges are additional and are not included in the exact US$6.75 Render
+increment; no honest total can be approved until a provider and region are
+selected and quoted.
+
+### Option A maintenance handover
+
+This is the current recommendation for the initial launch because it preserves
+the accepted upload boundary and adds no new monthly resource cost. Every
+production deploy must use this controlled handover:
+
+1. Require the protected `Release gate` on the exact candidate and record the
+   commit, approver and rollback artifact.
+2. Confirm the scheduled window, primary incident owner and backup owner are
+   available, then notify users of a maintenance period.
+3. Enable Render maintenance mode so new public requests receive a deliberate
+   HTTP 503 maintenance response instead of entering a transaction.
+4. Confirm readiness and the approved backup/recovery point without reading or
+   copying production rows into staging.
+5. Deploy once. Keep maintenance mode enabled until the new instance reports
+   ready and the authorised post-deploy smoke checks pass.
+6. Roll back to the recorded application artifact if readiness or smoke checks
+   fail. Never reverse a Flyway migration; use a new forward repair or the
+   separately approved restore procedure.
+7. Disable maintenance mode only after primary/backup sign-off, then record the
+   deploy ID, observed interruption, checks and any incident.
+
+### Option B two-instance handover
+
+This is the higher-availability target when continuous service and node
+redundancy justify the storage migration and extra cost. Before any billable
+change:
+
+1. select a shared object-storage provider and obtain an exact regional quote;
+2. obtain separate approval for that provider and the **US$6.75/month net
+   Render increase**, each prorated according to the provider's terms;
+3. implement and prove the storage adapter in isolated staging using synthetic
+   data only;
+4. detach the Render disk only after migration/rollback evidence is accepted;
+5. scale manually to two Starter instances and prove readiness, ownership,
+   deletion, sessions, throttles, scheduler leases and rolling deployment;
+6. retain two instances during launch only after monitoring owners have signed
+   the acceptance record.
+
+No instance, disk, object-storage account or production setting is authorised
+by this comparison. The SMTP, Twilio and Stripe placeholders remain `2bd`.
+
+Official references inspected on 29 July 2026:
+
+- [Render pricing](https://render.com/pricing)
+- [Render persistent-disk limitations](https://render.com/docs/disks)
+- [Render scaling and per-instance billing](https://render.com/docs/scaling)
+- [Render maintenance mode](https://render.com/docs/maintenance-mode)
+
 ## Current candidate validation
 
 The current source candidate retains the storage/provider work and adds Flyway
