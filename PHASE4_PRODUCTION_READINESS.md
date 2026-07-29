@@ -15,12 +15,13 @@ The code-level Phase 4 transactional checks completed without using production d
 4. The seeded `PLATFORM_ADMIN` could see but could not enter the trainer-verification queue.
 5. An empty SMTP host still selected `SmtpEmailService` instead of the documented no-op provider.
 
-The current operational-readiness candidate additionally closes the health,
-shared-session/throttle, scheduled-job ownership and privileged-audit gaps. The
-final post-repair automated result is:
+The current operational-readiness candidate additionally closes health,
+shared-session/throttle, scheduled-job ownership, privileged-audit,
+saved-card encryption, configuration ownership, provider wording and required
+CI gaps. The final post-repair automated result is:
 
 - CSS production build: passed.
-- Gradle: **557 tests passed, 0 failed, 0 skipped** across 143 suites.
+- Gradle: **568 tests passed, 0 failed, 0 skipped** across 146 suites.
 - Responsive release matrix: **88/88 passed**.
 - Axe: **22/22 passed** with no serious or critical finding.
 - Slow 4G/4× CPU journeys: **6/6 passed**.
@@ -278,7 +279,7 @@ byte rejection and aggregate multipart rejection above 25 MiB.
 | Uploads | Configurable filesystem directories on the live 1 GB staging disk; all four boundaries passed create/read/delete and redeploy persistence, with owner checks on chat/video |
 | Queue/cache | None |
 | Backup/restore | Logical export and isolated temporary recovery-database validation passed; the temporary database was deleted after evidence was retained |
-| Schema migration | Flyway V1 clean provisioning and forward upgrades through V6 proved on PostgreSQL 18; V5 adds the provider event ledger and V6 adds operational state/audit tables |
+| Schema migration | Flyway V1 clean provisioning and forward upgrades through V7 proved on PostgreSQL 18; V5 adds the provider event ledger, V6 adds operational state/audit tables and V7 adds card-key continuity state |
 
 The production demo seed and its shared credentials have been removed. Local and
 test H2 fixtures remain available only to the local/test profiles.
@@ -298,7 +299,10 @@ test H2 fixtures remain available only to the local/test profiles.
 | Stripe live staging | Start subscription checkout with staging-only configuration | Stripe returned HTTP 401 for invalid key; no Checkout Session, subscription or charge |
 | Database recovery | Restore to temporary Basic-256mb/1 GB recovery database | Available; schema creation and Flyway V1–V4 successful, 122 tables and labelled staging fixtures validated; instance deleted |
 
-Provider delivery was intentionally not claimed. The approval UI says “Notification queued”, but the current implementation has no durable notification queue or delivery-status record.
+Provider delivery is intentionally not claimed. The current implementation
+attempts email synchronously, catches provider failures and has no durable
+delivery-status record. Admin success wording now says delivery was attempted
+immediately and is not tracked; it does not claim queued or confirmed delivery.
 
 ## Repaired defects and coverage
 
@@ -347,10 +351,10 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 | Closed | Scheduled-job multi-instance ownership | All scheduled jobs use PostgreSQL leases and fail closed without ownership | Platform/backend |
 | Closed | Process-local sessions and login throttles | JDBC session and hashed throttle state both survived controlled staging restarts | Platform/security |
 | Closed | Privileged-action audit and retention | Mutations retained without body/query content; security denials fail; 180-day purge and interim owner documented | Security/product |
-| P1 | Render manifest omits email, SMS, OAuth, storage and card-encryption configuration | Complete secret/config manifest with owner and rotation process | Platform/security |
-| P1 | Saved-card encryption key is ephemeral when unconfigured | Persistent rotated secret configured and restart-decryption test | Security/backend |
-| P1 | Provider actions have no durable queue/delivery state but UI says “queued” | Delivery-state model or accurate synchronous wording plus retry policy | Backend/product |
-| P1 | Docker build explicitly skips tests and deploys automatically | CI-required green gate before deploy; reviewed rollback path | Platform |
+| Closed | Environment and secret ownership/rotation manifest | Versioned variable inventory, interim ownership, rotation/revocation and redaction controls | Platform/security |
+| Closed | Persistent saved-card encryption and restart continuity | Render fails closed without the key; V7 marker and saved token decrypted after controlled restart | Security/backend |
+| Closed | Provider UI claimed a queue that does not exist | Admin wording now states synchronous attempt and untracked delivery | Backend/product |
+| Closed | Release suite was not a required CI check | GitHub Actions release gate passed and strict `Release gate` is required on `main` | Platform |
 | P1 | Staging has one web instance and briefly returned 502 during redeploy | Accept a maintenance handover or approve two-instance zero-downtime topology | Platform/product |
 | P1 | Production monitoring/security owners are not named | Assign primary and backup owners; James is interim staging owner only | Product/platform |
 | P2 | External weather/geocoding, image and video dependencies need privacy/availability review | CSP/privacy/failure-mode review and documented fallback | Front-end/legal |
@@ -380,7 +384,7 @@ Provider delivery was intentionally not claimed. The approval UI says “Notific
 - [x] Prove merchandise-image create/read/delete and redeploy persistence.
 - [x] Prove workout-video create/read/delete, owner isolation and redeploy persistence.
 - [x] Set explicit multipart file/request limits and prove rejection at the real server boundary.
-- [ ] Configure a persistent card-encryption key and prove restart compatibility.
+- [x] Configure a persistent card-encryption key and prove restart compatibility.
 - [x] Adopt versioned production database migrations.
 - [x] Prove Flyway clean provisioning and forward upgrade on staging PostgreSQL.
 - [x] Complete the isolated database restore; logical export and application rollback pass.
@@ -420,15 +424,49 @@ logical export, application rollback, operational state and current-code
 automated gates pass.
 Execute the remaining work in order:
 
-1. configure a persistent saved-card encryption key and prove restart
-   decryption;
-2. complete the secret/configuration ownership and rotation manifest;
-3. resolve provider delivery state or correct the synchronous UI wording;
-4. make the full test/release gate mandatory CI and decide the one- versus
-   two-instance launch topology;
-5. assign named primary and backup production monitoring/security owners;
-6. replace the invalid provider placeholders only at the final pre-launch gate
+1. decide the one- versus two-instance launch topology; any scale increase is
+   billable and requires explicit approval;
+2. assign named primary and backup production monitoring/security owners;
+3. replace the invalid provider placeholders only at the final pre-launch gate
    and prove the complete live sandbox lifecycles;
-7. rerun the full gate against that provider-enabled release candidate.
+4. rerun the full gate against that provider-enabled release candidate.
+
+## Persistent saved-card encryption and required CI evidence
+
+Commit `fcf33145` encrypts saved provider tokens with versioned AES-256-GCM
+ciphertext before persistence and enforces ownership before decryption. Render
+profile startup now fails closed if `APP_ENCRYPTION_CARD_KEY` is absent,
+invalid or cannot decrypt the V7 continuity marker or any saved token. Existing
+unversioned encrypted values remain readable for compatibility; plaintext is
+never accepted by the startup verifier.
+
+The already-present masked staging key was retained rather than rotated
+blindly. `APP_ENCRYPTION_REQUIRE_PERSISTENT_KEY=true` was added without changing
+SMTP, Twilio or Stripe values. Initial deploy `dep-d9l00lid0e5s73ei0j8g`
+applied Flyway V7 and created one versioned 80-character continuity marker. A
+synthetic client then saved one synthetic provider token. Read-only staging
+evidence showed one 72-character `v1` ciphertext, no plaintext match and
+fingerprint `039e0ddfc22b67e4efb2cc4a475c6cb1`.
+
+Controlled same-commit deploy `dep-d9l03oj7uimc7389hllg` reached live. Startup
+logged successful continuity verification for one saved payment method,
+readiness returned HTTP 200 and the ciphertext fingerprint remained unchanged.
+The synthetic account was deleted through its authenticated account lifecycle;
+subsequent user and card counts were both zero. The encrypted continuity marker
+remains as operational state.
+
+The complete local candidate passed **568/568 tests across 146 suites** and
+`bootJar`. The first full browser run had one non-repeatable client CLS sample;
+an isolated rerun of all six throttled journeys passed with zero findings, so
+no performance edit was made. GitHub Actions run `30456277694` then passed the
+production CSS build, Java tests/artefact and full browser release gate using
+Java 21 and Node 22.22. The `main` branch now strictly requires the
+`Release gate` status check.
+
+The versioned environment/secret register is
+`Web_App/docs/phase4-environment-secret-manifest.md`. Production remains
+**NO-GO** because primary/backup production owners and deployment topology are
+unresolved and the intentional `2bd` provider placeholders have not completed
+their final sandbox lifecycles.
 
 Any real provider charge, refund, production data read/write, production webhook change or destructive database operation still requires James’s explicit approval.

@@ -4,7 +4,7 @@
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
 **Current branch:** `James/phase4-staging-readiness`
-**Current phase:** Phase 4 operational readiness; health, shared runtime state and privileged audit controls are complete, while real provider credentials remain deferred to the final pre-launch gate
+**Current phase:** Phase 4 launch controls; persistent saved-card encryption, configuration ownership, accurate provider wording and required CI are complete, while real provider credentials remain deferred to the final pre-launch gate
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
@@ -21,7 +21,7 @@ present before continuing on another device.
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md`, `Web_App/docs/phase4-staging-runbook.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 with the remaining launch-applicable P1 controls: configure a persistent saved-card encryption key and prove restart decryption, complete the secret/configuration ownership and rotation manifest, decide the provider delivery-state/wording contract, add a required CI release gate and decide whether launch requires two Render instances. Keep the SMTP, Twilio and Stripe values at the intentional `"2bd"` placeholders until the final pre-launch provider gate. Do not use real recipients, make real charges, alter production webhooks, create billable resources or access the existing `public` data without explicit approval.
+> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md`, `Web_App/docs/phase4-staging-runbook.md`, `Web_App/docs/phase4-environment-secret-manifest.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 with the remaining launch decisions: decide whether production accepts a documented maintenance handover or requires explicitly approved two-instance Render topology, and assign named primary and backup production monitoring/security owners. Keep the SMTP, Twilio and Stripe values at the intentional `"2bd"` placeholders until the final pre-launch provider gate. Do not use real recipients, make real charges, alter production webhooks, create billable resources or access the existing `public` data without explicit approval.
 
 ## Current verified status
 
@@ -40,7 +40,18 @@ Use this prompt after opening the repository on the new device:
 - James has confirmed that the Phase 3 human release gate passed, closing the remaining audible screen-reader and real-touch-device checks.
 - The final automated release gate covers public, login, client, trainer, gym and admin journeys: **88 responsive cases passed**, **22 Axe cases passed with zero serious/critical violations**, six cold-cache Slow 4G/4× CPU journeys passed, and six Lighthouse journeys passed.
 - Final Lighthouse scores are: public **97/100/100/100**, login **98/100/100/100**, client **86/100/100**, trainer **92/100/100**, gym **92/100/100** and admin **94/100/100** for performance/accessibility/best practices, with SEO included for public/login.
-- Latest full Gradle result: **557 tests passed, 0 failed, 0 skipped** across 143 suites.
+- Latest full Gradle result: **568 tests passed, 0 failed, 0 skipped** across 146 suites.
+- Saved provider tokens are AES-256-GCM ciphertext at rest. Render fails closed
+  without its persistent key and verifies the continuity marker plus every
+  saved token at startup. Deploy `dep-d9l03oj7uimc7389hllg` verified one
+  synthetic saved token after a controlled restart without changing its
+  ciphertext fingerprint; the synthetic account and card were then deleted.
+- The configuration/secret inventory and rotation/redaction controls are
+  versioned in `Web_App/docs/phase4-environment-secret-manifest.md`.
+- Provider-facing admin wording now accurately says email delivery was
+  attempted synchronously and is not tracked; it no longer claims a queue.
+- GitHub Actions run `30456277694` passed with the pinned Java 21/Node 22
+  toolchain. The strict `Release gate` status is required on `main`.
 - Latest local runtime proof: **HTTP 200** at `http://localhost:8081`, active profile `local`, datasource `jdbc:h2:mem:localdb`.
 - Latest CSS/JS version token: **`20260727p23`**.
 - Core CSS is **212,420 bytes / 207.4 KiB**, approximately 83% smaller than the previous monolithic core.
@@ -537,7 +548,7 @@ node --check src/main/resources/static/js/dashboard/client-dashboard-page.js
 
 ## Next implementation step
 
-Continue **Phase 4 — remaining launch controls**.
+Continue **Phase 4 — launch decision and final provider gate**.
 
 The isolated Render service, schema boundary, clean and forward migrations,
 all four upload boundaries, logical export, application rollback, isolated
@@ -548,20 +559,12 @@ intentionally deferred.
 
 Priority order:
 
-1. Configure a persistent saved-card encryption key in isolated staging and
-   prove that encrypted values remain decryptable across a restart.
-2. Complete the environment/secret manifest with an owner, rotation procedure,
-   expiry/revocation path and log-redaction check for every launch value.
-3. Resolve the provider delivery contract: add durable delivery/retry state or
-   replace the inaccurate “queued” wording with synchronous status.
-4. Make the full test and release-gate suites required CI checks before any
-   deploy, and document the forward-migration rollback decision.
-5. Decide whether production accepts a documented maintenance handover or
+1. Decide whether production accepts a documented maintenance handover or
    requires two Render instances for zero-downtime deployment. Scaling is
    billable and requires explicit approval.
-6. Assign named primary and backup production monitoring/security incident
+2. Assign named primary and backup production monitoring/security incident
    owners; James remains the interim staging owner only.
-7. At the final pre-launch gate, replace the invalid provider placeholders and
+3. At the final pre-launch gate, replace the invalid provider placeholders and
    prove the deferred SMTP, Twilio and Stripe lifecycles, then rerun every
    release gate.
 
@@ -569,9 +572,8 @@ Priority order:
 
 - Stripe test-mode payment completion, renewal, cancellation, failure, retry and duplicate webhook delivery.
 - External SMTP/Twilio sandbox verification and password-recovery delivery.
-- Persistent saved-card encryption and restart-decryption proof.
-- Provider delivery observability, required CI, production topology and named
-  primary/backup incident ownership.
+- Production topology and named primary/backup incident ownership.
+- Final sandbox-provider lifecycle proof with real test credentials.
 
 ## Rules for future updates to this file
 

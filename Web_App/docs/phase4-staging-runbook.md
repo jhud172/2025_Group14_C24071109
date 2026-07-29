@@ -26,8 +26,8 @@ Current resources:
 - Starter compute with automatic deploys disabled;
 - 1 GB disk `dsk-d9kct35aeets73ant8ag` mounted at `/var/data/uploads`;
 - PostgreSQL schema `one_to_one_staging` on `1to-one`;
-- live application commit `1fabec8e`, deploy
-  `dep-d9kvft2d0e5s73egun20`.
+- live application commit `fcf33145`, controlled-restart deploy
+  `dep-d9l03oj7uimc7389hllg`.
 
 ## Isolation boundary
 
@@ -315,7 +315,7 @@ Before deployment it passed:
   22.22/npm 11.11; CI must use the pinned toolchain;
 - `npm run build:css`;
 - `bootJar`;
-- **557/557 Gradle tests** across 143 suites;
+- **568/568 Gradle tests** across 146 suites;
 - **88/88 responsive**, **22/22 Axe**, **6/6 throttled** and **6/6
   Lighthouse** release-gate cases with zero findings.
 
@@ -329,6 +329,38 @@ hashed throttle state follows its configured expiry and the denial audit rows
 are intentionally retained under the 180-day evidence policy.
 Repeat provider tests only after the invalid staging sandbox values are
 replaced at the final pre-launch gate.
+
+## Saved-card key continuity and release gate
+
+`APP_ENCRYPTION_CARD_KEY` is present as a masked staging-only Render value and
+`APP_ENCRYPTION_REQUIRE_PERSISTENT_KEY=true` is explicit. Do not display,
+export or replace the key during normal operation. Render startup fails closed
+when the key is missing, malformed or cannot decrypt the singleton V7 marker
+and every saved provider token.
+
+Rotation is a data migration, not a direct variable replacement. Follow the
+dual-key re-encryption procedure in
+`docs/phase4-environment-secret-manifest.md`, preserve a tested backup and
+validate rollback before revoking the old key.
+
+Acceptance on 29 July 2026:
+
+1. deploy `dep-d9l00lid0e5s73ei0j8g` applied V7 and created one versioned
+   continuity marker;
+2. one synthetic `.example.test` client saved one synthetic provider token;
+3. the staging row was `v1` ciphertext, not plaintext, with fingerprint
+   `039e0ddfc22b67e4efb2cc4a475c6cb1`;
+4. same-commit deploy `dep-d9l03oj7uimc7389hllg` restarted the application;
+5. startup verified the marker and one saved token, the fingerprint was
+   unchanged and readiness returned HTTP 200;
+6. authenticated cleanup removed the synthetic user and card; both counts are
+   zero. The continuity marker remains intentionally.
+
+GitHub Actions workflow `.github/workflows/release-gate.yml` uses Java 21 and
+Node 22.22, performs clean npm installs, builds production CSS, runs Gradle
+tests plus `bootJar`, starts the local-profile JAR and runs `npm run
+qa:release`. Run `30456277694` passed. The strict `Release gate` context is
+required on `main`; a failing or missing check is a release stop.
 
 ## Evidence to retain
 
