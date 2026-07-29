@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import uk.ac.cf._5.group14.One_To_One.PaymentCards.CardEncryptionService;
 import uk.ac.cf._5.group14.One_To_One.PaymentCards.SavedPaymentMethod;
 import uk.ac.cf._5.group14.One_To_One.PaymentCards.SavedPaymentMethodRepository;
 import uk.ac.cf._5.group14.One_To_One.PaymentCards.SavedPaymentMethodServiceImpl;
@@ -24,6 +25,9 @@ class SavedPaymentMethodOwnershipTest {
 
     @Mock
     private SavedPaymentMethodRepository repo;
+
+    @Mock
+    private CardEncryptionService cardEncryptionService;
 
     @InjectMocks
     private SavedPaymentMethodServiceImpl service;
@@ -95,5 +99,51 @@ class SavedPaymentMethodOwnershipTest {
                 () -> service.addCard(u, "Name", "tok_abc", "99", "Visa", (short) 1, (short) 2030, false));
 
         verify(repo, never()).save(any());
+    }
+
+    @Test
+    void addCard_encryptsProviderTokenBeforePersistence() {
+        User u = user(1L);
+        when(repo.countByUserId(1L)).thenReturn(0);
+        when(cardEncryptionService.encrypt("pm_test_4242")).thenReturn("v1:encrypted");
+        when(repo.save(any(SavedPaymentMethod.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        SavedPaymentMethod saved = service.addCard(
+                u,
+                "James Test",
+                "pm_test_4242",
+                "4242",
+                "Visa",
+                (short) 12,
+                (short) 2030,
+                true
+        );
+
+        assertEquals("v1:encrypted", saved.getProviderPaymentMethodId());
+        assertNotEquals("pm_test_4242", saved.getProviderPaymentMethodId());
+        verify(cardEncryptionService).encrypt("pm_test_4242");
+    }
+
+    @Test
+    void resolveProviderToken_requiresOwnershipBeforeDecryption() {
+        when(repo.findByIdAndUserId(10L, 2L)).thenReturn(Optional.empty());
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> service.resolveProviderTokenForUser(10L, 2L)
+        );
+
+        verifyNoInteractions(cardEncryptionService);
+    }
+
+    @Test
+    void resolveProviderToken_decryptsOnlyOwnedCard() {
+        SavedPaymentMethod card = new SavedPaymentMethod();
+        card.setProviderPaymentMethodId("v1:encrypted");
+        when(repo.findByIdAndUserId(10L, 1L)).thenReturn(Optional.of(card));
+        when(cardEncryptionService.decrypt("v1:encrypted")).thenReturn("pm_test_4242");
+
+        assertEquals("pm_test_4242", service.resolveProviderTokenForUser(10L, 1L));
     }
 }

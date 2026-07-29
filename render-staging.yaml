@@ -12,7 +12,7 @@ services:
     dockerfilePath: ./Web_App/Dockerfile
     dockerContext: ./Web_App
     autoDeploy: false
-    healthCheckPath: /login
+    healthCheckPath: /actuator/health/readiness
     disk:
       name: staging-uploads
       mountPath: /var/data/uploads
@@ -46,6 +46,8 @@ services:
         value: /var/data/uploads/workout-videos
       - key: APP_ENCRYPTION_CARD_KEY
         generateValue: true
+      - key: APP_ENCRYPTION_REQUIRE_PERSISTENT_KEY
+        value: "true"
       - key: APP_EMAIL_PROVIDER
         value: none
       - key: APP_EMAIL_FAIL_ON_ERROR

@@ -1,0 +1,91 @@
+name: Release gate
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: release-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  release-gate:
+    name: Release gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: Web_App
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.22.0"
+          cache: npm
+          cache-dependency-path: |
+            Web_App/package-lock.json
+            Web_App/tools/playwright-local/package-lock.json
+
+      - name: Install JavaScript dependencies
+        run: |
+          npm ci
+          npm ci --prefix tools/playwright-local
+
+      - name: Install the Chromium test runtime
+        working-directory: Web_App/tools/playwright-local
+        run: npx playwright install --with-deps chromium
+
+      - name: Build production CSS
+        run: npm run build:css
+
+      - name: Run Java tests and build the release artefact
+        run: |
+          chmod +x ./gradlew
+          ./gradlew test bootJar --no-daemon
+
+      - name: Run the browser release gate
+        run: |
+          APP_JAR="$(find build/libs -maxdepth 1 -name '*.jar' ! -name '*-plain.jar' | head -n 1)"
+          test -n "$APP_JAR"
+          java -jar "$APP_JAR" \
+            --spring.profiles.active=local \
+            --server.port=8081 > "$RUNNER_TEMP/one-to-one.log" 2>&1 &
+          APP_PID=$!
+          trap 'kill "$APP_PID" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 90); do
+            if curl --fail --silent --show-error http://localhost:8081/login > /dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 90 ]; then
+              cat "$RUNNER_TEMP/one-to-one.log"
+              exit 1
+            fi
+            sleep 2
+          done
+
+          npm run qa:release
+
+      - name: Upload release-gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-gate-evidence
+          path: Web_App/output/playwright/release-gate
+          if-no-files-found: warn
+          retention-days: 14

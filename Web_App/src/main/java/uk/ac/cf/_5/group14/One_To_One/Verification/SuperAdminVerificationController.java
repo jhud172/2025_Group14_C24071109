@@ -92,7 +92,10 @@ public class SuperAdminVerificationController {
         
         try {
             verificationService.approveTrainer(id, admin.getId(), adminNotes);
-            redirectAttributes.addFlashAttribute("successMessage", "Trainer approved successfully. Notification queued.");
+            redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Trainer approved successfully. Email delivery was attempted immediately; delivery is not tracked."
+            );
         } catch (Exception e) {
             log.error("Error approving trainer", e);
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -120,7 +123,10 @@ public class SuperAdminVerificationController {
         
         try {
             verificationService.rejectTrainer(id, admin.getId(), adminNotes);
-            redirectAttributes.addFlashAttribute("successMessage", "Trainer verification rejected. Notification queued.");
+            redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Trainer verification rejected. Email delivery was attempted immediately; delivery is not tracked."
+            );
         } catch (Exception e) {
             log.error("Error rejecting trainer", e);
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -148,7 +154,10 @@ public class SuperAdminVerificationController {
         
         try {
             verificationService.requestMoreInfo(id, admin.getId(), adminNotes);
-            redirectAttributes.addFlashAttribute("successMessage", "Information requested from trainer. Notification queued.");
+            redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Information requested from trainer. Email delivery was attempted immediately; delivery is not tracked."
+            );
         } catch (Exception e) {
             log.error("Error requesting more info", e);
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

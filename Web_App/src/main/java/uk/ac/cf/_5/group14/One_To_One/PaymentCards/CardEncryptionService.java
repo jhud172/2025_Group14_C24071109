@@ -15,7 +15,8 @@ import java.util.logging.Logger;
 /**
  * AES-256-GCM encryption for sensitive card data.
  * The key is read from the {@code app.encryption.card-key} property (32-byte base64-encoded secret).
- * If no key is configured a random in-memory key is used (cards will not survive restarts).
+ * Local/demo environments may use a random in-memory key. Render requires a
+ * persistent key and fails closed when it is missing.
  */
 @Component
 public class CardEncryptionService {
@@ -29,15 +30,28 @@ public class CardEncryptionService {
 
     public CardEncryptionService(@Value("${app.encryption.card-key:}") String base64Key,
                                  @Value("${app.payments.stripe.secret-key:}") String stripeSecretKey,
-                                 @Value("${app.dev-mode:false}") boolean devMode) {
+                                 @Value("${app.dev-mode:false}") boolean devMode,
+                                 @Value("${app.encryption.require-persistent-key:false}")
+                                 boolean requirePersistentKey) {
         if (base64Key != null && !base64Key.isBlank()) {
-            byte[] keyBytes = Base64.getDecoder().decode(base64Key.trim());
+            final byte[] keyBytes;
+            try {
+                keyBytes = Base64.getDecoder().decode(base64Key.trim());
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalStateException(
+                        "app.encryption.card-key must be valid Base64", ex);
+            }
             if (keyBytes.length != 32) {
                 throw new IllegalStateException(
                         "app.encryption.card-key must be a 32-byte (256-bit) Base64-encoded key");
             }
             this.secretKey = new SecretKeySpec(keyBytes, "AES");
             return;
+        }
+
+        if (requirePersistentKey) {
+            throw new IllegalStateException(
+                    "app.encryption.card-key is required in this environment");
         }
 
         String message = "app.encryption.card-key is not configured. "
@@ -69,7 +83,8 @@ public class CardEncryptionService {
 
             byte[] ciphertext = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
 
-            return Base64.getEncoder().encodeToString(iv)
+            return "v1:"
+                    + Base64.getEncoder().encodeToString(iv)
                     + ":" + Base64.getEncoder().encodeToString(ciphertext);
         } catch (Exception e) {
             throw new IllegalStateException("Card encryption failed", e);
@@ -81,12 +96,24 @@ public class CardEncryptionService {
      */
     public String decrypt(String token) {
         try {
-            String[] parts = token.split(":", 2);
-            if (parts.length != 2) {
+            String[] parts = token.split(":");
+            int ivIndex;
+            int ciphertextIndex;
+            if (parts.length == 3 && "v1".equals(parts[0])) {
+                ivIndex = 1;
+                ciphertextIndex = 2;
+            } else if (parts.length == 2) {
+                // Backwards compatibility with the original unversioned format.
+                ivIndex = 0;
+                ciphertextIndex = 1;
+            } else {
                 throw new IllegalArgumentException("Invalid encrypted token format");
             }
-            byte[] iv = Base64.getDecoder().decode(parts[0]);
-            byte[] ciphertext = Base64.getDecoder().decode(parts[1]);
+            byte[] iv = Base64.getDecoder().decode(parts[ivIndex]);
+            byte[] ciphertext = Base64.getDecoder().decode(parts[ciphertextIndex]);
+            if (iv.length != GCM_IV_LENGTH) {
+                throw new IllegalArgumentException("Invalid encrypted token IV");
+            }
 
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, secretKey,

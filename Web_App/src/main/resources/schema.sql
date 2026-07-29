@@ -2995,3 +2995,12 @@ CREATE INDEX IF NOT EXISTS idx_privileged_audit_occurred_at
     ON privileged_audit_events (occurred_at);
 CREATE INDEX IF NOT EXISTS idx_privileged_audit_actor
     ON privileged_audit_events (actor, occurred_at);
+
+CREATE TABLE IF NOT EXISTS card_encryption_key_checks
+(
+    id               SMALLINT    PRIMARY KEY,
+    encrypted_marker TEXT        NOT NULL,
+    created_at       TIMESTAMP WITH TIME ZONE NOT NULL,
+    verified_at      TIMESTAMP WITH TIME ZONE NOT NULL,
+    CONSTRAINT card_encryption_key_check_singleton CHECK (id = 1)
+);

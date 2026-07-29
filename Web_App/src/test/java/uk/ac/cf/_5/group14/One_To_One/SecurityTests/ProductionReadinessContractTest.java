@@ -26,6 +26,8 @@ class ProductionReadinessContractTest {
                 RESOURCES.resolve("db/migration/postgresql/V4__align_saved_payment_last_four_type.sql");
         Path stripeWebhookLedgerMigration =
                 RESOURCES.resolve("db/migration/postgresql/V5__add_stripe_webhook_event_ledger.sql");
+        Path cardKeyCheckMigration =
+                RESOURCES.resolve("db/migration/postgresql/V7__add_card_encryption_key_check.sql");
 
         assertThat(renderProperties)
                 .contains("spring.sql.init.mode=never")
@@ -61,6 +63,13 @@ class ProductionReadinessContractTest {
                 .contains("CREATE TABLE IF NOT EXISTS stripe_webhook_events")
                 .contains("event_id")
                 .contains("PRIMARY KEY");
+        assertThat(cardKeyCheckMigration).isRegularFile();
+        assertThat(Files.readString(cardKeyCheckMigration))
+                .contains("CREATE TABLE IF NOT EXISTS card_encryption_key_checks")
+                .contains("encrypted_marker")
+                .contains("CHECK (id = 1)");
+        assertThat(renderProperties)
+                .contains("app.encryption.require-persistent-key=${APP_ENCRYPTION_REQUIRE_PERSISTENT_KEY:true}");
         assertThat(RESOURCES.resolve("render-data.sql")).doesNotExist();
     }
 
@@ -101,12 +110,40 @@ class ProductionReadinessContractTest {
                 .contains("branch: James/phase4-staging-readiness")
                 .contains("mountPath: /var/data/uploads")
                 .contains("autoDeploy: false")
+                .contains("healthCheckPath: /actuator/health/readiness")
                 .containsPattern("key: APP_DATABASE_SCHEMA\\R\\s+value: one_to_one_staging")
                 .containsPattern("key: APP_EMAIL_PROVIDER\\R\\s+value: none")
                 .containsPattern("key: APP_SMS_PROVIDER\\R\\s+value: console")
                 .containsPattern("key: STRIPE_SECRET_KEY\\R\\s+value: \"\"")
                 .containsPattern("key: DATABASE_URL\\R\\s+sync: false")
+                .containsPattern("key: APP_ENCRYPTION_CARD_KEY\\R\\s+generateValue: true")
+                .containsPattern("key: APP_ENCRYPTION_REQUIRE_PERSISTENT_KEY\\R\\s+value: \"true\"")
                 .doesNotContain("APP_DATABASE_SCHEMA: public")
                 .doesNotContain("one-to-one-web");
+    }
+
+    @Test
+    void releaseGateAndSecretOwnershipManifestAreVersionedContracts() throws IOException {
+        Path workflow = Path.of("../.github/workflows/release-gate.yml");
+        Path manifest = Path.of("docs/phase4-environment-secret-manifest.md");
+
+        assertThat(workflow).isRegularFile();
+        assertThat(Files.readString(workflow))
+                .contains("name: Release gate")
+                .contains("java-version: \"21\"")
+                .contains("node-version: \"22.22.0\"")
+                .contains("npm ci")
+                .contains("./gradlew test bootJar --no-daemon")
+                .contains("npm run qa:release");
+        assertThat(manifest).isRegularFile();
+        assertThat(Files.readString(manifest))
+                .contains("APP_ENCRYPTION_CARD_KEY")
+                .contains("STRIPE_WEBHOOK_SECRET")
+                .contains("TWILIO_AUTH_TOKEN")
+                .contains("SPRING_MAIL_PASSWORD")
+                .contains("DATABASE_PASSWORD")
+                .contains("Rotation")
+                .contains("Redaction")
+                .doesNotContain("APP_ENCRYPTION_CARD_KEY=");
     }
 }

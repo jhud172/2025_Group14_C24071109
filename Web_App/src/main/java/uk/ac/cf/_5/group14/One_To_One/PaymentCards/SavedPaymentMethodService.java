@@ -12,6 +12,13 @@ public interface SavedPaymentMethodService {
     Optional<SavedPaymentMethod> findByIdForUser(Long id, Long userId);
 
     /**
+     * Resolves the provider token for a user-owned payment method.
+     * The decrypted value must be passed only to the configured payment
+     * provider and must never be rendered or logged.
+     */
+    String resolveProviderTokenForUser(Long id, Long userId);
+
+    /**
      * Adds a new card for the user.
      * The raw PAN must never be passed here; callers should instead obtain a
      * provider-issued token (e.g. from Stripe/Adyen hosted fields) client-side and
