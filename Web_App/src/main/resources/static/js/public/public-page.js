@@ -47,8 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
             badgeBounceTimer = window.setTimeout(() => trigger.classList.remove(className), duration);
         };
 
-        const setMorphTarget = () => {
-            const trigger = visibleTrigger();
+        const setMorphTarget = (preferredTrigger = null) => {
+            const preferredRect = preferredTrigger?.getBoundingClientRect();
+            const trigger = preferredRect?.width > 0 && preferredRect?.height > 0
+                ? preferredTrigger
+                : visibleTrigger();
             if (!trigger || !card) {
                 return trigger;
             }
@@ -68,13 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const finishDismissal = () => {
-            const trigger = visibleTrigger();
-            notice.classList.remove('is-visible', 'is-entering', 'is-exiting');
+            notice.classList.remove('is-visible', 'is-entering', 'is-exiting', 'is-measuring');
             notice.hidden = true;
             notice.setAttribute('aria-hidden', 'true');
             notice.setAttribute('inert', '');
             setTriggerState(false);
-
         };
 
         const dismiss = () => {
@@ -100,8 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             badgeBounceTimer = window.setTimeout(() => {
                 bounceTrigger(trigger, 'is-receiving-notice', 720);
-            }, 400);
-            finishTimer = window.setTimeout(finishDismissal, 700);
+            }, 360);
+            finishTimer = window.setTimeout(finishDismissal, 620);
         };
 
         const show = ({ trigger = null } = {}) => {
@@ -109,17 +110,21 @@ document.addEventListener('DOMContentLoaded', () => {
             notice.hidden = false;
             notice.removeAttribute('inert');
             notice.setAttribute('aria-hidden', 'false');
-            notice.classList.remove('is-visible', 'is-entering', 'is-exiting');
+            notice.classList.remove('is-visible', 'is-entering', 'is-exiting', 'is-measuring');
+            notice.classList.add('is-measuring');
+
+            const activeTrigger = setMorphTarget(trigger);
 
             if (card) {
                 void card.offsetWidth;
             }
 
+            notice.classList.remove('is-measuring');
             notice.classList.add('is-visible');
             if (!prefersReducedMotion) {
                 notice.classList.add('is-entering');
-                entranceTimer = window.setTimeout(() => notice.classList.remove('is-entering'), 780);
-                bounceTrigger(trigger, 'is-launching-notice', 520);
+                entranceTimer = window.setTimeout(() => notice.classList.remove('is-entering'), 680);
+                bounceTrigger(activeTrigger, 'is-launching-notice', 520);
             }
 
             setTriggerState(true);
@@ -139,6 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 dismiss();
             }
         });
+
+        window.addEventListener('resize', () => {
+            if (!notice.hidden) {
+                setMorphTarget();
+            }
+        }, { passive: true });
 
         setTriggerState(false);
         return { show };
@@ -184,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showDevModeNotification();
     }
 
-    const createTabController = ({ tabSelector, panelSelector, keyName }) => {
+    const createTabController = ({ tabSelector, panelSelector, keyName, activateOnHover = false }) => {
         const tabs = Array.from(document.querySelectorAll(tabSelector));
         const panels = Array.from(document.querySelectorAll(panelSelector));
         if (!tabs.length || !panels.length) {
@@ -211,6 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tabs.forEach((tab, index) => {
             tab.addEventListener('click', () => activate(tab));
+            if (activateOnHover) {
+                tab.addEventListener('pointerenter', () => {
+                    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                        activate(tab);
+                    }
+                });
+            }
             tab.addEventListener('keydown', (event) => {
                 if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
                     return;
@@ -234,27 +252,541 @@ document.addEventListener('DOMContentLoaded', () => {
     createTabController({
         tabSelector: '[data-workspace-tab]',
         panelSelector: '[data-workspace-panel]',
-        keyName: 'workspaceTab'
+        keyName: 'workspaceTab',
+        activateOnHover: true
     });
+
+    const workspaceScenes = Array.from(document.querySelectorAll('[data-workspace-scene]'));
+    const supportsWorkspaceDepth = !prefersReducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (supportsWorkspaceDepth) {
+        workspaceScenes.forEach((scene) => {
+            scene.addEventListener('pointermove', (event) => {
+                const bounds = scene.getBoundingClientRect();
+                const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+                const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+                scene.style.setProperty('--workspace-image-x', `${((0.5 - x) * 9).toFixed(1)}px`);
+                scene.style.setProperty('--workspace-image-y', `${((0.5 - y) * 6).toFixed(1)}px`);
+            });
+            scene.addEventListener('pointerleave', () => {
+                scene.style.setProperty('--workspace-image-x', '0px');
+                scene.style.setProperty('--workspace-image-y', '0px');
+            });
+        });
+    }
+
+    const finalCta = document.querySelector('[data-final-cta]');
+    const supportsFinalDepth = finalCta
+        && !prefersReducedMotion
+        && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (supportsFinalDepth) {
+        let finalFrame = null;
+        const setFinalPose = (x, y) => {
+            finalCta.style.setProperty('--final-rotate-x', `${((0.5 - y) * 2.4).toFixed(2)}deg`);
+            finalCta.style.setProperty('--final-rotate-y', `${((x - 0.5) * 3.4).toFixed(2)}deg`);
+            finalCta.style.setProperty('--final-light-x', `${38 + (x * 54)}%`);
+            finalCta.style.setProperty('--final-light-y', `${8 + (y * 54)}%`);
+        };
+
+        finalCta.addEventListener('pointermove', (event) => {
+            const bounds = finalCta.getBoundingClientRect();
+            const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+            const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+            window.cancelAnimationFrame(finalFrame);
+            finalFrame = window.requestAnimationFrame(() => setFinalPose(x, y));
+        });
+        finalCta.addEventListener('pointerleave', () => {
+            window.cancelAnimationFrame(finalFrame);
+            setFinalPose(0.74, 0.18);
+            finalCta.style.setProperty('--final-rotate-x', '0deg');
+            finalCta.style.setProperty('--final-rotate-y', '0deg');
+        });
+    }
+
+    const createProductDemoController = () => {
+        const stage = document.querySelector('[data-product-stage]');
+        if (!stage) {
+            return;
+        }
+
+        const previewTabs = Array.from(stage.querySelectorAll('[data-preview-tab]'));
+        const railButtons = Array.from(stage.querySelectorAll('[data-product-nav]'));
+        const resetButton = stage.querySelector('[data-demo-reset]');
+        const sessionControl = stage.querySelector('[data-session-control]');
+        const completeControl = stage.querySelector('[data-complete-exercise]');
+        const progressTrack = stage.querySelector('[data-session-progress-track]');
+        const progressFill = stage.querySelector('[data-session-progress]');
+        const readiness = stage.querySelector('[data-demo-readiness]');
+        const remaining = stage.querySelector('[data-session-remaining]');
+        const sessionLabel = stage.querySelector('[data-session-label]');
+        const syncLabel = stage.querySelector('[data-demo-sync]');
+        const demoFeedback = stage.querySelector('[data-demo-feedback]');
+        const exercises = Array.from(stage.querySelectorAll('[data-demo-exercise]'));
+        const coachDrawer = stage.querySelector('[data-coach-drawer]');
+        const coachClose = stage.querySelector('[data-coach-close]');
+        const coachMessage = stage.querySelector('[data-coach-message]');
+        const coachSend = stage.querySelector('[data-coach-send]');
+        const coachFeedback = stage.querySelector('[data-coach-feedback]');
+        const translated = (name, fallback) => stage.dataset[name] || fallback;
+        const formatTranslated = (template, ...values) => template.replace(
+            /\{(\d+)}/g,
+            (match, index) => values[Number(index)] ?? match
+        );
+        const numberValues = (name, fallback) => translated(name, fallback)
+            .split(',')
+            .map((value) => Number.parseInt(value.trim(), 10))
+            .filter(Number.isFinite);
+        const textValues = (name, fallback) => translated(name, fallback).split('|');
+        const completeMarkerMarkup = exercises[0]?.querySelector(':scope > span')?.innerHTML || '';
+        const initialExercises = exercises.map((exercise) => ({
+            className: exercise.className,
+            markerClass: exercise.firstElementChild?.className || '',
+            markerMarkup: exercise.firstElementChild?.innerHTML || '',
+            status: exercise.querySelector('[data-exercise-status]')?.textContent || ''
+        }));
+        let activeExerciseIndex = 1;
+        let completedExercises = 1;
+        let sessionRunning = false;
+        let sessionComplete = false;
+
+        const setRailState = (value) => {
+            railButtons.forEach((button) => {
+                button.classList.toggle('is-active', button.dataset.productNav === value);
+            });
+        };
+
+        const closeCoachDrawer = ({ restoreNavigation = true } = {}) => {
+            if (!coachDrawer || coachDrawer.hidden) {
+                return;
+            }
+            coachDrawer.hidden = true;
+            if (restoreNavigation) {
+                const selectedTab = previewTabs.find((tab) => tab.getAttribute('aria-selected') === 'true');
+                setRailState(selectedTab?.dataset.previewTab || 'today');
+            }
+        };
+
+        const openCoachDrawer = () => {
+            if (!coachDrawer) {
+                return;
+            }
+            coachDrawer.hidden = false;
+            setRailState('coach');
+            coachMessage?.focus();
+        };
+
+        previewTabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                closeCoachDrawer({ restoreNavigation: false });
+                setRailState(tab.dataset.previewTab);
+            });
+        });
+
+        railButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const destination = button.dataset.productNav;
+                if (destination === 'coach') {
+                    openCoachDrawer();
+                    return;
+                }
+                closeCoachDrawer({ restoreNavigation: false });
+                previewTabs.find((tab) => tab.dataset.previewTab === destination)?.click();
+                setRailState(destination);
+            });
+        });
+
+        coachClose?.addEventListener('click', () => {
+            closeCoachDrawer();
+            railButtons.find((button) => button.classList.contains('is-active'))?.focus();
+        });
+
+        coachSend?.addEventListener('click', () => {
+            const message = coachMessage?.value.trim() || '';
+            if (!message) {
+                if (coachFeedback) {
+                    coachFeedback.textContent = translated(
+                        'i18nNoteRequired',
+                        'Add a short session note before sending.'
+                    );
+                }
+                coachMessage?.focus();
+                return;
+            }
+            if (coachFeedback) {
+                coachFeedback.textContent = translated('i18nNoteSent', 'Update sent to Coach Alex.');
+            }
+            if (syncLabel) {
+                syncLabel.textContent = translated('i18nSyncSent', 'Coach update sent');
+            }
+            if (coachMessage) {
+                coachMessage.value = '';
+            }
+        });
+
+        const setExerciseState = (exercise, index, state) => {
+            const marker = exercise.firstElementChild;
+            const status = exercise.querySelector('[data-exercise-status]');
+            exercise.classList.toggle('is-complete', state === 'complete');
+            exercise.classList.toggle('is-current', state === 'current');
+
+            if (marker) {
+                marker.className = state === 'complete' ? 'exercise-list__state' : 'exercise-list__index';
+                marker.innerHTML = state === 'complete'
+                    ? completeMarkerMarkup
+                    : String(index + 1).padStart(2, '0');
+            }
+            if (status) {
+                status.textContent = state === 'complete'
+                    ? (index === 0 ? initialExercises[0].status : translated('i18nCompleted', 'Completed'))
+                    : (state === 'current'
+                        ? translated('i18nCurrent', 'In progress')
+                        : translated('i18nNext', 'Up next'));
+            }
+        };
+
+        const renderSessionState = () => {
+            const progressValues = numberValues('i18nProgressValues', '0,38,70,100');
+            const readinessValues = numberValues('i18nReadinessValues', '82,86,90,94');
+            const remainingValues = textValues(
+                'i18nRemainingValues',
+                '45 min remaining|32 min remaining|18 min remaining|Session complete'
+            );
+            const progress = progressValues[completedExercises] ?? 100;
+
+            exercises.forEach((exercise, index) => {
+                if (index < completedExercises) {
+                    setExerciseState(exercise, index, 'complete');
+                } else if (!sessionComplete && index === activeExerciseIndex) {
+                    setExerciseState(exercise, index, 'current');
+                } else {
+                    setExerciseState(exercise, index, 'upcoming');
+                }
+            });
+
+            if (progressFill) {
+                progressFill.style.width = `${progress}%`;
+            }
+            progressTrack?.setAttribute('aria-valuenow', String(progress));
+            if (readiness) {
+                readiness.textContent = String(readinessValues[completedExercises] ?? 94);
+            }
+            if (remaining) {
+                remaining.textContent = remainingValues[completedExercises]
+                    || translated('i18nSessionComplete', 'Session complete');
+            }
+
+            stage.classList.toggle('is-demo-running', sessionRunning);
+            sessionControl?.classList.toggle('is-running', sessionRunning);
+            sessionControl?.setAttribute('aria-pressed', String(sessionRunning));
+            if (sessionControl) {
+                sessionControl.disabled = sessionComplete;
+            }
+            if (completeControl) {
+                completeControl.disabled = !sessionRunning || sessionComplete;
+                const exerciseName = exercises[activeExerciseIndex]?.querySelector('strong')?.textContent;
+                completeControl.textContent = exerciseName
+                    ? formatTranslated(
+                        translated('i18nCompletePattern', 'Complete {0}'),
+                        exerciseName
+                    )
+                    : formatTranslated(
+                        translated('i18nCompletePattern', 'Complete {0}'),
+                        translated('i18nExercise', 'exercise').toLocaleLowerCase(document.documentElement.lang)
+                    );
+            }
+
+            if (sessionLabel) {
+                sessionLabel.textContent = sessionComplete
+                    ? translated('i18nSessionComplete', 'Session complete')
+                    : (sessionRunning
+                        ? translated('i18nPause', 'Pause session')
+                        : (completedExercises > 1
+                            ? translated('i18nResume', 'Resume session')
+                            : translated('i18nStart', 'Start session')));
+            }
+            if (syncLabel) {
+                syncLabel.textContent = sessionComplete
+                    ? translated('i18nCoachNotified', 'Coach notified')
+                    : (sessionRunning
+                        ? translated('i18nSessionLive', 'Session live')
+                        : (completedExercises > 1
+                            ? translated('i18nProgressSaved', 'Progress saved')
+                            : translated('i18nSyncInitial', 'Synced with coach')));
+            }
+        };
+
+        sessionControl?.addEventListener('click', () => {
+            if (sessionComplete) {
+                return;
+            }
+            sessionRunning = !sessionRunning;
+            if (demoFeedback) {
+                const exerciseName = exercises[activeExerciseIndex]?.querySelector('strong')?.textContent
+                    || translated('i18nExercise', 'Exercise');
+                demoFeedback.textContent = sessionRunning
+                    ? formatTranslated(
+                        translated(
+                            'i18nExerciseActive',
+                            '{0} is active. Complete it when the working sets are finished.'
+                        ),
+                        exerciseName
+                    )
+                    : translated('i18nSessionPaused', 'Session paused. Your progress is saved in this demo.');
+            }
+            renderSessionState();
+        });
+
+        completeControl?.addEventListener('click', () => {
+            if (!sessionRunning || sessionComplete) {
+                return;
+            }
+            const completedName = exercises[activeExerciseIndex]?.querySelector('strong')?.textContent
+                || translated('i18nExercise', 'Exercise');
+            completedExercises += 1;
+            if (completedExercises >= exercises.length) {
+                activeExerciseIndex = -1;
+                sessionRunning = false;
+                sessionComplete = true;
+                if (demoFeedback) {
+                    demoFeedback.textContent = translated(
+                        'i18nSessionFinished',
+                        'Session complete. Coach Alex has been notified and your progress view is updated.'
+                    );
+                }
+            } else {
+                activeExerciseIndex = completedExercises;
+                const nextName = exercises[activeExerciseIndex]?.querySelector('strong')?.textContent
+                    || translated('i18nNextExercise', 'the next exercise');
+                if (demoFeedback) {
+                    demoFeedback.textContent = formatTranslated(
+                        translated('i18nExerciseNext', '{0} complete. {1} is ready.'),
+                        completedName,
+                        nextName
+                    );
+                }
+            }
+            renderSessionState();
+        });
+
+        const resetDemo = () => {
+            activeExerciseIndex = 1;
+            completedExercises = 1;
+            sessionRunning = false;
+            sessionComplete = false;
+            exercises.forEach((exercise, index) => {
+                const snapshot = initialExercises[index];
+                exercise.className = snapshot.className;
+                if (exercise.firstElementChild) {
+                    exercise.firstElementChild.className = snapshot.markerClass;
+                    exercise.firstElementChild.innerHTML = snapshot.markerMarkup;
+                }
+                const status = exercise.querySelector('[data-exercise-status]');
+                if (status) {
+                    status.textContent = snapshot.status;
+                }
+            });
+            if (demoFeedback) {
+                demoFeedback.textContent = translated(
+                    'i18nFeedbackInitial',
+                    'Start the session, then complete each exercise to update your live plan.'
+                );
+            }
+            if (coachFeedback) {
+                coachFeedback.textContent = translated(
+                    'i18nDemoLocal',
+                    'This demo message stays on this page.'
+                );
+            }
+            if (coachMessage) {
+                coachMessage.value = '';
+            }
+            closeCoachDrawer({ restoreNavigation: false });
+            previewTabs.find((tab) => tab.dataset.previewTab === 'today')?.click();
+            setRailState('today');
+            renderSessionState();
+        };
+
+        resetButton?.addEventListener('click', resetDemo);
+
+        const supportsStageTilt = !prefersReducedMotion
+            && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const setStagePose = (x, y) => {
+            stage.style.setProperty('--stage-rotate-x', `${(-y * 6.4).toFixed(2)}deg`);
+            stage.style.setProperty('--stage-rotate-y', `${(x * 9.6).toFixed(2)}deg`);
+            stage.style.setProperty('--stage-light-x', `${50 + (x * 34)}%`);
+            stage.style.setProperty('--stage-light-y', `${35 + (y * 28)}%`);
+        };
+
+        if (supportsStageTilt) {
+            stage.addEventListener('pointermove', (event) => {
+                if (event.buttons !== 1
+                    || event.target.closest('button, a, input, textarea, [role="tab"]')) {
+                    return;
+                }
+                const bounds = stage.getBoundingClientRect();
+                setStagePose(
+                    ((event.clientX - bounds.left) / bounds.width) - 0.5,
+                    ((event.clientY - bounds.top) / bounds.height) - 0.5
+                );
+            });
+            stage.addEventListener('pointerup', () => setStagePose(0, 0));
+            stage.addEventListener('pointercancel', () => setStagePose(0, 0));
+            stage.addEventListener('pointerleave', () => setStagePose(0, 0));
+            stage.addEventListener('blur', () => setStagePose(0, 0));
+        }
+
+        stage.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && coachDrawer && !coachDrawer.hidden) {
+                closeCoachDrawer();
+                return;
+            }
+            if (event.target !== stage || !supportsStageTilt) {
+                return;
+            }
+            const poses = {
+                ArrowLeft: [-0.45, 0],
+                ArrowRight: [0.45, 0],
+                ArrowUp: [0, -0.4],
+                ArrowDown: [0, 0.4]
+            };
+            if (!poses[event.key]) {
+                return;
+            }
+            event.preventDefault();
+            setStagePose(...poses[event.key]);
+        });
+
+        renderSessionState();
+    };
+
+    createProductDemoController();
+
+    const createHomeChapterNavigation = () => {
+        const chapters = Array.from(document.querySelectorAll('[data-home-chapter]'));
+        const chapterLinks = Array.from(document.querySelectorAll('[data-home-chapter-next]'));
+        const toTopTrigger = document.querySelector('[data-home-to-top-trigger]');
+        const toTop = document.querySelector('[data-home-to-top]');
+        if (!chapters.length || !toTopTrigger || !toTop) {
+            return;
+        }
+
+        document.documentElement.classList.add('home-chapters-ready');
+
+        const scrollToChapter = (event) => {
+            const targetId = event.currentTarget.getAttribute('href');
+            const target = targetId?.startsWith('#') ? document.querySelector(targetId) : null;
+            if (!target) {
+                return;
+            }
+
+            event.preventDefault();
+            target.scrollIntoView({
+                behavior: prefersReducedMotion ? 'auto' : 'smooth',
+                block: 'start'
+            });
+        };
+
+        chapterLinks.forEach((link) => link.addEventListener('click', scrollToChapter));
+        toTop.addEventListener('click', (event) => {
+            scrollToChapter(event);
+            toTop.classList.remove('is-visible');
+            toTop.setAttribute('aria-hidden', 'true');
+            toTop.tabIndex = -1;
+        });
+
+        let updateQueued = false;
+        const updateToTop = () => {
+            updateQueued = false;
+            const triggerBounds = toTopTrigger.getBoundingClientRect();
+            const navigationOffset = Number.parseFloat(
+                window.getComputedStyle(document.documentElement).scrollPaddingTop
+            ) || 0;
+            const hasPassedHowItWorks = triggerBounds.bottom <= navigationOffset;
+            toTop.classList.toggle('is-visible', hasPassedHowItWorks);
+            toTop.setAttribute('aria-hidden', String(!hasPassedHowItWorks));
+            toTop.tabIndex = hasPassedHowItWorks ? 0 : -1;
+        };
+
+        const queueToTopUpdate = () => {
+            if (updateQueued) {
+                return;
+            }
+            updateQueued = true;
+            window.requestAnimationFrame(updateToTop);
+        };
+
+        updateToTop();
+        window.addEventListener('scroll', queueToTopUpdate, { passive: true });
+        window.addEventListener('resize', queueToTopUpdate, { passive: true });
+    };
+
+    createHomeChapterNavigation();
 
     const brandObject = document.querySelector('[data-brand-object]');
     if (brandObject && !prefersReducedMotion) {
-        const setBrandPose = (x, y) => {
-            brandObject.style.setProperty('--brand-rotate-x', `${(-4 - (y * 10)).toFixed(2)}deg`);
-            brandObject.style.setProperty('--brand-rotate-y', `${(-9 + (x * 14)).toFixed(2)}deg`);
+        const visual = brandObject.closest('[data-home-depth]');
+        const currentPose = { x: 0, y: 0 };
+        const targetPose = { x: 0, y: 0 };
+        let interactionBounds = null;
+        let poseFrame = 0;
+        let previousFrameTime = performance.now();
+
+        const renderBrandPose = (x, y) => {
+            brandObject.style.setProperty('--brand-rotate-x', `${(-5 - (y * 11)).toFixed(2)}deg`);
+            brandObject.style.setProperty('--brand-rotate-y', `${(-8 + (x * 18)).toFixed(2)}deg`);
             brandObject.style.setProperty('--brand-shine-x', `${50 + (x * 28)}%`);
             brandObject.style.setProperty('--brand-shine-y', `${45 + (y * 25)}%`);
+            visual?.style.setProperty('--signal-shift-x', `${(-x * 12).toFixed(1)}px`);
+            visual?.style.setProperty('--signal-shift-y', `${(-y * 9).toFixed(1)}px`);
         };
 
+        const animateBrandPose = (time) => {
+            const elapsed = Math.min(Math.max((time - previousFrameTime) / 1000, 0), 0.05);
+            const smoothing = 1 - Math.exp(-11 * elapsed);
+            previousFrameTime = time;
+            currentPose.x += (targetPose.x - currentPose.x) * smoothing;
+            currentPose.y += (targetPose.y - currentPose.y) * smoothing;
+
+            const distance = Math.abs(targetPose.x - currentPose.x) + Math.abs(targetPose.y - currentPose.y);
+            if (distance < 0.001) {
+                currentPose.x = targetPose.x;
+                currentPose.y = targetPose.y;
+                renderBrandPose(currentPose.x, currentPose.y);
+                poseFrame = 0;
+                return;
+            }
+
+            renderBrandPose(currentPose.x, currentPose.y);
+            poseFrame = window.requestAnimationFrame(animateBrandPose);
+        };
+
+        const moveBrandTo = (x, y) => {
+            targetPose.x = Math.max(-0.5, Math.min(0.5, x));
+            targetPose.y = Math.max(-0.5, Math.min(0.5, y));
+            if (poseFrame) {
+                return;
+            }
+            previousFrameTime = performance.now();
+            poseFrame = window.requestAnimationFrame(animateBrandPose);
+        };
+
+        const resetBrandPose = () => {
+            interactionBounds = null;
+            moveBrandTo(0, 0);
+        };
+
+        brandObject.addEventListener('pointerenter', () => {
+            interactionBounds = brandObject.getBoundingClientRect();
+        });
         brandObject.addEventListener('pointermove', (event) => {
-            const bounds = brandObject.getBoundingClientRect();
-            setBrandPose(
+            const bounds = interactionBounds || brandObject.getBoundingClientRect();
+            moveBrandTo(
                 ((event.clientX - bounds.left) / bounds.width) - 0.5,
                 ((event.clientY - bounds.top) / bounds.height) - 0.5
             );
         });
-        brandObject.addEventListener('pointerleave', () => setBrandPose(0, 0));
-        brandObject.addEventListener('blur', () => setBrandPose(0, 0));
+        brandObject.addEventListener('pointerleave', resetBrandPose);
+        brandObject.addEventListener('pointercancel', resetBrandPose);
+        brandObject.addEventListener('blur', resetBrandPose);
         brandObject.addEventListener('keydown', (event) => {
             const poses = {
                 ArrowLeft: [-0.45, 0],
@@ -264,34 +796,79 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             if (!poses[event.key]) return;
             event.preventDefault();
-            setBrandPose(...poses[event.key]);
+            moveBrandTo(...poses[event.key]);
         });
     }
 
-    const sessionControl = document.querySelector('[data-session-control]');
-    sessionControl?.addEventListener('click', () => {
-        const isRunning = sessionControl.getAttribute('aria-pressed') === 'true';
-        sessionControl.setAttribute('aria-pressed', String(!isRunning));
-        sessionControl.classList.toggle('is-running', !isRunning);
-        const label = sessionControl.querySelector('[data-session-label]');
-        if (label) {
-            label.textContent = isRunning ? 'Continue session' : 'Session active';
-        }
-    });
+    const createStandardExperience = (controller) => {
+        const tabs = Array.from(controller.querySelectorAll('[data-standard-tab]'));
+        const panels = Array.from(controller.querySelectorAll('[data-standard-panel]'));
+        const proof = controller.querySelector('[data-standard-proof]');
+        if (!tabs.length || !panels.length || !proof) return;
 
-    const standardItems = Array.from(document.querySelectorAll('[data-standard-item]'));
-    if (standardItems.length && 'IntersectionObserver' in window) {
-        const standardObserver = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                standardItems.forEach((item) => item.classList.toggle('is-current', item === entry.target));
+        let activeKey = tabs.find((tab) => tab.classList.contains('is-current'))?.dataset.standardTab || tabs[0].dataset.standardTab;
+
+        const activate = (key, shouldFocus = false) => {
+            const nextTab = tabs.find((tab) => tab.dataset.standardTab === key);
+            const nextPanel = panels.find((panel) => panel.dataset.standardPanel === key);
+            if (!nextTab || !nextPanel) return;
+
+            activeKey = key;
+            tabs.forEach((tab) => {
+                const isActive = tab === nextTab;
+                tab.classList.toggle('is-current', isActive);
+                tab.setAttribute('aria-selected', String(isActive));
+                tab.tabIndex = isActive ? 0 : -1;
             });
-        }, { rootMargin: '-35% 0px -45% 0px', threshold: 0 });
-        standardItems.forEach((item) => standardObserver.observe(item));
-        standardItems[0].classList.add('is-current');
-    } else {
-        standardItems[0]?.classList.add('is-current');
-    }
+            panels.forEach((panel) => {
+                const isActive = panel === nextPanel;
+                panel.hidden = !isActive;
+                panel.classList.toggle('is-active', isActive);
+            });
+            proof.dataset.activeProof = key;
+            if (shouldFocus) nextTab.focus();
+        };
+
+        tabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => activate(tab.dataset.standardTab));
+            tab.addEventListener('pointerenter', () => {
+                if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                    activate(tab.dataset.standardTab);
+                }
+            });
+            tab.addEventListener('keydown', (event) => {
+                let nextIndex = index;
+                if (event.key === 'ArrowDown' || event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+                else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+                else if (event.key === 'Home') nextIndex = 0;
+                else if (event.key === 'End') nextIndex = tabs.length - 1;
+                else return;
+                event.preventDefault();
+                activate(tabs[nextIndex].dataset.standardTab, true);
+            });
+        });
+
+        const supportsProofDepth = !prefersReducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        if (supportsProofDepth) {
+            proof.addEventListener('pointermove', (event) => {
+                const bounds = proof.getBoundingClientRect();
+                const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+                const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+                proof.style.setProperty('--standard-pointer-x', `${(x * 100).toFixed(1)}%`);
+                proof.style.setProperty('--standard-pointer-y', `${(y * 100).toFixed(1)}%`);
+                proof.style.transform = `perspective(1300px) rotateX(${((0.5 - y) * 2.6).toFixed(2)}deg) rotateY(${((x - 0.5) * 3.8).toFixed(2)}deg) translateY(-2px)`;
+            });
+            proof.addEventListener('pointerleave', () => {
+                proof.style.removeProperty('transform');
+                proof.style.setProperty('--standard-pointer-x', '58%');
+                proof.style.setProperty('--standard-pointer-y', '36%');
+            });
+        }
+
+        activate(activeKey);
+    };
+
+    document.querySelectorAll('[data-standard-controller]').forEach(createStandardExperience);
 
     const depthStage = document.querySelector('[data-home-depth]');
     if (depthStage && !prefersReducedMotion) {

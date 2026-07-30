@@ -40,7 +40,7 @@
         <a th:href="@{/merch}"
            class="navlink group"
            th:classappend="${pageTitle != null and pageTitle == 'Merch Shop'} ? ' navlink-active' : ''">
-            <span>Shop</span>
+            <span th:text="#{nav.shop}">Shop</span>
         </a>
     </th:block>
 
@@ -493,7 +493,7 @@
 
 <header xmlns:th="http://www.thymeleaf.org"
         th:fragment="navbar"
-    class="navheader relative">
+        class="navheader">
     <!-- Accent strip -->
     <div class="accentstrip"></div>
     <div class="mx-auto w-full px-4 sm:px-6 lg:px-8">
@@ -512,7 +512,7 @@
             <!-- Full navigation -->
             <div class="navheader__nav-slot">
                 <div class="desktop-nav">
-                    <nav aria-label="Primary navigation">
+                    <nav th:attr="aria-label=#{nav.primary}">
                     <th:block sec:authorize="hasAnyRole('CLIENT','USER') and !hasAnyRole('TRAINER','GYM_ADMIN','PLATFORM_ADMIN','SUPER_ADMIN')">
                         <div class="navsurface navsurface--desktop">
                             <div class="navsurface__track">
@@ -569,7 +569,7 @@
                                         <line x1="3" y1="6" x2="21" y2="6"/>
                                         <path d="M16 10a4 4 0 0 1-8 0"/>
                                     </svg>
-                                    <span>Shop</span>
+                                    <span th:text="#{nav.shop}">Shop</span>
                                 </a>
 
                                 <a th:href="@{/levels}" class="navlink group"
@@ -603,11 +603,13 @@
             <div class="navheader__banner-slot">
                 <div class="authsurface">
                     <th:block sec:authorize="!isAuthenticated()">
-                        <th:block th:replace="~{universal-fragments/dev/dev-mode :: pill('dev-mode-pill--navbar', 'Development')}"></th:block>
+                        <th:block th:replace="~{universal-fragments/dev/dev-mode :: pill('dev-mode-pill--navbar', #{nav.development})}"></th:block>
                     </th:block>
                     <th:block sec:authorize="isAuthenticated()">
-                        <th:block th:replace="~{universal-fragments/dev/dev-mode :: pill('dev-mode-pill--profile', 'DEV MODE')}"></th:block>
+                        <th:block th:replace="~{universal-fragments/dev/dev-mode :: pill('dev-mode-pill--profile', #{nav.developmentMode})}"></th:block>
                     </th:block>
+
+                    <th:block th:replace="~{universal-fragments/layout/language-selector :: languageSelector}"></th:block>
 
                     <div class="nav-user-shell">
                         <div th:replace="~{universal-fragments/layout/username-logout :: usernameLogout}"></div>
@@ -621,8 +623,8 @@
                         class="nav-dropdown-trigger"
                         aria-controls="siteNavMenu"
                         aria-expanded="false"
-                        aria-label="Toggle navigation">
-                    <span class="sr-only">Toggle navigation</span>
+                        th:attr="aria-label=#{nav.toggle}">
+                    <span class="sr-only" th:text="#{nav.toggle}">Toggle navigation</span>
                     <span class="nav-dropdown-trigger__icon" aria-hidden="true">
                         <span class="nav-dropdown-trigger__line"></span>
                         <span class="nav-dropdown-trigger__line"></span>
@@ -634,49 +636,49 @@
     </div>
 
     <!-- Collapsed navigation menu -->
-    <nav aria-label="Primary navigation" id="siteNavMenu" class="nav-dropdown" aria-hidden="true">
+    <nav th:attr="aria-label=#{nav.primary}" id="siteNavMenu" class="nav-dropdown" aria-hidden="true">
         <div class="mx-auto w-full px-4 sm:px-6 lg:px-8">
             <div class="nav-dropdown__panel">
                 <div class="nav-dropdown__header">
                     <div>
-                        <p class="nav-dropdown__eyebrow">Navigation</p>
-                        <h2 class="nav-dropdown__title">Browse One To One</h2>
-                        <p class="nav-dropdown__subtitle">All sections and account actions in one place.</p>
+                        <p class="nav-dropdown__eyebrow" th:text="#{nav.menu.eyebrow}">Navigation</p>
+                        <h2 class="nav-dropdown__title" th:text="#{nav.menu.title}">Browse One To One</h2>
+                        <p class="nav-dropdown__subtitle" th:text="#{nav.menu.subtitle}">All sections and account actions in one place.</p>
                     </div>
                 </div>
 
                 <div class="nav-dropdown__group">
-                    <p class="nav-dropdown__group-label">Navigate</p>
+                    <p class="nav-dropdown__group-label" th:text="#{nav.menu.navigate}">Navigate</p>
                     <div class="nav-dropdown__stack" data-mobile-nav data-mobile-links>
                         <th:block th:replace="~{universal-fragments/layout/navbar :: navLinks}"></th:block>
                     </div>
                 </div>
 
                 <div sec:authorize="isAuthenticated()" class="nav-dropdown__group">
-                    <p class="nav-dropdown__group-label">Shortcuts</p>
+                    <p class="nav-dropdown__group-label" th:text="#{nav.menu.shortcuts}">Shortcuts</p>
                     <div class="nav-dropdown__stack nav-dropdown__stack--actions">
                         <button type="button" id="mobileQuickActionsToggle"
                                 class="nav-mobile-action"
-                                aria-label="Quick Actions">
+                                th:attr="aria-label=#{nav.menu.quickActions}">
                             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                  class="navicon">
                                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                             </svg>
-                            <span>Quick Actions</span>
+                            <span th:text="#{nav.menu.quickActions}">Quick actions</span>
                         </button>
 
                         <a th:href="@{/tutorial(restart=true)}"
                            class="nav-mobile-action"
                            data-site-tour-replay
-                           aria-label="Replay website tour">
+                           th:attr="aria-label=#{nav.menu.replayTour}">
                             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                  class="navicon">
                                 <path d="M3 12a9 9 0 1 0 3-6.7" />
                                 <path d="M3 4v6h6" />
                             </svg>
-                            <span>Replay website tour</span>
+                            <span th:text="#{nav.menu.replayTour}">Replay website tour</span>
                         </a>
 
                         <a sec:authorize="hasAnyRole('CLIENT','USER') and !hasAnyRole('TRAINER','GYM_ADMIN','PLATFORM_ADMIN','SUPER_ADMIN')"
@@ -702,19 +704,19 @@
                 </div>
 
                 <div class="nav-dropdown__group nav-dropdown__group--account">
-                    <p class="nav-dropdown__group-label">Account</p>
+                    <p class="nav-dropdown__group-label" th:text="#{nav.menu.account}">Account</p>
 
                     <div sec:authorize="isAuthenticated()" class="nav-dropdown__account-card">
                         <div class="nav-dropdown__account-meta">
-                            <span class="nav-dropdown__account-label">Signed in as</span>
+                            <span class="nav-dropdown__account-label" th:text="#{nav.menu.signedInAs}">Signed in as</span>
                             <a th:href="@{/profile}" class="nav-dropdown__account-name" sec:authentication="name">user</a>
                         </div>
                         <form th:action="@{/logout}" method="post" class="m-0">
                             <input type="hidden" th:if="${_csrf != null}"
                                    th:name="${_csrf.parameterName}"
                                    th:value="${_csrf.token}"/>
-                            <button type="submit" class="nav-dropdown__logout">
-                                Logout
+                            <button type="submit" class="nav-dropdown__logout" th:text="#{nav.menu.logout}">
+                                Log out
                             </button>
                         </form>
                     </div>
@@ -722,7 +724,7 @@
                     <a sec:authorize="!isAuthenticated()"
                        th:href="@{/login}"
                        class="nav-dropdown__login">
-                        Log in
+                        <th:block th:text="#{auth.login.submit}">Log in</th:block>
                     </a>
                 </div>
             </div>
@@ -730,5 +732,5 @@
     </nav>
 
     <!-- Toggle behaviour -->
-    <script th:src="@{/js/core/navbar-page.js(v='20260713b')}"></script>
+    <script th:src="@{/js/core/navbar-page.js(v='20260730a')}"></script>
 </header>

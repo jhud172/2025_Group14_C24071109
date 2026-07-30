@@ -77,7 +77,9 @@
                 </div>
             </div>
 
-            <div class="chat-tabs-premium">
+            <div class="chat-tabs-premium"
+                 th:classappend="${#authorization.expression('isAuthenticated()')} ? ' chat-tabs-premium--member' : ' chat-tabs-premium--guest'"
+                 aria-label="Charlie workspace">
                 <button type="button"
                         id="chatTabNormal"
                         class="chat-tab-btn active"
@@ -93,14 +95,44 @@
                         aria-label="Open inbox">
                     Inbox
                 </button>
-                <button type="button"
+                <button sec:authorize="isAuthenticated()"
+                        type="button"
                         id="chatProChatBtn"
-                        th:attr="data-locked=${!isPremium}"
                         class="chat-tab-btn"
-                        th:title="${isPremium ? 'Open Charlie Pro Chat' : 'Upgrade to Premium to unlock Charlie Pro Chat'}"
-                        th:attrappend="aria-label=${isPremium ? 'Open Charlie Pro Chat' : 'Charlie Pro Chat - Premium required'}">
+                        th:classappend="${isPremium} ? ' chat-tab-btn--premium' : ' chat-tab-btn--locked'"
+                        th:attr="data-locked=${!isPremium},
+                                 aria-label=${isPremium ? 'Open Chat Plus Premium' : 'Learn about Chat Plus Premium access'},
+                                 aria-haspopup=${!isPremium ? 'true' : null},
+                                 aria-expanded=${!isPremium ? 'false' : null},
+                                 aria-controls=${!isPremium ? 'chatPlusAccessNotice' : null}"
+                        th:title="${isPremium ? 'Open Chat Plus Premium' : 'Chat Plus requires Premium'}">
                     <span>Chat +</span>
+                    <small th:text="${isPremium ? 'Premium' : 'Locked'}">Premium</small>
                 </button>
+            </div>
+
+            <div sec:authorize="isAuthenticated()"
+                 th:if="${!isPremium}"
+                 id="chatPlusAccessNotice"
+                 class="chat-plus-access-notice"
+                 role="region"
+                 aria-hidden="true"
+                 inert
+                 aria-labelledby="chatPlusAccessTitle">
+                <span class="chat-plus-access-notice__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" class="chat-icon-svg">
+                        <path d="M8 10V8a4 4 0 0 1 8 0v2m-9 0h10a2 2 0 0 1 2 2v7H5v-7a2 2 0 0 1 2-2zm5 3.5v2"
+                              fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
+                    </svg>
+                </span>
+                <span class="chat-plus-access-notice__copy">
+                    <strong id="chatPlusAccessTitle">Chat+ is a Premium workspace</strong>
+                    <small>Upgrade to unlock advanced guidance, personalised workflows and the complete Charlie experience.</small>
+                </span>
+                <a th:href="@{/pricing}" class="chat-plus-access-notice__action">
+                    View Premium
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg>
+                </a>
             </div>
         </header>
 
@@ -177,7 +209,7 @@
                     <div class="chat-composer-shell">
                         <div id="chatAttachmentPreviewTray" class="chat-attachment-preview-tray hidden" aria-live="polite"></div>
 
-                        <form class="chat-input-container" id="chatForm" autocomplete="off">
+                        <form class="chat-input-container" id="chatForm" autocomplete="off" aria-label="Message Charlie">
                             <input type="file" id="chatCameraInput" accept="image/*" capture="environment" class="hidden" multiple />
                             <button type="button"
                                     id="chatUseCameraBtn"

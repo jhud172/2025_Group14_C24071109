@@ -55,6 +55,55 @@ class LoginPageAccessibilityContractTest {
     }
 
     @Test
+    void guestLoginActionUsesStableScaleAndHeldHoverProgress() throws IOException {
+        String navbar = Files.readString(Path.of("src/main/resources/static/css/components/core/navbar.css"));
+
+        assertThat(navbar)
+                .contains(".nav-login-cta:hover")
+                .contains("transform: scale(1.025)")
+                .doesNotContain("transform: translateY(-2px) scale(1.015)")
+                .contains(".nav-login-cta__icon::before")
+                .contains("transform-origin: left center")
+                .contains(".nav-login-cta:hover .nav-login-cta__icon::before")
+                .contains("transition-duration: 1.5s")
+                .contains("transition-timing-function: linear");
+    }
+
+    @Test
+    void developmentNavbarActionMirrorsStableHeldHoverMotion() throws IOException {
+        String devMode = Files.readString(Path.of("src/main/resources/static/css/components/core/dev-mode.css"));
+
+        assertThat(devMode)
+                .contains(".dev-mode-pill--navbar")
+                .contains("border-radius: 0.95rem")
+                .contains("background: linear-gradient(145deg, #fcd34d 0%, #f59e0b 58%, #d97706 100%)")
+                .contains(".dev-mode-pill--navbar::before")
+                .contains(".dev-mode-pill--navbar:hover")
+                .contains("transform: scale(1.025)")
+                .doesNotContain(".dev-mode-pill--navbar:hover {\n        border-color: rgba(180, 83, 9, 0.42)")
+                .contains(".dev-mode-pill--navbar:hover .dev-mode-pill__icon::before")
+                .contains("transition-duration: 3s")
+                .contains("transition-timing-function: linear");
+    }
+
+    @Test
+    void navigationHoverIndicatorRisesFromBelowAndExitsDownward() throws IOException {
+        String navbar = Files.readString(Path.of("src/main/resources/static/css/components/core/navbar.css"));
+
+        assertThat(navbar)
+                .contains("right: var(--nav-link-padding-x)")
+                .contains("left: var(--nav-link-padding-x)")
+                .contains("transform: translateY(0.52rem) scaleX(0.28)")
+                .contains("transform-origin: center")
+                .contains("filter: blur(1px)")
+                .contains(".navlink:hover::after")
+                .contains("transform: translateY(0) scaleX(1)")
+                .contains("filter: blur(0)")
+                .doesNotContain("transform: translateX(-72%) translateY(0.12rem) scaleX(0.18)")
+                .doesNotContain("transform-origin: left center;\n        box-shadow: 0 0.2rem 0.6rem");
+    }
+
+    @Test
     void loginValidationUsesOneFocusLinkedCrossBrowserMessage() throws IOException {
         String template = Files.readString(Path.of("src/main/resources/templates/public-views/auth/login.html"));
         String script = Files.readString(Path.of("src/main/resources/static/js/auth/login-page.js"));

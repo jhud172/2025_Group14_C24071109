@@ -7,6 +7,8 @@
     const header = button.closest('.navheader');
     const overlayManager = window.OneToOneOverlay;
     let lastScrollY = window.scrollY || 0;
+    let scrollDirection = 0;
+    let downwardTravel = 0;
     let ticking = false;
 
     const getFocusableMenuItems = () => Array.from(menu.querySelectorAll(
@@ -144,11 +146,26 @@
         const delta = currentY - lastScrollY;
         const menuOpen = header.classList.contains('navheader--menu-open');
         const focused = header.contains(document.activeElement);
+        const nextDirection = Math.sign(delta);
+
+        if (nextDirection !== 0 && nextDirection !== scrollDirection) {
+            scrollDirection = nextDirection;
+            downwardTravel = 0;
+        }
 
         if (currentY <= 20 || menuOpen || focused) {
             setHeaderVisible(true);
-        } else if (Math.abs(delta) > 8) {
-            setHeaderVisible(delta < 0);
+            downwardTravel = 0;
+        } else if (delta < 0) {
+            // Reveal on the first upward movement, including touch and trackpad scrolling.
+            setHeaderVisible(true);
+            downwardTravel = 0;
+        } else if (delta > 0) {
+            // A short downward dead zone prevents minor scroll jitter from hiding the bar.
+            downwardTravel += delta;
+            if (downwardTravel >= 12) {
+                setHeaderVisible(false);
+            }
         }
 
         header.classList.toggle('scrolled', currentY > 12);
