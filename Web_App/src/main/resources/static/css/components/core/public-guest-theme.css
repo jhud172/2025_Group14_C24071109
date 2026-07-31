@@ -1,0 +1,63 @@
+/*
+ * Signed-out surfaces follow the visitor's saved/system theme as one continuous
+ * environment. Page bundles can add character without switching luminance.
+ */
+body.public-guest {
+    --guest-page: #f4f8f5;
+    --guest-page-muted: #edf4ef;
+    --guest-surface: #ffffff;
+    --guest-border: rgba(21, 86, 62, 0.16);
+    --guest-ink: #102019;
+    --guest-copy: #52665d;
+    background: var(--guest-page);
+    background-image: none;
+    color: var(--guest-ink);
+    color-scheme: light;
+}
+
+html.dark body.public-guest {
+    --guest-page: #07120e;
+    --guest-page-muted: #0a1813;
+    --guest-surface: #0d1c16;
+    --guest-border: rgba(110, 231, 183, 0.15);
+    --guest-ink: #edf7f2;
+    --guest-copy: #a2b6ad;
+    color-scheme: dark;
+}
+
+body.public-guest #main-content {
+    background: var(--guest-page);
+    color: var(--guest-ink);
+}
+
+html:not(.dark) body.public-guest #main-content {
+    background-image:
+        radial-gradient(circle at 12% 8%, rgba(16, 185, 129, 0.055), transparent 27rem),
+        linear-gradient(180deg, #f7faf8 0%, var(--guest-page) 32rem);
+}
+
+html.dark body.public-guest #main-content {
+    background-image:
+        radial-gradient(circle at 78% 8%, rgba(16, 185, 129, 0.07), transparent 30rem),
+        linear-gradient(180deg, #081510 0%, var(--guest-page) 32rem);
+}
+
+html:not(.dark) body.public-guest :is(.bg-cyber-900, .bg-cyber-950) {
+    background-color: var(--guest-page) !important;
+}
+
+html:not(.dark) body.public-guest :is(.bg-cyber-800, .bg-cyber-800\/80, .bg-cyber-900\/80) {
+    background-color: var(--guest-surface) !important;
+}
+
+html:not(.dark) body.public-guest :is(.text-slate-100, .text-white) {
+    color: var(--guest-ink);
+}
+
+html:not(.dark) body.public-guest :is(.text-slate-300, .text-slate-400) {
+    color: var(--guest-copy);
+}
+
+body.public-guest .footer-redesign {
+    margin-top: 0;
+}

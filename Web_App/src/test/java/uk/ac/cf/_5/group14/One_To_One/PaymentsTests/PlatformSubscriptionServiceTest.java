@@ -48,4 +48,35 @@ class PlatformSubscriptionServiceTest {
         assertThat(subscription.getProviderSubId()).isEqualTo("sub_1");
         assertThat(subscription.getCurrentPeriodEnd()).isEqualTo(periodEnd);
     }
+
+    @Test
+    void paymentFailureAndRetryMoveSubscriptionThroughPastDueAndActive() {
+        PlatformSubscription subscription = new PlatformSubscription();
+        subscription.setProviderSubId("sub_1");
+        subscription.setStatus(PlatformSubscriptionStatus.ACTIVE);
+
+        when(repository.findByProviderSubId("sub_1")).thenReturn(Optional.of(subscription));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        PlatformSubscription failed = service.markPaymentFailed("sub_1").orElseThrow();
+        assertThat(failed.getStatus()).isEqualTo(PlatformSubscriptionStatus.PAST_DUE);
+
+        PlatformSubscription recovered = service.markPaymentRecovered("sub_1").orElseThrow();
+        assertThat(recovered.getStatus()).isEqualTo(PlatformSubscriptionStatus.ACTIVE);
+    }
+
+    @Test
+    void successfulRetryKeepsScheduledCancellation() {
+        PlatformSubscription subscription = new PlatformSubscription();
+        subscription.setProviderSubId("sub_1");
+        subscription.setStatus(PlatformSubscriptionStatus.PAST_DUE);
+        subscription.setCancelAtPeriodEnd(true);
+
+        when(repository.findByProviderSubId("sub_1")).thenReturn(Optional.of(subscription));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        PlatformSubscription recovered = service.markPaymentRecovered("sub_1").orElseThrow();
+
+        assertThat(recovered.getStatus()).isEqualTo(PlatformSubscriptionStatus.EXPIRES);
+    }
 }

@@ -1,8 +1,8 @@
 # One To One — full-site UX, motion and visual-quality audit
 
-**Audit date:** 13 July 2026; implementation status updated 19 July 2026
+**Audit date:** 13 July 2026; implementation status updated 27 July 2026
 **Environment:** local Spring application at `http://localhost:8081`  
-**Status:** audit complete; Phase 0, Phase 1, website stabilisation and Phase 2 are complete; Phase 3 browser/automated and remote touch-emulation release QA is complete, with the wider audible screen-reader journey and physical-device confirmation remaining
+**Status:** audit complete; Phases 0–3 and the human/automated release gates are complete; Phase 4 production-readiness and transactional integration is next
 
 ## Completion snapshot
 
@@ -12,7 +12,7 @@
 | Authenticated roles | Complete | Client, trainer, gym admin and platform admin journeys checked. |
 | Shared product surfaces | Complete | Inbox, workouts, goals, calendar, profile, Charlie and platform navigation checked. |
 | Responsive and motion | Complete | Desktop and 390 × 844 mobile states, overlay timing, overflow and layout transitions checked. |
-| Source and automated verification | Complete | Template/CSS/JS inventory, route checks, root-cause tracing and current 496-test Gradle run completed. |
+| Source and automated verification | Complete | Template/CSS/JS inventory, route checks, root-cause tracing and current 499-test Gradle run completed. |
 | Phase 0 implementation | Complete | Release-blocking calendar, gym, pricing, dashboard and authenticated mobile-layer defects repaired; 456 tests pass. |
 | Phase 1 continuity | Complete | One shared overlay owner, named motion/layer tokens and explicit high-risk transitions implemented; 461 tests pass. |
 | Phase 1 performance and shell continuity | Complete | Core CSS reduced by about 83%, feature styles load by route, fixed surfaces share measured reservations, and gzip/cache revalidation is verified; 467 tests pass. |
@@ -25,9 +25,34 @@
 | Phase 3 authentication and role-dashboard baseline | Complete | Login tabs, onboarding focus, client reveal availability and all four dashboards pass representative keyboard, reduced-motion, 390 px and 200% reflow checks. |
 | Phase 3 shared operational baseline | Complete | Calendar, inbox, workouts, goals, support and platform-admin operations pass keyboard/overlay, reduced-motion, 200% and initial 400% CSS-viewport checks. |
 | Assistive-technology browser evidence | Complete | Accessibility-tree structure/names, validation recovery, representative native high zoom, cross-role 400%-equivalent reflow, forced colours and critical 44 px targets pass. |
-| Audible screen reader and physical devices | Human gate required | The repaired login validation announcement has a human-confirmed Narrator pass. The wider audible journey was deferred while the user is remote; NVDA is not installed and real touch/GPU behaviour still needs physical-device confirmation. |
+| Audible screen reader and physical devices | Complete | James confirmed that the Phase 3 human release gate passed. |
+| Responsive, Axe and performance release gate | Complete | 88 responsive cases, 22 Axe cases, six cold-cache Slow 4G/4× CPU journeys and six Lighthouse journeys passed across public, login and all four authenticated roles. |
 
-**Next implementation step:** resume the final supervised Phase 3 gate from audible landmarks/headings and complete representative physical-device checks, repairing only reproduced defects.
+**Next implementation step:** begin Phase 4 production-readiness and transactional integration, starting with a read-only external-boundary inventory and safe staging/sandbox journeys.
+
+## Phase 3 verification update — final automated release gate complete
+
+Completed on 27 July 2026:
+
+- James confirmed that the human release gate passed, formally closing Phase 3.
+- Added a repeatable release runner covering public, login, client, trainer, gym and admin journeys at **390, 768, 1024, 1280, 1366, 1440, 1536 and 1920 px**.
+- The final responsive result is **88/88 cases passed** with expected URLs, HTTP 200, one main landmark, one H1, no document overflow and no runtime errors.
+- Axe completed **22/22 cases** at 390 and 1440 px with **zero serious or critical violations** after repairing reproduced ARIA, hidden-focus, tab, tooltip, contrast and scroll-region defects.
+- Cold-cache Slow 4G/4× CPU testing completed **6/6 journeys**. Median FCP is **868–1,228 ms**, LCP **1,100–1,948 ms**, load **1,065–2,315 ms** and CLS **0–0.001**.
+- Two profile sources causing 18–20 second cold-load regressions were reduced from **3.50 MB to 133 KB** and **3.44 MB to 128 KB**. The navigation logo was reduced from **118 KB to 24 KB** and now preserves its mobile aspect ratio.
+- Lighthouse completed **6/6 journeys** with zero threshold findings: public **97/100/100/100**, login **98/100/100/100**, client **86/100/100**, trainer **92/100/100**, gym **92/100/100** and admin **94/100/100**.
+- Production CSS rebuilt successfully; JavaScript syntax checks passed; the complete Gradle result is **499 tests, 499 passed, 0 failed, 0 skipped**. Cache-safe delivery is **`20260727p23`**.
+
+## Phase 3 verification update — supervised gate resumed locally
+
+Recorded on 27 July 2026:
+
+- Narrator's visible scan cursor reached the expected landmark and H1, but the automation cannot hear or assess speech, so neither is recorded as a new audible pass.
+- Charlie closes with Escape and returns focus to its trigger. The onboarding tour visibly traps Tab focus between its actions; unrelated password-manager focus interference was not treated as an application defect.
+- Reproduced and repaired month/week calendar live-announcement defects. `Jump to today` now announces `Jumped to today` through the polite live region, and the temporarily disabled control regains focus when the action finishes.
+- Versioned the month/week controller URLs after reproducing a stale cached script, advanced the shared delivery token to **`20260727p22`**, and added a regression contract for both script URLs.
+- JavaScript syntax checks and the complete Gradle suite pass: **497 tests, 497 passed, 0 failed, 0 skipped**. The local app returns HTTP 200 on port 8081.
+- Windows reports the NVIDIA and Intel GPUs as healthy, but no HID touchscreen/digitiser is exposed and NVDA is not installed. Audible output and representative physical touch/GPU behaviour remain ungraded human checks, so Phase 3 is still open.
 
 ## Phase 3 verification update — human gate resumed remotely
 
@@ -694,23 +719,22 @@ Use `cubic-bezier(0.22, 1, 0.36, 1)` for entrances and a faster ease-in for exit
 
 ### Phase 3 — polish and verification
 
-- Add purposeful calendar/page/list transitions using tokens.
+- Purposeful calendar/page/list transitions use the established motion tokens without blocking the release gate.
 - **Public, authentication, four-role dashboard and shared operational baselines complete:** keyboard/focus, reduced motion and 200% reflow equivalents pass; shared operations also pass an initial 400% CSS-viewport equivalent.
 - **Complete for browser/automated QA:** accessibility-tree output, representative native 200%/400% zoom, cross-role 400%-equivalent reflow, forced colours, keyboard validation recovery and critical 44 × 44 px targets.
-- **Next:** resume supervised audible Narrator/NVDA after the passed login validation check, then complete physical touch-device confirmation across representative critical journeys.
-- Run regression at 390, 768, 1024, 1280, 1366, 1440, 1536 and 1920 px.
-- **Representative native 200%/400% and cross-role CSS-viewport baselines complete; remaining:** audible assistive technology, physical-device and throttled CPU/network testing.
-- **Exit:** no clipping, gaps, fixed-layer collisions, inaccessible hidden content or motion-related context loss.
+- **Complete:** the human gate passed; responsive regression passed at 390, 768, 1024, 1280, 1366, 1440, 1536 and 1920 px.
+- **Complete:** wider contrast/Axe, cold-cache throttled CPU/network and Lighthouse checks pass across representative public, login and four-role journeys.
+- **Exit met:** no confirmed clipping, gaps, fixed-layer collisions, inaccessible hidden content or motion-related context loss remain in the release matrix.
 
 ## Accessibility caveat
 
-Screenshots, accessibility-tree output and touch emulation can reveal hierarchy, names, contrast concerns, clipping and responsive defects, but do **not** prove WCAG conformance or physical-device behaviour. The public, authentication, four-role dashboard, shared operational and browser release-QA baselines are complete, including representative native high zoom, forced colours and critical touch targets. Login validation now has a human-confirmed Narrator pass; release QA still needs the wider supervised audible journey, a physical touch device, wider measured contrast and axe/Lighthouse checks. Closed Charlie content and destructive production-like table actions still need particular care.
+Screenshots, accessibility-tree output, Axe and Lighthouse support release confidence but do **not** prove formal WCAG conformance. Phase 3 combines that automated evidence with the user-confirmed human screen-reader and physical-device gate. Future changes to overlays, live regions, destructive actions or fixed controls must rerun the relevant human and automated checks.
 
 ## Audit limits and closure
 
-The audit itself is complete. No remaining repository or browser access blocker prevented representative coverage of the public, client, trainer, gym-admin, platform-admin and shared experiences. The remaining work is implementation and release validation, not additional discovery.
+The audit and Phase 3 release validation are complete. No remaining repository or browser blocker prevented representative coverage of the public, client, trainer, gym-admin, platform-admin and shared experiences.
 
-Not fully verifiable in this local pass: live payment completion, external email/verification delivery, destructive production-like admin operations, audible assistive-technology output, physical-device GPU/touch behaviour and exhaustive native zoom on every route. These remain explicit release gates.
+The next limits belong to Phase 4 rather than this UX gate: live/sandbox payment completion, external email/verification delivery, uploads/storage, webhook and scheduled-job behaviour, and non-destructive production-like admin operations.
 
 ## Definition of done
 

@@ -1,0 +1,53 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="languageSelector">
+    <details class="language-selector" data-language-selector>
+        <summary class="language-selector__trigger"
+                 th:attr="aria-label=#{language.selector.label},
+                          title=#{language.selector.label}">
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+                <circle cx="10" cy="10" r="7"></circle>
+                <path d="M3.5 10h13M10 3c2 2 3 4.3 3 7s-1 5-3 7c-2-2-3-4.3-3-7s1-5 3-7Z"></path>
+            </svg>
+            <span class="language-selector__code"
+                  th:text="${#locale.language == 'cy' ? 'CY' : 'EN'}">EN</span>
+            <span class="language-selector__chevron" aria-hidden="true"></span>
+        </summary>
+
+        <div class="language-selector__panel">
+            <div class="language-selector__heading">
+                <span th:text="#{language.selector.eyebrow}">Display language</span>
+                <strong th:text="#{language.selector.title}">Choose language</strong>
+            </div>
+
+            <form method="get" class="language-selector__options">
+                <button type="submit"
+                        name="lang"
+                        value="en"
+                        class="language-selector__option"
+                        th:classappend="${#locale.language == 'en'} ? ' is-active' : ''"
+                        th:attr="aria-pressed=${#locale.language == 'en'}">
+                    <span class="language-selector__option-code">EN</span>
+                    <span>
+                        <strong th:text="#{language.selector.english}">English</strong>
+                        <small>English</small>
+                    </span>
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 3 3 7-7"></path></svg>
+                </button>
+
+                <button type="submit"
+                        name="lang"
+                        value="cy"
+                        class="language-selector__option"
+                        th:classappend="${#locale.language == 'cy'} ? ' is-active' : ''"
+                        th:attr="aria-pressed=${#locale.language == 'cy'}">
+                    <span class="language-selector__option-code">CY</span>
+                    <span>
+                        <strong th:text="#{language.selector.welsh}">Welsh</strong>
+                        <small>Cymraeg</small>
+                    </span>
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 3 3 7-7"></path></svg>
+                </button>
+            </form>
+        </div>
+    </details>
+</th:block>

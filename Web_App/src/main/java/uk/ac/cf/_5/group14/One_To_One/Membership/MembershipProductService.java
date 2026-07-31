@@ -84,7 +84,8 @@ public class MembershipProductService {
     
     /**
      * Initiate a price change for a membership product.
-     * This creates an audit trail, counts affected members, and queues email notifications.
+     * This creates an audit trail, counts affected members, and attempts configured
+     * email notifications synchronously.
      * 
      * @param productId The ID of the product
      * @param newPriceCents The new price in cents
@@ -155,7 +156,7 @@ public class MembershipProductService {
             productRepository.save(product);
         }
         
-        // Send email notifications to all affected members
+        // Attempt email notifications synchronously for all affected members.
         for (GymMemberSubscription subscription : activeSubscriptions) {
             User user = userRepository.findById(subscription.getUserId())
                 .orElse(null);
@@ -177,7 +178,10 @@ public class MembershipProductService {
             }
         }
         
-        log.info("Price change complete. Sent {} email notifications.", affectedCount);
+        log.info(
+            "Price change complete. Attempted {} email notifications; delivery is not tracked.",
+            affectedCount
+        );
         
         return event;
     }

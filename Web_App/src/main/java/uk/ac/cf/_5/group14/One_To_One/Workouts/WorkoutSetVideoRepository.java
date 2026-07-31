@@ -9,5 +9,7 @@ public interface WorkoutSetVideoRepository extends JpaRepository<WorkoutSetVideo
 
     Optional<WorkoutSetVideo> findTopBySetLogOrderByCreatedAtDesc(WorkoutSetLog setLog);
 
+    Optional<WorkoutSetVideo> findByIdAndSetLog(Long id, WorkoutSetLog setLog);
+
     List<WorkoutSetVideo> findByStatusOrderByCreatedAtAsc(VideoProcessingStatus status);
 }

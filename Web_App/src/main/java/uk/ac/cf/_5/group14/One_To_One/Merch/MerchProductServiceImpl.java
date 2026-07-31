@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderService;
+import uk.ac.cf._5.group14.One_To_One.MerchOrders.MerchOrderItemRepository;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -29,13 +30,16 @@ public class MerchProductServiceImpl implements MerchProductService {
 
     private final MerchProductRepository productRepo;
     private final MerchOrderService orderService;
+    private final MerchOrderItemRepository orderItemRepository;
     private final Path uploadRoot;
 
     public MerchProductServiceImpl(MerchProductRepository productRepo,
                                    @Lazy MerchOrderService orderService,
+                                   MerchOrderItemRepository orderItemRepository,
                                    @Value("${app.storage.merch-dir:uploads/merch}") String uploadRoot) {
         this.productRepo = productRepo;
         this.orderService = orderService;
+        this.orderItemRepository = orderItemRepository;
         this.uploadRoot = Paths.get(uploadRoot).toAbsolutePath().normalize();
     }
 
@@ -65,10 +69,21 @@ public class MerchProductServiceImpl implements MerchProductService {
     @Override
     public MerchProduct saveWithImage(MerchProduct product, MultipartFile image) {
         if (image != null && !image.isEmpty()) {
+            String previousImageUrl = product.getImageUrl();
+            String storedImageUrl;
             try {
-                product.setImageUrl(storeSanitizedImage(image));
+                storedImageUrl = storeSanitizedImage(image);
             } catch (IOException e) {
                 throw new IllegalStateException("Failed to store product image", e);
+            }
+            product.setImageUrl(storedImageUrl);
+            try {
+                MerchProduct saved = productRepo.save(product);
+                deleteStoredImageIfUnreferenced(previousImageUrl);
+                return saved;
+            } catch (RuntimeException failure) {
+                deleteStoredImage(storedImageUrl);
+                throw failure;
             }
         }
         return productRepo.save(product);
@@ -93,8 +108,37 @@ public class MerchProductServiceImpl implements MerchProductService {
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
 
         orderService.cancelPendingOrdersForProduct(productId);
+        String imageUrl = product.getImageUrl();
         product.setActive(false);
+        product.setImageUrl(null);
         productRepo.save(product);
+        deleteStoredImageIfUnreferenced(imageUrl);
+    }
+
+    private void deleteStoredImageIfUnreferenced(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank() || orderItemRepository.existsByImageUrlSnapshot(imageUrl)) {
+            return;
+        }
+        deleteStoredImage(imageUrl);
+    }
+
+    private void deleteStoredImage(String imageUrl) {
+        if (imageUrl == null || !imageUrl.startsWith("/uploads/merch/")) {
+            return;
+        }
+        String filename = imageUrl.substring("/uploads/merch/".length());
+        if (filename.isBlank() || filename.contains("/") || filename.contains("\\") || filename.contains("..")) {
+            return;
+        }
+        Path target = uploadRoot.resolve(filename).normalize();
+        if (!target.startsWith(uploadRoot)) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(target);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to remove product image", e);
+        }
     }
 
     private String storeSanitizedImage(MultipartFile image) throws IOException {

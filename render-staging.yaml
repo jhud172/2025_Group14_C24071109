@@ -1,0 +1,70 @@
+# UNAPPLIED STAGING BLUEPRINT
+# Reuses the existing My Workspace PostgreSQL instance only through a dedicated
+# staging schema. Database credentials must be linked securely in Render and
+# must never be committed. Do not point APP_DATABASE_SCHEMA at public.
+services:
+  - type: web
+    name: one-to-one-staging-jhuds
+    runtime: docker
+    plan: starter
+    region: oregon
+    branch: James/phase4-staging-readiness
+    dockerfilePath: ./Web_App/Dockerfile
+    dockerContext: ./Web_App
+    autoDeploy: false
+    healthCheckPath: /actuator/health/readiness
+    disk:
+      name: staging-uploads
+      mountPath: /var/data/uploads
+      sizeGB: 1
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: APP_BASE_URL
+        value: https://one-to-one-staging-jhuds.onrender.com
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_USER
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: APP_DATABASE_SCHEMA
+        value: one_to_one_staging
+      - key: DATABASE_DRIVER
+        value: org.postgresql.Driver
+      - key: PGSSLMODE
+        value: require
+      - key: SQL_INIT_MODE
+        value: never
+      - key: APP_STORAGE_PROFILE_DIR
+        value: /var/data/uploads/profile
+      - key: APP_STORAGE_CHAT_DIR
+        value: /var/data/uploads/chat
+      - key: APP_STORAGE_MERCH_DIR
+        value: /var/data/uploads/merch
+      - key: APP_STORAGE_WORKOUT_VIDEO_DIR
+        value: /var/data/uploads/workout-videos
+      - key: APP_ENCRYPTION_CARD_KEY
+        generateValue: true
+      - key: APP_ENCRYPTION_REQUIRE_PERSISTENT_KEY
+        value: "true"
+      - key: APP_EMAIL_PROVIDER
+        value: none
+      - key: APP_EMAIL_FAIL_ON_ERROR
+        value: "true"
+      - key: APP_SMS_PROVIDER
+        value: console
+      - key: APP_SMS_FAIL_ON_ERROR
+        value: "true"
+      - key: STRIPE_SECRET_KEY
+        value: ""
+      - key: STRIPE_WEBHOOK_SECRET
+        value: ""
+      - key: APP_AI_ENABLED
+        value: "false"
+      - key: APP_OAUTH_GOOGLE_LOGIN_ACTIVE
+        value: "false"
+      - key: APP_OAUTH_MICROSOFT_LOGIN_ACTIVE
+        value: "false"
+      - key: APP_OAUTH_APPLE_LOGIN_ACTIVE
+        value: "false"

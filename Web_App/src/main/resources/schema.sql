@@ -3,6 +3,11 @@
 -- =========================
 DROP VIEW IF EXISTS user_authorities CASCADE;
 
+DROP TABLE IF EXISTS privileged_audit_events CASCADE;
+DROP TABLE IF EXISTS scheduled_job_locks CASCADE;
+DROP TABLE IF EXISTS login_attempts CASCADE;
+DROP TABLE IF EXISTS spring_session_attributes CASCADE;
+DROP TABLE IF EXISTS spring_session CASCADE;
 DROP TABLE IF EXISTS merch_order_items CASCADE;
 DROP TABLE IF EXISTS merch_orders CASCADE;
 DROP TABLE IF EXISTS saved_payment_methods CASCADE;
@@ -61,6 +66,7 @@ DROP TABLE IF EXISTS goal_check_ins CASCADE;
 DROP TABLE IF EXISTS goal_links CASCADE;
 DROP TABLE IF EXISTS goals CASCADE;
 DROP TABLE IF EXISTS platform_subscriptions CASCADE;
+DROP TABLE IF EXISTS stripe_webhook_events CASCADE;
 DROP TABLE IF EXISTS gym_subscriptions CASCADE;
 DROP TABLE IF EXISTS password_reset_tokens CASCADE;
 DROP TABLE IF EXISTS email_verification_tokens CASCADE;
@@ -219,6 +225,16 @@ CREATE TABLE IF NOT EXISTS platform_subscriptions
 
 CREATE INDEX IF NOT EXISTS idx_platform_subscriptions_user
     ON platform_subscriptions (user_id);
+
+CREATE TABLE IF NOT EXISTS stripe_webhook_events
+(
+    event_id      VARCHAR(255) PRIMARY KEY,
+    event_type    VARCHAR(120) NOT NULL,
+    processed_at  TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_stripe_webhook_events_processed_at
+    ON stripe_webhook_events (processed_at);
 
 -- =========================
 -- GYM SUBSCRIPTIONS (PLATFORM VIEW)
@@ -1524,14 +1540,14 @@ CREATE TABLE IF NOT EXISTS health_records
     id                       BIGSERIAL PRIMARY KEY,
     user_id                  BIGINT       NOT NULL,
     baseline_date            TIMESTAMP    NOT NULL,
-    systolic_blood_pressure  BIGINT,
-    diastolic_blood_pressure BIGINT,
-    cholesterol              DECIMAL(4, 2),
-    weight_kg                BIGINT       NOT NULL,
-    height_cm                BIGINT       NOT NULL,
-    bmi                      DECIMAL(5, 2),
+    systolic_blood_pressure  INTEGER,
+    diastolic_blood_pressure INTEGER,
+    cholesterol              DOUBLE PRECISION,
+    weight_kg                DOUBLE PRECISION NOT NULL,
+    height_cm                DOUBLE PRECISION NOT NULL,
+    bmi                      DOUBLE PRECISION,
     waist_height_ratio       DOUBLE PRECISION,
-    waist_cm                 BIGINT       NOT NULL,
+    waist_cm                 DOUBLE PRECISION NOT NULL,
     activity_level           VARCHAR(180),
 
     CONSTRAINT fk_health_records_user
@@ -2438,6 +2454,8 @@ CREATE TABLE IF NOT EXISTS chat_threads
 (
     id         BIGSERIAL PRIMARY KEY,
     user_id    BIGINT       NOT NULL,
+    chat_type  VARCHAR(32)  NOT NULL DEFAULT 'AI_PERSONAL',
+    peer_user_id BIGINT      NULL,
     folder_id  BIGINT       NULL,
     title      VARCHAR(160) NOT NULL,
     color_hex  VARCHAR(10)  NOT NULL,
@@ -2817,7 +2835,7 @@ CREATE TABLE IF NOT EXISTS saved_payment_methods
     id                          BIGSERIAL PRIMARY KEY,
     user_id                     BIGINT       NOT NULL,
     card_holder_name            VARCHAR(200) NOT NULL,
-    last_four                   CHAR(4)      NOT NULL,
+    last_four                   VARCHAR(4)   NOT NULL,
     brand                       VARCHAR(50)  NOT NULL,
     expiry_month                SMALLINT     NOT NULL,
     expiry_year                 SMALLINT     NOT NULL,
@@ -2911,3 +2929,78 @@ CREATE INDEX IF NOT EXISTS idx_entry_schedule
 CREATE INDEX IF NOT EXISTS idx_schedule_user
     ON schedules (user_id);
 
+-- =========================
+-- OPERATIONAL READINESS
+-- =========================
+CREATE TABLE IF NOT EXISTS spring_session
+(
+    primary_id            CHAR(36)     NOT NULL PRIMARY KEY,
+    session_id            CHAR(36)     NOT NULL,
+    creation_time         BIGINT       NOT NULL,
+    last_access_time      BIGINT       NOT NULL,
+    max_inactive_interval INT          NOT NULL,
+    expiry_time           BIGINT       NOT NULL,
+    principal_name        VARCHAR(100)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS spring_session_ix1 ON spring_session (session_id);
+CREATE INDEX IF NOT EXISTS spring_session_ix2 ON spring_session (expiry_time);
+CREATE INDEX IF NOT EXISTS spring_session_ix3 ON spring_session (principal_name);
+
+CREATE TABLE IF NOT EXISTS spring_session_attributes
+(
+    session_primary_id CHAR(36)     NOT NULL,
+    attribute_name     VARCHAR(200) NOT NULL,
+    attribute_bytes    BINARY LARGE OBJECT NOT NULL,
+    PRIMARY KEY (session_primary_id, attribute_name),
+    CONSTRAINT spring_session_attributes_fk
+        FOREIGN KEY (session_primary_id) REFERENCES spring_session (primary_id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS login_attempts
+(
+    attempt_key_hash CHAR(64)    PRIMARY KEY,
+    attempt_count    INT         NOT NULL,
+    window_start     TIMESTAMP WITH TIME ZONE NULL,
+    blocked_until    TIMESTAMP WITH TIME ZONE NULL,
+    updated_at       TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_login_attempts_updated_at ON login_attempts (updated_at);
+
+CREATE TABLE IF NOT EXISTS scheduled_job_locks
+(
+    job_name     VARCHAR(120) PRIMARY KEY,
+    locked_until TIMESTAMP WITH TIME ZONE NOT NULL,
+    locked_at    TIMESTAMP WITH TIME ZONE NOT NULL,
+    locked_by    VARCHAR(120) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS privileged_audit_events
+(
+    id              BIGSERIAL    PRIMARY KEY,
+    occurred_at     TIMESTAMP WITH TIME ZONE NOT NULL,
+    request_id      VARCHAR(80)   NOT NULL,
+    actor           VARCHAR(100)  NOT NULL,
+    authorities     VARCHAR(500)  NOT NULL,
+    http_method     VARCHAR(10)   NOT NULL,
+    request_path    VARCHAR(500)  NOT NULL,
+    response_status INT           NOT NULL,
+    succeeded       BOOLEAN       NOT NULL,
+    source_ip_hash  CHAR(64)      NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_privileged_audit_occurred_at
+    ON privileged_audit_events (occurred_at);
+CREATE INDEX IF NOT EXISTS idx_privileged_audit_actor
+    ON privileged_audit_events (actor, occurred_at);
+
+CREATE TABLE IF NOT EXISTS card_encryption_key_checks
+(
+    id               SMALLINT    PRIMARY KEY,
+    encrypted_marker TEXT        NOT NULL,
+    created_at       TIMESTAMP WITH TIME ZONE NOT NULL,
+    verified_at      TIMESTAMP WITH TIME ZONE NOT NULL,
+    CONSTRAINT card_encryption_key_check_singleton CHECK (id = 1)
+);

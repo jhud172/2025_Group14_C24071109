@@ -126,6 +126,32 @@ class DashboardConsistencyContractTest {
                 .contains("outline-offset: 2px");
     }
 
+    @Test
+    void clientDashboardKeepsHiddenPanelsOutOfTheFocusOrderAndRequestsLocationOnDemand() throws IOException {
+        String page = read("src/main/resources/templates/client-views/dashboard/client-dashboard.html");
+        String fragment = read("src/main/resources/templates/client-views/dashboard/fragments/client-dashboard-shell.html");
+        String script = read("src/main/resources/static/js/dashboard/client-dashboard-page.js");
+
+        assertThat(page)
+                .contains("aria-label=\"Explore platform\" aria-hidden=\"true\" inert")
+                .contains("aria-label=\"Trainer overview\" aria-hidden=\"true\" inert")
+                .contains("aria-label=\"Goals overview\" aria-hidden=\"true\" inert")
+                .contains("aria-label=\"Help and trust\" aria-hidden=\"true\" inert")
+                .contains("aria-label=\"Profile overview\" aria-hidden=\"true\" inert");
+        assertThat(fragment)
+                .contains("role=\"tab\"")
+                .contains("role=\"tabpanel\"")
+                .contains("dashboard-action-panel-all")
+                .contains("aria-hidden=\"true\" inert")
+                .contains("data-ambience-location-request");
+        assertThat(script)
+                .contains("panel?.toggleAttribute(\"inert\", !isOpen)")
+                .contains("view.toggleAttribute(\"inert\", !active)")
+                .contains("tab.tabIndex = active ? 0 : -1")
+                .contains("locationRequestEl?.addEventListener(\"click\", () => loadForecast(true))")
+                .contains("loadForecast(false)");
+    }
+
     private static void assertDashboard(String relativePath, String roleClass) throws IOException {
         assertThat(read("src/main/resources/templates/" + relativePath))
                 .contains("app-dashboard")

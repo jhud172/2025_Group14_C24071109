@@ -305,7 +305,7 @@ public class GymAdminMembershipController {
 
         redirectAttributes.addFlashAttribute(
             "successMessage",
-            "Price change initiated successfully. Notification queued for affected members."
+            "Price change initiated successfully. Email delivery was attempted immediately; delivery is not tracked."
         );
         return "redirect:/gym/admin/memberships/" + id + "/price-change";
     }

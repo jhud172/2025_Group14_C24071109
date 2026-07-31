@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.cf._5.group14.One_To_One.Nutrition.DailyNutritionLog;
 import uk.ac.cf._5.group14.One_To_One.Nutrition.DailyNutritionLogRepository;
 import uk.ac.cf._5.group14.One_To_One.Nutrition.ProteinTargetService;
+import uk.ac.cf._5.group14.One_To_One.Operations.ExclusiveScheduledJob;
 import uk.ac.cf._5.group14.One_To_One.StrengthLog.Repository.WorkoutSessionRepository;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
@@ -36,6 +37,7 @@ public class ProteinNudgeNotificationScheduler {
     }
 
     @Scheduled(cron = "${app.notifications.proteinNudgeCron:0 0 18 * * *}")
+    @ExclusiveScheduledJob(value = "protein-nudge-notifications", lockAtMostFor = "PT20M")
     public void sendProteinNudges() {
         LocalDate today = LocalDate.now(clock);
         List<User> users = workoutSessionRepository.findDistinctUsersWithCompletedWorkouts(today);

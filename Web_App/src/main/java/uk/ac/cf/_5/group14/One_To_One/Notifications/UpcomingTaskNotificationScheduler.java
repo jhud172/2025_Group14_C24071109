@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.cf._5.group14.One_To_One.CalendarData.CalendarTask;
 import uk.ac.cf._5.group14.One_To_One.CalendarData.CalendarTaskRepository;
 import uk.ac.cf._5.group14.One_To_One.Config.DatabaseTableAvailability;
+import uk.ac.cf._5.group14.One_To_One.Operations.ExclusiveScheduledJob;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,6 +40,7 @@ public class UpcomingTaskNotificationScheduler {
     }
 
     @Scheduled(fixedDelay = 60_000)
+    @ExclusiveScheduledJob(value = "upcoming-task-notifications", lockAtMostFor = "PT10M")
     public void sendUpcomingTaskNotifications() {
         try {
             if (!tableAvailability.hasTable("calendar_tasks") || !tableAvailability.hasTable("users")) {

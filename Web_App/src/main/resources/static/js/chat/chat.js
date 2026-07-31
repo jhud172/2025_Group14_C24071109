@@ -26,7 +26,7 @@ function initCharlieWidget(config) {
         root, fab, panel, panelContent, closeBtn, clearBtn, form, input, body, sendBtn,
         dot, normalTabBtn, notificationsToggle2, notificationsView, notifFilterAll, notifFilterUnread,
         notificationsUnreadCount, notificationsList, notificationsReadAll, unreadBadge,
-        inlineToast, proChatBtn, chatAttachImageBtn, chatComposerTools, chatComposerOptions, chatUseCameraBtn,
+        inlineToast, proChatBtn, chatPlusAccessNotice, chatAttachImageBtn, chatComposerTools, chatComposerOptions, chatUseCameraBtn,
         chatUsePhotosBtn, chatCameraInput, chatPhotoInput, chatAttachmentPreviewTray,
         chatAttachmentCount, chatCharacterCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
         chatMediaLightbox, chatMediaLightboxBackdrop, chatMediaLightboxClose, chatMediaLightboxImage,
@@ -46,6 +46,16 @@ function initCharlieWidget(config) {
     const composerTooltipLabel = chatAttachImageBtn?.dataset?.tooltip || "";
     let lightboxReturnFocus = null;
     let clearConfirmReturnFocus = null;
+
+    const setChatPlusAccessOpen = (open, options = {}) => {
+        if (!chatPlusAccessNotice || !proChatBtn) return;
+        const nextOpen = Boolean(open);
+        chatPlusAccessNotice.classList.toggle("is-open", nextOpen);
+        chatPlusAccessNotice.setAttribute("aria-hidden", String(!nextOpen));
+        chatPlusAccessNotice.toggleAttribute("inert", !nextOpen);
+        proChatBtn.setAttribute("aria-expanded", String(nextOpen));
+        if (!nextOpen && options.restoreFocus) proChatBtn.focus();
+    };
 
     const headers = (json = true) => {
         const next = {};
@@ -369,6 +379,7 @@ function initCharlieWidget(config) {
         fab.setAttribute("aria-expanded", "false");
         fab.setAttribute("aria-label", "Open Charlie");
         closeComposerOptions();
+        setChatPlusAccessOpen(false);
         closeInlineClearConfirm({ restoreFocus: false });
         if (!options.fromOverlayManager) overlayManager?.release("charlie");
         if (options.restoreFocus && focusWasInsidePanel) fab.focus();
@@ -637,13 +648,28 @@ function initCharlieWidget(config) {
         showInlineMessage("Chat history cleared.", "success");
         if (isAuthenticated) await fetch("/chat/clear", { method: "POST", headers: headers(false) }).catch(() => undefined);
     });
-    normalTabBtn?.addEventListener("click", () => { openPanel(); setActiveView("chat"); });
+    normalTabBtn?.addEventListener("click", () => {
+        setChatPlusAccessOpen(false);
+        openPanel();
+        setActiveView("chat");
+    });
     notificationsToggle2?.addEventListener("click", async () => {
+        setChatPlusAccessOpen(false);
         openPanel();
         setActiveView(state.view === "inbox" ? "chat" : "inbox");
         if (state.view === "inbox") await loadNotifications();
     });
-    proChatBtn?.addEventListener("click", (event) => { const locked = proChatBtn.getAttribute("data-locked") === "true" || !isPremium; if (locked) { event.preventDefault(); showInlineMessage("Upgrade to use Chat +.", "warning"); setTimeout(() => { window.location.href = "/pricing"; }, 320); } else { window.location.href = "/chat"; } });
+    proChatBtn?.addEventListener("click", (event) => {
+        const locked = proChatBtn.getAttribute("data-locked") === "true" || !isPremium;
+        if (!locked) {
+            window.location.href = "/chat";
+            return;
+        }
+
+        event.preventDefault();
+        const isOpen = proChatBtn.getAttribute("aria-expanded") === "true";
+        setChatPlusAccessOpen(!isOpen);
+    });
     chatAttachImageBtn?.addEventListener("click", (event) => {
         event.preventDefault();
         toggleComposerOptions();
@@ -677,14 +703,26 @@ function initCharlieWidget(config) {
     input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); form.requestSubmit(); } });
     document.addEventListener("click", (event) => {
         if (!chatComposerTools?.contains(event.target)) closeComposerOptions();
+        if (chatPlusAccessNotice?.classList.contains("is-open")
+            && !chatPlusAccessNotice.contains(event.target)
+            && !proChatBtn?.contains(event.target)) {
+            setChatPlusAccessOpen(false);
+        }
     });
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape") { if (chatMediaLightbox?.classList.contains("is-open")) closeLightbox(); else if (clearInlineConfirm?.classList.contains("is-open")) closeInlineClearConfirm({ restoreFocus: true }); else if (panel.classList.contains("open")) closePanel({ restoreFocus: true }); } });
+    document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        if (chatMediaLightbox?.classList.contains("is-open")) closeLightbox();
+        else if (clearInlineConfirm?.classList.contains("is-open")) closeInlineClearConfirm({ restoreFocus: true });
+        else if (chatPlusAccessNotice?.classList.contains("is-open")) setChatPlusAccessOpen(false, { restoreFocus: true });
+        else if (panel.classList.contains("open")) closePanel({ restoreFocus: true });
+    });
 
     panel.toggleAttribute("inert", !panel.classList.contains("open"));
     if (panel.classList.contains("open")) overlayManager?.open("charlie");
     else overlayManager?.release("charlie");
     renderHistory(readHistory());
     setActiveView("chat");
+    setChatPlusAccessOpen(false);
     closeComposerOptions();
     autoResizeInput();
     renderPendingAttachments();
@@ -725,6 +763,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const toastRegion = document.getElementById("chatToastRegion");
     const inlineToast = document.getElementById("chatInlineToast");
     const proChatBtn = document.getElementById("chatProChatBtn");
+    const chatPlusAccessNotice = document.getElementById("chatPlusAccessNotice");
     const chatAttachImageBtn = document.getElementById("chatAttachImageBtn");
     const chatComposerTools = document.getElementById("chatComposerTools");
     const chatComposerOptions = document.getElementById("chatComposerOptions");
@@ -795,7 +834,7 @@ document.addEventListener("DOMContentLoaded", () => {
         root, fab, panel, panelContent, closeBtn, clearBtn, form, input, body, sendBtn,
         dot, normalTabBtn, notificationsToggle2, notificationsView, notifFilterAll, notifFilterUnread,
         notificationsUnreadCount, notificationsList, notificationsReadAll, unreadBadge,
-        inlineToast, proChatBtn, chatAttachImageBtn, chatComposerTools, chatComposerOptions, chatUseCameraBtn,
+        inlineToast, proChatBtn, chatPlusAccessNotice, chatAttachImageBtn, chatComposerTools, chatComposerOptions, chatUseCameraBtn,
         chatUsePhotosBtn, chatCameraInput, chatPhotoInput, chatAttachmentPreviewTray,
         chatAttachmentCount, chatCharacterCount, clearInlineConfirm, clearInlineCancel, clearInlineConfirmBtn,
         chatMediaLightbox, chatMediaLightboxBackdrop, chatMediaLightboxClose, chatMediaLightboxImage,

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +44,7 @@ public class HomePageController {
     private final UserService userService;
     private final UserPreferenceService userPreferenceService;
     private final AdaptiveFeedbackService adaptiveFeedbackService;
+    private final MessageSource messageSource;
     
     @Autowired
     private DevModeProperties devModeProperties;
@@ -59,7 +61,8 @@ public class HomePageController {
             AuthHelper authHelper,
             UserService userService,
             UserPreferenceService userPreferenceService,
-            AdaptiveFeedbackService adaptiveFeedbackService
+            AdaptiveFeedbackService adaptiveFeedbackService,
+            MessageSource messageSource
     ) {
         this.exerciseLogService = exerciseLogService;
         this.calendarTaskRepository = calendarTaskRepository;
@@ -70,16 +73,22 @@ public class HomePageController {
         this.userService = userService;
         this.userPreferenceService = userPreferenceService;
         this.adaptiveFeedbackService = adaptiveFeedbackService;
+        this.messageSource = messageSource;
     }
 
     @GetMapping("/")
-    public ModelAndView homePage(Authentication authentication) {
+    public ModelAndView homePage(Authentication authentication, Locale locale) {
         User user = resolveCurrentUser(authentication);
 
         if (user == null) {
             ModelAndView mav = new ModelAndView("public-views/home/public");
             mav.addObject("isDevMode", devModeProperties.isDevMode());
-            mav.addObject("pageDescription", "Find a verified personal trainer, follow a structured programme and keep coaching, workouts and progress connected with One To One.");
+            mav.addObject("pageDescription", messageSource.getMessage(
+                    "home.001.page.description",
+                    null,
+                    "Find a verified personal trainer, follow a plan built around your life and keep every session, message and sign of progress connected with One To One.",
+                    locale
+            ));
             return mav;
         }
         

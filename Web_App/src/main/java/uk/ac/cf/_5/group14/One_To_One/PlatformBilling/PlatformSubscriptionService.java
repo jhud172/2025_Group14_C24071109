@@ -85,6 +85,30 @@ public class PlatformSubscriptionService {
     }
 
     @Transactional
+    public Optional<PlatformSubscription> markPaymentFailed(String providerSubId) {
+        Optional<PlatformSubscription> existing = findByProviderSubscriptionId(providerSubId);
+        if (existing.isEmpty()) {
+            return Optional.empty();
+        }
+        PlatformSubscription subscription = existing.get();
+        subscription.setStatus(PlatformSubscriptionStatus.PAST_DUE);
+        return Optional.of(repository.save(subscription));
+    }
+
+    @Transactional
+    public Optional<PlatformSubscription> markPaymentRecovered(String providerSubId) {
+        Optional<PlatformSubscription> existing = findByProviderSubscriptionId(providerSubId);
+        if (existing.isEmpty()) {
+            return Optional.empty();
+        }
+        PlatformSubscription subscription = existing.get();
+        subscription.setStatus(subscription.isCancelAtPeriodEnd()
+                ? PlatformSubscriptionStatus.EXPIRES
+                : PlatformSubscriptionStatus.ACTIVE);
+        return Optional.of(repository.save(subscription));
+    }
+
+    @Transactional
     public Optional<PlatformSubscription> updateCancelAtPeriodEnd(Long userId, boolean cancelAtPeriodEnd) {
         Optional<PlatformSubscription> existing = findByUserId(userId);
         if (existing.isEmpty()) {
@@ -191,5 +215,12 @@ public class PlatformSubscriptionService {
         }
         sub.setPlan(plan);
         return Optional.of(repository.save(sub));
+    }
+
+    private Optional<PlatformSubscription> findByProviderSubscriptionId(String providerSubId) {
+        if (providerSubId == null || providerSubId.isBlank()) {
+            return Optional.empty();
+        }
+        return repository.findByProviderSubId(providerSubId.trim());
     }
 }

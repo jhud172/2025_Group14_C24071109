@@ -194,7 +194,12 @@
                             class="cd-segmented__button"
                             th:classappend="${iterStat.index == 0 ? ' is-active' : ''}"
                             data-goal-tab
-                            th:attr="data-goal-tab=${section.key},aria-selected=${iterStat.index == 0 ? 'true' : 'false'}"
+                            role="tab"
+                            th:attr="id=${'dashboard-goal-tab-' + section.key},
+                                     data-goal-tab=${section.key},
+                                     aria-selected=${iterStat.index == 0 ? 'true' : 'false'},
+                                     aria-controls=${'dashboard-goal-panel-' + section.key},
+                                     tabindex=${iterStat.index == 0 ? '0' : '-1'}"
                             th:text="${section.title}">Week goals</button>
                 </div>
                 <div class="cd-goal-slider__mask">
@@ -203,7 +208,12 @@
                                  class="cd-goal-section"
                                  th:classappend="${iterStat.index == 0 ? ' is-active' : ''}"
                                  data-goal-view
-                                 th:attr="data-goal-view=${section.key}">
+                                 role="tabpanel"
+                                 th:attr="id=${'dashboard-goal-panel-' + section.key},
+                                          data-goal-view=${section.key},
+                                          aria-labelledby=${'dashboard-goal-tab-' + section.key},
+                                          aria-hidden=${iterStat.index == 0 ? 'false' : 'true'},
+                                          inert=${iterStat.index == 0 ? null : 'inert'}">
                             <div class="cd-goal-section__header">
                                 <h3 class="cd-goal-section__title" th:text="${section.title}">Week goals</h3>
                                 <span class="cd-goal-section__count"
@@ -407,14 +417,14 @@
                     </div>
                 </div>
                 <div class="cd-segmented cd-segmented--slider" role="tablist" aria-label="Action hub views" data-selected-tab="recommended">
-                    <button type="button" class="cd-segmented__button is-active" data-action-tab="recommended" role="tab" aria-selected="true">Recommended</button>
-                    <button type="button" class="cd-segmented__button" data-action-tab="all" role="tab" aria-selected="false">All</button>
+                    <button type="button" id="dashboard-action-tab-recommended" class="cd-segmented__button is-active" data-action-tab="recommended" role="tab" aria-selected="true" aria-controls="dashboard-action-panel-recommended" tabindex="0">Recommended</button>
+                    <button type="button" id="dashboard-action-tab-all" class="cd-segmented__button" data-action-tab="all" role="tab" aria-selected="false" aria-controls="dashboard-action-panel-all" tabindex="-1">All</button>
                 </div>
             </div>
 
             <div class="cd-action-slider" data-action-slider>
                 <div class="cd-action-slider__track" data-action-track>
-                    <div class="cd-action-view is-active" data-action-view="recommended" aria-hidden="false">
+                    <div id="dashboard-action-panel-recommended" class="cd-action-view is-active" data-action-view="recommended" role="tabpanel" aria-labelledby="dashboard-action-tab-recommended" aria-hidden="false">
                         <div th:if="${actionHub.primaryCard != null}" class="cd-action-layout">
                             <a th:with="card=${actionHub.primaryCard}"
                                th:href="@{${card.href}}"
@@ -499,7 +509,7 @@
                         </div>
                     </div>
 
-                    <div class="cd-action-view" data-action-view="all" aria-hidden="true">
+                    <div id="dashboard-action-panel-all" class="cd-action-view" data-action-view="all" role="tabpanel" aria-labelledby="dashboard-action-tab-all" aria-hidden="true" inert>
                         <div class="cd-action-grid cd-action-grid--all">
                             <a th:each="card : ${actionHub.allCards}"
                                th:href="@{${card.href}}"
@@ -737,9 +747,10 @@
                             </div>
                         </div>
                     </div>
-                    <p class="cd-ambience-card__permission" data-ambience-permission-message hidden>
-                        Please allow this site to access your location to use the weather feature.
-                    </p>
+                    <div class="cd-ambience-card__permission" data-ambience-permission-message hidden>
+                        <p data-ambience-permission-copy>Please allow this site to access your location to use the weather feature.</p>
+                        <button type="button" class="cd-button-chip" data-ambience-location-request>Enable local weather</button>
+                    </div>
                     <div class="cd-segmented cd-segmented--slider cd-ambience-card__graph-toggle"
                          data-ambience-graph-toggle
                          data-selected-mode="temperature"

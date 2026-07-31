@@ -65,6 +65,21 @@ class TemplateRouteContractTest {
     }
 
     @Test
+    void trainerClientMessageActionsUseTheInboxPostContract() throws IOException {
+        String clients = read("src/main/resources/templates/trainer-views/trainer/clients.html");
+        String activeClients = read("src/main/resources/templates/trainer-views/trainer/active-clients.html");
+
+        assertThat(clients)
+                .contains("th:action=\"@{/inbox/start/{id}(id=${link.clientUserId})}\"")
+                .contains("method=\"post\"")
+                .doesNotContain("th:href=\"@{/inbox/start/{id}(id=${link.clientUserId})}\"");
+        assertThat(activeClients)
+                .contains("th:action=\"@{/inbox/start/{id}(id=${link.clientUserId})}\"")
+                .contains("method=\"post\"")
+                .doesNotContain("th:href=\"@{/inbox/start/{id}(id=${link.clientUserId})}\"");
+    }
+
+    @Test
     void adminDashboardUsesCleanOperationalMetadata() throws IOException {
         String template = read("src/main/resources/templates/admin-views/dashboard/admin-dashboard.html");
 
@@ -178,6 +193,31 @@ class TemplateRouteContractTest {
         assertThat(template).doesNotContain("Ã°Å¸");
         assertThat(template).doesNotContain("Ã¢Å“");
         assertThat(template).doesNotContain("Ã¢â€ ");
+    }
+
+    @Test
+    void globalChatWidgetSeparatesGuestAndPremiumNavigation() throws IOException {
+        String template = read("src/main/resources/templates/universal-fragments/chat/chat-widget.html");
+        String css = read("src/main/resources/static/css/components/chat/chat-widget.css");
+        String script = read("src/main/resources/static/js/chat/chat.js");
+
+        assertThat(template)
+                .contains("chat-tabs-premium--guest")
+                .contains("<button sec:authorize=\"isAuthenticated()\"\n                        type=\"button\"\n                        id=\"chatProChatBtn\"")
+                .contains("chat-tab-btn--premium")
+                .contains("chat-tab-btn--locked")
+                .contains("id=\"chatPlusAccessNotice\"")
+                .contains("Chat+ is a Premium workspace")
+                .contains("View Premium");
+        assertThat(css)
+                .contains(".chat-tabs-premium--guest")
+                .contains(".chat-tabs-premium--member")
+                .contains(".chat-plus-access-notice.is-open")
+                .contains("grid-template-areas: \"camera message send\"");
+        assertThat(script)
+                .contains("setChatPlusAccessOpen")
+                .contains("chatPlusAccessNotice")
+                .contains("proChatBtn.getAttribute(\"aria-expanded\") === \"true\"");
     }
 
     @Test

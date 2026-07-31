@@ -1,32 +1,27 @@
 # One To One — project handoff and continuation point
 
-**Last updated:** 19 July 2026
+**Last updated:** 29 July 2026
 **Repository:** `G:\No OneDrive Work\My Website\Crystal-Powers-OneToOne\One To One\One-To-One`
 **Application:** Spring web app in `Web_App`  
-**Current branch:** `main`  
-**Current phase:** Phase 2 complete; Phase 3 browser/automated and remote touch-emulation release QA complete, with the wider audible screen-reader journey and physical-device confirmation remaining
+**Current branch:** `James/phase4-staging-readiness`
+**Current phase:** Phase 4 launch controls; persistent saved-card encryption, configuration ownership, accurate provider wording and required CI are complete, while real provider credentials remain deferred to the final pre-launch gate
 **Local preview:** `http://localhost:8081`
 
 ## Purpose
 
 This file is the durable reference point for continuing the One To One project on another device or in a new Codex session. Read this file first, then read `ONE_TO_ONE_UX_AUDIT.md` for the full evidence, defect inventory and phased plan.
 
-## Critical transfer warning
+## Transfer status
 
-The current working tree contains modified and untracked implementation files. They are **not committed at the time of this handoff**. A Markdown file alone will not transfer those changes to another device.
-
-Before changing devices, preserve the whole working tree by doing one of the following:
-
-1. Review, commit and push all intended project changes to the remote repository.
-2. Copy the complete repository folder, including untracked files, to the new device.
-
-Do not clone a fresh copy on the new device and assume this work will be present until the changes have been committed and pushed.
+The Phase 4 provider/recovery implementation and this handoff belong on
+`James/phase4-staging-readiness`. Confirm that the latest branch revision is
+present before continuing on another device.
 
 ## Resume prompt for a new Codex session
 
 Use this prompt after opening the repository on the new device:
 
-> Read `PROJECT_HANDOFF.md`, `ONE_TO_ONE_UX_AUDIT.md` and `Web_App/AGENTS.md`. Preserve all existing work. Verify the CSS build and Gradle tests, start the application at localhost:8081, then resume the remaining supervised Phase 3 audible screen-reader journey and physical-device release gate documented in the next step. The login validation announcement already has a human-confirmed pass; do not repeat completed browser or remote touch-emulation work unless a regression is reproduced.
+> Read `PROJECT_HANDOFF.md`, `PHASE4_PRODUCTION_READINESS.md`, `ONE_TO_ONE_UX_AUDIT.md`, `Web_App/docs/phase4-staging-runbook.md`, `Web_App/docs/phase4-environment-secret-manifest.md` and `Web_App/AGENTS.md`. Preserve all existing work. Continue Phase 4 with the remaining launch decisions: decide whether production accepts a documented maintenance handover or requires explicitly approved two-instance Render topology, and assign named primary and backup production monitoring/security owners. Keep the SMTP, Twilio and Stripe values at the intentional `"2bd"` placeholders until the final pre-launch provider gate. Do not use real recipients, make real charges, alter production webhooks, create billable resources or access the existing `public` data without explicit approval.
 
 ## Current verified status
 
@@ -42,9 +37,23 @@ Use this prompt after opening the repository on the new device:
 - Phase 3 now covers the public routes, login/sign-up presentation and the client, trainer, gym-admin and platform-admin dashboard baselines for keyboard/focus behaviour, reduced motion and 200% reflow.
 - Phase 3 now also covers calendar, inbox, workouts, goals, support and platform-admin operations for keyboard/focus behaviour, overlay trapping/return, accessible names, live feedback, reduced motion, 200% reflow and an initial 400% CSS-viewport equivalent.
 - Phase 3 browser release QA now also covers Chromium's accessibility tree, native 200%/400% zoom on representative login/client journeys, 400%-equivalent cross-role reflow, Windows forced colours, keyboard-only validation recovery and 44 × 44 px targets on critical controls.
-- Latest full Gradle result: **496 tests passed, 0 failed, 0 skipped**.
+- James has confirmed that the Phase 3 human release gate passed, closing the remaining audible screen-reader and real-touch-device checks.
+- The final automated release gate covers public, login, client, trainer, gym and admin journeys: **88 responsive cases passed**, **22 Axe cases passed with zero serious/critical violations**, six cold-cache Slow 4G/4× CPU journeys passed, and six Lighthouse journeys passed.
+- Final Lighthouse scores are: public **97/100/100/100**, login **98/100/100/100**, client **86/100/100**, trainer **92/100/100**, gym **92/100/100** and admin **94/100/100** for performance/accessibility/best practices, with SEO included for public/login.
+- Latest full Gradle result: **568 tests passed, 0 failed, 0 skipped** across 146 suites.
+- Saved provider tokens are AES-256-GCM ciphertext at rest. Render fails closed
+  without its persistent key and verifies the continuity marker plus every
+  saved token at startup. Deploy `dep-d9l03oj7uimc7389hllg` verified one
+  synthetic saved token after a controlled restart without changing its
+  ciphertext fingerprint; the synthetic account and card were then deleted.
+- The configuration/secret inventory and rotation/redaction controls are
+  versioned in `Web_App/docs/phase4-environment-secret-manifest.md`.
+- Provider-facing admin wording now accurately says email delivery was
+  attempted synchronously and is not tracked; it no longer claims a queue.
+- GitHub Actions run `30456277694` passed with the pinned Java 21/Node 22
+  toolchain. The strict `Release gate` status is required on `main`.
 - Latest local runtime proof: **HTTP 200** at `http://localhost:8081`, active profile `local`, datasource `jdbc:h2:mem:localdb`.
-- Latest CSS/JS version token: **`20260718p20`**.
+- Latest CSS/JS version token: **`20260727p23`**.
 - Core CSS is **212,420 bytes / 207.4 KiB**, approximately 83% smaller than the previous monolithic core.
 - Core CSS transfers at approximately **34 KiB with gzip**.
 - Static CSS caching, gzip compression, `Last-Modified` and `304 Not Modified` revalidation were verified.
@@ -225,11 +234,234 @@ Keep these already implemented homepage and Charlie requirements intact:
 - Restarted the local H2 application after the previous process ended overnight. HTTP 200 and **`20260718p20`** are again live on port 8081.
 - Phase 3 remains **not formally closed**. The next human session should resume with either the skipped main-landmark announcement or the first physical login reflow/touch check, depending on which testing environment is available.
 
+### Phase 3 — supervised gate resumed locally
+
+- Resumed on **27 July 2026** from the human-confirmed login-validation result. Narrator's visible scan cursor reached the page landmark and the Home H1 in the expected order, but this environment cannot hear or assess the spoken output, so those observations are not recorded as audible passes.
+- Verified Charlie's Escape path closes the panel and restores focus to its `Open Charlie` trigger. The onboarding tour visibly trapped Tab focus between its actions; a password-manager extension interfered with the post-close browser focus observation, so extension focus was not treated as an application defect.
+- Reproduced two calendar live-announcement defects in both month and week views: `Jump to today` announced `Jumped to selected date`, and temporarily disabling the jump controls dropped keyboard focus onto the document body.
+- Repaired the two calendar controllers so the polite live region now announces `Jumped to today` and focus returns to the activated jump control. A fresh Chromium context verified the final month and week results.
+- Reproduced stale delivery of the repaired calendar controllers because their script tags lacked the shared asset token. Month and week now use the versioned script contract, covered by `RoleAwareSharedSurfaceContractTest`, and the shared token is **`20260727p22`**.
+- Windows reports the NVIDIA GeForce RTX 3070 Ti and Intel UHD Graphics 770 as healthy. No HID touchscreen/digitiser is exposed, Android device tooling is unavailable, and NVDA is not installed; no physical touch or NVDA pass is claimed.
+- JavaScript syntax checks passed and the complete Gradle suite finished with **497 tests: 497 passed, 0 failed, 0 skipped**. The local app remains available on port 8081 with the `local` profile and H2.
+- A supplementary all-role standards matrix generated a partial report before exceeding its ten-minute runner limit. It was stopped and is not counted as a pass or failure; the previously completed cross-role browser evidence remains the baseline.
+- Phase 3 remains **not formally closed**. James must still listen to the remaining Narrator announcements and run the representative client, trainer, gym and admin journeys on a physical touchscreen device.
+
+### Phase 3 — performance, accessibility and responsive release gate complete
+
+- James confirmed that the preceding human release gate passed; Phase 3 is now formally complete.
+- Added `tools/qa/playwright-release-gate.mjs` and `npm run qa:release` for repeatable responsive, Axe, cold-cache throttled-performance and Lighthouse checks across representative public, login, client, trainer, gym and admin journeys.
+- Repaired only reproduced defects: invalid disclosure ARIA, focusable content inside hidden dashboard panels, incomplete tab semantics, an empty tooltip, scroll-region focus, two sub-AA emerald treatments, a distorted mobile logo, automatic geolocation prompting and segmented-code paste cancellation.
+- Reduced the two demo profile assets responsible for the cold-load regression from **3.50 MB to 133 KB** and **3.44 MB to 128 KB**; the shared nav logo fell from **118 KB to 24 KB**.
+- The final cold-cache Slow 4G/4× CPU medians are FCP **868–1,228 ms**, LCP **1,100–1,948 ms**, load **1,065–2,315 ms** and CLS **0–0.001**. Gym load fell from **18.1 s to 1.86 s**.
+- Final automated results: **88/88 responsive cases**, **22/22 Axe cases**, **6/6 throttled journeys**, **6/6 Lighthouse journeys** and **499/499 Gradle tests** passed. The app remains live on port 8081 using local H2.
+
+### Phase 4 — inventory and isolated transactional integration
+
+- Completed a read-only inventory of direct Java/npm dependencies, deployment configuration, environment variables, provider endpoints, callback/webhook routes, scheduled jobs, uploads, storage, sessions and production data stores. The durable evidence is in `PHASE4_PRODUCTION_READINESS.md`.
+- Ran all transaction checks in isolated local JAR processes with disposable H2. Stripe used the application simulation path, email was disabled/no-op, SMS was console-only and AI was disabled. No charge, refund, real provider message, production upload or production-data mutation occurred.
+- Completed representative client simulated-merch, trainer conversation/message, gym trainer-invite and platform-admin trainer-approval journeys.
+- Reproduced and repaired five defects: webhook CSRF interception, unlimited signed-webhook age, a trainer Message GET/POST mismatch, platform-admin denial from the trainer-verification queue, and empty-host SMTP selection.
+- Added integration/contract coverage for each repaired boundary. The full suite now reports **505 tests passed, 0 failed, 0 skipped** across 126 suites.
+- Rebuilt production CSS and ran the final-code release gate against an isolated server: **88 responsive cases**, **22 Axe cases**, **6 Slow 4G/4× CPU journeys** and **6 Lighthouse journeys** passed with zero findings.
+- Final Phase 4 Lighthouse scores are public **94/100/100/100**, login **98/100/100/100**, client **85/100/100**, trainer **90/100/100**, gym **91/100/100** and admin **93/100/100** for performance/accessibility/best practices, with SEO included for public/login.
+- The production decision is **NO-GO**. P0 blockers are the known shared-password production demo seed, ephemeral uploads, absence of an isolated staging/provider boundary, unproved real Stripe test-mode and email/SMS lifecycles, and missing migration/backup/restore/rollback evidence.
+
+### Phase 4 — local P0 hardening and staging design
+
+- Reproduced the Render profile's automatic `render-data.sql` execution and removed the production demo seed, including the shared-password platform-admin account.
+- Added Flyway's PostgreSQL module and `V1__baseline_schema.sql`; Render now disables Spring SQL initialisation, validates the schema through JPA and uses a versioned migration history. Local/test H2 explicitly keeps Flyway disabled.
+- Reproduced the mismatch between configurable upload directories and the fixed `file:uploads/` resource root. Each public upload route now serves from its matching configured storage directory.
+- Added the unapplied `render-staging.yaml` proposal and `Web_App/docs/phase4-staging-runbook.md`. After James directed reuse of the existing populated `1to-one` PostgreSQL instance, the design was revised to isolate staging in the `one_to_one_staging` schema. Flyway, Hibernate and the JDBC `currentSchema` now share that explicit boundary. The Starter web service remains separate, uses a 1 GB persistent upload disk, disables automatic deploys and starts with all external providers disabled.
+- Captured an exact read-only `public` baseline before staging: 6 users, 12 user-role links, 42 support requests, 2 trainer profiles, 1 gym profile, 4 platform subscriptions, 7 mobile authentication tokens and 1 waitlist email. These counts must remain unchanged by staging provisioning and migration drills.
+- Inspected current Render pricing. James approved the original **US$13.55/month** ceiling. Reusing the existing database reduces the expected incremental minimum to approximately **US$7.25/month**: US$7 web compute and US$0.25 persistent-disk storage, before usage overages. The empty `One To One Staging` Hobby workspace was created, but no service, database or disk was created there.
+- The first full run reproduced one Flyway/H2 test-profile collision. Explicit test-profile isolation repaired the root cause. Four database-schema boundary tests were then added; the final result is **512 passed, 0 failed, 0 skipped** across 128 suites.
+- Production CSS rebuilt successfully. The final local release gate on port 8094 passed **88 responsive cases**, **22 Axe cases**, **6 throttled-performance journeys** and **6 Lighthouse journeys** with zero findings.
+- No Render service/database/disk, real charge, real message, provider credential or webhook was changed. A read-only inventory confirmed that the existing database's `public` schema is populated, so staging is prohibited from targeting it. The production decision remains **NO-GO** until the schema boundary, external providers, upload persistence, PostgreSQL migration and recovery drills pass.
+
+### Phase 4 — isolated Render staging and migration proof
+
+- Created the approved `one-to-one-staging-jhuds` Starter web service (`srv-d9kct35aeets73ant7k0`) in the existing `one-to-one` Render environment. Automatic deploys are disabled. A 1 GB persistent disk (`dsk-d9kct35aeets73ant8ag`) is mounted at `/var/data/uploads`. Incremental minimum cost is approximately **US$7.25/month**.
+- Reused PostgreSQL `1to-one` only through `one_to_one_staging`. The first clean boot applied Flyway V1 with zero users and no demo seed. Controlled forward upgrades then applied V2–V4. The current staging state is one synthetic client, five successful Flyway history rows including schema creation, current version **4**, and one durable profile-upload reference.
+- Reproduced four PostgreSQL/Hibernate defects during real staging boots and repaired only those failures: conflicting legacy/V2 `chat_messages` ownership, missing `chat_threads.chat_type` and `peer_user_id`, incompatible health-record numeric types, and `saved_payment_methods.last_four` being fixed-width instead of variable-width. Mapping/migration contract coverage was added.
+- Deployed commit `50a2be4597db48e87857ec02793da213e33cef89`. Deployments `dep-d9kd8e5g1s2s73fsq100` and `dep-d9kdebrm8hqs73c7rlhg` reached live. A later rollback to the earlier successful artifact also reached live without a database downgrade.
+- Created and verified a staging-only client through sign-up, verification and login while email remained disabled. No real message was sent. A profile upload returned HTTP 200 before and after redeploy and rollback with the same **139,305-byte** size and SHA-256 `054f1b7337602ac967057876fe0f166b9ce9a7d9ba8d80498f22a391605a738f`.
+- The `public` fingerprint remained exactly unchanged after schema creation, migrations, the synthetic transaction, redeploy and rollback: 6 users, 12 user-role links, 42 support requests, 2 trainer profiles, 1 gym profile, 4 platform subscriptions, 7 mobile authentication tokens and 1 waitlist email.
+- Render completed an on-demand logical export at **28 July 2026 17:28 BST** and retains it for seven days. It was not downloaded because it includes the out-of-scope `public` schema. Render PITR always creates a separate billable database, so no restore was started without explicit approval.
+- The final local verification passed: production CSS build; **513/513 Gradle tests** across 129 suites; **88/88 responsive cases**; **22/22 Axe cases**; **6/6 throttled journeys**; and **6/6 Lighthouse journeys**, with zero findings.
+- No Stripe, SMTP or Twilio credential is configured. No real charge, refund, email, SMS, production webhook or production-service setting was changed. The decision remains **NO-GO** pending provider sandbox lifecycle proof, an approved isolated restore, and the remaining operational P1 decisions.
+- A follow-up provider-lifecycle attempt on 28 July 2026 rechecked the live Render environment rather than trusting the handoff assertion. `APP_EMAIL_PROVIDER` was still `none`, `APP_SMS_PROVIDER` was still `console`, and no `SPRING_MAIL_*`, `TWILIO_*`, `STRIPE_SECRET_KEY` or `STRIPE_WEBHOOK_SECRET` keys, secret files or linked environment groups existed on `one-to-one-staging-jhuds`. No provider request was made and no lifecycle pass is claimed.
+- The Render recovery customisation screen confirmed the lowest selectable recovery configuration as Basic-256mb at **US$6/month** plus 1 GB storage at **US$0.30/month**, for an exact **US$6.30/month**, billed and prorated by the second. The default copied 15 GB storage configuration would be **US$10.50/month**. The form was inspected only; `Create Database` was not activated.
+
+### Phase 4 — provider and recovery continuation
+
+- Forced a staging-only redeploy after provider variables were added and
+  confirmed that the new process selected SMTP and Twilio rather than the
+  previous no-op/console implementations.
+- SMTP verification and password-reset delivery both remain blocked because
+  the configured staging mail host is invalid. The password-reset page
+  correctly retained its generic anti-enumeration response, but no test-inbox
+  delivery occurred.
+- Added the documented Twilio test sender to staging after reproducing the
+  missing-sender failure. The request then reached Twilio and returned
+  authentication error 20003, proving that the configured test Account
+  SID/auth token is invalid. No SMS was sent.
+- Stripe checkout reached Stripe in test configuration and returned HTTP 401
+  for an invalid API key. No Checkout Session, subscription or charge was
+  created, and no production webhook was touched.
+- Reproduced three Stripe lifecycle defects in tests before editing: duplicate
+  event IDs were processed twice, invoice failure/recovery events were ignored,
+  and cancellation changed only the local database. Added a persistent webhook
+  event ledger (Flyway V5), payment failure/recovery state transitions and
+  provider-first cancellation so local state is not committed after a provider
+  failure.
+- With James's separate approval, created temporary recovery database
+  `one-to-one-phase4-recovery-20260728`
+  (`dpg-d9kgb35aeets73aupr70-a`) at the approved Basic-256mb/1 GB
+  **US$6.30/month prorated-by-the-second** configuration. The isolated restore
+  reached available, reported successful schema creation and Flyway V1–V4,
+  122 base tables, one expected synthetic user and one profile-upload
+  reference. No `public` row query was made.
+- Deleted the exact temporary recovery database immediately after validation
+  and confirmed that only the original source database remains available,
+  stopping further recovery-instance charges.
+- Final verification passed: `npm run build:css`, `bootJar`, **520/520 Gradle
+  tests** across 131 suites, **88/88 responsive**, **22/22 Axe**, **6/6
+  throttled** and **6/6 Lighthouse** cases with zero findings. Latest
+  Lighthouse scores are public **93/100/100/100**, login
+  **98/100/100/100**, client **83/100/100**, trainer **91/100/100**, gym
+  **89/100/100** and admin **94/100/100**.
+- Commit `f99024cf` was pushed and Render deploy
+  `dep-d9kgqgh42hec73doqmkg` reached live. Startup validated six Flyway
+  history entries, applied V5 successfully to `one_to_one_staging`, and served
+  the public homepage normally.
+- Production remains **NO-GO** until valid non-delivering SMTP sandbox,
+  Twilio test and Stripe test-mode credentials are installed and their live
+  staging lifecycles pass.
+- James directed the real provider credential work to remain deferred until
+  the final pre-launch gate. With the relevant SMTP, Twilio and Stripe
+  environment values set to the intentional invalid placeholder `"2bd"`, a
+  focused **19-test / 6-suite** provider and payment safety run passed with
+  zero failures. The live evidence remains the expected safe outcome: SMTP
+  cannot resolve the placeholder host, Twilio returns authentication error
+  20003, Stripe returns HTTP 401, and no message, Checkout Session,
+  subscription, charge or local cancellation success is created.
+
+### Phase 4 — chat, merchandise and workout storage acceptance
+
+- Reproduced on the live isolated staging service that chat images and workout
+  videos were served as public static resources: the owner, an unrelated
+  authenticated client and an anonymous request all received HTTP 200. The
+  merchandise image remained intentionally public.
+- Repaired only the reproduced private-read defect. Chat and workout files now
+  pass through authenticated owner checks, return HTTP 401 to anonymous
+  requests and HTTP 404 to another owner, and use `Cache-Control: no-store`.
+  Profile and merchandise image routes remain public.
+- Chat upload now rejects more than five files rather than silently truncating,
+  rejects files over 4 MiB, removes partial writes after failure and refuses a
+  stored attachment URL owned by another user. Clearing a conversation removes
+  only that owner's durable chat files.
+- Merchandise replacement/deactivation now removes an unreferenced stored
+  image, retains images referenced by order snapshots and removes a newly
+  written file when repository persistence fails.
+- Workout form video upload now enforces an 8 MiB limit, retains the MP4/WebM
+  signature checks, removes a written file after persistence failure and
+  exposes an owner-scoped deletion journey in the workout player.
+- The global multipart transport limit is explicitly **8 MB per file** and
+  **25 MB per request**, with a bounded **32 MB Tomcat swallow limit** so
+  rejected clients receive structured HTTP 413 JSON. Real embedded-Tomcat
+  coverage proves 8 MiB acceptance, 8 MiB + 1 byte rejection and aggregate
+  request rejection above 25 MiB.
+- Synthetic staging fixtures were created only in `one_to_one_staging`. Before
+  deploy, chat and merchandise images were both 23,044 bytes with SHA-256
+  `d08fc3b55a4a7d1c50c77f8929cd7ac0ca69656652f9bab9fc19f11510fa613a`;
+  the synthetic workout video was 24 bytes with SHA-256
+  `c8c5af84ac765d911a9ab05bc9a19d15d0b1bc5cf0654eff4469ce536410654e`.
+- Commit `7c4fce55` was pushed and Render deploy
+  `dep-d9kst0rl550s73f6kdmg` reached live. All three files retained identical
+  sizes and hashes after the redeploy. Owner reads returned 200, unrelated
+  chat/workout reads returned 404, anonymous chat/workout reads returned 401,
+  and anonymous merchandise read returned 200.
+- Application deletion passed for all three boundaries; every durable fixture
+  subsequently returned 404 and workout latest returned `NONE`. The three
+  labelled users, workout template and merchandise product were then removed
+  from the staging schema, with zero labelled rows remaining.
+- Final verification passed: `npm ci`, `npm run build:css`, `bootJar`,
+  **544/544 Gradle tests** across 135 suites, **88/88 responsive**, **22/22
+  Axe**, **6/6 throttled-performance** and **6/6 Lighthouse** journeys, with
+  zero release-gate findings.
+- No `public` row was queried or changed during this work. The existing service,
+  PostgreSQL instance, staging schema and disk were reused; no resource cost
+  was added. The `"2bd"` provider placeholders and production service/webhooks
+  were unchanged.
+
+### Phase 4 — operational health, shared state and audit ownership
+
+- Reproduced that aggregate Actuator health, readiness and liveness all
+  returned HTTP 401 and that Render was using `/login` as its health check.
+  Added status-only public `/actuator/health/liveness` and
+  `/actuator/health/readiness` contracts; aggregate `/actuator/health` remains
+  protected. Readiness includes application availability, PostgreSQL and disk
+  checks without exposing component details.
+- Configured the existing staging service health path to
+  `/actuator/health/readiness`. Live probes return HTTP 200 with
+  `{"status":"UP"}`, while aggregate health remains HTTP 401.
+- Reproduced that a valid authenticated session and login-attempt counters were
+  lost on application restart. Replaced both with PostgreSQL-backed state:
+  Spring Session JDBC uses `SESSION` cookies and the login throttle stores only
+  SHA-256 identity/network keys in `login_attempts`.
+- Reproduced restart behaviour twice. The same synthetic authenticated session
+  returned the client dashboard after both redeploys, and a staged throttle
+  remained effective after restart. Raw usernames and source addresses are not
+  retained in the throttle table.
+- Added database-owned leases for every scheduled job. A job now fails closed
+  when ownership cannot be acquired, preventing concurrent execution after
+  horizontal scale-out.
+- Added retained audit events for mutating `/admin/`, `/super-admin/` and
+  `/gym/` actions. Evidence records actor, roles, path, method, response,
+  result, timestamp, request ID and a hashed source address; request bodies and
+  query strings are excluded. Retention is 180 days.
+- A live staging denial probe reproduced that an `/access-denied` redirect was
+  initially classified as successful. Commit `b79f79bb` repairs that exact
+  outcome and adds regression coverage.
+- The subsequent full-suite run exposed that Spring could not bind the
+  scheduler annotation when a real scheduled proxy fired. Commit `1fabec8e`
+  resolves the annotation from the concrete target method, fails closed if it
+  cannot be resolved and adds real AOP proxy coverage. Final Render deploy
+  `dep-d9kvft2d0e5s73egun20` contains both fixes.
+- Flyway V6 creates the Spring Session, login-throttle, scheduler-lease and
+  privileged-audit tables. Validation was restricted to
+  `one_to_one_staging`; no `public` row or production provider configuration
+  was accessed.
+- James is the interim staging monitor, incident commander and privileged-audit
+  access owner until named primary and backup production owners are assigned.
+  Render workspace failure notifications are active. The response procedure is
+  documented in the staging runbook.
+- The service still has one Starter instance. A controlled redeploy produced a
+  brief HTTP 502 during handover, so a zero-downtime launch requires either an
+  explicitly accepted maintenance window or approval for at least two
+  instances. No billable scale change was made.
+- A 29 July 2026 read-only Render inspection confirmed the exact live
+  reference: one Oregon Starter instance, one 1 GB persistent disk and one
+  configured readiness path. Render prohibits scaling a disk-backed service
+  and disables its zero-downtime deploys. The production comparison is now
+  documented: retaining the single-instance maintenance handover adds
+  **US$0.00/month**, while two stateless Starter instances are
+  **US$14.00/month**, a net **US$6.75/month Render increase** after removing
+  the current US$0.25 disk. Shared object storage must be selected, quoted and
+  approved separately before the two-instance design is technically possible.
+  No resource or production setting was changed.
+- `npm ci` reported zero vulnerabilities. The workstation used Node 24.18/npm
+  11.14 rather than the repository-pinned Node 22.22/npm 11.11; the release
+  gate passed, but CI should use the pinned toolchain.
+
 ## Important implementation files
 
 ### Project evidence and handoff
 
 - `PROJECT_HANDOFF.md` — this continuation point.
+- `PHASE4_PRODUCTION_READINESS.md` — external-boundary inventory, transactional evidence, launch blockers and go/no-go checklist.
+- `render-staging.yaml` — staging Blueprint reference; the live service was configured manually in Render.
+- `Web_App/docs/phase4-staging-runbook.md` — approval boundary, provider test plan and recovery/rollback procedure.
 - `ONE_TO_ONE_UX_AUDIT.md` — complete audit, priorities and phase plan.
 - `Web_App/AGENTS.md` — repository-specific working instructions.
 
@@ -248,6 +480,7 @@ Keep these already implemented homepage and Charlie requirements intact:
 - `Web_App/src/main/resources/static/css/entries/`
 - `Web_App/src/main/resources/static/css/bundles/`
 - `Web_App/src/main/resources/static/css/app.css`
+- `Web_App/tools/qa/playwright-release-gate.mjs`
 
 ### Shell ownership and fixed surfaces
 
@@ -304,6 +537,7 @@ npm ci
 npm run build:css
 .\gradlew.bat test --no-daemon
 .\gradlew.bat bootRun
+npm run qa:release
 ```
 
 Then open:
@@ -324,35 +558,35 @@ node --check src/main/resources/static/js/dashboard/client-dashboard-page.js
 
 ## Next implementation step
 
-Continue **Phase 3 — polish and verification**.
+Continue **Phase 4 — launch decision and final provider gate**.
 
-The immediate next workstream is the remaining human portion of the final Phase 3 release gate: continue audible screen-reader output after the already-passed login validation check, then confirm representative journeys on a physical touch device. Repository, automated, desktop and remote touch-emulation evidence is complete.
+The isolated Render service, schema boundary, clean and forward migrations,
+all four upload boundaries, logical export, application rollback, isolated
+restore, authentication-safe health checks, shared sessions/throttles,
+scheduled-job ownership, privileged audit retention and automated gates are
+complete. Real provider proof remains a mandatory final pre-launch gate but is
+intentionally deferred.
 
 Priority order:
 
-1. **Complete:** make authentication and onboarding role-aware, including field visibility, grouped errors and destination routing.
-2. **Complete for the four role dashboards:** standardise typography, measured contrast, action hierarchy and useful empty states.
-3. **Complete:** make shared inbox, support and tool copy/actions/empty states match the active role.
-4. **Complete:** shorten long public pages and standardise section transitions using the existing motion tokens.
-5. **Complete baseline:** keyboard order, focus return, reduced motion and 200% reflow verification on public routes.
-6. **Complete baseline:** authentication and all four role dashboards, including repaired login tabs, tour focus visibility and client reveal availability.
-7. **Complete baseline:** calendar, inbox, workouts, goals, support and platform-admin operational tables, including focus containment/return, accessible naming, reduced motion and 200%/initial 400% reflow equivalents.
-8. **Complete for browser/automated QA:** Chromium accessibility-tree review, representative browser-native 200%/400% zoom, cross-role 400%-equivalent reflow, Windows forced colours, validation recovery and critical 44 × 44 px targets.
-9. **Remote/browser portion complete; human confirmation next:** continue Windows Narrator output (and NVDA if installed) from landmarks/headings after the passed login validation check, then confirm representative journeys on a physical touch device; repair only defects reproduced in that gate.
+1. James must explicitly sign off either the documented single-instance
+   maintenance handover (**US$0.00/month incremental**) or the two-instance
+   direction. The latter needs a separately selected/quoted shared object
+   store before approval of the exact **US$6.75/month net Render increase** and
+   any external-provider charge.
+2. James must provide the named primary and backup production
+   monitoring/security incident owners; the manifest intentionally keeps both
+   unassigned and James remains the interim staging owner only.
+3. At the final pre-launch gate, replace the invalid provider placeholders and
+   prove the deferred SMTP, Twilio and Stripe lifecycles, then rerun every
+   release gate.
 
-Phase 2 exit condition is met: role and public surfaces now share the intended visual, action, recovery and motion language without reintroducing overlay collisions or broad public transitions.
+## Phase 4 gates still required
 
-## Remaining release QA
-
-These checks were not claimed as complete and remain scheduled for Phase 3:
-
-- Physical touch devices and GPU performance; Chrome, Edge and WebKit touch emulation is complete but is not a hardware pass.
-- Audible screen-reader output and whole-site reading order beyond the completed browser accessibility-tree evidence and human-confirmed login validation announcement.
-- Whole-site measured colour contrast outside the completed dashboard token set.
-- Browser-native zoom beyond the representative login/client checks and cross-role CSS-viewport reflow evidence.
-- Throttled CPU and network testing.
-- Supervised confirmation of spoken validation/live announcements; browser focus recovery and live-region semantics are complete.
-- Responsive regression at 390, 768, 1024, 1280, 1366, 1440, 1536 and 1920 px.
+- Stripe test-mode payment completion, renewal, cancellation, failure, retry and duplicate webhook delivery.
+- External SMTP/Twilio sandbox verification and password-recovery delivery.
+- Production topology and named primary/backup incident ownership.
+- Final sandbox-provider lifecycle proof with real test credentials.
 
 ## Rules for future updates to this file
 

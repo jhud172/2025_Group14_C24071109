@@ -30,10 +30,6 @@
             <div class="floating-profile-card__shell"
                  th:classappend="${' profile-card-back-theme--' + cardBackTheme}">
                 <header class="floating-profile-card__top"
-                        data-profile-preview-trigger
-                        tabindex="0"
-                        aria-expanded="false"
-                        aria-controls="floating-profile-card-panel"
                         th:classappend="${' profile-banner-pill--' + bannerTheme}">
                     <a th:href="@{/profile}" class="floating-profile-card__avatar-wrap" aria-label="Open profile">
                         <span class="floating-profile-card__avatar profile-avatar-ring"
@@ -101,6 +97,7 @@
 
                     <button type="button"
                             class="floating-profile-card__toggle"
+                            data-profile-preview-trigger
                             data-profile-preview-toggle
                             aria-label="Open profile menu"
                             aria-expanded="false"
@@ -228,7 +225,7 @@
     <a sec:authorize="!isAuthenticated()"
        th:href="@{/login}"
        class="nav-login-cta">
-        <span class="nav-login-cta__label">Log in</span>
+        <span class="nav-login-cta__label" th:text="#{auth.login.submit}">Log in</span>
         <span class="nav-login-cta__icon" aria-hidden="true">
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4.5 10h10"/>

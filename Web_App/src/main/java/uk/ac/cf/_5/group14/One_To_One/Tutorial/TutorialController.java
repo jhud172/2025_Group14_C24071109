@@ -53,9 +53,6 @@ public class TutorialController {
         }
         if (user != null && !user.isHasSeenTutorial()) {
             userService.markTutorialSeen(user);
-            // Refresh session copy so future checks are correct
-            user.setHasSeenTutorial(true);
-            session.setAttribute("user", user);
         }
         return "redirect:" + dashboardPath(authentication);
     }

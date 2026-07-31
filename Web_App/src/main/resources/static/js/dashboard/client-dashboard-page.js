@@ -82,6 +82,7 @@
                 handle?.setAttribute("aria-expanded", isOpen ? "true" : "false");
                 handle?.classList.toggle("is-active", isOpen);
                 panel?.setAttribute("aria-hidden", isOpen ? "false" : "true");
+                panel?.toggleAttribute("inert", !isOpen);
             });
         };
 
@@ -278,11 +279,13 @@
                     const active = tabIndex === index;
                     tab.classList.toggle("is-active", active);
                     tab.setAttribute("aria-selected", active ? "true" : "false");
+                    tab.tabIndex = active ? 0 : -1;
                 });
                 views.forEach((view, viewIndex) => {
                     const active = viewIndex === index;
                     view.classList.toggle("is-active", active);
                     view.setAttribute("aria-hidden", active ? "false" : "true");
+                    view.toggleAttribute("inert", !active);
                 });
                 track.style.transform = `translateX(-${index * 100}%)`;
                 setHeight(views[index]);
@@ -290,6 +293,18 @@
 
             tabs.forEach((tab) => {
                 tab.addEventListener("click", () => setActive(tab.dataset.goalTab || "week"));
+                tab.addEventListener("keydown", (event) => {
+                    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+                    event.preventDefault();
+                    const currentIndex = tabs.indexOf(tab);
+                    const nextIndex = event.key === "Home"
+                        ? 0
+                        : event.key === "End"
+                            ? tabs.length - 1
+                            : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+                    setActive(tabs[nextIndex].dataset.goalTab || "week");
+                    tabs[nextIndex].focus();
+                });
             });
 
             const initial = tabs.find((tab) => tab.classList.contains("is-active"))?.dataset.goalTab || tabs[0].dataset.goalTab;
@@ -323,11 +338,13 @@
                     const active = tabIndex === index;
                     tab.classList.toggle("is-active", active);
                     tab.setAttribute("aria-selected", active ? "true" : "false");
+                    tab.tabIndex = active ? 0 : -1;
                 });
                 views.forEach((view, viewIndex) => {
                     const active = viewIndex === index;
                     view.classList.toggle("is-active", active);
                     view.setAttribute("aria-hidden", active ? "false" : "true");
+                    view.toggleAttribute("inert", !active);
                 });
                 track.style.transform = `translateX(-${index * 100}%)`;
                 setHeight(views[index]);
@@ -335,6 +352,18 @@
 
             tabs.forEach((tab) => {
                 tab.addEventListener("click", () => activate(tab.dataset.actionTab || "recommended"));
+                tab.addEventListener("keydown", (event) => {
+                    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+                    event.preventDefault();
+                    const currentIndex = tabs.indexOf(tab);
+                    const nextIndex = event.key === "Home"
+                        ? 0
+                        : event.key === "End"
+                            ? tabs.length - 1
+                            : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+                    activate(tabs[nextIndex].dataset.actionTab || "recommended");
+                    tabs[nextIndex].focus();
+                });
             });
 
             const initial = tabs.find((tab) => tab.classList.contains("is-active"))?.dataset.actionTab || tabs[0].dataset.actionTab;
@@ -1093,6 +1122,8 @@
         const locationMetaEl = root.querySelector("[data-ambience-location-meta]");
         const locationIndicatorEl = root.querySelector("[data-ambience-location-indicator]");
         const permissionEl = root.querySelector("[data-ambience-permission-message]");
+        const permissionCopyEl = root.querySelector("[data-ambience-permission-copy]");
+        const locationRequestEl = root.querySelector("[data-ambience-location-request]");
         const graphToggleEl = root.querySelector("[data-ambience-graph-toggle]");
         const timelineWrapEl = root.querySelector("[data-ambience-timeline-wrap]");
         const timelineEl = root.querySelector("[data-ambience-timeline]");
@@ -1143,7 +1174,7 @@
             }).catch(() => undefined);
         };
 
-        const renderStatusOnly = (weatherCopy, summaryCopy, showPermission) => {
+        const renderStatusOnly = (weatherCopy, summaryCopy, showPermission, canRequestLocation = showPermission) => {
             currentWeather = "auto";
             page.dataset.dashboardWeather = currentWeather;
             setCompactState(true);
@@ -1156,7 +1187,12 @@
             if (timelineEl) timelineEl.innerHTML = "";
             if (permissionEl) {
                 permissionEl.hidden = !showPermission;
-                permissionEl.textContent = WEATHER_PERMISSION_COPY;
+            }
+            if (permissionCopyEl) {
+                permissionCopyEl.textContent = WEATHER_PERMISSION_COPY;
+            }
+            if (locationRequestEl) {
+                locationRequestEl.hidden = !showPermission || !canRequestLocation;
             }
             applyTheme();
         };
@@ -1318,18 +1354,29 @@
             });
         });
 
-        const loadForecast = async () => {
+        const loadForecast = async (allowPrompt = false) => {
             const permissionStatus = await getGeolocationPermissionStatus();
             if (permissionStatus?.state === "denied") {
                 renderStatusOnly(
                     WEATHER_PERMISSION_COPY,
                     "Location access is required before the 24 hour outlook can load.",
+                    true,
+                    false
+                );
+                return;
+            }
+
+            if (permissionStatus?.state !== "granted" && !allowPrompt) {
+                renderStatusOnly(
+                    "Local weather is off",
+                    "Enable local weather when you want a location-aware 24 hour outlook.",
+                    true,
                     true
                 );
                 return;
             }
 
-            if (permissionStatus?.state === "prompt") {
+            if (permissionStatus?.state === "prompt" || permissionStatus === null) {
                 markPermissionPromptPending();
             }
 
@@ -1342,7 +1389,8 @@
                     renderStatusOnly(
                         WEATHER_PERMISSION_COPY,
                         "Location access is required before the 24 hour outlook can load.",
-                        true
+                        true,
+                        false
                     );
                 }
             });
@@ -1400,10 +1448,11 @@
             page.dataset.dashboardImmersive = next ? "true" : "false";
             await savePreference();
         });
+        locationRequestEl?.addEventListener("click", () => loadForecast(true));
 
         applyTheme();
         setGraphToggleState(currentGraphMode);
-        loadForecast();
+        loadForecast(false);
         window.setInterval(applyTheme, 1000);
     }
 

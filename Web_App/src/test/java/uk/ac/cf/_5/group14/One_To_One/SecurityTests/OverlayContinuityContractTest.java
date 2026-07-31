@@ -44,6 +44,19 @@ class OverlayContinuityContractTest {
     }
 
     @Test
+    void navbarRemainsStickyAndReturnsOnUpwardScroll() throws IOException {
+        String template = read("src/main/resources/templates/universal-fragments/layout/navbar.html");
+        String navbar = read("src/main/resources/static/js/core/navbar-page.js");
+
+        assertThat(template).contains("class=\"navheader\"")
+                .doesNotContain("class=\"navheader relative\"");
+        assertThat(navbar)
+                .contains("else if (delta < 0)")
+                .contains("setHeaderVisible(true)")
+                .contains("downwardTravel >= 12");
+    }
+
+    @Test
     void interactionTokensExposeTheApprovedMotionAndLayerScale() throws IOException {
         String tokens = read("src/main/resources/static/css/components/core/interaction-tokens.css");
 

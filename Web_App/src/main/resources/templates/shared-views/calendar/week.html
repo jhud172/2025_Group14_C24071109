@@ -158,7 +158,11 @@
                                             <span class="calendar-empty-state-icon"></span>
                                         </div>
                                         <!-- Detailed mode (COMBINED_LIST) -->
-                                        <div th:if="${!grouped}" class="calendar-singular-list">
+                                        <div th:if="${!grouped}"
+                                             class="calendar-singular-list"
+                                             role="group"
+                                             tabindex="0"
+                                             th:attr="aria-label=${'Scheduled items for ' + dayModel.isoDate}">
                                                 <div th:each="task,iter : ${tasks}"
                                                     th:if="${iter.index < 5 && task != null}"
                                                  class="calendar-item"
@@ -252,7 +256,7 @@
 </div>
 
 <div th:fragment="pageScripts">
-    <script src="/js/calendar/week.js"></script>
+    <script th:src="@{/js/calendar/week.js(v=${assetVersion})}"></script>
     <script th:src="@{/js/calendar/calendar-ux.js(v=${assetVersion})}"></script>
 </div>
 

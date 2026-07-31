@@ -17,9 +17,13 @@ public class SavedPaymentMethodServiceImpl implements SavedPaymentMethodService 
     private static final Logger log = Logger.getLogger(SavedPaymentMethodServiceImpl.class.getName());
 
     private final SavedPaymentMethodRepository repo;
+    private final CardEncryptionService cardEncryptionService;
 
-    public SavedPaymentMethodServiceImpl(SavedPaymentMethodRepository repo) {
+    public SavedPaymentMethodServiceImpl(
+            SavedPaymentMethodRepository repo,
+            CardEncryptionService cardEncryptionService) {
         this.repo = repo;
+        this.cardEncryptionService = cardEncryptionService;
     }
 
     @Override
@@ -32,6 +36,14 @@ public class SavedPaymentMethodServiceImpl implements SavedPaymentMethodService 
     @Transactional(readOnly = true)
     public Optional<SavedPaymentMethod> findByIdForUser(Long id, Long userId) {
         return repo.findByIdAndUserId(id, userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String resolveProviderTokenForUser(Long id, Long userId) {
+        SavedPaymentMethod card = repo.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new AccessDeniedException("Card not found"));
+        return cardEncryptionService.decrypt(card.getProviderPaymentMethodId());
     }
 
     @Override
@@ -67,7 +79,7 @@ public class SavedPaymentMethodServiceImpl implements SavedPaymentMethodService 
         card.setBrand(brand.trim());
         card.setExpiryMonth(expiryMonth);
         card.setExpiryYear(expiryYear);
-        card.setProviderPaymentMethodId(providerToken.trim());
+        card.setProviderPaymentMethodId(cardEncryptionService.encrypt(providerToken.trim()));
         card.setDefault(shouldBeDefault);
 
         log.info(() -> "Payment method added for user=" + user.getId() + " brand=" + brand + " last4=" + lastFour);

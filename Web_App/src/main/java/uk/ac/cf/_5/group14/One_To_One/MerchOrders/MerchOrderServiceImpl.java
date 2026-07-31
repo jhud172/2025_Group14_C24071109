@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.cf._5.group14.One_To_One.Merch.MerchProduct;
 import uk.ac.cf._5.group14.One_To_One.Merch.MerchProductService;
+import uk.ac.cf._5.group14.One_To_One.Operations.ExclusiveScheduledJob;
 import uk.ac.cf._5.group14.One_To_One.PaymentCards.SavedPaymentMethod;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
@@ -156,6 +157,7 @@ public class MerchOrderServiceImpl implements MerchOrderService {
     }
 
     @Scheduled(fixedDelay = 15 * 60 * 1000L)
+    @ExclusiveScheduledJob(value = "abandoned-merch-orders", lockAtMostFor = "PT20M")
     public void expireAbandonedPendingOrders() {
         Instant cutoff = Instant.now().minusSeconds(PENDING_PAYMENT_TTL_SECONDS);
         List<MerchOrder> abandoned = orderRepo.findByPaymentStatusAndCreatedAtBefore(PaymentStatus.PENDING_PAYMENT, cutoff);

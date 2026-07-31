@@ -25,6 +25,21 @@ class ShellPerformanceContractTest {
     }
 
     @Test
+    void sharedNavigationAndDemoAvatarImagesStayWithinColdLoadBudgets() throws IOException {
+        assertThat(Files.size(Path.of("src/main/resources/static/img/brand/logo.png")))
+                .as("navigation logo must stay below 64 KiB")
+                .isLessThan(64L * 1024L);
+        assertThat(Files.size(Path.of(
+                "src/main/resources/static/img/Products/Short_Sleeve_Top/Short_Sleeve_Front.jpg")))
+                .as("trainer demo avatar source must stay below 256 KiB")
+                .isLessThan(256L * 1024L);
+        assertThat(Files.size(Path.of(
+                "src/main/resources/static/img/Products/Long_Sleeve_Top/Long_Sleeve_Front.jpg")))
+                .as("gym demo avatar source must stay below 256 KiB")
+                .isLessThan(256L * 1024L);
+    }
+
+    @Test
     void featureStylesAreSplitOutOfTheCoreEntryPoint() throws IOException {
         String coreImports = read("src/main/resources/static/css/components/core/index.css");
 

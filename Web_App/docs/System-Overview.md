@@ -203,9 +203,13 @@ Commerce and billing surfaces include:
 The application uses different runtime profiles:
 
 - `local`: in-memory H2 database, schema plus seeded demo data, default port `8081`
-- `render`: PostgreSQL-oriented configuration, Render schema/data scripts, default port `8080`
+- `render`: PostgreSQL, versioned Flyway migrations and no automatic demo-data
+  seed, default port `8080`
 
-The application boot path also normalizes Render/PostgreSQL URLs in [`src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java`](../src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java).
+The application boot path also normalises Render/PostgreSQL URLs in
+[`src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java`](../src/main/java/uk/ac/cf/_5/group14/One_To_One/OneToOneApplication.java).
+`APP_DATABASE_SCHEMA` can bind a deployment to a dedicated PostgreSQL schema;
+the same value is applied to JDBC, Flyway and Hibernate.
 
 ## Configuration Model
 
@@ -228,6 +232,7 @@ The main repository-level flags and integrations include:
 - `DATABASE_URL`
 - `DATABASE_USER`
 - `DATABASE_PASSWORD`
+- `APP_DATABASE_SCHEMA`
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `APP_BASE_URL`

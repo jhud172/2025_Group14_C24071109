@@ -97,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const startBtn = panel.querySelector("[data-record-start]");
         const stopBtn = panel.querySelector("[data-record-stop]");
         const uploadBtn = panel.querySelector("[data-record-upload]");
+        const deleteBtn = panel.querySelector("[data-record-delete]");
         const statusEl = panel.querySelector("[data-video-status]");
         const preview = panel.querySelector("[data-record-preview]");
         const feedbackEl = panel.querySelector("[data-feedback]");
@@ -105,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let mediaStream = null;
         let chunks = [];
         let recordedBlob = null;
+        let latestVideoId = null;
 
         const setStatus = (text) => {
             if (statusEl) statusEl.textContent = text;
@@ -141,6 +143,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 const res = await fetch(`/workouts/studio/${sessionId}/sets/${setId}/video/latest`);
                 if (!res.ok) return;
                 const data = await res.json();
+                latestVideoId = data.videoId || null;
+                deleteBtn?.classList.toggle("hidden", !latestVideoId);
+                if (preview && data.videoUrl && !recordedBlob) {
+                    preview.src = data.videoUrl;
+                    preview.classList.remove("hidden");
+                }
                 if (data.status) {
                     setStatus(data.status.toLowerCase());
                 }
@@ -215,6 +223,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     setStatus("Upload failed");
                     return;
                 }
+                const saved = await res.json();
+                latestVideoId = saved.videoId || null;
+                deleteBtn?.classList.toggle("hidden", !latestVideoId);
                 setStatus("Processing");
                 showFeedback(null);
                 pollFeedback();
@@ -222,6 +233,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(pollFeedback, 10000);
             } catch {
                 setStatus("Upload failed");
+            }
+        });
+
+        deleteBtn?.addEventListener("click", async () => {
+            if (!latestVideoId) return;
+            const headers = {};
+            if (csrfToken) headers[csrfHeader] = csrfToken;
+            try {
+                const res = await fetch(
+                    `/workouts/studio/${sessionId}/sets/${setId}/video/${latestVideoId}`,
+                    { method: "DELETE", headers }
+                );
+                if (!res.ok) {
+                    setStatus("Remove failed");
+                    return;
+                }
+                latestVideoId = null;
+                recordedBlob = null;
+                deleteBtn.classList.add("hidden");
+                uploadBtn?.classList.add("hidden");
+                feedbackEl?.classList.add("hidden");
+                if (preview) {
+                    preview.removeAttribute("src");
+                    preview.load();
+                    preview.classList.add("hidden");
+                }
+                setStatus("Not recorded");
+            } catch {
+                setStatus("Remove failed");
             }
         });
 

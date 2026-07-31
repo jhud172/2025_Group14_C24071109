@@ -1,7 +1,9 @@
 package uk.ac.cf._5.group14.One_To_One.Security;
 
 import java.util.Locale;
+import java.nio.file.Path;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.ObjectProvider;
@@ -24,13 +26,19 @@ public class WebConfig implements WebMvcConfigurer {
     private final AuthHelper authHelper;
     private final UserSettingsService userSettingsService;
     private final ObjectProvider<CurrentUserArgumentResolver> currentUserArgumentResolverProvider;
+    private final String profileUploadLocation;
+    private final String merchUploadLocation;
 
     public WebConfig(AuthHelper authHelper,
                      UserSettingsService userSettingsService,
-                     ObjectProvider<CurrentUserArgumentResolver> currentUserArgumentResolverProvider) {
+                     ObjectProvider<CurrentUserArgumentResolver> currentUserArgumentResolverProvider,
+                     @Value("${app.storage.profile-dir:uploads/profile}") String profileUploadDirectory,
+                     @Value("${app.storage.merch-dir:uploads/merch}") String merchUploadDirectory) {
         this.authHelper = authHelper;
         this.userSettingsService = userSettingsService;
         this.currentUserArgumentResolverProvider = currentUserArgumentResolverProvider;
+        this.profileUploadLocation = resourceLocation(profileUploadDirectory);
+        this.merchUploadLocation = resourceLocation(merchUploadDirectory);
     }
 
     @Override
@@ -43,8 +51,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+        registry.addResourceHandler("/uploads/profile/**")
+                .addResourceLocations(profileUploadLocation);
+        registry.addResourceHandler("/uploads/merch/**")
+                .addResourceLocations(merchUploadLocation);
     }
 
     @Override
@@ -72,4 +82,12 @@ public class WebConfig implements WebMvcConfigurer {
         return new UserSettingsLocaleInterceptor(authHelper, userSettingsService, localeResolver());
     }
 
+    private static String resourceLocation(String configuredDirectory) {
+        String location = Path.of(configuredDirectory)
+                .toAbsolutePath()
+                .normalize()
+                .toUri()
+                .toString();
+        return location.endsWith("/") ? location : location + "/";
+    }
 }

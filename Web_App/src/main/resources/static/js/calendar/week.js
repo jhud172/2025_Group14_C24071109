@@ -484,6 +484,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function runJumpAction(action) {
         if (jumpActionInProgress) return;
+        const focusedControl = jumpControls.includes(document.activeElement)
+            ? document.activeElement
+            : null;
         jumpActionInProgress = true;
         setJumpControlsDisabled(true);
         try {
@@ -494,6 +497,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
             setJumpControlsDisabled(false);
             jumpActionInProgress = false;
+            if (focusedControl?.isConnected) {
+                focusedControl.focus();
+            }
         }
     }
 
@@ -601,7 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }) || null;
     }
 
-    async function jumpToDate(dateIso) {
+    async function jumpToDate(dateIso, successMessage = 'Jumped to selected date.') {
         const parsed = parseIsoDateInput(dateIso);
         if (!parsed) {
             setJumpStatus('Please enter a valid date.', 'error');
@@ -618,7 +624,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setJumpStatus('No day card found for that date.', 'error');
             return;
         }
-        setJumpStatus('Jumped to selected date.', 'success');
+        setJumpStatus(successMessage, 'success');
     }
 
     async function jumpToNextWorkout() {
@@ -669,7 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     jumpTodayBtn?.addEventListener('click', () => {
-        runJumpAction(() => jumpToDate(toLocalIsoDate(new Date())));
+        runJumpAction(() => jumpToDate(toLocalIsoDate(new Date()), 'Jumped to today.'));
     });
 
     jumpDateBtn?.addEventListener('click', () => {
