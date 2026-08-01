@@ -351,6 +351,7 @@ html[lang="cy"] .home-actions {
     transform-style: preserve-3d;
     transform: translate3d(var(--depth-x), var(--depth-y), 0);
     transition: transform 500ms var(--motion-ease-standard);
+    will-change: transform;
 }
 
 .brand-object {
@@ -4748,7 +4749,8 @@ html.dark :is(.gym-board > span, .gym-board > div) {
     }
 
     .home-scroll-cue {
-        display: none;
+        display: inline-flex;
+        bottom: max(1rem, env(safe-area-inset-bottom));
     }
 
     .home-section-intro--split {
@@ -5439,6 +5441,30 @@ html.dark :is(.gym-board > span, .gym-board > div) {
 }
 
 @media (hover: none), (pointer: coarse) {
+    #opening-overlay {
+        display: none;
+    }
+
+    .home-hero__visual {
+        transform: none !important;
+        transition: none !important;
+        will-change: auto;
+    }
+
+    .brand-object,
+    .coach-signal {
+        transition: none !important;
+        will-change: auto;
+    }
+
+    .brand-object__assembly,
+    .brand-object__orbit,
+    .brand-object__shine,
+    .coach-signal,
+    .coach-signal__pulse {
+        animation: none !important;
+    }
+
     .product-stage,
     .standard-proof,
     .home-final {

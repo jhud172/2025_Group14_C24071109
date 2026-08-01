@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('opening-overlay');
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const supportsFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const usesCoarsePointer = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+    const supportsFinePointerMotion = supportsFinePointer && !prefersReducedMotion;
 
     const createDevModeNotificationController = () => {
         const notice = document.getElementById('devModeHomeNotice');
@@ -157,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const devModeNotification = createDevModeNotificationController();
     const showDevModeNotification = () => {
-        if (!devModeNotification) {
+        if (!devModeNotification || usesCoarsePointer) {
             return;
         }
         window.setTimeout(() => devModeNotification.show(), 120);
@@ -180,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // INTRO SEQUENCE
     if (overlay) {
-        if (prefersReducedMotion) {
+        if (prefersReducedMotion || usesCoarsePointer) {
             overlay.remove();
             showDevModeNotification();
         } else {
@@ -224,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.addEventListener('click', () => activate(tab));
             if (activateOnHover) {
                 tab.addEventListener('pointerenter', () => {
-                    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                    if (supportsFinePointer) {
                         activate(tab);
                     }
                 });
@@ -257,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const workspaceScenes = Array.from(document.querySelectorAll('[data-workspace-scene]'));
-    const supportsWorkspaceDepth = !prefersReducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const supportsWorkspaceDepth = supportsFinePointerMotion;
     if (supportsWorkspaceDepth) {
         workspaceScenes.forEach((scene) => {
             scene.addEventListener('pointermove', (event) => {
@@ -275,9 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const finalCta = document.querySelector('[data-final-cta]');
-    const supportsFinalDepth = finalCta
-        && !prefersReducedMotion
-        && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const supportsFinalDepth = finalCta && supportsFinePointerMotion;
     if (supportsFinalDepth) {
         let finalFrame = null;
         const setFinalPose = (x, y) => {
@@ -607,8 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resetButton?.addEventListener('click', resetDemo);
 
-        const supportsStageTilt = !prefersReducedMotion
-            && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const supportsStageTilt = supportsFinePointerMotion;
         const setStagePose = (x, y) => {
             stage.style.setProperty('--stage-rotate-x', `${(-y * 6.4).toFixed(2)}deg`);
             stage.style.setProperty('--stage-rotate-y', `${(x * 9.6).toFixed(2)}deg`);
@@ -696,11 +696,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let updateQueued = false;
         const updateToTop = () => {
             updateQueued = false;
-            const triggerBounds = toTopTrigger.getBoundingClientRect();
             const navigationOffset = Number.parseFloat(
                 window.getComputedStyle(document.documentElement).scrollPaddingTop
             ) || 0;
-            const hasPassedHowItWorks = triggerBounds.bottom <= navigationOffset;
+            const triggerIsRendered = toTopTrigger.getClientRects().length > 0;
+            const visibleTriggerBottom = triggerIsRendered
+                ? toTopTrigger.getBoundingClientRect().bottom
+                : chapters[0].getBoundingClientRect().bottom;
+            const hasPassedHowItWorks = visibleTriggerBottom <= navigationOffset;
             toTop.classList.toggle('is-visible', hasPassedHowItWorks);
             toTop.setAttribute('aria-hidden', String(!hasPassedHowItWorks));
             toTop.tabIndex = hasPassedHowItWorks ? 0 : -1;
@@ -774,18 +777,20 @@ document.addEventListener('DOMContentLoaded', () => {
             moveBrandTo(0, 0);
         };
 
-        brandObject.addEventListener('pointerenter', () => {
-            interactionBounds = brandObject.getBoundingClientRect();
-        });
-        brandObject.addEventListener('pointermove', (event) => {
-            const bounds = interactionBounds || brandObject.getBoundingClientRect();
-            moveBrandTo(
-                ((event.clientX - bounds.left) / bounds.width) - 0.5,
-                ((event.clientY - bounds.top) / bounds.height) - 0.5
-            );
-        });
-        brandObject.addEventListener('pointerleave', resetBrandPose);
-        brandObject.addEventListener('pointercancel', resetBrandPose);
+        if (supportsFinePointer) {
+            brandObject.addEventListener('pointerenter', () => {
+                interactionBounds = brandObject.getBoundingClientRect();
+            });
+            brandObject.addEventListener('pointermove', (event) => {
+                const bounds = interactionBounds || brandObject.getBoundingClientRect();
+                moveBrandTo(
+                    ((event.clientX - bounds.left) / bounds.width) - 0.5,
+                    ((event.clientY - bounds.top) / bounds.height) - 0.5
+                );
+            });
+            brandObject.addEventListener('pointerleave', resetBrandPose);
+            brandObject.addEventListener('pointercancel', resetBrandPose);
+        }
         brandObject.addEventListener('blur', resetBrandPose);
         brandObject.addEventListener('keydown', (event) => {
             const poses = {
@@ -832,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabs.forEach((tab, index) => {
             tab.addEventListener('click', () => activate(tab.dataset.standardTab));
             tab.addEventListener('pointerenter', () => {
-                if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                if (supportsFinePointer) {
                     activate(tab.dataset.standardTab);
                 }
             });
@@ -848,7 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        const supportsProofDepth = !prefersReducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const supportsProofDepth = supportsFinePointerMotion;
         if (supportsProofDepth) {
             proof.addEventListener('pointermove', (event) => {
                 const bounds = proof.getBoundingClientRect();
@@ -871,15 +876,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-standard-controller]').forEach(createStandardExperience);
 
     const depthStage = document.querySelector('[data-home-depth]');
-    if (depthStage && !prefersReducedMotion) {
+    if (depthStage && supportsFinePointerMotion) {
+        let depthUpdateQueued = false;
         const updateDepth = () => {
+            depthUpdateQueued = false;
             const bounds = depthStage.getBoundingClientRect();
             const viewportMiddle = window.innerHeight / 2;
             const offset = Math.max(-1, Math.min(1, (bounds.top + bounds.height / 2 - viewportMiddle) / window.innerHeight));
             depthStage.style.setProperty('--depth-y', `${(offset * -12).toFixed(1)}px`);
         };
-        updateDepth();
-        window.addEventListener('scroll', updateDepth, { passive: true });
+        const queueDepthUpdate = () => {
+            if (depthUpdateQueued) return;
+            depthUpdateQueued = true;
+            window.requestAnimationFrame(updateDepth);
+        };
+        queueDepthUpdate();
+        window.addEventListener('scroll', queueDepthUpdate, { passive: true });
+        window.addEventListener('resize', queueDepthUpdate, { passive: true });
     }
 
     // SCROLL REVEAL

@@ -134,6 +134,8 @@ class PublicPageConsistencyContractTest {
                 .contains("translated('i18nSyncSent'")
                 .contains("formatTranslated")
                 .contains("supportsStageTilt")
+                .contains("supportsFinePointerMotion")
+                .contains("usesCoarsePointer")
                 .contains("interactionBounds")
                 .contains("Math.exp(-11 * elapsed)")
                 .contains("requestAnimationFrame(animateBrandPose)")
@@ -210,14 +212,21 @@ class PublicPageConsistencyContractTest {
                 .contains(".home-to-top.is-visible")
                 .contains("@keyframes chapterArrow")
                 .contains(".home-hero::after")
-                .contains("display: none")
+                .contains(".home-scroll-cue {\n        display: inline-flex;")
+                .contains("@media (hover: none), (pointer: coarse)")
+                .contains("#opening-overlay {\n        display: none;")
+                .contains(".home-hero__visual {\n        transform: none !important;")
                 .doesNotContain("scroll-snap-type", "scroll-behavior: smooth");
         assertThat(script)
                 .contains("createHomeChapterNavigation")
                 .contains("scrollIntoView")
                 .contains("home-chapters-ready")
                 .contains("hasPassedHowItWorks")
-                .contains("triggerBounds.bottom <= navigationOffset")
+                .contains("toTopTrigger.getClientRects().length > 0")
+                .contains("visibleTriggerBottom <= navigationOffset")
+                .contains("window.addEventListener('scroll', queueDepthUpdate, { passive: true })")
+                .contains("prefersReducedMotion || usesCoarsePointer")
+                .contains("!devModeNotification || usesCoarsePointer")
                 .contains("toTop.tabIndex");
     }
 
