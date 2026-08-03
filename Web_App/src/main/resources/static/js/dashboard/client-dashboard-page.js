@@ -77,7 +77,6 @@
                 const isOpen = isMobile && key === activeFlyout;
                 const handle = getHandle(flyout);
                 const panel = getPanel(flyout);
-                flyout.hidden = !isMobile;
                 flyout.classList.toggle("is-open", isOpen);
                 handle?.setAttribute("aria-expanded", isOpen ? "true" : "false");
                 handle?.classList.toggle("is-active", isOpen);

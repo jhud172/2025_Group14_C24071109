@@ -97,9 +97,12 @@ class DashboardConsistencyContractTest {
 
     @Test
     void clientDashboardStartsWithAReleaseQaHeadingAndReflowsAtHighZoom() throws IOException {
+        String page = read("src/main/resources/templates/client-views/dashboard/client-dashboard.html");
         String template = read("src/main/resources/templates/client-views/dashboard/fragments/client-dashboard-shell.html");
         String stylesheet = read("src/main/resources/static/css/components/dashboard/client-dashboard-refresh.css");
 
+        assertThat(page.indexOf("class=\"cd-dashboard-main\""))
+                .isLessThan(page.indexOf("id=\"dashboardLeftRail\""));
         assertThat(template)
                 .contains("<h1 class=\"sr-only\" th:text=\"#{ui.00480}\">Client dashboard</h1>");
         assertThat(stylesheet)
@@ -149,7 +152,8 @@ class DashboardConsistencyContractTest {
                 .contains("view.toggleAttribute(\"inert\", !active)")
                 .contains("tab.tabIndex = active ? 0 : -1")
                 .contains("locationRequestEl?.addEventListener(\"click\", () => loadForecast(true))")
-                .contains("loadForecast(false)");
+                .contains("loadForecast(false)")
+                .doesNotContain("flyout.hidden = !isMobile");
     }
 
     private static void assertDashboard(String relativePath, String roleClass) throws IOException {

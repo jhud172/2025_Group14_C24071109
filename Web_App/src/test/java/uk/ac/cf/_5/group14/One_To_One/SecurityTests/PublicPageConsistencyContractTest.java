@@ -89,7 +89,8 @@ class PublicPageConsistencyContractTest {
                 .contains("data-brand-depth=\"124\"")
                 .contains("class=\"brand-sculpture__volume brand-sculpture__volume--wordmark\"")
                 .contains("class=\"brand-sculpture__slice\"")
-                .contains("th:src=\"@{/img/home/one-to-one-sculpture-v2.png}\"")
+                .contains("data-brand-object role=\"img\"")
+                .contains("<span class=\"brand-object__render-fallback\" aria-hidden=\"true\"></span>")
                 .contains("class=\"brand-object__reflection\"")
                 .contains("th:src=\"@{/img/logo.png}\"")
                 .contains("data-product-nav=\"coach\"")
@@ -122,6 +123,7 @@ class PublicPageConsistencyContractTest {
                 .contains("--slice-z")
                 .contains("clip-path: inset(64% 0 0 0)")
                 .contains(".brand-object__render-fallback")
+                .contains("background: url(\"/img/home/one-to-one-sculpture-v2.webp\") center / contain no-repeat")
                 .contains("--stage-rotate-x")
                 .contains("translateZ(72px)")
                 .contains("@keyframes coachDrawerIn")
@@ -178,6 +180,7 @@ class PublicPageConsistencyContractTest {
         assertPublicImageExists("role-trainer.webp");
         assertPublicImageExists("role-gym.webp");
         assertPublicImageExists("one-to-one-sculpture-v2.png");
+        assertPublicImageExists("one-to-one-sculpture-v2.webp");
     }
 
     @Test
