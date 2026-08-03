@@ -40,16 +40,18 @@ class HomeLocalisationContractTest {
                 .contains("data-i18n-note-required")
                 .contains("#{home.294.to.top}");
         assertThat(base)
-                .contains("lang=${#locale.language}")
-                .contains("data-language=${#locale.language}");
+                .contains("lang=${currentLanguage.localeTag()}")
+                .contains("data-language=${currentLanguage.code()}")
+                .contains("dir=${textDirection}");
         assertThat(navbar)
                 .contains("language-selector :: languageSelector")
                 .contains("#{nav.development}");
         assertThat(selector)
                 .contains("name=\"lang\"")
-                .contains("value=\"en\"")
-                .contains("value=\"cy\"");
-        assertThat(application).contains("spring.messages.basename=messages,messages-home");
+                .contains("th:each=\"language : ${supportedLanguages}\"")
+                .contains("data-language-search")
+                .contains("data-language-search-value");
+        assertThat(application).contains("spring.messages.basename=messages,messages-home,messages-ui");
         assertThat(script)
                 .contains("'i18nSessionFinished'")
                 .contains("formatTranslated");

@@ -1,13 +1,13 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Gym Application', ~{::pageStyles}, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.01212}, ~{::pageStyles}, ~{::content}, null)}">
 
     <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
         <div class="auth-card">
             <div class="auth-accent-bar"></div>
 
             <div class="mb-6 mt-4 text-center">
-                <h1 class="auth-heading">Gym application status</h1>
-                <p class="auth-subheading">Track the review status and reply when our team requests more information.</p>
+                <h1 class="auth-heading" th:text="#{ui.01206}">Gym application status</h1>
+                <p class="auth-subheading" th:text="#{ui.01207}">Track the review status and reply when our team requests more information.</p>
             </div>
 
             <div th:if="${gymApplicationSuccess}" class="auth-alert auth-alert--success" role="alert" th:text="${gymApplicationSuccess}">Saved.</div>
@@ -16,7 +16,7 @@
             <section class="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <p class="text-xs uppercase tracking-[0.22em] text-slate-500">Application</p>
+                        <p class="text-xs uppercase tracking-[0.22em] text-slate-500" th:text="#{ui.01208}">Application</p>
                         <h2 class="mt-2 text-2xl font-semibold text-slate-900" th:text="${gymApplication.gymName}">Gym name</h2>
                         <p class="mt-2 text-sm text-slate-600" th:text="${gymApplication.adminEmail}">email@example.com</p>
                     </div>
@@ -25,19 +25,19 @@
 
                 <dl class="mt-5 grid grid-cols-1 gap-3 text-sm text-slate-600 sm:grid-cols-2">
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Gym username</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.01177}">Gym username</dt>
                         <dd class="mt-1 text-slate-900" th:text="${gymApplication.gymUsername}">gym_username</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Primary contact</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00019}">Primary contact</dt>
                         <dd class="mt-1 text-slate-900" th:text="${gymApplication.contactName}">Contact name</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00020}">Phone</dt>
                         <dd class="mt-1 text-slate-900" th:text="${gymApplication.contactPhone}">000</dd>
                     </div>
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Location</dt>
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00546}">Location</dt>
                         <dd class="mt-1 text-slate-900" th:text="${gymApplication.address + ', ' + gymApplication.city}">Address</dd>
                     </div>
                 </dl>
@@ -60,11 +60,11 @@
                   class="mt-5 space-y-3">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div>
-                    <label for="applicationReply" class="auth-field__label">Reply to the review team</label>
-                    <textarea id="applicationReply" name="message" rows="5" maxlength="5000" class="auth-field__input" placeholder="Add further details, documents, or clarifications for the application review."></textarea>
+                    <label for="applicationReply" class="auth-field__label" th:text="#{ui.01209}">Reply to the review team</label>
+                    <textarea id="applicationReply" name="message" rows="5" maxlength="5000" class="auth-field__input" placeholder="Add further details, documents, or clarifications for the application review." th:placeholder="#{ui.01210}"></textarea>
                 </div>
                 <button type="submit" class="auth-btn auth-btn--primary">
-                    <span>Send update</span>
+                    <span th:text="#{ui.01211}">Send update</span>
                 </button>
             </form>
         </div>

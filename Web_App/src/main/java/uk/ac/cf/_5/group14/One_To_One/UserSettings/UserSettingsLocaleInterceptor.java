@@ -4,16 +4,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
+import uk.ac.cf._5.group14.One_To_One.Config.SupportedLanguage;
 import uk.ac.cf._5.group14.One_To_One.Users.AuthHelper;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
 
-import java.util.Locale;
-import java.util.Set;
-
 public class UserSettingsLocaleInterceptor implements HandlerInterceptor {
-    private static final String DEFAULT_LANGUAGE = "en";
-    private static final Set<String> SUPPORTED_LANGUAGES = Set.of("en", "cy");
-
     private final AuthHelper authHelper;
     private final UserSettingsService userSettingsService;
     private final LocaleResolver localeResolver;
@@ -54,7 +49,7 @@ public class UserSettingsLocaleInterceptor implements HandlerInterceptor {
                 );
                 UserSettingsRequestCache.set(request, settings);
             }
-            localeResolver.setLocale(request, response, Locale.forLanguageTag(requestedLanguage));
+            localeResolver.setLocale(request, response, SupportedLanguage.fromCode(requestedLanguage).locale());
             return true;
         }
 
@@ -62,7 +57,7 @@ public class UserSettingsLocaleInterceptor implements HandlerInterceptor {
                 ? normalizeLanguage(settings.getLanguage())
                 : normalizeLanguage(localeResolver.resolveLocale(request).getLanguage());
 
-        localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+        localeResolver.setLocale(request, response, SupportedLanguage.fromCode(language).locale());
         return true;
     }
 
@@ -74,10 +69,6 @@ public class UserSettingsLocaleInterceptor implements HandlerInterceptor {
     }
 
     private static String normalizeLanguage(String language) {
-        if (language == null) {
-            return DEFAULT_LANGUAGE;
-        }
-        String normalized = language.trim().toLowerCase(Locale.ROOT);
-        return SUPPORTED_LANGUAGES.contains(normalized) ? normalized : DEFAULT_LANGUAGE;
+        return SupportedLanguage.normalizeCode(language);
     }
 }

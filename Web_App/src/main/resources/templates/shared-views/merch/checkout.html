@@ -1,10 +1,10 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Checkout', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.01437}, null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
 
         <div class="mb-6 flex items-center gap-3">
-            <a th:href="@{/merch}" class="text-neon-cyan text-sm hover:underline">&larr; Back to Shop</a>
+            <a th:href="@{/merch}" class="text-neon-cyan text-sm hover:underline" th:text="#{ui.02019}">&larr; Back to Shop</a>
         </div>
 
         <div class="grid gap-6 lg:grid-cols-[1.45fr,0.95fr]">
@@ -13,12 +13,12 @@
                     th:text="${paymentSimulationMode} ? 'Demo checkout' : 'Secure checkout'">Checkout</h1>
                 <p class="mt-2 text-sm text-slate-400"
                    th:if="${!paymentSimulationMode}">
-                    We use
+                    <th:block th:text="#{ui.02020}">We use</th:block>
                     <span th:text="${paymentProviderName != null ? paymentProviderName : 'our payment provider'}">Stripe</span>
-                    hosted checkout for merch payments. Card details stay with the provider and the order is only confirmed after payment is verified.
+                    <th:block th:text="#{ui.02021}">hosted checkout for merch payments. Card details stay with the provider and the order is only confirmed after payment is verified.</th:block>
                 </p>
                 <p class="mt-2 text-sm text-slate-300"
-                   th:if="${paymentSimulationMode}">
+                   th:if="${paymentSimulationMode}" th:text="#{ui.02022}">
                     This environment is using a simulated checkout. No real payment will be taken, saved card tokens stay local to this app, and demo merch orders will not be delivered.
                 </p>
 
@@ -28,11 +28,11 @@
 
                 <div th:if="${paymentSimulationMode}"
                      class="mt-5 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-100">
-                    Demo mode is active because the Stripe secret key is set to <code>false</code>. You can still test the full flow, save a demo card, and place a simulated order.
+                    <th:block th:text="#{ui.01404}">Demo mode is active because the Stripe secret key is set to</th:block> <code>false</code><th:block th:text="#{ui.02023}">. You can still test the full flow, save a demo card, and place a simulated order.</th:block>
                 </div>
 
                 <div th:if="${!paymentSimulationMode and !paymentProviderConfigured}"
-                     class="mt-5 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-100">
+                     class="mt-5 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-100" th:text="#{ui.02024}">
                     Secure checkout is not configured yet for this environment. No order will be charged or confirmed until the payment provider is enabled.
                 </div>
 
@@ -62,7 +62,7 @@
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                     <div>
-                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Quantity</label>
+                        <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{ui.02025}">Quantity</label>
                         <input type="number"
                                name="quantity"
                                min="1"
@@ -73,8 +73,8 @@
 
                     <div th:if="${paymentSimulationMode}" class="space-y-4 rounded-xl border border-slate-700/50 bg-slate-900/30 p-4">
                         <div>
-                            <p class="text-sm font-semibold text-white">Choose a demo payment method</p>
-                            <p class="mt-1 text-xs text-slate-400">Saved cards are only reused inside this local simulation flow.</p>
+                            <p class="text-sm font-semibold text-white" th:text="#{ui.02026}">Choose a demo payment method</p>
+                            <p class="mt-1 text-xs text-slate-400" th:text="#{ui.02027}">Saved cards are only reused inside this local simulation flow.</p>
                         </div>
 
                         <div th:if="${savedCards != null and !#lists.isEmpty(savedCards)}" class="space-y-3">
@@ -102,14 +102,14 @@
                                        class="mt-1 h-4 w-4"
                                        data-select-new-card="true" />
                                 <span class="flex-1 text-sm text-slate-300">
-                                    <span class="block font-semibold text-white">Use a different demo card</span>
-                                    <span class="block text-xs text-slate-400">Enter a one-off card below or save it to your profile.</span>
+                                    <span class="block font-semibold text-white" th:text="#{ui.01409}">Use a different demo card</span>
+                                    <span class="block text-xs text-slate-400" th:text="#{ui.02028}">Enter a one-off card below or save it to your profile.</span>
                                 </span>
                             </label>
                         </div>
 
                         <div th:if="${savedCards == null or #lists.isEmpty(savedCards)}"
-                             class="rounded-xl border border-dashed border-slate-600 bg-slate-950/20 p-3 text-sm text-slate-300">
+                             class="rounded-xl border border-dashed border-slate-600 bg-slate-950/20 p-3 text-sm text-slate-300" th:text="#{ui.01411}">
                             No saved cards yet. Add a demo card below to continue.
                         </div>
 
@@ -120,18 +120,18 @@
                             <input type="hidden" name="newLastFour" value="" data-last-four="true" />
 
                             <div>
-                                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Cardholder Name</label>
+                                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{ui.01412}">Cardholder Name</label>
                                 <input type="text"
                                        name="newCardHolderName"
                                        maxlength="200"
                                        class="input-field w-full"
                                        data-new-card-input="true"
-                                       placeholder="Name on card" />
+                                       placeholder="Name on card"  th:placeholder="#{ui.00838}"/>
                             </div>
 
                             <div class="grid gap-4 md:grid-cols-2">
                                 <div>
-                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Card Number</label>
+                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{ui.01413}">Card Number</label>
                                     <input type="text"
                                            maxlength="23"
                                            class="input-field w-full"
@@ -141,19 +141,19 @@
                                            inputmode="numeric" />
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Brand</label>
+                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{ui.01414}">Brand</label>
                                     <input type="text"
                                            name="newBrand"
                                            maxlength="50"
                                            class="input-field w-full"
                                            data-new-card-input="true"
-                                           placeholder="Visa" />
+                                           placeholder="Visa"  th:placeholder="#{ui.00842}"/>
                                 </div>
                             </div>
 
                             <div class="grid gap-4 md:grid-cols-2">
                                 <div>
-                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Expiry Month</label>
+                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{ui.01415}">Expiry Month</label>
                                     <input type="number"
                                            name="newExpiryMonth"
                                            min="1"
@@ -163,7 +163,7 @@
                                            placeholder="12" />
                                 </div>
                                 <div>
-                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">Expiry Year</label>
+                                    <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{ui.01416}">Expiry Year</label>
                                     <input type="number"
                                            name="newExpiryYear"
                                            min="2024"
@@ -176,22 +176,22 @@
 
                             <label class="flex items-start gap-3 rounded-xl border border-slate-700/50 bg-slate-950/30 p-3 text-sm text-slate-300">
                                 <input type="checkbox" name="saveCard" value="true" class="mt-1 h-4 w-4 rounded" />
-                                <span>Save this demo card to my profile so it appears next time.</span>
+                                <span th:text="#{ui.02029}">Save this demo card to my profile so it appears next time.</span>
                             </label>
                         </div>
                     </div>
 
                     <div class="rounded-xl border border-slate-700/50 bg-slate-900/30 p-4 text-sm text-slate-300">
-                        <p class="font-semibold text-white">What happens next</p>
+                        <p class="font-semibold text-white" th:text="#{ui.02030}">What happens next</p>
                         <ul class="mt-2 space-y-2 text-sm text-slate-400" th:if="${!paymentSimulationMode}">
-                            <li>1. We reserve your stock and open a hosted payment page.</li>
-                            <li>2. You complete payment directly with the provider.</li>
-                            <li>3. We verify the provider session before confirming the order.</li>
+                            <li th:text="#{ui.02031}">1. We reserve your stock and open a hosted payment page.</li>
+                            <li th:text="#{ui.02032}">2. You complete payment directly with the provider.</li>
+                            <li th:text="#{ui.02033}">3. We verify the provider session before confirming the order.</li>
                         </ul>
                         <ul class="mt-2 space-y-2 text-sm text-slate-400" th:if="${paymentSimulationMode}">
-                            <li>1. We reserve the stock for a demo order.</li>
-                            <li>2. We simulate a successful card payment inside this app.</li>
-                            <li>3. The order appears in your history, but no money is taken and nothing will be shipped.</li>
+                            <li th:text="#{ui.02034}">1. We reserve the stock for a demo order.</li>
+                            <li th:text="#{ui.02035}">2. We simulate a successful card payment inside this app.</li>
+                            <li th:text="#{ui.02036}">3. The order appears in your history, but no money is taken and nothing will be shipped.</li>
                         </ul>
                     </div>
 
@@ -202,29 +202,29 @@
                                 th:text="${paymentSimulationMode} ? 'Complete demo purchase' : 'Continue to secure checkout'">
                             Continue
                         </button>
-                        <a th:href="@{/merch}" class="btn btn--secondary">Cancel</a>
+                        <a th:href="@{/merch}" class="btn btn--secondary" th:text="#{ui.00125}">Cancel</a>
                     </div>
                 </form>
             </section>
 
             <aside class="card-neon p-6">
-                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Order summary</h2>
+                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400" th:text="#{ui.01432}">Order summary</h2>
                 <div class="mt-4 space-y-3 text-sm text-slate-300">
                     <div class="flex items-center justify-between">
-                        <span>Item</span>
+                        <span th:text="#{ui.02037}">Item</span>
                         <span class="font-semibold text-white" th:text="${product.name}">Product</span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span>Price</span>
+                        <span th:text="#{ui.00132}">Price</span>
                         <span class="font-semibold text-white"
                               th:text="'£' + ${#numbers.formatDecimal(product.price, 1, 2)}">£0.00</span>
                     </div>
                     <div class="rounded-xl border border-slate-700/50 bg-slate-900/30 p-3 text-xs text-slate-400"
                          th:if="${!paymentSimulationMode}">
-                        Orders stay in <span class="font-semibold text-white">pending payment</span> until the provider confirms the charge.
+                        <th:block th:text="#{ui.02038}">Orders stay in</th:block> <span class="font-semibold text-white" th:text="#{ui.02039}">pending payment</span> <th:block th:text="#{ui.02040}">until the provider confirms the charge.</th:block>
                     </div>
                     <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-100"
-                         th:if="${paymentSimulationMode}">
+                         th:if="${paymentSimulationMode}" th:text="#{ui.02041}">
                         Demo orders are marked as paid for testing only. They will not be fulfilled or dispatched.
                     </div>
                 </div>

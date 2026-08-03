@@ -1,16 +1,16 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout(${pageTitle} ?: 'Gym · Change Membership Price', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(${pageTitle} ?: #{ui.01024}, null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
             <div class="flex items-start justify-between gap-4 mb-6">
                 <div>
-                    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Change Membership Price</h1>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Update pricing for this membership product with proper audit trail.</p>
+                    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00990}">Change Membership Price</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00991}">Update pricing for this membership product with proper audit trail.</p>
                 </div>
                 <a th:href="@{/gym/admin/memberships}"
-                   class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70">
+                   class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70" th:text="#{ui.00571}">
                     Back
                 </a>
             </div>
@@ -26,20 +26,20 @@
 
             <!-- Current Product Details -->
             <div class="mb-6 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-white/10 p-5">
-                <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-3">Current Product</h2>
+                <h2 class="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-3" th:text="#{ui.00992}">Current Product</h2>
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-600 dark:text-slate-400">Product Name:</span>
+                        <span class="text-sm text-slate-600 dark:text-slate-400" th:text="#{ui.00993}">Product Name:</span>
                         <span class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${product.name}">Premium Membership</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-600 dark:text-slate-400">Current Price:</span>
+                        <span class="text-sm text-slate-600 dark:text-slate-400" th:text="#{ui.00994}">Current Price:</span>
                         <span class="text-lg font-bold text-slate-900 dark:text-slate-100">
                             $<span th:text="${#numbers.formatDecimal(product.priceDollars, 1, 2)}">49.99</span>
                         </span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-600 dark:text-slate-400">Billing Period:</span>
+                        <span class="text-sm text-slate-600 dark:text-slate-400" th:text="#{ui.00995}">Billing Period:</span>
                         <span class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${product.billingPeriod}">MONTHLY</span>
                     </div>
                 </div>
@@ -52,12 +52,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                     </svg>
                     <div>
-                        <h3 class="text-sm font-semibold text-yellow-900 dark:text-yellow-100">Impact Notice</h3>
+                        <h3 class="text-sm font-semibold text-yellow-900 dark:text-yellow-100" th:text="#{ui.00996}">Impact Notice</h3>
                         <p class="mt-1 text-sm text-yellow-800 dark:text-yellow-200">
-                            This price change will affect 
+                            <th:block th:text="#{ui.00997}">This price change will affect</th:block>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100" th:text="${affectedMemberCount}">0</span>
-                            active subscriber<span th:if="${affectedMemberCount} != 1">s</span>. 
-                            They will be automatically notified by email about this change.
+                            <th:block th:text="#{ui.00998}">active subscriber</th:block><span th:if="${affectedMemberCount} != 1" th:text="#{ui.00999}">s</span><th:block th:text="#{ui.01000}">. They will be automatically notified by email about this change.</th:block>
                         </p>
                     </div>
                 </div>
@@ -69,8 +68,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <div>
-                        <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100">No Active Subscribers</h3>
-                        <p class="mt-1 text-sm text-blue-800 dark:text-blue-200">
+                        <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100" th:text="#{ui.01001}">No Active Subscribers</h3>
+                        <p class="mt-1 text-sm text-blue-800 dark:text-blue-200" th:text="#{ui.01002}">
                             This product currently has no active subscribers. The price change will only affect new subscriptions.
                         </p>
                     </div>
@@ -89,7 +88,7 @@
                 <!-- New Price -->
                 <div>
                     <label for="newPriceDollars" class="block text-sm font-semibold text-slate-900 dark:text-slate-100">
-                        New Price (USD) <span class="text-red-500">*</span>
+                        <th:block th:text="#{ui.01003}">New Price (USD)</th:block> <span class="text-red-500">*</span>
                     </label>
                     <div class="mt-2 relative rounded-xl">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
@@ -108,13 +107,13 @@
                     <div th:if="${#fields.hasErrors('newPriceDollars')}" class="mt-1 text-sm text-rose-700">
                         <span th:errors="*{newPriceDollars}"></span>
                     </div>
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Enter the new price in dollars</p>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.01004}">Enter the new price in dollars</p>
                 </div>
 
                 <!-- Reason -->
                 <div>
                     <label for="reason" class="block text-sm font-semibold text-slate-900 dark:text-slate-100">
-                        Reason for Price Change <span class="text-red-500">*</span>
+                        <th:block th:text="#{ui.01005}">Reason for Price Change</th:block> <span class="text-red-500">*</span>
                     </label>
                     <textarea id="reason" 
                               th:field="*{reason}"
@@ -123,11 +122,11 @@
                               maxlength="500"
                               th:classappend="${#fields.hasErrors('reason')} ? ' border-rose-300 focus:border-rose-400 focus:ring-rose-400/20' : ''"
                               class="mt-2 block w-full rounded-xl border border-white/20 bg-white/5 dark:bg-slate-800/50 px-4 py-2.5 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400"
-                              placeholder="e.g., Annual rate adjustment to reflect increased facility costs and new equipment additions..."></textarea>
+                              placeholder="e.g., Annual rate adjustment to reflect increased facility costs and new equipment additions..." th:placeholder="#{ui.01006}"></textarea>
                     <div th:if="${#fields.hasErrors('reason')}" class="mt-1 text-sm text-rose-700">
                         <span th:errors="*{reason}"></span>
                     </div>
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.01007}">
                         Maximum 500 characters. This reason will be included in the email notification to members.
                     </p>
                 </div>
@@ -135,7 +134,7 @@
                 <!-- Effective Date -->
                 <div>
                     <label for="effectiveDate" class="block text-sm font-semibold text-slate-900 dark:text-slate-100">
-                        Effective Date <span class="text-red-500">*</span>
+                        <th:block th:text="#{ui.01008}">Effective Date</th:block> <span class="text-red-500">*</span>
                     </label>
                     <input type="date" 
                            id="effectiveDate" 
@@ -146,7 +145,7 @@
                     <div th:if="${#fields.hasErrors('effectiveDate')}" class="mt-1 text-sm text-rose-700">
                         <span th:errors="*{effectiveDate}"></span>
                     </div>
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.01009}">
                         Defaults to the next upcoming renewal date. Must be a future date.
                     </p>
                 </div>
@@ -158,13 +157,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
                         <div>
-                            <h3 class="text-sm font-semibold text-red-900 dark:text-red-100">Important Notice</h3>
+                            <h3 class="text-sm font-semibold text-red-900 dark:text-red-100" th:text="#{ui.01010}">Important Notice</h3>
                             <ul class="mt-1 text-sm text-red-800 dark:text-red-200 list-disc list-inside space-y-1">
-                                <li>This change will be recorded in the audit log</li>
-                                <li>All affected subscribers will receive an email notification</li>
-                                <li>Your members' current billing period will not be altered</li>
-                                <li>The change cannot be undone (but you can create another price change)</li>
-                                <li>Please ensure your reason is clear and professional</li>
+                                <li th:text="#{ui.01011}">This change will be recorded in the audit log</li>
+                                <li th:text="#{ui.01012}">All affected subscribers will receive an email notification</li>
+                                <li th:text="#{ui.01013}">Your members' current billing period will not be altered</li>
+                                <li th:text="#{ui.01014}">The change cannot be undone (but you can create another price change)</li>
+                                <li th:text="#{ui.01015}">Please ensure your reason is clear and professional</li>
                             </ul>
                         </div>
                     </div>
@@ -173,12 +172,12 @@
                 <!-- Submit Buttons -->
                 <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
                     <a th:href="@{/gym/admin/memberships}"
-                       class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70">
+                       class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70" th:text="#{ui.00125}">
                         Cancel
                     </a>
                     <button type="button"
                             id="openConfirmModal"
-                            class="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-600 px-6 py-2 text-sm font-semibold text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600">
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-600 px-6 py-2 text-sm font-semibold text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600" th:text="#{ui.01016}">
                         Review & Confirm
                     </button>
                 </div>
@@ -190,43 +189,43 @@
     <div id="confirmModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/50">
         <div class="flex min-h-full items-center justify-center p-4">
             <div class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-xl">
-                <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Confirm Price Change</h3>
-                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.01017}">Confirm Price Change</h3>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.01018}">
                     This will notify all affected members and create a permanent audit entry.
                 </p>
 
                 <div class="mt-4 space-y-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-white/10 p-4">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-500 dark:text-slate-400">Product</span>
+                        <span class="text-slate-500 dark:text-slate-400" th:text="#{ui.01019}">Product</span>
                         <span class="font-semibold text-slate-900 dark:text-slate-100" th:text="${product.name}">Product</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-500 dark:text-slate-400">Current Price</span>
+                        <span class="text-slate-500 dark:text-slate-400" th:text="#{ui.00966}">Current Price</span>
                         <span class="font-semibold text-slate-900 dark:text-slate-100">
                             $<span th:text="${#numbers.formatDecimal(product.priceDollars, 1, 2)}">49.99</span>
                         </span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-500 dark:text-slate-400">New Price</span>
+                        <span class="text-slate-500 dark:text-slate-400" th:text="#{ui.01020}">New Price</span>
                         <span id="confirmNewPrice" class="font-semibold text-slate-900 dark:text-slate-100">$0.00</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-500 dark:text-slate-400">Effective Date</span>
-                        <span id="confirmEffectiveDate" class="font-semibold text-slate-900 dark:text-slate-100">TBD</span>
+                        <span class="text-slate-500 dark:text-slate-400" th:text="#{ui.01008}">Effective Date</span>
+                        <span id="confirmEffectiveDate" class="font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.01021}">TBD</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-500 dark:text-slate-400">Affected Members</span>
+                        <span class="text-slate-500 dark:text-slate-400" th:text="#{ui.01022}">Affected Members</span>
                         <span class="font-semibold text-slate-900 dark:text-slate-100" th:text="${affectedMemberCount}">0</span>
                     </div>
                 </div>
 
                 <div class="mt-6 flex justify-end gap-3">
                     <button type="button" id="closeConfirmModal"
-                            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70">
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/70" th:text="#{ui.00125}">
                         Cancel
                     </button>
                     <button type="submit" form="priceChangeForm"
-                            class="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600">
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600" th:text="#{ui.01023}">
                         Confirm & Notify
                     </button>
                 </div>

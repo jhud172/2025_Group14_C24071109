@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Preferences', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.00298}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="styles">
         <link rel="stylesheet" th:href="@{/css/components/account/preference-form.css(v='20260315a')}">
@@ -11,14 +11,14 @@
             <div class="pref-card pref-hero-card rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Your profile</p>
-                        <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950 dark:text-slate-50">Preferences</h1>
-                        <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400" th:text="#{ui.00270}">Your profile</p>
+                        <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-950 dark:text-slate-50" th:text="#{ui.00298}">Preferences</h1>
+                        <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300" th:text="#{ui.00299}">
                             Adjust everything from one place. Your display, training choices, conditions, defaults, and dashboard summary cards are grouped below so changes are easy to review.
                         </p>
                     </div>
                     <div th:if="${param.quickSetup != null}"
-                         class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-100">
+                         class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-100" th:text="#{ui.00300}">
                         Quick setup finished. You can fine-tune everything here.
                     </div>
                 </div>
@@ -27,35 +27,35 @@
                      class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-100"
                      th:text="#{preferences.saved}">Preferences saved successfully.</div>
                 <div th:if="${param.reset != null}"
-                     class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
+                     class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200" th:text="#{ui.00301}">
                     Smart defaults reset to baseline values.
                 </div>
                 <div th:if="${#fields.hasAnyErrors()}"
                      class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-100"
-                     role="alert">
+                     role="alert" th:text="#{ui.00302}">
                     Please correct the highlighted fields before saving your changes.
                 </div>
 
-                <div class="pref-status-strip" aria-label="Preference coverage">
+                <div class="pref-status-strip" aria-label="Preference coverage" th:attr="aria-label=#{ui.00303}">
                     <div class="pref-status-card">
-                        <p class="pref-status-card__label">Display</p>
-                        <p class="pref-status-card__copy">Theme, language, weather and accessibility stay consistent across the client experience.</p>
+                        <p class="pref-status-card__label" th:text="#{ui.00304}">Display</p>
+                        <p class="pref-status-card__copy" th:text="#{ui.00305}">Theme, language, weather and accessibility stay consistent across the client experience.</p>
                     </div>
                     <div class="pref-status-card">
-                        <p class="pref-status-card__label">Training</p>
-                        <p class="pref-status-card__copy">Conditions and focus areas keep recommendations aligned with your health record and goals.</p>
+                        <p class="pref-status-card__label" th:text="#{ui.00306}">Training</p>
+                        <p class="pref-status-card__copy" th:text="#{ui.00307}">Conditions and focus areas keep recommendations aligned with your health record and goals.</p>
                     </div>
                     <div class="pref-status-card">
-                        <p class="pref-status-card__label">Dashboard</p>
-                        <p class="pref-status-card__copy">Default workout values and summary cards shape what you see first each week.</p>
+                        <p class="pref-status-card__label" th:text="#{ui.00308}">Dashboard</p>
+                        <p class="pref-status-card__copy" th:text="#{ui.00309}">Default workout values and summary cards shape what you see first each week.</p>
                     </div>
                 </div>
             </div>
 
             <div class="pref-page-toolbar">
-                <p class="pref-page-toolbar__copy">Changes here affect your dashboard, planning defaults, and the coaching information your trainer sees first.</p>
+                <p class="pref-page-toolbar__copy" th:text="#{ui.00310}">Changes here affect your dashboard, planning defaults, and the coaching information your trainer sees first.</p>
                 <div class="pref-inline-actions">
-                    <a th:href="@{/dashboard}" class="pref-btn-secondary pref-btn-secondary--quiet">Back to dashboard</a>
+                    <a th:href="@{/dashboard}" class="pref-btn-secondary pref-btn-secondary--quiet" th:text="#{ui.00311}">Back to dashboard</a>
                 </div>
             </div>
 
@@ -71,61 +71,62 @@
                 <div class="pref-editor-grid">
                     <section class="pref-card pref-section-card rounded-[24px] border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                         <div class="pref-section-head">
-                            <p class="pref-section-head__eyebrow">Design</p>
-                            <h2 class="pref-section-head__title">Display & accessibility</h2>
-                            <p class="pref-section-head__copy">Control how the app looks and how time and weather are displayed across the dashboard.</p>
+                            <p class="pref-section-head__eyebrow" th:text="#{ui.00312}">Design</p>
+                            <h2 class="pref-section-head__title" th:text="#{ui.00313}">Display & accessibility</h2>
+                            <p class="pref-section-head__copy" th:text="#{ui.00314}">Control how the app looks and how time and weather are displayed across the dashboard.</p>
                         </div>
 
                         <div class="pref-category-grid mt-6">
                             <div id="field-language">
-                                <label class="pref-required block text-sm font-medium text-slate-700 dark:text-slate-200" for="language">Language</label>
+                                <label class="pref-required block text-sm font-medium text-slate-700 dark:text-slate-200" for="language" th:text="#{ui.00315}">Language</label>
                                 <div class="mt-2 pref-select-wrap">
                                     <select id="language" th:field="*{language}" class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
-                                        <option value="en">English</option>
-                                        <option value="cy">Welsh</option>
+                                        <option th:each="supportedLanguage : ${supportedLanguages}"
+                                                th:value="${supportedLanguage.code()}"
+                                                th:text="${#messages.msg(supportedLanguage.messageKey()) + ' — ' + supportedLanguage.nativeName()}">English — English</option>
                                     </select>
                                 </div>
                                 <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('language')}" th:errors="*{language}"></p>
                             </div>
 
                             <div id="field-theme">
-                                <label class="pref-required block text-sm font-medium text-slate-700 dark:text-slate-200" for="theme">Theme</label>
+                                <label class="pref-required block text-sm font-medium text-slate-700 dark:text-slate-200" for="theme" th:text="#{ui.00316}">Theme</label>
                                 <div class="mt-2 pref-select-wrap">
                                     <select id="theme" th:field="*{theme}" class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
-                                        <option value="SYSTEM">System default</option>
-                                        <option value="LIGHT">Light</option>
-                                        <option value="DARK">Dark</option>
+                                        <option value="SYSTEM" th:text="#{ui.00317}">System default</option>
+                                        <option value="LIGHT" th:text="#{ui.00318}">Light</option>
+                                        <option value="DARK" th:text="#{ui.00319}">Dark</option>
                                     </select>
                                 </div>
                                 <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('theme')}" th:errors="*{theme}"></p>
                             </div>
 
                             <div id="field-weatherTemperatureUnit">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="weatherTemperatureUnit">Weather unit</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="weatherTemperatureUnit" th:text="#{ui.00320}">Weather unit</label>
                                 <div class="mt-2 pref-select-wrap">
                                     <select id="weatherTemperatureUnit" th:field="*{weatherTemperatureUnit}" class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
-                                        <option value="CELSIUS">Celsius (C)</option>
-                                        <option value="FAHRENHEIT">Fahrenheit (F)</option>
+                                        <option value="CELSIUS" th:text="#{ui.00321}">Celsius (C)</option>
+                                        <option value="FAHRENHEIT" th:text="#{ui.00322}">Fahrenheit (F)</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div id="field-weatherDisplayMode">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="weatherDisplayMode">Weather display</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="weatherDisplayMode" th:text="#{ui.00323}">Weather display</label>
                                 <div class="mt-2 pref-select-wrap">
                                     <select id="weatherDisplayMode" th:field="*{weatherDisplayMode}" class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
-                                        <option value="VISUAL">Visual weather view</option>
-                                        <option value="GRAPH">Graph view</option>
+                                        <option value="VISUAL" th:text="#{ui.00324}">Visual weather view</option>
+                                        <option value="GRAPH" th:text="#{ui.00325}">Graph view</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div id="field-timeDisplayFormat">
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="timeDisplayFormat">Time format</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" for="timeDisplayFormat" th:text="#{ui.00326}">Time format</label>
                                 <div class="mt-2 pref-select-wrap">
                                     <select id="timeDisplayFormat" th:field="*{timeDisplayFormat}" class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100">
-                                        <option value="TWELVE_HOUR">12 hour</option>
-                                        <option value="TWENTY_FOUR_HOUR">24 hour</option>
+                                        <option value="TWELVE_HOUR" th:text="#{ui.00327}">12 hour</option>
+                                        <option value="TWENTY_FOUR_HOUR" th:text="#{ui.00328}">24 hour</option>
                                     </select>
                                 </div>
                             </div>
@@ -134,8 +135,8 @@
                         <div class="mt-6 space-y-3">
                             <label class="pref-toggle-row">
                                 <span>
-                                    <span class="block text-sm font-medium text-slate-700 dark:text-slate-200">Easy mode</span>
-                                    <span class="block text-xs text-slate-500 dark:text-slate-400">Larger text and spacing for readability.</span>
+                                    <span class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00329}">Easy mode</span>
+                                    <span class="block text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.00330}">Larger text and spacing for readability.</span>
                                 </span>
                                 <span class="pref-toggle ml-4 shrink-0">
                                     <input type="checkbox" th:field="*{easyMode}" class="pref-toggle__input" />
@@ -145,8 +146,8 @@
 
                             <label class="pref-toggle-row">
                                 <span>
-                                    <span class="block text-sm font-medium text-slate-700 dark:text-slate-200">Colour blind mode</span>
-                                    <span class="block text-xs text-slate-500 dark:text-slate-400">Boost contrast for key UI elements.</span>
+                                    <span class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00331}">Colour blind mode</span>
+                                    <span class="block text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.00332}">Boost contrast for key UI elements.</span>
                                 </span>
                                 <span class="pref-toggle ml-4 shrink-0">
                                     <input type="checkbox" th:field="*{colorBlindMode}" class="pref-toggle__input" />
@@ -158,15 +159,15 @@
 
                     <section class="pref-card pref-section-card rounded-[24px] border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                         <div class="pref-section-head">
-                            <p class="pref-section-head__eyebrow">Training</p>
-                            <h2 class="pref-section-head__title">Conditions & focus areas</h2>
-                            <p class="pref-section-head__copy">Choose the physical conditions and training preferences that shape your recommendations.</p>
+                            <p class="pref-section-head__eyebrow" th:text="#{ui.00306}">Training</p>
+                            <h2 class="pref-section-head__title" th:text="#{ui.00333}">Conditions & focus areas</h2>
+                            <p class="pref-section-head__copy" th:text="#{ui.00334}">Choose the physical conditions and training preferences that shape your recommendations.</p>
                         </div>
 
                         <div class="mt-6">
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Physical conditions</label>
-                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Conditions from your health record are locked and cannot be removed here.</p>
-                            <div th:if="${lockedConditions != null and !lockedConditions.isEmpty()}" class="mt-3 rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-300">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00335}">Physical conditions</label>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.00336}">Conditions from your health record are locked and cannot be removed here.</p>
+                            <div th:if="${lockedConditions != null and !lockedConditions.isEmpty()}" class="mt-3 rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/30 dark:text-slate-300" th:text="#{ui.00337}">
                                 Some conditions are locked from your health assessment.
                             </div>
                             <div class="mt-4">
@@ -183,7 +184,7 @@
                         <div class="pref-section-divider"></div>
 
                         <div th:if="${preferencesByCategory == null or preferencesByCategory.isEmpty()}"
-                             class="rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/30">
+                             class="rounded-xl border border-slate-200/70 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/30" th:text="#{ui.00338}">
                             No training preferences available yet.
                         </div>
 
@@ -195,7 +196,7 @@
                                         <select th:id="'select-' + ${category.key.replace(' ', '-').toLowerCase()}"
                                                 class="pref-single-select block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100"
                                                 th:attr="data-category=${category.key}">
-                                            <option value="">None selected</option>
+                                            <option value="" th:text="#{ui.00339}">None selected</option>
                                             <option th:each="preference : ${category.value}"
                                                     th:value="${preference.id}"
                                                     th:text="${preference.description}"
@@ -237,26 +238,26 @@
                 <section class="pref-card pref-section-card rounded-[24px] border border-slate-200/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
                     <div class="pref-panel-header">
                         <div class="pref-section-head">
-                            <p class="pref-section-head__eyebrow">Defaults</p>
-                            <h2 class="pref-section-head__title">Smart defaults</h2>
-                            <p class="pref-section-head__copy">Control the values used when new workouts, nutrition logs, and weekly summary cards are created.</p>
+                            <p class="pref-section-head__eyebrow" th:text="#{ui.00340}">Defaults</p>
+                            <h2 class="pref-section-head__title" th:text="#{ui.00341}">Smart defaults</h2>
+                            <p class="pref-section-head__copy" th:text="#{ui.00342}">Control the values used when new workouts, nutrition logs, and weekly summary cards are created.</p>
                         </div>
-                        <button type="submit" th:formaction="@{/select-preferences/reset}" formmethod="post" class="pref-btn-secondary pref-btn-secondary--quiet">Reset defaults</button>
+                        <button type="submit" th:formaction="@{/select-preferences/reset}" formmethod="post" class="pref-btn-secondary pref-btn-secondary--quiet" th:text="#{ui.00343}">Reset defaults</button>
                     </div>
 
                     <div class="pref-category-grid pref-category-grid--compact mt-6">
                             <div id="field-defaultSets">
-                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400" for="defaultSets">Default sets</label>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400" for="defaultSets" th:text="#{ui.00344}">Default sets</label>
                                 <input type="number" id="defaultSets" min="1" max="20" th:field="*{defaultSets}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
                                 <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('defaultSets')}" th:errors="*{defaultSets}"></p>
                             </div>
                             <div id="field-defaultRepMin">
-                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400" for="defaultRepMin">Rep range (min)</label>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400" for="defaultRepMin" th:text="#{ui.00345}">Rep range (min)</label>
                                 <input type="number" id="defaultRepMin" min="1" max="30" th:field="*{defaultRepMin}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
                                 <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('defaultRepMin')}" th:errors="*{defaultRepMin}"></p>
                             </div>
                             <div id="field-defaultRepMax">
-                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400" for="defaultRepMax">Rep range (max)</label>
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400" for="defaultRepMax" th:text="#{ui.00346}">Rep range (max)</label>
                                 <input type="number" id="defaultRepMax" min="1" max="50" th:field="*{defaultRepMax}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
                                 <p class="mt-1 text-xs text-red-600 dark:text-red-400" th:if="${#fields.hasErrors('defaultRepMax')}" th:errors="*{defaultRepMax}"></p>
                             </div>
@@ -265,57 +266,57 @@
                     <div class="pref-section-divider"></div>
 
                     <div>
-                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Preferred equipment</p>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400" th:text="#{ui.00347}">Preferred equipment</p>
                         <div class="pref-pill-cloud mt-3">
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentBodyweight}" class="sr-only pref-pill-checkbox" />Bodyweight</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentDumbbell}" class="sr-only pref-pill-checkbox" />Dumbbells</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentBarbell}" class="sr-only pref-pill-checkbox" />Barbells</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentMachine}" class="sr-only pref-pill-checkbox" />Machines</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentBands}" class="sr-only pref-pill-checkbox" />Bands</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentKettlebell}" class="sr-only pref-pill-checkbox" />Kettlebells</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentCable}" class="sr-only pref-pill-checkbox" />Cable</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentPullupBar}" class="sr-only pref-pill-checkbox" />Pull-up Bar</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentJumpRope}" class="sr-only pref-pill-checkbox" />Jump Rope</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentMedicineBall}" class="sr-only pref-pill-checkbox" />Medicine Ball</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentFoamRoller}" class="sr-only pref-pill-checkbox" />Foam Roller</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentTrx}" class="sr-only pref-pill-checkbox" />TRX / Suspension</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentOther}" class="sr-only pref-pill-checkbox" id="equipment-other-checkbox" />Other</label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentBodyweight}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00348}">Bodyweight</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentDumbbell}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00349}">Dumbbells</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentBarbell}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00350}">Barbells</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentMachine}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00351}">Machines</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentBands}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00352}">Bands</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentKettlebell}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00353}">Kettlebells</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentCable}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00354}">Cable</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentPullupBar}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00355}">Pull-up Bar</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentJumpRope}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00356}">Jump Rope</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentMedicineBall}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00357}">Medicine Ball</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentFoamRoller}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00358}">Foam Roller</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentTrx}" class="sr-only pref-pill-checkbox" /><th:block th:text="#{ui.00359}">TRX / Suspension</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><svg class="pref-pill-check h-3 w-3 hidden text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><input type="checkbox" th:field="*{preferredEquipmentOther}" class="sr-only pref-pill-checkbox" id="equipment-other-checkbox" /><th:block th:text="#{ui.00360}">Other</th:block></label>
                         </div>
 
                         <div id="equipment-other-container" class="mt-3 hidden">
-                            <input type="text" th:field="*{preferredEquipmentOtherSpecify}" maxlength="200" placeholder="Specify other equipment..." class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
+                            <input type="text" th:field="*{preferredEquipmentOtherSpecify}" maxlength="200" placeholder="Specify other equipment..." class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100"  th:placeholder="#{ui.00361}"/>
                         </div>
                     </div>
 
                     <div class="pref-section-divider"></div>
 
                     <div>
-                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Macro targets</p>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400" th:text="#{ui.00362}">Macro targets</p>
                         <div class="pref-category-grid pref-category-grid--macro mt-3">
-                            <div><label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetCalories">Calories (kcal)</label><input type="number" id="macroTargetCalories" min="0" max="20000" th:field="*{macroTargetCalories}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" /></div>
-                            <div><label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetProtein">Protein (g)</label><input type="number" id="macroTargetProtein" min="0" max="1000" th:field="*{macroTargetProtein}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" /></div>
-                            <div><label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetCarbs">Carbs (g)</label><input type="number" id="macroTargetCarbs" min="0" max="1000" th:field="*{macroTargetCarbs}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" /></div>
-                            <div><label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetFat">Fat (g)</label><input type="number" id="macroTargetFat" min="0" max="1000" th:field="*{macroTargetFat}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" /></div>
+                            <div><label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetCalories" th:text="#{ui.00363}">Calories (kcal)</label><input type="number" id="macroTargetCalories" min="0" max="20000" th:field="*{macroTargetCalories}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" /></div>
+                            <div><label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetProtein" th:text="#{ui.00364}">Protein (g)</label><input type="number" id="macroTargetProtein" min="0" max="1000" th:field="*{macroTargetProtein}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" /></div>
+                            <div><label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetCarbs" th:text="#{ui.00365}">Carbs (g)</label><input type="number" id="macroTargetCarbs" min="0" max="1000" th:field="*{macroTargetCarbs}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" /></div>
+                            <div><label class="block text-xs text-slate-500 dark:text-slate-400" for="macroTargetFat" th:text="#{ui.00366}">Fat (g)</label><input type="number" id="macroTargetFat" min="0" max="1000" th:field="*{macroTargetFat}" class="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" /></div>
                         </div>
                     </div>
 
                     <div class="pref-section-divider"></div>
 
                     <div id="weekly-summary-metrics">
-                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Dashboard weekly summary cards <span class="font-normal">(choose up to 6)</span></p>
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400"><th:block th:text="#{ui.00367}">Dashboard weekly summary cards</th:block> <span class="font-normal" th:text="#{ui.00368}">(choose up to 6)</span></p>
                         <div class="pref-pill-cloud mt-3" id="weekly-metric-choices">
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="WORKOUTS_COMPLETED" />Workouts completed</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="WORKOUTS_REMAINING" />Workouts remaining</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="TASKS_COMPLETED" />Tasks completed</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="TASKS_NOT_COMPLETED" />Tasks not completed</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="MEALS_LOGGED" />Meals logged</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="HABITS_COMPLETED" />Habits completed</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="HABITS_NOT_COMPLETED" />Habits not completed</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="WEIGHT_TREND" />Weight trend</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="WORKOUT_STREAK" />Workout streak</label>
-                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="NUTRITION_STREAK" />Nutrition streak</label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="WORKOUTS_COMPLETED" /><th:block th:text="#{ui.00369}">Workouts completed</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="WORKOUTS_REMAINING" /><th:block th:text="#{ui.00370}">Workouts remaining</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="TASKS_COMPLETED" /><th:block th:text="#{ui.00371}">Tasks completed</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="TASKS_NOT_COMPLETED" /><th:block th:text="#{ui.00372}">Tasks not completed</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="MEALS_LOGGED" /><th:block th:text="#{ui.00373}">Meals logged</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="HABITS_COMPLETED" /><th:block th:text="#{ui.00374}">Habits completed</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="HABITS_NOT_COMPLETED" /><th:block th:text="#{ui.00375}">Habits not completed</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="WEIGHT_TREND" /><th:block th:text="#{ui.00376}">Weight trend</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="WORKOUT_STREAK" /><th:block th:text="#{ui.00377}">Workout streak</th:block></label>
+                            <label class="pref-pill inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"><input type="checkbox" class="sr-only pref-pill-checkbox weekly-metric-checkbox" th:field="*{weeklySummaryMetrics}" value="NUTRITION_STREAK" /><th:block th:text="#{ui.00378}">Nutrition streak</th:block></label>
                         </div>
-                        <p id="weekly-metric-limit-msg" class="mt-2 hidden text-xs text-amber-700 dark:text-amber-300">You can select up to 6 metrics.</p>
+                        <p id="weekly-metric-limit-msg" class="mt-2 hidden text-xs text-amber-700 dark:text-amber-300" th:text="#{ui.00379}">You can select up to 6 metrics.</p>
                     </div>
                 </section>
             </form>
@@ -324,10 +325,10 @@
         <div id="pref-save-bar" class="pref-save-bar hidden" data-pref-save-bar>
             <div class="pref-save-bar__inner">
                 <div>
-                    <p class="pref-save-bar__title">Unsaved changes</p>
-                    <p class="pref-save-bar__copy">Save your updated preferences to apply them across the app.</p>
+                    <p class="pref-save-bar__title" th:text="#{ui.00380}">Unsaved changes</p>
+                    <p class="pref-save-bar__copy" th:text="#{ui.00381}">Save your updated preferences to apply them across the app.</p>
                 </div>
-                <button type="submit" form="preferences-editor-form" class="pref-btn-primary">Save changes</button>
+                <button type="submit" form="preferences-editor-form" class="pref-btn-primary" th:text="#{ui.00382}">Save changes</button>
             </div>
         </div>
     </div>

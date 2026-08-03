@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Restricted Feature', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.02363}, ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <th:block th:fragment="pageStyles">
         <link rel="stylesheet" th:href="@{/css/components/dev/dev-mode-pages.css(v='20260315a')}">
@@ -14,7 +14,7 @@
                             <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon(${restrictedNotice.iconKey})}"></th:block>
                         </div>
                         <div class="devnotice-card__copy">
-                            <p class="devnotice-eyebrow">Restricted During Development</p>
+                            <p class="devnotice-eyebrow" th:text="#{ui.02361}">Restricted During Development</p>
                             <h1 class="devnotice-title" th:text="${restrictedNotice.title}">Restricted Feature</h1>
                             <p class="devnotice-card__path" th:text="${restrictedNotice.path}">/path</p>
                         </div>
@@ -31,8 +31,8 @@
                     </div>
 
                     <div class="devnotice-card__actions">
-                        <a th:href="@{/dev-mode}" class="devnotice-button devnotice-button--primary">Back to Dev Hub</a>
-                        <a th:href="@{/}" class="devnotice-button devnotice-button--secondary">Return Home</a>
+                        <a th:href="@{/dev-mode}" class="devnotice-button devnotice-button--primary" th:text="#{ui.02362}">Back to Dev Hub</a>
+                        <a th:href="@{/}" class="devnotice-button devnotice-button--secondary" th:text="#{ui.01132}">Return Home</a>
                     </div>
                 </div>
             </article>

@@ -1,15 +1,15 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Messages', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.02083}, null, ~{::content}, null)}">
 
     <div th:fragment="content">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight">Inbox</h1>
-                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Your messages with your trainer.</p>
+                <h1 class="text-2xl font-bold tracking-tight" th:text="#{ui.00952}">Inbox</h1>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.02080}">Your messages with your trainer.</p>
             </div>
 
             <div class="mt-6 rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
-                <div th:if="${thread == null}" class="text-sm text-slate-600 dark:text-slate-300">
+                <div th:if="${thread == null}" class="text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.02081}">
                     No trainer thread yet. Once you have a pending or active trainer relationship, it will appear here.
                 </div>
 
@@ -22,7 +22,7 @@
                     </div>
 
                     <a th:href="@{/inbox/{id}(id=${thread.id})}"
-                       class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                       class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white" th:text="#{ui.02082}">
                         Open thread
                     </a>
                 </div>

@@ -17,11 +17,14 @@
     "qa:release": "node tools/qa/playwright-release-gate.mjs",
     "qa:login:roles": "node tools/qa/run-site-simulation.mjs --login-only --roles trainer,gym --fail-on major",
     "qa:login:trainer": "node tools/qa/run-site-simulation.mjs --login-only --roles trainer --fail-on major",
-    "qa:login:gym": "node tools/qa/run-site-simulation.mjs --login-only --roles gym --fail-on major"
+    "qa:login:gym": "node tools/qa/run-site-simulation.mjs --login-only --roles gym --fail-on major",
+    "i18n:extract": "node tools/i18n/extract-template-messages.mjs --write",
+    "i18n:check": "node tools/i18n/extract-template-messages.mjs && node tools/i18n/check-bundle-parity.mjs"
   },
   "devDependencies": {
     "autoprefixer": "^10.5.0",
     "cssnano": "^7.1.9",
+    "parse5": "^8.0.0",
     "postcss": "^8.5.12",
     "postcss-cli": "^11.0.1",
     "postcss-import": "^16.1.0",

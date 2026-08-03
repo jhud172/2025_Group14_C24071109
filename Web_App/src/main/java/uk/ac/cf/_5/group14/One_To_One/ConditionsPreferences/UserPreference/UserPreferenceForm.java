@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.ac.cf._5.group14.One_To_One.Config.SupportedLanguage;
 
 @Data
 @AllArgsConstructor
@@ -19,7 +20,8 @@ public class UserPreferenceForm {
     Set<Long> selectedPreferenceIds = new HashSet<>();
     Set<Long> selectedConditionIds = new HashSet<>();
 
-    @Pattern(regexp = "^(en|cy)$", message = "Please select a valid language.")
+    @Pattern(regexp = SupportedLanguage.SUPPORTED_LANGUAGE_PATTERN,
+            message = "{validation.preferences.language}")
     String language = "en";
 
     @Pattern(regexp = "^(SYSTEM|LIGHT|DARK)$", message = "Please select a valid theme.")

@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Edit Blood Pressure Reading', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.00687}, null, ~{::content}, null)}">
 
     <div th:fragment="content">
         <div class="mx-auto w-full max-w-lg px-4 py-6 sm:px-6 lg:px-8">
 
             <div class="mb-6">
-                <a th:href="@{/health/blood-pressure}" class="text-sm text-emerald-600 hover:text-emerald-700 dark:text-emerald-400">
+                <a th:href="@{/health/blood-pressure}" class="text-sm text-emerald-600 hover:text-emerald-700 dark:text-emerald-400" th:text="#{ui.00677}">
                     ← Back to Blood Pressure
                 </a>
-                <h1 class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">Edit Reading</h1>
+                <h1 class="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100" th:text="#{ui.00678}">Edit Reading</h1>
             </div>
 
             <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -19,7 +19,7 @@
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <!-- Date -->
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Date <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"><th:block th:text="#{ui.00660}">Date</th:block> <span class="text-red-500">*</span></label>
                             <input type="date" id="readingDate" name="readingDate"
                                    th:value="*{readingDate != null ? #temporals.format(readingDate, 'yyyy-MM-dd') : ''}"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
@@ -27,37 +27,37 @@
                         </div>
                         <!-- Time -->
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Time <span class="text-slate-400 text-xs">(optional)</span></label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"><th:block th:text="#{ui.00055}">Time</th:block> <span class="text-slate-400 text-xs" th:text="#{ui.00679}">(optional)</span></label>
                             <input type="time" id="readingTime" name="readingTime"
                                    th:value="*{readingTime != null ? #temporals.format(readingTime, 'HH:mm') : ''}"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                         </div>
                         <!-- Systolic -->
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Systolic (mmHg) <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"><th:block th:text="#{ui.00680}">Systolic (mmHg)</th:block> <span class="text-red-500">*</span></label>
                             <input type="number" th:field="*{systolic}" min="60" max="250"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                             <p th:if="${#fields.hasErrors('systolic')}" th:errors="*{systolic}" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <!-- Diastolic -->
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Diastolic (mmHg) <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"><th:block th:text="#{ui.00681}">Diastolic (mmHg)</th:block> <span class="text-red-500">*</span></label>
                             <input type="number" th:field="*{diastolic}" min="40" max="150"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                             <p th:if="${#fields.hasErrors('diastolic')}" th:errors="*{diastolic}" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <!-- Pulse -->
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Pulse (bpm)</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1" th:text="#{ui.00682}">Pulse (bpm)</label>
                             <input type="number" th:field="*{pulse}" min="30" max="220"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                         </div>
                         <!-- Arm -->
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Arm</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1" th:text="#{ui.00683}">Arm</label>
                             <select th:field="*{arm}"
                                     class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                                <option value="">— select —</option>
+                                <option value="" th:text="#{ui.00684}">— select —</option>
                                 <option th:each="a : ${arms}" th:value="${a}"
                                         th:text="${#strings.capitalize(#strings.toLowerCase(a.name()))}"
                                         th:selected="${reading.arm == a}"></option>
@@ -65,10 +65,10 @@
                         </div>
                         <!-- Position -->
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Position</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1" th:text="#{ui.00685}">Position</label>
                             <select th:field="*{position}"
                                     class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                                <option value="">— select —</option>
+                                <option value="" th:text="#{ui.00684}">— select —</option>
                                 <option th:each="p : ${positions}" th:value="${p}"
                                         th:text="${#strings.capitalize(#strings.toLowerCase(p.name()))}"
                                         th:selected="${reading.position == p}"></option>
@@ -76,7 +76,7 @@
                         </div>
                         <!-- Notes -->
                         <div class="sm:col-span-2">
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Notes</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1" th:text="#{ui.00175}">Notes</label>
                             <input type="text" th:field="*{notes}" maxlength="500"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                         </div>
@@ -84,11 +84,11 @@
 
                     <div class="mt-6 flex justify-end gap-3">
                         <a th:href="@{/health/blood-pressure}"
-                           class="rounded-xl border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                           class="rounded-xl border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300" th:text="#{ui.00125}">
                             Cancel
                         </a>
                         <button type="submit"
-                                class="rounded-xl bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 focus:outline-none transition-colors">
+                                class="rounded-xl bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 focus:outline-none transition-colors" th:text="#{ui.00686}">
                             Save Changes
                         </button>
                     </div>

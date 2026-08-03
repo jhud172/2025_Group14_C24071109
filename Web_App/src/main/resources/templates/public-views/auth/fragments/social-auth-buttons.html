@@ -1,7 +1,7 @@
 <th:block xmlns:th="http://www.thymeleaf.org">
     <div th:fragment="buttons(role, providers)" th:if="${providers != null and !#lists.isEmpty(providers)}" class="social-auth">
         <div class="social-auth__divider">
-            <span>Quick access</span>
+            <span th:text="#{ui.01108}">Quick access</span>
         </div>
         <div class="social-auth__stack">
             <th:block th:each="provider : ${providers}">
@@ -25,6 +25,6 @@
                 </button>
             </th:block>
         </div>
-        <p class="social-auth__note">If an account does not exist yet, we will create the matching <span th:text="${role}">client</span> account and sign you in immediately.</p>
+        <p class="social-auth__note"><th:block th:text="#{ui.01109}">If an account does not exist yet, we will create the matching</th:block> <span th:text="${role}">client</span> <th:block th:text="#{ui.01110}">account and sign you in immediately.</th:block></p>
     </div>
 </th:block>

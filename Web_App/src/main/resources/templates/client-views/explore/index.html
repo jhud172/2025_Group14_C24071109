@@ -1,18 +1,18 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout('Explore Trainers', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.00569}, null, ~{::content}, null)}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div class="rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Explore</p>
-                    <h1 class="mt-1 text-2xl font-semibold text-slate-900">Verified trainer directory</h1>
-                    <p class="mt-2 text-sm text-slate-600">Find trusted coaches with proven results, transparent pricing, and clear training styles.</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00396}">Explore</p>
+                    <h1 class="mt-1 text-2xl font-semibold text-slate-900" th:text="#{ui.00540}">Verified trainer directory</h1>
+                    <p class="mt-2 text-sm text-slate-600" th:text="#{ui.00541}">Find trusted coaches with proven results, transparent pricing, and clear training styles.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <a th:href="@{/}" class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50">Back to home</a>
-                    <a th:href="@{/inbox}" class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Open inbox</a>
+                    <a th:href="@{/}" class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50" th:text="#{ui.00542}">Back to home</a>
+                    <a th:href="@{/inbox}" class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" th:text="#{ui.00543}">Open inbox</a>
                 </div>
             </div>
         </div>
@@ -21,18 +21,18 @@
             <aside class="lg:col-span-1">
                 <details class="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:hidden">
                     <summary class="flex cursor-pointer items-center justify-between text-sm font-semibold text-slate-900">
-                        Filters
-                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">Tap to edit</span>
+                        <th:block th:text="#{ui.00544}">Filters</th:block>
+                        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600" th:text="#{ui.00545}">Tap to edit</span>
                     </summary>
                     <div class="mt-4">
                         <form method="get" th:action="@{/explore}" class="space-y-4">
                             <div>
-                                <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Location</label>
+                                <label class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00546}">Location</label>
                                 <input type="text" name="location" th:value="${selectedLocation}" placeholder="City or region"
-                                       class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
+                                       class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20"  th:placeholder="#{ui.00547}"/>
                             </div>
                             <div>
-                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Training styles</p>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00548}">Training styles</p>
                                 <div class="mt-2 grid gap-2">
                                     <label th:each="tag : ${availableTags}" class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
                                         <input type="checkbox" name="tags" th:value="${tag}" th:checked="${selectedTags.contains(#strings.toLowerCase(tag))}" class="rounded border-slate-300 text-slate-900" />
@@ -41,26 +41,26 @@
                                 </div>
                             </div>
                             <div>
-                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Price per session</p>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00549}">Price per session</p>
                                 <div class="mt-2 grid grid-cols-2 gap-2">
                                     <input type="number" min="0" name="minPrice" th:value="${selectedMinPrice}" placeholder="Min"
-                                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
+                                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20"  th:placeholder="#{ui.00550}"/>
                                     <input type="number" min="0" name="maxPrice" th:value="${selectedMaxPrice}" placeholder="Max"
-                                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
+                                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20"  th:placeholder="#{ui.00551}"/>
                                 </div>
                             </div>
                             <div>
-                                <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Minimum rating</label>
+                                <label class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00552}">Minimum rating</label>
                                 <select name="minRating" class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20">
-                                    <option value="">Any</option>
+                                    <option value="" th:text="#{ui.00553}">Any</option>
                                     <option value="3.5" th:selected="${selectedMinRating != null and selectedMinRating == 3.5}">3.5+</option>
                                     <option value="4.0" th:selected="${selectedMinRating != null and selectedMinRating == 4.0}">4.0+</option>
                                     <option value="4.5" th:selected="${selectedMinRating != null and selectedMinRating == 4.5}">4.5+</option>
                                 </select>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button type="submit" class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Apply filters</button>
-                                <a th:if="${hasFilters}" th:href="@{/explore}" class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Clear</a>
+                                <button type="submit" class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" th:text="#{ui.00554}">Apply filters</button>
+                                <a th:if="${hasFilters}" th:href="@{/explore}" class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" th:text="#{ui.00555}">Clear</a>
                             </div>
                         </form>
                     </div>
@@ -68,17 +68,17 @@
 
                 <div class="hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:block lg:sticky lg:top-6">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-sm font-semibold text-slate-900">Filters</h2>
-                        <a th:if="${hasFilters}" th:href="@{/explore}" class="text-xs font-semibold text-slate-500 hover:text-slate-900">Clear</a>
+                        <h2 class="text-sm font-semibold text-slate-900" th:text="#{ui.00544}">Filters</h2>
+                        <a th:if="${hasFilters}" th:href="@{/explore}" class="text-xs font-semibold text-slate-500 hover:text-slate-900" th:text="#{ui.00555}">Clear</a>
                     </div>
                     <form method="get" th:action="@{/explore}" class="mt-4 space-y-5">
                         <div>
-                            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Location</label>
+                            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00546}">Location</label>
                             <input type="text" name="location" th:value="${selectedLocation}" placeholder="City or region"
-                                   class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
+                                   class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20"  th:placeholder="#{ui.00547}"/>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Training styles</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00548}">Training styles</p>
                             <div class="mt-2 grid gap-2">
                                 <label th:each="tag : ${availableTags}" class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
                                     <input type="checkbox" name="tags" th:value="${tag}" th:checked="${selectedTags.contains(#strings.toLowerCase(tag))}" class="rounded border-slate-300 text-slate-900" />
@@ -87,24 +87,24 @@
                             </div>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Price per session</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00549}">Price per session</p>
                             <div class="mt-2 grid grid-cols-2 gap-2">
                                 <input type="number" min="0" name="minPrice" th:value="${selectedMinPrice}" placeholder="Min"
-                                       class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
+                                       class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20"  th:placeholder="#{ui.00550}"/>
                                 <input type="number" min="0" name="maxPrice" th:value="${selectedMaxPrice}" placeholder="Max"
-                                       class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20" />
+                                       class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20"  th:placeholder="#{ui.00551}"/>
                             </div>
                         </div>
                         <div>
-                            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Minimum rating</label>
+                            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00552}">Minimum rating</label>
                             <select name="minRating" class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20">
-                                <option value="">Any</option>
+                                <option value="" th:text="#{ui.00553}">Any</option>
                                 <option value="3.5" th:selected="${selectedMinRating != null and selectedMinRating == 3.5}">3.5+</option>
                                 <option value="4.0" th:selected="${selectedMinRating != null and selectedMinRating == 4.0}">4.0+</option>
                                 <option value="4.5" th:selected="${selectedMinRating != null and selectedMinRating == 4.5}">4.5+</option>
                             </select>
                         </div>
-                        <button type="submit" class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Apply filters</button>
+                        <button type="submit" class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" th:text="#{ui.00554}">Apply filters</button>
                     </form>
                 </div>
             </aside>
@@ -113,7 +113,7 @@
                 <div class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p class="text-sm font-semibold text-slate-900" th:text="${resultCount + ' verified trainers'}">0 verified trainers</p>
-                        <p class="text-xs text-slate-500">Only active, verified coaches appear in this directory.</p>
+                        <p class="text-xs text-slate-500" th:text="#{ui.00556}">Only active, verified coaches appear in this directory.</p>
                     </div>
                     <form method="get" th:action="@{/explore}" class="flex items-center gap-2">
                         <input type="hidden" name="location" th:value="${selectedLocation}" />
@@ -123,21 +123,21 @@
                         <th:block th:each="tag : ${selectedTags}">
                             <input type="hidden" name="tags" th:value="${tag}" />
                         </th:block>
-                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Sort</label>
+                        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500" th:text="#{ui.00557}">Sort</label>
                         <select name="sort" data-auto-submit
                                 class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20">
-                            <option value="recommended" th:selected="${selectedSort == 'recommended'}">Recommended</option>
-                            <option value="rating" th:selected="${selectedSort == 'rating'}">Rating</option>
-                            <option value="price_low" th:selected="${selectedSort == 'price_low'}">Price (low)</option>
-                            <option value="price_high" th:selected="${selectedSort == 'price_high'}">Price (high)</option>
+                            <option value="recommended" th:selected="${selectedSort == 'recommended'}" th:text="#{ui.00484}">Recommended</option>
+                            <option value="rating" th:selected="${selectedSort == 'rating'}" th:text="#{ui.00558}">Rating</option>
+                            <option value="price_low" th:selected="${selectedSort == 'price_low'}" th:text="#{ui.00559}">Price (low)</option>
+                            <option value="price_high" th:selected="${selectedSort == 'price_high'}" th:text="#{ui.00560}">Price (high)</option>
                         </select>
                     </form>
                 </div>
 
                 <div th:if="${#lists.isEmpty(trainers)}" class="mt-6 rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
-                    <p class="text-sm font-semibold text-slate-900">No trainers match these filters.</p>
-                    <p class="mt-2 text-sm text-slate-500">Try a broader location or remove some filters.</p>
-                    <a th:href="@{/explore}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Clear filters</a>
+                    <p class="text-sm font-semibold text-slate-900" th:text="#{ui.00561}">No trainers match these filters.</p>
+                    <p class="mt-2 text-sm text-slate-500" th:text="#{ui.00562}">Try a broader location or remove some filters.</p>
+                    <a th:href="@{/explore}" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" th:text="#{ui.00563}">Clear filters</a>
                 </div>
 
                 <div th:if="${!#lists.isEmpty(trainers)}" class="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -149,7 +149,7 @@
                             <div class="min-w-0 flex-1">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <h3 class="text-base font-semibold text-slate-900" th:text="${card.trainer.fullName}">Trainer Name</h3>
-                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">Verified</span>
+                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700" th:text="#{ui.00564}">Verified</span>
                                 </div>
                                 <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                                     <span th:if="${card.location != null && !card.location.isEmpty()}" th:text="${card.location}">Cardiff</span>
@@ -179,23 +179,23 @@
 
                         <div class="mt-4 flex items-center justify-between text-sm">
                             <p class="font-semibold text-slate-900" th:if="${card.pricePerSession != null}" th:text="${card.formattedPricePerSession}">£45 / session</p>
-                            <p class="text-slate-500" th:if="${card.pricePerSession == null}">Contact for pricing</p>
-                            <span class="text-xs text-slate-500" th:if="${card.pricePerSession != null}">Verified pricing</span>
+                            <p class="text-slate-500" th:if="${card.pricePerSession == null}" th:text="#{ui.00565}">Contact for pricing</p>
+                            <span class="text-xs text-slate-500" th:if="${card.pricePerSession != null}" th:text="#{ui.00566}">Verified pricing</span>
                         </div>
 
                         <div class="mt-5 flex flex-wrap gap-2">
                             <a th:href="@{'/u/' + ${card.trainer.username}}"
-                               class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                               class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" th:text="#{ui.00567}">
                                 View profile
                             </a>
                             <form sec:authorize="hasAnyRole('CLIENT','USER')" th:action="@{/client/trainers/{id}/request(id=${card.trainer.id})}" method="post" class="flex-1">
                                 <button type="submit"
-                                        class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                                        class="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" th:text="#{ui.00568}">
                                     Request trainer
                                 </button>
                             </form>
                             <a sec:authorize="!isAuthenticated()" th:href="@{/login}"
-                               class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
+                               class="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" th:text="#{ui.00568}">
                                 Request trainer
                             </a>
                         </div>

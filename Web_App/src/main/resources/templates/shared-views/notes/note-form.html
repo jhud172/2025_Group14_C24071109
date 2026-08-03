@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(${note != null and note.id != null} ? 'Edit Note' : 'New Note', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(${note != null and note.id != null} ? #{ui.02165} : #{ui.02115}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="styles">
 </div>
@@ -12,13 +12,13 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight text-slate-900" th:text="${note != null and note.id != null} ? 'Edit Note' : 'New Note'">New Note</h1>
-                    <p class="mt-1 text-sm text-slate-600">Use the toolbar to format your note.</p>
+                    <p class="mt-1 text-sm text-slate-600" th:text="#{ui.02130}">Use the toolbar to format your note.</p>
                 </div>
                 <div class="flex gap-2">
                     <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                       th:if="${folder != null}" th:href="@{/notes/folders/{id}(id=${folder.id})}">Cancel</a>
+                       th:if="${folder != null}" th:href="@{/notes/folders/{id}(id=${folder.id})}" th:text="#{ui.00125}">Cancel</a>
                     <a class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                       th:if="${folder == null}" th:href="@{/notes}">Cancel</a>
+                       th:if="${folder == null}" th:href="@{/notes}" th:text="#{ui.00125}">Cancel</a>
                 </div>
             </div>
 
@@ -28,65 +28,65 @@
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700" for="noteTitle">Title</label>
+                    <label class="block text-sm font-medium text-slate-700" for="noteTitle" th:text="#{ui.00583}">Title</label>
                     <input id="noteTitle" type="text" name="title" placeholder="Title" maxlength="120" th:value="${note != null ? note.title : ''}" required
-                           class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10">
+                           class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" th:placeholder="#{ui.00583}">
                 </div>
 
                 <div>
                     <div class="flex items-center justify-between gap-3">
-                        <span class="text-sm font-medium text-slate-700">Colour</span>
+                        <span class="text-sm font-medium text-slate-700" th:text="#{ui.02131}">Colour</span>
                         <input type="hidden" name="noteColour" id="noteColour" value="slate">
                     </div>
 
                     <div class="mt-2 flex flex-wrap gap-2">
-                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="slate">Slate</button>
-                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="purple">Purple</button>
-                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="cyan">Cyan</button>
-                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="green">Green</button>
-                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="pink">Pink</button>
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="slate" th:text="#{ui.02132}">Slate</button>
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="purple" th:text="#{ui.02133}">Purple</button>
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="cyan" th:text="#{ui.02134}">Cyan</button>
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="green" th:text="#{ui.02135}">Green</button>
+                        <button type="button" class="chip rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10 [&.active]:bg-slate-900 [&.active]:text-white" data-note-colour="pink" th:text="#{ui.02136}">Pink</button>
                     </div>
                 </div>
 
-                <div class="rounded-lg border border-slate-200 bg-slate-50 p-2" role="toolbar" aria-label="Note formatting toolbar">
+                <div class="rounded-lg border border-slate-200 bg-slate-50 p-2" role="toolbar" aria-label="Note formatting toolbar" th:attr="aria-label=#{ui.02137}">
                     <div class="flex flex-wrap items-center gap-2">
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="bold" title="Bold (Ctrl+B)" th:title="#{ui.02138}"><b th:text="#{ui.02139}">B</b></button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="italic" title="Italic (Ctrl+I)" th:title="#{ui.02140}"><i th:text="#{ui.02141}">I</i></button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="underline" title="Underline (Ctrl+U)" th:title="#{ui.02142}"><u th:text="#{ui.02143}">U</u></button>
 
                         <span class="mx-1 h-5 w-px bg-slate-200"></span>
 
-                        <select class="tool-select rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 shadow-sm" id="headingSelect" title="Heading style">
-                            <option value="p">Normal</option>
-                            <option value="h1">Heading 1</option>
-                            <option value="h2">Heading 2</option>
-                            <option value="h3">Heading 3</option>
-                            <option value="blockquote">Quote</option>
+                        <select class="tool-select rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 shadow-sm" id="headingSelect" title="Heading style" th:title="#{ui.02144}">
+                            <option value="p" th:text="#{ui.02145}">Normal</option>
+                            <option value="h1" th:text="#{ui.02146}">Heading 1</option>
+                            <option value="h2" th:text="#{ui.02147}">Heading 2</option>
+                            <option value="h3" th:text="#{ui.02148}">Heading 3</option>
+                            <option value="blockquote" th:text="#{ui.02149}">Quote</option>
                         </select>
 
-                        <select class="tool-select rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 shadow-sm" id="fontSizeSelect" title="Font size">
-                            <option value="2">Small</option>
-                            <option value="3" selected>Normal</option>
-                            <option value="4">Large</option>
-                            <option value="5">XL</option>
+                        <select class="tool-select rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-900 shadow-sm" id="fontSizeSelect" title="Font size" th:title="#{ui.02150}">
+                            <option value="2" th:text="#{ui.02151}">Small</option>
+                            <option value="3" selected th:text="#{ui.02145}">Normal</option>
+                            <option value="4" th:text="#{ui.02152}">Large</option>
+                            <option value="5" th:text="#{ui.02153}">XL</option>
                         </select>
 
                         <span class="mx-1 h-5 w-px bg-slate-200"></span>
 
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="insertUnorderedList" title="Bullets">• List</button>
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="insertOrderedList" title="Numbered">1. List</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="insertUnorderedList" title="Bullets" th:title="#{ui.02154}" th:text="#{ui.02155}">• List</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-cmd="insertOrderedList" title="Numbered" th:title="#{ui.02156}" th:text="#{ui.02157}">1. List</button>
 
                         <span class="mx-1 h-5 w-px bg-slate-200"></span>
 
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-align="left" title="Align left">⟸</button>
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-align="center" title="Align centre">≡</button>
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-align="right" title="Align right">⟹</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-align="left" title="Align left" th:title="#{ui.02158}">⟸</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-align="center" title="Align centre" th:title="#{ui.02159}">≡</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" data-align="right" title="Align right" th:title="#{ui.02160}">⟹</button>
 
                         <span class="mx-1 h-5 w-px bg-slate-200"></span>
 
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" id="linkBtn" title="Insert link">🔗 Link</button>
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" id="highlightBtn" title="Highlight">🖍</button>
-                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" id="clearBtn" title="Clear formatting">Clear</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" id="linkBtn" title="Insert link" th:title="#{ui.02161}" th:text="#{ui.02162}">🔗 Link</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" id="highlightBtn" title="Highlight" th:title="#{ui.02163}">🖍</button>
+                        <button type="button" class="tool inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 shadow-sm hover:bg-slate-50" id="clearBtn" title="Clear formatting" th:title="#{ui.02164}" th:text="#{ui.00555}">Clear</button>
                     </div>
                 </div>
 
@@ -99,7 +99,7 @@
             <input type="hidden" name="content" id="contentHtml">
 
                 <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end">
-                    <button class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10" type="submit">Save</button>
+                    <button class="inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10" type="submit" th:text="#{ui.00109}">Save</button>
                 </div>
 
             </form>

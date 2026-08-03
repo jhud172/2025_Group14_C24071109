@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(${pageTitle} ?: 'Vault Note', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(${pageTitle} ?: #{ui.02295}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="styles"></div>
 
@@ -12,7 +12,7 @@
                 <div class="min-w-0">
                     <a class="inline-flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors" th:href="@{/vault}">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                        Back to Vault
+                        <th:block th:text="#{ui.02281}">Back to Vault</th:block>
                     </a>
                     <h1 class="mt-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100" th:text="${pageTitle}">Vault Note</h1>
                 </div>
@@ -26,7 +26,7 @@
                 <!-- Type + Date row -->
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Type</label>
+                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00623}">Type</label>
                         <select name="noteType"
                                 class="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-colors">
                             <option th:each="t : ${noteTypes}"
@@ -36,7 +36,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Linked date <span class="font-normal text-slate-400">(optional)</span></label>
+                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100"><th:block th:text="#{ui.02282}">Linked date</th:block> <span class="font-normal text-slate-400" th:text="#{ui.00679}">(optional)</span></label>
                         <input type="date" name="linkedDate"
                                th:value="${note != null and note.linkedDate != null ? note.linkedDate : ''}"
                                class="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40">
@@ -45,37 +45,37 @@
 
                 <!-- Title -->
                 <div>
-                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Title</label>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00583}">Title</label>
                     <input name="title" required
                            th:value="${note != null ? note.title : ''}"
                            class="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-colors"
-                           placeholder="E.g. Week 3 check-in, shoulder discomfort, nutrition tweak">
+                           placeholder="E.g. Week 3 check-in, shoulder discomfort, nutrition tweak" th:placeholder="#{ui.02283}">
                 </div>
 
                 <!-- Content -->
                 <div>
-                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Content</label>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02167}">Content</label>
                     <textarea name="content" required rows="10"
                               class="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-colors resize-y"
                               placeholder="Write your note… What happened, how did it feel, what did you notice?"
-                              th:text="${note != null ? note.content : ''}"></textarea>
+                              th:text="${note != null ? note.content : ''}" th:placeholder="#{ui.02284}"></textarea>
                 </div>
 
                 <!-- Tags + Mood row -->
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Tags <span class="font-normal text-slate-400">(optional, comma-separated)</span></label>
+                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100"><th:block th:text="#{ui.02285}">Tags</th:block> <span class="font-normal text-slate-400" th:text="#{ui.02286}">(optional, comma-separated)</span></label>
                         <input type="text" name="tags"
                                th:value="${note != null ? note.tags : ''}"
                                placeholder="e.g. legs, recovery, cardio"
-                               class="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-colors">
-                        <p class="mt-1 text-xs text-slate-400">Separate tags with commas. They help filter your vault.</p>
+                               class="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40 transition-colors" th:placeholder="#{ui.02287}">
+                        <p class="mt-1 text-xs text-slate-400" th:text="#{ui.02288}">Separate tags with commas. They help filter your vault.</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Mood / Energy <span class="font-normal text-slate-400">(optional)</span></label>
+                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100"><th:block th:text="#{ui.02289}">Mood / Energy</th:block> <span class="font-normal text-slate-400" th:text="#{ui.00679}">(optional)</span></label>
                         <select name="mood"
                                 class="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40">
-                            <option value="">— Not tracked —</option>
+                            <option value="" th:text="#{ui.02290}">— Not tracked —</option>
                             <option th:each="m : ${moods}"
                                     th:value="${m}"
                                     th:selected="${note != null and note.mood != null and note.mood == m}"
@@ -86,26 +86,26 @@
 
                 <!-- Linked workout session -->
                 <div>
-                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100">Linked workout session <span class="font-normal text-slate-400">(optional)</span></label>
+                    <label class="block text-sm font-semibold text-slate-900 dark:text-slate-100"><th:block th:text="#{ui.02291}">Linked workout session</th:block> <span class="font-normal text-slate-400" th:text="#{ui.00679}">(optional)</span></label>
                     <select name="linkedWorkoutSessionId"
                             class="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/40">
-                        <option value="">— None —</option>
+                        <option value="" th:text="#{ui.02292}">— None —</option>
                         <option th:each="s : ${recentSessions}"
                                 th:value="${s.id}"
                                 th:selected="${note != null and note.linkedWorkoutSessionId != null and note.linkedWorkoutSessionId == s.id}"
                                 th:text="${#temporals.format(s.date, 'dd MMM yyyy') + ' — ' + (s.nameSnapshot != null ? s.nameSnapshot : (s.workout != null ? s.workout.name : 'Workout'))}">Session</option>
                     </select>
-                    <p class="mt-1 text-xs text-slate-400">Shows your most recent sessions.</p>
+                    <p class="mt-1 text-xs text-slate-400" th:text="#{ui.02293}">Shows your most recent sessions.</p>
                 </div>
 
                 <!-- Actions -->
                 <div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                     <a th:href="@{/vault}"
-                       class="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-slate-400/20 transition-colors">
+                       class="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-slate-400/20 transition-colors" th:text="#{ui.00125}">
                         Cancel
                     </a>
                     <button type="submit"
-                            class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-colors">
+                            class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-colors" th:text="#{ui.02294}">
                         Save Note
                     </button>
                 </div>

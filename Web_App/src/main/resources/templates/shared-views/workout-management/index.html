@@ -1,24 +1,24 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Workout Management', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.02326}, null, ~{::content}, null)}">
 
 <div th:fragment="content">
     <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div class="space-y-3">
-                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600 dark:text-emerald-300">Workout management</p>
+                    <p class="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600 dark:text-emerald-300" th:text="#{ui.00522}">Workout management</p>
                     <div>
-                        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">One place for scheduled workouts, logs, and history</h1>
-                        <p class="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-300">
+                        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100" th:text="#{ui.02307}">One place for scheduled workouts, logs, and history</h1>
+                        <p class="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.02308}">
                             Open upcoming workouts, jump back into completed sessions, and edit personal exercise logs without switching between calendar flows.
                         </p>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <a th:href="@{/calendar}"
-                       class="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">Open planner</a>
+                       class="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900" th:text="#{ui.02309}">Open planner</a>
                     <a th:href="@{/exercise-log/list}"
-                       class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">View log library</a>
+                       class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700" th:text="#{ui.02310}">View log library</a>
                 </div>
             </div>
         </section>
@@ -28,8 +28,8 @@
                 <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
                     <div class="flex items-center justify-between gap-4">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Active today</p>
-                            <h2 class="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100">Workouts ready to launch now</h2>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400" th:text="#{ui.02311}">Active today</p>
+                            <h2 class="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02312}">Workouts ready to launch now</h2>
                         </div>
                         <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                               th:text="${#lists.size(activeWorkouts) + ' ready'}">0 ready</span>
@@ -54,13 +54,13 @@
                                        th:text="${item.summary.completedSets + ' of ' + item.summary.totalSets + ' sets logged'}">0 of 0 sets logged</p>
                                 </div>
                                 <a th:href="@{${item.launchUrl}}"
-                                   class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">Open workout</a>
+                                   class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700" th:text="#{ui.02313}">Open workout</a>
                             </div>
                         </article>
                     </div>
 
                     <div th:if="${activeWorkouts == null or #lists.isEmpty(activeWorkouts)}"
-                         class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                         class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" th:text="#{ui.02314}">
                         Nothing is waiting right now. Upcoming scheduled workouts will appear below.
                     </div>
                 </section>
@@ -68,10 +68,10 @@
                 <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
                     <div class="flex items-center justify-between gap-4">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Upcoming</p>
-                            <h2 class="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100">Scheduled workouts over the next 3 weeks</h2>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400" th:text="#{ui.02315}">Upcoming</p>
+                            <h2 class="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02316}">Scheduled workouts over the next 3 weeks</h2>
                         </div>
-                        <a th:href="@{/calendar}" class="text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200">Open calendar</a>
+                        <a th:href="@{/calendar}" class="text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200" th:text="#{ui.02317}">Open calendar</a>
                     </div>
 
                     <div class="mt-5 grid gap-3 lg:grid-cols-2" th:if="${upcomingWorkouts != null and !#lists.isEmpty(upcomingWorkouts)}">
@@ -86,12 +86,12 @@
                             <p class="mt-2 text-xs text-slate-500 dark:text-slate-400"
                                th:text="${item.summary.exerciseCount + ' exercises planned'}">0 exercises planned</p>
                             <a th:href="@{${item.launchUrl}}"
-                               class="mt-4 inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">Launch workout</a>
+                               class="mt-4 inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900" th:text="#{ui.02318}">Launch workout</a>
                         </article>
                     </div>
 
                     <div th:if="${upcomingWorkouts == null or #lists.isEmpty(upcomingWorkouts)}"
-                         class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                         class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" th:text="#{ui.02319}">
                         No future scheduled workouts were found for the next 3 weeks.
                     </div>
                 </section>
@@ -101,8 +101,8 @@
                 <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
                     <div class="flex items-center justify-between gap-4">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Session history</p>
-                            <h2 class="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100">Recently completed workout sessions</h2>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400" th:text="#{ui.02320}">Session history</p>
+                            <h2 class="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02321}">Recently completed workout sessions</h2>
                         </div>
                     </div>
 
@@ -119,13 +119,13 @@
                                        th:text="${item.summary.completedSets + ' sets complete'}">0 sets complete</p>
                                 </div>
                                 <a th:href="@{${item.href}}"
-                                   class="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">Review</a>
+                                   class="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900" th:text="#{ui.00933}">Review</a>
                             </div>
                         </article>
                     </div>
 
                     <div th:if="${completedSessions == null or #lists.isEmpty(completedSessions)}"
-                         class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                         class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" th:text="#{ui.02322}">
                         Completed sessions will appear here once a scheduled workout is finished in the new session flow.
                     </div>
                 </section>
@@ -133,10 +133,10 @@
                 <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
                     <div class="flex items-center justify-between gap-4">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Exercise logs</p>
-                            <h2 class="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100">Personal log entries you can edit</h2>
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400" th:text="#{ui.00858}">Exercise logs</p>
+                            <h2 class="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02323}">Personal log entries you can edit</h2>
                         </div>
-                        <a th:href="@{/exercise-log/list}" class="text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200">Full log history</a>
+                        <a th:href="@{/exercise-log/list}" class="text-sm font-semibold text-emerald-700 transition hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200" th:text="#{ui.02324}">Full log history</a>
                     </div>
 
                     <div class="mt-5 space-y-3" th:if="${exerciseLogs != null and !#lists.isEmpty(exerciseLogs)}">
@@ -153,16 +153,16 @@
                                 </div>
                                 <div class="flex flex-wrap gap-2">
                                     <a th:href="@{'/exercise-log/view/' + ${log.id}}"
-                                       class="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">View</a>
+                                       class="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900" th:text="#{ui.00664}">View</a>
                                     <a th:href="@{'/exercise-log/edit/' + ${log.id}}"
-                                       class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">Edit</a>
+                                       class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white" th:text="#{ui.00138}">Edit</a>
                                 </div>
                             </div>
                         </article>
                     </div>
 
                     <div th:if="${exerciseLogs == null or #lists.isEmpty(exerciseLogs)}"
-                         class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                         class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" th:text="#{ui.02325}">
                         Personal workout logs will appear here after you add them.
                     </div>
                 </section>

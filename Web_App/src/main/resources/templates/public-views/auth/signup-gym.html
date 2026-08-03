@@ -1,25 +1,25 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Gym Sign Up', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.01228}, ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
         <div class="auth-card">
             <div class="auth-accent-bar"></div>
 
             <div class="mb-6 mt-4 text-center">
-                <h1 class="auth-heading">Apply for your gym account</h1>
-                <p class="auth-subheading">Submit your gym details for review. We only create the live gym admin account after approval.</p>
+                <h1 class="auth-heading" th:text="#{ui.01213}">Apply for your gym account</h1>
+                <p class="auth-subheading" th:text="#{ui.01214}">Submit your gym details for review. We only create the live gym admin account after approval.</p>
             </div>
 
             <form th:action="@{/signup/gym}" th:object="${signupForm}" method="post" class="auth-form">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                <div th:if="${#fields.hasAnyErrors()}" class="auth-alert auth-alert--error" role="alert">
+                <div th:if="${#fields.hasAnyErrors()}" class="auth-alert auth-alert--error" role="alert" th:text="#{ui.01192}">
                     Please correct the highlighted fields below.
                 </div>
 
                 <div class="auth-form-grid">
                 <div class="auth-field">
-                    <label for="gymName" class="auth-field__label">Gym name *</label>
+                    <label for="gymName" class="auth-field__label" th:text="#{ui.01215}">Gym name *</label>
                     <input
                         type="text"
                         id="gymName"
@@ -27,14 +27,14 @@
                         required
                         autocomplete="organization"
                         placeholder="Your gym name"
-                        class="auth-field__input" />
+                        class="auth-field__input"  th:placeholder="#{ui.01216}"/>
                     <div th:if="${#fields.hasErrors('gymName')}" class="auth-field__error">
                         <span th:errors="*{gymName}"></span>
                     </div>
                 </div>
 
                 <div class="auth-field">
-                    <label for="contactName" class="auth-field__label">Primary contact name *</label>
+                    <label for="contactName" class="auth-field__label" th:text="#{ui.01217}">Primary contact name *</label>
                     <input
                         type="text"
                         id="contactName"
@@ -42,7 +42,7 @@
                         required
                         autocomplete="name"
                         placeholder="Full name"
-                        class="auth-field__input" />
+                        class="auth-field__input"  th:placeholder="#{ui.01218}"/>
                     <div th:if="${#fields.hasErrors('contactName')}" class="auth-field__error">
                         <span th:errors="*{contactName}"></span>
                     </div>
@@ -51,7 +51,7 @@
 
                 <div class="auth-form-grid">
                 <div class="auth-field">
-                    <label for="adminEmail" class="auth-field__label">Admin email *</label>
+                    <label for="adminEmail" class="auth-field__label" th:text="#{ui.01219}">Admin email *</label>
                     <input
                         type="email"
                         id="adminEmail"
@@ -59,14 +59,14 @@
                         required
                         autocomplete="email"
                         placeholder="admin@example.com"
-                        class="auth-field__input" />
+                        class="auth-field__input"  th:placeholder="#{ui.01220}"/>
                     <div th:if="${#fields.hasErrors('adminEmail')}" class="auth-field__error">
                         <span th:errors="*{adminEmail}"></span>
                     </div>
                 </div>
 
                 <div class="auth-field">
-                    <label for="gymUsername" class="auth-field__label">Gym username *</label>
+                    <label for="gymUsername" class="auth-field__label" th:text="#{ui.01221}">Gym username *</label>
                     <input
                         type="text"
                         id="gymUsername"
@@ -74,8 +74,8 @@
                         required
                         autocomplete="username"
                         placeholder="Choose a gym username"
-                        class="auth-field__input" />
-                    <p class="auth-field__hint">3–20 characters. Letters, numbers and underscores only.</p>
+                        class="auth-field__input"  th:placeholder="#{ui.01222}"/>
+                    <p class="auth-field__hint" th:text="#{ui.01197}">3–20 characters. Letters, numbers and underscores only.</p>
                     <div th:if="${#fields.hasErrors('gymUsername')}" class="auth-field__error">
                         <span th:errors="*{gymUsername}"></span>
                     </div>
@@ -83,7 +83,7 @@
                 </div>
 
                 <div class="auth-field">
-                    <label for="contactPhone" class="auth-field__label">Contact phone *</label>
+                    <label for="contactPhone" class="auth-field__label" th:text="#{ui.01223}">Contact phone *</label>
                     <input
                         type="tel"
                         id="contactPhone"
@@ -91,7 +91,7 @@
                         required
                         autocomplete="tel"
                         placeholder="Contact phone number"
-                        class="auth-field__input" />
+                        class="auth-field__input"  th:placeholder="#{ui.01224}"/>
                     <div th:if="${#fields.hasErrors('contactPhone')}" class="auth-field__error">
                         <span th:errors="*{contactPhone}"></span>
                     </div>
@@ -99,7 +99,7 @@
 
                 <div class="auth-form-grid">
                     <div class="auth-field">
-                        <label for="address" class="auth-field__label">Street address *</label>
+                        <label for="address" class="auth-field__label" th:text="#{ui.01225}">Street address *</label>
                         <input
                             type="text"
                             id="address"
@@ -113,7 +113,7 @@
                     </div>
 
                     <div class="auth-field">
-                        <label for="city" class="auth-field__label">City *</label>
+                        <label for="city" class="auth-field__label" th:text="#{ui.01226}">City *</label>
                         <input
                             type="text"
                             id="city"
@@ -129,7 +129,7 @@
 
                 <div class="auth-form-grid">
                     <div class="auth-field">
-                        <label for="password" class="auth-field__label">Password *</label>
+                        <label for="password" class="auth-field__label" th:text="#{ui.01198}">Password *</label>
                         <div class="auth-field__input-wrapper">
                             <input
                                 type="password"
@@ -138,21 +138,21 @@
                                 required
                                 autocomplete="new-password"
                                 class="auth-field__input auth-field__input--with-icon" />
-                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility" th:attr="aria-label=#{ui.01187}">
                                 <svg class="h-5 w-5" id="eyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </button>
                         </div>
-                        <p class="auth-field__hint">At least 8 characters, including upper and lower case, a number and a special character.</p>
+                        <p class="auth-field__hint" th:text="#{ui.01199}">At least 8 characters, including upper and lower case, a number and a special character.</p>
                         <div th:if="${#fields.hasErrors('password')}" class="auth-field__error">
                             <span th:errors="*{password}"></span>
                         </div>
                     </div>
 
                     <div class="auth-field">
-                        <label for="confirmPassword" class="auth-field__label">Confirm password *</label>
+                        <label for="confirmPassword" class="auth-field__label" th:text="#{ui.01200}">Confirm password *</label>
                         <div class="auth-field__input-wrapper">
                             <input
                                 type="password"
@@ -161,7 +161,7 @@
                                 required
                                 autocomplete="new-password"
                                 class="auth-field__input auth-field__input--with-icon" />
-                            <button type="button" class="password-toggle" id="toggleConfirmPassword" aria-label="Toggle password visibility">
+                            <button type="button" class="password-toggle" id="toggleConfirmPassword" aria-label="Toggle password visibility" th:attr="aria-label=#{ui.01187}">
                                 <svg class="h-5 w-5" id="confirmEyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -176,10 +176,10 @@
 
                 <div class="auth-actions-row">
                     <a th:href="@{/signup}" class="auth-btn auth-btn--secondary">
-                        <span>Choose account type</span>
+                        <span th:text="#{ui.01201}">Choose account type</span>
                     </a>
                     <button type="submit" class="auth-btn auth-btn--primary">
-                        <span>Submit gym application</span>
+                        <span th:text="#{ui.01227}">Submit gym application</span>
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -187,8 +187,8 @@
                 </div>
 
                 <p class="text-center text-sm text-gray-600">
-                    Already have an account?
-                    <a th:href="@{/login(role=gym)}" class="auth-link">Log in</a>
+                    <th:block th:text="#{ui.01203}">Already have an account?</th:block>
+                    <a th:href="@{/login(role=gym)}" class="auth-link" th:text="#{ui.01204}">Log in</a>
                 </p>
             </form>
         </div>

@@ -2,11 +2,12 @@
 <html lang="en"
     xmlns:th="http://www.thymeleaf.org"
     th:classappend="${userSettings != null and userSettings.theme != null and userSettings.theme.toString() == 'DARK'} ? ' dark'"
-    th:attr="lang=${#locale.language},
-             data-lang=${#locale.language},
+    th:attr="lang=${currentLanguage.localeTag()},
+             dir=${textDirection},
+             data-lang=${currentLanguage.code()},
              data-theme=${userSettings != null && userSettings.theme != null ? userSettings.theme.toString().toLowerCase() : 'system'},
              data-colorblind=${userSettings != null && userSettings.colorBlindMode ? 'on' : 'off'}"
-    th:with="assetVersion=${uiCssVersion != null and !#strings.isEmpty(uiCssVersion) ? uiCssVersion : '20260801p53'},
+    th:with="assetVersion=${uiCssVersion != null and !#strings.isEmpty(uiCssVersion) ? uiCssVersion : '20260802p72'},
              authUser=${@authHelper.getAuthenticatedUser()},
              includeNavbar=${@environment.getProperty('app.ui.includeNavbar') != 'false'},
              includeGlobalChatbot=${@environment.getProperty('app.ui.includeChatbot') != 'false' and disableGlobalChatbot != true and disableGlobalChatbot != 'true'},
@@ -58,7 +59,7 @@
     th:classappend="${((userSettings != null and userSettings.easyMode) ? ' text-lg leading-relaxed' : ' text-base') + (userSettings != null and userSettings.colorBlindMode ? ' color-blind' : '') + (timeOfDayMoodClass != null ? ' ' + timeOfDayMoodClass : '') + (includeGlobalChatbot ? ' has-global-chat' : '') + (includeQuickActions ? ' has-quick-actions has-platform-panel' : ' public-guest')}"
     th:attr="data-time-theme=${timeTheme},
              data-chat-history=${disableChatHistory == true ? 'off' : 'on'},
-             data-language=${#locale.language},
+             data-language=${currentLanguage.code()},
              data-easy-mode=${userSettings != null && userSettings.easyMode ? 'on' : 'off'},
              data-color-blind=${userSettings != null && userSettings.colorBlindMode ? 'on' : 'off'},
              data-disability-hearing=${userSettings != null && userSettings.disabilityHearing ? 'on' : 'off'},
@@ -101,6 +102,7 @@
 <script th:if="${includeQuickActions}" th:src="@{/js/core/platform-panel.js(v=${assetVersion})}" defer></script>
 <script th:if="${includeQuickActions}" th:src="@{/js/public/site-tour.js(v=${assetVersion})}" defer></script>
 <script th:src="@{/js/core/navbar-premium.js(v='20260316a')}" defer></script>
+<script th:src="@{/js/core/language-selector.js(v=${assetVersion})}" defer></script>
 <script th:src="@{/js/core/floating-profile-card.js(v=${assetVersion})}" defer></script>
 <script th:src="@{/js/core/profile-preview.js(v=${assetVersion})}" defer></script>
 

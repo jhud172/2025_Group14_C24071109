@@ -7,7 +7,7 @@
         <link rel="stylesheet" th:href="@{/css/components/misc/home-public.css(v=${assetVersion})}">
     </th:block>
 
-    <div th:fragment="content" class="public-journey home-experience overflow-x-hidden">
+    <div th:fragment="content" class="public-journey home-experience">
         <a href="#home-main" class="home-skip-link" th:text="#{home.002.skip}">Skip to main content</a>
         <th:block th:replace="~{universal-fragments/dev/dev-mode :: homeGuestNotice}"></th:block>
 
@@ -49,19 +49,45 @@
                     </div>
                 </div>
 
-                <div class="home-hero__visual" data-home-depth>
+                <div class="home-hero__visual" data-home-depth data-brand-interaction>
+                    <div class="brand-field" aria-hidden="true">
+                        <span class="brand-field__aurora"></span>
+                        <span class="brand-field__mesh"></span>
+                        <span class="brand-field__scan"></span>
+                        <span class="brand-field__aperture brand-field__aperture--outer"></span>
+                        <span class="brand-field__aperture brand-field__aperture--inner"></span>
+                        <span class="brand-field__node brand-field__node--one"></span>
+                        <span class="brand-field__node brand-field__node--two"></span>
+                        <span class="brand-field__node brand-field__node--three"></span>
+                    </div>
+
                     <div class="brand-object" data-brand-object tabindex="0" th:attr="aria-label=#{home.014.hero.brand.label}">
-                        <span class="brand-object__orbit brand-object__orbit--outer" aria-hidden="true"></span>
-                        <span class="brand-object__orbit brand-object__orbit--inner" aria-hidden="true"></span>
                         <span class="brand-object__flare" aria-hidden="true"></span>
-                        <span class="brand-object__assembly">
-                            <img th:src="@{/img/logo.png}" alt="" class="brand-object__depth brand-object__depth--far" aria-hidden="true" draggable="false">
-                            <img th:src="@{/img/logo.png}" alt="" class="brand-object__depth brand-object__depth--middle" aria-hidden="true" draggable="false">
-                            <img th:src="@{/img/logo.png}" alt="" class="brand-object__depth brand-object__depth--near" aria-hidden="true" draggable="false">
-                            <img th:src="@{/img/logo.png}" th:alt="#{home.015.hero.brand.alt}" alt="One To One" class="brand-object__logo" fetchpriority="high" draggable="false">
-                            <span class="brand-object__shine" aria-hidden="true"></span>
+                        <span class="brand-object__floor" aria-hidden="true"></span>
+
+                        <span class="brand-object__assembly brand-sculpture" data-brand-sculpture>
+                            <span class="brand-sculpture__volume brand-sculpture__volume--mark"
+                                  data-brand-volume data-brand-slices="34" data-brand-depth="124" aria-hidden="true">
+                                <img th:src="@{/img/logo.png}" alt="" class="brand-sculpture__front" draggable="false">
+                            </span>
+                            <span class="brand-sculpture__volume brand-sculpture__volume--wordmark"
+                                  data-brand-volume data-brand-slices="26" data-brand-depth="92" aria-hidden="true">
+                                <img th:src="@{/img/logo.png}" alt="" class="brand-sculpture__front" draggable="false">
+                            </span>
+                            <span class="brand-sculpture__shine brand-sculpture__shine--mark" aria-hidden="true"></span>
+                            <span class="brand-sculpture__shine brand-sculpture__shine--wordmark" aria-hidden="true"></span>
+                            <span class="brand-sculpture__rim brand-sculpture__rim--cool" aria-hidden="true"></span>
+                            <span class="brand-sculpture__rim brand-sculpture__rim--warm" aria-hidden="true"></span>
+                            <img th:src="@{/img/logo.png}" th:alt="#{home.015.hero.brand.alt}" alt="One To One"
+                                 class="brand-sculpture__accessible-face" fetchpriority="high" draggable="false">
                         </span>
-                        <img th:src="@{/img/logo.png}" alt="" class="brand-object__reflection" aria-hidden="true" draggable="false">
+
+                        <img th:src="@{/img/home/one-to-one-sculpture-v2.png}" alt="" class="brand-object__render-fallback" aria-hidden="true" draggable="false">
+                        <span class="brand-object__reflection" aria-hidden="true"></span>
+
+                        <template data-brand-slice-template>
+                            <img th:src="@{/img/logo.png}" alt="" class="brand-sculpture__slice" aria-hidden="true" draggable="false">
+                        </template>
                     </div>
 
                     <div class="coach-signal coach-signal--verified">
@@ -240,7 +266,7 @@
                         <header class="standard-proof__bar">
                             <div class="standard-proof__brand">
                                 <img th:src="@{/img/brand/tab_logo.png}" src="/img/brand/tab_logo.png" alt="">
-                                <span><small>One To One</small><strong th:text="#{home.149.standard.proof.layer}">Trust layer</strong></span>
+                                <span><small th:text="#{ui.01376}">One To One</small><strong th:text="#{home.149.standard.proof.layer}">Trust layer</strong></span>
                             </div>
                             <span class="standard-proof__live"><i></i><th:block th:text="#{home.150.standard.proof.record}">Protected record</th:block></span>
                         </header>
@@ -415,7 +441,8 @@
                     </div>
                 </div>
 
-                <div class="home-final" data-final-cta data-public-section>
+                <div class="home-final-motion" data-final-cta data-public-section>
+                <div class="home-final" data-final-cta-panel>
                     <div class="home-final__topline">
                         <p class="home-kicker"><span></span><th:block th:text="#{home.280.final.kicker}">Make the next session count</th:block></p>
                         <span class="home-final__status"><i aria-hidden="true"></i><th:block th:text="#{home.281.final.status}">Ready when you are</th:block></span>
@@ -457,6 +484,7 @@
                         <a th:href="@{/support}" class="home-final__support"><th:block th:text="#{home.292.final.support}">Talk to support</th:block> <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"/></svg></a>
                         <span class="home-final__assurance" th:text="#{home.293.final.assurance}">Verified trainers · Connected coaching · Visible progress</span>
                     </div>
+                </div>
                 </div>
             </div>
         </section>

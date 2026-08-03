@@ -10,16 +10,21 @@ window.toggleChatPanel = function() {
         panel.setAttribute("aria-hidden", "true");
         panel.setAttribute("inert", "");
         fab.setAttribute("aria-expanded", "false");
-        fab.setAttribute("aria-label", "Open Charlie");
+        fab.setAttribute("aria-label", getChatCopy("openCharlie", "Open Charlie"));
     } else {
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
         panel.removeAttribute("inert");
         fab.setAttribute("aria-expanded", "true");
-        fab.setAttribute("aria-label", "Close Charlie");
+        fab.setAttribute("aria-label", getChatCopy("closeCharlie", "Close Charlie"));
     }
     console.log("Chat panel toggled via fallback:", !isOpen ? "open" : "closed");
 };
+
+function getChatCopy(key, fallback, ...values) {
+    const source = document.querySelector(`#chatLocalisation [data-chat-copy="${key}"]`)?.textContent?.trim() || fallback;
+    return values.reduce((message, value, index) => message.replaceAll(`{${index}}`, value), source);
+}
 
 function initCharlieWidget(config) {
     const {
@@ -129,7 +134,7 @@ function initCharlieWidget(config) {
         lightboxReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         overlayManager?.open("charlie-media", { group: "modal" });
         chatMediaLightboxImage.src = url;
-        chatMediaLightboxImage.alt = label || "Expanded chat attachment";
+        chatMediaLightboxImage.alt = label || getChatCopy("expandedAttachment", "Expanded chat attachment");
         chatMediaLightbox.classList.add("is-open");
         chatMediaLightbox.setAttribute("aria-hidden", "false");
         chatMediaLightbox.removeAttribute("inert");
@@ -166,20 +171,21 @@ function initCharlieWidget(config) {
             }
             const image = document.createElement("img");
             image.src = attachment.url;
-            image.alt = attachment.fileName || "Attached image";
+            image.alt = attachment.fileName || getChatCopy("attachedImage", "Attached image");
             image.className = pending ? "chat-pending-attachment-image" : "chat-attachment-image";
             card.appendChild(image);
             const meta = document.createElement("div");
             meta.className = pending ? "chat-pending-attachment-meta" : "chat-attachment-meta";
             const label = document.createElement("span");
             label.className = "chat-attachment-name";
-            label.textContent = attachment.fileName || "image";
+            label.textContent = attachment.fileName || getChatCopy("image", "image");
             meta.appendChild(label);
             if (pending) {
                 const remove = document.createElement("button");
                 remove.type = "button";
                 remove.className = "chat-pending-attachment-remove";
                 remove.textContent = "X";
+                remove.setAttribute("aria-label", getChatCopy("removeAttachment", "Remove attachment"));
                 remove.addEventListener("click", () => {
                     state.pendingAttachments = state.pendingAttachments.filter((item) => item.id !== attachment.id);
                     renderPendingAttachments();
@@ -189,7 +195,7 @@ function initCharlieWidget(config) {
             } else {
                 const expand = document.createElement("span");
                 expand.className = "chat-attachment-expand";
-                expand.textContent = "View";
+                expand.textContent = getChatCopy("view", "View");
                 meta.appendChild(expand);
             }
             card.appendChild(meta);
@@ -215,7 +221,7 @@ function initCharlieWidget(config) {
                 const link = document.createElement("a");
                 link.href = action.url;
                 link.className = "chat-nav-btn";
-                link.textContent = action.label || "Open";
+                link.textContent = action.label || getChatCopy("open", "Open");
                 nav.appendChild(link);
             });
             if (nav.children.length) wrap.appendChild(nav);
@@ -346,8 +352,8 @@ function initCharlieWidget(config) {
         chatCharacterCount.classList.toggle("is-at-limit", isAtLimit);
         chatCharacterCount.classList.toggle("is-over-limit", isOver);
         chatCharacterCount.setAttribute("title", isOver
-            ? `${Math.abs(remaining).toLocaleString()} characters over the limit`
-            : `${remaining.toLocaleString()} characters remaining`);
+            ? getChatCopy("charactersOver", "{0} characters over the limit", Math.abs(remaining).toLocaleString())
+            : getChatCopy("charactersRemaining", "{0} characters remaining", remaining.toLocaleString()));
         input.setAttribute("aria-invalid", isOver ? "true" : "false");
         return !isOver;
     };
@@ -364,7 +370,7 @@ function initCharlieWidget(config) {
         panel.setAttribute("aria-hidden", "false");
         panel.removeAttribute("inert");
         fab.setAttribute("aria-expanded", "true");
-        fab.setAttribute("aria-label", "Close Charlie");
+        fab.setAttribute("aria-label", getChatCopy("closeCharlie", "Close Charlie"));
         syncHeaderState();
     };
 
@@ -377,7 +383,7 @@ function initCharlieWidget(config) {
         panel.setAttribute("aria-hidden", "true");
         panel.setAttribute("inert", "");
         fab.setAttribute("aria-expanded", "false");
-        fab.setAttribute("aria-label", "Open Charlie");
+        fab.setAttribute("aria-label", getChatCopy("openCharlie", "Open Charlie"));
         closeComposerOptions();
         setChatPlusAccessOpen(false);
         closeInlineClearConfirm({ restoreFocus: false });
@@ -404,7 +410,9 @@ function initCharlieWidget(config) {
             chatAttachmentPreviewTray.classList.add("hidden");
         }
         if (chatAttachmentCount) {
-            chatAttachmentCount.textContent = state.pendingAttachments.length ? `${state.pendingAttachments.length} / ${MAX_ATTACHMENTS} photos` : "";
+            chatAttachmentCount.textContent = state.pendingAttachments.length
+                ? getChatCopy("photosCount", "{0} / {1} photos", state.pendingAttachments.length, MAX_ATTACHMENTS)
+                : "";
             chatAttachmentCount.classList.toggle("hidden", !state.pendingAttachments.length);
         }
         autoResizeInput();
@@ -491,7 +499,20 @@ function initCharlieWidget(config) {
 
     const renderGuestInbox = () => {
         if (!notificationsList) return;
-        notificationsList.innerHTML = "<div class=\"chat-empty-state-card\"><div class=\"chat-empty-state-icon\">Inbox</div><p class=\"chat-empty-state-title\">Log in to use your inbox</p><p class=\"chat-empty-state-text\">Charlie chat is available on the website, but notifications stay attached to signed-in accounts.</p></div>";
+        notificationsList.innerHTML = "";
+        const card = document.createElement("div");
+        card.className = "chat-empty-state-card";
+        const icon = document.createElement("div");
+        icon.className = "chat-empty-state-icon";
+        icon.textContent = getChatCopy("inbox", "Inbox");
+        const title = document.createElement("p");
+        title.className = "chat-empty-state-title";
+        title.textContent = getChatCopy("loginInbox", "Log in to use your inbox");
+        const copy = document.createElement("p");
+        copy.className = "chat-empty-state-text";
+        copy.textContent = getChatCopy("guestInbox", "Charlie chat is available on the website, but notifications stay attached to signed-in accounts.");
+        card.append(icon, title, copy);
+        notificationsList.appendChild(card);
     };
 
     const loadNotifications = async () => {
@@ -510,13 +531,21 @@ function initCharlieWidget(config) {
                 items = items.filter((item) => !item.readAt && !item.dismissedAt);
             }
             if (!items.length) {
-                notificationsList.innerHTML = `<div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">${state.filter === "unread" ? "No unread notifications." : "No notifications yet."}</div>`;
+                const empty = document.createElement("div");
+                empty.className = "rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400";
+                empty.textContent = state.filter === "unread"
+                    ? getChatCopy("noUnread", "No unread notifications.")
+                    : getChatCopy("noNotifications", "No notifications yet.");
+                notificationsList.appendChild(empty);
                 return;
             }
             items.forEach((item) => {
                 const row = document.createElement("div");
                 row.className = `group rounded-xl border p-3 shadow-sm transition-all ${!item.readAt && !item.dismissedAt ? "border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/10" : "border-slate-200 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/60"}`;
-                row.innerHTML = `<div class="flex items-start justify-between gap-2"><div class="text-xs font-semibold text-slate-600 dark:text-slate-300">${item.title || "Notification"}</div><button type="button" class="text-[11px] font-semibold text-slate-400">Dismiss</button></div><div class="mt-1.5 text-sm leading-snug text-slate-700 dark:text-slate-200">${item.message || ""}</div>`;
+                row.innerHTML = `<div class="flex items-start justify-between gap-2"><div class="text-xs font-semibold text-slate-600 dark:text-slate-300"></div><button type="button" class="text-[11px] font-semibold text-slate-400"></button></div><div class="mt-1.5 text-sm leading-snug text-slate-700 dark:text-slate-200"></div>`;
+                row.querySelector(".text-xs").textContent = item.title || getChatCopy("notification", "Notification");
+                row.querySelector("button").textContent = getChatCopy("dismiss", "Dismiss");
+                row.querySelector(".mt-1\\.5").textContent = item.message || "";
                 row.querySelector("button")?.addEventListener("click", async (event) => {
                     event.stopPropagation();
                     await fetch(`/api/notifications/${item.id}/dismiss`, { method: "POST", headers: headers(false) });
@@ -534,12 +563,12 @@ function initCharlieWidget(config) {
         const candidates = Array.from(files || []).filter((file) => file?.type?.startsWith("image/"));
         const availableSlots = MAX_ATTACHMENTS - state.pendingAttachments.length;
         if (availableSlots <= 0) {
-            showInlineMessage("You can attach up to 5 photos per message.", "warning");
+            showInlineMessage(getChatCopy("photoLimit", "You can attach up to 5 photos per message."), "warning");
             return;
         }
         const selected = candidates.slice(0, availableSlots);
         if (candidates.length > availableSlots) {
-            showInlineMessage("Only the first 5 photos were kept for this message.", "warning");
+            showInlineMessage(getChatCopy("photosKept", "Only the first 5 photos were kept for this message."), "warning");
         }
         for (const file of selected) {
             state.pendingAttachments.push(await prepareAttachment(file));
@@ -557,7 +586,7 @@ function initCharlieWidget(config) {
         if (csrfToken) nextHeaders[csrfHeader] = csrfToken;
         const response = await fetch("/chat/attachments", { method: "POST", headers: nextHeaders, body: formData });
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data?.error || "Unable to upload chat images right now.");
+        if (!response.ok) throw new Error(data?.error || getChatCopy("uploadUnavailable", "Unable to upload chat images right now."));
         return Array.isArray(data?.attachments) ? data.attachments.map(normalizeAttachment).filter(Boolean) : [];
     };
 
@@ -588,7 +617,7 @@ function initCharlieWidget(config) {
         if (state.sending) return;
         if (input.value.length > MAX_MESSAGE_LENGTH) {
             const excess = input.value.length - MAX_MESSAGE_LENGTH;
-            showInlineMessage(`Your message is ${excess.toLocaleString()} characters over the ${MAX_MESSAGE_LENGTH.toLocaleString()} character limit.`, "warning");
+            showInlineMessage(getChatCopy("messageOverLimit", "Your message is {0} characters over the {1} character limit.", excess.toLocaleString(), MAX_MESSAGE_LENGTH.toLocaleString()), "warning");
             updateSendState();
             input.focus();
             return;
@@ -596,7 +625,7 @@ function initCharlieWidget(config) {
         const text = input.value.trim();
         const queuedAttachments = state.pendingAttachments.slice();
         if (!text && !queuedAttachments.length) {
-            showInlineMessage("Add a message or photo before sending.", "warning");
+            showInlineMessage(getChatCopy("addBeforeSending", "Add a message or photo before sending."), "warning");
             updateSendState();
             return;
         }
@@ -617,11 +646,11 @@ function initCharlieWidget(config) {
                 })
             });
             const data = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(data?.reply || "Charlie is unavailable right now.");
-            appendMessage({ who: "ai", text: data?.reply || "No response received.", attachments: [], navActions: Array.isArray(data?.navActions) ? data.navActions : [] });
+            if (!response.ok) throw new Error(data?.reply || getChatCopy("charlieUnavailable", "Charlie is unavailable right now."));
+            appendMessage({ who: "ai", text: data?.reply || getChatCopy("noResponse", "No response received."), attachments: [], navActions: Array.isArray(data?.navActions) ? data.navActions : [] });
             dot?.classList.add("active");
         } catch (error) {
-            appendMessage({ who: "ai", text: error?.message || "Charlie is unavailable right now.", attachments: [], navActions: [] });
+            appendMessage({ who: "ai", text: error?.message || getChatCopy("charlieUnavailable", "Charlie is unavailable right now."), attachments: [], navActions: [] });
         } finally {
             state.sending = false;
             updateSendState();
@@ -645,7 +674,7 @@ function initCharlieWidget(config) {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(LEGACY_STORAGE_KEY);
         renderHistory([]);
-        showInlineMessage("Chat history cleared.", "success");
+        showInlineMessage(getChatCopy("historyCleared", "Chat history cleared."), "success");
         if (isAuthenticated) await fetch("/chat/clear", { method: "POST", headers: headers(false) }).catch(() => undefined);
     });
     normalTabBtn?.addEventListener("click", () => {
@@ -720,7 +749,7 @@ function initCharlieWidget(config) {
     panel.toggleAttribute("inert", !panel.classList.contains("open"));
     if (panel.classList.contains("open")) overlayManager?.open("charlie");
     else overlayManager?.release("charlie");
-    renderHistory(readHistory());
+    renderHistory(isAuthenticated ? readHistory() : []);
     setActiveView("chat");
     setChatPlusAccessOpen(false);
     closeComposerOptions();

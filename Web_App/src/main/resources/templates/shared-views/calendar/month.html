@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Calendar', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.01297}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="styles">
     <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}">
@@ -10,73 +10,73 @@
 
 <div th:fragment="content">
     <div class="calendar-month-view mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-        <h1 class="sr-only">Calendar month view</h1>
+        <h1 class="sr-only" th:text="#{ui.01790}">Calendar month view</h1>
         <div class="flex flex-col gap-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="calendar-view-toggle" data-site-tour="calendar-controls">
-                    <a href="/calendar?view=month" class="calendar-view-btn active">Month view</a>
-                    <a href="/calendar?view=week" class="calendar-view-btn">Week view</a>
-                    <a th:href="@{'/calendar/day/' + ${today}}" class="calendar-view-btn">Day view</a>
+                    <a href="/calendar?view=month" class="calendar-view-btn active" th:text="#{ui.01587}">Month view</a>
+                    <a href="/calendar?view=week" class="calendar-view-btn" th:text="#{ui.01588}">Week view</a>
+                    <a th:href="@{'/calendar/day/' + ${today}}" class="calendar-view-btn" th:text="#{ui.01589}">Day view</a>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <div class="calendar-expand-toggle" aria-label="Expand month view">
-                        <button type="button" id="month-expand-toggle" class="calendar-expand-toggle__btn" aria-pressed="false">Expand</button>
+                    <div class="calendar-expand-toggle" aria-label="Expand month view" th:attr="aria-label=#{ui.01791}">
+                        <button type="button" id="month-expand-toggle" class="calendar-expand-toggle__btn" aria-pressed="false" th:text="#{ui.01792}">Expand</button>
                     </div>
-                    <div class="calendar-info-link" aria-label="Expand mode information">
-                        <button type="button" class="calendar-info-link__button" aria-label="How expand mode works">
-                            <span class="calendar-info-link__icon">i</span>
+                    <div class="calendar-info-link" aria-label="Expand mode information" th:attr="aria-label=#{ui.01793}">
+                        <button type="button" class="calendar-info-link__button" aria-label="How expand mode works" th:attr="aria-label=#{ui.01794}">
+                            <span class="calendar-info-link__icon" th:text="#{ui.01795}">i</span>
                         </button>
-                        <span class="calendar-info-link__tip" role="tooltip">
+                        <span class="calendar-info-link__tip" role="tooltip" th:text="#{ui.01796}">
                             Expand mode loads adjacent months as you scroll near either edge.
                         </span>
                     </div>
                     <div class="calendar-mode-indicator hidden sm:flex">
-                        Month View - <span th:text="${calendarLayoutLabel}">Detailed</span>
+                        <th:block th:text="#{ui.01797}">Month View -</th:block> <span th:text="${calendarLayoutLabel}">Detailed</span>
                     </div>
-                    <div class="calendar-info-link" aria-label="Calendar layout information">
-                        <button type="button" class="calendar-info-link__button" aria-label="Calendar layout settings help">
-                            <span class="calendar-info-link__icon">i</span>
+                    <div class="calendar-info-link" aria-label="Calendar layout information" th:attr="aria-label=#{ui.01798}">
+                        <button type="button" class="calendar-info-link__button" aria-label="Calendar layout settings help" th:attr="aria-label=#{ui.01799}">
+                            <span class="calendar-info-link__icon" th:text="#{ui.01795}">i</span>
                         </button>
                         <span class="calendar-info-link__tip" role="tooltip">
-                            Controls how cards display: Detailed combines items, Grouped separates categories.
-                            <a href="/profile" class="calendar-info-link__tip-link">Open calendar settings</a>
+                            <th:block th:text="#{ui.01800}">Controls how cards display: Detailed combines items, Grouped separates categories.</th:block>
+                            <a href="/profile" class="calendar-info-link__tip-link" th:text="#{ui.01801}">Open calendar settings</a>
                         </span>
                     </div>
-                    <button type="button" id="scheduleDrawerButton" class="calendar-action-btn calendar-action-btn--primary">Schedules</button>
-                    <button type="button" id="motivation-mode-toggle" class="calendar-action-btn" aria-pressed="false" title="Show monthly goal progress and motivation insights">Motivation</button>
+                    <button type="button" id="scheduleDrawerButton" class="calendar-action-btn calendar-action-btn--primary" th:text="#{ui.00266}">Schedules</button>
+                    <button type="button" id="motivation-mode-toggle" class="calendar-action-btn" aria-pressed="false" title="Show monthly goal progress and motivation insights" th:title="#{ui.01802}" th:text="#{ui.01803}">Motivation</button>
                 </div>
             </div>
 
-            <div class="calendar-jump-controls" aria-label="Month jump controls">
+            <div class="calendar-jump-controls" aria-label="Month jump controls" th:attr="aria-label=#{ui.01804}">
                 <div class="calendar-jump-toolbar">
-                    <button type="button" id="month-jump-today" class="calendar-action-btn calendar-jump-btn">Jump to today</button>
+                    <button type="button" id="month-jump-today" class="calendar-action-btn calendar-jump-btn" th:text="#{ui.01805}">Jump to today</button>
                     <div class="calendar-jump-field calendar-jump-field--date">
-                        <label class="sr-only" for="month-jump-date">Jump to date</label>
+                        <label class="sr-only" for="month-jump-date" th:text="#{ui.01806}">Jump to date</label>
                         <input id="month-jump-date" type="date" class="calendar-jump-input" />
-                        <button type="button" id="month-jump-date-go" class="calendar-action-btn calendar-jump-btn">Jump to date</button>
+                        <button type="button" id="month-jump-date-go" class="calendar-action-btn calendar-jump-btn" th:text="#{ui.01806}">Jump to date</button>
                     </div>
-                    <button type="button" id="month-jump-next-workout" class="calendar-action-btn calendar-jump-btn">Jump to next workout</button>
+                    <button type="button" id="month-jump-next-workout" class="calendar-action-btn calendar-jump-btn" th:text="#{ui.01807}">Jump to next workout</button>
                     <div class="calendar-jump-field calendar-jump-field--task">
-                        <label class="sr-only" for="month-jump-task">Jump to task</label>
-                        <input id="month-jump-task" type="text" class="calendar-jump-input" placeholder="Task name" />
-                        <button type="button" id="month-jump-task-go" class="calendar-action-btn calendar-action-btn--accent calendar-jump-btn">Jump to task</button>
+                        <label class="sr-only" for="month-jump-task" th:text="#{ui.01808}">Jump to task</label>
+                        <input id="month-jump-task" type="text" class="calendar-jump-input" placeholder="Task name"  th:placeholder="#{ui.01809}"/>
+                        <button type="button" id="month-jump-task-go" class="calendar-action-btn calendar-action-btn--accent calendar-jump-btn" th:text="#{ui.01808}">Jump to task</button>
                     </div>
                 </div>
                 <p id="month-jump-status" class="calendar-jump-status" aria-live="polite"></p>
             </div>
 
             <div class="calendar-nav-controls">
-                <a id="month-prev" th:href="@{'/calendar?view=month&month=' + ${prevMonth} + '&year=' + ${prevYear}}" class="calendar-nav-btn">&#8592; Prev</a>
+                <a id="month-prev" th:href="@{'/calendar?view=month&month=' + ${prevMonth} + '&year=' + ${prevYear}}" class="calendar-nav-btn" th:text="#{ui.01597}">&#8592; Prev</a>
                 <div class="calendar-month-title">
                     <span id="month-name" class="calendar-month-name" th:text="${T(java.time.Month).of(month).getDisplayName(T(java.time.format.TextStyle).FULL, T(java.util.Locale).UK)}"></span>
                     <span id="month-year" class="calendar-month-year" th:text="${year}"></span>
                 </div>
-                <a id="month-next" th:href="@{'/calendar?view=month&month=' + ${nextMonth} + '&year=' + ${nextYear}}" class="calendar-nav-btn">Next &#8594;</a>
+                <a id="month-next" th:href="@{'/calendar?view=month&month=' + ${nextMonth} + '&year=' + ${nextYear}}" class="calendar-nav-btn" th:text="#{ui.01599}">Next &#8594;</a>
             </div>
 
             <!-- Planning view (existing) -->
             <div id="planning-view-panel" class="mt-6">
-                <div id="month-carousel" class="month-carousel" role="region" aria-label="Calendar month carousel">
+                <div id="month-carousel" class="month-carousel" role="region" aria-label="Calendar month carousel" th:attr="aria-label=#{ui.01810}">
                     <div id="month-carousel-track" class="month-carousel__track">
                         <div class="calendar-month-container month-pane" th:fragment="monthPane"
                              th:attr="data-month-pane=true,
@@ -100,13 +100,13 @@
                                 </div>
                             </div>
                             <div class="calendar-day-headers grid grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm">
-                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 1} ? ' calendar-weekday-pill--today' : ''">Mon</div>
-                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 2} ? ' calendar-weekday-pill--today' : ''">Tue</div>
-                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 3} ? ' calendar-weekday-pill--today' : ''">Wed</div>
-                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 4} ? ' calendar-weekday-pill--today' : ''">Thu</div>
-                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 5} ? ' calendar-weekday-pill--today' : ''">Fri</div>
-                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 6} ? ' calendar-weekday-pill--today' : ''">Sat</div>
-                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 7} ? ' calendar-weekday-pill--today' : ''">Sun</div>
+                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 1} ? ' calendar-weekday-pill--today' : ''" th:text="#{ui.01811}">Mon</div>
+                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 2} ? ' calendar-weekday-pill--today' : ''" th:text="#{ui.01812}">Tue</div>
+                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 3} ? ' calendar-weekday-pill--today' : ''" th:text="#{ui.01813}">Wed</div>
+                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 4} ? ' calendar-weekday-pill--today' : ''" th:text="#{ui.01814}">Thu</div>
+                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 5} ? ' calendar-weekday-pill--today' : ''" th:text="#{ui.01815}">Fri</div>
+                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 6} ? ' calendar-weekday-pill--today' : ''" th:text="#{ui.01816}">Sat</div>
+                                <div class="calendar-weekday-pill" th:classappend="${today.dayOfWeek.value == 7} ? ' calendar-weekday-pill--today' : ''" th:text="#{ui.01817}">Sun</div>
                             </div>
                             <div class="calendar-month-grid grid grid-cols-7">
                                 <th:block th:each="cell : ${calendarCells}">
@@ -132,8 +132,8 @@
                                         <div class="calendar-day-header">
                                             <a th:href="@{'/calendar/day/' + ${dayModel.isoDate}}"
                                                               class="calendar-day-number" th:text="${dayModel.dayOfMonth + (dayModel.dayOfMonth == 1 || dayModel.dayOfMonth == 21 || dayModel.dayOfMonth == 31 ? 'st' : (dayModel.dayOfMonth == 2 || dayModel.dayOfMonth == 22 ? 'nd' : (dayModel.dayOfMonth == 3 || dayModel.dayOfMonth == 23 ? 'rd' : 'th')))}"></a>
-                                            <span th:if="${dayModel.today}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">Today</span>
-                                                          <span th:if="${dayModel.tomorrow}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">Tomorrow</span>
+                                            <span th:if="${dayModel.today}" class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400" th:text="#{ui.00495}">Today</span>
+                                                          <span th:if="${dayModel.tomorrow}" class="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400" th:text="#{ui.00501}">Tomorrow</span>
                                         </div>
                                     <div class="calendar-day-content" th:with="grouped=${calendarLayoutGrouped}">
                                         <!-- Activity sticker row (visible in motivation mode) -->
@@ -152,11 +152,11 @@
                                                 <span th:if="${occ.completed}"
                                                       class="activity-sticker"
                                                       data-activity-type="GYM"
-                                                      title="Gym workout">&#127947;</span>
+                                                      title="Gym workout" th:title="#{ui.01818}">&#127947;</span>
                                                 <span th:if="${!occ.completed}"
                                                       class="activity-sticker activity-sticker--pending"
                                                       data-activity-type="GYM"
-                                                      title="Gym workout (pending)">&#127947;</span>
+                                                      title="Gym workout (pending)" th:title="#{ui.01819}">&#127947;</span>
                                             </th:block>
                                         </div>
                                         <!-- Empty state when no tasks or schedules -->
@@ -212,7 +212,7 @@
                                         <div th:if="${grouped}" class="space-y-3">
                                             <div class="calendar-grouped-section">
                                                 <div class="calendar-grouped-header">
-                                                    <span class="calendar-grouped-label">Tasks</span>
+                                                    <span class="calendar-grouped-label" th:text="#{ui.00497}">Tasks</span>
                                                     <span class="calendar-grouped-count" th:text="${tTotal}"></span>
                                                 </div>
                                                 <div class="calendar-grouped-items">
@@ -232,7 +232,7 @@
                                             </div>
                                             <div class="calendar-grouped-section">
                                                 <div class="calendar-grouped-header">
-                                                    <span class="calendar-grouped-label">Workouts</span>
+                                                    <span class="calendar-grouped-label" th:text="#{ui.00235}">Workouts</span>
                                                     <span class="calendar-grouped-count" th:text="${sTotal}"></span>
                                                 </div>
                                                 <div class="calendar-grouped-items">
@@ -262,10 +262,10 @@
             </div>
 
             <!-- Motivation View (sticker calendar) - populated by JS -->
-            <div id="sticker-view-panel" class="hidden" aria-label="Motivation sticker calendar">
+            <div id="sticker-view-panel" class="hidden" aria-label="Motivation sticker calendar" th:attr="aria-label=#{ui.01820}">
                 <!-- Monthly target progress bar -->
                 <div class="sticker-target-bar">
-                    <span class="sticker-target-label">Monthly goal:</span>
+                    <span class="sticker-target-label" th:text="#{ui.01821}">Monthly goal:</span>
                     <div class="sticker-target-progress-wrap" role="progressbar"
                          aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                         <div id="sticker-target-fill" class="sticker-target-progress-fill sticker-target-progress-fill--empty"></div>
@@ -275,15 +275,15 @@
                 <!-- Motivation insights row (populated by JS) -->
                 <div id="motivation-insights" class="motivation-insights" aria-live="polite"></div>
                 <!-- Sticker pack selector -->
-                <div class="sticker-pack-selector mb-4" role="group" aria-label="Sticker style">
-                    <span class="sticker-pack-label">Style:</span>
-                    <button type="button" class="sticker-pack-btn active" data-pack="STARS" aria-pressed="true">&#9733; Stars</button>
-                    <button type="button" class="sticker-pack-btn" data-pack="SPORT" aria-pressed="false">&#127947; Sport</button>
-                    <button type="button" class="sticker-pack-btn" data-pack="EMOJI" aria-pressed="false">&#9786; Emoji</button>
+                <div class="sticker-pack-selector mb-4" role="group" aria-label="Sticker style" th:attr="aria-label=#{ui.01822}">
+                    <span class="sticker-pack-label" th:text="#{ui.01823}">Style:</span>
+                    <button type="button" class="sticker-pack-btn active" data-pack="STARS" aria-pressed="true" th:text="#{ui.01824}">&#9733; Stars</button>
+                    <button type="button" class="sticker-pack-btn" data-pack="SPORT" aria-pressed="false" th:text="#{ui.01825}">&#127947; Sport</button>
+                    <button type="button" class="sticker-pack-btn" data-pack="EMOJI" aria-pressed="false" th:text="#{ui.01826}">&#9786; Emoji</button>
                 </div>
                 <!-- Day header row (same as planning) -->
                 <div class="calendar-day-headers grid grid-cols-7 gap-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 sm:text-sm mb-1">
-                    <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                    <div th:text="#{ui.01811}">Mon</div><div th:text="#{ui.01812}">Tue</div><div th:text="#{ui.01813}">Wed</div><div th:text="#{ui.01814}">Thu</div><div th:text="#{ui.01815}">Fri</div><div th:text="#{ui.01816}">Sat</div><div th:text="#{ui.01817}">Sun</div>
                 </div>
                 <!-- Sticker grid (populated by JS) -->
                 <div id="sticker-month-grid" class="sticker-month-grid" aria-live="polite"></div>

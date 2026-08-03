@@ -1,192 +1,233 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-          th:replace="~{base :: layout('Dev Hub', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.02360}, ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <th:block th:fragment="pageStyles">
-        <link rel="stylesheet" th:href="@{/css/components/dev/dev-mode-pages.css(v='20260315a')}">
+        <link rel="stylesheet" th:href="@{/css/components/dev/dev-hub.css(v=${uiCssVersion})}">
     </th:block>
 
     <div th:fragment="content" class="devhub">
+        <div class="devhub__atmosphere" aria-hidden="true"></div>
+
         <div class="devhub-shell">
-            <section class="devhub-hero" aria-labelledby="devhub-title">
-                <div class="devhub-hero__inner">
-                    <div class="devhub-hero__top">
-                        <div class="devhub-hero__brand">
-                            <div class="devhub-hero__icon" aria-hidden="true">
-                                <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('layout')}"></th:block>
-                            </div>
-                            <div class="devhub-hero__copy">
-                                <p class="devhub-eyebrow">Development Testing Dashboard</p>
-                                <h1 id="devhub-title" class="devhub-title">Use the Dev Hub to explore live development routes.</h1>
-                                <p class="devhub-copy">
-                                    Browse public pages, jump into signed-in areas after login, and see which features are temporarily restricted while
-                                    development work continues.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="devhub-hero__actions">
-                            <th:block th:replace="~{universal-fragments/dev/dev-mode :: pill('', 'DEV MODE')}"></th:block>
-                            <a sec:authorize="!isAuthenticated()"
-                               th:href="@{/login(devLogin=1)}"
-                               class="devhub-button devhub-button--primary">Sign In</a>
-                        </div>
+            <header class="devhub-header" aria-labelledby="devhub-title">
+                <div class="devhub-header__identity">
+                    <div class="devhub-brand-mark" aria-hidden="true">
+                        <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('layout')}"></th:block>
                     </div>
 
-                    <dl class="devhub-summary">
-                        <div class="devhub-summary__item">
-                            <dt>Public Pages</dt>
-                            <dd th:text="${#lists.size(devHubView.publicPages)} + ' available now'">0 available now</dd>
-                        </div>
-                        <div class="devhub-summary__item">
-                            <dt>After Login</dt>
-                            <dd th:text="${#lists.size(devHubView.loginRequiredPages)} + ' routes for signed-in testing'">0 routes</dd>
-                        </div>
-                        <div class="devhub-summary__item">
-                            <dt>Restricted</dt>
-                            <dd th:text="${#lists.size(devHubView.restrictedPages)} + ' pages currently unavailable'">0 unavailable</dd>
-                        </div>
-                        <div class="devhub-summary__item">
-                            <dt>Testing Use</dt>
-                            <dd>Create accounts, exercise flows, and preview live UI work while Dev Mode is active.</dd>
-                        </div>
-                    </dl>
+                    <div class="devhub-header__copy">
+                        <p class="devhub-kicker">
+                            <span class="devhub-kicker__signal" aria-hidden="true"></span>
+                            <span th:text="#{ui.02344}">Development Testing Dashboard</span>
+                        </p>
+                        <h1 id="devhub-title" class="devhub-title" th:text="#{ui.02360}">Dev Hub</h1>
+                        <p class="devhub-intro" th:text="#{ui.02345}">Use the Dev Hub to explore live development routes.</p>
+                    </div>
                 </div>
-            </section>
 
-            <div class="devhub-grid">
-                <section class="devhub-section devhub-section--public">
-                    <div class="devhub-section__panel">
-                        <div class="devhub-section__head">
-                            <div>
-                                <p class="devsection-eyebrow">Public Pages</p>
-                                <h2 class="devsection-title">Open routes for guest testing</h2>
-                                <p class="devsection-copy">These pages are available immediately without authentication.</p>
+                <div class="devhub-header__actions">
+                    <div class="devhub-mode" role="status">
+                        <span class="devhub-mode__dot" aria-hidden="true"></span>
+                        <span th:text="#{ui.02365}">DEV MODE</span>
+                    </div>
+                    <a sec:authorize="!isAuthenticated()"
+                       th:href="@{/login(devLogin=1)}"
+                       class="devhub-sign-in">
+                        <span th:text="#{ui.01126}">Sign In</span>
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M4 10h12M12 6l4 4-4 4"/>
+                        </svg>
+                    </a>
+                </div>
+            </header>
+
+            <dl class="devhub-overview" aria-label="Development route summary" th:attr="aria-label=#{ui.02344}">
+                <div class="devhub-overview__item devhub-overview__item--public">
+                    <dt th:text="#{ui.02347}">Public Pages</dt>
+                    <dd>
+                        <strong th:text="${#lists.size(devHubView.publicPages)}">0</strong>
+                        <span th:text="#{ui.02351}">Open routes for guest testing</span>
+                    </dd>
+                </div>
+                <div class="devhub-overview__item devhub-overview__item--login">
+                    <dt th:text="#{ui.02348}">After Login</dt>
+                    <dd>
+                        <strong th:text="${#lists.size(devHubView.loginRequiredPages)}">0</strong>
+                        <span th:text="#{ui.02354}">Signed-in testing routes</span>
+                    </dd>
+                </div>
+                <div class="devhub-overview__item devhub-overview__item--restricted">
+                    <dt th:text="#{ui.00103}">Restricted</dt>
+                    <dd>
+                        <strong th:text="${#lists.size(devHubView.restrictedPages)}">0</strong>
+                        <span th:text="#{ui.02357}">Temporarily unavailable routes</span>
+                    </dd>
+                </div>
+            </dl>
+
+            <div class="devhub-workspace">
+                <aside class="devhub-sidebar" aria-label="Dev Hub route groups" th:attr="aria-label=#{ui.02360}">
+                    <div class="devhub-sidebar__nav">
+                        <p class="devhub-sidebar__label" th:text="#{ui.02360}">Dev Hub</p>
+                        <nav class="devhub-route-nav" aria-label="Route access groups" th:attr="aria-label=#{ui.02344}">
+                            <a href="#public-routes" class="devhub-route-nav__link devhub-route-nav__link--public"
+                               aria-label="Public Pages" th:attr="aria-label=#{ui.02347}">
+                                <span class="devhub-route-nav__icon" aria-hidden="true">
+                                    <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('search')}"></th:block>
+                                </span>
+                                <span th:text="#{ui.02347}">Public Pages</span>
+                                <strong th:text="${#lists.size(devHubView.publicPages)}">0</strong>
+                            </a>
+                            <a href="#login-routes" class="devhub-route-nav__link devhub-route-nav__link--login"
+                               aria-label="After Login" th:attr="aria-label=#{ui.02348}">
+                                <span class="devhub-route-nav__icon" aria-hidden="true">
+                                    <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('user')}"></th:block>
+                                </span>
+                                <span th:text="#{ui.02348}">After Login</span>
+                                <strong th:text="${#lists.size(devHubView.loginRequiredPages)}">0</strong>
+                            </a>
+                            <a href="#restricted-routes" class="devhub-route-nav__link devhub-route-nav__link--restricted"
+                               aria-label="Restricted" th:attr="aria-label=#{ui.00103}">
+                                <span class="devhub-route-nav__icon" aria-hidden="true">
+                                    <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('shield')}"></th:block>
+                                </span>
+                                <span th:text="#{ui.00103}">Restricted</span>
+                                <strong th:text="${#lists.size(devHubView.restrictedPages)}">0</strong>
+                            </a>
+                        </nav>
+                    </div>
+
+                    <div class="devhub-testing-note">
+                        <span class="devhub-testing-note__icon" aria-hidden="true">
+                            <svg viewBox="0 0 20 20">
+                                <path d="M10 2.5v3M10 14.5v3M2.5 10h3M14.5 10h3"/>
+                                <circle cx="10" cy="10" r="4.5"/>
+                            </svg>
+                        </span>
+                        <div>
+                            <strong th:text="#{ui.02364}">Development environment</strong>
+                            <p th:text="#{dev.notice.copy}">Data entered during testing may be reset or changed.</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <div class="devhub-content">
+                    <section id="public-routes" class="devhub-section devhub-section--public" aria-labelledby="public-routes-title">
+                        <header class="devhub-section__header">
+                            <div class="devhub-section__identity">
+                                <span class="devhub-section__icon" aria-hidden="true">
+                                    <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('search')}"></th:block>
+                                </span>
+                                <div>
+                                    <p class="devhub-section__eyebrow" th:text="#{ui.02347}">Public Pages</p>
+                                    <h2 id="public-routes-title" class="devhub-section__title" th:text="#{ui.02351}">Open routes for guest testing</h2>
+                                </div>
                             </div>
                             <div class="devhub-section__meta">
+                                <span class="devhub-section__count" th:text="${#lists.size(devHubView.publicPages)}">0</span>
                                 <th:block th:replace="~{universal-fragments/dev/dev-page-display :: statusBadge('public', 'Public')}"></th:block>
-                                <span class="devhub-section__count" th:text="${#lists.size(devHubView.publicPages)} + ' pages'">0 pages</span>
                             </div>
-                        </div>
+                        </header>
 
-                        <div class="devhub-card-grid">
-                            <a th:each="page : ${devHubView.publicPages}"
-                               th:href="${page.href}"
-                               class="devhub-card devhub-card--public">
-                                <div class="devhub-card__top">
-                                    <div class="devhub-card__icon" aria-hidden="true">
+                        <ul class="devroute-list">
+                            <li th:each="page : ${devHubView.publicPages}">
+                                <a th:href="${page.href}" class="devroute devroute--public">
+                                    <span class="devroute__icon" aria-hidden="true">
                                         <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon(${page.iconKey})}"></th:block>
-                                    </div>
-                                    <th:block th:replace="~{universal-fragments/dev/dev-page-display :: statusBadge(${page.statusTone}, ${page.statusLabel})}"></th:block>
-                                </div>
-                                <div class="devhub-card__body">
-                                    <h3 class="devhub-card__title" th:text="${page.title}">Title</h3>
-                                    <p class="devhub-card__path" th:text="${page.path}">/path</p>
-                                    <p class="devhub-card__copy" th:text="${page.description}">Description</p>
-                                </div>
-                                <div class="devhub-card__footer">
-                                    <p class="devhub-card__availability" th:text="${page.availabilityCopy}">Open now</p>
-                                    <span class="devhub-card__arrow" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M5 12h14"/>
-                                            <path d="M12 5l7 7-7 7"/>
-                                        </svg>
                                     </span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </section>
+                                    <span class="devroute__main">
+                                        <strong class="devroute__title" th:text="${page.title}">Title</strong>
+                                        <code class="devroute__path" th:text="${page.path}">/path</code>
+                                    </span>
+                                    <span class="devroute__availability" th:text="${page.availabilityCopy}">Open now</span>
+                                    <span class="devroute__arrow" aria-hidden="true">
+                                        <svg viewBox="0 0 20 20"><path d="M4 10h12M12 6l4 4-4 4"/></svg>
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
 
-                <section class="devhub-section devhub-section--login">
-                    <div class="devhub-section__panel">
-                        <div class="devhub-section__head">
-                            <div>
-                                <p class="devsection-eyebrow">Pages Available After Login</p>
-                                <h2 class="devsection-title">Signed-in testing routes</h2>
-                                <p class="devsection-copy">These routes remain behind authentication and open after a normal login session.</p>
+                    <section id="login-routes" class="devhub-section devhub-section--login" aria-labelledby="login-routes-title">
+                        <header class="devhub-section__header">
+                            <div class="devhub-section__identity">
+                                <span class="devhub-section__icon" aria-hidden="true">
+                                    <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('user')}"></th:block>
+                                </span>
+                                <div>
+                                    <p class="devhub-section__eyebrow" th:text="#{ui.02353}">Pages Available After Login</p>
+                                    <h2 id="login-routes-title" class="devhub-section__title" th:text="#{ui.02354}">Signed-in testing routes</h2>
+                                </div>
                             </div>
                             <div class="devhub-section__meta">
+                                <span class="devhub-section__count" th:text="${#lists.size(devHubView.loginRequiredPages)}">0</span>
                                 <th:block th:replace="~{universal-fragments/dev/dev-page-display :: statusBadge('login', 'Login Required')}"></th:block>
-                                <span class="devhub-section__count" th:text="${#lists.size(devHubView.loginRequiredPages)} + ' pages'">0 pages</span>
                             </div>
-                        </div>
+                        </header>
 
-                        <div class="devhub-card-grid">
-                            <a th:each="page : ${devHubView.loginRequiredPages}"
-                               th:href="${page.href}"
-                               class="devhub-card devhub-card--login">
-                                <div class="devhub-card__top">
-                                    <div class="devhub-card__icon" aria-hidden="true">
+                        <ul class="devroute-list">
+                            <li th:each="page : ${devHubView.loginRequiredPages}">
+                                <a th:href="${page.href}" class="devroute devroute--login">
+                                    <span class="devroute__icon" aria-hidden="true">
                                         <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon(${page.iconKey})}"></th:block>
-                                    </div>
-                                    <th:block th:replace="~{universal-fragments/dev/dev-page-display :: statusBadge(${page.statusTone}, ${page.statusLabel})}"></th:block>
-                                </div>
-                                <div class="devhub-card__body">
-                                    <h3 class="devhub-card__title" th:text="${page.title}">Title</h3>
-                                    <p class="devhub-card__path" th:text="${page.path}">/path</p>
-                                    <p class="devhub-card__copy" th:text="${page.description}">Description</p>
-                                </div>
-                                <div class="devhub-card__footer">
-                                    <p class="devhub-card__availability" th:text="${page.availabilityCopy}">Sign in to access</p>
-                                    <span class="devhub-card__arrow" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M5 12h14"/>
-                                            <path d="M12 5l7 7-7 7"/>
-                                        </svg>
                                     </span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </section>
+                                    <span class="devroute__main">
+                                        <strong class="devroute__title" th:text="${page.title}">Title</strong>
+                                        <code class="devroute__path" th:text="${page.path}">/path</code>
+                                    </span>
+                                    <span class="devroute__availability" th:text="${page.availabilityCopy}">Sign in to access</span>
+                                    <span class="devroute__arrow" aria-hidden="true">
+                                        <svg viewBox="0 0 20 20"><path d="M4 10h12M12 6l4 4-4 4"/></svg>
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
 
-                <section class="devhub-section devhub-section--restricted">
-                    <div class="devhub-section__panel">
-                        <div class="devhub-section__head">
-                            <div>
-                                <p class="devsection-eyebrow">Restricted Pages</p>
-                                <h2 class="devsection-title">Temporarily unavailable routes</h2>
-                                <p class="devsection-copy">Admin controls can move pages here when a feature should not be tested right now.</p>
+                    <section id="restricted-routes" class="devhub-section devhub-section--restricted" aria-labelledby="restricted-routes-title">
+                        <header class="devhub-section__header">
+                            <div class="devhub-section__identity">
+                                <span class="devhub-section__icon" aria-hidden="true">
+                                    <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('shield')}"></th:block>
+                                </span>
+                                <div>
+                                    <p class="devhub-section__eyebrow" th:text="#{ui.02356}">Restricted Pages</p>
+                                    <h2 id="restricted-routes-title" class="devhub-section__title" th:text="#{ui.02357}">Temporarily unavailable routes</h2>
+                                </div>
                             </div>
                             <div class="devhub-section__meta">
+                                <span class="devhub-section__count" th:text="${#lists.size(devHubView.restrictedPages)}">0</span>
                                 <th:block th:replace="~{universal-fragments/dev/dev-page-display :: statusBadge('restricted', 'Restricted')}"></th:block>
-                                <span class="devhub-section__count" th:text="${#lists.size(devHubView.restrictedPages)} + ' pages'">0 pages</span>
                             </div>
-                        </div>
+                        </header>
 
                         <div th:if="${#lists.isEmpty(devHubView.restrictedPages)}" class="devhub-empty">
-                            No pages are currently marked as restricted. Admin controls can move routes here when a feature needs to be paused during testing.
+                            <span class="devhub-empty__icon" aria-hidden="true">
+                                <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('shield')}"></th:block>
+                            </span>
+                            <p th:text="#{ui.02359}">No pages are currently marked as restricted.</p>
                         </div>
 
-                        <div th:if="${!#lists.isEmpty(devHubView.restrictedPages)}" class="devhub-card-grid">
-                            <a th:each="page : ${devHubView.restrictedPages}"
-                               th:href="${page.href}"
-                               class="devhub-card devhub-card--restricted">
-                                <div class="devhub-card__top">
-                                    <div class="devhub-card__icon" aria-hidden="true">
+                        <ul th:if="${!#lists.isEmpty(devHubView.restrictedPages)}" class="devroute-list">
+                            <li th:each="page : ${devHubView.restrictedPages}">
+                                <a th:href="${page.href}" class="devroute devroute--restricted">
+                                    <span class="devroute__icon" aria-hidden="true">
                                         <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon(${page.iconKey})}"></th:block>
-                                    </div>
-                                    <th:block th:replace="~{universal-fragments/dev/dev-page-display :: statusBadge(${page.statusTone}, ${page.statusLabel})}"></th:block>
-                                </div>
-                                <div class="devhub-card__body">
-                                    <h3 class="devhub-card__title" th:text="${page.title}">Title</h3>
-                                    <p class="devhub-card__path" th:text="${page.path}">/path</p>
-                                    <p class="devhub-card__copy" th:text="${page.description}">Description</p>
-                                </div>
-                                <div class="devhub-card__footer">
-                                    <p class="devhub-card__availability" th:text="${page.availabilityCopy}">Restricted during development</p>
-                                    <span class="devhub-card__arrow" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M5 12h14"/>
-                                            <path d="M12 5l7 7-7 7"/>
-                                        </svg>
                                     </span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </section>
+                                    <span class="devroute__main">
+                                        <strong class="devroute__title" th:text="${page.title}">Title</strong>
+                                        <code class="devroute__path" th:text="${page.path}">/path</code>
+                                    </span>
+                                    <span class="devroute__availability" th:text="${page.availabilityCopy}">Restricted during development</span>
+                                    <span class="devroute__arrow" aria-hidden="true">
+                                        <svg viewBox="0 0 20 20"><path d="M4 10h12M12 6l4 4-4 4"/></svg>
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
             </div>
         </div>
     </div>

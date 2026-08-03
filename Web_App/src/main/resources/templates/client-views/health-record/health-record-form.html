@@ -1,4 +1,4 @@
-<th:block th:replace="~{base :: layout('Health Record', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+<th:block th:replace="~{base :: layout(#{ui.00656}, ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="pageStyles">
         <link rel="stylesheet" th:href="@{/vendor/slimselect/slimselect.css}">
@@ -7,8 +7,8 @@
     <div th:fragment="content">
         <div class="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-6">
             <div>
-                <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Health record</h1>
-                <p class="mt-1 text-sm text-slate-700 dark:text-slate-200">Enter your measurements and activity level.</p>
+                <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100" th:text="#{ui.00631}">Health record</h1>
+                <p class="mt-1 text-sm text-slate-700 dark:text-slate-200" th:text="#{ui.00632}">Enter your measurements and activity level.</p>
             </div>
 
             <form th:action="@{/health-record}" th:method="post" th:object="${healthRecordForm}" class="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
@@ -19,75 +19,75 @@
 
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div class="sm:col-span-2">
-                        <label th:for="*{baselineDate}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Date and time</label>
+                        <label th:for="*{baselineDate}" class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00633}">Date and time</label>
                         <div class="mt-1">
                             <input type="datetime-local" th:field="*{baselineDate}" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
                         </div>
                     </div>
 
                     <div>
-                        <label th:for="*{systolicBloodPressure}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Systolic blood pressure</label>
+                        <label th:for="*{systolicBloodPressure}" class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00634}">Systolic blood pressure</label>
                         <div class="mt-1">
-                            <input th:field="*{systolicBloodPressure}" placeholder="mmHg" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                            <input th:field="*{systolicBloodPressure}" placeholder="mmHg" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" th:placeholder="#{ui.00635}">
                         </div>
-                        <div th:errors="*{systolicBloodPressure}" th:if="${#fields.hasErrors('systolicBloodPressure')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200">Systolic blood pressure error</div>
+                        <div th:errors="*{systolicBloodPressure}" th:if="${#fields.hasErrors('systolicBloodPressure')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200" th:text="#{ui.00636}">Systolic blood pressure error</div>
                     </div>
 
                     <div>
-                        <label th:for="*{diastolicBloodPressure}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Diastolic blood pressure</label>
+                        <label th:for="*{diastolicBloodPressure}" class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00637}">Diastolic blood pressure</label>
                         <div class="mt-1">
-                            <input th:field="*{diastolicBloodPressure}" placeholder="mmHg" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                            <input th:field="*{diastolicBloodPressure}" placeholder="mmHg" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" th:placeholder="#{ui.00635}">
                         </div>
-                        <div th:errors="*{diastolicBloodPressure}" th:if="${#fields.hasErrors('diastolicBloodPressure')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200">Diastolic blood pressure error</div>
+                        <div th:errors="*{diastolicBloodPressure}" th:if="${#fields.hasErrors('diastolicBloodPressure')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200" th:text="#{ui.00638}">Diastolic blood pressure error</div>
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label th:for="*{cholesterol}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Cholesterol</label>
+                        <label th:for="*{cholesterol}" class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00639}">Cholesterol</label>
                         <div class="mt-1">
-                            <input th:field="*{cholesterol}" placeholder="mmol/L" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                            <input th:field="*{cholesterol}" placeholder="mmol/L" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" th:placeholder="#{ui.00640}">
                         </div>
-                        <div th:errors="*{cholesterol}" th:if="${#fields.hasErrors('cholesterol')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200">Cholesterol error</div>
+                        <div th:errors="*{cholesterol}" th:if="${#fields.hasErrors('cholesterol')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200" th:text="#{ui.00641}">Cholesterol error</div>
                     </div>
 
                     <div>
-                        <label th:for="*{weightKg}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Weight</label>
+                        <label th:for="*{weightKg}" class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00642}">Weight</label>
                         <div class="mt-1">
-                            <input th:field="*{weightKg}" placeholder="kg" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                            <input th:field="*{weightKg}" placeholder="kg" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" th:placeholder="#{ui.00643}">
                         </div>
-                        <div th:errors="*{weightKg}" th:if="${#fields.hasErrors('weightKg')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200">Weight error</div>
+                        <div th:errors="*{weightKg}" th:if="${#fields.hasErrors('weightKg')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200" th:text="#{ui.00644}">Weight error</div>
                     </div>
 
                     <div>
-                        <label th:for="*{heightCm}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Height</label>
+                        <label th:for="*{heightCm}" class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00645}">Height</label>
                         <div class="mt-1">
-                            <input th:field="*{heightCm}" placeholder="cm" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                            <input th:field="*{heightCm}" placeholder="cm" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" th:placeholder="#{ui.00646}">
                         </div>
-                        <div th:errors="*{heightCm}" th:if="${#fields.hasErrors('heightCm')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200">Height error</div>
+                        <div th:errors="*{heightCm}" th:if="${#fields.hasErrors('heightCm')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200" th:text="#{ui.00647}">Height error</div>
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label th:for="*{waistCm}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Waist circumference</label>
+                        <label th:for="*{waistCm}" class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00648}">Waist circumference</label>
                         <div class="mt-1">
-                            <input th:field="*{waistCm}" placeholder="cm" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                            <input th:field="*{waistCm}" placeholder="cm" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" th:placeholder="#{ui.00646}">
                         </div>
-                        <div th:errors="*{waistCm}" th:if="${#fields.hasErrors('waistCm')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200">Waist circumference error</div>
+                        <div th:errors="*{waistCm}" th:if="${#fields.hasErrors('waistCm')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200" th:text="#{ui.00649}">Waist circumference error</div>
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label th:for="*{activityLevel}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Activity level</label>
+                        <label th:for="*{activityLevel}" class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00650}">Activity level</label>
                         <div class="mt-1">
                             <select th:field="*{activityLevel}" class="w-full rounded-xl border border-slate-300 bg-white p-2 text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                                <option value="Sedentary">I do little to no exercise</option>
-                                <option value="Lightly Active">I exercise 1-3 times a week</option>
-                                <option value="Moderately Active">I exercise 3-5 times a week</option>
-                                <option value="Very Active">I exercise 6-7 times a week</option>
+                                <option value="Sedentary" th:text="#{ui.00651}">I do little to no exercise</option>
+                                <option value="Lightly Active" th:text="#{ui.00652}">I exercise 1-3 times a week</option>
+                                <option value="Moderately Active" th:text="#{ui.00653}">I exercise 3-5 times a week</option>
+                                <option value="Very Active" th:text="#{ui.00654}">I exercise 6-7 times a week</option>
                             </select>
                         </div>
-                        <div th:errors="*{activityLevel}" th:if="${#fields.hasErrors('activityLevel')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200">Activity level error</div>
+                        <div th:errors="*{activityLevel}" th:if="${#fields.hasErrors('activityLevel')}" class="mt-2 text-sm font-medium text-red-800 dark:text-red-200" th:text="#{ui.00655}">Activity level error</div>
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label th:for="*{physicalConditions}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">Physical conditions</label>
+                        <label th:for="*{physicalConditions}" class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00335}">Physical conditions</label>
                         <div class="mt-1">
                             <select id="selectElement" multiple="multiple" th:field="*{physicalConditions}" class="w-full">
                                 <option th:each="physicalCondition: ${allPhysicalConditions}" th:text="${physicalCondition.name}" th:value="${physicalCondition.id}"></option>
@@ -97,7 +97,7 @@
                 </div>
 
                 <div class="mt-6">
-                    <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Save</button>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" th:text="#{ui.00109}">Save</button>
                 </div>
             </form>
         </div>

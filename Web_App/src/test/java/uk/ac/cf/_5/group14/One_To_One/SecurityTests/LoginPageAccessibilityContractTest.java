@@ -65,7 +65,7 @@ class LoginPageAccessibilityContractTest {
                 .contains(".nav-login-cta__icon::before")
                 .contains("transform-origin: left center")
                 .contains(".nav-login-cta:hover .nav-login-cta__icon::before")
-                .contains("transition-duration: 1.5s")
+                .contains("transition-duration: 1s")
                 .contains("transition-timing-function: linear");
     }
 
@@ -82,7 +82,7 @@ class LoginPageAccessibilityContractTest {
                 .contains("transform: scale(1.025)")
                 .doesNotContain(".dev-mode-pill--navbar:hover {\n        border-color: rgba(180, 83, 9, 0.42)")
                 .contains(".dev-mode-pill--navbar:hover .dev-mode-pill__icon::before")
-                .contains("transition-duration: 3s")
+                .contains("transition-duration: 1s")
                 .contains("transition-timing-function: linear");
     }
 

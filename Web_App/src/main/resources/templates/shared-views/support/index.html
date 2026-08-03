@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Support', ~{::styles}, ~{::content}, ~{::scripts})}">
+          th:replace="~{base :: layout(#{ui.00950}, ~{::styles}, ~{::content}, ~{::scripts})}">
 
     <div th:fragment="styles"></div>
 
@@ -27,51 +27,51 @@
                     <form th:action="@{/support/feedback}" method="post" class="role-surface__form" id="support-form">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <div>
-                            <h2 id="support-form-heading" class="text-lg font-semibold text-slate-900 dark:text-slate-100">What can we help with?</h2>
-                            <p class="role-surface__copy">Include the page or action involved and what you expected to happen.</p>
+                            <h2 id="support-form-heading" class="text-lg font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02238}">What can we help with?</h2>
+                            <p class="role-surface__copy" th:text="#{ui.02239}">Include the page or action involved and what you expected to happen.</p>
                         </div>
 
                         <div th:if="${authUser != null}" class="role-surface__notice">
-                            Sending as <strong th:text="${authUser.firstName + ' ' + authUser.lastName}">Account holder</strong>.
+                            <th:block th:text="#{ui.02240}">Sending as</th:block> <strong th:text="${authUser.firstName + ' ' + authUser.lastName}">Account holder</strong>.
                         </div>
 
                         <div th:if="${authUser == null}" class="grid gap-4 sm:grid-cols-2">
                             <div class="role-surface__field">
-                                <label for="support-name">Name</label>
+                                <label for="support-name" th:text="#{ui.00131}">Name</label>
                                 <input id="support-name" name="name" type="text" autocomplete="name">
                             </div>
                             <div class="role-surface__field">
-                                <label for="support-email">Email</label>
+                                <label for="support-email" th:text="#{ui.00096}">Email</label>
                                 <input id="support-email" name="email" type="email" autocomplete="email">
                             </div>
                         </div>
 
                         <div class="role-surface__field">
-                            <label for="support-type">Support type</label>
+                            <label for="support-type" th:text="#{ui.02241}">Support type</label>
                             <select id="support-type" name="requestType" required>
-                                <option value="">Choose a support type</option>
-                                <option value="QUERY">Question or account help</option>
-                                <option value="IMPROVEMENT">Product improvement</option>
-                                <option value="BUG">Something is not working</option>
-                                <option value="ERROR">Error message</option>
+                                <option value="" th:text="#{ui.02242}">Choose a support type</option>
+                                <option value="QUERY" th:text="#{ui.02243}">Question or account help</option>
+                                <option value="IMPROVEMENT" th:text="#{ui.02244}">Product improvement</option>
+                                <option value="BUG" th:text="#{ui.02245}">Something is not working</option>
+                                <option value="ERROR" th:text="#{ui.02246}">Error message</option>
                             </select>
                         </div>
 
                         <div class="role-surface__field">
-                            <label for="support-subject">Subject</label>
+                            <label for="support-subject" th:text="#{ui.00026}">Subject</label>
                             <input id="support-subject" name="subject" type="text" maxlength="180" required
-                                   placeholder="A short summary of what you need">
+                                   placeholder="A short summary of what you need" th:placeholder="#{ui.02247}">
                         </div>
 
                         <div class="role-surface__field">
-                            <label for="support-message">Details</label>
+                            <label for="support-message" th:text="#{ui.01755}">Details</label>
                             <textarea id="support-message" name="message" maxlength="5000" required
-                                      placeholder="Tell us what happened, where it happened and what you have already tried"></textarea>
+                                      placeholder="Tell us what happened, where it happened and what you have already tried" th:placeholder="#{ui.02248}"></textarea>
                         </div>
 
                         <label class="flex min-h-11 items-start gap-3 text-sm text-slate-700 dark:text-slate-200">
                             <input type="checkbox" name="allowEmailReply" class="mt-1 h-5 w-5 shrink-0">
-                            <span>Allow the support team to reply by email. This is required for a question.</span>
+                            <span th:text="#{ui.02249}">Allow the support team to reply by email. This is required for a question.</span>
                         </label>
 
                         <div>
@@ -82,11 +82,11 @@
                 </section>
 
                 <aside class="role-surface__surface role-surface__empty" aria-labelledby="support-next-heading">
-                    <h2 id="support-next-heading" class="role-surface__empty-title">Before you send</h2>
-                    <p class="role-surface__empty-copy">Do not include passwords, payment card details or other sensitive information.</p>
-                    <a th:href="@{/faq}" class="role-surface__action role-surface__action--secondary">Check common questions</a>
+                    <h2 id="support-next-heading" class="role-surface__empty-title" th:text="#{ui.02250}">Before you send</h2>
+                    <p class="role-surface__empty-copy" th:text="#{ui.02251}">Do not include passwords, payment card details or other sensitive information.</p>
+                    <a th:href="@{/faq}" class="role-surface__action role-surface__action--secondary" th:text="#{ui.02252}">Check common questions</a>
                     <a th:if="${roleSurface.roleKey == 'platform-admin'}" th:href="@{/admin/feedback}"
-                       class="role-surface__action role-surface__action--secondary mt-3">Open support inbox</a>
+                       class="role-surface__action role-surface__action--secondary mt-3" th:text="#{ui.02253}">Open support inbox</a>
                 </aside>
             </div>
         </div>

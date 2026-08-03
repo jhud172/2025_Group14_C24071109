@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Profile', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.00419}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="styles">
     <!-- profile.css is included in app.css via tailwind.css -->
@@ -26,7 +26,7 @@
                              th:classappend="${' profile-avatar-ring profile-avatar-ring--' + ring}">
                             <img th:if="${user != null &amp;&amp; user.profileImageUrl != null}"
                                  th:src="${user.profileImageUrl}" alt="Profile photo"
-                                 class="h-full w-full object-cover" draggable="false"/>
+                                 class="h-full w-full object-cover" draggable="false" th:alt="#{ui.00426}"/>
                             <span th:if="${user == null || user.profileImageUrl == null}"
                                   class="text-2xl font-bold text-white"
                                   th:text="${(user != null &amp;&amp; user.firstName != null ? user.firstName.substring(0,1) : '') + (user != null &amp;&amp; user.lastName != null ? user.lastName.substring(0,1) : '')}">GA</span>
@@ -43,7 +43,7 @@
                 <!-- Gym Code display -->
                 <div th:if="${gymProfile != null and gymProfile.gymCode != null}"
                      class="w-full rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-center">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">Gym Code</p>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1" th:text="#{ui.01075}">Gym Code</p>
                     <div class="flex items-center justify-center gap-2">
                         <span id="gymCodeVal"
                               class="font-mono text-sm font-bold tracking-[0.10em] text-emerald-800 dark:text-emerald-200 select-all"
@@ -53,7 +53,7 @@
                             <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
-                            <span id="copyGymCodeLabel">Copy</span>
+                            <span id="copyGymCodeLabel" th:text="#{ui.01076}">Copy</span>
                         </button>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
                 <div class="profile-completion-widget w-full">
                     <div class="profile-completion-widget__surface">
                         <div class="profile-completion-widget__header">
-                            <span class="profile-completion-widget__eyebrow">Profile radar</span>
+                            <span class="profile-completion-widget__eyebrow" th:text="#{ui.00710}">Profile radar</span>
                             <span class="profile-completion-widget__percent" th:text="${completionPercent + '%'}">0%</span>
                         </div>
                         <div class="profile-completion-widget__bar-track">
@@ -73,10 +73,10 @@
 
                 <!-- Quick actions -->
                 <div class="w-full">
-                    <p class="mb-2 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account actions</p>
+                    <p class="mb-2 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400" th:text="#{ui.00722}">Account actions</p>
                     <div class="flex flex-col gap-2">
                         <a th:href="@{/dashboard}"
-                           class="profile-btn-secondary w-full text-center text-sm">
+                           class="profile-btn-secondary w-full text-center text-sm" th:text="#{ui.01077}">
                             Go to dashboard
                         </a>
                     </div>
@@ -89,7 +89,7 @@
 
             <!-- Success / error banner -->
             <div th:if="${profileUpdated}" class="mb-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-4 text-emerald-800 dark:text-emerald-200">
-                <p>Profile updated successfully.</p>
+                <p th:text="#{ui.01078}">Profile updated successfully.</p>
             </div>
             <div th:if="${profileError}" class="mb-4 rounded-xl bg-red-50 dark:bg-red-900/20 p-4 text-red-800 dark:text-red-200">
                 <p th:text="${profileError}"></p>
@@ -99,8 +99,8 @@
             <section class="profile-section">
                 <div class="profile-section-header">
                     <div>
-                        <h2 class="profile-section-title">Gym Details</h2>
-                        <p class="profile-section-subtitle">Your gym's name, address, and contact information.</p>
+                        <h2 class="profile-section-title" th:text="#{ui.01079}">Gym Details</h2>
+                        <p class="profile-section-subtitle" th:text="#{ui.01080}">Your gym's name, address, and contact information.</p>
                     </div>
                 </div>
 
@@ -109,43 +109,43 @@
 
                     <div class="divide-y divide-slate-200/70 dark:divide-slate-800/90">
                         <div class="profile-field-row py-4">
-                            <label for="gymName" class="profile-field-label">Gym Name</label>
+                            <label for="gymName" class="profile-field-label" th:text="#{ui.01081}">Gym Name</label>
                             <div class="profile-field-value">
                                 <input type="text" id="gymName" name="gymName" maxlength="120"
                                        class="profile-input w-full"
                                        placeholder="Your gym's name"
-                                       th:value="${gymProfile != null ? gymProfile.gymName : ''}"/>
+                                       th:value="${gymProfile != null ? gymProfile.gymName : ''}" th:placeholder="#{ui.01082}"/>
                             </div>
                         </div>
                         <div class="profile-field-row py-4">
-                            <label for="gymAddress" class="profile-field-label">Address</label>
+                            <label for="gymAddress" class="profile-field-label" th:text="#{ui.00021}">Address</label>
                             <div class="profile-field-value">
                                 <input type="text" id="gymAddress" name="gymAddress" maxlength="200"
                                        class="profile-input w-full"
                                        placeholder="Street address"
-                                       th:value="${gymProfile != null ? gymProfile.address : ''}"/>
+                                       th:value="${gymProfile != null ? gymProfile.address : ''}" th:placeholder="#{ui.01083}"/>
                             </div>
                         </div>
                         <div class="profile-field-row py-4">
-                            <label for="gymCity" class="profile-field-label">City</label>
+                            <label for="gymCity" class="profile-field-label" th:text="#{ui.00022}">City</label>
                             <div class="profile-field-value">
                                 <input type="text" id="gymCity" name="gymCity" maxlength="120"
                                        class="profile-input w-full"
                                        placeholder="City"
-                                       th:value="${gymProfile != null ? gymProfile.city : ''}"/>
+                                       th:value="${gymProfile != null ? gymProfile.city : ''}" th:placeholder="#{ui.00022}"/>
                             </div>
                         </div>
                         <div class="profile-field-row py-4">
-                            <label for="gymContactName" class="profile-field-label">Contact Name</label>
+                            <label for="gymContactName" class="profile-field-label" th:text="#{ui.01084}">Contact Name</label>
                             <div class="profile-field-value">
                                 <input type="text" id="gymContactName" name="gymContactName" maxlength="120"
                                        class="profile-input w-full"
                                        placeholder="Manager or owner name"
-                                       th:value="${gymProfile != null ? gymProfile.contactName : ''}"/>
+                                       th:value="${gymProfile != null ? gymProfile.contactName : ''}" th:placeholder="#{ui.01085}"/>
                             </div>
                         </div>
                         <div class="profile-field-row py-4">
-                            <label for="gymContactPhone" class="profile-field-label">Contact Phone</label>
+                            <label for="gymContactPhone" class="profile-field-label" th:text="#{ui.01086}">Contact Phone</label>
                             <div class="profile-field-value">
                                 <input type="tel" id="gymContactPhone" name="gymContactPhone" maxlength="40"
                                        class="profile-input w-full"
@@ -156,7 +156,7 @@
                     </div>
 
                     <div class="mt-6 flex justify-end">
-                        <button type="submit" class="profile-btn-primary">Save gym details</button>
+                        <button type="submit" class="profile-btn-primary" th:text="#{ui.01087}">Save gym details</button>
                     </div>
                 </form>
             </section>
@@ -165,8 +165,8 @@
             <section class="profile-section mt-6">
                 <div class="profile-section-header">
                     <div>
-                        <h2 class="profile-section-title">Account Settings</h2>
-                        <p class="profile-section-subtitle">Your name, email, username, and phone number.</p>
+                        <h2 class="profile-section-title" th:text="#{ui.01088}">Account Settings</h2>
+                        <p class="profile-section-subtitle" th:text="#{ui.01089}">Your name, email, username, and phone number.</p>
                     </div>
                 </div>
 
@@ -175,7 +175,7 @@
 
                     <div class="divide-y divide-slate-200/70 dark:divide-slate-800/90">
                         <div class="profile-field-row py-4">
-                            <label for="firstName" class="profile-field-label">First Name</label>
+                            <label for="firstName" class="profile-field-label" th:text="#{ui.01047}">First Name</label>
                             <div class="profile-field-value">
                                 <input type="text" id="firstName" name="firstName" maxlength="100"
                                        class="profile-input w-full"
@@ -183,7 +183,7 @@
                             </div>
                         </div>
                         <div class="profile-field-row py-4">
-                            <label for="lastName" class="profile-field-label">Last Name</label>
+                            <label for="lastName" class="profile-field-label" th:text="#{ui.01049}">Last Name</label>
                             <div class="profile-field-value">
                                 <input type="text" id="lastName" name="lastName" maxlength="100"
                                        class="profile-input w-full"
@@ -191,7 +191,7 @@
                             </div>
                         </div>
                         <div class="profile-field-row py-4">
-                            <label for="username" class="profile-field-label">Username</label>
+                            <label for="username" class="profile-field-label" th:text="#{ui.01052}">Username</label>
                             <div class="profile-field-value">
                                 <input type="text" id="username" name="username" maxlength="100"
                                        class="profile-input w-full"
@@ -199,7 +199,7 @@
                             </div>
                         </div>
                         <div class="profile-field-row py-4">
-                            <label for="email" class="profile-field-label">Email</label>
+                            <label for="email" class="profile-field-label" th:text="#{ui.00096}">Email</label>
                             <div class="profile-field-value">
                                 <input type="email" id="email" name="email" maxlength="255"
                                        class="profile-input w-full"
@@ -207,7 +207,7 @@
                             </div>
                         </div>
                         <div class="profile-field-row py-4">
-                            <label for="phoneNumber" class="profile-field-label">Phone</label>
+                            <label for="phoneNumber" class="profile-field-label" th:text="#{ui.00020}">Phone</label>
                             <div class="profile-field-value">
                                 <input type="tel" id="phoneNumber" name="phoneNumber" maxlength="30"
                                        class="profile-input w-full"
@@ -218,7 +218,7 @@
                     </div>
 
                     <div class="mt-6 flex justify-end">
-                        <button type="submit" class="profile-btn-primary">Save account settings</button>
+                        <button type="submit" class="profile-btn-primary" th:text="#{ui.01090}">Save account settings</button>
                     </div>
                 </form>
             </section>
@@ -227,8 +227,8 @@
             <section class="profile-section mt-6">
                 <div class="profile-section-header">
                     <div>
-                        <h2 class="profile-section-title">Profile Image</h2>
-                        <p class="profile-section-subtitle">Upload a photo (PNG, JPG or WebP, max 2 MB).</p>
+                        <h2 class="profile-section-title" th:text="#{ui.01091}">Profile Image</h2>
+                        <p class="profile-section-subtitle" th:text="#{ui.01092}">Upload a photo (PNG, JPG or WebP, max 2 MB).</p>
                     </div>
                 </div>
 
@@ -238,7 +238,7 @@
                         <div class="h-16 w-16 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center bg-slate-100 dark:bg-slate-800 flex-shrink-0">
                             <img th:if="${user != null and user.profileImageUrl != null}"
                                  th:src="${user.profileImageUrl}" alt="Current photo"
-                                 class="h-full w-full object-cover"/>
+                                 class="h-full w-full object-cover" th:alt="#{ui.00762}"/>
                             <span th:if="${user == null or user.profileImageUrl == null}"
                                   class="text-xl font-bold text-slate-400"
                                   th:text="${user != null and user.firstName != null ? #strings.toUpperCase(#strings.substring(user.firstName,0,1)) : '?'}">?</span>
@@ -251,10 +251,10 @@
                     <div th:if="${user != null and user.profileImageUrl != null}" class="flex items-center gap-2 pb-2">
                         <input type="checkbox" id="removeProfileImage" name="removeProfileImage" value="true"
                                class="h-4 w-4 rounded border-slate-300 text-red-600 focus:ring-red-500"/>
-                        <label for="removeProfileImage" class="text-sm text-slate-600 dark:text-slate-400">Remove current photo</label>
+                        <label for="removeProfileImage" class="text-sm text-slate-600 dark:text-slate-400" th:text="#{ui.01093}">Remove current photo</label>
                     </div>
                     <div class="flex justify-end">
-                        <button type="submit" class="profile-btn-primary">Update photo</button>
+                        <button type="submit" class="profile-btn-primary" th:text="#{ui.01094}">Update photo</button>
                     </div>
                 </form>
             </section>
@@ -263,24 +263,24 @@
             <section class="profile-section mt-6">
                 <div class="profile-section-header">
                     <div>
-                        <h2 class="profile-section-title">Data &amp; Account</h2>
-                        <p class="profile-section-subtitle">Export your data or permanently delete your account.</p>
+                        <h2 class="profile-section-title" th:text="#{ui.01095}">Data &amp; Account</h2>
+                        <p class="profile-section-subtitle" th:text="#{ui.01096}">Export your data or permanently delete your account.</p>
                     </div>
                 </div>
 
                 <div class="divide-y divide-slate-200/70 dark:divide-slate-800/90">
                     <!-- Data export -->
                     <div class="py-4">
-                        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Data Export</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Request a copy of all your account data.</p>
+                        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1" th:text="#{ui.01097}">Data Export</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3" th:text="#{ui.01098}">Request a copy of all your account data.</p>
                         <form th:action="@{/profile/data-export}" method="post">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                            <button type="submit" class="profile-btn-secondary text-sm">Request data export</button>
+                            <button type="submit" class="profile-btn-secondary text-sm" th:text="#{ui.00877}">Request data export</button>
                         </form>
                         <ul th:if="${recentExportRequests != null and !#lists.isEmpty(recentExportRequests)}"
                             class="mt-3 space-y-1 text-xs text-slate-500 dark:text-slate-400">
                             <li th:each="req : ${recentExportRequests}">
-                                Export requested on <span th:text="${#temporals.format(req.requestedAt, 'dd MMM yyyy')}">date</span>
+                                <th:block th:text="#{ui.01099}">Export requested on</th:block> <span th:text="${#temporals.format(req.requestedAt, 'dd MMM yyyy')}">date</span>
                                 — <span th:text="${req.status}">PENDING</span>
                             </li>
                         </ul>
@@ -288,15 +288,15 @@
 
                     <!-- Account deletion -->
                     <div class="py-4">
-                        <h3 class="text-sm font-semibold text-red-600 dark:text-red-400 mb-1">Delete Account</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">This action is permanent and cannot be undone. Type <strong>DELETE</strong> to confirm.</p>
+                        <h3 class="text-sm font-semibold text-red-600 dark:text-red-400 mb-1" th:text="#{ui.01100}">Delete Account</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3"><th:block th:text="#{ui.01101}">This action is permanent and cannot be undone. Type</th:block> <strong th:text="#{ui.01102}">DELETE</strong> <th:block th:text="#{ui.01103}">to confirm.</th:block></p>
                         <form th:action="@{/profile/delete}" method="post" class="flex items-center gap-3">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <input type="text" name="confirmText" placeholder="DELETE"
                                    class="profile-input w-28"
-                                   autocomplete="off"/>
+                                   autocomplete="off" th:placeholder="#{ui.01102}"/>
                             <button type="submit"
-                                    class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500">
+                                    class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500" th:text="#{ui.00883}">
                                 Delete account
                             </button>
                         </form>

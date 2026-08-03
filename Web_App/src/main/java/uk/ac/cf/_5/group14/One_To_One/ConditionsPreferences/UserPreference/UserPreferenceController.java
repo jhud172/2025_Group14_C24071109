@@ -31,6 +31,7 @@ import uk.ac.cf._5.group14.One_To_One.UserSettings.TimeDisplayFormatPreference;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.WeatherDisplayModePreference;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.WeatherTemperatureUnitPreference;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.UserSettings;
+import uk.ac.cf._5.group14.One_To_One.Config.SupportedLanguage;
 import uk.ac.cf._5.group14.One_To_One.UserSettings.UserSettingsService;
 import uk.ac.cf._5.group14.One_To_One.Users.AuthHelper;
 import uk.ac.cf._5.group14.One_To_One.Users.User;
@@ -155,7 +156,7 @@ public class UserPreferenceController {
         UserSettings settings = userSettingsService.getOrCreate(user);
         if (settings != null) {
             String language = settings.getLanguage() != null ? settings.getLanguage() : "en";
-            localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+            localeResolver.setLocale(request, response, SupportedLanguage.fromCode(language).locale());
         }
 
         return new ModelAndView("redirect:/select-preferences?quickSetup=1");
@@ -247,7 +248,7 @@ public class UserPreferenceController {
             );
 
             String language = updated.getLanguage() != null ? updated.getLanguage() : "en";
-            localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+            localeResolver.setLocale(request, response, SupportedLanguage.fromCode(language).locale());
         }
 
         userSettingsService.updateQuickPreferencesCompleted(user, true);
@@ -281,7 +282,7 @@ public class UserPreferenceController {
         UserSettings updated = userSettingsService.resetSmartDefaults(user);
         if (updated != null) {
             String language = updated.getLanguage() != null ? updated.getLanguage() : "en";
-            localeResolver.setLocale(request, response, Locale.forLanguageTag(language));
+            localeResolver.setLocale(request, response, SupportedLanguage.fromCode(language).locale());
         }
         return new ModelAndView("redirect:/select-preferences?reset=1");
     }

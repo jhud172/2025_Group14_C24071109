@@ -1,4 +1,4 @@
-<th:block th:replace="~{base :: layout('Exercise Log', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+<th:block th:replace="~{base :: layout(#{ui.01984}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
     <div th:fragment="styles">
     </div>
 
@@ -10,15 +10,15 @@
                         <div>
                             <h1 class="text-2xl font-bold tracking-tight text-slate-900"
                                 th:text="${editing} ? 'Edit Exercise Log' : 'Exercise Log'">Exercise Log</h1>
-                            <p class="mt-1 text-sm text-slate-600">Record how you felt before and after exercising.</p>
+                            <p class="mt-1 text-sm text-slate-600" th:text="#{ui.01968}">Record how you felt before and after exercising.</p>
                         </div>
                         <a th:href="@{/exercise-log/list}"
-                           class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50">View history</a>
+                           class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50" th:text="#{ui.01969}">View history</a>
                     </div>
 
                     <div th:if="${exerciseLog.exerciseType != null && !#strings.isEmpty(exerciseLog.exerciseType)}"
                          class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                        Logging for <span class="font-semibold" th:text="${exerciseLog.exerciseType}">Workout</span>.
+                        <th:block th:text="#{ui.01970}">Logging for</th:block> <span class="font-semibold" th:text="${exerciseLog.exerciseType}">Workout</span>.
                     </div>
 
                     <form th:action="${formAction}" th:object="${exerciseLog}" method="post" class="mt-6 space-y-6" data-exercise-log-form>
@@ -28,13 +28,13 @@
                         <input type="hidden" th:field="*{exerciseType}">
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-700">Date</label>
+                            <label class="block text-sm font-medium text-slate-700" th:text="#{ui.00660}">Date</label>
                             <input type="date" th:field="*{date}" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"/>
                             <p class="mt-1 text-sm text-red-600" th:errors="*{date}" th:if="${#fields.hasErrors('date')}"></p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-700">How did you feel before exercising?</label>
+                            <label class="block text-sm font-medium text-slate-700" th:text="#{ui.01971}">How did you feel before exercising?</label>
                             <div class="mt-2 flex flex-col items-center gap-3">
                                 <div id="moodBeforeEmoji" class="text-4xl transition-all duration-300">-</div>
                                 <input type="range" min="1" max="4" step="1" th:field="*{moodBefore}" class="w-full cursor-pointer accent-slate-900" data-slider-kind="mood-before">
@@ -43,7 +43,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-700">How did you feel after exercising?</label>
+                            <label class="block text-sm font-medium text-slate-700" th:text="#{ui.01972}">How did you feel after exercising?</label>
                             <div class="mt-2 flex flex-col items-center gap-3">
                                 <div id="moodAfterEmoji" class="text-4xl transition-all duration-300">-</div>
                                 <input type="range" min="1" max="4" step="1" th:field="*{moodAfter}" class="w-full cursor-pointer accent-slate-900" data-slider-kind="mood-after">
@@ -52,7 +52,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-700">Confidence Level</label>
+                            <label class="block text-sm font-medium text-slate-700" th:text="#{ui.01973}">Confidence Level</label>
                             <div class="mt-2 flex flex-col items-center gap-3">
                                 <div id="confidenceEmoji" class="text-4xl transition-all duration-300">-</div>
                                 <input type="range" min="1" max="4" step="1" th:field="*{confidence}" class="w-full cursor-pointer accent-slate-900" data-slider-kind="confidence">
@@ -61,14 +61,14 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-700">Duration (minutes)</label>
-                            <input type="number" th:field="*{durationMinutes}" min="1" placeholder="e.g., 30" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" />
+                            <label class="block text-sm font-medium text-slate-700" th:text="#{ui.01974}">Duration (minutes)</label>
+                            <input type="number" th:field="*{durationMinutes}" min="1" placeholder="e.g., 30" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"  th:placeholder="#{ui.01975}"/>
                             <p class="mt-1 text-sm text-red-600" th:errors="*{durationMinutes}" th:if="${#fields.hasErrors('durationMinutes')}"></p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-700">Comments</label>
-                            <textarea th:field="*{comments}" rows="4" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" placeholder="Anything to note about your session?"></textarea>
+                            <label class="block text-sm font-medium text-slate-700" th:text="#{ui.01976}">Comments</label>
+                            <textarea th:field="*{comments}" rows="4" class="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10" placeholder="Anything to note about your session?" th:placeholder="#{ui.01977}"></textarea>
                             <p class="mt-1 text-sm text-red-600" th:errors="*{comments}" th:if="${#fields.hasErrors('comments')}"></p>
                         </div>
 
@@ -76,39 +76,39 @@
                             <button type="submit" class="inline-flex flex-1 items-center justify-center rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
                                     th:text="${editing} ? 'Update Log' : 'Save Log'">Save Log</button>
                             <a th:href="@{/exercise-log/list}"
-                               class="inline-flex flex-1 items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10">Cancel</a>
+                               class="inline-flex flex-1 items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10" th:text="#{ui.00125}">Cancel</a>
                         </div>
                     </form>
                 </section>
 
                 <aside class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <h2 class="text-lg font-semibold text-slate-900">Preview</h2>
-                    <p class="mt-1 text-sm text-slate-600">Updates as you type.</p>
+                    <h2 class="text-lg font-semibold text-slate-900" th:text="#{ui.00059}">Preview</h2>
+                    <p class="mt-1 text-sm text-slate-600" th:text="#{ui.01978}">Updates as you type.</p>
 
                     <dl class="mt-6 space-y-3 text-sm">
                         <div class="flex items-center justify-between gap-3">
-                            <dt class="font-medium text-slate-700">Date</dt>
+                            <dt class="font-medium text-slate-700" th:text="#{ui.00660}">Date</dt>
                             <dd id="previewDate" class="text-slate-900">-</dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
-                            <dt class="font-medium text-slate-700">Mood Before</dt>
+                            <dt class="font-medium text-slate-700" th:text="#{ui.01979}">Mood Before</dt>
                             <dd id="previewMoodBefore" class="text-slate-900">-</dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
-                            <dt class="font-medium text-slate-700">Mood After</dt>
+                            <dt class="font-medium text-slate-700" th:text="#{ui.01980}">Mood After</dt>
                             <dd id="previewMoodAfter" class="text-slate-900">-</dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
-                            <dt class="font-medium text-slate-700">Confidence</dt>
+                            <dt class="font-medium text-slate-700" th:text="#{ui.01981}">Confidence</dt>
                             <dd id="previewConfidence" class="text-slate-900">-</dd>
                         </div>
                         <div class="flex items-center justify-between gap-3">
-                            <dt class="font-medium text-slate-700">Duration</dt>
+                            <dt class="font-medium text-slate-700" th:text="#{ui.01982}">Duration</dt>
                             <dd id="previewDuration" class="text-slate-900">-</dd>
                         </div>
                         <div class="pt-2">
-                            <dt class="font-medium text-slate-700">Comments</dt>
-                            <dd id="previewComments" class="mt-1 text-slate-600">No comments yet.</dd>
+                            <dt class="font-medium text-slate-700" th:text="#{ui.01976}">Comments</dt>
+                            <dd id="previewComments" class="mt-1 text-slate-600" th:text="#{ui.01983}">No comments yet.</dd>
                         </div>
                     </dl>
                 </aside>

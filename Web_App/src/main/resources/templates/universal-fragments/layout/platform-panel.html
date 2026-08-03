@@ -4,21 +4,21 @@
      class="platform-panel-root"
      th:with="authUser=${@authHelper.getAuthenticatedUser()}"
      th:attr="data-role=${authUser != null and authUser.role != null ? authUser.role : 'USER'}">
-    <div class="platform-panel" aria-label="Platform navigation panel">
+    <div class="platform-panel" aria-label="Platform navigation panel" th:attr="aria-label=#{ui.02990}">
         <div class="platform-panel__rail">
             <button type="button"
                     class="platform-panel__control platform-panel__control--prev"
                     id="platformPanelPrev"
-                    aria-label="Scroll platform actions left">
+                    aria-label="Scroll platform actions left" th:attr="aria-label=#{ui.02991}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
             </button>
 
-            <nav class="platform-panel__track" id="platformPanelTrack" aria-label="Selected platform actions"></nav>
+            <nav class="platform-panel__track" id="platformPanelTrack" aria-label="Selected platform actions" th:attr="aria-label=#{ui.02992}"></nav>
 
             <button type="button"
                     class="platform-panel__control platform-panel__control--next"
                     id="platformPanelNext"
-                    aria-label="Scroll platform actions right">
+                    aria-label="Scroll platform actions right" th:attr="aria-label=#{ui.02993}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
             </button>
 
@@ -27,7 +27,7 @@
                     id="platformPanelSettings"
                     aria-label="Customize platform panel"
                     aria-controls="platformPanelCustomizer"
-                    aria-expanded="false">
+                    aria-expanded="false" th:attr="aria-label=#{ui.02994}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8 3.5-.9-.5a7.9 7.9 0 0 0-.5-1.3l.5-.9a1 1 0 0 0-.1-1.2l-1.3-1.3a1 1 0 0 0-1.2-.1l-.9.5c-.4-.2-.8-.4-1.3-.5l-.5-.9A1 1 0 0 0 13 4h-2a1 1 0 0 0-.9.6l-.5.9c-.5.1-.9.3-1.3.5l-.9-.5a1 1 0 0 0-1.2.1L4.9 7a1 1 0 0 0-.1 1.2l.5.9c-.2.4-.4.8-.5 1.3l-.9.5A1 1 0 0 0 3 12v2a1 1 0 0 0 .6.9l.9.5c.1.5.3.9.5 1.3l-.5.9a1 1 0 0 0 .1 1.2L5.9 20a1 1 0 0 0 1.2.1l.9-.5c.4.2.8.4 1.3.5l.5.9a1 1 0 0 0 .9.6h2a1 1 0 0 0 .9-.6l.5-.9c.5-.1.9-.3 1.3-.5l.9.5a1 1 0 0 0 1.2-.1l1.3-1.3a1 1 0 0 0 .1-1.2l-.5-.9c.2-.4.4-.8.5-1.3l.9-.5A1 1 0 0 0 21 14v-2a1 1 0 0 0-.6-.9Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35"/></svg>
             </button>
         </div>
@@ -37,24 +37,24 @@
              id="platformPanelCustomizer"
              aria-hidden="true"
              inert
-             aria-label="Customize platform panel">
+             aria-label="Customize platform panel" th:attr="aria-label=#{ui.02994}">
         <div class="platform-panel-customizer__header">
             <div>
-                <p class="platform-panel-customizer__eyebrow">Platform Panel</p>
-                <h2>Choose your shortcuts</h2>
+                <p class="platform-panel-customizer__eyebrow" th:text="#{ui.02995}">Platform Panel</p>
+                <h2 th:text="#{ui.02996}">Choose your shortcuts</h2>
             </div>
-            <button type="button" id="platformPanelClose" class="platform-panel-customizer__close" aria-label="Close platform panel settings">
+            <button type="button" id="platformPanelClose" class="platform-panel-customizer__close" aria-label="Close platform panel settings" th:attr="aria-label=#{ui.02997}">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/></svg>
             </button>
         </div>
-        <p class="platform-panel-customizer__hint">Select 1 to 7 actions. Dragging is not required; actions appear in the order shown.</p>
+        <p class="platform-panel-customizer__hint" th:text="#{ui.02998}">Select 1 to 7 actions. Dragging is not required; actions appear in the order shown.</p>
         <div class="platform-panel-customizer__list" id="platformPanelOptions"></div>
         <div class="platform-panel-customizer__footer">
-            <div class="platform-panel-customizer__status" id="platformPanelStatus">0/7 selected</div>
-            <div class="platform-panel-customizer__placements" aria-label="Panel placement">
-                <button type="button" data-placement="left">Left</button>
-                <button type="button" data-placement="center">Center</button>
-                <button type="button" data-placement="right">Right</button>
+            <div class="platform-panel-customizer__status" id="platformPanelStatus" th:text="#{ui.02999}">0/7 selected</div>
+            <div class="platform-panel-customizer__placements" aria-label="Panel placement" th:attr="aria-label=#{ui.03000}">
+                <button type="button" data-placement="left" th:text="#{ui.03001}">Left</button>
+                <button type="button" data-placement="center" th:text="#{ui.03002}">Center</button>
+                <button type="button" data-placement="right" th:text="#{ui.03003}">Right</button>
             </div>
         </div>
     </section>

@@ -1,21 +1,21 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(${pageTitle} ?: 'Programme', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(${pageTitle} ?: #{ui.02743}, null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="detail-container">
         <!-- Header with key metadata at top -->
         <div class="detail-header">
             <div class="detail-header-content">
                 <div class="detail-header-meta">
-                    <p class="detail-label">Programme</p>
+                    <p class="detail-label" th:text="#{ui.02743}">Programme</p>
                     <h1 class="detail-title" th:text="${programme.title}">Programme</h1>
                     <p class="detail-subtitle" th:text="${programme.weeks != null ? (programme.weeks + ' weeks') : ''}">Weeks</p>
                 </div>
                 <!-- Primary actions - sticky on larger screens -->
                 <div class="detail-actions-sticky">
-                    <a th:href="@{/trainer/library/programmes}" class="detail-btn-secondary">Back</a>
-                    <a th:href="@{/trainer/library/programmes/{id}/edit(id=${programme.id})}" class="detail-btn-primary">Edit</a>
+                    <a th:href="@{/trainer/library/programmes}" class="detail-btn-secondary" th:text="#{ui.00571}">Back</a>
+                    <a th:href="@{/trainer/library/programmes/{id}/edit(id=${programme.id})}" class="detail-btn-primary" th:text="#{ui.00138}">Edit</a>
                     <button type="button" class="detail-btn-secondary"
-                            data-share-dialog-open="shareDialog">Share</button>
+                            data-share-dialog-open="shareDialog" th:text="#{ui.02697}">Share</button>
                 </div>
             </div>
         </div>
@@ -24,10 +24,10 @@
         <div class="detail-sections">
             <div class="detail-grid-2">
                 <section class="detail-section">
-                    <h2 class="detail-section-title">Programme days</h2>
+                    <h2 class="detail-section-title" th:text="#{ui.02744}">Programme days</h2>
 
                     <div class="detail-section-content">
-                        <div th:if="${#lists.isEmpty(days)}" class="detail-empty">No days yet.</div>
+                        <div th:if="${#lists.isEmpty(days)}" class="detail-empty" th:text="#{ui.02745}">No days yet.</div>
 
                         <div th:if="${!#lists.isEmpty(days)}" class="detail-list">
                             <div th:each="d : ${days}" class="detail-list-item">
@@ -40,7 +40,7 @@
                                     </div>
                                     <form method="post" th:action="@{/trainer/library/programmes/{pid}/days/{did}/delete(pid=${programme.id},did=${d.id})}">
                                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <button type="submit" class="detail-btn-destructive">Remove</button>
+                                        <button type="submit" class="detail-btn-destructive" th:text="#{ui.00801}">Remove</button>
                                     </form>
                                 </div>
                             </div>
@@ -49,33 +49,33 @@
 
                     <!-- Add Day Form -->
                     <div class="detail-section-content border-t border-slate-200 dark:border-white/10 pt-4">
-                        <h3 class="detail-section-title mb-3">Add day</h3>
+                        <h3 class="detail-section-title mb-3" th:text="#{ui.02746}">Add day</h3>
                         <form class="grid grid-cols-1 gap-3" method="post" th:action="@{/trainer/library/programmes/{id}/days(id=${programme.id})}" th:object="${dayForm}">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                             <div>
-                                <label class="detail-metadata-label" for="dayOfWeek">Day of week</label>
+                                <label class="detail-metadata-label" for="dayOfWeek" th:text="#{ui.02747}">Day of week</label>
                                 <input id="dayOfWeek" type="text" th:field="*{dayOfWeek}"
                                        class="mt-1 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-white/5 px-4 py-2 text-sm text-slate-700 dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400" />
                             </div>
 
                             <div>
-                                <label class="detail-metadata-label" for="workoutId">Workout</label>
+                                <label class="detail-metadata-label" for="workoutId" th:text="#{ui.02748}">Workout</label>
                                 <select id="workoutId" th:field="*{workoutId}"
                                         class="mt-1 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-white/5 px-4 py-2 text-sm text-slate-700 dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-                                    <option value="" selected>Select a workout…</option>
+                                    <option value="" selected th:text="#{ui.02749}">Select a workout…</option>
                                     <option th:each="w : ${workouts}" th:value="${w.id}" th:text="${w.title}">Workout</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label class="detail-metadata-label" for="orderIndex">Order index</label>
+                                <label class="detail-metadata-label" for="orderIndex" th:text="#{ui.02750}">Order index</label>
                                 <input id="orderIndex" type="number" min="0" th:field="*{orderIndex}"
                                        class="mt-1 w-full rounded-xl border border-slate-200 dark:border-white/15 bg-white dark:bg-white/5 px-4 py-2 text-sm text-slate-700 dark:text-white" />
                             </div>
 
                             <div class="flex items-center justify-end">
-                                <button type="submit" class="detail-btn-primary">Add</button>
+                                <button type="submit" class="detail-btn-primary" th:text="#{ui.02591}">Add</button>
                             </div>
                         </form>
                     </div>
@@ -83,9 +83,9 @@
 
                 <!-- Coaching Notes Section -->
                 <section class="detail-section">
-                    <h2 class="detail-section-title">Coaching notes</h2>
+                    <h2 class="detail-section-title" th:text="#{ui.00239}">Coaching notes</h2>
                     <div class="detail-section-content">
-                        <div th:if="${#lists.isEmpty(notes)}" class="detail-empty">No notes.</div>
+                        <div th:if="${#lists.isEmpty(notes)}" class="detail-empty" th:text="#{ui.00240}">No notes.</div>
                         <ul th:if="${!#lists.isEmpty(notes)}" class="detail-list">
                             <li th:each="n : ${notes}" class="detail-list-item">
                                 <span class="detail-list-item-description" th:text="${n.noteText}">Note</span>
@@ -97,7 +97,7 @@
                     <div class="detail-section-content border-t border-slate-200 dark:border-white/10 pt-4 flex items-center justify-end">
                         <form method="post" th:action="@{/trainer/library/programmes/{id}/delete(id=${programme.id})}">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <button type="submit" class="detail-btn-destructive">Delete Programme</button>
+                            <button type="submit" class="detail-btn-destructive" th:text="#{ui.02751}">Delete Programme</button>
                         </form>
                     </div>
                 </section>

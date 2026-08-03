@@ -1,33 +1,33 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Nutrition', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.02198}, null, ~{::content}, null)}">
 
     <div th:fragment="content">
         <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Daily nutrition log</h1>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Track calories and macros for any day.</p>
+                    <h1 class="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100" th:text="#{ui.02174}">Daily nutrition log</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.02175}">Track calories and macros for any day.</p>
                 </div>
                 <form method="get" action="/nutrition" class="flex items-center gap-2">
-                    <label class="sr-only" for="nutrition-date">Date</label>
+                    <label class="sr-only" for="nutrition-date" th:text="#{ui.00660}">Date</label>
                     <input id="nutrition-date" name="date" type="date" th:value="${selectedDate}"
                            class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" />
-                    <button type="submit" class="btn btn--secondary btn--md">Go</button>
+                    <button type="submit" class="btn btn--secondary btn--md" th:text="#{ui.02176}">Go</button>
                 </form>
             </div>
 
-            <div th:if="${saved}" class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+            <div th:if="${saved}" class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800" th:text="#{ui.02177}">
                 Nutrition log saved.
             </div>
 
             <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[2fr,1fr]">
                 <section class="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
-                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Log details</h2>
+                    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.01998}">Log details</h2>
                     <form th:action="@{/nutrition}" th:object="${nutritionForm}" method="post" class="mt-4 space-y-5">
                         <input th:if="${_csrf != null}" th:type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Date</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00660}">Date</label>
                             <input type="date" th:field="*{date}"
                                    class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" />
                             <p class="mt-1 text-sm text-red-600" th:errors="*{date}" th:if="${#fields.hasErrors('date')}"></p>
@@ -35,96 +35,96 @@
 
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Calories</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.02178}">Calories</label>
                                 <input type="number" min="0" max="20000" step="1" th:field="*{calories}"
                                        placeholder="e.g., 2100"
-                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" />
+                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"  th:placeholder="#{ui.02179}"/>
                                 <p class="mt-1 text-sm text-red-600" th:errors="*{calories}" th:if="${#fields.hasErrors('calories')}"></p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Protein (g)</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00364}">Protein (g)</label>
                                 <input type="number" min="0" max="1000" step="1" th:field="*{proteinGrams}"
                                        placeholder="e.g., 140"
-                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" />
+                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"  th:placeholder="#{ui.02180}"/>
                                 <p class="mt-1 text-sm text-red-600" th:errors="*{proteinGrams}" th:if="${#fields.hasErrors('proteinGrams')}"></p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Carbs (g)</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00365}">Carbs (g)</label>
                                 <input type="number" min="0" max="1000" step="1" th:field="*{carbsGrams}"
                                        placeholder="e.g., 200"
-                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" />
+                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"  th:placeholder="#{ui.02181}"/>
                                 <p class="mt-1 text-sm text-red-600" th:errors="*{carbsGrams}" th:if="${#fields.hasErrors('carbsGrams')}"></p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Fat (g)</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.00366}">Fat (g)</label>
                                 <input type="number" min="0" max="1000" step="1" th:field="*{fatGrams}"
                                        placeholder="e.g., 70"
-                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" />
+                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"  th:placeholder="#{ui.02182}"/>
                                 <p class="mt-1 text-sm text-red-600" th:errors="*{fatGrams}" th:if="${#fields.hasErrors('fatGrams')}"></p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Fibre (g, optional)</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.02183}">Fibre (g, optional)</label>
                                 <input type="number" min="0" max="200" step="1" th:field="*{fibreGrams}"
                                        placeholder="e.g., 30"
-                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" />
+                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"  th:placeholder="#{ui.01975}"/>
                                 <p class="mt-1 text-sm text-red-600" th:errors="*{fibreGrams}" th:if="${#fields.hasErrors('fibreGrams')}"></p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Water (ml, optional)</label>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.02184}">Water (ml, optional)</label>
                                 <input type="number" min="0" max="10000" step="50" th:field="*{waterMl}"
                                        placeholder="e.g., 2000"
-                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" />
+                                       class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"  th:placeholder="#{ui.02185}"/>
                                 <p class="mt-1 text-sm text-red-600" th:errors="*{waterMl}" th:if="${#fields.hasErrors('waterMl')}"></p>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">Notes (optional)</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200" th:text="#{ui.02186}">Notes (optional)</label>
                             <textarea rows="4" th:field="*{notes}"
                                       placeholder="Any highlights or reminders?"
-                                      class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"></textarea>
+                                      class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" th:placeholder="#{ui.02187}"></textarea>
                             <p class="mt-1 text-sm text-red-600" th:errors="*{notes}" th:if="${#fields.hasErrors('notes')}"></p>
                         </div>
 
-                        <button type="submit" class="btn btn--primary btn--md w-full">Save log</button>
+                        <button type="submit" class="btn btn--primary btn--md w-full" th:text="#{ui.02188}">Save log</button>
                     </form>
                 </section>
 
                 <aside class="space-y-4">
                     <div th:if="${hasEntry}" class="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/50">
-                        <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Summary</h3>
+                        <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400" th:text="#{ui.02189}">Summary</h3>
                         <dl class="mt-4 space-y-3 text-sm">
                             <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                                <span>Calories</span>
+                                <span th:text="#{ui.02178}">Calories</span>
                                 <span class="font-semibold text-slate-900 dark:text-white" th:text="${summary.calories}">0</span>
                             </div>
                             <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                                <span>Macro calories</span>
+                                <span th:text="#{ui.02190}">Macro calories</span>
                                 <span class="font-semibold text-slate-900 dark:text-white" th:text="${summary.macroCalories}">0</span>
                             </div>
                             <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                                <span>Total macro grams</span>
+                                <span th:text="#{ui.02191}">Total macro grams</span>
                                 <span class="font-semibold text-slate-900 dark:text-white" th:text="${summary.totalMacroGrams}">0</span>
                             </div>
                             <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
-                                <span>Calorie delta</span>
+                                <span th:text="#{ui.02192}">Calorie delta</span>
                                 <span class="font-semibold text-slate-900 dark:text-white"
                                       th:text="${summary.calorieDelta >= 0 ? '+' + summary.calorieDelta : summary.calorieDelta}">0</span>
                             </div>
                             <div class="pt-2 text-slate-600 dark:text-slate-300">
-                                <div class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400">Notes</div>
+                                <div class="text-xs uppercase tracking-widest text-slate-500 dark:text-slate-400" th:text="#{ui.00175}">Notes</div>
                                 <div class="mt-1 text-sm text-slate-700 dark:text-slate-200" th:text="${summary.notes != null ? summary.notes : 'None'}">None</div>
                             </div>
                         </dl>
                     </div>
 
                     <div th:if="${!hasEntry}" class="rounded-2xl border border-dashed border-slate-200 bg-white/60 p-5 text-sm text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-300">
-                        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">No nutrition logged yet</h3>
-                        <p class="mt-2">Start by entering your calories and macros for this day.</p>
+                        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200" th:text="#{ui.02193}">No nutrition logged yet</h3>
+                        <p class="mt-2" th:text="#{ui.02194}">Start by entering your calories and macros for this day.</p>
                         <ul class="mt-3 space-y-1 text-sm">
-                            <li>Use rounded values if you do not have exact numbers.</li>
-                            <li>Optional fields like fibre and water help add detail.</li>
-                            <li>Notes can capture meals, cravings, or habits to revisit later.</li>
+                            <li th:text="#{ui.02195}">Use rounded values if you do not have exact numbers.</li>
+                            <li th:text="#{ui.02196}">Optional fields like fibre and water help add detail.</li>
+                            <li th:text="#{ui.02197}">Notes can capture meals, cravings, or habits to revisit later.</li>
                         </ul>
                     </div>
                 </aside>

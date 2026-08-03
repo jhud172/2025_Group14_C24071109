@@ -1,16 +1,16 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Admin Feedback Inbox', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.00015}, null, ~{::content}, null)}">
 
     <div th:fragment="content" class="role-surface role-surface__page" data-role-surface="platform-admin">
         <div class="role-surface__header px-6 py-6 sm:px-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4" data-site-tour="admin-feedback">
             <div>
-                <p class="role-surface__eyebrow">Platform operations</p>
-                <h1 class="role-surface__title">Support inbox</h1>
-                <p class="role-surface__copy">Review client, trainer and gym submissions, update their status and respond when requested.</p>
+                <p class="role-surface__eyebrow" th:text="#{ui.00001}">Platform operations</p>
+                <h1 class="role-surface__title" th:text="#{ui.00002}">Support inbox</h1>
+                <p class="role-surface__copy" th:text="#{ui.00003}">Review client, trainer and gym submissions, update their status and respond when requested.</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-3">
-                <a th:href="@{/support}" class="role-surface__action role-surface__action--secondary">Open support form</a>
-                <a th:href="@{/admin/dashboard}" class="role-surface__action role-surface__action--secondary">Back to operations</a>
+                <a th:href="@{/support}" class="role-surface__action role-surface__action--secondary" th:text="#{ui.00004}">Open support form</a>
+                <a th:href="@{/admin/dashboard}" class="role-surface__action role-surface__action--secondary" th:text="#{ui.00005}">Back to operations</a>
             </div>
         </div>
 
@@ -43,35 +43,35 @@
 
                     <form th:action="@{/admin/feedback/{id}/status(id=${item.id})}" method="post" class="rounded-xl border border-slate-200 p-3 dark:border-slate-700 space-y-2">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500" th:for="${'feedback-status-' + item.id}">Status</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500" th:for="${'feedback-status-' + item.id}" th:text="#{ui.00006}">Status</label>
                         <select name="status" th:id="${'feedback-status-' + item.id}" class="min-h-11 w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs dark:border-slate-600 dark:bg-slate-900">
                             <option th:each="status : ${statuses}" th:value="${status.name()}" th:text="${status.name()}" th:selected="${status == item.status}">NEW</option>
                         </select>
-                        <button type="submit" class="min-h-11 w-full rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-500">Update status</button>
+                        <button type="submit" class="min-h-11 w-full rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-500" th:text="#{ui.00007}">Update status</button>
                     </form>
 
                     <form th:action="@{/admin/feedback/{id}/respond(id=${item.id})}" method="post" class="rounded-xl border border-slate-200 p-3 dark:border-slate-700 space-y-2">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500" th:for="${'feedback-response-' + item.id}">Reply email</label>
-                        <textarea name="response" th:id="${'feedback-response-' + item.id}" rows="3" maxlength="5000" class="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs dark:border-slate-600 dark:bg-slate-900" placeholder="Type response for requester"></textarea>
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500" th:for="${'feedback-response-' + item.id}" th:text="#{ui.00008}">Reply email</label>
+                        <textarea name="response" th:id="${'feedback-response-' + item.id}" rows="3" maxlength="5000" class="w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs dark:border-slate-600 dark:bg-slate-900" placeholder="Type response for requester" th:placeholder="#{ui.00009}"></textarea>
                         <p class="text-[11px] text-slate-500" th:text="${item.allowEmailReply} ? 'Requester opted in for email reply.' : 'Requester did NOT opt in for email reply.'">Opt-in state</p>
-                        <button type="submit" class="min-h-11 w-full rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500">Send response email</button>
+                        <button type="submit" class="min-h-11 w-full rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500" th:text="#{ui.00010}">Send response email</button>
                     </form>
                 </div>
 
                 <div th:if="${item.adminResponse != null}" class="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
-                    <p class="font-semibold">Last admin response</p>
+                    <p class="font-semibold" th:text="#{ui.00011}">Last admin response</p>
                     <p class="mt-1 whitespace-pre-line" th:text="${item.adminResponse}">Response</p>
                 </div>
             </article>
         </div>
 
         <div th:if="${feedbackItems == null or #lists.isEmpty(feedbackItems)}" class="role-surface__surface role-surface__empty">
-            <p class="role-surface__empty-title">Support inbox clear</p>
-            <p class="role-surface__empty-copy">There are no support requests in the current view. Return to platform operations or open the public form to verify the submission journey.</p>
+            <p class="role-surface__empty-title" th:text="#{ui.00012}">Support inbox clear</p>
+            <p class="role-surface__empty-copy" th:text="#{ui.00013}">There are no support requests in the current view. Return to platform operations or open the public form to verify the submission journey.</p>
             <div class="flex flex-col sm:flex-row gap-3">
-                <a th:href="@{/admin/dashboard}" class="role-surface__action role-surface__action--primary">Return to operations</a>
-                <a th:href="@{/support}" class="role-surface__action role-surface__action--secondary">Open support form</a>
+                <a th:href="@{/admin/dashboard}" class="role-surface__action role-surface__action--primary" th:text="#{ui.00014}">Return to operations</a>
+                <a th:href="@{/support}" class="role-surface__action role-surface__action--secondary" th:text="#{ui.00004}">Open support form</a>
             </div>
         </div>
     </div>

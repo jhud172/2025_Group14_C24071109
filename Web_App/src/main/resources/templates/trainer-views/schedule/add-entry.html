@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Training Flow Editor', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.02477}, null, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="content">
     <div id="schedule-studio-bootstrap"
@@ -32,7 +32,7 @@
                             <span th:text="${entries.isEmpty() ? 'Draft' : 'Applied'}">Draft</span>
                         </span>
                         <span class="studio-timestamp">
-                            Last updated: <span id="lastUpdatedTime">Just now</span>
+                            <th:block th:text="#{ui.02442}">Last updated:</th:block> <span id="lastUpdatedTime" th:text="#{ui.02443}">Just now</span>
                         </span>
                     </div>
                 </div>
@@ -41,13 +41,13 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
-                        Back
+                        <th:block th:text="#{ui.00571}">Back</th:block>
                     </a>
                     <button type="button" id="applyToCalendarBtn" class="studio-btn-primary">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        Apply to Calendar
+                        <th:block th:text="#{ui.02444}">Apply to Calendar</th:block>
                     </button>
                 </div>
             </div>
@@ -64,20 +64,20 @@
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                             </svg>
-                            Undo
+                            <th:block th:text="#{ui.02445}">Undo</th:block>
                         </button>
                         <button type="button" id="resetBtn" class="version-control-btn reset">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
-                            Reset to Last Saved
+                            <th:block th:text="#{ui.02446}">Reset to Last Saved</th:block>
                         </button>
                         <div class="relative ml-auto">
                             <button type="button" id="advancedControlsBtn" class="version-control-btn">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                 </svg>
-                                More Actions
+                                <th:block th:text="#{ui.02447}">More Actions</th:block>
                             </button>
                             <div id="advancedControlsDropdown" class="advanced-controls-dropdown">
                                 <div class="advanced-controls-menu">
@@ -85,26 +85,26 @@
                                         <svg class="advanced-controls-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                         </svg>
-                                        Duplicate Schedule
+                                        <th:block th:text="#{ui.02448}">Duplicate Schedule</th:block>
                                     </button>
                                     <button type="button" class="advanced-controls-item" id="shiftScheduleBtn">
                                         <svg class="advanced-controls-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                         </svg>
-                                        Shift All Workouts
+                                        <th:block th:text="#{ui.02449}">Shift All Workouts</th:block>
                                     </button>
                                     <button type="button" class="advanced-controls-item" id="autoBalanceBtn">
                                         <svg class="advanced-controls-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                         </svg>
-                                        Auto-Balance Workouts
+                                        <th:block th:text="#{ui.02450}">Auto-Balance Workouts</th:block>
                                     </button>
                                     <div class="advanced-controls-divider"></div>
                                     <button type="button" class="advanced-controls-item danger" id="clearAllBtn">
                                         <svg class="advanced-controls-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
-                                        Clear Entire Schedule
+                                        <th:block th:text="#{ui.02451}">Clear Entire Schedule</th:block>
                                     </button>
                                 </div>
                             </div>
@@ -115,9 +115,9 @@
                 <!-- Weekly Flow Builder -->
                 <div class="flow-builder-container">
                     <div class="flow-builder-header">
-                        <h2 class="flow-builder-title">Weekly Training Flow</h2>
+                        <h2 class="flow-builder-title" th:text="#{ui.02452}">Weekly Training Flow</h2>
                         <span class="text-xs font-medium text-slate-600 dark:text-slate-400" id="weekSummary">
-                            <span id="totalEntriesCount">0</span> workouts scheduled
+                            <span id="totalEntriesCount">0</span> <th:block th:text="#{ui.02453}">workouts scheduled</th:block>
                         </span>
                     </div>
                     
@@ -125,7 +125,7 @@
                         <!-- Monday -->
                         <div class="flow-day-column" data-day="1" data-day-name="Monday">
                             <div class="flow-day-header">
-                                <span class="flow-day-name">Mon</span>
+                                <span class="flow-day-name" th:text="#{ui.01811}">Mon</span>
                                 <span class="flow-day-count">0</span>
                             </div>
                             <div class="flow-day-content" data-drop-zone="1">
@@ -135,14 +135,14 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Add Exercise
+                                <th:block th:text="#{ui.02454}">Add Exercise</th:block>
                             </button>
                         </div>
 
                         <!-- Tuesday -->
                         <div class="flow-day-column" data-day="2" data-day-name="Tuesday">
                             <div class="flow-day-header">
-                                <span class="flow-day-name">Tue</span>
+                                <span class="flow-day-name" th:text="#{ui.01812}">Tue</span>
                                 <span class="flow-day-count">0</span>
                             </div>
                             <div class="flow-day-content" data-drop-zone="2">
@@ -152,14 +152,14 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Add Exercise
+                                <th:block th:text="#{ui.02454}">Add Exercise</th:block>
                             </button>
                         </div>
 
                         <!-- Wednesday -->
                         <div class="flow-day-column" data-day="3" data-day-name="Wednesday">
                             <div class="flow-day-header">
-                                <span class="flow-day-name">Wed</span>
+                                <span class="flow-day-name" th:text="#{ui.01813}">Wed</span>
                                 <span class="flow-day-count">0</span>
                             </div>
                             <div class="flow-day-content" data-drop-zone="3">
@@ -169,14 +169,14 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Add Exercise
+                                <th:block th:text="#{ui.02454}">Add Exercise</th:block>
                             </button>
                         </div>
 
                         <!-- Thursday -->
                         <div class="flow-day-column" data-day="4" data-day-name="Thursday">
                             <div class="flow-day-header">
-                                <span class="flow-day-name">Thu</span>
+                                <span class="flow-day-name" th:text="#{ui.01814}">Thu</span>
                                 <span class="flow-day-count">0</span>
                             </div>
                             <div class="flow-day-content" data-drop-zone="4">
@@ -186,14 +186,14 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Add Exercise
+                                <th:block th:text="#{ui.02454}">Add Exercise</th:block>
                             </button>
                         </div>
 
                         <!-- Friday -->
                         <div class="flow-day-column" data-day="5" data-day-name="Friday">
                             <div class="flow-day-header">
-                                <span class="flow-day-name">Fri</span>
+                                <span class="flow-day-name" th:text="#{ui.01815}">Fri</span>
                                 <span class="flow-day-count">0</span>
                             </div>
                             <div class="flow-day-content" data-drop-zone="5">
@@ -203,14 +203,14 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Add Exercise
+                                <th:block th:text="#{ui.02454}">Add Exercise</th:block>
                             </button>
                         </div>
 
                         <!-- Saturday -->
                         <div class="flow-day-column" data-day="6" data-day-name="Saturday">
                             <div class="flow-day-header">
-                                <span class="flow-day-name">Sat</span>
+                                <span class="flow-day-name" th:text="#{ui.01816}">Sat</span>
                                 <span class="flow-day-count">0</span>
                             </div>
                             <div class="flow-day-content" data-drop-zone="6">
@@ -220,14 +220,14 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Add Exercise
+                                <th:block th:text="#{ui.02454}">Add Exercise</th:block>
                             </button>
                         </div>
 
                         <!-- Sunday -->
                         <div class="flow-day-column" data-day="7" data-day-name="Sunday">
                             <div class="flow-day-header">
-                                <span class="flow-day-name">Sun</span>
+                                <span class="flow-day-name" th:text="#{ui.01817}">Sun</span>
                                 <span class="flow-day-count">0</span>
                             </div>
                             <div class="flow-day-content" data-drop-zone="7">
@@ -237,7 +237,7 @@
                                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Add Exercise
+                                <th:block th:text="#{ui.02454}">Add Exercise</th:block>
                             </button>
                         </div>
                     </div>
@@ -253,35 +253,35 @@
                         <svg class="insights-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
-                        <h3 class="insights-title">Schedule Insights</h3>
+                        <h3 class="insights-title" th:text="#{ui.02455}">Schedule Insights</h3>
                     </div>
                     
                     <div class="insights-grid">
                         <!-- Total Sessions -->
                         <div class="insight-metric">
                             <div class="insight-metric-header">
-                                <span class="insight-metric-label">Total Sessions</span>
+                                <span class="insight-metric-label" th:text="#{ui.02456}">Total Sessions</span>
                                 <span class="insight-metric-value" id="totalSessions">0</span>
                             </div>
-                            <p class="insight-metric-description">Workouts scheduled this week</p>
+                            <p class="insight-metric-description" th:text="#{ui.02457}">Workouts scheduled this week</p>
                         </div>
 
                         <!-- Active Days -->
                         <div class="insight-metric">
                             <div class="insight-metric-header">
-                                <span class="insight-metric-label">Active Days</span>
+                                <span class="insight-metric-label" th:text="#{ui.02458}">Active Days</span>
                                 <span class="insight-metric-value" id="activeDays">0</span>
                             </div>
-                            <p class="insight-metric-description">Days with scheduled workouts</p>
+                            <p class="insight-metric-description" th:text="#{ui.02459}">Days with scheduled workouts</p>
                         </div>
 
                         <!-- Rest Days -->
                         <div class="insight-metric">
                             <div class="insight-metric-header">
-                                <span class="insight-metric-label">Rest Days</span>
+                                <span class="insight-metric-label" th:text="#{ui.02460}">Rest Days</span>
                                 <span class="insight-metric-value" id="restDays">7</span>
                             </div>
-                            <p class="insight-metric-description">Recovery days per week</p>
+                            <p class="insight-metric-description" th:text="#{ui.02461}">Recovery days per week</p>
                         </div>
 
                         <!-- Warnings & Recommendations -->
@@ -293,24 +293,24 @@
 
                 <!-- Quick Schedule Details -->
                 <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
-                    <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100 mb-4">Schedule Details</h3>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100 mb-4" th:text="#{ui.02462}">Schedule Details</h3>
                     <form th:action="@{'/schedules/' + ${schedule.id} + '/update'}" method="post" class="space-y-4" id="updateDetailsForm">
                         <input type="hidden" th:if="${_csrf != null}"
                                th:name="${_csrf.parameterName}"
                                th:value="${_csrf.token}"/>
                         
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 dark:text-slate-200 mb-1.5">Description</label>
+                            <label class="block text-xs font-medium text-slate-700 dark:text-slate-200 mb-1.5" th:text="#{ui.00113}">Description</label>
                             <textarea name="description" rows="3" id="scheduleDescription"
                                       class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                      placeholder="Add notes or goals for this schedule..." th:text="${schedule.description}"></textarea>
+                                      placeholder="Add notes or goals for this schedule..." th:text="${schedule.description}" th:placeholder="#{ui.02463}"></textarea>
                         </div>
 
                         <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Save Changes
+                            <th:block th:text="#{ui.00686}">Save Changes</th:block>
                         </button>
                     </form>
                 </div>
@@ -321,7 +321,7 @@
         <div id="applyModal" class="modal-overlay hidden">
             <div class="modal-container">
                 <div class="modal-header">
-                    <h3 class="modal-title">Apply Schedule to Calendar</h3>
+                    <h3 class="modal-title" th:text="#{ui.02464}">Apply Schedule to Calendar</h3>
                     <button type="button" class="modal-close-btn" id="closeModalBtn">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -335,54 +335,54 @@
                                th:name="${_csrf.parameterName}"
                                th:value="${_csrf.token}"/>
                         
-                        <p class="modal-description">
+                        <p class="modal-description" th:text="#{ui.02465}">
                             This will add scheduled workouts to your calendar. Choose how you want to apply this schedule:
                         </p>
 
                         <!-- Application Mode -->
                         <div class="modal-option-group">
-                            <label class="modal-option-label">Application Mode</label>
+                            <label class="modal-option-label" th:text="#{ui.02466}">Application Mode</label>
                             
                             <label class="modal-option-radio selected" data-radio-group="mode" data-value="replace">
                                 <input type="radio" name="applicationMode" value="replace" checked class="modal-option-radio-input">
                                 <div class="modal-option-content">
-                                    <div class="modal-option-title">Replace Existing Entries</div>
-                                    <div class="modal-option-description">Remove current calendar entries for this schedule and apply fresh</div>
+                                    <div class="modal-option-title" th:text="#{ui.02467}">Replace Existing Entries</div>
+                                    <div class="modal-option-description" th:text="#{ui.02468}">Remove current calendar entries for this schedule and apply fresh</div>
                                 </div>
                             </label>
                             
                             <label class="modal-option-radio" data-radio-group="mode" data-value="merge">
                                 <input type="radio" name="applicationMode" value="merge" class="modal-option-radio-input">
                                 <div class="modal-option-content">
-                                    <div class="modal-option-title">Merge with Existing</div>
-                                    <div class="modal-option-description">Keep current entries and add new ones alongside</div>
+                                    <div class="modal-option-title" th:text="#{ui.02469}">Merge with Existing</div>
+                                    <div class="modal-option-description" th:text="#{ui.02470}">Keep current entries and add new ones alongside</div>
                                 </div>
                             </label>
                         </div>
 
                         <!-- Start Date -->
                         <div>
-                            <label class="modal-option-label" for="startDate">Start Date</label>
+                            <label class="modal-option-label" for="startDate" th:text="#{ui.02471}">Start Date</label>
                             <input type="date" name="startDate" id="startDate" required
                                    class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"/>
                         </div>
 
                         <!-- Duration -->
                         <div>
-                            <label class="modal-option-label" for="weeks">Duration (Weeks)</label>
+                            <label class="modal-option-label" for="weeks" th:text="#{ui.02472}">Duration (Weeks)</label>
                             <input type="number" name="weeks" id="weeks" value="4" min="1" max="52" required
                                    class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"/>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">How many weeks to repeat this schedule</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" th:text="#{ui.02473}">How many weeks to repeat this schedule</p>
                         </div>
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="studio-btn-secondary" id="cancelModalBtn">Cancel</button>
+                        <button type="button" class="studio-btn-secondary" id="cancelModalBtn" th:text="#{ui.00125}">Cancel</button>
                         <button type="submit" class="studio-btn-primary">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Apply to Calendar
+                            <th:block th:text="#{ui.02444}">Apply to Calendar</th:block>
                         </button>
                     </div>
                 </form>
@@ -393,7 +393,7 @@
         <div id="addEntryModal" class="modal-overlay hidden">
             <div class="modal-container">
                 <div class="modal-header">
-                    <h3 class="modal-title">Add Exercise to <span id="addEntryDayName">Day</span></h3>
+                    <h3 class="modal-title"><th:block th:text="#{ui.02474}">Add Exercise to</th:block> <span id="addEntryDayName" th:text="#{ui.02475}">Day</span></h3>
                     <button type="button" class="modal-close-btn" id="closeAddEntryModalBtn">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -410,22 +410,22 @@
                         <input type="hidden" name="orderNumber" id="addEntryOrderValue" value="1"/>
                         
                         <div>
-                            <label class="modal-option-label" for="exerciseSelect">Exercise</label>
+                            <label class="modal-option-label" for="exerciseSelect" th:text="#{ui.01682}">Exercise</label>
                             <select name="exercise.id" id="exerciseSelect" required
                                     class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                <option value="">Select an exercise...</option>
+                                <option value="" th:text="#{ui.02476}">Select an exercise...</option>
                                 <option th:each="ex : ${exercises}" th:value="${ex.id}" th:text="${ex.name}">Exercise</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="studio-btn-secondary" id="cancelAddEntryModalBtn">Cancel</button>
+                        <button type="button" class="studio-btn-secondary" id="cancelAddEntryModalBtn" th:text="#{ui.00125}">Cancel</button>
                         <button type="submit" class="studio-btn-primary">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            Add Exercise
+                            <th:block th:text="#{ui.02454}">Add Exercise</th:block>
                         </button>
                     </div>
                 </form>

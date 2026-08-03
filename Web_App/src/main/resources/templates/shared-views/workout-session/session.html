@@ -26,7 +26,7 @@
                 <div class="flex w-full flex-col gap-3 lg:max-w-xs">
                     <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
                         <div class="flex items-center justify-between gap-4">
-                            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">Session progress</p>
+                            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100" th:text="#{ui.02336}">Session progress</p>
                             <span class="text-sm font-bold text-slate-900 dark:text-slate-100"
                                   th:text="${view.summary.completionPercent + '%'}">0%</span>
                         </div>
@@ -35,9 +35,9 @@
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <a th:href="@{'/calendar/day/' + ${view.date}}"
-                           class="inline-flex flex-1 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">Back to day</a>
+                           class="inline-flex flex-1 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900" th:text="#{ui.01829}">Back to day</a>
                         <a href="/workout-management"
-                           class="inline-flex flex-1 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900">Manage workouts</a>
+                           class="inline-flex flex-1 items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900" th:text="#{ui.02337}">Manage workouts</a>
                     </div>
                 </div>
             </div>
@@ -65,7 +65,7 @@
                           method="post">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <button type="submit"
-                                class="inline-flex items-center justify-center rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-800/40 dark:bg-emerald-950/30 dark:text-emerald-200 dark:hover:bg-emerald-950/50">
+                                class="inline-flex items-center justify-center rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-800/40 dark:bg-emerald-950/30 dark:text-emerald-200 dark:hover:bg-emerald-950/50" th:text="#{ui.02338}">
                             Add set
                         </button>
                     </form>
@@ -88,7 +88,7 @@
                                   class="grid gap-3 sm:grid-cols-4">
                                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                                 <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                                    Weight
+                                    <th:block th:text="#{ui.00642}">Weight</th:block>
                                     <input type="number"
                                            step="0.5"
                                            min="0"
@@ -97,7 +97,7 @@
                                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
                                 </label>
                                 <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                                    Reps
+                                    <th:block th:text="#{ui.02339}">Reps</th:block>
                                     <input type="number"
                                            min="0"
                                            name="reps"
@@ -105,14 +105,14 @@
                                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
                                 </label>
                                 <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 sm:col-span-2">
-                                    Notes
+                                    <th:block th:text="#{ui.00175}">Notes</th:block>
                                     <input type="text"
                                            name="notes"
                                            th:value="${set.notes}"
                                            class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
                                 </label>
                                 <button type="submit"
-                                        class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white sm:col-span-4">Save set</button>
+                                        class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white sm:col-span-4" th:text="#{ui.02340}">Save set</button>
                             </form>
 
                             <div class="flex flex-wrap gap-3">
@@ -128,7 +128,7 @@
                                       method="post">
                                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                                     <button type="submit"
-                                            class="inline-flex items-center justify-center rounded-2xl border border-rose-300 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-800 transition hover:bg-rose-100 dark:border-rose-800/40 dark:bg-rose-950/30 dark:text-rose-200 dark:hover:bg-rose-950/50">Delete</button>
+                                            class="inline-flex items-center justify-center rounded-2xl border border-rose-300 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-800 transition hover:bg-rose-100 dark:border-rose-800/40 dark:bg-rose-950/30 dark:text-rose-200 dark:hover:bg-rose-950/50" th:text="#{ui.00139}">Delete</button>
                                 </form>
                             </div>
                         </div>
@@ -140,14 +140,14 @@
         <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Finish this scheduled workout</p>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Completing the session stores the workout, shows the completion summary, and updates the schedule entry everywhere else in the platform.</p>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02341}">Finish this scheduled workout</p>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.02342}">Completing the session stores the workout, shows the completion summary, and updates the schedule entry everywhere else in the platform.</p>
                 </div>
                 <form th:action="@{'/workout-session/' + ${view.sessionId} + '/complete'}"
                       method="post">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <button type="submit"
-                            class="inline-flex w-full items-center justify-center rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 lg:w-auto">
+                            class="inline-flex w-full items-center justify-center rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 lg:w-auto" th:text="#{ui.02343}">
                         Finish workout
                     </button>
                 </form>

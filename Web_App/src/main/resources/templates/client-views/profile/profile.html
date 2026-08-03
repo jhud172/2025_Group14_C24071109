@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Profile', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.00419}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="styles">
     <!-- profile.css is included in app.css via tailwind.css -->
@@ -33,7 +33,7 @@
                                    th:src="${user.profileImageUrl}" alt="Profile photo" class="h-full w-full object-cover"
                                    id="profile-sidebar-avatar-image"
                                 draggable="false"
-                                   th:attr="data-original-src=${user.profileImageUrl}" />
+                                   th:attr="data-original-src=${user.profileImageUrl}"  th:alt="#{ui.00426}"/>
                             <span th:if="${user == null || user.profileImageUrl == null}"
                                     class="text-2xl font-bold text-white"
                                     id="profile-sidebar-avatar-fallback"
@@ -52,7 +52,7 @@
                                       class="nav-premium-badge premium-orb-badge group profile-preview-lock"
                                       tabindex="0"
                                       role="button"
-                                      aria-label="Premium membership details">
+                                      aria-label="Premium membership details" th:attr="aria-label=#{ui.00428}">
                                     <svg class="nav-premium-badge__icon" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                     </svg>
@@ -74,30 +74,30 @@
                      aria-label="Profile completion guidance"
                      tabindex="0"
                      role="button"
-                     aria-expanded="false">
+                     aria-expanded="false" th:attr="aria-label=#{ui.00709}">
                     <div class="profile-completion-widget__surface">
                         <div class="profile-completion-widget__header">
-                            <span class="profile-completion-widget__eyebrow profile-preview-lock">Profile radar</span>
+                            <span class="profile-completion-widget__eyebrow profile-preview-lock" th:text="#{ui.00710}">Profile radar</span>
                             <span id="profile-completion-percent" class="profile-completion-widget__percent profile-preview-lock" th:text="${completionPercent + '%'}">80%</span>
                         </div>
                         <div class="profile-completion-widget__track">
                             <div id="profile-completion-progress-bar" class="profile-completion-widget__fill"></div>
                             <span class="profile-completion-widget__glow" aria-hidden="true"></span>
                         </div>
-                        <div id="profile-completion-complete-bar" class="profile-completion-widget__complete hidden">Profile completed</div>
+                        <div id="profile-completion-complete-bar" class="profile-completion-widget__complete hidden" th:text="#{ui.00711}">Profile completed</div>
                         <button type="button"
                                 id="profile-completion-dismiss"
-                                class="profile-completion-widget__dismiss hidden">
+                                class="profile-completion-widget__dismiss hidden" th:text="#{ui.00712}">
                             Dismiss
                         </button>
                     </div>
                     <div id="profile-completion-tooltip"
                          class="profile-completion-tooltip"
                          aria-hidden="true">
-                        <p class="profile-completion-tooltip__eyebrow">Profile radar checklist</p>
-                        <p id="profile-completion-title" class="profile-completion-tooltip__title">Complete your profile</p>
-                        <p id="profile-completion-message" class="profile-completion-tooltip__message">Add the next missing item to improve your profile.</p>
-                        <a id="profile-completion-action" href="#" class="profile-completion-tooltip__action">Open item</a>
+                        <p class="profile-completion-tooltip__eyebrow" th:text="#{ui.00713}">Profile radar checklist</p>
+                        <p id="profile-completion-title" class="profile-completion-tooltip__title" th:text="#{ui.00714}">Complete your profile</p>
+                        <p id="profile-completion-message" class="profile-completion-tooltip__message" th:text="#{ui.00715}">Add the next missing item to improve your profile.</p>
+                        <a id="profile-completion-action" href="#" class="profile-completion-tooltip__action" th:text="#{ui.00716}">Open item</a>
                     </div>
                 </div>
 
@@ -113,23 +113,23 @@
                             data-profile-bio-toggle
                             hidden
                             aria-hidden="true"
-                            aria-expanded="false">Read more</button>
+                            aria-expanded="false" th:text="#{ui.00717}">Read more</button>
                 </div>
 
                  <div id="profile-sidebar-milestones-panel"
                      class="profile-sidebar-milestones-panel">
-                    <p class="profile-sidebar-milestones-title profile-preview-copy">Visible milestones</p>
+                    <p class="profile-sidebar-milestones-title profile-preview-copy" th:text="#{ui.00718}">Visible milestones</p>
                     <div id="profile-sidebar-milestones-list" class="profile-preview-milestone-grid">
                         <span class="profile-preview-milestone is-achieved"
                               th:each="ms, iter : ${profileMilestoneOptions}"
                               th:if="${selectedProfileMilestones != null and selectedProfileMilestones.contains(ms.key) and iter.index < 4}">
-                            <span class="profile-preview-milestone__status">Achieved</span>
+                            <span class="profile-preview-milestone__status" th:text="#{ui.00205}">Achieved</span>
                             <span class="profile-preview-milestone__title" th:text="${ms.title}">Milestone</span>
                         </span>
                         <span class="profile-preview-milestone profile-preview-milestone--empty"
                               th:if="${selectedProfileMilestones == null or selectedProfileMilestones.size() == 0}">
-                            <span class="profile-preview-milestone__status">Milestones</span>
-                            <span class="profile-preview-milestone__title">No Milestones Displayed</span>
+                            <span class="profile-preview-milestone__status" th:text="#{ui.00212}">Milestones</span>
+                            <span class="profile-preview-milestone__title" th:text="#{ui.00536}">No Milestones Displayed</span>
                         </span>
                     </div>
                 </div>
@@ -138,7 +138,7 @@
             <div class="h-px bg-slate-200/70 dark:bg-slate-800/80"></div>
 
             <!-- Horizontal stat strip -->
-            <div class="profile-stats-strip" aria-label="Profile stats">
+            <div class="profile-stats-strip" aria-label="Profile stats" th:attr="aria-label=#{ui.00719}">
                 <div class="profile-stat-segment">
                     <p class="text-lg font-bold text-slate-900 dark:text-white"
                        th:text="${levelProgress != null ? levelProgress.points : 0}">0</p>
@@ -154,7 +154,7 @@
                 <div class="profile-stat-segment">
                     <p class="text-lg font-bold text-slate-900 dark:text-white"
                        th:text="${exerciseLogCount}">0</p>
-                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Logs</p>
+                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400" th:text="#{ui.00720}">Logs</p>
                 </div>
             </div>
 
@@ -166,24 +166,24 @@
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
-                    <span>Customise Profile</span>
+                    <span th:text="#{ui.00721}">Customise Profile</span>
                 </button>
                 <div class="mt-3 rounded-2xl bg-slate-50/80 px-3 py-3 dark:bg-slate-900/40">
-                    <p class="mb-2 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Account actions</p>
+                    <p class="mb-2 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400" th:text="#{ui.00722}">Account actions</p>
                     <div class="flex flex-col gap-2.5 profile-sidebar-actions">
                         <a href="/goals"
                            class="profile-btn-secondary w-full flex items-center justify-center gap-2">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m3 6V7m3 10v-4M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                     </svg>
-                    Goals
+                    <th:block th:text="#{ui.00408}">Goals</th:block>
                 </a>
                         <a href="/orders"
                            class="profile-btn-secondary w-full flex items-center justify-center gap-2">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
-                    Orders
+                    <th:block th:text="#{ui.00723}">Orders</th:block>
                 </a>
                 <button type="button" id="open-options-drawer"
                         class="profile-btn-secondary profile-drawer-toggle w-full flex items-center justify-center gap-2"
@@ -194,7 +194,7 @@
                         <span class="profile-drawer-toggle__line"></span>
                         <span class="profile-drawer-toggle__line"></span>
                     </span>
-                    Options
+                    <th:block th:text="#{ui.00724}">Options</th:block>
                 </button>
                 <button type="button" id="open-settings-drawer"
                         class="profile-btn-secondary w-full flex items-center justify-center gap-2">
@@ -202,7 +202,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    Settings
+                    <th:block th:text="#{ui.00725}">Settings</th:block>
                 </button>
                     </div>
                 </div>
@@ -217,18 +217,18 @@
             <section class="profile-section relative">
                 <div class="profile-section-header">
                     <div>
-                        <h2 class="profile-section-title">Profile Details</h2>
+                        <h2 class="profile-section-title" th:text="#{ui.00726}">Profile Details</h2>
                     </div>
                 </div>
 
                 <!-- Flash alerts -->
                 <div class="space-y-2 pb-3">
-                    <div th:if="${devProfilePreview}" class="profile-alert-success">
+                    <div th:if="${devProfilePreview}" class="profile-alert-success" th:text="#{ui.00727}">
                         Dev mode preview: this profile is shown using demo data. Sign in to edit your own account.
                     </div>
                     <div th:if="${profileUpdated}" class="profile-alert-success" th:text="#{profile.updated}">Profile updated.</div>
                     <div th:if="${profileError}" class="profile-alert-error" th:text="${profileError}">Error.</div>
-                    <div th:if="${subscriptionUpdated}" class="profile-alert-success">Subscription updated.</div>
+                    <div th:if="${subscriptionUpdated}" class="profile-alert-success" th:text="#{ui.00728}">Subscription updated.</div>
                     <div th:if="${subscriptionError}" class="profile-alert-error" th:text="${subscriptionError}">Subscription update failed.</div>
                     <div th:if="${verifySuccess}" class="profile-alert-success" th:text="${verifySuccess}">Verification sent.</div>
                     <div th:if="${verifyError}" class="profile-alert-error" th:text="${verifyError}">Verification error.</div>
@@ -243,12 +243,12 @@
                         <div class="absolute inset-0 rounded-3xl bg-slate-900/18 backdrop-blur-sm dark:bg-slate-950/36"></div>
                         <div class="absolute inset-0 flex items-center justify-center p-4 sm:p-6">
                             <div class="w-full max-w-md rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white to-slate-50 p-5 shadow-2xl ring-1 ring-emerald-200/70 dark:border-slate-700 dark:from-slate-900 dark:to-slate-950 dark:ring-emerald-500/30">
-                                <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100">Unsaved changes</h3>
-                                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">You have unsaved changes. Would you like to save them before finishing customising?</p>
+                                <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00380}">Unsaved changes</h3>
+                                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00729}">You have unsaved changes. Would you like to save them before finishing customising?</p>
                                 <div class="mt-4 flex flex-wrap justify-end gap-2">
-                                    <button type="button" id="profile-unsaved-cancel" class="profile-btn-secondary">Keep editing</button>
-                                    <button type="button" id="profile-unsaved-discard" class="profile-btn-secondary">Discard changes</button>
-                                    <button type="button" id="profile-unsaved-save" class="profile-btn-primary">Save profile</button>
+                                    <button type="button" id="profile-unsaved-cancel" class="profile-btn-secondary" th:text="#{ui.00730}">Keep editing</button>
+                                    <button type="button" id="profile-unsaved-discard" class="profile-btn-secondary" th:text="#{ui.00731}">Discard changes</button>
+                                    <button type="button" id="profile-unsaved-save" class="profile-btn-primary" th:text="#{ui.00732}">Save profile</button>
                                 </div>
                             </div>
                         </div>
@@ -316,32 +316,32 @@
                                 <div class="profile-inline-edit">
                                     <div class="profile-phone-row">
                                         <div class="profile-phone-row__country">
-                                            <label class="profile-field-label">Country code</label>
+                                            <label class="profile-field-label" th:text="#{ui.00733}">Country code</label>
                                             <select id="profile-phone-country" name="phoneCountry" class="profile-input mt-1">
-                                                <option value="GB" th:selected="${user != null &amp;&amp; user.phoneCountry == 'GB'}">🇬🇧 GB - United Kingdom</option>
-                                                <option value="US" th:selected="${user != null &amp;&amp; user.phoneCountry == 'US'}">🇺🇸 US - United States</option>
-                                                <option value="CA" th:selected="${user != null &amp;&amp; user.phoneCountry == 'CA'}">🇨🇦 CA - Canada</option>
-                                                <option value="AU" th:selected="${user != null &amp;&amp; user.phoneCountry == 'AU'}">🇦🇺 AU - Australia</option>
-                                                <option value="NZ" th:selected="${user != null &amp;&amp; user.phoneCountry == 'NZ'}">🇳🇿 NZ - New Zealand</option>
-                                                <option value="IE" th:selected="${user != null &amp;&amp; user.phoneCountry == 'IE'}">🇮🇪 IE - Ireland</option>
-                                                <option value="DE" th:selected="${user != null &amp;&amp; user.phoneCountry == 'DE'}">🇩🇪 DE - Germany</option>
-                                                <option value="FR" th:selected="${user != null &amp;&amp; user.phoneCountry == 'FR'}">🇫🇷 FR - France</option>
-                                                <option value="NL" th:selected="${user != null &amp;&amp; user.phoneCountry == 'NL'}">🇳🇱 NL - Netherlands</option>
-                                                <option value="BE" th:selected="${user != null &amp;&amp; user.phoneCountry == 'BE'}">🇧🇪 BE - Belgium</option>
-                                                <option value="ES" th:selected="${user != null &amp;&amp; user.phoneCountry == 'ES'}">🇪🇸 ES - Spain</option>
-                                                <option value="IT" th:selected="${user != null &amp;&amp; user.phoneCountry == 'IT'}">🇮🇹 IT - Italy</option>
-                                                <option value="JP" th:selected="${user != null &amp;&amp; user.phoneCountry == 'JP'}">🇯🇵 JP - Japan</option>
-                                                <option value="IN" th:selected="${user != null &amp;&amp; user.phoneCountry == 'IN'}">🇮🇳 IN - India</option>
-                                                <option value="BR" th:selected="${user != null &amp;&amp; user.phoneCountry == 'BR'}">🇧🇷 BR - Brazil</option>
-                                                <option value="MX" th:selected="${user != null &amp;&amp; user.phoneCountry == 'MX'}">🇲🇽 MX - Mexico</option>
-                                                <option value="SG" th:selected="${user != null &amp;&amp; user.phoneCountry == 'SG'}">🇸🇬 SG - Singapore</option>
-                                                <option value="HK" th:selected="${user != null &amp;&amp; user.phoneCountry == 'HK'}">🇭🇰 HK - Hong Kong</option>
-                                                <option value="ZA" th:selected="${user != null &amp;&amp; user.phoneCountry == 'ZA'}">🇿🇦 ZA - South Africa</option>
+                                                <option value="GB" th:selected="${user != null &amp;&amp; user.phoneCountry == 'GB'}" th:text="#{ui.00734}">🇬🇧 GB - United Kingdom</option>
+                                                <option value="US" th:selected="${user != null &amp;&amp; user.phoneCountry == 'US'}" th:text="#{ui.00735}">🇺🇸 US - United States</option>
+                                                <option value="CA" th:selected="${user != null &amp;&amp; user.phoneCountry == 'CA'}" th:text="#{ui.00736}">🇨🇦 CA - Canada</option>
+                                                <option value="AU" th:selected="${user != null &amp;&amp; user.phoneCountry == 'AU'}" th:text="#{ui.00737}">🇦🇺 AU - Australia</option>
+                                                <option value="NZ" th:selected="${user != null &amp;&amp; user.phoneCountry == 'NZ'}" th:text="#{ui.00738}">🇳🇿 NZ - New Zealand</option>
+                                                <option value="IE" th:selected="${user != null &amp;&amp; user.phoneCountry == 'IE'}" th:text="#{ui.00739}">🇮🇪 IE - Ireland</option>
+                                                <option value="DE" th:selected="${user != null &amp;&amp; user.phoneCountry == 'DE'}" th:text="#{ui.00740}">🇩🇪 DE - Germany</option>
+                                                <option value="FR" th:selected="${user != null &amp;&amp; user.phoneCountry == 'FR'}" th:text="#{ui.00741}">🇫🇷 FR - France</option>
+                                                <option value="NL" th:selected="${user != null &amp;&amp; user.phoneCountry == 'NL'}" th:text="#{ui.00742}">🇳🇱 NL - Netherlands</option>
+                                                <option value="BE" th:selected="${user != null &amp;&amp; user.phoneCountry == 'BE'}" th:text="#{ui.00743}">🇧🇪 BE - Belgium</option>
+                                                <option value="ES" th:selected="${user != null &amp;&amp; user.phoneCountry == 'ES'}" th:text="#{ui.00744}">🇪🇸 ES - Spain</option>
+                                                <option value="IT" th:selected="${user != null &amp;&amp; user.phoneCountry == 'IT'}" th:text="#{ui.00745}">🇮🇹 IT - Italy</option>
+                                                <option value="JP" th:selected="${user != null &amp;&amp; user.phoneCountry == 'JP'}" th:text="#{ui.00746}">🇯🇵 JP - Japan</option>
+                                                <option value="IN" th:selected="${user != null &amp;&amp; user.phoneCountry == 'IN'}" th:text="#{ui.00747}">🇮🇳 IN - India</option>
+                                                <option value="BR" th:selected="${user != null &amp;&amp; user.phoneCountry == 'BR'}" th:text="#{ui.00748}">🇧🇷 BR - Brazil</option>
+                                                <option value="MX" th:selected="${user != null &amp;&amp; user.phoneCountry == 'MX'}" th:text="#{ui.00749}">🇲🇽 MX - Mexico</option>
+                                                <option value="SG" th:selected="${user != null &amp;&amp; user.phoneCountry == 'SG'}" th:text="#{ui.00750}">🇸🇬 SG - Singapore</option>
+                                                <option value="HK" th:selected="${user != null &amp;&amp; user.phoneCountry == 'HK'}" th:text="#{ui.00751}">🇭🇰 HK - Hong Kong</option>
+                                                <option value="ZA" th:selected="${user != null &amp;&amp; user.phoneCountry == 'ZA'}" th:text="#{ui.00752}">🇿🇦 ZA - South Africa</option>
                                             </select>
                                         </div>
                                         <div class="profile-phone-row__number">
-                                            <label class="profile-field-label">Phone number</label>
-                                            <input type="tel" id="profile-phone-input" name="phoneNumber" th:value="${user != null &amp;&amp; user.phoneNumber != null ? user.phoneNumber : ''}" class="profile-input mt-1" inputmode="numeric" placeholder="Enter phone number" />
+                                            <label class="profile-field-label" th:text="#{ui.00753}">Phone number</label>
+                                            <input type="tel" id="profile-phone-input" name="phoneNumber" th:value="${user != null &amp;&amp; user.phoneNumber != null ? user.phoneNumber : ''}" class="profile-input mt-1" inputmode="numeric" placeholder="Enter phone number"  th:placeholder="#{ui.00754}"/>
                                         </div>
                                     </div>
                                     <p th:if="${profileFieldErrors != null &amp;&amp; profileFieldErrors.containsKey('phoneNumber')}" class="mt-2 text-xs text-rose-600" th:text="${profileFieldErrors['phoneNumber']}">Phone error.</p>
@@ -349,18 +349,18 @@
                             </div>
                         </div>
                         <div class="min-w-0">
-                            <p class="profile-field-heading">Name</p>
+                            <p class="profile-field-heading" th:text="#{ui.00131}">Name</p>
                             <div class="profile-inline-field mt-1">
                                           <p class="profile-inline-view text-sm font-semibold text-slate-800 dark:text-slate-100"
                                    th:text="${user != null ? user.fullName : 'Profile'}">Profile</p>
                                 <div class="profile-inline-edit grid gap-3 sm:grid-cols-2">
                                     <div>
-                                        <label class="profile-field-label">First name</label>
+                                        <label class="profile-field-label" th:text="#{ui.00755}">First name</label>
                                         <input type="text" id="profile-first-name-input" name="firstName" th:value="${user != null ? user.firstName : ''}" class="profile-input" />
                                         <p th:if="${profileFieldErrors != null &amp;&amp; profileFieldErrors.containsKey('firstName')}" class="mt-1 text-xs text-rose-600" th:text="${profileFieldErrors['firstName']}">First name error.</p>
                                     </div>
                                     <div>
-                                        <label class="profile-field-label">Last name</label>
+                                        <label class="profile-field-label" th:text="#{ui.00756}">Last name</label>
                                         <input type="text" id="profile-last-name-input" name="lastName" th:value="${user != null ? user.lastName : ''}" class="profile-input" />
                                         <p th:if="${profileFieldErrors != null &amp;&amp; profileFieldErrors.containsKey('lastName')}" class="mt-1 text-xs text-rose-600" th:text="${profileFieldErrors['lastName']}">Last name error.</p>
                                     </div>
@@ -372,25 +372,25 @@
                     <div class="grid gap-x-8 gap-y-4 py-4 sm:grid-cols-2">
                         <div class="min-w-0">
                             <div class="profile-field-heading-with-info">
-                                <p class="profile-field-heading">Date of birth</p>
+                                <p class="profile-field-heading" th:text="#{ui.00757}">Date of birth</p>
                                 <button type="button"
                                         class="profile-warning-hint"
                                         aria-label="Date of birth can only be set once and cannot be changed"
-                                        tabindex="0">
+                                        tabindex="0" th:attr="aria-label=#{ui.00758}">
                                     <svg class="profile-warning-hint__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-7.4 12.8A2 2 0 004.62 20h14.76a2 2 0 001.73-3.34l-7.4-12.8a2 2 0 00-3.46 0z"/>
                                     </svg>
-                                    <span class="profile-warning-hint__tooltip" role="tooltip">One-time input: once saved, date of birth cannot be changed.</span>
+                                    <span class="profile-warning-hint__tooltip" role="tooltip" th:text="#{ui.00759}">One-time input: once saved, date of birth cannot be changed.</span>
                                 </button>
                             </div>
                             <div class="profile-inline-field mt-1">
                                 <div class="profile-inline-view flex flex-wrap items-center gap-2">
                                     <p class="text-sm font-semibold text-slate-800 dark:text-slate-100"
                                        th:text="${user != null &amp;&amp; user.dateOfBirth != null ? #temporals.format(user.dateOfBirth, 'dd MMM yyyy') : 'Not set'}">Not set</p>
-                                    <span th:if="${user != null &amp;&amp; user.dateOfBirth != null}" class="profile-badge-verified">Locked</span>
+                                    <span th:if="${user != null &amp;&amp; user.dateOfBirth != null}" class="profile-badge-verified" th:text="#{ui.00210}">Locked</span>
                                 </div>
                                 <div class="profile-inline-edit">
-                                    <label class="profile-field-label">Birth date</label>
+                                    <label class="profile-field-label" th:text="#{ui.00760}">Birth date</label>
                                     <input type="date"
                                            id="profile-date-of-birth-input"
                                            name="dateOfBirth"
@@ -419,8 +419,8 @@
                     </div>
 
                     <div class="profile-edit hidden mt-5 border-t border-slate-200/70 pt-5 dark:border-slate-800">
-                    <h3 class="text-base font-semibold text-slate-900 dark:text-white">Profile photo</h3>
-                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Upload a new image (PNG, JPG, or WebP, max 2 MB).</p>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-white" th:text="#{ui.00426}">Profile photo</h3>
+                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.00761}">Upload a new image (PNG, JPG, or WebP, max 2 MB).</p>
                     <div id="profile-image-dropzone" class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-4 transition-colors dark:border-slate-700 dark:bg-slate-900/30">
                     <div class="flex flex-wrap items-center gap-3">
                         <button type="button"
@@ -433,28 +433,28 @@
                                      th:attr="data-original-src=${user.profileImageUrl}"
                                      alt="Current photo"
                                      class="h-full w-full object-cover"
-                                     id="profile-upload-preview-image" />
+                                     id="profile-upload-preview-image"  th:alt="#{ui.00762}"/>
                                 <span th:if="${user == null || user.profileImageUrl == null}"
                                       class="text-sm font-semibold text-slate-500"
-                                      id="profile-upload-preview-fallback">N/A</span>
+                                      id="profile-upload-preview-fallback" th:text="#{ui.00136}">N/A</span>
                             </div>
                         </button>
                         <div class="flex flex-col gap-2">
                             <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" id="profile-image-select" class="profile-btn-secondary">Choose file</button>
-                                <button type="button" id="profile-image-remove" class="profile-btn-secondary">Remove photo</button>
-                                <button type="button" id="profile-image-revert" class="profile-btn-secondary">Revert to original</button>
-                                <span id="profile-image-file-name" class="text-xs text-slate-500 dark:text-slate-400">No file selected</span>
+                                <button type="button" id="profile-image-select" class="profile-btn-secondary" th:text="#{ui.00763}">Choose file</button>
+                                <button type="button" id="profile-image-remove" class="profile-btn-secondary" th:text="#{ui.00764}">Remove photo</button>
+                                <button type="button" id="profile-image-revert" class="profile-btn-secondary" th:text="#{ui.00765}">Revert to original</button>
+                                <span id="profile-image-file-name" class="text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.00766}">No file selected</span>
                             </div>
                             <input type="file" id="profileImageInput" name="profileImage"
                                    accept="image/png,image/jpeg,image/webp"
                                    class="sr-only" />
                             <input type="hidden" id="remove-profile-image" name="removeProfileImage" value="false" />
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Drag and drop an image here.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.00767}">Drag and drop an image here.</p>
                         </div>
                     </div>
                             </div>
-                    <p id="profile-image-error" class="mt-2 text-xs text-rose-600 hidden">Invalid image.</p>
+                    <p id="profile-image-error" class="mt-2 text-xs text-rose-600 hidden" th:text="#{ui.00768}">Invalid image.</p>
                     <p th:if="${profileFieldErrors != null &amp;&amp; profileFieldErrors.containsKey('profileImage')}" class="mt-2 text-xs text-rose-600" th:text="${profileFieldErrors['profileImage']}">Image error.</p>
                 </div>
                 </form>
@@ -471,21 +471,21 @@
                      th:classappend="${!isPremium ? ' profile-customiser-locked' : ''}">
                     <div class="flex items-start justify-between gap-3">
                         <div>
-                            <h3 class="text-base font-semibold text-slate-900 dark:text-white"><span class="text-emerald-600 dark:text-emerald-400">Premium Feature</span> – Customise Profile</h3>
+                            <h3 class="text-base font-semibold text-slate-900 dark:text-white"><span class="text-emerald-600 dark:text-emerald-400" th:text="#{ui.00769}">Premium Feature</span> <th:block th:text="#{ui.00770}">– Customise Profile</th:block></h3>
                         </div>
-                        <a th:if="${!isPremium}" th:href="@{/pricing}" class="profile-btn-small">Unlock Premium</a>
+                        <a th:if="${!isPremium}" th:href="@{/pricing}" class="profile-btn-small" th:text="#{ui.00771}">Unlock Premium</a>
                     </div>
 
                     <div class="profile-inline-view mt-4" th:if="${!isPremium}">
                         <div class="rounded-2xl border border-emerald-300/70 bg-gradient-to-br from-emerald-50 via-amber-50/60 to-emerald-50/70 p-4 shadow-sm dark:border-emerald-700/50 dark:from-emerald-900/20 dark:via-amber-900/10 dark:to-emerald-900/15">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Premium customiser</p>
-                            <p class="mt-1 text-sm text-slate-700 dark:text-slate-200">Upgrade to unlock full profile styling controls and showcase your personal brand.</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300" th:text="#{ui.00772}">Premium customiser</p>
+                            <p class="mt-1 text-sm text-slate-700 dark:text-slate-200" th:text="#{ui.00773}">Upgrade to unlock full profile styling controls and showcase your personal brand.</p>
                             <div class="mt-3 grid gap-2 sm:grid-cols-2">
-                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200">Banner theme styles</div>
-                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200">Avatar ring effects</div>
-                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200">Card back design</div>
-                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200">Username + general text colours</div>
-                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200 sm:col-span-2">Visible milestone showcase (up to 6)</div>
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200" th:text="#{ui.00774}">Banner theme styles</div>
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200" th:text="#{ui.00775}">Avatar ring effects</div>
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200" th:text="#{ui.00776}">Card back design</div>
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200" th:text="#{ui.00777}">Username + general text colours</div>
+                                <div class="rounded-xl border border-amber-300/70 bg-white/75 px-3 py-2 text-xs text-slate-700 dark:border-amber-700/50 dark:bg-slate-900/45 dark:text-slate-200 sm:col-span-2" th:text="#{ui.00778}">Visible milestone showcase (up to 6)</div>
                             </div>
                         </div>
                     </div>
@@ -497,33 +497,33 @@
                         <div class="rounded-2xl border border-emerald-300/70 bg-gradient-to-br from-emerald-50/90 via-amber-50/55 to-emerald-100/80 p-4 shadow-sm dark:border-emerald-700/50 dark:from-emerald-900/20 dark:via-amber-900/10 dark:to-emerald-900/20">
                             <div class="flex items-start justify-between gap-2">
                                 <div>
-                                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Premium customiser active</p>
-                                    <p class="mt-1 text-sm text-slate-700 dark:text-slate-200">Your selected profile customisation settings are active.</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300" th:text="#{ui.00779}">Premium customiser active</p>
+                                    <p class="mt-1 text-sm text-slate-700 dark:text-slate-200" th:text="#{ui.00780}">Your selected profile customisation settings are active.</p>
                                 </div>
-                                <span class="inline-flex items-center rounded-full border border-amber-300/80 bg-amber-100/80 px-2.5 py-1 text-[11px] font-semibold text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/25 dark:text-amber-300">Premium</span>
+                                <span class="inline-flex items-center rounded-full border border-amber-300/80 bg-amber-100/80 px-2.5 py-1 text-[11px] font-semibold text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/25 dark:text-amber-300" th:text="#{ui.00781}">Premium</span>
                             </div>
 
                             <div class="mt-3 grid gap-2 sm:grid-cols-2">
                                 <div class="rounded-xl border border-emerald-200/80 bg-white/75 px-3 py-2 text-xs dark:border-emerald-800/50 dark:bg-slate-900/45">
-                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Banner</p>
+                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00782}">Banner</p>
                                     <p class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100" th:text="${#strings.replace(bannerChoice, '_', ' ')}">Aurora</p>
                                 </div>
                                 <div class="rounded-xl border border-emerald-200/80 bg-white/75 px-3 py-2 text-xs dark:border-emerald-800/50 dark:bg-slate-900/45">
-                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Ring</p>
+                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00783}">Ring</p>
                                     <p class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100" th:text="${#strings.replace(ringChoice, '_', ' ')}">Neon Dual</p>
                                 </div>
                                 <div class="rounded-xl border border-emerald-200/80 bg-white/75 px-3 py-2 text-xs dark:border-emerald-800/50 dark:bg-slate-900/45">
-                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Card back</p>
+                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00784}">Card back</p>
                                     <p class="mt-0.5 font-semibold text-slate-800 dark:text-slate-100" th:text="${#strings.replace(backChoice, '_', ' ')}">Glass</p>
                                 </div>
                                 <div class="rounded-xl border border-emerald-200/80 bg-white/75 px-3 py-2 text-xs dark:border-emerald-800/50 dark:bg-slate-900/45">
-                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Milestones</p>
+                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00212}">Milestones</p>
                                     <div class="mt-1 flex flex-wrap gap-1" th:if="${selectedProfileMilestones != null and selectedProfileMilestones.size() > 0}">
                                         <span th:each="ms : ${profileMilestoneOptions}" th:if="${selectedProfileMilestones.contains(ms.key)}"
                                               class="inline-flex items-center rounded-full border border-amber-300/70 bg-amber-100/70 px-2 py-0.5 text-[10px] font-semibold text-amber-800 dark:border-amber-700/50 dark:bg-amber-900/25 dark:text-amber-300"
                                               th:text="${ms.title}">Milestone</span>
                                     </div>
-                                    <p class="mt-0.5 font-semibold text-slate-700 dark:text-slate-200" th:if="${selectedProfileMilestones == null or selectedProfileMilestones.size() == 0}">No milestones selected</p>
+                                    <p class="mt-0.5 font-semibold text-slate-700 dark:text-slate-200" th:if="${selectedProfileMilestones == null or selectedProfileMilestones.size() == 0}" th:text="#{ui.00785}">No milestones selected</p>
                                 </div>
                             </div>
                         </div>
@@ -535,7 +535,7 @@
                         <div th:classappend="${!isPremium ? 'rounded-lg border border-amber-300/50 bg-amber-100/30 backdrop-blur-sm p-4 space-y-4 opacity-50 pointer-events-none dark:border-amber-700/30 dark:bg-amber-900/20' : 'p-4 space-y-4'}">
                         <div class="grid gap-3 sm:grid-cols-4">
                             <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                                Banner theme
+                                <th:block th:text="#{ui.00786}">Banner theme</th:block>
                                 <select id="customiser-banner" name="bannerTheme" th:disabled="${!isPremium}" class="profile-input mt-1" data-searchable-select="Banner theme">
                                     <option th:each="theme : ${profileBannerThemes}"
                                             th:value="${theme}"
@@ -544,7 +544,7 @@
                                 </select>
                             </label>
                             <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                                Ring style
+                                <th:block th:text="#{ui.00787}">Ring style</th:block>
                                 <select id="customiser-ring" name="ringStyle" th:disabled="${!isPremium}" class="profile-input mt-1" data-searchable-select="Ring style">
                                     <option th:each="ring : ${profileRingStyles}"
                                             th:value="${ring}"
@@ -553,7 +553,7 @@
                                 </select>
                             </label>
                             <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                                Card back style
+                                <th:block th:text="#{ui.00788}">Card back style</th:block>
                                 <select id="customiser-back" name="cardBackStyle" th:disabled="${!isPremium}" class="profile-input mt-1" data-searchable-select="Card back style">
                                     <option th:each="back : ${profileCardBackStyles}"
                                             th:value="${back}"
@@ -562,7 +562,7 @@
                                 </select>
                             </label>
                             <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                                Username text colour
+                                <th:block th:text="#{ui.00789}">Username text colour</th:block>
                                 <input id="customiser-text-color"
                                        name="textColor"
                                        type="color"
@@ -571,7 +571,7 @@
                                        th:value="${userSettings != null and userSettings.profileTextColor != null and !#strings.isEmpty(userSettings.profileTextColor) ? userSettings.profileTextColor : '#F8FAFC'}" />
                             </label>
                             <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                                    General text colour
+                                    <th:block th:text="#{ui.00790}">General text colour</th:block>
                                     <input id="customiser-general-text-color"
                                         name="generalTextColor"
                                        type="color"
@@ -582,8 +582,8 @@
                         </div>
 
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">Visible milestones (up to 6)</p>
-                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Only unlocked milestones can be pinned to your profile.</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300" th:text="#{ui.00791}">Visible milestones (up to 6)</p>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.00792}">Only unlocked milestones can be pinned to your profile.</p>
                             <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 <label th:each="ms : ${profileMilestoneOptions}" class="customiser-milestone-option">
                                     <input type="checkbox" name="milestoneKeys" th:value="${ms.key}" th:checked="${selectedProfileMilestones != null and selectedProfileMilestones.contains(ms.key)}" th:disabled="${!isPremium}" th:attr="data-milestone-title=${ms.title}" class="customiser-milestone customiser-milestone-input sr-only peer" />
@@ -594,7 +594,7 @@
                                     </span>
                                 </label>
                             </div>
-                            <p id="customiser-milestone-msg" class="mt-2 hidden text-xs text-amber-700 dark:text-amber-300">You can select up to 6 milestones.</p>
+                            <p id="customiser-milestone-msg" class="mt-2 hidden text-xs text-amber-700 dark:text-amber-300" th:text="#{ui.00793}">You can select up to 6 milestones.</p>
                         </div>
                         </div>
 
@@ -602,7 +602,7 @@
 
                     <div class="profile-edit-actions profile-form-actions-bottom mt-5 items-center justify-end gap-3" th:classappend="${isPremium ? 'border-t border-slate-200/70 pt-4 dark:border-slate-800' : 'border-t border-slate-200/70 pt-4 dark:border-slate-800 -mt-8'}">
                         <button type="button" id="cancel-profile-edit" class="profile-btn-secondary" th:text="#{profile.cancel}">Cancel</button>
-                        <button type="submit" form="profile-edit-form" class="profile-btn-primary" id="save-profile-edit">Save profile</button>
+                        <button type="submit" form="profile-edit-form" class="profile-btn-primary" id="save-profile-edit" th:text="#{ui.00732}">Save profile</button>
                     </div>
                 </div>
             </section>
@@ -612,32 +612,32 @@
                 <div class="profile-section-header">
                     <div>
                         <h2 class="profile-section-title flex items-center gap-1.5">
-                            Health Conditions
+                            <th:block th:text="#{ui.00794}">Health Conditions</th:block>
                             <span class="relative inline-flex group/conditions-tip">
-                                <svg class="h-4 w-4 cursor-pointer text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Why conditions affect training">
+                                <svg class="h-4 w-4 cursor-pointer text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Why conditions affect training" th:attr="aria-label=#{ui.00795}">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <span class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal text-slate-700 shadow-lg opacity-0 transition-opacity group-hover/conditions-tip:opacity-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                                <span class="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-normal text-slate-700 shadow-lg opacity-0 transition-opacity group-hover/conditions-tip:opacity-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" th:text="#{ui.00796}">
                                     Health conditions shape recovery, exercise intensity, and movement safety. We use them to tailor workouts and recommendations.
                                 </span>
                             </span>
                         </h2>
-                        <p class="profile-section-subtitle">Track permanent or time-limited conditions that affect your training.</p>
+                        <p class="profile-section-subtitle" th:text="#{ui.00797}">Track permanent or time-limited conditions that affect your training.</p>
                     </div>
-                    <p class="text-xs text-slate-500 text-right">Premium members receive inbox follow-ups when timed conditions end.</p>
+                    <p class="text-xs text-slate-500 text-right" th:text="#{ui.00798}">Premium members receive inbox follow-ups when timed conditions end.</p>
                 </div>
                 <div class="grid items-stretch gap-6 lg:grid-cols-2">
                     <!-- Permanent conditions -->
                     <div class="profile-settings-card profile-condition-card">
-                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Permanent conditions</h3>
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white" th:text="#{ui.00799}">Permanent conditions</h3>
                         <ul class="mt-3 space-y-2">
-                            <li th:if="${permanentConditions == null || permanentConditions.isEmpty()}" class="text-sm text-slate-500">No permanent conditions saved.</li>
+                            <li th:if="${permanentConditions == null || permanentConditions.isEmpty()}" class="text-sm text-slate-500" th:text="#{ui.00800}">No permanent conditions saved.</li>
                             <li th:each="condition : ${permanentConditions}"
                                 class="flex items-center justify-between rounded-xl border border-slate-200/70 bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
                                 <span th:text="${condition.name}">Condition</span>
                                 <form th:action="@{/profile/conditions/{id}/delete(id=${condition.id})}" method="post">
                                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                    <button type="submit" class="text-xs text-rose-600 hover:underline">Remove</button>
+                                    <button type="submit" class="text-xs text-rose-600 hover:underline" th:text="#{ui.00801}">Remove</button>
                                 </form>
                             </li>
                         </ul>
@@ -645,18 +645,18 @@
                         <form th:action="@{/profile/conditions/permanent}" method="post" class="mt-3 grid gap-2.5">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                                Add condition
+                                <th:block th:text="#{ui.00802}">Add condition</th:block>
                                 <input type="text" name="conditionName" class="condition-input" />
                             </label>
-                            <button type="submit" class="profile-btn-small justify-self-start">Add permanent</button>
+                            <button type="submit" class="profile-btn-small justify-self-start" th:text="#{ui.00803}">Add permanent</button>
                         </form>
                     </div>
 
                     <!-- Timed conditions -->
                     <div class="profile-settings-card profile-condition-card">
-                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">Timed conditions</h3>
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white" th:text="#{ui.00804}">Timed conditions</h3>
                         <ul class="mt-3 space-y-3">
-                            <li th:if="${timedConditions == null || timedConditions.isEmpty()}" class="text-sm text-slate-500">No timed conditions saved.</li>
+                            <li th:if="${timedConditions == null || timedConditions.isEmpty()}" class="text-sm text-slate-500" th:text="#{ui.00805}">No timed conditions saved.</li>
                             <li th:each="condition : ${timedConditions}"
                                 class="rounded-xl border border-slate-200/70 bg-white/90 p-3 text-sm text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-200">
                                 <div class="flex items-center justify-between">
@@ -673,15 +673,15 @@
                                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                         <input type="number" name="extraDays" min="1" value="7"
                                                class="w-20 rounded-lg border border-slate-200/80 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-950" />
-                                        <button type="submit" class="text-xs text-slate-700 hover:underline dark:text-slate-200">Extend</button>
+                                        <button type="submit" class="text-xs text-slate-700 hover:underline dark:text-slate-200" th:text="#{ui.00806}">Extend</button>
                                     </form>
                                     <form th:action="@{/profile/conditions/{id}/recover(id=${condition.id})}" method="post">
                                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <button type="submit" class="text-xs text-emerald-600 hover:underline">Mark recovered</button>
+                                        <button type="submit" class="text-xs text-emerald-600 hover:underline" th:text="#{ui.00807}">Mark recovered</button>
                                     </form>
                                     <form th:action="@{/profile/conditions/{id}/delete(id=${condition.id})}" method="post">
                                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <button type="submit" class="text-xs text-rose-600 hover:underline">Remove</button>
+                                        <button type="submit" class="text-xs text-rose-600 hover:underline" th:text="#{ui.00801}">Remove</button>
                                     </form>
                                 </div>
                             </li>
@@ -691,19 +691,19 @@
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <div class="grid gap-2.5 sm:grid-cols-2">
                                 <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300 sm:col-span-2">
-                                    Condition name
+                                    <th:block th:text="#{ui.00808}">Condition name</th:block>
                                     <input type="text" name="conditionName" class="condition-input" />
                                 </label>
                                 <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                                    Start date
+                                    <th:block th:text="#{ui.00589}">Start date</th:block>
                                     <input type="date" name="startDate" th:value="${today}" class="condition-input custom-date-input" data-picker-label="Select start date" />
                                 </label>
                                 <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                                    Duration (days)
+                                    <th:block th:text="#{ui.00809}">Duration (days)</th:block>
                                     <input type="number" name="durationDays" min="1" value="14" class="condition-input" />
                                 </label>
                             </div>
-                            <button type="submit" class="profile-btn-small justify-self-start">Add timed condition</button>
+                            <button type="submit" class="profile-btn-small justify-self-start" th:text="#{ui.00810}">Add timed condition</button>
                         </form>
                     </div>
                 </div>
@@ -715,22 +715,22 @@
     <!-- OPTIONS DRAWER -->
     <div id="options-drawer-root" class="profile-settings-drawer" aria-hidden="true">
         <div class="profile-settings-overlay" id="options-overlay" aria-hidden="true"></div>
-        <aside class="profile-settings-panel" id="options-panel" role="dialog" aria-modal="true" aria-label="Options">
+        <aside class="profile-settings-panel" id="options-panel" role="dialog" aria-modal="true" aria-label="Options" th:attr="aria-label=#{ui.00724}">
             <div class="profile-settings-panel-header">
                 <div class="flex items-center gap-2">
                     <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
-                    <h2 class="text-base font-bold text-slate-900 dark:text-white">Options</h2>
+                    <h2 class="text-base font-bold text-slate-900 dark:text-white" th:text="#{ui.00724}">Options</h2>
                 </div>
             </div>
 
             <div class="profile-settings-panel-body space-y-8">
                 <div class="profile-settings-group">
-                    <h3 class="profile-settings-category-title">Appearance</h3>
+                    <h3 class="profile-settings-category-title" th:text="#{ui.00811}">Appearance</h3>
                     <div class="profile-settings-panel-section">
-                        <h3 class="profile-settings-panel-section-title">Appearance</h3>
-                        <p class="profile-settings-panel-section-subtitle">Choose between light and dark mode.</p>
+                        <h3 class="profile-settings-panel-section-title" th:text="#{ui.00811}">Appearance</h3>
+                        <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00812}">Choose between light and dark mode.</p>
                         <div class="mt-4">
                             <div class="profile-theme-picker" id="theme-picker">
                                 <button type="button" class="profile-theme-option"
@@ -741,7 +741,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
                                     </svg>
-                                    Light
+                                    <th:block th:text="#{ui.00318}">Light</th:block>
                                 </button>
                                 <button type="button" class="profile-theme-option"
                                         data-theme="SYSTEM"
@@ -751,7 +751,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                     </svg>
-                                    Auto
+                                    <th:block th:text="#{ui.00814}">Auto</th:block>
                                 </button>
                                 <button type="button" class="profile-theme-option"
                                         data-theme="DARK"
@@ -761,7 +761,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                                     </svg>
-                                    Dark
+                                    <th:block th:text="#{ui.00319}">Dark</th:block>
                                 </button>
                             </div>
                             <form th:action="@{/profile/settings/theme}" method="post" id="theme-form" class="hidden">
@@ -771,7 +771,7 @@
                             </form>
                             <p id="theme-save-feedback"
                                class="mt-2 hidden text-xs text-emerald-600 dark:text-emerald-400"
-                               role="status" aria-live="polite">Appearance saved.</p>
+                               role="status" aria-live="polite" th:text="#{ui.00816}">Appearance saved.</p>
                         </div>
                     </div>
 
@@ -779,16 +779,16 @@
                           id="calendar-display-form"
                           class="profile-settings-panel-section mt-4">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <h3 class="profile-settings-panel-section-title">Calendar display</h3>
-                        <p class="profile-settings-panel-section-subtitle">Control how tasks and workouts appear on the calendar.</p>
+                        <h3 class="profile-settings-panel-section-title" th:text="#{ui.00817}">Calendar display</h3>
+                        <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00818}">Control how tasks and workouts appear on the calendar.</p>
                         <div class="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-200">
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="radio" name="layout" value="COMBINED_LIST"
                                        th:checked="${userSettings != null &amp;&amp; userSettings.calendarTaskLayout.name() == 'COMBINED_LIST'}"
                                        class="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500" />
                                 <div>
-                                    <div class="font-semibold">Detailed</div>
-                                    <div class="text-xs text-slate-500">All tasks and workouts in a single combined list.</div>
+                                    <div class="font-semibold" th:text="#{ui.00819}">Detailed</div>
+                                    <div class="text-xs text-slate-500" th:text="#{ui.00820}">All tasks and workouts in a single combined list.</div>
                                 </div>
                             </label>
                             <label class="flex items-start gap-3 cursor-pointer">
@@ -796,40 +796,40 @@
                                        th:checked="${userSettings != null &amp;&amp; userSettings.calendarTaskLayout.name() == 'SEPARATED_BY_CATEGORY'}"
                                        class="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500" />
                                 <div>
-                                    <div class="font-semibold">Grouped</div>
-                                    <div class="text-xs text-slate-500">Tasks and workouts organised into separate categories.</div>
+                                    <div class="font-semibold" th:text="#{ui.00821}">Grouped</div>
+                                    <div class="text-xs text-slate-500" th:text="#{ui.00822}">Tasks and workouts organised into separate categories.</div>
                                 </div>
                             </label>
                         </div>
                         <p id="calendar-display-feedback"
                            class="mt-3 hidden text-xs text-emerald-600 dark:text-emerald-400"
-                           role="status" aria-live="polite">Calendar display saved.</p>
+                           role="status" aria-live="polite" th:text="#{ui.00823}">Calendar display saved.</p>
                     </form>
                 </div>
 
                 <div class="profile-settings-group">
-                    <h3 class="profile-settings-category-title">Preferences</h3>
+                    <h3 class="profile-settings-category-title" th:text="#{ui.00298}">Preferences</h3>
                     <div class="profile-settings-panel-section">
-                        <h3 class="profile-settings-panel-section-title">Exercise preferences</h3>
-                        <p class="profile-settings-panel-section-subtitle">Update goals, training preferences, and more.</p>
-                        <a th:href="@{/select-preferences}" class="mt-4 profile-btn-small inline-flex">Open preferences</a>
+                        <h3 class="profile-settings-panel-section-title" th:text="#{ui.00824}">Exercise preferences</h3>
+                        <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00825}">Update goals, training preferences, and more.</p>
+                        <a th:href="@{/select-preferences}" class="mt-4 profile-btn-small inline-flex" th:text="#{ui.00473}">Open preferences</a>
                     </div>
                 </div>
 
                 <div class="profile-settings-group">
-                    <h3 class="profile-settings-category-title">Templates</h3>
+                    <h3 class="profile-settings-category-title" th:text="#{ui.00826}">Templates</h3>
                     <div class="profile-settings-panel-section mt-4">
-                        <h3 class="profile-settings-panel-section-title">Workout session templates</h3>
-                        <p class="profile-settings-panel-section-subtitle">Choose your preferred workout layout: Flow, Professional, Plain, or Futuristic. Create custom layouts in the template builder.</p>
-                        <a th:href="@{/workout-templates}" class="mt-4 profile-btn-small inline-flex">Manage templates</a>
+                        <h3 class="profile-settings-panel-section-title" th:text="#{ui.00827}">Workout session templates</h3>
+                        <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00828}">Choose your preferred workout layout: Flow, Professional, Plain, or Futuristic. Create custom layouts in the template builder.</p>
+                        <a th:href="@{/workout-templates}" class="mt-4 profile-btn-small inline-flex" th:text="#{ui.00829}">Manage templates</a>
                     </div>
                 </div>
 
                 <div class="profile-settings-group">
-                    <h3 class="profile-settings-category-title">Payments</h3>
+                    <h3 class="profile-settings-category-title" th:text="#{ui.00830}">Payments</h3>
                     <div class="profile-settings-panel-section">
-                        <h3 class="profile-settings-panel-section-title">Payment &amp; Cards</h3>
-                        <p class="profile-settings-panel-section-subtitle">Manage saved payment methods. Only the last 4 digits are shown.</p>
+                        <h3 class="profile-settings-panel-section-title" th:text="#{ui.00831}">Payment &amp; Cards</h3>
+                        <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00832}">Manage saved payment methods. Only the last 4 digits are shown.</p>
 
                         <div th:if="${cardSuccess}"
                              class="mt-3 rounded border border-emerald-300/50 bg-emerald-50 p-2 text-sm text-emerald-700 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300"
@@ -845,7 +845,7 @@
                                     <span class="font-semibold text-slate-900 dark:text-slate-100" th:text="${card.brand}">Visa</span>
                                     <span class="text-slate-500 text-sm dark:text-slate-400" th:text="' •••• ' + ${card.lastFour}"> •••• 4242</span>
                                     <span th:if="${card.default}"
-                                          class="ml-2 rounded-full border border-emerald-300/60 bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300">Default</span>
+                                          class="ml-2 rounded-full border border-emerald-300/60 bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700 dark:border-emerald-700/40 dark:bg-emerald-900/20 dark:text-emerald-300" th:text="#{ui.00833}">Default</span>
                                     <p class="text-xs text-slate-500 mt-0.5 dark:text-slate-400"
                                        th:text="${card.cardHolderName} + ' · Exp ' + ${card.expiryMonth < 10 ? '0' + card.expiryMonth : card.expiryMonth} + '/' + ${card.expiryYear}">Name · Exp 01/2030</p>
                                 </div>
@@ -854,7 +854,7 @@
                                           th:action="@{/profile/settings/cards/{id}/default(id=${card.id})}"
                                           method="post">
                                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <button type="submit" class="btn btn--secondary text-xs px-3 py-1">Set Default</button>
+                                        <button type="submit" class="btn btn--secondary text-xs px-3 py-1" th:text="#{ui.00834}">Set Default</button>
                                     </form>
                                     <button type="button"
                                             th:attr="data-card-id=${card.id},
@@ -864,22 +864,22 @@
                                                      data-year=${card.expiryYear},
                                                      data-default=${card.default}"
                                             data-open-edit-card
-                                            class="btn btn--secondary text-xs px-3 py-1">Edit</button>
+                                            class="btn btn--secondary text-xs px-3 py-1" th:text="#{ui.00138}">Edit</button>
                                     <form th:action="@{/profile/settings/cards/{id}/delete(id=${card.id})}"
                                           method="post"
                                           data-confirm-submit="Remove this card?">
                                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                         <button type="submit"
-                                                class="btn text-xs px-3 py-1 bg-red-900/40 border border-red-700/50 text-red-400 hover:bg-red-800/60">Remove</button>
+                                                class="btn text-xs px-3 py-1 bg-red-900/40 border border-red-700/50 text-red-400 hover:bg-red-800/60" th:text="#{ui.00801}">Remove</button>
                                     </form>
                                 </div>
                             </div>
                         </div>
                         <p th:if="${savedCards == null or #lists.isEmpty(savedCards)}"
-                           class="mt-3 text-sm text-slate-500">No saved cards yet.</p>
+                           class="mt-3 text-sm text-slate-500" th:text="#{ui.00835}">No saved cards yet.</p>
 
                         <details class="group mt-4">
-                            <summary class="cursor-pointer text-sm font-semibold text-emerald-700 hover:underline select-none dark:text-emerald-300">
+                            <summary class="cursor-pointer text-sm font-semibold text-emerald-700 hover:underline select-none dark:text-emerald-300" th:text="#{ui.00836}">
                                 + Add New Card
                             </summary>
                             <form th:action="@{/profile/settings/cards/add}" method="post"
@@ -889,12 +889,12 @@
                                 <input type="hidden" name="providerToken" id="addProviderTokenSettings" />
                                 <input type="hidden" name="lastFour" id="addLastFourSettings" />
                                 <div>
-                                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Cardholder Name *</label>
+                                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1" th:text="#{ui.00837}">Cardholder Name *</label>
                                     <input type="text" name="cardHolderName" required maxlength="200"
-                                           class="input-field w-full" placeholder="Name on card" />
+                                           class="input-field w-full" placeholder="Name on card"  th:placeholder="#{ui.00838}"/>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Card Number *</label>
+                                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1" th:text="#{ui.00839}">Card Number *</label>
                                     <div class="relative">
                                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                                              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -909,52 +909,52 @@
                                 </div>
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Brand *</label>
+                                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1" th:text="#{ui.00840}">Brand *</label>
                                         <select name="brand" required class="input-field w-full">
-                                            <option value="">Select brand</option>
-                                            <option value="Visa">Visa</option>
-                                            <option value="Mastercard">Mastercard</option>
-                                            <option value="Amex">Amex</option>
-                                            <option value="Discover">Discover</option>
-                                            <option value="Other">Other</option>
+                                            <option value="" th:text="#{ui.00841}">Select brand</option>
+                                            <option value="Visa" th:text="#{ui.00842}">Visa</option>
+                                            <option value="Mastercard" th:text="#{ui.00843}">Mastercard</option>
+                                            <option value="Amex" th:text="#{ui.00844}">Amex</option>
+                                            <option value="Discover" th:text="#{ui.00845}">Discover</option>
+                                            <option value="Other" th:text="#{ui.00360}">Other</option>
                                         </select>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Expiry Month *</label>
+                                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1" th:text="#{ui.00846}">Expiry Month *</label>
                                             <select name="expiryMonth" required class="input-field w-full">
-                                                <option value="">MM</option>
+                                                <option value="" th:text="#{ui.00847}">MM</option>
                                                 <option th:each="m : ${#numbers.sequence(1, 12)}"
                                                         th:value="${m}"
                                                         th:text="${m < 10 ? '0' + m : m}">01</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Year *</label>
+                                            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1" th:text="#{ui.00848}">Year *</label>
                                             <input type="number" name="expiryYear" required
                                                    th:min="${#dates.year(#dates.createNow())}"
                                                    th:max="${#dates.year(#dates.createNow()) + 20}"
-                                                   class="input-field w-full" placeholder="YYYY" />
+                                                   class="input-field w-full" placeholder="YYYY"  th:placeholder="#{ui.00849}"/>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" name="makeDefault" id="addCardDefaultSettings"
                                            class="h-4 w-4 rounded border-slate-300 bg-white text-emerald-600 dark:border-slate-600 dark:bg-slate-900" />
-                                    <label for="addCardDefaultSettings" class="text-sm text-slate-600 dark:text-slate-300">Set as default card</label>
+                                    <label for="addCardDefaultSettings" class="text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00850}">Set as default card</label>
                                 </div>
-                                <button type="submit" class="btn btn--primary text-sm w-full" aria-label="Save payment card">Save Card</button>
+                                <button type="submit" class="btn btn--primary text-sm w-full" aria-label="Save payment card" th:attr="aria-label=#{ui.00851}" th:text="#{ui.00852}">Save Card</button>
                             </form>
                         </details>
                     </div>
                 </div>
 
                 <div class="profile-settings-group">
-                    <h3 class="profile-settings-category-title">Password</h3>
+                    <h3 class="profile-settings-category-title" th:text="#{ui.00853}">Password</h3>
                     <div class="profile-settings-panel-section">
-                        <h3 class="profile-settings-panel-section-title">Password change</h3>
-                        <p class="profile-settings-panel-section-subtitle">Use secure reset flow to change your password.</p>
-                        <a th:href="@{/forgot-password}" class="mt-4 profile-btn-small inline-flex">Change password</a>
+                        <h3 class="profile-settings-panel-section-title" th:text="#{ui.00854}">Password change</h3>
+                        <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00855}">Use secure reset flow to change your password.</p>
+                        <a th:href="@{/forgot-password}" class="mt-4 profile-btn-small inline-flex" th:text="#{ui.00856}">Change password</a>
                     </div>
                 </div>
             </div>
@@ -964,7 +964,7 @@
     <!-- SETTINGS DRAWER -->
     <div id="settings-drawer-root" class="profile-settings-drawer" aria-hidden="true">
         <div class="profile-settings-overlay" id="settings-overlay" aria-hidden="true"></div>
-        <aside class="profile-settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-label="Settings">
+        <aside class="profile-settings-panel" id="settings-panel" role="dialog" aria-modal="true" aria-label="Settings" th:attr="aria-label=#{ui.00725}">
             <!-- Header -->
             <div class="profile-settings-panel-header">
                 <div class="flex items-center gap-2">
@@ -972,14 +972,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    <h2 class="text-base font-bold text-slate-900 dark:text-white">Settings</h2>
+                    <h2 class="text-base font-bold text-slate-900 dark:text-white" th:text="#{ui.00725}">Settings</h2>
                 </div>
                 <button type="button" id="close-settings-drawer"
                         class="inline-flex items-center gap-1 rounded-xl border border-slate-200/70 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900 transition-colors">
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
-                    Close
+                    <th:block th:text="#{ui.00857}">Close</th:block>
                 </button>
             </div>
 
@@ -987,46 +987,46 @@
             <div class="profile-settings-panel-body space-y-8">
 
                 <div class="profile-settings-group">
-                    <h3 class="profile-settings-category-title">Activity</h3>
+                    <h3 class="profile-settings-category-title" th:text="#{ui.00662}">Activity</h3>
                     <div class="profile-settings-panel-section" id="settings-exercise-logs-section">
-                        <h3 class="profile-settings-panel-section-title">Exercise logs</h3>
-                        <p class="profile-settings-panel-section-subtitle">Review your progress, trends, and workout history.</p>
-                        <a th:href="@{/exercise-log/list}" class="mt-4 profile-btn-small inline-flex">View exercise logs</a>
+                        <h3 class="profile-settings-panel-section-title" th:text="#{ui.00858}">Exercise logs</h3>
+                        <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00859}">Review your progress, trends, and workout history.</p>
+                        <a th:href="@{/exercise-log/list}" class="mt-4 profile-btn-small inline-flex" th:text="#{ui.00860}">View exercise logs</a>
                     </div>
                 </div>
 
 
                 <!-- Data Sharing -->
                 <div class="profile-settings-group">
-                <h3 class="profile-settings-category-title">Data Sharing</h3>
+                <h3 class="profile-settings-category-title" th:text="#{ui.00861}">Data Sharing</h3>
 
                 <!-- Accessibility -->
                 <form th:action="@{/profile/settings/accessibility}" method="post"
                       class="profile-settings-panel-section" id="accessibility-form">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <h3 class="profile-settings-panel-section-title">Accessibility</h3>
-                    <p class="profile-settings-panel-section-subtitle">Colour blind mode and disability support toggles.</p>
+                    <h3 class="profile-settings-panel-section-title" th:text="#{ui.00862}">Accessibility</h3>
+                    <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00863}">Colour blind mode and disability support toggles.</p>
                     <div class="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-200">
                         <label class="flex items-center justify-between gap-3 cursor-pointer">
-                            <span>Colour blind mode</span>
+                            <span th:text="#{ui.00331}">Colour blind mode</span>
                             <input type="checkbox" name="colorBlindMode"
                                    th:checked="${userSettings != null &amp;&amp; userSettings.colorBlindMode}"
                                    class="profile-checkbox" />
                         </label>
                         <label class="flex items-center justify-between gap-3 cursor-pointer">
-                            <span>Hearing support</span>
+                            <span th:text="#{ui.00864}">Hearing support</span>
                             <input type="checkbox" name="disabilityHearing"
                                    th:checked="${userSettings != null &amp;&amp; userSettings.disabilityHearing}"
                                    class="profile-checkbox" />
                         </label>
                         <label class="flex items-center justify-between gap-3 cursor-pointer">
-                            <span>Mobility support</span>
+                            <span th:text="#{ui.00865}">Mobility support</span>
                             <input type="checkbox" name="disabilityMobility"
                                    th:checked="${userSettings != null &amp;&amp; userSettings.disabilityMobility}"
                                    class="profile-checkbox" />
                         </label>
                         <label class="flex items-center justify-between gap-3 cursor-pointer">
-                            <span>Vision support</span>
+                            <span th:text="#{ui.00866}">Vision support</span>
                             <input type="checkbox" name="disabilityVision"
                                    th:checked="${userSettings != null &amp;&amp; userSettings.disabilityVision}"
                                    class="profile-checkbox" />
@@ -1034,65 +1034,65 @@
                     </div>
                     <div id="accessibility-feedback"
                          class="mt-3 hidden rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-400"
-                         role="status" aria-live="polite">
+                         role="status" aria-live="polite" th:text="#{ui.00867}">
                         Accessibility settings applied.
                     </div>
-                    <button type="submit" class="mt-4 profile-btn-small">Save accessibility</button>
+                    <button type="submit" class="mt-4 profile-btn-small" th:text="#{ui.00868}">Save accessibility</button>
                 </form>
 
                 <!-- Trainer Sharing -->
                 <form th:action="@{/profile/settings/trainer-sharing}" method="post"
                       class="profile-settings-panel-section">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <h3 class="profile-settings-panel-section-title">Trainer data sharing</h3>
-                    <p class="profile-settings-panel-section-subtitle">Choose what your active trainer can view.</p>
+                    <h3 class="profile-settings-panel-section-title" th:text="#{ui.00869}">Trainer data sharing</h3>
+                    <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00870}">Choose what your active trainer can view.</p>
                     <div class="mt-4 space-y-3 text-sm text-slate-700 dark:text-slate-200">
                         <label class="flex items-center justify-between gap-3 cursor-pointer">
-                            <span>Recovery signals</span>
+                            <span th:text="#{ui.00871}">Recovery signals</span>
                             <input type="checkbox" name="shareRecoverySignals"
                                    th:checked="${userSettings != null &amp;&amp; userSettings.shareRecoverySignals}"
                                    class="profile-checkbox" />
                         </label>
                         <label class="flex items-center justify-between gap-3 cursor-pointer">
-                            <span>Nutrition logs</span>
+                            <span th:text="#{ui.00872}">Nutrition logs</span>
                             <input type="checkbox" name="shareNutritionSignals"
                                    th:checked="${userSettings != null &amp;&amp; userSettings.shareNutritionSignals}"
                                    class="profile-checkbox" />
                         </label>
                         <label class="flex items-center justify-between gap-3 cursor-pointer">
-                            <span>Sleep signals</span>
+                            <span th:text="#{ui.00873}">Sleep signals</span>
                             <input type="checkbox" name="shareSleepSignals"
                                    th:checked="${userSettings != null &amp;&amp; userSettings.shareSleepSignals}"
                                    class="profile-checkbox" />
                         </label>
                         <label class="flex items-center justify-between gap-3 cursor-pointer">
-                            <span>Fatigue signals</span>
+                            <span th:text="#{ui.00874}">Fatigue signals</span>
                             <input type="checkbox" name="shareFatigueSignals"
                                    th:checked="${userSettings != null &amp;&amp; userSettings.shareFatigueSignals}"
                                    class="profile-checkbox" />
                         </label>
                         <label class="flex items-center justify-between gap-3 cursor-pointer">
-                            <span>Weight trend</span>
+                            <span th:text="#{ui.00376}">Weight trend</span>
                             <input type="checkbox" name="shareWeightTrend"
                                    th:checked="${userSettings != null &amp;&amp; userSettings.shareWeightTrend}"
                                    class="profile-checkbox" />
                         </label>
                     </div>
-                    <p class="mt-2 text-xs text-slate-500">Only your active trainer can see shared signals.</p>
-                    <button type="submit" class="mt-4 profile-btn-small">Save sharing</button>
+                    <p class="mt-2 text-xs text-slate-500" th:text="#{ui.00875}">Only your active trainer can see shared signals.</p>
+                    <button type="submit" class="mt-4 profile-btn-small" th:text="#{ui.00876}">Save sharing</button>
                 </form>
                 </div>
 
                 <!-- Data export -->
                 <div class="profile-settings-panel-section mt-4">
-                    <h3 class="profile-settings-panel-section-title">Request data export</h3>
-                    <p class="profile-settings-panel-section-subtitle">We will prepare a downloadable export and notify you in your inbox.</p>
+                    <h3 class="profile-settings-panel-section-title" th:text="#{ui.00877}">Request data export</h3>
+                    <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00878}">We will prepare a downloadable export and notify you in your inbox.</p>
                     <form th:action="@{/profile/data-export}" method="post" class="mt-4">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <button type="submit" class="profile-btn-secondary">Request export</button>
+                        <button type="submit" class="profile-btn-secondary" th:text="#{ui.00879}">Request export</button>
                     </form>
                     <div th:if="${recentExportRequests != null &amp;&amp; !recentExportRequests.isEmpty()}" class="mt-3 text-xs text-slate-500">
-                        Last request: <span class="font-semibold text-slate-700 dark:text-slate-200"
+                        <th:block th:text="#{ui.00880}">Last request:</th:block> <span class="font-semibold text-slate-700 dark:text-slate-200"
                                             th:text="${#temporals.format(recentExportRequests[0].requestedAt, 'dd MMM yyyy')}">-</span>
                     </div>
                 </div>
@@ -1100,19 +1100,19 @@
 
                 <!-- Danger zone -->
                 <div class="profile-settings-panel-section mt-4">
-                    <h3 class="profile-settings-panel-section-title text-rose-700 dark:text-rose-300">Danger Zone</h3>
-                    <p class="profile-settings-panel-section-subtitle">Use this action only when you are sure. It cannot be undone.</p>
+                    <h3 class="profile-settings-panel-section-title text-rose-700 dark:text-rose-300" th:text="#{ui.00881}">Danger Zone</h3>
+                    <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00882}">Use this action only when you are sure. It cannot be undone.</p>
                     <div class="profile-danger-zone mt-3">
-                        <h3 class="text-sm font-semibold text-rose-900 dark:text-rose-100">Delete account</h3>
-                        <p class="mt-1 text-sm text-rose-700 dark:text-rose-200">This action permanently removes all your data and cannot be undone.</p>
+                        <h3 class="text-sm font-semibold text-rose-900 dark:text-rose-100" th:text="#{ui.00883}">Delete account</h3>
+                        <p class="mt-1 text-sm text-rose-700 dark:text-rose-200" th:text="#{ui.00884}">This action permanently removes all your data and cannot be undone.</p>
                         <form th:action="@{/profile/delete}" method="post" class="mt-4 space-y-3">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <label class="block text-sm text-rose-900 dark:text-rose-100">
-                                Type DELETE to confirm
+                                <th:block th:text="#{ui.00885}">Type DELETE to confirm</th:block>
                                 <input type="text" name="confirmText"
                                        class="mt-1 w-full rounded-xl border border-rose-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-rose-500 focus:ring-rose-500/30 dark:border-rose-800 dark:bg-rose-950" />
                             </label>
-                            <button type="submit" class="profile-btn-danger">Delete account</button>
+                            <button type="submit" class="profile-btn-danger" th:text="#{ui.00883}">Delete account</button>
                         </form>
                     </div>
                 </div>
@@ -1124,21 +1124,21 @@
     <!-- PURCHASES DRAWER -->
     <div id="purchases-drawer-root" class="profile-settings-drawer" aria-hidden="true">
         <div class="profile-settings-overlay" id="purchases-overlay" aria-hidden="true"></div>
-        <aside class="profile-settings-panel" id="purchases-panel" role="dialog" aria-modal="true" aria-label="Purchases & Subscriptions">
+        <aside class="profile-settings-panel" id="purchases-panel" role="dialog" aria-modal="true" aria-label="Purchases & Subscriptions" th:attr="aria-label=#{ui.00886}">
             <!-- Header -->
             <div class="profile-settings-panel-header">
                 <div class="flex items-center gap-2">
                     <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
-                    <h2 class="text-base font-bold text-slate-900 dark:text-white">Purchases & Subscriptions</h2>
+                    <h2 class="text-base font-bold text-slate-900 dark:text-white" th:text="#{ui.00886}">Purchases & Subscriptions</h2>
                 </div>
                 <button type="button" id="close-purchases-drawer"
                         class="inline-flex items-center gap-1 rounded-xl border border-slate-200/70 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-900 transition-colors">
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
-                    Close
+                    <th:block th:text="#{ui.00857}">Close</th:block>
                 </button>
             </div>
 
@@ -1154,7 +1154,7 @@
                                isExpiring=${sub != null and sub.status.name() == 'EXPIRES'},
                                daysLeft=${subscriptionDaysLeft},
                                planLabel=${sub == null ? '' : (sub.plan.name() == 'MONTHLY' ? 'Monthly' : (sub.plan.name() == 'YEARLY' ? 'Yearly' : sub.plan.name()))}">
-                    <h3 class="profile-settings-panel-section-title">Subscription</h3>
+                    <h3 class="profile-settings-panel-section-title" th:text="#{ui.00887}">Subscription</h3>
 
                     <!-- Status badge row -->
                     <div class="mt-2 flex flex-wrap items-center gap-2">
@@ -1164,7 +1164,7 @@
                                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636C16.948 4.22 15.026 3.25 13 3.25s-3.948.97-5.364 2.386L5.636 7.636m12.728 0 2 2m-2-2-2 2M5.636 7.636l-2 2m2-2 2 2M7.636 18.364C9.052 19.78 10.974 20.75 13 20.75s3.948-.97 5.364-2.386l2-2m-14.728 0-2-2m2 2 2-2"/>
                                 </svg>
-                                Lifetime Premium
+                                <th:block th:text="#{ui.00888}">Lifetime Premium</th:block>
                             </span>
                         </th:block>
 
@@ -1175,14 +1175,14 @@
                                 <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
-                                Active
+                                <th:block th:text="#{ui.00134}">Active</th:block>
                             </span>
                             <span th:if="${isExpiring}"
                                   class="inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                                 </svg>
-                                Cancels at period end
+                                <th:block th:text="#{ui.00889}">Cancels at period end</th:block>
                             </span>
                             <span class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800/50 dark:border-slate-600 dark:text-slate-300"
                                   th:text="${planLabel}">Monthly</span>
@@ -1194,7 +1194,7 @@
                                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
-                                Inactive
+                                <th:block th:text="#{ui.00137}">Inactive</th:block>
                             </span>
                             <span class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800/50 dark:border-slate-600 dark:text-slate-300"
                                   th:text="${planLabel}">Monthly</span>
@@ -1202,7 +1202,7 @@
 
                         <!-- No subscription -->
                         <th:block th:if="${sub == null}">
-                            <span class="inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-800/50 dark:border-slate-600 dark:text-slate-400">Free</span>
+                            <span class="inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-800/50 dark:border-slate-600 dark:text-slate-400" th:text="#{ui.00890}">Free</span>
                         </th:block>
                     </div>
 
@@ -1216,7 +1216,7 @@
                            th:text="${'Access ends in ' + daysLeft + (daysLeft == 1 ? ' day' : ' days')}">Access ends in 30 days</p>
                     </th:block>
                     <th:block th:if="${isExpired}">
-                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Your subscription has ended.</p>
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.00891}">Your subscription has ended.</p>
                     </th:block>
 
                     <!-- Actions -->
@@ -1226,7 +1226,7 @@
                               th:action="@{/profile/subscription/cancel}" method="post" class="inline">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="cancelAtPeriodEnd" value="true" />
-                            <button type="submit" class="profile-btn-small bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800/50">
+                            <button type="submit" class="profile-btn-small bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800/50" th:text="#{ui.00892}">
                                 Cancel at period end
                             </button>
                         </form>
@@ -1236,7 +1236,7 @@
                               th:action="@{/profile/subscription/cancel}" method="post" class="inline">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="cancelAtPeriodEnd" value="false" />
-                            <button type="submit" class="profile-btn-small bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800/50">
+                            <button type="submit" class="profile-btn-small bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800/50" th:text="#{ui.00893}">
                                 Keep subscription
                             </button>
                         </form>
@@ -1246,18 +1246,18 @@
                               th:action="@{/profile/subscription/plan}" method="post" class="inline">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="plan" value="YEARLY" />
-                            <button type="submit" class="profile-btn-small">
+                            <button type="submit" class="profile-btn-small" th:text="#{ui.00894}">
                                 Switch to Yearly (save 2 months)
                             </button>
                         </form>
 
                         <!-- Expired / no subscription: link to pricing -->
                         <a th:if="${isExpired}" th:href="@{/pricing}"
-                           class="profile-btn-small bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800/50 inline-flex items-center">
+                           class="profile-btn-small bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800/50 inline-flex items-center" th:text="#{ui.00895}">
                             Reactivate subscription
                         </a>
                         <a th:if="${sub == null}" th:href="@{/pricing}"
-                           class="profile-btn-small bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800/50 inline-flex items-center">
+                           class="profile-btn-small bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800/50 inline-flex items-center" th:text="#{ui.00896}">
                             Get Premium
                         </a>
                     </div>
@@ -1265,13 +1265,13 @@
 
                 <!-- All Purchases -->
                 <div class="profile-settings-panel-section">
-                    <h3 class="profile-settings-panel-section-title">All Purchases</h3>
-                    <p class="profile-settings-panel-section-subtitle">View all your orders and transactions.</p>
+                    <h3 class="profile-settings-panel-section-title" th:text="#{ui.00897}">All Purchases</h3>
+                    <p class="profile-settings-panel-section-subtitle" th:text="#{ui.00898}">View all your orders and transactions.</p>
 
                     <div th:if="${allOrders == null or #lists.isEmpty(allOrders)}"
                          class="mt-4 rounded-2xl border border-slate-200/70 bg-slate-50/60 p-6 text-center dark:border-slate-800 dark:bg-slate-900/30">
-                        <p class="text-sm text-slate-500 dark:text-slate-400">No purchases yet.</p>
-                        <a th:href="@{/merch}" class="mt-2 inline-block text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-400">Browse shop</a>
+                        <p class="text-sm text-slate-500 dark:text-slate-400" th:text="#{ui.00899}">No purchases yet.</p>
+                        <a th:href="@{/merch}" class="mt-2 inline-block text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-400" th:text="#{ui.00900}">Browse shop</a>
                     </div>
 
                     <!-- Grouped purchases display -->
@@ -1298,7 +1298,7 @@
                                          class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b last:border-b-0 border-slate-200/50 dark:border-slate-800/50 bg-slate-50/30 dark:bg-slate-900/20">
                                         <div class="flex flex-col gap-1">
                                             <div class="flex items-baseline gap-2">
-                                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Order</span>
+                                                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400" th:text="#{ui.00901}">Order</span>
                                                 <span class="font-mono text-sm font-medium text-slate-900 dark:text-white" th:text="'#' + ${order.id}">1</span>
                                             </div>
                                             <span class="text-xs text-slate-500 dark:text-slate-400"
@@ -1327,26 +1327,26 @@
     <div id="edit-card-modal"
          class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 p-4">
         <div class="card-neon card--cyan w-full max-w-md p-6">
-            <h3 class="text-lg font-bold text-white mb-4">Edit Card</h3>
+            <h3 class="text-lg font-bold text-white mb-4" th:text="#{ui.00902}">Edit Card</h3>
             <form id="edit-card-form" method="post" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Cardholder Name *</label>
+                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1" th:text="#{ui.00837}">Cardholder Name *</label>
                     <input type="text" name="cardHolderName" id="editCardHolder" required maxlength="200"
                            class="input-field w-full" />
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Brand *</label>
+                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1" th:text="#{ui.00840}">Brand *</label>
                     <select name="brand" id="editCardBrand" required class="input-field w-full">
-                        <option value="Visa">Visa</option>
-                        <option value="Mastercard">Mastercard</option>
-                        <option value="Amex">Amex</option>
-                        <option value="Discover">Discover</option>
-                        <option value="Other">Other</option>
+                        <option value="Visa" th:text="#{ui.00842}">Visa</option>
+                        <option value="Mastercard" th:text="#{ui.00843}">Mastercard</option>
+                        <option value="Amex" th:text="#{ui.00844}">Amex</option>
+                        <option value="Discover" th:text="#{ui.00845}">Discover</option>
+                        <option value="Other" th:text="#{ui.00360}">Other</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Expiry Month *</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1" th:text="#{ui.00846}">Expiry Month *</label>
                         <select name="expiryMonth" id="editCardMonth" required class="input-field w-full">
                             <option th:each="m : ${#numbers.sequence(1, 12)}"
                                     th:value="${m}"
@@ -1354,7 +1354,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">Year *</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1" th:text="#{ui.00848}">Year *</label>
                         <input type="number" name="expiryYear" id="editCardYear" required
                                th:min="${#dates.year(#dates.createNow())}"
                                th:max="${#dates.year(#dates.createNow()) + 20}"
@@ -1364,11 +1364,11 @@
                 <div class="flex items-center gap-2">
                     <input type="checkbox" name="makeDefault" id="editCardDefault"
                            class="h-4 w-4 rounded border-slate-600 bg-slate-800 text-neon-cyan" />
-                    <label for="editCardDefault" class="text-sm text-slate-300">Set as default</label>
+                    <label for="editCardDefault" class="text-sm text-slate-300" th:text="#{ui.00903}">Set as default</label>
                 </div>
                 <div class="flex gap-3 pt-2">
-                    <button type="submit" class="btn btn--primary text-sm">Save Changes</button>
-                    <button type="button" data-close-edit-card class="btn btn--secondary text-sm">Cancel</button>
+                    <button type="submit" class="btn btn--primary text-sm" th:text="#{ui.00686}">Save Changes</button>
+                    <button type="button" data-close-edit-card class="btn btn--secondary text-sm" th:text="#{ui.00125}">Cancel</button>
                 </div>
             </form>
         </div>
@@ -1390,37 +1390,37 @@
                 </div>
 
                 <!-- Title -->
-                <h2 class="dob-awareness-modal__title">Important: Permanent Information</h2>
+                <h2 class="dob-awareness-modal__title" th:text="#{ui.00904}">Important: Permanent Information</h2>
 
                 <!-- Message -->
                 <p class="dob-awareness-modal__message">
-                    Your date of birth can only be set once and <span class="font-semibold">cannot be changed later</span>. This is to maintain data integrity and security.
+                    <th:block th:text="#{ui.00905}">Your date of birth can only be set once and</th:block> <span class="font-semibold" th:text="#{ui.00906}">cannot be changed later</span><th:block th:text="#{ui.00907}">. This is to maintain data integrity and security.</th:block>
                 </p>
 
                 <!-- Info Box -->
                 <div class="dob-awareness-modal__info-box">
                     <div class="dob-awareness-modal__info-item">
                         <span class="dob-awareness-modal__info-icon">✓</span>
-                        <span>Please verify your date of birth is correct</span>
+                        <span th:text="#{ui.00908}">Please verify your date of birth is correct</span>
                     </div>
                     <div class="dob-awareness-modal__info-item">
                         <span class="dob-awareness-modal__info-icon">✓</span>
-                        <span>Double-check before proceeding</span>
+                        <span th:text="#{ui.00909}">Double-check before proceeding</span>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="dob-awareness-modal__actions">
-                    <button id="dob-modal-cancel" type="button" class="dob-awareness-modal__btn dob-awareness-modal__btn--secondary">
+                    <button id="dob-modal-cancel" type="button" class="dob-awareness-modal__btn dob-awareness-modal__btn--secondary" th:text="#{ui.00910}">
                         Review Again
                     </button>
-                    <button id="dob-modal-confirm" type="button" class="dob-awareness-modal__btn dob-awareness-modal__btn--primary">
+                    <button id="dob-modal-confirm" type="button" class="dob-awareness-modal__btn dob-awareness-modal__btn--primary" th:text="#{ui.00911}">
                         Confirm & Save
                     </button>
                 </div>
 
                 <!-- Footer note -->
-                <p class="dob-awareness-modal__footer-note">
+                <p class="dob-awareness-modal__footer-note" th:text="#{ui.00912}">
                     This action is permanent
                 </p>
             </div>
@@ -1429,13 +1429,13 @@
 
     <div id="profile-image-editor-modal" class="profile-image-editor-modal" aria-hidden="true">
         <div class="profile-image-editor-modal__backdrop" data-image-editor-close></div>
-        <div class="profile-image-editor-modal__dialog" role="dialog" aria-modal="true" aria-label="Edit profile photo">
+        <div class="profile-image-editor-modal__dialog" role="dialog" aria-modal="true" aria-label="Edit profile photo" th:attr="aria-label=#{ui.00913}">
             <div class="profile-image-editor-modal__header">
                 <div>
-                    <h2 class="profile-image-editor-modal__title">Edit profile photo</h2>
-                    <p class="profile-image-editor-modal__subtitle">Drag to reposition and use zoom to fit your avatar frame.</p>
+                    <h2 class="profile-image-editor-modal__title" th:text="#{ui.00913}">Edit profile photo</h2>
+                    <p class="profile-image-editor-modal__subtitle" th:text="#{ui.00914}">Drag to reposition and use zoom to fit your avatar frame.</p>
                 </div>
-                <button type="button" class="profile-image-editor-modal__close" id="profile-image-editor-close" aria-label="Close image editor">
+                <button type="button" class="profile-image-editor-modal__close" id="profile-image-editor-close" aria-label="Close image editor" th:attr="aria-label=#{ui.00915}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -1444,22 +1444,22 @@
 
             <div class="profile-image-editor-modal__stage-wrap">
                 <div id="profile-image-editor-stage" class="profile-image-editor-modal__stage">
-                    <img id="profile-image-editor-image" class="profile-image-editor-modal__image" alt="Image crop preview" />
+                    <img id="profile-image-editor-image" class="profile-image-editor-modal__image" alt="Image crop preview"  th:alt="#{ui.00916}"/>
                     <div id="profile-image-editor-crop-frame" class="profile-image-editor-modal__crop-frame" aria-hidden="true"></div>
                 </div>
             </div>
 
             <div class="profile-image-editor-modal__controls">
                 <label class="profile-image-editor-modal__zoom-wrap" for="profile-image-editor-zoom">
-                    <span class="profile-image-editor-modal__zoom-label">Zoom</span>
+                    <span class="profile-image-editor-modal__zoom-label" th:text="#{ui.00917}">Zoom</span>
                     <input id="profile-image-editor-zoom" type="range" min="100" max="300" step="1" value="100" class="profile-image-editor-modal__zoom" />
                 </label>
-                <button type="button" id="profile-image-editor-reset" class="profile-btn-secondary">Reset</button>
+                <button type="button" id="profile-image-editor-reset" class="profile-btn-secondary" th:text="#{ui.00918}">Reset</button>
             </div>
 
             <div class="profile-image-editor-modal__actions">
-                <button type="button" id="profile-image-editor-cancel" class="profile-btn-secondary">Cancel</button>
-                <button type="button" id="profile-image-editor-apply" class="profile-btn-primary">Use cropped photo</button>
+                <button type="button" id="profile-image-editor-cancel" class="profile-btn-secondary" th:text="#{ui.00125}">Cancel</button>
+                <button type="button" id="profile-image-editor-apply" class="profile-btn-primary" th:text="#{ui.00919}">Use cropped photo</button>
             </div>
         </div>
     </div>
@@ -1469,23 +1469,23 @@
         <div class="custom-date-picker__backdrop"></div>
         <div class="custom-date-picker__panel">
             <div class="custom-date-picker__header">
-                <h2 class="custom-date-picker__title" id="date-picker-title">Select date</h2>
-                <button type="button" class="custom-date-picker__close" id="date-picker-close" aria-label="Close date picker">
+                <h2 class="custom-date-picker__title" id="date-picker-title" th:text="#{ui.00920}">Select date</h2>
+                <button type="button" class="custom-date-picker__close" id="date-picker-close" aria-label="Close date picker" th:attr="aria-label=#{ui.00921}">
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
-                    Close
+                    <th:block th:text="#{ui.00857}">Close</th:block>
                 </button>
             </div>
 
             <div class="custom-date-picker__nav">
-                <button type="button" class="custom-date-picker__btn-nav" id="date-picker-prev-month" aria-label="Previous month">
+                <button type="button" class="custom-date-picker__btn-nav" id="date-picker-prev-month" aria-label="Previous month" th:attr="aria-label=#{ui.00922}">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
-                <h3 class="custom-date-picker__month" id="date-picker-month-label">December 2024</h3>
-                <button type="button" class="custom-date-picker__btn-nav" id="date-picker-next-month" aria-label="Next month">
+                <h3 class="custom-date-picker__month" id="date-picker-month-label" th:text="#{ui.00923}">December 2024</h3>
+                <button type="button" class="custom-date-picker__btn-nav" id="date-picker-next-month" aria-label="Next month" th:attr="aria-label=#{ui.00924}">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
@@ -1498,8 +1498,8 @@
             </div>
 
             <div class="custom-date-picker__actions">
-                <button type="button" class="custom-date-picker__btn" id="date-picker-today">Today</button>
-                <button type="button" class="custom-date-picker__btn custom-date-picker__btn--primary" id="date-picker-apply">Apply</button>
+                <button type="button" class="custom-date-picker__btn" id="date-picker-today" th:text="#{ui.00495}">Today</button>
+                <button type="button" class="custom-date-picker__btn custom-date-picker__btn--primary" id="date-picker-apply" th:text="#{ui.00925}">Apply</button>
             </div>
         </div>
     </div>

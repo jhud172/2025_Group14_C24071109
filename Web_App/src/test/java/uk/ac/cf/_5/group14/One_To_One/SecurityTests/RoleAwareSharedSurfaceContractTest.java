@@ -160,14 +160,14 @@ class RoleAwareSharedSurfaceContractTest {
         String goalsScript = read("src/main/resources/static/js/goals/goal-pages.js");
 
         assertThat(month)
-                .contains("<h1 class=\"sr-only\">Calendar month view</h1>")
+                .contains("<h1 class=\"sr-only\" th:text=\"#{ui.01790}\">Calendar month view</h1>")
                 .contains("class=\"calendar-singular-list\"")
                 .contains("tabindex=\"0\"")
                 .contains("id=\"sticker-tooltip\"")
                 .contains("aria-hidden=\"true\" hidden")
                 .contains("/js/calendar/month.js(v=${assetVersion})");
         assertThat(week)
-                .contains("<h1 class=\"sr-only\">Calendar week view</h1>")
+                .contains("<h1 class=\"sr-only\" th:text=\"#{ui.01854}\">Calendar week view</h1>")
                 .contains("class=\"calendar-singular-list\"")
                 .contains("tabindex=\"0\"")
                 .contains("/js/calendar/week.js(v=${assetVersion})")

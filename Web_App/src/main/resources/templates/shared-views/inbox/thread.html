@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Inbox', ~{::styles}, ~{::content}, ~{::scripts})}">
+          th:replace="~{base :: layout(#{ui.00952}, ~{::styles}, ~{::content}, ~{::scripts})}">
 
 <div th:fragment="styles"></div>
 
@@ -16,7 +16,7 @@
                 <div class="border-b border-slate-200/70 px-5 py-4 dark:border-slate-800">
                     <div class="flex items-center justify-between gap-3">
                         <h1 class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${roleSurface.inboxHeading}">Inbox</h1>
-                        <a href="/inbox" class="text-sm font-semibold text-slate-900 hover:underline dark:text-slate-100">All</a>
+                        <a href="/inbox" class="text-sm font-semibold text-slate-900 hover:underline dark:text-slate-100" th:text="#{ui.00485}">All</a>
                     </div>
                 </div>
 
@@ -61,14 +61,14 @@
                             <p class="mt-0.5 text-sm text-slate-600 dark:text-slate-300"
                                th:text="${otherUser != null ? ('@' + otherUser.username) : conversationId}"></p>
                         </div>
-                        <a th:href="${roleSurface.dashboardPath}" class="role-surface__action role-surface__action--secondary role-surface__action--compact">Dashboard</a>
+                        <a th:href="${roleSurface.dashboardPath}" class="role-surface__action role-surface__action--secondary role-surface__action--compact" th:text="#{ui.00308}">Dashboard</a>
                     </div>
                 </div>
 
                 <div class="flex flex-col">
                     <div class="px-5 py-5">
                         <div id="inboxMessagesEmpty" th:classappend="${messages != null && !messages.isEmpty()} ? ' hidden' : ''" class="rounded-2xl border border-slate-200/70 bg-slate-50 p-5 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/25 dark:text-slate-200">
-                            <p class="font-semibold text-slate-900 dark:text-slate-100">No messages yet</p>
+                            <p class="font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02005}">No messages yet</p>
                             <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${roleSurface.threadEmptyCopy}">Send the first message.</p>
                         </div>
 
@@ -87,7 +87,7 @@
                             <input th:name="${_csrf.parameterName}" th:type="hidden" th:value="${_csrf.token}"/>
 
                             <label class="block w-full">
-                                <span class="sr-only">Message</span>
+                                <span class="sr-only" th:text="#{ui.00028}">Message</span>
                                 <textarea name="body" id="inboxBody" required rows="2"
                                           class="block w-full resize-none rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100"
                                           th:placeholder="${roleSurface.messagePlaceholder}"></textarea>
@@ -96,14 +96,14 @@
                             <div class="flex w-full flex-wrap items-center gap-3 sm:w-auto">
                                 <label class="inline-flex items-center gap-2 text-xs text-slate-500">
                                     <input type="file" disabled class="hidden" />
-                                    <span class="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-500 dark:border-slate-800">Attachments coming soon</span>
+                                    <span class="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-500 dark:border-slate-800" th:text="#{ui.02006}">Attachments coming soon</span>
                                 </label>
                                 <input type="url" id="inboxAttachmentUrl" placeholder="Attachment link (optional)"
-                                       class="min-w-[220px] rounded-2xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100" />
+                                       class="min-w-[220px] rounded-2xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-400 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-100"  th:placeholder="#{ui.02007}"/>
                             </div>
 
                             <button type="submit"
-                                    class="role-surface__action role-surface__action--primary">
+                                    class="role-surface__action role-surface__action--primary" th:text="#{ui.02008}">
                                 Send
                             </button>
                         </form>

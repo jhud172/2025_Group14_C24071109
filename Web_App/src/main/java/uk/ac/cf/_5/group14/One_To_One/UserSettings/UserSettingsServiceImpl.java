@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import uk.ac.cf._5.group14.One_To_One.Config.SupportedLanguage;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.ac.cf._5.group14.One_To_One.Users.User;
@@ -16,7 +17,6 @@ import uk.ac.cf._5.group14.One_To_One.Users.UserRepository;
 @Service("userSettingsService")
 public class UserSettingsServiceImpl implements UserSettingsService {
 
-    private static final List<String> SUPPORTED_LANGUAGES = List.of("en", "cy");
 
     private static final List<String> ALLOWED_WEEKLY_METRICS = List.of(
         "WORKOUTS_COMPLETED",
@@ -574,11 +574,7 @@ public class UserSettingsServiceImpl implements UserSettingsService {
     }
 
     private String normalizeLanguage(String value) {
-        if (value == null || value.isBlank()) {
-            return "en";
-        }
-        String normalized = value.trim().toLowerCase(Locale.ROOT);
-        return SUPPORTED_LANGUAGES.contains(normalized) ? normalized : "en";
+        return SupportedLanguage.normalizeCode(value);
     }
 
     private List<String> normalizeMilestoneKeys(Set<String> selected) {

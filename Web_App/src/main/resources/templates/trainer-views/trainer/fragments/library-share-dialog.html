@@ -6,12 +6,12 @@
         <div class="w-[min(92vw,28rem)] p-6">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <div class="text-sm font-semibold">Share to active client</div>
-                    <div class="mt-1 text-sm text-slate-300">Only active clients can be selected.</div>
+                    <div class="text-sm font-semibold" th:text="#{ui.02701}">Share to active client</div>
+                    <div class="mt-1 text-sm text-slate-300" th:text="#{ui.02702}">Only active clients can be selected.</div>
                 </div>
                 <button type="button"
                         class="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm hover:bg-white/10"
-                        th:attr="data-share-dialog-close=${dialogId}">
+                        th:attr="data-share-dialog-close=${dialogId}" th:text="#{ui.00857}">
                     Close
                 </button>
             </div>
@@ -23,18 +23,18 @@
                 <input type="hidden" th:field="*{returnUrl}" />
 
                 <div>
-                    <label class="block text-sm font-semibold" th:for="${dialogId + '-clientId'}">Client</label>
+                    <label class="block text-sm font-semibold" th:for="${dialogId + '-clientId'}" th:text="#{ui.01288}">Client</label>
                     <select th:id="${dialogId + '-clientId'}"
                             th:field="*{clientId}"
                             class="mt-1 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30">
-                        <option value="" selected>Select a client…</option>
+                        <option value="" selected th:text="#{ui.02703}">Select a client…</option>
                         <option th:each="c : ${activeClients}" th:value="${c.id}" th:text="${c.username != null ? c.username : ('Client #' + c.id)}">Client</option>
                     </select>
                 </div>
 
                 <div class="flex items-center justify-end gap-2">
                     <button type="submit"
-                            class="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100">
+                            class="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100" th:text="#{ui.02697}">
                         Share
                     </button>
                 </div>

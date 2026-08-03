@@ -1,25 +1,25 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Error', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.02393}, null, ~{::content}, null)}">
 
 <div th:fragment="content">
     <section class="error-page" aria-labelledby="error-title">
         <div class="error-card error-card--generic">
             <div class="error-status">
                 <span class="error-status__code" th:text="${statusCode ?: 'Error'}">Error</span>
-                <span class="error-status__label">Request failed</span>
+                <span class="error-status__label" th:text="#{ui.02391}">Request failed</span>
             </div>
 
             <div class="error-card__body">
-                <p class="error-eyebrow">Page unavailable</p>
+                <p class="error-eyebrow" th:text="#{ui.02392}">Page unavailable</p>
                 <h1 id="error-title" class="error-title" th:text="${statusCode != null ? 'Error ' + statusCode : 'Something went wrong'}">Something went wrong</h1>
                 <p class="error-copy" th:text="${errorMessage ?: 'An unexpected error occurred. Please try again later.'}">
                     An unexpected error occurred. Please try again later.
                 </p>
 
                 <div class="error-actions">
-                    <a th:href="@{/dashboard}" class="error-button error-button--primary">Dashboard</a>
-                    <a th:href="@{/}" class="error-button error-button--secondary">Home</a>
-                    <button type="button" data-history-back data-history-fallback="/" class="error-button error-button--ghost">Go back</button>
+                    <a th:href="@{/dashboard}" class="error-button error-button--primary" th:text="#{ui.00308}">Dashboard</a>
+                    <a th:href="@{/}" class="error-button error-button--secondary" th:text="#{ui.01401}">Home</a>
+                    <button type="button" data-history-back data-history-fallback="/" class="error-button error-button--ghost" th:text="#{ui.02373}">Go back</button>
                 </div>
             </div>
         </div>

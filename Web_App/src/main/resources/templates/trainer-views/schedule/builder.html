@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Training Structure Designer', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.02483}, null, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="content">
     <div class="schedule-designer">
@@ -9,12 +9,12 @@
                 <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
-                Home
+                <th:block th:text="#{ui.01401}">Home</th:block>
             </a>
             <span class="workout-breadcrumb-separator">›</span>
-            <a th:href="@{/schedules}" class="workout-breadcrumb-item">Schedules</a>
+            <a th:href="@{/schedules}" class="workout-breadcrumb-item" th:text="#{ui.00266}">Schedules</a>
             <span class="workout-breadcrumb-separator">›</span>
-            <span class="workout-breadcrumb-item active">Training Structure Designer</span>
+            <span class="workout-breadcrumb-item active" th:text="#{ui.02483}">Training Structure Designer</span>
         </nav>
 
         <!-- Save Panel -->
@@ -23,23 +23,23 @@
                 <div class="save-panel-content">
                     <div class="save-panel-input-group">
                         <label class="save-panel-label">
-                            Schedule Name
+                            <th:block th:text="#{ui.02484}">Schedule Name</th:block>
                             <span class="text-red-500">*</span>
                         </label>
                         <input type="text" name="name" id="scheduleName" required 
                                placeholder="e.g., Push Pull Legs, Full Body Split..."
-                               class="save-panel-input"/>
+                               class="save-panel-input" th:placeholder="#{ui.02485}"/>
                     </div>
                     <div class="save-panel-actions">
                         <div id="saveTimestamp" class="save-timestamp hidden">
                             <span class="save-success-indicator"></span>
-                            <span id="lastSavedText">Draft saved</span>
+                            <span id="lastSavedText" th:text="#{ui.02486}">Draft saved</span>
                         </div>
                         <button type="submit" class="workout-btn-primary">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Save Schedule
+                            <th:block th:text="#{ui.02487}">Save Schedule</th:block>
                         </button>
                     </div>
                 </div>
@@ -55,12 +55,12 @@
         <!-- Schedule Type Selector -->
         <div class="schedule-type-selector">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Choose Schedule Type</h2>
+                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100" th:text="#{ui.02488}">Choose Schedule Type</h2>
                 <button type="button" id="showTemplatesBtn" class="template-library-trigger">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                     </svg>
-                    Start from Template
+                    <th:block th:text="#{ui.02489}">Start from Template</th:block>
                 </button>
             </div>
             
@@ -75,11 +75,11 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <div class="schedule-type-title">Weekly Schedule</div>
+                                <div class="schedule-type-title" th:text="#{ui.02490}">Weekly Schedule</div>
                             </div>
-                            <span class="schedule-type-badge">Most Popular</span>
+                            <span class="schedule-type-badge" th:text="#{ui.02491}">Most Popular</span>
                         </div>
-                        <p class="schedule-type-description">
+                        <p class="schedule-type-description" th:text="#{ui.02492}">
                             Traditional Monday–Sunday schedule. Perfect for consistent weekly training routines.
                         </p>
                     </div>
@@ -95,10 +95,10 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <div class="schedule-type-title">Daily Schedule</div>
+                                <div class="schedule-type-title" th:text="#{ui.02493}">Daily Schedule</div>
                             </div>
                         </div>
-                        <p class="schedule-type-description">
+                        <p class="schedule-type-description" th:text="#{ui.02494}">
                             Single day routine. Ideal for simple, consistent daily workouts.
                         </p>
                     </div>
@@ -114,17 +114,17 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <div class="schedule-type-title">Custom Schedule</div>
+                                <div class="schedule-type-title" th:text="#{ui.02495}">Custom Schedule</div>
                             </div>
-                            <span class="schedule-type-badge">Flexible</span>
+                            <span class="schedule-type-badge" th:text="#{ui.02496}">Flexible</span>
                         </div>
-                        <p class="schedule-type-description">
+                        <p class="schedule-type-description" th:text="#{ui.02497}">
                             Choose your own number of days (e.g., 5-day split that rotates continuously).
                         </p>
                         <div id="customDayControls" class="custom-day-controls hidden">
-                            <label class="custom-day-label">Number of days:</label>
+                            <label class="custom-day-label" th:text="#{ui.02498}">Number of days:</label>
                             <input type="number" id="customDayInput" min="1" max="14" value="5" class="custom-day-input"/>
-                            <button type="button" id="applyCustomDays" class="workout-btn-secondary text-sm px-3 py-1.5">
+                            <button type="button" id="applyCustomDays" class="workout-btn-secondary text-sm px-3 py-1.5" th:text="#{ui.00925}">
                                 Apply
                             </button>
                         </div>
@@ -134,20 +134,20 @@
 
             <!-- Rotation Mode Selector (for custom schedules) -->
             <div id="rotationModeSection" class="rotation-mode-selector hidden">
-                <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3">Rotation Mode</h3>
+                <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3" th:text="#{ui.02499}">Rotation Mode</h3>
                 <div class="rotation-mode-options">
                     <label class="rotation-mode-option">
                         <input type="radio" name="rotationMode" value="WEEKLY_REPEAT" checked class="rotation-mode-radio">
                         <div>
-                            <div class="rotation-mode-label">Weekly Repeat</div>
-                            <div class="rotation-mode-description">Schedule repeats every week</div>
+                            <div class="rotation-mode-label" th:text="#{ui.02500}">Weekly Repeat</div>
+                            <div class="rotation-mode-description" th:text="#{ui.02501}">Schedule repeats every week</div>
                         </div>
                     </label>
                     <label class="rotation-mode-option">
                         <input type="radio" name="rotationMode" value="CONTINUOUS_ROTATION" class="rotation-mode-radio">
                         <div>
-                            <div class="rotation-mode-label">Continuous Rotation</div>
-                            <div class="rotation-mode-description">Schedule rotates continuously across calendar weeks</div>
+                            <div class="rotation-mode-label" th:text="#{ui.02502}">Continuous Rotation</div>
+                            <div class="rotation-mode-description" th:text="#{ui.02503}">Schedule rotates continuously across calendar weeks</div>
                         </div>
                     </label>
                 </div>
@@ -157,8 +157,8 @@
         <!-- Template Library (initially hidden) -->
         <div id="templateLibrary" class="template-library hidden">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Choose a Template</h2>
-                <button type="button" id="hideTemplatesBtn" class="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100" th:text="#{ui.02504}">Choose a Template</h2>
+                <button type="button" id="hideTemplatesBtn" class="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100" th:text="#{ui.02505}">
                     Hide Templates
                 </button>
             </div>
@@ -177,7 +177,7 @@
                             <span class="template-preview-day-workout" th:text="${template.dayWorkouts.get(day).get(0)}">Workout</span>
                         </div>
                     </div>
-                    <button type="button" class="template-select-btn" th:attr="data-template-id=${template.id}">
+                    <button type="button" class="template-select-btn" th:attr="data-template-id=${template.id}" th:text="#{ui.02506}">
                         Select Template
                     </button>
                 </div>
@@ -190,12 +190,12 @@
             <aside class="lg:col-span-3">
                 <div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-4 sticky top-4">
                     <div class="flex items-center justify-between gap-3 mb-4">
-                        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">
+                        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02507}">
                             Your Workouts
                         </h2>
                         <a href="/workout"
                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 transition-colors"
-                           title="Create a new workout">
+                           title="Create a new workout" th:title="#{ui.02508}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
@@ -205,7 +205,7 @@
                     <!-- Search -->
                     <div class="mb-4">
                         <input id="workout-search" type="text" placeholder="Search workouts..."
-                               class="workout-search-input text-sm py-2"/>
+                               class="workout-search-input text-sm py-2" th:placeholder="#{ui.02509}"/>
                     </div>
 
                     <!-- Workout List -->
@@ -214,8 +214,8 @@
                             <svg class="w-12 h-12 mx-auto text-slate-300 dark:text-slate-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
-                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-2">No workouts yet</p>
-                            <a href="/workout" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">Create one now →</a>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 mb-2" th:text="#{ui.02510}">No workouts yet</p>
+                            <a href="/workout" class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline" th:text="#{ui.02511}">Create one now →</a>
                         </div>
 
                         <div th:each="w : ${workouts}"
@@ -228,7 +228,7 @@
                                 </svg>
                                 <div class="flex-1 min-w-0">
                                     <span class="text-sm font-semibold text-emerald-900 dark:text-emerald-100 block" th:text="${w.name}">Workout</span>
-                                    <span class="text-xs text-emerald-700 dark:text-emerald-300 mt-0.5 block">Drag to a day →</span>
+                                    <span class="text-xs text-emerald-700 dark:text-emerald-300 mt-0.5 block" th:text="#{ui.02512}">Drag to a day →</span>
                                 </div>
                             </div>
                         </div>
@@ -246,7 +246,7 @@
                         </svg>
                         <div class="flex-1">
                             <p class="text-sm text-slate-900 dark:text-slate-100">
-                                <strong>Quick Start:</strong> Choose a template above or drag workouts from the left onto any day. Click and drag to reorder. Hover over workouts for quick actions.
+                                <strong th:text="#{ui.02513}">Quick Start:</strong> <th:block th:text="#{ui.02514}">Choose a template above or drag workouts from the left onto any day. Click and drag to reorder. Hover over workouts for quick actions.</th:block>
                             </p>
                         </div>
                     </div>
@@ -266,34 +266,34 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="intelligence-panel-title">Training Intelligence</h2>
-                            <p class="text-sm text-slate-600 dark:text-slate-400">Smart insights about your schedule</p>
+                            <h2 class="intelligence-panel-title" th:text="#{ui.02515}">Training Intelligence</h2>
+                            <p class="text-sm text-slate-600 dark:text-slate-400" th:text="#{ui.02516}">Smart insights about your schedule</p>
                         </div>
                     </div>
 
                     <!-- Quick Stats -->
                     <div class="intelligence-grid">
                         <div class="intelligence-stat">
-                            <div class="intelligence-stat-label">Total Workouts</div>
+                            <div class="intelligence-stat-label" th:text="#{ui.02517}">Total Workouts</div>
                             <div class="intelligence-stat-value" id="totalWorkouts">0</div>
-                            <div class="intelligence-stat-description">Across all days</div>
+                            <div class="intelligence-stat-description" th:text="#{ui.02518}">Across all days</div>
                         </div>
                         <div class="intelligence-stat">
-                            <div class="intelligence-stat-label">Training Days</div>
+                            <div class="intelligence-stat-label" th:text="#{ui.02519}">Training Days</div>
                             <div class="intelligence-stat-value" id="activeDays">0</div>
                             <div class="intelligence-stat-description">
-                                <span id="restDays">7</span> rest days
+                                <span id="restDays">7</span> <th:block th:text="#{ui.02520}">rest days</th:block>
                             </div>
                         </div>
                         <div class="intelligence-stat">
-                            <div class="intelligence-stat-label">Frequency</div>
+                            <div class="intelligence-stat-label" th:text="#{ui.01752}">Frequency</div>
                             <div class="intelligence-stat-value" id="frequency">0%</div>
-                            <div class="intelligence-stat-description">Training ratio</div>
+                            <div class="intelligence-stat-description" th:text="#{ui.02521}">Training ratio</div>
                         </div>
                         <div class="intelligence-stat">
-                            <div class="intelligence-stat-label">Avg Per Day</div>
+                            <div class="intelligence-stat-label" th:text="#{ui.02522}">Avg Per Day</div>
                             <div class="intelligence-stat-value" id="avgPerDay">0.0</div>
-                            <div class="intelligence-stat-description">Workouts per active day</div>
+                            <div class="intelligence-stat-description" th:text="#{ui.02523}">Workouts per active day</div>
                         </div>
                     </div>
 
@@ -309,13 +309,13 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                         </svg>
-                        Duplicate Schedule
+                        <th:block th:text="#{ui.02448}">Duplicate Schedule</th:block>
                     </button>
                     <button type="button" id="clearAllBtn" class="advanced-control-btn destructive">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Clear All
+                        <th:block th:text="#{ui.02524}">Clear All</th:block>
                     </button>
                 </div>
             </section>

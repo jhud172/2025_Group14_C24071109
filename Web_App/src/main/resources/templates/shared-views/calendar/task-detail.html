@@ -6,16 +6,16 @@
     <header class="rounded-3xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-sm dark:border-slate-800 dark:from-slate-950 dark:to-slate-900/80">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Task workspace</p>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400" th:text="#{ui.01827}">Task workspace</p>
                 <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100" th:text="${task.title}">Task detail</h1>
-                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Deep edit and configure scheduling, reminders, and completion behavior.</p>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.01828}">Deep edit and configure scheduling, reminders, and completion behavior.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold"
                       th:classappend="${task.completed} ? ' border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/40 dark:bg-emerald-950/30 dark:text-emerald-300' : ' border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'"
                       th:text="${task.completed ? 'Completed' : 'In progress'}">In progress</span>
                 <a th:href="@{'/calendar/day/' + ${date}}"
-                   class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">Back to day</a>
+                   class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800" th:text="#{ui.01829}">Back to day</a>
             </div>
         </div>
 
@@ -27,10 +27,10 @@
                         th:text="${task.completed ? 'Mark incomplete' : 'Mark complete'}">Mark complete</button>
             </form>
             <a th:href="@{'/calendar/day/' + ${date} + '#timeline'}"
-               class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">Open timeline</a>
+               class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800" th:text="#{ui.01830}">Open timeline</a>
             <form th:action="@{'/calendar/task/' + ${task.id} + '/delete'}" method="post" data-confirm="Delete this task?" class="inline-flex">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <button class="inline-flex items-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-800 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200 dark:hover:bg-red-950/50">Delete</button>
+                <button class="inline-flex items-center rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-800 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200 dark:hover:bg-red-950/50" th:text="#{ui.00139}">Delete</button>
             </form>
         </div>
     </header>
@@ -38,53 +38,53 @@
     <div class="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <section class="space-y-5">
             <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Task profile</h2>
+                <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400" th:text="#{ui.01831}">Task profile</h2>
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
                     <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Time</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00055}">Time</p>
                         <p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100" th:text="${task.time != null ? task.time : 'No fixed time'}">No fixed time</p>
                     </div>
                     <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Type</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00623}">Type</p>
                         <p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100"
                            th:text="${task.activityType != null ? (task.activityType.icon + ' ' + task.activityType.label) : (task.exercise ? 'Exercise task' : 'General task')}">General task</p>
                     </div>
                     <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Grace period</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.01832}">Grace period</p>
                         <p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100" th:text="${task.gracePeriodMinutes != null ? task.gracePeriodMinutes + ' min' : 'Not set'}">Not set</p>
                     </div>
                     <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Activity state</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.01833}">Activity state</p>
                         <p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100" th:text="${task.completed ? 'Marked complete' : 'Awaiting completion'}">Awaiting completion</p>
                     </div>
                 </div>
 
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
                     <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/50">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Schedule control</p>
-                        <p class="mt-1 text-sm text-slate-700 dark:text-slate-200">Use the Day timeline or warning controls on this page to keep this task anchored to today.</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.01834}">Schedule control</p>
+                        <p class="mt-1 text-sm text-slate-700 dark:text-slate-200" th:text="#{ui.01835}">Use the Day timeline or warning controls on this page to keep this task anchored to today.</p>
                     </div>
                     <div class="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/50">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Completion history</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.01836}">Completion history</p>
                         <p class="mt-1 text-sm text-slate-700 dark:text-slate-200" th:text="${task.completed ? 'Completed for this date.' : 'Not completed yet for this date.'}">Not completed yet.</p>
                     </div>
                 </div>
 
                 <div class="mt-4 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/50">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Rich notes</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.01837}">Rich notes</p>
                     <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-200"
                        th:text="${task.notes != null && !#strings.isEmpty(task.notes) ? task.notes : 'No notes yet. Add intent, constraints, or cues to improve execution quality.'}"></p>
                 </div>
 
                 <div class="mt-4 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/50">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Metadata</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.01838}">Metadata</p>
                     <dl class="mt-2 grid gap-2 text-sm text-slate-700 dark:text-slate-200 sm:grid-cols-2">
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Task ID</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.01839}">Task ID</dt>
                             <dd th:text="${task.id}">0</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Date</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00660}">Date</dt>
                             <dd th:text="${task.date}">2026-01-01</dd>
                         </div>
                     </dl>
@@ -92,14 +92,14 @@
             </article>
 
             <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Warnings and reminders</h2>
-                <div th:if="${taskWarnings == null || #lists.isEmpty(taskWarnings)}" class="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50/70 px-4 py-5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300">No warnings configured.</div>
+                <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400" th:text="#{ui.01840}">Warnings and reminders</h2>
+                <div th:if="${taskWarnings == null || #lists.isEmpty(taskWarnings)}" class="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50/70 px-4 py-5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300" th:text="#{ui.01841}">No warnings configured.</div>
                 <ul th:if="${taskWarnings != null && !#lists.isEmpty(taskWarnings)}" class="mt-4 space-y-2">
                     <li th:each="w : ${taskWarnings}" class="rounded-xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/50">
                         <p class="text-sm font-semibold text-slate-800 dark:text-slate-100" th:text="${w.triggerType}">Trigger type</p>
                         <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                            <span th:if="${w.triggerType.name() == 'TIME'}">Time trigger at <strong th:text="${w.triggerTime}"></strong></span>
-                            <span th:if="${w.triggerType.name() == 'ON_TASK_COMPLETE'}">Runs when <strong th:text="${w.triggerTask != null ? w.triggerTask.title : 'another task'}"></strong> is completed</span>
+                            <span th:if="${w.triggerType.name() == 'TIME'}"><th:block th:text="#{ui.01842}">Time trigger at</th:block> <strong th:text="${w.triggerTime}"></strong></span>
+                            <span th:if="${w.triggerType.name() == 'ON_TASK_COMPLETE'}"><th:block th:text="#{ui.01843}">Runs when</th:block> <strong th:text="${w.triggerTask != null ? w.triggerTask.title : 'another task'}"></strong> <th:block th:text="#{ui.01844}">is completed</th:block></span>
                         </p>
                     </li>
                 </ul>
@@ -108,37 +108,37 @@
 
         <aside class="space-y-5">
             <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Scheduling controls</h2>
+                <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400" th:text="#{ui.01845}">Scheduling controls</h2>
                 <form th:action="@{'/calendar/task/' + ${task.id} + '/grace-period'}" method="post" class="mt-4 space-y-3">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="grace-minutes">Grace period minutes</label>
+                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="grace-minutes" th:text="#{ui.01846}">Grace period minutes</label>
                     <input id="grace-minutes" name="gracePeriodMinutes" type="number" min="1" step="1"
                            th:value="${task.gracePeriodMinutes}"
                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
-                    <button class="inline-flex items-center rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white">Save grace period</button>
+                    <button class="inline-flex items-center rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white" th:text="#{ui.01847}">Save grace period</button>
                 </form>
             </section>
 
             <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Add warning rules</h2>
+                <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400" th:text="#{ui.01848}">Add warning rules</h2>
                 <form th:action="@{'/calendar/task/' + ${task.id} + '/warning-time'}" method="post" class="mt-4 space-y-3">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="warning-time">Time warning</label>
+                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="warning-time" th:text="#{ui.01849}">Time warning</label>
                     <input id="warning-time" name="triggerTime" type="time" required
                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"/>
-                    <button class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">Add time warning</button>
+                    <button class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800" th:text="#{ui.01850}">Add time warning</button>
                 </form>
 
                 <form th:action="@{'/calendar/task/' + ${task.id} + '/warning-on-complete'}" method="post" class="mt-4 space-y-3">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="warning-trigger-task">Completion warning trigger</label>
+                    <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" for="warning-trigger-task" th:text="#{ui.01851}">Completion warning trigger</label>
                     <select id="warning-trigger-task" name="triggerTaskId"
                             class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                        <option th:if="${warningTriggerTasks == null || #lists.isEmpty(warningTriggerTasks)}" value="" selected disabled>No other tasks available</option>
+                        <option th:if="${warningTriggerTasks == null || #lists.isEmpty(warningTriggerTasks)}" value="" selected disabled th:text="#{ui.01852}">No other tasks available</option>
                         <option th:each="t : ${warningTriggerTasks}" th:value="${t.id}" th:text="${t.title}"></option>
                     </select>
                     <button class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-                            th:disabled="${warningTriggerTasks == null || #lists.isEmpty(warningTriggerTasks)}">Add completion warning</button>
+                            th:disabled="${warningTriggerTasks == null || #lists.isEmpty(warningTriggerTasks)}" th:text="#{ui.01853}">Add completion warning</button>
                 </form>
             </section>
         </aside>

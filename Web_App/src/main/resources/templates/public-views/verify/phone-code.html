@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('SMS Verification', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.01584}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="styles">
         <link rel="stylesheet" th:href="@{/css/components/account/verification.css(v='20260315b')}">
@@ -15,8 +15,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="verify-title">Enter SMS code</h1>
-                        <p class="verify-copy">We sent a 6-digit code to your phone number. Enter it below to verify your account.</p>
+                        <h1 class="verify-title" th:text="#{ui.01576}">Enter SMS code</h1>
+                        <p class="verify-copy" th:text="#{ui.01577}">We sent a 6-digit code to your phone number. Enter it below to verify your account.</p>
                     </div>
                 </div>
 
@@ -35,7 +35,7 @@
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" name="returnTo" value="phone-code" />
 
-                        <label class="verify-label" for="phoneVerificationCode">
+                        <label class="verify-label" for="phoneVerificationCode" th:text="#{ui.01578}">
                             SMS verification code
                         </label>
                         <input id="phoneVerificationCode"
@@ -48,10 +48,10 @@
                                required
                                aria-label="6-digit SMS verification code"
                                class="verify-code-input"
-                               placeholder="______" />
-                        <p class="verify-help">Use the most recent text message if you requested more than one code.</p>
+                               placeholder="______"  th:attr="aria-label=#{ui.01579}"/>
+                        <p class="verify-help" th:text="#{ui.01580}">Use the most recent text message if you requested more than one code.</p>
 
-                        <button type="submit" class="verify-primary">
+                        <button type="submit" class="verify-primary" th:text="#{ui.01581}">
                             Verify phone
                         </button>
                     </form>
@@ -59,7 +59,7 @@
                     <div class="verify-resend">
                         <form th:action="@{/verify/phone/send}" method="post" class="verify-resend__form">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <button type="submit" class="verify-resend__button">
+                            <button type="submit" class="verify-resend__button" th:text="#{ui.01582}">
                                 Resend code
                             </button>
                         </form>
@@ -67,7 +67,7 @@
                 </div>
 
                 <div class="verify-actions">
-                    <a th:href="@{/profile}" class="verify-btn-secondary">
+                    <a th:href="@{/profile}" class="verify-btn-secondary" th:text="#{ui.01583}">
                         Back to profile
                     </a>
                 </div>

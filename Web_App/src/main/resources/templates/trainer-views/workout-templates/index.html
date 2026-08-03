@@ -1,31 +1,31 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Workout Templates', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.02848}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="styles"></div>
 
     <div th:fragment="content">
-        <main class="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8" role="main" aria-label="Workout Templates">
+        <main class="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8" role="main" aria-label="Workout Templates" th:attr="aria-label=#{ui.02848}">
 
             <div class="mb-6 flex items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Workout Templates</h1>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage your custom workout session layouts</p>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100" th:text="#{ui.02848}">Workout Templates</h1>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400" th:text="#{ui.02849}">Manage your custom workout session layouts</p>
                 </div>
                 <a href="/workout-templates/builder"
                    class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    New Template
+                    <th:block th:text="#{ui.02850}">New Template</th:block>
                 </a>
             </div>
 
             <!-- My Templates -->
             <section class="mb-8">
-                <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">My Templates</h2>
+                <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.02851}">My Templates</h2>
                 <div th:if="${#lists.isEmpty(userTemplates)}"
                      class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900">
-                    <p class="text-sm text-slate-500 dark:text-slate-400">No custom templates yet. <a href="/workout-templates/builder" class="font-semibold text-emerald-600 hover:underline">Create your first template</a></p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400"><th:block th:text="#{ui.02852}">No custom templates yet.</th:block> <a href="/workout-templates/builder" class="font-semibold text-emerald-600 hover:underline" th:text="#{ui.02853}">Create your first template</a></p>
                 </div>
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div th:each="tpl : ${userTemplates}"
@@ -41,25 +41,25 @@
                                 <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
-                                Preferred
+                                <th:block th:text="#{ui.02854}">Preferred</th:block>
                             </span>
                         </div>
                         <div class="mt-4 flex items-center gap-2">
                             <a th:href="@{'/workout-templates/builder/' + ${tpl.id}}"
-                               class="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-center text-xs font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900">
+                               class="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-center text-xs font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-900" th:text="#{ui.00138}">
                                 Edit
                             </a>
                             <button type="button"
                                     th:attr="data-template-id=${tpl.id}"
                                     class="set-preferred-btn flex-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-center text-xs font-semibold text-emerald-800 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-300"
-                                    th:disabled="${preferredTemplate != null && tpl.id == preferredTemplate.id}">
+                                    th:disabled="${preferredTemplate != null && tpl.id == preferredTemplate.id}" th:text="#{ui.02855}">
                                 Set as Preferred
                             </button>
                             <form th:action="@{'/workout-templates/' + ${tpl.id} + '/delete'}" method="post"
                                   data-confirm="Delete this template?">
                                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                 <button type="submit"
-                                        class="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+                                        class="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300" th:text="#{ui.00139}">
                                     Delete
                                 </button>
                             </form>
@@ -70,7 +70,7 @@
 
             <!-- Global Templates -->
             <section th:if="${!#lists.isEmpty(globalTemplates)}">
-                <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Built-in Templates</h2>
+                <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.02856}">Built-in Templates</h2>
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div th:each="tpl : ${globalTemplates}"
                          class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -85,14 +85,14 @@
                                 <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
-                                Preferred
+                                <th:block th:text="#{ui.02854}">Preferred</th:block>
                             </span>
                         </div>
                         <div class="mt-4">
                             <button type="button"
                                     th:attr="data-template-id=${tpl.id}"
                                     class="set-preferred-btn w-full rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-300"
-                                    th:disabled="${preferredTemplate != null && tpl.id == preferredTemplate.id}">
+                                    th:disabled="${preferredTemplate != null && tpl.id == preferredTemplate.id}" th:text="#{ui.02855}">
                                 Set as Preferred
                             </button>
                         </div>

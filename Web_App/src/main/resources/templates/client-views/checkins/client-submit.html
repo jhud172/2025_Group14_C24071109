@@ -1,17 +1,17 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(${pageTitle} ?: 'Weekly Check-in', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(${pageTitle} ?: #{ui.00222}, null, ~{::content}, null)}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Client check-in</p>
-                    <h1 class="mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-100">Weekly check-in</h1>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Share your progress and blockers with your coach.</p>
+                    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00213}">Client check-in</p>
+                    <h1 class="mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00214}">Weekly check-in</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00215}">Share your progress and blockers with your coach.</p>
                 </div>
             </div>
 
-            <div th:if="${activeLink == null}" class="mt-6 text-sm text-slate-600 dark:text-slate-300">
+            <div th:if="${activeLink == null}" class="mt-6 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00216}">
                 You need an active trainer link to submit a weekly check-in.
             </div>
 
@@ -19,16 +19,16 @@
                 <form class="mt-6 space-y-4" th:action="@{/checkins/client-submit}" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
-                    <label class="block text-xs text-slate-500">Template</label>
+                    <label class="block text-xs text-slate-500" th:text="#{ui.00217}">Template</label>
                         <select name="templateId" data-auto-query-param="templateId"
                             class="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100">
                         <option th:each="t : ${templates}" th:value="${t.id}" th:text="${t.name}" th:selected="${t.id == selectedTemplateId}"></option>
                     </select>
 
-                    <label class="block text-xs text-slate-500">Week start (optional)</label>
+                    <label class="block text-xs text-slate-500" th:text="#{ui.00218}">Week start (optional)</label>
                     <input type="date" name="weekStart" class="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100">
 
-                    <div th:if="${#lists.isEmpty(questions)}" class="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-600 dark:text-slate-300">
+                    <div th:if="${#lists.isEmpty(questions)}" class="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00219}">
                         No questions configured for this template.
                     </div>
 
@@ -39,10 +39,10 @@
                         </div>
                     </div>
 
-                    <label class="block text-xs text-slate-500">Anything else to share?</label>
+                    <label class="block text-xs text-slate-500" th:text="#{ui.00220}">Anything else to share?</label>
                     <textarea name="clientNotes" rows="3" class="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"></textarea>
 
-                    <button type="submit" class="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Submit check-in</button>
+                    <button type="submit" class="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" th:text="#{ui.00221}">Submit check-in</button>
                 </form>
             </div>
         </div>

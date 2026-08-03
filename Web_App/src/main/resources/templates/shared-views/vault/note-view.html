@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(${note != null ? note.title : 'Training Vault'}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(${note != null ? note.title : #messages.msg('ui.02280')}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
 <div th:fragment="styles"></div>
 
@@ -20,7 +20,7 @@
                             <svg class="h-3 w-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                 <path d="M10 2a1 1 0 011 1v1.268l4.243 4.243A1 1 0 0116 9.5v1a1 1 0 01-1 1h-4v5.5a1 1 0 01-2 0V11.5H5a1 1 0 01-1-1v-1a1 1 0 01.757-.97L9 4.268V3a1 1 0 011-1z"/>
                             </svg>
-                            Pinned
+                            <th:block th:text="#{ui.01747}">Pinned</th:block>
                         </span>
                         <!-- Mood -->
                         <span class="vault-mood-badge" th:if="${note.mood != null and !note.mood.isBlank()}"
@@ -29,12 +29,12 @@
                         <span class="text-xs text-slate-500 dark:text-slate-400" th:if="${note.linkedDate != null}" th:text="${'Linked: ' + note.linkedDate}">Date</span>
                         <!-- Workout -->
                         <span class="text-xs text-slate-500 dark:text-slate-400" th:if="${linkedSession != null}">
-                            Workout: <span th:text="${linkedSession.nameSnapshot != null ? linkedSession.nameSnapshot : (linkedSession.workout != null ? linkedSession.workout.name : 'Session')}">Session</span>
+                            <th:block th:text="#{ui.02296}">Workout:</th:block> <span th:text="${linkedSession.nameSnapshot != null ? linkedSession.nameSnapshot : (linkedSession.workout != null ? linkedSession.workout.name : 'Session')}">Session</span>
                         </span>
                     </div>
                     <h1 class="detail-title" th:text="${note.title}">Title</h1>
                     <p class="detail-subtitle" th:if="${note.updatedAt != null}">
-                        Updated <span th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy HH:mm')}">date</span>
+                        <th:block th:text="#{ui.02297}">Updated</th:block> <span th:text="${#temporals.format(note.updatedAt,'dd MMM yyyy HH:mm')}">date</span>
                     </p>
                     <!-- Tags -->
                     <div class="mt-2 flex flex-wrap gap-1" th:if="${note.tags != null and !note.tags.isBlank()}">
@@ -47,8 +47,8 @@
 
                 <!-- Sticky actions -->
                 <div class="detail-actions-sticky">
-                    <a th:href="@{/vault}" class="detail-btn-secondary">← Back</a>
-                    <a class="detail-btn-secondary" th:href="@{/vault/{id}/edit(id=${note.id})}">Edit</a>
+                    <a th:href="@{/vault}" class="detail-btn-secondary" th:text="#{ui.02298}">← Back</a>
+                    <a class="detail-btn-secondary" th:href="@{/vault/{id}/edit(id=${note.id})}" th:text="#{ui.00138}">Edit</a>
                     <form th:action="@{/vault/{id}/pin(id=${note.id})}" method="post" class="inline">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <input type="hidden" name="returnTo" th:value="@{/vault/{id}(id=${note.id})}">
@@ -57,7 +57,7 @@
                     <form th:action="@{/vault/{id}/delete(id=${note.id})}" method="post"
                           data-confirm data-confirm-title="Delete note?" data-confirm-message="This will permanently remove the vault note.">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button class="detail-btn-destructive" type="submit">Delete</button>
+                        <button class="detail-btn-destructive" type="submit" th:text="#{ui.00139}">Delete</button>
                     </form>
                 </div>
             </div>
@@ -78,7 +78,7 @@
                     <svg class="h-4 w-4 text-violet-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                     </svg>
-                    AI Insight
+                    <th:block th:text="#{ui.02299}">AI Insight</th:block>
                 </h2>
                 <div class="detail-section-content">
                     <div class="rounded-lg border border-violet-100 dark:border-violet-700/20 bg-violet-50 dark:bg-violet-900/10 p-4">
@@ -89,7 +89,7 @@
 
             <!-- Note content -->
             <section class="detail-section">
-                <h2 class="detail-section-title">Note content</h2>
+                <h2 class="detail-section-title" th:text="#{ui.02300}">Note content</h2>
                 <div class="detail-section-content">
                     <article class="whitespace-pre-wrap text-sm leading-6 text-slate-800 dark:text-slate-200" th:text="${note.content}">
                         Content
@@ -99,9 +99,9 @@
 
             <!-- AI actions -->
             <section class="detail-section">
-                <h2 class="detail-section-title">AI actions</h2>
+                <h2 class="detail-section-title" th:text="#{ui.02301}">AI actions</h2>
                 <div class="detail-section-content">
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Use AI to analyse, summarise, or rewrite this note.</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400" th:text="#{ui.02302}">Use AI to analyse, summarise, or rewrite this note.</p>
                     <div class="mt-4 flex flex-wrap gap-2">
                         <!-- Generate insight for this note -->
                         <form th:action="@{/vault/ai/insight/{id}(id=${note.id})}" method="post">
@@ -111,7 +111,7 @@
                                 <svg class="h-4 w-4 mr-1.5 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                 </svg>
-                                Generate Insight
+                                <th:block th:text="#{ui.02303}">Generate Insight</th:block>
                             </button>
                         </form>
 
@@ -119,14 +119,14 @@
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="noteIds" th:value="${note.id}">
                             <input type="hidden" name="returnTo" th:value="@{/vault/{id}(id=${note.id})}">
-                            <button type="submit" class="detail-btn-secondary">Summarise</button>
+                            <button type="submit" class="detail-btn-secondary" th:text="#{ui.02304}">Summarise</button>
                         </form>
 
                         <form th:action="@{/vault/ai/rewrite-checkin}" method="post">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <input type="hidden" name="noteIds" th:value="${note.id}">
                             <input type="hidden" name="returnTo" th:value="@{/vault/{id}(id=${note.id})}">
-                            <button type="submit" class="detail-btn-secondary">Rewrite as check-in</button>
+                            <button type="submit" class="detail-btn-secondary" th:text="#{ui.02305}">Rewrite as check-in</button>
                         </form>
                     </div>
                 </div>
@@ -137,9 +137,9 @@
     <!-- Not found -->
     <div class="detail-empty" th:if="${note == null}">
         <div class="rounded-xl border border-dashed border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900/40 p-8 text-center">
-            <p class="text-sm font-medium text-slate-900 dark:text-slate-100">Note not found.</p>
-            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">It may have been deleted, or you may not have access.</p>
-            <a class="mt-4 detail-btn-secondary" th:href="@{/vault}">Back to vault</a>
+            <p class="text-sm font-medium text-slate-900 dark:text-slate-100" th:text="#{ui.02170}">Note not found.</p>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.02171}">It may have been deleted, or you may not have access.</p>
+            <a class="mt-4 detail-btn-secondary" th:href="@{/vault}" th:text="#{ui.02306}">Back to vault</a>
         </div>
     </div>
 
@@ -147,11 +147,11 @@
     <div id="confirmOverlay"
          class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 opacity-0 pointer-events-none transition-opacity [&.show]:opacity-100 [&.show]:pointer-events-auto">
         <div class="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-            <h3 id="confirmTitle" class="text-lg font-semibold text-slate-900">Confirm</h3>
-            <p id="confirmMessage" class="mt-2 text-sm text-slate-600">Are you sure?</p>
+            <h3 id="confirmTitle" class="text-lg font-semibold text-slate-900" th:text="#{ui.01783}">Confirm</h3>
+            <p id="confirmMessage" class="mt-2 text-sm text-slate-600" th:text="#{ui.02120}">Are you sure?</p>
             <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <button id="confirmCancel" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10" type="button">Cancel</button>
-                <button id="confirmOk" class="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600/20" type="button">Delete</button>
+                <button id="confirmCancel" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-900/10" type="button" th:text="#{ui.00125}">Cancel</button>
+                <button id="confirmOk" class="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600/20" type="button" th:text="#{ui.00139}">Delete</button>
             </div>
         </div>
     </div>

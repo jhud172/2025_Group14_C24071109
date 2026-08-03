@@ -13,7 +13,7 @@
             aria-label="Open quick actions"
             title="Open quick actions"
             aria-controls="quickActionsShelf"
-            aria-expanded="false">
+            aria-expanded="false" th:title="#{ui.03004}" th:attr="aria-label=#{ui.03004}">
         <span class="quick-actions-fab-icon quick-actions-fab-icon--primary" aria-hidden="true">
             <svg viewBox="0 0 24 24" class="quick-actions-icon-svg">
                 <path d="M13 2L5 14h5l-1 8 8-12h-5z"
@@ -43,8 +43,8 @@
                         </svg>
                     </div>
                     <div class="quick-actions-title-text">
-                        <div class="quick-actions-title-main">Quick Actions</div>
-                        <div class="quick-actions-title-subtitle">One-tap moves for today</div>
+                        <div class="quick-actions-title-main" th:text="#{ui.01922}">Quick Actions</div>
+                        <div class="quick-actions-title-subtitle" th:text="#{ui.03005}">One-tap moves for today</div>
                     </div>
                 </div>
 
@@ -53,7 +53,7 @@
                             class="quick-actions-icon-btn-premium"
                             data-tooltip="Customize"
                             title="Customize"
-                            aria-label="Customize quick actions">
+                            aria-label="Customize quick actions" th:title="#{ui.03006}" th:attr="aria-label=#{ui.03007}">
                         <svg viewBox="0 0 24 24" class="quick-actions-icon-svg">
                             <path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5zm8 3.5-.9-.5a7.9 7.9 0 0 0-.5-1.3l.5-.9a1 1 0 0 0-.1-1.2l-1.3-1.3a1 1 0 0 0-1.2-.1l-.9.5c-.4-.2-.8-.4-1.3-.5l-.5-.9A1 1 0 0 0 13 4h-2a1 1 0 0 0-.9.6l-.5.9c-.5.1-.9.3-1.3.5l-.9-.5a1 1 0 0 0-1.2.1L4.9 7a1 1 0 0 0-.1 1.2l.5.9c-.2.4-.4.8-.5 1.3l-.9.5A1 1 0 0 0 3 12v2a1 1 0 0 0 .6.9l.9.5c.1.5.3.9.5 1.3l-.5.9a1 1 0 0 0 .1 1.2L5.9 20a1 1 0 0 0 1.2.1l.9-.5c.4.2.8.4 1.3.5l.5.9a1 1 0 0 0 .9.6h2a1 1 0 0 0 .9-.6l.5-.9c.5-.1.9-.3 1.3-.5l.9.5a1 1 0 0 0 1.2-.1l1.3-1.3a1 1 0 0 0 .1-1.2l-.5-.9c.2-.4.4-.8.5-1.3l.9-.5A1 1 0 0 0 21 14v-2a1 1 0 0 0-.6-.9z"
                                   fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4"/>
@@ -63,7 +63,7 @@
                             class="quick-actions-icon-btn-premium"
                             data-tooltip="Close"
                             title="Close"
-                            aria-label="Close quick actions">
+                            aria-label="Close quick actions" th:title="#{ui.00857}" th:attr="aria-label=#{ui.03008}">
                         <svg viewBox="0 0 24 24" class="quick-actions-icon-svg">
                             <path d="M6 6l12 12M18 6L6 18"
                                   fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
@@ -77,8 +77,8 @@
             <div class="quick-actions-panel-views">
                 <div id="quickActionsView" class="quick-actions-main-view quick-actions-view-pane quick-actions-view-pane-main">
                     <div class="quick-actions-actions-list-header">
-                        <span>Active</span>
-                        <span>Tap to run</span>
+                        <span th:text="#{ui.00134}">Active</span>
+                        <span th:text="#{ui.03009}">Tap to run</span>
                     </div>
                     <div id="quickActionsList" class="quick-actions-grid"></div>
                     <div id="quickActionsEmpty" class="quick-actions-empty-state hidden">
@@ -88,8 +88,8 @@
                                       fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/>
                             </svg>
                         </div>
-                        <p class="quick-actions-empty-text">No actions yet</p>
-                        <p class="quick-actions-empty-subtext">Tap the settings icon to get started</p>
+                        <p class="quick-actions-empty-text" th:text="#{ui.03010}">No actions yet</p>
+                        <p class="quick-actions-empty-subtext" th:text="#{ui.03011}">Tap the settings icon to get started</p>
                     </div>
                     <div id="quickActionsMessage" class="quick-actions-message hidden"></div>
                 </div>
@@ -97,25 +97,25 @@
                 <div id="quickActionsCustomize" class="quick-actions-customize-view quick-actions-view-pane quick-actions-view-pane-customize">
                     <div class="quick-actions-search-section">
                         <input id="quickActionsSearch" type="search" placeholder="Search actions"
-                               class="quick-actions-input-premium" />
+                               class="quick-actions-input-premium"  th:placeholder="#{ui.03012}"/>
                     </div>
                     <div class="quick-actions-customize-list-wrapper">
                         <ul id="quickActionsCustomizeList" class="quick-actions-customize-list"></ul>
                     </div>
                     <div class="quick-actions-custom-ai-section">
                         <div class="quick-actions-custom-ai-header">
-                            <span class="quick-actions-custom-ai-title">Custom AI actions</span>
+                            <span class="quick-actions-custom-ai-title" th:text="#{ui.03013}">Custom AI actions</span>
                             <span id="quickActionsCustomLimit" class="quick-actions-custom-ai-limit">0/2</span>
                         </div>
                         <div class="quick-actions-custom-ai-form">
                             <textarea id="quickActionsCustomPrompt" rows="2" placeholder="Task prompt (what should AI do?)"
-                                      class="quick-actions-input-premium quick-actions-textarea"></textarea>
+                                      class="quick-actions-input-premium quick-actions-textarea" th:placeholder="#{ui.03014}"></textarea>
                             <button type="button" id="quickActionsCustomCreate"
-                                    class="quick-actions-btn-premium">
+                                    class="quick-actions-btn-premium" th:text="#{ui.03015}">
                                 Create action
                             </button>
                             <p id="quickActionsCustomLock" class="quick-actions-premium-text hidden">
-                                <span class="quick-actions-premium-highlight">Premium</span> required for custom actions.
+                                <span class="quick-actions-premium-highlight" th:text="#{ui.00781}">Premium</span> <th:block th:text="#{ui.03016}">required for custom actions.</th:block>
                             </p>
                         </div>
                     </div>

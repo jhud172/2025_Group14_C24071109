@@ -1,13 +1,13 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Gym Applications', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.00044}, null, ~{::content}, null)}">
 
     <div th:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div class="flex items-center justify-between gap-4" data-site-tour="admin-gym-applications">
             <div>
-                <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100">Gym Applications</h1>
-                <p class="mt-1 text-slate-600 dark:text-slate-300">Review moderated gym onboarding requests and move them through approval, decline, or follow-up.</p>
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100" th:text="#{ui.00044}">Gym Applications</h1>
+                <p class="mt-1 text-slate-600 dark:text-slate-300" th:text="#{ui.00045}">Review moderated gym onboarding requests and move them through approval, decline, or follow-up.</p>
             </div>
-            <a th:href="@{/admin/dashboard}" class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200">Back to admin panel</a>
+            <a th:href="@{/admin/dashboard}" class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200" th:text="#{ui.00046}">Back to admin panel</a>
         </div>
 
         <div th:if="${gymApplicationSuccess}" class="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" th:text="${gymApplicationSuccess}">Saved.</div>
@@ -25,11 +25,11 @@
                 </div>
                 <p class="mt-4 text-sm text-slate-600 dark:text-slate-300" th:text="${gymApplication.contactName + ' • ' + gymApplication.contactPhone + ' • ' + gymApplication.city}">Contact</p>
                 <div class="mt-4">
-                    <a th:href="@{/admin/gym-applications/{id}(id=${gymApplication.id})}" class="inline-flex min-h-11 items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">Open application</a>
+                    <a th:href="@{/admin/gym-applications/{id}(id=${gymApplication.id})}" class="inline-flex min-h-11 items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500" th:text="#{ui.00047}">Open application</a>
                 </div>
             </article>
         </div>
 
-        <p th:if="${applications == null or #lists.isEmpty(applications)}" class="text-sm text-slate-500">No gym applications found.</p>
+        <p th:if="${applications == null or #lists.isEmpty(applications)}" class="text-sm text-slate-500" th:text="#{ui.00048}">No gym applications found.</p>
     </div>
 </th:block>

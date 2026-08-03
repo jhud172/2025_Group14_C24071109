@@ -1,38 +1,38 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-          th:replace="~{base :: layout('Admin Dashboard', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.00110}, null, ~{::content}, null)}">
 
     <div th:fragment="content" class="app-dashboard app-dashboard--admin max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <header class="dashboard-page-header">
             <div>
-                <h1 class="dashboard-page-title">Platform Operations</h1>
-                <p class="dashboard-page-subtitle">Review support, applications and waitlist activity, then move into the operational task that needs attention.</p>
+                <h1 class="dashboard-page-title" th:text="#{ui.00061}">Platform Operations</h1>
+                <p class="dashboard-page-subtitle" th:text="#{ui.00062}">Review support, applications and waitlist activity, then move into the operational task that needs attention.</p>
             </div>
-            <div class="dashboard-status" aria-label="Platform operations workspace active">
+            <div class="dashboard-status" aria-label="Platform operations workspace active" th:attr="aria-label=#{ui.00063}">
                 <span class="dashboard-status__dot" aria-hidden="true"></span>
-                <span>Admin workspace</span>
+                <span th:text="#{ui.00064}">Admin workspace</span>
             </div>
         </header>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" data-site-tour="admin-dashboard">
             <div class="dashboard-metric p-4">
-                <p class="dashboard-metric__label">Unread feedback</p>
+                <p class="dashboard-metric__label" th:text="#{ui.00065}">Unread feedback</p>
                 <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${feedbackUnreadCount}">0</p>
             </div>
             <div class="dashboard-metric p-4">
-                <p class="dashboard-metric__label">New tickets</p>
+                <p class="dashboard-metric__label" th:text="#{ui.00066}">New tickets</p>
                 <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${feedbackNewCount}">0</p>
             </div>
             <div class="dashboard-metric p-4">
-                <p class="dashboard-metric__label">Ongoing issues</p>
+                <p class="dashboard-metric__label" th:text="#{ui.00067}">Ongoing issues</p>
                 <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${feedbackOngoingCount}">0</p>
             </div>
             <div class="dashboard-metric p-4">
-                <p class="dashboard-metric__label">Waitlist signups</p>
+                <p class="dashboard-metric__label" th:text="#{ui.00068}">Waitlist signups</p>
                 <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${waitlistCount}">0</p>
             </div>
             <div sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')" class="dashboard-metric p-4">
-                <p class="dashboard-metric__label">Open gym applications</p>
+                <p class="dashboard-metric__label" th:text="#{ui.00069}">Open gym applications</p>
                 <p class="dashboard-metric__value mt-2 text-3xl font-bold" th:text="${gymApplicationCount}">0</p>
             </div>
         </div>
@@ -40,30 +40,30 @@
         <section class="dashboard-surface">
             <div class="dashboard-section-header">
                 <div>
-                    <h2 class="dashboard-section-title">Operations shortcuts</h2>
-                    <p class="dashboard-section-copy">Open the most frequently used platform administration tools.</p>
+                    <h2 class="dashboard-section-title" th:text="#{ui.00070}">Operations shortcuts</h2>
+                    <p class="dashboard-section-copy" th:text="#{ui.00071}">Open the most frequently used platform administration tools.</p>
                 </div>
             </div>
             <div class="dashboard-shortcuts">
                 <a th:href="@{/admin/feedback}" class="dashboard-shortcut dashboard-shortcut--primary">
-                    <div class="dashboard-shortcut__title">Support inbox</div>
-                    <div class="dashboard-shortcut__copy">Triage feedback and keep issues moving.</div>
+                    <div class="dashboard-shortcut__title" th:text="#{ui.00002}">Support inbox</div>
+                    <div class="dashboard-shortcut__copy" th:text="#{ui.00072}">Triage feedback and keep issues moving.</div>
                 </a>
                 <a sec:authorize="hasAnyRole('PLATFORM_ADMIN','SUPER_ADMIN')" th:href="@{/admin/gym-applications}" class="dashboard-shortcut">
-                    <div class="dashboard-shortcut__title">Gym applications</div>
-                    <div class="dashboard-shortcut__copy">Review new gym onboarding requests before accounts go live.</div>
+                    <div class="dashboard-shortcut__title" th:text="#{ui.00073}">Gym applications</div>
+                    <div class="dashboard-shortcut__copy" th:text="#{ui.00074}">Review new gym onboarding requests before accounts go live.</div>
                 </a>
                 <a th:href="@{/admin/merch}" class="dashboard-shortcut">
-                    <div class="dashboard-shortcut__title">Merch controls</div>
-                    <div class="dashboard-shortcut__copy">Review products, stock and storefront copy.</div>
+                    <div class="dashboard-shortcut__title" th:text="#{ui.00075}">Merch controls</div>
+                    <div class="dashboard-shortcut__copy" th:text="#{ui.00076}">Review products, stock and storefront copy.</div>
                 </a>
                 <a href="#admin-outreach-form" class="dashboard-shortcut">
-                    <div class="dashboard-shortcut__title">Outreach composer</div>
-                    <div class="dashboard-shortcut__copy">Send updates to users or the waitlist from this page.</div>
+                    <div class="dashboard-shortcut__title" th:text="#{ui.00077}">Outreach composer</div>
+                    <div class="dashboard-shortcut__copy" th:text="#{ui.00078}">Send updates to users or the waitlist from this page.</div>
                 </a>
                 <a href="#dev-page-controls" class="dashboard-shortcut">
-                    <div class="dashboard-shortcut__title">Dev Hub controls</div>
-                    <div class="dashboard-shortcut__copy">Adjust page visibility and route access modes.</div>
+                    <div class="dashboard-shortcut__title" th:text="#{ui.00079}">Dev Hub controls</div>
+                    <div class="dashboard-shortcut__copy" th:text="#{ui.00080}">Adjust page visibility and route access modes.</div>
                 </a>
             </div>
         </section>
@@ -71,8 +71,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <section class="dashboard-surface">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="dashboard-section-title">Support inbox</h2>
-                    <a th:href="@{/admin/feedback}" class="dashboard-inline-action">Open full inbox <span aria-hidden="true">&rarr;</span></a>
+                    <h2 class="dashboard-section-title" th:text="#{ui.00002}">Support inbox</h2>
+                    <a th:href="@{/admin/feedback}" class="dashboard-inline-action"><th:block th:text="#{ui.00081}">Open full inbox</th:block> <span aria-hidden="true">&rarr;</span></a>
                 </div>
                 <div class="space-y-3" th:if="${latestFeedback != null and !#lists.isEmpty(latestFeedback)}">
                     <div th:each="item : ${latestFeedback}" class="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
@@ -84,66 +84,66 @@
                     </div>
                 </div>
                 <div th:if="${latestFeedback == null or #lists.isEmpty(latestFeedback)}" class="dashboard-empty-state">
-                    <h3 class="dashboard-empty-state__title">No support requests waiting</h3>
-                    <p class="dashboard-empty-state__copy">New requests will appear here. You can use outreach to send a proactive platform update.</p>
+                    <h3 class="dashboard-empty-state__title" th:text="#{ui.00082}">No support requests waiting</h3>
+                    <p class="dashboard-empty-state__copy" th:text="#{ui.00083}">New requests will appear here. You can use outreach to send a proactive platform update.</p>
                     <div class="dashboard-empty-state__actions">
-                        <a href="#admin-outreach-form" class="dashboard-action dashboard-action--secondary">Compose an update</a>
+                        <a href="#admin-outreach-form" class="dashboard-action dashboard-action--secondary" th:text="#{ui.00084}">Compose an update</a>
                     </div>
                 </div>
             </section>
 
             <section class="dashboard-surface">
-                <h2 class="dashboard-section-title mb-4">Admin outreach email</h2>
+                <h2 class="dashboard-section-title mb-4" th:text="#{ui.00085}">Admin outreach email</h2>
                 <div th:if="${adminOutreachSuccess}" class="mb-3 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-800" th:text="${adminOutreachSuccess}">Sent.</div>
                 <div th:if="${adminOutreachError}" class="mb-3 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-800" th:text="${adminOutreachError}">Error.</div>
                 <form th:action="@{/admin/outreach/send}" method="post" class="space-y-3" id="admin-outreach-form">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                     <div>
-                        <label for="outreach-audience" class="dashboard-metric__label block mb-1">Audience</label>
+                        <label for="outreach-audience" class="dashboard-metric__label block mb-1" th:text="#{ui.00086}">Audience</label>
                         <select name="audience" id="outreach-audience" class="dashboard-field">
-                            <option value="ALL_USERS">All platform users</option>
-                            <option value="WAITLIST">All waitlist signups</option>
-                            <option value="SPECIFIC">One specific email</option>
+                            <option value="ALL_USERS" th:text="#{ui.00087}">All platform users</option>
+                            <option value="WAITLIST" th:text="#{ui.00088}">All waitlist signups</option>
+                            <option value="SPECIFIC" th:text="#{ui.00089}">One specific email</option>
                         </select>
                     </div>
 
                     <div id="specific-email-wrap" class="hidden">
-                        <label for="specific-email" class="dashboard-metric__label block mb-1">Recipient email</label>
+                        <label for="specific-email" class="dashboard-metric__label block mb-1" th:text="#{ui.00090}">Recipient email</label>
                         <input type="email" name="specificEmail" id="specific-email" class="dashboard-field" />
                     </div>
 
                     <div>
-                        <label for="outreach-subject" class="dashboard-metric__label block mb-1">Subject</label>
+                        <label for="outreach-subject" class="dashboard-metric__label block mb-1" th:text="#{ui.00026}">Subject</label>
                         <input type="text" name="subject" id="outreach-subject" maxlength="180" required class="dashboard-field" />
                     </div>
 
                     <div>
-                        <label for="outreach-message" class="dashboard-metric__label block mb-1">Message</label>
+                        <label for="outreach-message" class="dashboard-metric__label block mb-1" th:text="#{ui.00028}">Message</label>
                         <textarea name="message" id="outreach-message" rows="5" maxlength="5000" required class="dashboard-field"></textarea>
                     </div>
 
-                    <button type="submit" class="dashboard-action dashboard-action--primary">Send message</button>
+                    <button type="submit" class="dashboard-action dashboard-action--primary" th:text="#{ui.00091}">Send message</button>
                 </form>
             </section>
         </div>
 
         <section class="dashboard-surface">
-            <h2 class="dashboard-section-title mb-4">Dev go-live waitlist</h2>
+            <h2 class="dashboard-section-title mb-4" th:text="#{ui.00092}">Dev go-live waitlist</h2>
             <div th:if="${waitlistEntries == null or #lists.isEmpty(waitlistEntries)}" class="dashboard-empty-state">
-                <h3 class="dashboard-empty-state__title">No waitlist signups yet</h3>
-                <p class="dashboard-empty-state__copy">New confirmed and unconfirmed signups will appear here when people join the development waitlist.</p>
+                <h3 class="dashboard-empty-state__title" th:text="#{ui.00093}">No waitlist signups yet</h3>
+                <p class="dashboard-empty-state__copy" th:text="#{ui.00094}">New confirmed and unconfirmed signups will appear here when people join the development waitlist.</p>
                 <div class="dashboard-empty-state__actions">
-                    <a href="#admin-outreach-form" class="dashboard-action dashboard-action--secondary">Prepare an outreach message</a>
+                    <a href="#admin-outreach-form" class="dashboard-action dashboard-action--secondary" th:text="#{ui.00095}">Prepare an outreach message</a>
                 </div>
             </div>
             <div th:if="${waitlistEntries != null and !#lists.isEmpty(waitlistEntries)}" class="dashboard-table-wrap">
                 <table class="dashboard-table">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-slate-700 text-left">
-                            <th class="py-2 pr-4">Email</th>
-                            <th class="py-2 pr-4">Signed up</th>
-                            <th class="py-2 pr-4">Confirmed</th>
+                            <th class="py-2 pr-4" th:text="#{ui.00096}">Email</th>
+                            <th class="py-2 pr-4" th:text="#{ui.00097}">Signed up</th>
+                            <th class="py-2 pr-4" th:text="#{ui.00098}">Confirmed</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -164,22 +164,22 @@
         <section id="dev-page-controls" class="dashboard-surface">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <h2 class="dashboard-section-title">Dev Hub page controls</h2>
-                    <p class="dashboard-section-copy">
+                    <h2 class="dashboard-section-title" th:text="#{ui.00099}">Dev Hub page controls</h2>
+                    <p class="dashboard-section-copy" th:text="#{ui.00100}">
                         Control which Dev Hub routes stay enabled, which are disabled, and which are shown as restricted during development.
                     </p>
                 </div>
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div class="dashboard-metric px-4 py-3">
-                        <p class="dashboard-metric__label">Enabled</p>
+                        <p class="dashboard-metric__label" th:text="#{ui.00101}">Enabled</p>
                         <p class="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-200" th:text="${devPageSummary.enabledCount}">0</p>
                     </div>
                     <div class="dashboard-metric px-4 py-3">
-                        <p class="dashboard-metric__label">Disabled</p>
+                        <p class="dashboard-metric__label" th:text="#{ui.00102}">Disabled</p>
                         <p class="mt-1 text-2xl font-bold text-amber-700 dark:text-amber-200" th:text="${devPageSummary.disabledCount}">0</p>
                     </div>
                     <div class="dashboard-metric px-4 py-3">
-                        <p class="dashboard-metric__label">Restricted</p>
+                        <p class="dashboard-metric__label" th:text="#{ui.00103}">Restricted</p>
                         <p class="mt-1 text-2xl font-bold text-rose-700 dark:text-rose-200" th:text="${devPageSummary.restrictedCount}">0</p>
                     </div>
                 </div>
@@ -190,13 +190,13 @@
 
             <div class="dashboard-table-wrap mt-5">
                 <table class="dashboard-table">
-                    <caption class="sr-only">Dev Hub page access controls</caption>
+                    <caption class="sr-only" th:text="#{ui.00104}">Dev Hub page access controls</caption>
                     <thead>
                         <tr class="border-b border-slate-200 text-left dark:border-slate-700">
-                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Page</th>
-                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Default status</th>
-                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Hub status</th>
-                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300">Access mode</th>
+                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300" th:text="#{ui.00105}">Page</th>
+                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300" th:text="#{ui.00106}">Default status</th>
+                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300" th:text="#{ui.00107}">Hub status</th>
+                            <th class="py-3 pr-4 font-semibold text-slate-600 dark:text-slate-300" th:text="#{ui.00108}">Access mode</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -232,7 +232,7 @@
                                             class="dashboard-action dashboard-action--primary disabled:cursor-not-allowed disabled:opacity-50"
                                              data-dev-page-submit
                                              th:attr="aria-label=${'Save access mode for ' + page.title}"
-                                             disabled>
+                                             disabled th:text="#{ui.00109}">
                                         Save
                                     </button>
                                 </form>

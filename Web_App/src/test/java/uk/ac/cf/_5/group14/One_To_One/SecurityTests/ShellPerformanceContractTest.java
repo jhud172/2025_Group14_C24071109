@@ -71,6 +71,21 @@ class ShellPerformanceContractTest {
     }
 
     @Test
+    void navigationLanguageControlKeepsStableHoverGeometry() throws IOException {
+        String languageSelector = read("src/main/resources/static/css/components/core/language-selector.css");
+
+        assertThat(languageSelector)
+                .contains("background-color 0.24s var(--motion-ease-enter)")
+                .contains(".language-selector__code {")
+                .contains("line-height: 1;")
+                .contains("transform: rotate(45deg);")
+                .contains("transform: rotate(225deg);")
+                .doesNotContain("transform: scale(1.025)")
+                .doesNotContain("translateY(-0.1rem) rotate(45deg)")
+                .doesNotContain("translateY(0.1rem) rotate(225deg)");
+    }
+
+    @Test
     void routeFamiliesReceiveOnlyTheirFeatureBundle() {
         assertThat(bundlesFor("/"))
                 .isEmpty();

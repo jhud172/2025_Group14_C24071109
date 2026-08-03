@@ -1,17 +1,17 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout('Leave a Review', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.02225}, null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
-            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Leave a Review</h1>
+            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02225}">Leave a Review</h1>
             <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" 
                th:text="'Review ' + ${trainer.firstName} + ' ' + ${trainer.lastName}">Review Trainer</p>
 
             <form th:action="@{/trainers/{id}/review(id=${trainer.id})}" method="post" class="mt-6 space-y-6">
                 <!-- Star Rating -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Rating *</label>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" th:text="#{ui.02226}">Rating *</label>
                     <div class="mt-2 flex items-center gap-2">
                         <div class="flex gap-1" id="starRating">
                             <button type="button" class="star-btn" data-rating="1">
@@ -47,38 +47,38 @@
 
                 <!-- Tags -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Tags (optional)</label>
-                    <p class="mt-1 text-xs text-slate-500">Select qualities that describe this trainer</p>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" th:text="#{ui.02227}">Tags (optional)</label>
+                    <p class="mt-1 text-xs text-slate-500" th:text="#{ui.02228}">Select qualities that describe this trainer</p>
                     <div class="mt-2 flex flex-wrap gap-2">
                         <label class="inline-flex items-center">
                             <input type="checkbox" name="tag" value="Professional" 
                                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"/>
-                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300">Professional</span>
+                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300" th:text="#{ui.02229}">Professional</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="checkbox" name="tag" value="Responsive" 
                                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"/>
-                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300">Responsive</span>
+                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300" th:text="#{ui.02230}">Responsive</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="checkbox" name="tag" value="Knowledgeable" 
                                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"/>
-                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300">Knowledgeable</span>
+                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300" th:text="#{ui.02231}">Knowledgeable</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="checkbox" name="tag" value="Motivating" 
                                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"/>
-                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300">Motivating</span>
+                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300" th:text="#{ui.02232}">Motivating</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="checkbox" name="tag" value="Supportive" 
                                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"/>
-                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300">Supportive</span>
+                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300" th:text="#{ui.02233}">Supportive</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="checkbox" name="tag" value="Patient" 
                                    class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"/>
-                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300">Patient</span>
+                            <span class="ml-2 text-sm text-slate-700 dark:text-slate-300" th:text="#{ui.02234}">Patient</span>
                         </label>
                     </div>
                     <input type="hidden" name="tags" id="tagsInput"/>
@@ -86,20 +86,20 @@
 
                 <!-- Comment -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Your Review (optional)</label>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" th:text="#{ui.02235}">Your Review (optional)</label>
                     <textarea name="comment" rows="4"
                              class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                             placeholder="Share your experience with this trainer..."></textarea>
+                             placeholder="Share your experience with this trainer..." th:placeholder="#{ui.02236}"></textarea>
                 </div>
 
                 <!-- Submit -->
                 <div class="flex justify-end gap-3">
                     <a th:href="@{/trainers/{id}/profile(id=${trainer.id})}"
-                       class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2">
+                       class="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2" th:text="#{ui.00125}">
                         Cancel
                     </a>
                     <button type="submit"
-                           class="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30">
+                           class="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/30" th:text="#{ui.02237}">
                         Submit Review
                     </button>
                 </div>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Blood Pressure', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.00688}, null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content">
         <div class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
@@ -8,8 +8,8 @@
             <!-- Page header -->
             <div class="mb-6 flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Blood Pressure</h1>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Track and monitor your readings over time.</p>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100" th:text="#{ui.00688}">Blood Pressure</h1>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400" th:text="#{ui.00689}">Track and monitor your readings over time.</p>
                 </div>
             </div>
 
@@ -23,26 +23,26 @@
             <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <!-- Avg BP -->
                 <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Avg BP</p>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00690}">Avg BP</p>
                     <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100"
                        th:text="${stats.totalReadings > 0} ? ${stats.avgSystolic} + '/' + ${stats.avgDiastolic} : '—'"></p>
-                    <p class="text-xs text-slate-500">mmHg</p>
+                    <p class="text-xs text-slate-500" th:text="#{ui.00635}">mmHg</p>
                 </div>
                 <!-- Streak -->
                 <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Streak</p>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00691}">Streak</p>
                     <p class="mt-1 text-xl font-bold text-emerald-600 dark:text-emerald-400" th:text="${streak} + ' days'"></p>
-                    <p class="text-xs text-slate-500">consecutive days</p>
+                    <p class="text-xs text-slate-500" th:text="#{ui.00692}">consecutive days</p>
                 </div>
                 <!-- Total readings -->
                 <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Readings</p>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00693}">Readings</p>
                     <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100" th:text="${stats.totalReadings}"></p>
                     <p class="text-xs text-slate-500" th:text="'last ' + ${range} + ' days'"></p>
                 </div>
                 <!-- Days logged -->
                 <div class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Days Logged</p>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400" th:text="#{ui.00694}">Days Logged</p>
                     <p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100" th:text="${stats.daysLogged}"></p>
                     <p class="text-xs text-slate-500" th:text="'of last ' + ${range} + ' days'"></p>
                 </div>
@@ -50,14 +50,14 @@
 
             <!-- Quick add form -->
             <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-slate-100">Log Reading</h2>
+                <h2 class="mb-4 text-base font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00695}">Log Reading</h2>
                 <form th:action="@{/health/blood-pressure}" method="post" th:object="${quickAdd}">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <input type="hidden" name="range" th:value="${range}" />
                     <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                         <!-- Date -->
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Date</label>
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1" th:text="#{ui.00660}">Date</label>
                             <input type="date" id="readingDate" name="readingDate"
                                    th:value="*{readingDate != null ? #temporals.format(readingDate, 'yyyy-MM-dd') : ''}"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
@@ -65,21 +65,21 @@
                         </div>
                         <!-- Time -->
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Time <span class="text-slate-400">(optional)</span></label>
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1"><th:block th:text="#{ui.00055}">Time</th:block> <span class="text-slate-400" th:text="#{ui.00679}">(optional)</span></label>
                             <input type="time" id="readingTime" name="readingTime"
                                    th:value="*{readingTime != null ? #temporals.format(readingTime, 'HH:mm') : ''}"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                         </div>
                         <!-- Systolic -->
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Systolic</label>
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1" th:text="#{ui.00696}">Systolic</label>
                             <input type="number" th:field="*{systolic}" min="60" max="250" placeholder="120"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                             <p th:if="${#fields.hasErrors('systolic')}" th:errors="*{systolic}" class="mt-1 text-xs text-red-500"></p>
                         </div>
                         <!-- Diastolic -->
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Diastolic</label>
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1" th:text="#{ui.00697}">Diastolic</label>
                             <input type="number" th:field="*{diastolic}" min="40" max="150" placeholder="80"
                                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                             <p th:if="${#fields.hasErrors('diastolic')}" th:errors="*{diastolic}" class="mt-1 text-xs text-red-500"></p>
@@ -89,46 +89,46 @@
                     <!-- Optional fields toggle -->
                     <div class="mt-3">
                         <button type="button" id="toggleOptional"
-                                class="text-xs text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 font-medium">
+                                class="text-xs text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 font-medium" th:text="#{ui.00698}">
                             + Show optional fields (pulse, arm, position, notes)
                         </button>
                         <div id="optionalFields" class="hidden mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                             <!-- Pulse -->
                             <div>
-                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Pulse (bpm)</label>
+                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1" th:text="#{ui.00682}">Pulse (bpm)</label>
                                 <input type="number" th:field="*{pulse}" min="30" max="220" placeholder="72"
                                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
                             </div>
                             <!-- Arm -->
                             <div>
-                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Arm</label>
+                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1" th:text="#{ui.00683}">Arm</label>
                                 <select th:field="*{arm}"
                                         class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                                    <option value="">— select —</option>
+                                    <option value="" th:text="#{ui.00684}">— select —</option>
                                     <option th:each="a : ${arms}" th:value="${a}" th:text="${#strings.capitalize(#strings.toLowerCase(a.name()))}"></option>
                                 </select>
                             </div>
                             <!-- Position -->
                             <div>
-                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Position</label>
+                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1" th:text="#{ui.00685}">Position</label>
                                 <select th:field="*{position}"
                                         class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                                    <option value="">— select —</option>
+                                    <option value="" th:text="#{ui.00684}">— select —</option>
                                     <option th:each="p : ${positions}" th:value="${p}" th:text="${#strings.capitalize(#strings.toLowerCase(p.name()))}"></option>
                                 </select>
                             </div>
                             <!-- Notes -->
                             <div class="col-span-2 sm:col-span-4">
-                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Notes</label>
+                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1" th:text="#{ui.00175}">Notes</label>
                                 <input type="text" th:field="*{notes}" maxlength="500" placeholder="Any notes…"
-                                       class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
+                                       class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-400 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"  th:placeholder="#{ui.00699}"/>
                             </div>
                         </div>
                     </div>
 
                     <div class="mt-4 flex justify-end">
                         <button type="submit"
-                                class="rounded-xl bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 transition-colors">
+                                class="rounded-xl bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 transition-colors" th:text="#{ui.00700}">
                             Save Reading
                         </button>
                     </div>
@@ -138,24 +138,24 @@
             <!-- Range filter + recent readings -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-                    <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Recent Readings</h2>
+                    <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00701}">Recent Readings</h2>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-500">Range:</span>
+                        <span class="text-xs text-slate-500" th:text="#{ui.00702}">Range:</span>
                         <a th:href="@{/health/blood-pressure(range=7)}"
                            class="rounded-lg px-2.5 py-1 text-xs font-medium transition-colors"
-                           th:classappend="${range == 7} ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'">7d</a>
+                           th:classappend="${range == 7} ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'" th:text="#{ui.00703}">7d</a>
                         <a th:href="@{/health/blood-pressure(range=30)}"
                            class="rounded-lg px-2.5 py-1 text-xs font-medium transition-colors"
-                           th:classappend="${range == 30} ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'">30d</a>
+                           th:classappend="${range == 30} ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'" th:text="#{ui.00704}">30d</a>
                         <a th:href="@{/health/blood-pressure(range=90)}"
                            class="rounded-lg px-2.5 py-1 text-xs font-medium transition-colors"
-                           th:classappend="${range == 90} ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'">90d</a>
+                           th:classappend="${range == 90} ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'" th:text="#{ui.00705}">90d</a>
                     </div>
                 </div>
 
                 <!-- Empty state -->
                 <div th:if="${recent.isEmpty()}" class="px-5 py-12 text-center">
-                    <p class="text-sm text-slate-500 dark:text-slate-400">No readings yet. Log your first reading above.</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400" th:text="#{ui.00706}">No readings yet. Log your first reading above.</p>
                 </div>
 
                 <!-- Readings table -->
@@ -163,11 +163,11 @@
                     <table class="w-full text-sm">
                         <thead>
                         <tr class="border-b border-slate-100 dark:border-slate-800">
-                            <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">Date</th>
-                            <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">BP</th>
-                            <th class="hidden px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500 sm:table-cell">Pulse</th>
-                            <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500">Category</th>
-                            <th class="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-500">Actions</th>
+                            <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500" th:text="#{ui.00660}">Date</th>
+                            <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500" th:text="#{ui.00707}">BP</th>
+                            <th class="hidden px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500 sm:table-cell" th:text="#{ui.00708}">Pulse</th>
+                            <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500" th:text="#{ui.00117}">Category</th>
+                            <th class="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-500" th:text="#{ui.00135}">Actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -179,7 +179,7 @@
                             </td>
                             <td class="px-5 py-3 font-semibold text-slate-900 dark:text-slate-100">
                                 <span th:text="${r.systolic} + '/' + ${r.diastolic}"></span>
-                                <span class="ml-1 text-xs font-normal text-slate-400">mmHg</span>
+                                <span class="ml-1 text-xs font-normal text-slate-400" th:text="#{ui.00635}">mmHg</span>
                             </td>
                             <td class="hidden px-5 py-3 text-slate-600 dark:text-slate-400 sm:table-cell"
                                 th:text="${r.pulse != null} ? ${r.pulse} + ' bpm' : '—'"></td>
@@ -191,12 +191,12 @@
                             </td>
                             <td class="px-5 py-3 text-right">
                                 <a th:href="@{/health/blood-pressure/edit/{id}(id=${r.id})}"
-                                   class="mr-2 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Edit</a>
+                                   class="mr-2 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200" th:text="#{ui.00138}">Edit</a>
                                 <form th:action="@{/health/blood-pressure/delete/{id}(id=${r.id})}" method="post" class="inline"
                                       data-confirm="Delete this reading?">
                                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                     <button type="submit" class="text-xs text-red-400 hover:text-red-600"
-                                            >Delete</button>
+                                             th:text="#{ui.00139}">Delete</button>
                                 </form>
                             </td>
                         </tr>

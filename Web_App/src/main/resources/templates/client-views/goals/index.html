@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Goals', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.00408}, ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <th:block th:fragment="pageStyles">
         <link rel="stylesheet" th:href="@{/css/components/goals/goal-pages.css(v='20260313')}">
@@ -19,19 +19,19 @@
             </div>
 
             <div th:if="${!roleSurface.coachingToolsPrimary}" class="role-surface__notice">
-                This is a personal account tool and does not set gym or platform targets.
-                <a th:href="${roleSurface.dashboardPath}" class="font-semibold underline">Return to your operational dashboard</a>.
+                <th:block th:text="#{ui.00618}">This is a personal account tool and does not set gym or platform targets.</th:block>
+                <a th:href="${roleSurface.dashboardPath}" class="font-semibold underline" th:text="#{ui.00619}">Return to your operational dashboard</a>.
             </div>
 
             <div class="goal-top-grid">
                 <section class="goal-panel">
                     <div class="goal-head">
                         <div>
-                            <p class="goal-kicker">Milestones</p>
-                            <h2 class="goal-card-pro__title">Milestones to obtain</h2>
-                            <p class="goal-copy">Unlock milestone progress from the same goals area and keep bigger progress visible.</p>
+                            <p class="goal-kicker" th:text="#{ui.00212}">Milestones</p>
+                            <h2 class="goal-card-pro__title" th:text="#{ui.00620}">Milestones to obtain</h2>
+                            <p class="goal-copy" th:text="#{ui.00621}">Unlock milestone progress from the same goals area and keep bigger progress visible.</p>
                         </div>
-                        <a href="/achievements" class="goal-secondary-btn">View milestones</a>
+                        <a href="/achievements" class="goal-secondary-btn" th:text="#{ui.00622}">View milestones</a>
                     </div>
                 </section>
 
@@ -39,16 +39,16 @@
                     <input type="hidden" name="clientId" th:if="${clientId != null}" th:value="${clientId}" />
                     <div class="goal-form-split">
                         <div class="goal-field">
-                            <label for="goal-status">Status</label>
+                            <label for="goal-status" th:text="#{ui.00006}">Status</label>
                             <select id="goal-status" name="status">
-                                <option value="">All</option>
+                                <option value="" th:text="#{ui.00485}">All</option>
                                 <option th:each="s : ${goalStatuses}" th:value="${s}" th:text="${s}" th:selected="${statusFilter == s}"></option>
                             </select>
                         </div>
                         <div class="goal-field">
-                            <label for="goal-type">Type</label>
+                            <label for="goal-type" th:text="#{ui.00623}">Type</label>
                             <select id="goal-type" name="type">
-                                <option value="">All</option>
+                                <option value="" th:text="#{ui.00485}">All</option>
                                 <option th:each="t : ${goalTypes}" th:value="${t}" th:text="${t}" th:selected="${typeFilter == t}"></option>
                             </select>
                         </div>
@@ -56,10 +56,10 @@
                     <div class="goal-form-split goal-form-split--spaced">
                         <label class="goal-field goal-inline-toggle">
                             <input type="checkbox" name="archived" value="true" th:checked="${archived != null && archived}" class="goal-inline-toggle__input" />
-                            Show archived only
+                            <th:block th:text="#{ui.00624}">Show archived only</th:block>
                         </label>
                         <div class="goal-form-actions-end">
-                            <button type="submit" class="goal-secondary-btn">Apply filters</button>
+                            <button type="submit" class="goal-secondary-btn" th:text="#{ui.00554}">Apply filters</button>
                         </div>
                     </div>
                 </form>
@@ -68,16 +68,16 @@
             <section class="goal-panel goal-panel--spaced" data-goal-tabs>
                 <div class="goal-head">
                     <div>
-                        <p class="goal-kicker">Structured view</p>
-                        <h2 class="goal-card-pro__title">Week goals, month goals, and targets</h2>
+                        <p class="goal-kicker" th:text="#{ui.00625}">Structured view</p>
+                        <h2 class="goal-card-pro__title" th:text="#{ui.00626}">Week goals, month goals, and targets</h2>
                     </div>
-                    <div class="goal-segmented" role="tablist" aria-label="Goal timeframe views">
+                    <div class="goal-segmented" role="tablist" aria-label="Goal timeframe views" th:attr="aria-label=#{ui.00627}">
                         <button type="button" id="goal-tab-week" class="goal-segmented__btn is-active" data-goal-tab="week"
-                                role="tab" aria-selected="true" aria-controls="goal-panel-week" tabindex="0">Week goals</button>
+                                role="tab" aria-selected="true" aria-controls="goal-panel-week" tabindex="0" th:text="#{ui.00628}">Week goals</button>
                         <button type="button" id="goal-tab-month" class="goal-segmented__btn" data-goal-tab="month"
-                                role="tab" aria-selected="false" aria-controls="goal-panel-month" tabindex="-1">Month goals</button>
+                                role="tab" aria-selected="false" aria-controls="goal-panel-month" tabindex="-1" th:text="#{ui.00629}">Month goals</button>
                         <button type="button" id="goal-tab-target" class="goal-segmented__btn" data-goal-tab="target"
-                                role="tab" aria-selected="false" aria-controls="goal-panel-target" tabindex="-1">Targets</button>
+                                role="tab" aria-selected="false" aria-controls="goal-panel-target" tabindex="-1" th:text="#{ui.00630}">Targets</button>
                     </div>
                 </div>
 

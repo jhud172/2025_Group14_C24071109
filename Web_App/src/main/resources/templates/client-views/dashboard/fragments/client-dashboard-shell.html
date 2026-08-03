@@ -4,12 +4,12 @@
         <section class="cd-rail-card cd-rail-card--explore" data-testid="explore-rail-card">
             <div class="cd-rail-card__header">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Explore Platform</p>
-                    <h2 class="cd-rail-card__title">Discover What Supports Your Goals</h2>
+                    <p class="cd-kicker" th:text="#{ui.00398}">Explore Platform</p>
+                    <h2 class="cd-rail-card__title" th:text="#{ui.00429}">Discover What Supports Your Goals</h2>
                 </div>
             </div>
-            <p class="cd-rail-card__copy">Jump into the most useful support spaces without losing your place in today&apos;s flow.</p>
-            <nav class="cd-link-tile-stack" aria-label="Explore links">
+            <p class="cd-rail-card__copy" th:text="#{ui.00430}">Jump into the most useful support spaces without losing your place in today&apos;s flow.</p>
+            <nav class="cd-link-tile-stack" aria-label="Explore links" th:attr="aria-label=#{ui.00431}">
                 <a th:href="@{/explore}" class="cd-link-tile">
                     <span class="cd-link-tile__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -18,8 +18,8 @@
                         </svg>
                     </span>
                     <span class="cd-link-tile__body">
-                        <span class="cd-link-tile__title">Explore trainers</span>
-                        <span class="cd-link-tile__text">Compare coaching styles and find the right support for your routine.</span>
+                        <span class="cd-link-tile__title" th:text="#{ui.00432}">Explore trainers</span>
+                        <span class="cd-link-tile__text" th:text="#{ui.00433}">Compare coaching styles and find the right support for your routine.</span>
                     </span>
                     <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
                 </a>
@@ -30,8 +30,8 @@
                         </svg>
                     </span>
                     <span class="cd-link-tile__body">
-                        <span class="cd-link-tile__title">Explore gyms</span>
-                        <span class="cd-link-tile__text">Find a setup and environment that suits the week ahead.</span>
+                        <span class="cd-link-tile__title" th:text="#{ui.00434}">Explore gyms</span>
+                        <span class="cd-link-tile__text" th:text="#{ui.00435}">Find a setup and environment that suits the week ahead.</span>
                     </span>
                     <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
                 </a>
@@ -43,8 +43,8 @@
         <section class="cd-rail-card cd-rail-card--trainer" data-testid="trainer-rail-card">
             <div class="cd-rail-card__header">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Trainer Overview</p>
-                    <h2 class="cd-rail-card__title">Your Coaching Relationship</h2>
+                    <p class="cd-kicker" th:text="#{ui.00404}">Trainer Overview</p>
+                    <h2 class="cd-rail-card__title" th:text="#{ui.00436}">Your Coaching Relationship</h2>
                 </div>
                 <span class="cd-status-pill"
                       th:classappend="${trainerRail.active} ? ' is-emerald' : (${trainerRail.requested} ? ' is-outline' : ' is-slate')"
@@ -77,17 +77,17 @@
                                         data-profile-bio-toggle
                                         hidden
                                         aria-hidden="true"
-                                        aria-expanded="false">Show more</button>
+                                        aria-expanded="false" th:text="#{ui.00437}">Show more</button>
                             </div>
                         </div>
                         <div class="cd-identity-stats">
                             <div class="cd-identity-stat">
                                 <span class="cd-identity-stat__value" th:text="${trainerRail.points}">0</span>
-                                <span class="cd-identity-stat__label">points</span>
+                                <span class="cd-identity-stat__label" th:text="#{ui.00438}">points</span>
                             </div>
                             <div class="cd-identity-stat">
                                 <span class="cd-identity-stat__value" th:text="${trainerRail.level}">1</span>
-                                <span class="cd-identity-stat__label">level</span>
+                                <span class="cd-identity-stat__label" th:text="#{ui.00439}">level</span>
                             </div>
                         </div>
                     </div>
@@ -95,8 +95,8 @@
             </div>
 
             <div th:if="${trainerRail.identity == null}" class="cd-empty-state">
-                <p class="cd-empty-state__title">Coaching is optional</p>
-                <p class="cd-empty-state__copy">You can use the full dashboard on your own, and connect with a trainer later if you want guided support.</p>
+                <p class="cd-empty-state__title" th:text="#{ui.00440}">Coaching is optional</p>
+                <p class="cd-empty-state__copy" th:text="#{ui.00441}">You can use the full dashboard on your own, and connect with a trainer later if you want guided support.</p>
             </div>
 
             <div class="cd-trainer-meta-row">
@@ -116,8 +116,8 @@
                      th:attr="data-trainer-name=${trainerRail.trainerDisplayName},data-thread-id=${trainerRail.trainerThreadId}">
                     <div th:if="${trainerRail.activityItems == null or #lists.isEmpty(trainerRail.activityItems)}"
                          class="cd-empty-state cd-empty-state--subtle">
-                        <p class="cd-empty-state__title">No trainer notifications yet</p>
-                        <p class="cd-empty-state__copy">Coach updates and progress checks will appear here when they are live.</p>
+                        <p class="cd-empty-state__title" th:text="#{ui.00442}">No trainer notifications yet</p>
+                        <p class="cd-empty-state__copy" th:text="#{ui.00443}">Coach updates and progress checks will appear here when they are live.</p>
                     </div>
                     <article th:each="item : ${trainerRail.activityItems}"
                              class="cd-activity-item"
@@ -146,7 +146,7 @@
                                     class="cd-activity-item__action cd-activity-item__action--check"
                                     data-activity-read
                                     th:if="${item.canMarkRead}"
-                                    aria-label="Mark trainer notification as read">
+                                    aria-label="Mark trainer notification as read" th:attr="aria-label=#{ui.00444}">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                     <path d="M6 12.5 10 16 18 8"/>
                                 </svg>
@@ -155,7 +155,7 @@
                                     class="cd-activity-item__action"
                                     data-activity-dismiss
                                     th:if="${item.canDismiss}"
-                                    aria-label="Dismiss trainer notification">
+                                    aria-label="Dismiss trainer notification" th:attr="aria-label=#{ui.00445}">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                     <path d="M8 8 16 16M16 8l-8 8"/>
                                 </svg>
@@ -166,29 +166,29 @@
             </div>
 
             <div class="cd-cta-row cd-cta-row--left">
-                <a th:href="@{/chat}" class="cd-button-chip">Open coach</a>
-                <a th:if="${trainerRail.messageHref != null}" th:href="@{${trainerRail.messageHref}}" class="cd-button-chip cd-button-chip--solid">Message trainer</a>
+                <a th:href="@{/chat}" class="cd-button-chip" th:text="#{ui.00446}">Open coach</a>
+                <a th:if="${trainerRail.messageHref != null}" th:href="@{${trainerRail.messageHref}}" class="cd-button-chip cd-button-chip--solid" th:text="#{ui.00447}">Message trainer</a>
                 <a th:href="@{${trainerRail.planHref}}" class="cd-button-chip" th:text="${trainerRail.planCtaLabel}">Open trainer plan</a>
-                <a th:href="@{${trainerRail.manageHref}}" class="cd-button-chip">Manage</a>
+                <a th:href="@{${trainerRail.manageHref}}" class="cd-button-chip" th:text="#{ui.00448}">Manage</a>
             </div>
         </section>
     </th:block>
 
     <th:block th:fragment="leftRailGoals">
-        <section class="cd-rail-card" aria-label="Goals summary">
+        <section class="cd-rail-card" aria-label="Goals summary" th:attr="aria-label=#{ui.00449}">
             <div class="cd-rail-card__header">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Goals</p>
-                    <h2 class="cd-rail-card__title">Keep Long-Term Progress Visible</h2>
+                    <p class="cd-kicker" th:text="#{ui.00408}">Goals</p>
+                    <h2 class="cd-rail-card__title" th:text="#{ui.00450}">Keep Long-Term Progress Visible</h2>
                 </div>
-                <a th:href="@{/goals}" class="cd-inline-link">Open</a>
+                <a th:href="@{/goals}" class="cd-inline-link" th:text="#{ui.00451}">Open</a>
             </div>
             <p class="cd-rail-card__copy">
-                <span th:text="${activeGoalsCount}">0</span> active and
-                <span th:text="${completedGoalsCount}">0</span> completed.
+                <span th:text="${activeGoalsCount}">0</span> <th:block th:text="#{ui.00452}">active and</th:block>
+                <span th:text="${completedGoalsCount}">0</span> <th:block th:text="#{ui.00453}">completed.</th:block>
             </p>
             <div class="cd-goal-slider" data-goal-slider>
-                <div class="cd-segmented cd-segmented--compact cd-goal-slider__tabs" role="tablist" aria-label="Goal sections">
+                <div class="cd-segmented cd-segmented--compact cd-goal-slider__tabs" role="tablist" aria-label="Goal sections" th:attr="aria-label=#{ui.00454}">
                     <button type="button"
                             th:each="section, iterStat : ${goalSections}"
                             class="cd-segmented__button"
@@ -249,10 +249,10 @@
     </th:block>
 
     <th:block th:fragment="coachSpotlight(tooltipId)">
-        <section class="cd-panel cd-coach-spotlight" aria-label="Coaching focus">
+        <section class="cd-panel cd-coach-spotlight" aria-label="Coaching focus" th:attr="aria-label=#{ui.00455}">
             <div class="cd-panel__header cd-panel__header--split">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Coaching Focus</p>
+                    <p class="cd-kicker" th:text="#{ui.00456}">Coaching Focus</p>
                     <h2 class="cd-panel__title"
                         th:text="${trainerRail.identity != null ? 'Your Week With ' + trainerRail.trainerDisplayName : 'Train With Clear Weekly Direction'}">Your coaching focus</h2>
                     <p class="cd-panel__copy"
@@ -279,20 +279,20 @@
                 <div class="cd-coach-spotlight__body">
                     <div class="cd-coach-spotlight__metrics">
                         <article class="cd-coach-metric">
-                            <p class="cd-coach-metric__label">Relationship</p>
+                            <p class="cd-coach-metric__label" th:text="#{ui.00457}">Relationship</p>
                             <h3 class="cd-coach-metric__value" th:text="${trainerRail.relationshipLabel}">Connected</h3>
                             <p class="cd-coach-metric__meta" th:text="${trainerRail.phaseLabel}">Coaching active</p>
                         </article>
                         <article class="cd-coach-metric">
-                            <p class="cd-coach-metric__label">Updates waiting</p>
+                            <p class="cd-coach-metric__label" th:text="#{ui.00458}">Updates waiting</p>
                             <h3 class="cd-coach-metric__value"
                                 th:text="${trainerRail.activityItems != null ? #lists.size(trainerRail.activityItems) : 0}">0</h3>
-                            <p class="cd-coach-metric__meta">Trainer activity and check-ins</p>
+                            <p class="cd-coach-metric__meta" th:text="#{ui.00459}">Trainer activity and check-ins</p>
                         </article>
                         <article class="cd-coach-metric">
-                            <p class="cd-coach-metric__label">Current streak</p>
+                            <p class="cd-coach-metric__label" th:text="#{ui.00460}">Current streak</p>
                             <h3 class="cd-coach-metric__value" th:text="${profileRail.workoutStreak} + ' days'">0 days</h3>
-                            <p class="cd-coach-metric__meta">Weekly adherence signal</p>
+                            <p class="cd-coach-metric__meta" th:text="#{ui.00461}">Weekly adherence signal</p>
                         </article>
                     </div>
 
@@ -306,7 +306,7 @@
 
                         <article class="cd-coach-update"
                                  th:if="${trainerRail.activityItems != null and !#lists.isEmpty(trainerRail.activityItems)}">
-                            <p class="cd-coach-update__label">Latest trainer activity</p>
+                            <p class="cd-coach-update__label" th:text="#{ui.00462}">Latest trainer activity</p>
                             <h3 class="cd-coach-update__title" th:text="${trainerRail.activityItems[0].title}">Recent trainer activity</h3>
                             <p class="cd-coach-update__copy" th:text="${trainerRail.activityItems[0].body}">Activity body</p>
                             <p class="cd-coach-update__meta" th:text="${trainerRail.activityItems[0].meta}">Activity meta</p>
@@ -314,41 +314,41 @@
 
                         <article class="cd-coach-update"
                                  th:if="${trainerRail.activityItems == null or #lists.isEmpty(trainerRail.activityItems)}">
-                            <p class="cd-coach-update__label">Client focus</p>
+                            <p class="cd-coach-update__label" th:text="#{ui.00463}">Client focus</p>
                             <h3 class="cd-coach-update__title" th:text="${profileRail.focusTitle}">Daily focus</h3>
                             <p class="cd-coach-update__copy" th:text="${profileRail.focusBody}">Focus copy</p>
-                            <p class="cd-coach-update__meta">Your dashboard keeps the coach relationship and your own momentum in one place.</p>
+                            <p class="cd-coach-update__meta" th:text="#{ui.00464}">Your dashboard keeps the coach relationship and your own momentum in one place.</p>
                         </article>
                     </div>
 
                     <div class="cd-cta-row cd-cta-row--left">
-                        <a th:if="${trainerRail.messageHref != null}" th:href="@{${trainerRail.messageHref}}" class="cd-button-chip cd-button-chip--solid">Message trainer</a>
+                        <a th:if="${trainerRail.messageHref != null}" th:href="@{${trainerRail.messageHref}}" class="cd-button-chip cd-button-chip--solid" th:text="#{ui.00447}">Message trainer</a>
                         <a th:href="@{${trainerRail.planHref}}" class="cd-button-chip" th:text="${trainerRail.planCtaLabel}">Open trainer plan</a>
-                        <a th:href="@{${trainerRail.manageHref}}" class="cd-button-chip">Manage coaching</a>
+                        <a th:href="@{${trainerRail.manageHref}}" class="cd-button-chip" th:text="#{ui.00465}">Manage coaching</a>
                     </div>
                 </div>
             </div>
 
             <div th:if="${trainerRail.identity == null}" class="cd-empty-state cd-empty-state--panel">
-                <p class="cd-empty-state__title">Coaching stays optional until you want it</p>
-                <p class="cd-empty-state__copy">You can keep training independently with the action hub and planner, then connect with one verified trainer when guided support becomes useful.</p>
+                <p class="cd-empty-state__title" th:text="#{ui.00466}">Coaching stays optional until you want it</p>
+                <p class="cd-empty-state__copy" th:text="#{ui.00467}">You can keep training independently with the action hub and planner, then connect with one verified trainer when guided support becomes useful.</p>
                 <div class="cd-cta-row cd-cta-row--left">
-                    <a th:href="@{/explore}" class="cd-button-chip cd-button-chip--solid">Explore trainers</a>
-                    <a th:href="@{/goals}" class="cd-button-chip">Open goals</a>
+                    <a th:href="@{/explore}" class="cd-button-chip cd-button-chip--solid" th:text="#{ui.00432}">Explore trainers</a>
+                    <a th:href="@{/goals}" class="cd-button-chip" th:text="#{ui.00468}">Open goals</a>
                 </div>
             </div>
         </section>
     </th:block>
 
     <th:block th:fragment="profilePulse">
-        <section class="cd-panel cd-profile-pulse" aria-label="Profile pulse">
+        <section class="cd-panel cd-profile-pulse" aria-label="Profile pulse" th:attr="aria-label=#{ui.00469}">
             <div class="cd-panel__header cd-panel__header--split">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Profile Pulse</p>
-                    <h2 class="cd-panel__title">Keep Your Own Progress Visible</h2>
-                    <p class="cd-panel__copy">Your focus, account status, and progress signals stay close without taking over the dashboard.</p>
+                    <p class="cd-kicker" th:text="#{ui.00470}">Profile Pulse</p>
+                    <h2 class="cd-panel__title" th:text="#{ui.00471}">Keep Your Own Progress Visible</h2>
+                    <p class="cd-panel__copy" th:text="#{ui.00472}">Your focus, account status, and progress signals stay close without taking over the dashboard.</p>
                 </div>
-                <a th:href="@{/preferences/edit}" class="cd-button-chip">Open preferences</a>
+                <a th:href="@{/preferences/edit}" class="cd-button-chip" th:text="#{ui.00473}">Open preferences</a>
             </div>
 
             <div class="cd-profile-pulse__layout">
@@ -370,24 +370,24 @@
 
                 <div class="cd-profile-pulse__stats">
                     <article class="cd-coach-metric">
-                        <p class="cd-coach-metric__label">Points</p>
+                        <p class="cd-coach-metric__label" th:text="#{ui.00474}">Points</p>
                         <h3 class="cd-coach-metric__value" th:text="${profileRail.points}">0</h3>
-                        <p class="cd-coach-metric__meta">Platform momentum</p>
+                        <p class="cd-coach-metric__meta" th:text="#{ui.00475}">Platform momentum</p>
                     </article>
                     <article class="cd-coach-metric">
-                        <p class="cd-coach-metric__label">Level</p>
+                        <p class="cd-coach-metric__label" th:text="#{ui.00476}">Level</p>
                         <h3 class="cd-coach-metric__value" th:text="${profileRail.level}">1</h3>
-                        <p class="cd-coach-metric__meta">Current account tier</p>
+                        <p class="cd-coach-metric__meta" th:text="#{ui.00477}">Current account tier</p>
                     </article>
                     <article class="cd-coach-metric">
-                        <p class="cd-coach-metric__label">Workout streak</p>
+                        <p class="cd-coach-metric__label" th:text="#{ui.00377}">Workout streak</p>
                         <h3 class="cd-coach-metric__value" th:text="${profileRail.workoutStreak} + ' days'">0 days</h3>
-                        <p class="cd-coach-metric__meta">Recent training consistency</p>
+                        <p class="cd-coach-metric__meta" th:text="#{ui.00478}">Recent training consistency</p>
                     </article>
                 </div>
 
                 <div class="cd-context-panel cd-context-panel--profile">
-                    <p class="cd-context-panel__label">Daily focus</p>
+                    <p class="cd-context-panel__label" th:text="#{ui.00479}">Daily focus</p>
                     <h3 class="cd-context-panel__title" th:text="${profileRail.focusTitle}">Daily focus</h3>
                     <p class="cd-context-panel__body" th:text="${profileRail.focusBody}">Focus body</p>
                 </div>
@@ -401,14 +401,14 @@
     </th:block>
 
     <th:block th:fragment="mainColumn">
-        <h1 class="sr-only">Client dashboard</h1>
+        <h1 class="sr-only" th:text="#{ui.00480}">Client dashboard</h1>
         <th:block th:replace="~{client-views/dashboard/fragments/client-dashboard-shell :: coachSpotlight('trainer-premium-tooltip-main')}"></th:block>
 
-        <section aria-label="Action hub" class="cd-panel cd-action-hub" data-action-hub>
+        <section aria-label="Action hub" class="cd-panel cd-action-hub" data-action-hub th:attr="aria-label=#{ui.00481}">
             <div class="cd-panel__header cd-panel__header--split" data-site-tour="client-dashboard">
                 <div class="cd-action-hub__intro">
                     <div class="cd-section-head">
-                        <p class="cd-kicker">Action Hub</p>
+                        <p class="cd-kicker" th:text="#{ui.00482}">Action Hub</p>
                         <h2 class="cd-panel__title" th:text="${actionHub.title}">What Should I Do Next?</h2>
                     </div>
                     <div th:if="${actionHub.primaryCard != null}" class="cd-action-hub__route">
@@ -416,9 +416,9 @@
                         <p class="cd-action-hub__route-copy" th:text="${actionHub.primaryCard.supportText}">Clear the most time-sensitive task before the rest of the board fans out.</p>
                     </div>
                 </div>
-                <div class="cd-segmented cd-segmented--slider" role="tablist" aria-label="Action hub views" data-selected-tab="recommended">
-                    <button type="button" id="dashboard-action-tab-recommended" class="cd-segmented__button is-active" data-action-tab="recommended" role="tab" aria-selected="true" aria-controls="dashboard-action-panel-recommended" tabindex="0">Recommended</button>
-                    <button type="button" id="dashboard-action-tab-all" class="cd-segmented__button" data-action-tab="all" role="tab" aria-selected="false" aria-controls="dashboard-action-panel-all" tabindex="-1">All</button>
+                <div class="cd-segmented cd-segmented--slider" role="tablist" aria-label="Action hub views" data-selected-tab="recommended" th:attr="aria-label=#{ui.00483}">
+                    <button type="button" id="dashboard-action-tab-recommended" class="cd-segmented__button is-active" data-action-tab="recommended" role="tab" aria-selected="true" aria-controls="dashboard-action-panel-recommended" tabindex="0" th:text="#{ui.00484}">Recommended</button>
+                    <button type="button" id="dashboard-action-tab-all" class="cd-segmented__button" data-action-tab="all" role="tab" aria-selected="false" aria-controls="dashboard-action-panel-all" tabindex="-1" th:text="#{ui.00485}">All</button>
                 </div>
             </div>
 
@@ -444,7 +444,7 @@
                                         <span class="cd-action-card__highlight-label" th:text="${card.highlightLabel}">scheduled</span>
                                     </div>
                                     <div th:if="${card.timed}" class="cd-action-card__countdown">
-                                        <span class="cd-action-card__countdown-label">Countdown</span>
+                                        <span class="cd-action-card__countdown-label" th:text="#{ui.00486}">Countdown</span>
                                         <span class="cd-action-card__countdown-value" data-countdown-output>00:00:00</span>
                                     </div>
                                 </div>
@@ -472,7 +472,7 @@
                                     </div>
                                     <p class="cd-upcoming-card__text" th:text="${actionHub.upcoming.helperText}">Upcoming helper text</p>
                                         <div class="cd-upcoming-card__footer">
-                                            <a th:href="@{${actionHub.upcoming.href}}" class="cd-button-chip">Open</a>
+                                            <a th:href="@{${actionHub.upcoming.href}}" class="cd-button-chip" th:text="#{ui.00451}">Open</a>
                                             <div class="text-right">
                                                 <p id="recommendedUpcomingRelative" class="cd-upcoming-card__meta" th:text="${actionHub.upcoming.statusLabel}">Today</p>
                                                 <p id="recommendedUpcomingTimer" class="cd-upcoming-card__timer">00:00:00</p>
@@ -537,7 +537,7 @@
             </div>
         </section>
 
-        <section aria-label="Primary dashboard actions" class="cd-primary-actions">
+        <section aria-label="Primary dashboard actions" class="cd-primary-actions" th:attr="aria-label=#{ui.00487}">
             <a th:href="@{${bodyActionCard.href}}" class="cd-primary-cta cd-primary-cta--body">
                 <div class="cd-primary-cta__top">
                     <span class="cd-primary-cta__icon cd-primary-cta__icon--right" aria-hidden="true" data-icon-kind="body">
@@ -585,34 +585,34 @@
             </a>
         </section>
 
-        <section aria-label="Your next 7 days" class="cd-panel cd-week-panel">
+        <section aria-label="Your next 7 days" class="cd-panel cd-week-panel" th:attr="aria-label=#{ui.00488}">
             <div class="cd-panel__header cd-panel__header--split">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Planner</p>
-                    <h2 class="cd-panel__title">Your Next 7 Days</h2>
-                    <p class="cd-panel__copy">Pick a day to preview the useful detail, then jump straight into that date.</p>
+                    <p class="cd-kicker" th:text="#{ui.00489}">Planner</p>
+                    <h2 class="cd-panel__title" th:text="#{ui.00490}">Your Next 7 Days</h2>
+                    <p class="cd-panel__copy" th:text="#{ui.00491}">Pick a day to preview the useful detail, then jump straight into that date.</p>
                 </div>
-                <a th:href="@{/calendar}" class="cd-button-chip">Open Planner</a>
+                <a th:href="@{/calendar}" class="cd-button-chip" th:text="#{ui.00492}">Open Planner</a>
             </div>
             <div class="cd-week-layout">
                 <div class="cd-week-preview" data-week-preview-panel>
                     <div class="cd-week-preview__top">
-                        <p class="cd-kicker mb-0" id="weekSelectedLabel">Selected Day</p>
-                        <a id="weekOpenDayLink" class="cd-inline-link" th:href="@{${todayPath}}">Open Day</a>
+                        <p class="cd-kicker mb-0" id="weekSelectedLabel" th:text="#{ui.00493}">Selected Day</p>
+                        <a id="weekOpenDayLink" class="cd-inline-link" th:href="@{${todayPath}}" th:text="#{ui.00494}">Open Day</a>
                     </div>
-                    <h3 id="weekSelectedTitle" class="cd-week-preview__title">Today</h3>
-                    <p id="weekSelectedSummary" class="cd-week-preview__summary">0 tasks, 0 workouts</p>
+                    <h3 id="weekSelectedTitle" class="cd-week-preview__title" th:text="#{ui.00495}">Today</h3>
+                    <p id="weekSelectedSummary" class="cd-week-preview__summary" th:text="#{ui.00496}">0 tasks, 0 workouts</p>
                     <div class="cd-week-preview__lists">
                         <div>
-                            <p class="cd-kicker mb-2">Tasks</p>
+                            <p class="cd-kicker mb-2" th:text="#{ui.00497}">Tasks</p>
                             <div id="weekTaskList" class="cd-week-preview-list">
-                                <span class="cd-week-preview-item">No tasks selected</span>
+                                <span class="cd-week-preview-item" th:text="#{ui.00498}">No tasks selected</span>
                             </div>
                         </div>
                         <div>
-                            <p class="cd-kicker mb-2">Workouts</p>
+                            <p class="cd-kicker mb-2" th:text="#{ui.00235}">Workouts</p>
                             <div id="weekWorkoutList" class="cd-week-preview-list">
-                                <span class="cd-week-preview-item">No workouts selected</span>
+                                <span class="cd-week-preview-item" th:text="#{ui.00499}">No workouts selected</span>
                             </div>
                         </div>
                     </div>
@@ -620,7 +620,7 @@
 
                 <div class="cd-week-strip-wrap">
                     <div class="cd-week-strip-shell">
-                        <div class="dashboard-week-strip cd-week-strip" role="tablist" aria-label="7 day selector" data-week-strip>
+                        <div class="dashboard-week-strip cd-week-strip" role="tablist" aria-label="7 day selector" data-week-strip th:attr="aria-label=#{ui.00500}">
                         <button type="button"
                                 th:each="d, iterStat : ${weekDays}"
                                 class="dashboard-week-day-button cd-week-day-button"
@@ -635,8 +635,8 @@
                                 th:attrappend="aria-selected=${d.today or iterStat.index == 0}">
                             <div class="cd-week-day-button__top">
                                 <span class="cd-week-day-button__label" th:text="${d.dayLabel}">Mon</span>
-                                <span th:if="${d.today}" class="cd-mini-badge">Today</span>
-                                <span th:if="${d.tomorrow}" class="cd-mini-badge cd-mini-badge--emerald">Tomorrow</span>
+                                <span th:if="${d.today}" class="cd-mini-badge" th:text="#{ui.00495}">Today</span>
+                                <span th:if="${d.tomorrow}" class="cd-mini-badge cd-mini-badge--emerald" th:text="#{ui.00501}">Tomorrow</span>
                             </div>
                             <p class="cd-week-day-button__date" th:text="${d.prettyDate}">13 Mar</p>
                             <div class="cd-week-day-button__stats">
@@ -662,18 +662,18 @@
             </div>
         </section>
 
-        <section aria-label="Weekly summary" class="cd-panel">
+        <section aria-label="Weekly summary" class="cd-panel" th:attr="aria-label=#{ui.00502}">
             <div class="cd-panel__header cd-panel__header--split">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Weekly Summary</p>
-                    <h2 class="cd-panel__title">This Week So Far</h2>
+                    <p class="cd-kicker" th:text="#{ui.00503}">Weekly Summary</p>
+                    <h2 class="cd-panel__title" th:text="#{ui.00504}">This Week So Far</h2>
                 </div>
                 <div class="cd-info-pop">
                     <button type="button"
                             class="cd-info-pop__button"
                             data-info-trigger
                             aria-expanded="false"
-                            aria-label="Weekly summary information">
+                            aria-label="Weekly summary information" th:attr="aria-label=#{ui.00505}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
                             <circle cx="12" cy="12" r="9"></circle>
                             <path d="M12 10v5"></path>
@@ -681,8 +681,8 @@
                         </svg>
                     </button>
                     <div class="cd-info-pop__panel" data-info-panel>
-                        <p>You can change what is displayed and how it is displayed in preferences.</p>
-                        <a th:href="@{/preferences/edit#weekly-summary-metrics}" class="cd-inline-link" data-preferences-link>Open preferences</a>
+                        <p th:text="#{ui.00506}">You can change what is displayed and how it is displayed in preferences.</p>
+                        <a th:href="@{/preferences/edit#weekly-summary-metrics}" class="cd-inline-link" data-preferences-link th:text="#{ui.00473}">Open preferences</a>
                     </div>
                 </div>
             </div>
@@ -711,9 +711,9 @@
                           data-compact='false'">
             <div class="cd-ambience-card__top">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Dashboard Ambience</p>
-                    <h2 class="cd-panel__title cd-ambience-card__title">Local Time And Weather Context</h2>
-                    <p class="cd-panel__copy">Keep ambience lightweight unless local data adds useful context for the day ahead.</p>
+                    <p class="cd-kicker" th:text="#{ui.00507}">Dashboard Ambience</p>
+                    <h2 class="cd-panel__title cd-ambience-card__title" th:text="#{ui.00508}">Local Time And Weather Context</h2>
+                    <p class="cd-panel__copy" th:text="#{ui.00509}">Keep ambience lightweight unless local data adds useful context for the day ahead.</p>
                 </div>
                 <button type="button"
                         class="cd-switch"
@@ -721,58 +721,58 @@
                         role="switch"
                         th:attr="aria-checked=${dashboardAmbience.enabled}">
                     <span class="cd-switch__track"><span class="cd-switch__thumb"></span></span>
-                    <span class="sr-only">Toggle immersive dashboard ambience</span>
+                    <span class="sr-only" th:text="#{ui.00510}">Toggle immersive dashboard ambience</span>
                 </button>
             </div>
             <div class="cd-ambience-card__body">
                 <div class="cd-ambience-card__visual">
                     <div class="cd-ambience-card__icon" data-ambience-icon></div>
                     <div>
-                        <p class="cd-ambience-card__period" data-ambience-period>Morning</p>
+                        <p class="cd-ambience-card__period" data-ambience-period th:text="#{ui.00511}">Morning</p>
                         <p class="cd-ambience-card__clock" data-ambience-clock>00:00:00</p>
-                        <p class="cd-ambience-card__weather" data-ambience-weather-label>Checking your local weather</p>
+                        <p class="cd-ambience-card__weather" data-ambience-weather-label th:text="#{ui.00512}">Checking your local weather</p>
                     </div>
                 </div>
                 <div class="cd-ambience-card__controls">
                     <div class="cd-ambience-card__forecast-head">
                         <div>
-                            <p class="cd-ambience-card__label">Weather outlook</p>
-                            <p class="cd-ambience-card__summary" data-ambience-summary>Loading the next 24 hours</p>
+                            <p class="cd-ambience-card__label" th:text="#{ui.00513}">Weather outlook</p>
+                            <p class="cd-ambience-card__summary" data-ambience-summary th:text="#{ui.00514}">Loading the next 24 hours</p>
                         </div>
                         <div class="cd-ambience-card__location-block">
-                            <p class="cd-ambience-card__meta" data-ambience-location-meta>Using Your Local Area</p>
+                            <p class="cd-ambience-card__meta" data-ambience-location-meta th:text="#{ui.00515}">Using Your Local Area</p>
                             <div class="cd-ambience-card__location-indicator" data-ambience-location-indicator hidden>
                                 <span class="cd-ambience-card__location-dot" aria-hidden="true"></span>
-                                <span data-ambience-location>Waiting for location</span>
+                                <span data-ambience-location th:text="#{ui.00516}">Waiting for location</span>
                             </div>
                         </div>
                     </div>
                     <div class="cd-ambience-card__permission" data-ambience-permission-message hidden>
-                        <p data-ambience-permission-copy>Please allow this site to access your location to use the weather feature.</p>
-                        <button type="button" class="cd-button-chip" data-ambience-location-request>Enable local weather</button>
+                        <p data-ambience-permission-copy th:text="#{ui.00517}">Please allow this site to access your location to use the weather feature.</p>
+                        <button type="button" class="cd-button-chip" data-ambience-location-request th:text="#{ui.00518}">Enable local weather</button>
                     </div>
                     <div class="cd-segmented cd-segmented--slider cd-ambience-card__graph-toggle"
                          data-ambience-graph-toggle
                          data-selected-mode="temperature"
                          hidden>
-                        <button type="button" class="cd-segmented__button is-active" data-graph-mode="temperature" aria-pressed="true">Temperature</button>
-                        <button type="button" class="cd-segmented__button" data-graph-mode="trend" aria-pressed="false">Conditions</button>
+                        <button type="button" class="cd-segmented__button is-active" data-graph-mode="temperature" aria-pressed="true" th:text="#{ui.00519}">Temperature</button>
+                        <button type="button" class="cd-segmented__button" data-graph-mode="trend" aria-pressed="false" th:text="#{ui.00520}">Conditions</button>
                     </div>
                     <div class="cd-ambience-timeline-wrap" data-ambience-timeline-wrap>
-                        <div class="cd-ambience-timeline" data-ambience-timeline aria-label="Weather outlook for the next 24 hours"></div>
+                        <div class="cd-ambience-timeline" data-ambience-timeline aria-label="Weather outlook for the next 24 hours" th:attr="aria-label=#{ui.00521}"></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section aria-label="Workout management" class="cd-panel">
+        <section aria-label="Workout management" class="cd-panel" th:attr="aria-label=#{ui.00522}">
             <div class="cd-panel__header cd-panel__header--split">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Workout Hub</p>
-                    <h2 class="cd-panel__title">Manage Your Workout Flow</h2>
-                    <p class="cd-panel__copy">Open upcoming workouts, edit personal logs, and review workout history from one dedicated page.</p>
+                    <p class="cd-kicker" th:text="#{ui.00523}">Workout Hub</p>
+                    <h2 class="cd-panel__title" th:text="#{ui.00524}">Manage Your Workout Flow</h2>
+                    <p class="cd-panel__copy" th:text="#{ui.00525}">Open upcoming workouts, edit personal logs, and review workout history from one dedicated page.</p>
                 </div>
-                <a th:href="@{/workout-management}" class="cd-button-chip cd-button-chip--solid">Open Workout Management</a>
+                <a th:href="@{/workout-management}" class="cd-button-chip cd-button-chip--solid" th:text="#{ui.00526}">Open Workout Management</a>
             </div>
         </section>
     </th:block>
@@ -781,12 +781,12 @@
         <section class="cd-rail-card cd-rail-card--support">
             <div class="cd-rail-card__header">
                 <div class="cd-section-head">
-                    <p class="cd-kicker">Help and Trust</p>
-                    <h2 class="cd-rail-card__title">Support Without Leaving the Dashboard</h2>
+                    <p class="cd-kicker" th:text="#{ui.00415}">Help and Trust</p>
+                    <h2 class="cd-rail-card__title" th:text="#{ui.00527}">Support Without Leaving the Dashboard</h2>
                 </div>
             </div>
-            <p class="cd-rail-card__copy">Keep essential help, privacy, and support access close to the main dashboard flow.</p>
-            <nav class="cd-link-tile-stack" aria-label="Support links">
+            <p class="cd-rail-card__copy" th:text="#{ui.00528}">Keep essential help, privacy, and support access close to the main dashboard flow.</p>
+            <nav class="cd-link-tile-stack" aria-label="Support links" th:attr="aria-label=#{ui.00529}">
                 <a th:href="@{/faq}" class="cd-link-tile">
                     <span class="cd-link-tile__icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -796,8 +796,8 @@
                         </svg>
                     </span>
                     <span class="cd-link-tile__body">
-                        <span class="cd-link-tile__title">FAQ</span>
-                        <span class="cd-link-tile__text">Fast answers to common questions and workflows.</span>
+                        <span class="cd-link-tile__title" th:text="#{ui.00530}">FAQ</span>
+                        <span class="cd-link-tile__text" th:text="#{ui.00531}">Fast answers to common questions and workflows.</span>
                     </span>
                     <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
                 </a>
@@ -809,8 +809,8 @@
                         </svg>
                     </span>
                     <span class="cd-link-tile__body">
-                        <span class="cd-link-tile__title">Privacy and terms</span>
-                        <span class="cd-link-tile__text">See how your data and account rules are handled.</span>
+                        <span class="cd-link-tile__title" th:text="#{ui.00532}">Privacy and terms</span>
+                        <span class="cd-link-tile__text" th:text="#{ui.00533}">See how your data and account rules are handled.</span>
                     </span>
                     <span class="cd-link-tile__arrow" aria-hidden="true">&rarr;</span>
                 </a>
@@ -824,7 +824,7 @@
                  th:classappend="${profileRail.identity != null and profileRail.identity.cardBackStyle != null ? ' profile-card-back-theme--' + #strings.toLowerCase(profileRail.identity.cardBackStyle) : ''}">
             <div class="cd-rail-card__header">
                 <div class="cd-section-head cd-section-head--center">
-                    <p class="cd-kicker">Your Profile</p>
+                    <p class="cd-kicker" th:text="#{ui.00421}">Your Profile</p>
                 </div>
             </div>
 
@@ -845,45 +845,45 @@
                                 data-profile-bio-toggle
                                 hidden
                                 aria-hidden="true"
-                                aria-expanded="false">Show more</button>
+                                aria-expanded="false" th:text="#{ui.00437}">Show more</button>
                     </div>
                 </div>
 
                 <section class="cd-profile-card__section">
-                    <p class="cd-kicker">Points and level</p>
+                    <p class="cd-kicker" th:text="#{ui.00534}">Points and level</p>
                     <div class="cd-identity-stats cd-identity-stats--wide">
                         <div class="cd-identity-stat">
                             <span class="cd-identity-stat__value" th:text="${profileRail.points}">0</span>
-                            <span class="cd-identity-stat__label">points</span>
+                            <span class="cd-identity-stat__label" th:text="#{ui.00438}">points</span>
                         </div>
                         <div class="cd-identity-stat">
                             <span class="cd-identity-stat__value" th:text="${profileRail.level}">1</span>
-                            <span class="cd-identity-stat__label">level</span>
+                            <span class="cd-identity-stat__label" th:text="#{ui.00439}">level</span>
                         </div>
                     </div>
                 </section>
 
                 <section class="cd-profile-card__section">
-                    <p class="cd-kicker">Milestones</p>
+                    <p class="cd-kicker" th:text="#{ui.00212}">Milestones</p>
                     <div th:if="${profileRail.milestones != null and !#lists.isEmpty(profileRail.milestones)}"
                          class="cd-chip-row"
-                         aria-label="Displayed profile milestones">
+                         aria-label="Displayed profile milestones" th:attr="aria-label=#{ui.00535}">
                         <span th:each="milestone : ${profileRail.milestones}"
                               class="cd-stat-chip"
                               th:text="${milestone}">Milestone</span>
                     </div>
                     <div th:if="${profileRail.milestones == null or #lists.isEmpty(profileRail.milestones)}"
                          class="cd-empty-state cd-empty-state--subtle">
-                        <p class="cd-empty-state__title">No Milestones Displayed</p>
-                        <p class="cd-empty-state__copy">Choose which earned milestones appear here from your profile preferences.</p>
+                        <p class="cd-empty-state__title" th:text="#{ui.00536}">No Milestones Displayed</p>
+                        <p class="cd-empty-state__copy" th:text="#{ui.00537}">Choose which earned milestones appear here from your profile preferences.</p>
                         <div class="dashboard-empty-state__actions">
-                            <a th:href="@{/preferences/edit}" class="cd-button-chip">Choose milestones</a>
+                            <a th:href="@{/preferences/edit}" class="cd-button-chip" th:text="#{ui.00538}">Choose milestones</a>
                         </div>
                     </div>
                 </section>
 
                 <section class="cd-profile-card__section">
-                    <p class="cd-kicker">Daily focus</p>
+                    <p class="cd-kicker" th:text="#{ui.00479}">Daily focus</p>
                     <div class="cd-context-panel cd-context-panel--profile">
                         <h3 class="cd-context-panel__title" th:text="${profileRail.focusTitle}">Daily focus</h3>
                         <p class="cd-context-panel__body" th:text="${profileRail.focusBody}">Focus body</p>
@@ -891,10 +891,10 @@
                 </section>
 
                 <section class="cd-profile-card__section">
-                    <p class="cd-kicker">Workout streak</p>
+                    <p class="cd-kicker" th:text="#{ui.00377}">Workout streak</p>
                     <div class="cd-streak-card">
                         <span class="cd-streak-card__value" th:text="${profileRail.workoutStreak}">0</span>
-                        <span class="cd-streak-card__label">days</span>
+                        <span class="cd-streak-card__label" th:text="#{ui.00539}">days</span>
                     </div>
                 </section>
             </div>

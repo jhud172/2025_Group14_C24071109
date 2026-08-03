@@ -1,13 +1,13 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Client Sign Up', ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.01205}, ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
         <div class="auth-card auth-card--signup-compact">
             <div class="auth-accent-bar"></div>
 
             <div class="mb-6 mt-4 text-center">
-                <h1 class="auth-heading">Create your client account</h1>
-                <p class="auth-subheading">Personalise your profile and start booking trainers.</p>
+                <h1 class="auth-heading" th:text="#{ui.01190}">Create your client account</h1>
+                <p class="auth-subheading" th:text="#{ui.01191}">Personalise your profile and start booking trainers.</p>
             </div>
 
             <th:block th:replace="~{public-views/auth/fragments/social-auth-buttons :: buttons('client', ${socialProviders})}"></th:block>
@@ -15,13 +15,13 @@
             <form th:action="@{/signup/client}" th:object="${signupForm}" method="post" class="auth-form">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                <div th:if="${#fields.hasAnyErrors()}" class="auth-alert auth-alert--error" role="alert">
+                <div th:if="${#fields.hasAnyErrors()}" class="auth-alert auth-alert--error" role="alert" th:text="#{ui.01192}">
                     Please correct the highlighted fields below.
                 </div>
 
                 <div class="auth-form-grid">
                     <div class="auth-field">
-                        <label for="email" class="auth-field__label">Email address *</label>
+                        <label for="email" class="auth-field__label" th:text="#{ui.01193}">Email address *</label>
                         <input
                             type="email"
                             id="email"
@@ -29,14 +29,14 @@
                             required
                             autocomplete="email"
                             placeholder="you@example.com"
-                            class="auth-field__input" />
+                            class="auth-field__input"  th:placeholder="#{ui.01194}"/>
                         <div th:if="${#fields.hasErrors('email')}" class="auth-field__error">
                             <span th:errors="*{email}"></span>
                         </div>
                     </div>
 
                     <div class="auth-field">
-                        <label for="username" class="auth-field__label">Username *</label>
+                        <label for="username" class="auth-field__label" th:text="#{ui.01195}">Username *</label>
                         <input
                             type="text"
                             id="username"
@@ -44,8 +44,8 @@
                             required
                             autocomplete="username"
                             placeholder="Choose a username"
-                            class="auth-field__input" />
-                        <p class="auth-field__hint">3–20 characters. Letters, numbers and underscores only.</p>
+                            class="auth-field__input"  th:placeholder="#{ui.01196}"/>
+                        <p class="auth-field__hint" th:text="#{ui.01197}">3–20 characters. Letters, numbers and underscores only.</p>
                         <div th:if="${#fields.hasErrors('username')}" class="auth-field__error">
                             <span th:errors="*{username}"></span>
                         </div>
@@ -54,7 +54,7 @@
 
                 <div class="auth-form-grid">
                     <div class="auth-field">
-                        <label for="password" class="auth-field__label">Password *</label>
+                        <label for="password" class="auth-field__label" th:text="#{ui.01198}">Password *</label>
                         <div class="auth-field__input-wrapper">
                             <input
                                 type="password"
@@ -63,21 +63,21 @@
                                 required
                                 autocomplete="new-password"
                                 class="auth-field__input auth-field__input--with-icon" />
-                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility" th:attr="aria-label=#{ui.01187}">
                                 <svg class="h-5 w-5" id="eyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                             </button>
                         </div>
-                        <p class="auth-field__hint">At least 8 characters, including upper and lower case, a number and a special character.</p>
+                        <p class="auth-field__hint" th:text="#{ui.01199}">At least 8 characters, including upper and lower case, a number and a special character.</p>
                         <div th:if="${#fields.hasErrors('password')}" class="auth-field__error">
                             <span th:errors="*{password}"></span>
                         </div>
                     </div>
 
                     <div class="auth-field">
-                        <label for="confirmPassword" class="auth-field__label">Confirm password *</label>
+                        <label for="confirmPassword" class="auth-field__label" th:text="#{ui.01200}">Confirm password *</label>
                         <div class="auth-field__input-wrapper">
                             <input
                                 type="password"
@@ -86,7 +86,7 @@
                                 required
                                 autocomplete="new-password"
                                 class="auth-field__input auth-field__input--with-icon" />
-                            <button type="button" class="password-toggle" id="toggleConfirmPassword" aria-label="Toggle password visibility">
+                            <button type="button" class="password-toggle" id="toggleConfirmPassword" aria-label="Toggle password visibility" th:attr="aria-label=#{ui.01187}">
                                 <svg class="h-5 w-5" id="confirmEyeIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -101,10 +101,10 @@
 
                 <div class="auth-actions-row">
                     <a th:href="@{/signup}" class="auth-btn auth-btn--secondary">
-                        <span>Choose account type</span>
+                        <span th:text="#{ui.01201}">Choose account type</span>
                     </a>
                     <button type="submit" class="auth-btn auth-btn--primary">
-                        <span>Sign up as client</span>
+                        <span th:text="#{ui.01202}">Sign up as client</span>
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -112,8 +112,8 @@
                 </div>
 
                 <p class="text-center text-sm text-gray-600">
-                    Already have an account?
-                    <a th:href="@{/login(role=client)}" class="auth-link">Log in</a>
+                    <th:block th:text="#{ui.01203}">Already have an account?</th:block>
+                    <a th:href="@{/login(role=client)}" class="auth-link" th:text="#{ui.01204}">Log in</a>
                 </p>
             </form>
         </div>

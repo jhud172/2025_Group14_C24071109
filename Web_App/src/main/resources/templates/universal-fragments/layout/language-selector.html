@@ -1,6 +1,9 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:fragment="languageSelector">
-    <details class="language-selector" data-language-selector>
+    <details class="language-selector"
+             data-language-selector
+             th:attr="data-current-language=${currentLanguage.code()},
+                      data-language-available-label=#{language.selector.available}">
         <summary class="language-selector__trigger"
                  th:attr="aria-label=#{language.selector.label},
                           title=#{language.selector.label}">
@@ -9,45 +12,97 @@
                 <path d="M3.5 10h13M10 3c2 2 3 4.3 3 7s-1 5-3 7c-2-2-3-4.3-3-7s1-5 3-7Z"></path>
             </svg>
             <span class="language-selector__code"
-                  th:text="${#locale.language == 'cy' ? 'CY' : 'EN'}">EN</span>
+                  th:text="${currentLanguage.shortLabel()}">EN</span>
             <span class="language-selector__chevron" aria-hidden="true"></span>
         </summary>
 
         <div class="language-selector__panel">
-            <div class="language-selector__heading">
-                <span th:text="#{language.selector.eyebrow}">Display language</span>
-                <strong th:text="#{language.selector.title}">Choose language</strong>
+            <div class="language-selector__topline">
+                <div class="language-selector__heading">
+                    <span th:text="#{language.selector.eyebrow}">Display language</span>
+                    <strong th:text="#{language.selector.title}">Choose language</strong>
+                </div>
+                <span class="language-selector__count"
+                      th:text="${#lists.size(supportedLanguages)} + ' ' + #{language.selector.available}">14 available</span>
             </div>
 
-            <form method="get" class="language-selector__options">
-                <button type="submit"
-                        name="lang"
-                        value="en"
-                        class="language-selector__option"
-                        th:classappend="${#locale.language == 'en'} ? ' is-active' : ''"
-                        th:attr="aria-pressed=${#locale.language == 'en'}">
-                    <span class="language-selector__option-code">EN</span>
-                    <span>
-                        <strong th:text="#{language.selector.english}">English</strong>
-                        <small>English</small>
+            <div class="language-selector__search-block" data-language-search-block>
+                <div class="language-selector__search">
+                    <span class="language-selector__search-icon" aria-hidden="true">
+                        <svg viewBox="0 0 20 20">
+                            <circle cx="8.5" cy="8.5" r="5.25"></circle>
+                            <path d="m12.5 12.5 4 4"></path>
+                        </svg>
                     </span>
-                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 3 3 7-7"></path></svg>
-                </button>
+                    <label class="sr-only"
+                           for="language-selector-search"
+                           th:text="#{language.selector.search.label}">Search languages</label>
+                    <input id="language-selector-search"
+                           type="search"
+                           inputmode="search"
+                           autocomplete="off"
+                           spellcheck="false"
+                           data-language-search
+                           th:attr="placeholder=#{language.selector.search.placeholder},
+                                    aria-label=#{language.selector.search.label}">
+                    <button class="language-selector__search-clear"
+                            type="button"
+                            data-language-search-clear
+                            hidden
+                            th:attr="aria-label=#{ui.02267},title=#{ui.02267}">
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="m6 6 8 8M14 6l-8 8"></path>
+                        </svg>
+                    </button>
+                    <kbd aria-hidden="true" th:text="#{ui.02983}">Esc</kbd>
+                </div>
+                <div class="language-selector__search-feedback">
+                    <span class="language-selector__search-pulse" aria-hidden="true"></span>
+                    <p class="language-selector__status"
+                       data-language-search-status
+                       aria-live="polite"
+                       th:text="${#lists.size(supportedLanguages)} + ' ' + #{language.selector.available}">14 available</p>
+                    <span class="language-selector__search-arrows" aria-hidden="true">↑ ↓</span>
+                </div>
+            </div>
 
-                <button type="submit"
+            <form method="get"
+                  class="language-selector__options"
+                  data-language-options
+                  th:attr="aria-label=#{language.selector.options.label}">
+                <button th:each="language : ${supportedLanguages}"
+                        type="submit"
                         name="lang"
-                        value="cy"
+                        th:value="${language.code()}"
                         class="language-selector__option"
-                        th:classappend="${#locale.language == 'cy'} ? ' is-active' : ''"
-                        th:attr="aria-pressed=${#locale.language == 'cy'}">
-                    <span class="language-selector__option-code">CY</span>
-                    <span>
-                        <strong th:text="#{language.selector.welsh}">Welsh</strong>
-                        <small>Cymraeg</small>
+                        th:classappend="${currentLanguage.code() == language.code()} ? ' is-active' : ''"
+                        th:attr="aria-pressed=${currentLanguage.code() == language.code()},
+                                 lang=${language.localeTag()},
+                                 dir=${language.rightToLeft() ? 'rtl' : 'ltr'},
+                                 data-language-option=${language.code()},
+                                 data-language-search-value=${#messages.msg(language.messageKey()) + ' ' + language.nativeName() + ' ' + language.code()}">
+                    <span class="language-selector__option-code"
+                          th:text="${language.shortLabel()}">EN</span>
+                    <span class="language-selector__option-copy">
+                        <strong th:text="${#messages.msg(language.messageKey())}">English</strong>
+                        <small th:text="${language.nativeName()}">English</small>
                     </span>
                     <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 10 3 3 7-7"></path></svg>
                 </button>
             </form>
+
+            <div class="language-selector__empty" data-language-empty hidden>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="8"></circle>
+                    <path d="M8.5 12h7M12 8.5v7"></path>
+                </svg>
+                <strong th:text="#{language.selector.search.empty.title}">No language found</strong>
+                <span th:text="#{language.selector.search.empty.copy}">Try another language name or code.</span>
+            </div>
+
+            <p class="language-selector__hint" th:text="#{language.selector.hint}">
+                Your choice is applied immediately and remembered.
+            </p>
         </div>
     </details>
 </th:block>

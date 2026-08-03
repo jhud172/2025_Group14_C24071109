@@ -90,7 +90,7 @@ class TemplateRouteContractTest {
         assertThat(template).contains("href=\"#dev-page-controls\"");
         assertThat(template).contains("aria-label=${'Access mode for ' + page.title}");
         assertThat(template).contains("aria-label=${'Save access mode for ' + page.title}");
-        assertThat(template).contains("<caption class=\"sr-only\">Dev Hub page access controls</caption>");
+        assertThat(template).contains("<caption class=\"sr-only\" th:text=\"#{ui.00104}\">Dev Hub page access controls</caption>");
         assertThat(template).doesNotContain("â€¢");
     }
 

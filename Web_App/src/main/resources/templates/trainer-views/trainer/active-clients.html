@@ -1,23 +1,23 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout('Active Clients', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.02597}, null, ~{::content}, null)}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Active Clients</h1>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Your current one-to-one clients.</p>
+                    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02597}">Active Clients</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.02598}">Your current one-to-one clients.</p>
                 </div>
                 <a th:href="@{/trainer/requests}"
-                   class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+                   class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" th:text="#{ui.02599}">
                     View requests
                 </a>
             </div>
 
             <div th:if="${#lists.isEmpty(activeLinks)}" class="mt-6 border border-dashed border-white/15 rounded-xl p-8 text-center">
-                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">No active clients</h2>
-                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Accepted clients will show up here.</p>
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02600}">No active clients</h2>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.02601}">Accepted clients will show up here.</p>
             </div>
 
             <div th:if="${!#lists.isEmpty(activeLinks)}" class="mt-6 divide-y divide-white/10">
@@ -26,24 +26,24 @@
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-semibold text-slate-900 dark:text-slate-100"
                                   th:text="${'Client #' + link.clientUserId}">Client</span>
-                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs ring-1 ring-white/10 bg-emerald-400/10 text-emerald-300">ACTIVE</span>
+                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs ring-1 ring-white/10 bg-emerald-400/10 text-emerald-300" th:text="#{ui.00252}">ACTIVE</span>
                         </div>
-                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Relationship is active.</p>
+                        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.02602}">Relationship is active.</p>
                     </div>
 
                     <div class="flex items-center gap-2 shrink-0">
                         <a th:href="@{/trainer/clients/{id}/assessment(id=${link.clientUserId})}"
-                           class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+                           class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" th:text="#{ui.02603}">
                             Assess
                         </a>
                         <a th:href="@{/trainer/clients/{id}(id=${link.clientUserId})}"
-                           class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">
+                           class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-800/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" th:text="#{ui.01433}">
                             Plan
                         </a>
                         <form th:action="@{/inbox/start/{id}(id=${link.clientUserId})}" method="post">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                             <button type="submit"
-                                    class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white">
+                                    class="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white" th:text="#{ui.00028}">
                                 Message
                             </button>
                         </form>

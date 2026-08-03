@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Pricing', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.01471}, null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="pricing-page public-journey"
          th:with="sub=${platformSubscription},
@@ -10,48 +10,48 @@
         <div class="mx-auto w-full max-w-5xl px-4 pt-6 sm:px-6 lg:px-8">
             <div th:if="${pricingSuccess}" class="mb-4 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900" role="status" th:text="${pricingSuccess}">Platform Premium is now active.</div>
             <div th:if="${pricingError}" class="mb-4 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert" th:text="${pricingError}">Subscription checkout error.</div>
-            <div th:if="${!paymentProviderConfigured}" class="mb-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            <div th:if="${!paymentProviderConfigured}" class="mb-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950" th:text="#{ui.01438}">
                 Secure subscription checkout is not configured yet. Pricing is visible, but hosted payment is unavailable in this environment.
             </div>
         </div>
 
         <header class="public-section public-section--muted" data-public-hero>
             <div class="public-section__inner public-section__inner--narrow text-center">
-                <p class="public-eyebrow">Platform Premium</p>
-                <h1 class="public-title">More insight. The same focused training journey.</h1>
-                <p class="public-copy mx-auto">Premium adds deeper dashboards, weekly insight and priority support without changing your core coaching relationship.</p>
+                <p class="public-eyebrow" th:text="#{ui.01439}">Platform Premium</p>
+                <h1 class="public-title" th:text="#{ui.01440}">More insight. The same focused training journey.</h1>
+                <p class="public-copy mx-auto" th:text="#{ui.01441}">Premium adds deeper dashboards, weekly insight and priority support without changing your core coaching relationship.</p>
             </div>
         </header>
 
         <section class="public-section" data-public-section aria-labelledby="pricing-plans-heading">
             <div class="public-section__inner">
                 <div class="public-section__header public-section__header--centred">
-                    <p class="public-eyebrow">Choose a plan</p>
-                    <h2 id="pricing-plans-heading" class="public-heading">Monthly flexibility or yearly value.</h2>
-                    <p class="public-copy mx-auto">Both paid plans include the same Premium features. Only the billing period changes.</p>
+                    <p class="public-eyebrow" th:text="#{ui.01442}">Choose a plan</p>
+                    <h2 id="pricing-plans-heading" class="public-heading" th:text="#{ui.01443}">Monthly flexibility or yearly value.</h2>
+                    <p class="public-copy mx-auto" th:text="#{ui.01444}">Both paid plans include the same Premium features. Only the billing period changes.</p>
                 </div>
 
                 <div th:if="${isInfinite}" class="pricing-surface-success mb-8 rounded-2xl p-5">
-                    <p class="font-bold text-emerald-900 text-lg">Premium active</p>
-                    <p class="text-sm text-slate-700 mt-1">You have lifetime access to every Platform Premium feature.</p>
+                    <p class="font-bold text-emerald-900 text-lg" th:text="#{ui.01445}">Premium active</p>
+                    <p class="text-sm text-slate-700 mt-1" th:text="#{ui.01446}">You have lifetime access to every Platform Premium feature.</p>
                 </div>
 
                 <div th:if="${isExpired}" class="pricing-surface-danger mb-8 rounded-2xl p-5">
-                    <p class="font-bold text-red-800 text-lg">Subscription ended</p>
-                    <p class="text-sm text-slate-700 mt-1">Reactivate below to restore Premium features.</p>
+                    <p class="font-bold text-red-800 text-lg" th:text="#{ui.01447}">Subscription ended</p>
+                    <p class="text-sm text-slate-700 mt-1" th:text="#{ui.01448}">Reactivate below to restore Premium features.</p>
                 </div>
 
                 <div th:if="${isActive and !isInfinite}" class="pricing-surface-success-soft mb-8 rounded-2xl p-5">
-                    <p class="font-bold text-emerald-900 text-lg">Premium active</p>
-                    <p class="text-sm text-slate-700 mt-1">Manage your active subscription from your <a th:href="@{/profile}" class="font-semibold text-emerald-800 underline">profile</a>.</p>
+                    <p class="font-bold text-emerald-900 text-lg" th:text="#{ui.01445}">Premium active</p>
+                    <p class="text-sm text-slate-700 mt-1"><th:block th:text="#{ui.01449}">Manage your active subscription from your</th:block> <a th:href="@{/profile}" class="font-semibold text-emerald-800 underline" th:text="#{ui.01450}">profile</a>.</p>
                 </div>
 
                 <div class="grid gap-8 md:grid-cols-2">
                     <article th:each="plan : ${plans}" class="plan-card" th:classappend="${plan.plan.name() == 'YEARLY'} ? ' featured' : ''">
-                        <span th:if="${plan.plan.name() == 'YEARLY'}" class="plan-badge-recommended">Best value</span>
+                        <span th:if="${plan.plan.name() == 'YEARLY'}" class="plan-badge-recommended" th:text="#{ui.01451}">Best value</span>
 
                         <div th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}"
-                             class="absolute top-4 right-4 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">
+                             class="absolute top-4 right-4 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800" th:text="#{ui.00134}">
                             Active
                         </div>
 
@@ -63,8 +63,8 @@
                         <div class="mt-3 mb-1">
                             <span class="price-display" th:classappend="${plan.plan.name() == 'MONTHLY'} ? ' cyan' : ''" th:text="${plan.priceLabel}">&#163;12 / month</span>
                         </div>
-                        <p th:if="${plan.plan.name() == 'YEARLY'}" class="text-xs text-slate-600 mb-4">Equivalent to &#163;9 per month, billed annually.</p>
-                        <p th:if="${plan.plan.name() == 'MONTHLY'}" class="text-xs text-slate-600 mb-4">Billed monthly. Cancel at any time.</p>
+                        <p th:if="${plan.plan.name() == 'YEARLY'}" class="text-xs text-slate-600 mb-4" th:text="#{ui.01452}">Equivalent to &#163;9 per month, billed annually.</p>
+                        <p th:if="${plan.plan.name() == 'MONTHLY'}" class="text-xs text-slate-600 mb-4" th:text="#{ui.01453}">Billed monthly. Cancel at any time.</p>
 
                         <div class="pricing-divider-emerald h-px mb-4"></div>
 
@@ -76,19 +76,19 @@
                         </ul>
 
                         <th:block th:if="${sub == null or (isExpired and sub.plan.name() != plan.plan.name())}">
-                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full" th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">Get started</a>
+                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full" th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'" th:text="#{ui.01275}">Get started</a>
                         </th:block>
                         <th:block th:if="${isExpired and sub.plan.name() == plan.plan.name()}">
-                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full btn--primary">Reactivate now</a>
+                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full btn--primary" th:text="#{ui.01454}">Reactivate now</a>
                         </th:block>
                         <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}">
-                            <a th:href="@{/profile}" class="btn w-full btn--ghost">Manage subscription</a>
+                            <a th:href="@{/profile}" class="btn w-full btn--ghost" th:text="#{ui.01455}">Manage subscription</a>
                         </th:block>
                         <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() != plan.plan.name()}">
-                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full" th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'">Switch to this plan</a>
+                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full" th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'" th:text="#{ui.01456}">Switch to this plan</a>
                         </th:block>
                         <th:block th:if="${isInfinite}">
-                            <span class="btn w-full btn--ghost inline-flex items-center justify-center opacity-60">Included in lifetime</span>
+                            <span class="btn w-full btn--ghost inline-flex items-center justify-center opacity-60" th:text="#{ui.01457}">Included in lifetime</span>
                         </th:block>
                     </article>
                 </div>
@@ -98,21 +98,21 @@
         <section class="public-section public-section--muted" data-public-section aria-labelledby="pricing-includes-heading">
             <div class="public-section__inner">
                 <div class="public-section__header">
-                    <p class="public-eyebrow">Included with Premium</p>
-                    <h2 id="pricing-includes-heading" class="public-heading">Three upgrades, one clear purpose.</h2>
+                    <p class="public-eyebrow" th:text="#{ui.01458}">Included with Premium</p>
+                    <h2 id="pricing-includes-heading" class="public-heading" th:text="#{ui.01459}">Three upgrades, one clear purpose.</h2>
                 </div>
                 <div class="public-proof-list">
                     <article class="public-proof">
-                        <h3 class="public-proof__title">Deeper progress insight</h3>
-                        <p class="public-proof__copy">Premium dashboards, richer analytics and weekly summaries make patterns easier to see.</p>
+                        <h3 class="public-proof__title" th:text="#{ui.01460}">Deeper progress insight</h3>
+                        <p class="public-proof__copy" th:text="#{ui.01461}">Premium dashboards, richer analytics and weekly summaries make patterns easier to see.</p>
                     </article>
                     <article class="public-proof">
-                        <h3 class="public-proof__title">Priority guidance</h3>
-                        <p class="public-proof__copy">Receive priority Charlie access and faster support handling when you need help.</p>
+                        <h3 class="public-proof__title" th:text="#{ui.01462}">Priority guidance</h3>
+                        <p class="public-proof__copy" th:text="#{ui.01463}">Receive priority Charlie access and faster support handling when you need help.</p>
                     </article>
                     <article class="public-proof">
-                        <h3 class="public-proof__title">Trainer collaboration</h3>
-                        <p class="public-proof__copy">Share clearer progress signals with your trainer to support useful programme decisions.</p>
+                        <h3 class="public-proof__title" th:text="#{ui.01464}">Trainer collaboration</h3>
+                        <p class="public-proof__copy" th:text="#{ui.01465}">Share clearer progress signals with your trainer to support useful programme decisions.</p>
                     </article>
                 </div>
             </div>
@@ -120,12 +120,12 @@
 
         <section class="public-section public-section--accent" data-public-section aria-labelledby="pricing-help-heading">
             <div class="public-section__inner public-section__inner--narrow">
-                <p class="public-eyebrow">Before you subscribe</p>
-                <h2 id="pricing-help-heading" class="public-heading">Check the details or ask us first.</h2>
-                <p class="public-copy">Platform Premium is separate from gym membership and renews until cancelled. Subscription controls remain available from your profile.</p>
+                <p class="public-eyebrow" th:text="#{ui.01466}">Before you subscribe</p>
+                <h2 id="pricing-help-heading" class="public-heading" th:text="#{ui.01467}">Check the details or ask us first.</h2>
+                <p class="public-copy" th:text="#{ui.01468}">Platform Premium is separate from gym membership and renews until cancelled. Subscription controls remain available from your profile.</p>
                 <div class="public-actions">
-                    <a th:href="@{/faq}" class="public-action public-action--inverse">Read common questions</a>
-                    <a th:href="@{/support}" class="public-action public-action--inverse-secondary">Contact support</a>
+                    <a th:href="@{/faq}" class="public-action public-action--inverse" th:text="#{ui.01469}">Read common questions</a>
+                    <a th:href="@{/support}" class="public-action public-action--inverse-secondary" th:text="#{ui.01470}">Contact support</a>
                 </div>
             </div>
         </section>

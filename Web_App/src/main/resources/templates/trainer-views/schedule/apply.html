@@ -1,18 +1,18 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Apply Schedule', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.02479}, null, ~{::content}, null)}">
 
 <div th:fragment="content">
     <div class="schedule-apply-page mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
         <nav class="mb-6 flex items-center gap-2 text-sm">
-            <a href="/schedules" class="schedule-apply-breadcrumb-link">&larr; Schedules</a>
+            <a href="/schedules" class="schedule-apply-breadcrumb-link" th:text="#{ui.02478}">&larr; Schedules</a>
             <span class="schedule-apply-breadcrumb-separator">&rsaquo;</span>
-            <span class="schedule-apply-breadcrumb-current">Apply Schedule</span>
+            <span class="schedule-apply-breadcrumb-current" th:text="#{ui.02479}">Apply Schedule</span>
         </nav>
 
         <div class="mb-6 flex flex-col gap-2">
-            <h1 class="schedule-apply-title text-2xl font-bold tracking-tight">Apply schedule</h1>
+            <h1 class="schedule-apply-title text-2xl font-bold tracking-tight" th:text="#{ui.02480}">Apply schedule</h1>
             <p class="schedule-apply-subtitle text-sm">
-                Applying: <span class="schedule-apply-glow-text font-semibold" th:text="${schedule.name}"></span>
+                <th:block th:text="#{ui.02481}">Applying:</th:block> <span class="schedule-apply-glow-text font-semibold" th:text="${schedule.name}"></span>
             </p>
         </div>
 
@@ -23,13 +23,13 @@
                        th:value="${_csrf.token}"/>
 
                 <div>
-                    <label class="schedule-apply-label mb-1.5 block text-sm font-semibold">Start date</label>
+                    <label class="schedule-apply-label mb-1.5 block text-sm font-semibold" th:text="#{ui.00589}">Start date</label>
                     <input type="date" name="startDate" required
                            class="schedule-apply-input w-full rounded-xl px-4 py-2.5"/>
                 </div>
 
                 <div>
-                    <label class="schedule-apply-label mb-1.5 block text-sm font-semibold">Number of weeks</label>
+                    <label class="schedule-apply-label mb-1.5 block text-sm font-semibold" th:text="#{ui.02482}">Number of weeks</label>
                     <input type="number" name="weeks" value="4" min="1"
                            class="schedule-apply-input w-full rounded-xl px-4 py-2.5"/>
                 </div>
@@ -39,7 +39,7 @@
                         <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        Apply schedule
+                        <th:block th:text="#{ui.02480}">Apply schedule</th:block>
                     </button>
                 </div>
             </form>

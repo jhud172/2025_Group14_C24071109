@@ -1,12 +1,12 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:replace="~{base :: layout('Trainer Profile', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.02734}, null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="detail-container">
         <!-- Trainer Code (only visible to the trainer themselves) -->
         <div th:if="${isOwner and trainerProfile != null and trainerProfile.trainerCode != null}"
              class="mb-6 rounded-2xl border-2 border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 p-5">
-            <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Your Trainer Code</p>
+            <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400" th:text="#{ui.01231}">Your Trainer Code</p>
             <div class="flex flex-wrap items-center gap-3">
                 <span id="trainerCodeVal"
                       class="font-mono text-2xl font-bold tracking-[0.15em] text-emerald-800 dark:text-emerald-200 select-all"
@@ -16,10 +16,10 @@
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    <span id="copyTrainerCodeLabel">Copy</span>
+                    <span id="copyTrainerCodeLabel" th:text="#{ui.01076}">Copy</span>
                 </button>
             </div>
-            <p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Share this code with clients who need to verify you during login.</p>
+            <p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400" th:text="#{ui.02709}">Share this code with clients who need to verify you during login.</p>
         </div>
 
         <!-- Success/Error Messages -->
@@ -27,17 +27,17 @@
             <p th:text="${successMessage}"></p>
         </div>
         <div th:if="${param.error}" class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
-            <p class="text-sm text-red-700 dark:text-red-200" th:if="${param.error[0] == 'cannot_review'}">You cannot review this trainer at this time.</p>
-            <p class="text-sm text-red-700 dark:text-red-200" th:if="${param.error[0] == 'already_reviewed'}">You have already reviewed this trainer for your current/most recent relationship.</p>
-            <p class="text-sm text-red-700 dark:text-red-200" th:if="${param.error[0] == 'not_eligible'}">You must have an active or past relationship with this trainer to leave a review.</p>
-            <p class="text-sm text-red-700 dark:text-red-200" th:if="${param.error[0] == 'invalid'}">An error occurred. Please try again.</p>
+            <p class="text-sm text-red-700 dark:text-red-200" th:if="${param.error[0] == 'cannot_review'}" th:text="#{ui.02725}">You cannot review this trainer at this time.</p>
+            <p class="text-sm text-red-700 dark:text-red-200" th:if="${param.error[0] == 'already_reviewed'}" th:text="#{ui.02726}">You have already reviewed this trainer for your current/most recent relationship.</p>
+            <p class="text-sm text-red-700 dark:text-red-200" th:if="${param.error[0] == 'not_eligible'}" th:text="#{ui.02727}">You must have an active or past relationship with this trainer to leave a review.</p>
+            <p class="text-sm text-red-700 dark:text-red-200" th:if="${param.error[0] == 'invalid'}" th:text="#{ui.02728}">An error occurred. Please try again.</p>
         </div>
 
         <!-- Header with key metadata at top -->
         <div class="detail-header">
             <div class="detail-header-content">
                 <div class="detail-header-meta">
-                    <p class="detail-label">Personal Trainer</p>
+                    <p class="detail-label" th:text="#{ui.02729}">Personal Trainer</p>
                     <h1 class="detail-title" th:text="${trainer.firstName + ' ' + trainer.lastName}">Trainer Name</h1>
                     
                     <!-- Bio -->
@@ -130,7 +130,7 @@
                 <!-- Primary actions - sticky on larger screens -->
                 <div class="detail-actions-sticky">
                     <a th:if="${canReview}" th:href="@{/trainers/{id}/review(id=${trainer.id})}"
-                       class="detail-btn-primary">
+                       class="detail-btn-primary" th:text="#{ui.02225}">
                         Leave a Review
                     </a>
                 </div>
@@ -161,10 +161,10 @@
         <!-- Structured content sections -->
         <div class="detail-sections">
             <section class="detail-section">
-                <h2 class="detail-section-title">Reviews</h2>
+                <h2 class="detail-section-title" th:text="#{ui.01572}">Reviews</h2>
 
                 <div class="detail-section-content">
-                    <div th:if="${#lists.isEmpty(reviews)}" class="detail-empty">No reviews yet.</div>
+                    <div th:if="${#lists.isEmpty(reviews)}" class="detail-empty" th:text="#{ui.01573}">No reviews yet.</div>
 
                     <div th:if="${!#lists.isEmpty(reviews)}" class="divide-y divide-slate-200 dark:divide-white/10">
                         <div th:each="review : ${reviews}" class="py-6 first:pt-0 last:pb-0">
@@ -205,7 +205,7 @@
                                 <button type="button"
                                         data-open-report-modal
                                         th:attr="data-review-id=${review.id},data-trainer-id=${trainer.id}"
-                                        class="text-sm text-slate-500 hover:text-red-600">
+                                        class="text-sm text-slate-500 hover:text-red-600" th:text="#{ui.02730}">
                                     Report
                                 </button>
                             </div>
@@ -219,21 +219,21 @@
         <div id="reportModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/50">
             <div class="flex min-h-full items-center justify-center p-4">
                 <div class="w-full max-w-md rounded-xl bg-white dark:bg-slate-800 p-6 shadow-xl">
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Report Review</h3>
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.02731}">Report Review</h3>
                     <form id="reportForm" method="post">
                         <input type="hidden" name="trainerId" id="reportTrainerId"/>
                         <div class="mt-4">
-                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Reason for reporting</label>
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300" th:text="#{ui.02732}">Reason for reporting</label>
                             <textarea name="reason" rows="4" required
                                      class="mt-1 block w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
                         </div>
                         <div class="mt-6 flex justify-end gap-3">
                             <button type="button" data-close-report-modal
-                                   class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                                   class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100" th:text="#{ui.00125}">
                                 Cancel
                             </button>
                             <button type="submit"
-                                   class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
+                                   class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700" th:text="#{ui.02733}">
                                 Submit Report
                             </button>
                         </div>

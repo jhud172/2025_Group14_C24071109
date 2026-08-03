@@ -106,10 +106,19 @@ public class UserPreferenceFormValidationTest {
     @Test
     void invalidLanguageShouldFail() {
         UserPreferenceForm form = validForm();
-        form.setLanguage("fr");
+        form.setLanguage("unknown");
         Set<ConstraintViolation<UserPreferenceForm>> violations = validator.validate(form);
         assertFalse(violations.isEmpty());
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("language")));
+    }
+
+    @Test
+    void everySupportedLanguageShouldBeValid() {
+        for (String language : new String[]{"en", "cy", "es", "fr", "de", "it", "pt", "pl", "nl", "zh", "ja", "ko", "ar", "hi"}) {
+            UserPreferenceForm form = validForm();
+            form.setLanguage(language);
+            assertTrue(validator.validate(form).isEmpty(), language + " should be accepted");
+        }
     }
 
     @Test

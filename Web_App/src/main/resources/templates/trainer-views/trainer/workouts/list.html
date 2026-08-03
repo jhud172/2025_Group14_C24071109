@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(${pageTitle} ?: 'Workout Library', null, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(${pageTitle} ?: #{ui.02800}, null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <!-- Breadcrumb Navigation -->
@@ -8,18 +8,18 @@
                 <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
-                Library
+                <th:block th:text="#{ui.02654}">Library</th:block>
             </a>
             <span class="workout-breadcrumb-separator">›</span>
-            <span class="workout-breadcrumb-item active">Workouts</span>
+            <span class="workout-breadcrumb-item active" th:text="#{ui.00235}">Workouts</span>
         </nav>
 
         <!-- Header -->
         <div class="bg-white dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 mb-6">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div class="flex-1">
-                    <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Workout Library</h1>
-                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">Build workout programs from your exercise library</p>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100" th:text="#{ui.02800}">Workout Library</h1>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400" th:text="#{ui.02801}">Build workout programs from your exercise library</p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                     <a th:href="@{/trainer/library}"
@@ -27,14 +27,14 @@
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
-                        Back
+                        <th:block th:text="#{ui.00571}">Back</th:block>
                     </a>
                     <a th:href="@{/trainer/library/workouts/create}"
                        class="workout-btn-primary">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Create Workout
+                        <th:block th:text="#{ui.02798}">Create Workout</th:block>
                     </a>
                 </div>
             </div>
@@ -43,10 +43,10 @@
             <div th:if="${!#lists.isEmpty(workouts)}" class="mt-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 <div class="flex-1 max-w-md">
                     <input type="text" id="workoutSearch" placeholder="Search workouts by title..."
-                           class="workout-search-input" />
+                           class="workout-search-input"  th:placeholder="#{ui.02802}"/>
                 </div>
                 <div class="workout-stat-card px-4 py-2">
-                    <span class="workout-stat-label">Total Workouts</span>
+                    <span class="workout-stat-label" th:text="#{ui.02517}">Total Workouts</span>
                     <span class="text-xl font-bold text-emerald-600 dark:text-emerald-400 ml-2" th:text="${#lists.size(workouts)}">0</span>
                 </div>
             </div>
@@ -57,13 +57,13 @@
             <svg class="empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
             </svg>
-            <h2 class="empty-state-title">No workout programs yet</h2>
-            <p class="empty-state-description">Create your first workout program by combining exercises from your library</p>
+            <h2 class="empty-state-title" th:text="#{ui.02803}">No workout programs yet</h2>
+            <p class="empty-state-description" th:text="#{ui.02804}">Create your first workout program by combining exercises from your library</p>
             <a th:href="@{/trainer/library/workouts/create}" class="workout-btn-primary">
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Create First Workout
+                <th:block th:text="#{ui.02805}">Create First Workout</th:block>
             </a>
         </div>
 
@@ -76,7 +76,7 @@
                     <h3 class="workout-preview-title" th:text="${workout.title}">Workout Title</h3>
                     <span class="workout-badge badge-success" 
                           th:if="${workout.items != null && #lists.size(workout.items) > 0}">
-                        <span th:text="${#lists.size(workout.items)}">0</span> exercises
+                        <span th:text="${#lists.size(workout.items)}">0</span> <th:block th:text="#{ui.02806}">exercises</th:block>
                     </span>
                 </div>
                 
@@ -87,12 +87,12 @@
                 <div class="flex items-center justify-between pt-3 border-t border-emerald-200 dark:border-emerald-800">
                     <div class="flex gap-2">
                         <a th:href="@{/trainer/library/workouts/{id}/edit(id=${workout.id})}"
-                           class="text-sm text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium">
+                           class="text-sm text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium" th:text="#{ui.00138}">
                             Edit
                         </a>
                     </div>
                     <a th:href="@{/trainer/library/workouts/{id}(id=${workout.id})}"
-                       class="workout-btn-secondary py-1.5 px-3 text-xs">
+                       class="workout-btn-secondary py-1.5 px-3 text-xs" th:text="#{ui.02807}">
                         View Details →
                     </a>
                 </div>
@@ -108,8 +108,8 @@
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">Next Step: Create a Schedule</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                    <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1" th:text="#{ui.02808}">Next Step: Create a Schedule</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400" th:text="#{ui.02809}">
                         Once you have workouts ready, you can organize them into a weekly schedule and assign them to your clients.
                     </p>
                 </div>

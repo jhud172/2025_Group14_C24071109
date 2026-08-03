@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Notes', ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.00175}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="styles">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" />
@@ -23,23 +23,23 @@
                     <aside class="border-b border-slate-200/70 bg-white/80 p-5 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950/40 lg:border-b-0 lg:border-r">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">Folders</h2>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Organise your ideas.</p>
+                                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300" th:text="#{ui.01937}">Folders</h2>
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.02121}">Organise your ideas.</p>
                             </div>
                             <button id="addFolderBtn" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">+</button>
                         </div>
 
                         <div class="mt-4">
                             <input id="folderSearch" type="text" placeholder="Search folders"
-                                   class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100" />
+                                   class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"  th:placeholder="#{ui.02122}"/>
                         </div>
 
                         <div id="newFolderRow" class="mt-3 hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-950">
                             <input id="newFolderName" type="text" placeholder="New folder name"
-                                   class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100" />
+                                   class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"  th:placeholder="#{ui.02106}"/>
                             <div class="mt-2 flex items-center justify-end gap-2">
-                                <button id="cancelFolderBtn" type="button" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">Cancel</button>
-                                <button id="createFolderBtn" type="button" class="rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">Create</button>
+                                <button id="cancelFolderBtn" type="button" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200" th:text="#{ui.00125}">Cancel</button>
+                                <button id="createFolderBtn" type="button" class="rounded-lg bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900" th:text="#{ui.01116}">Create</button>
                             </div>
                         </div>
 
@@ -60,15 +60,15 @@
                     <section class="border-b border-slate-200/70 bg-white/80 p-5 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950/40 lg:border-b-0 lg:border-r">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">Notes</h2>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Your latest drafts.</p>
+                                <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300" th:text="#{ui.00175}">Notes</h2>
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" th:text="#{ui.02123}">Your latest drafts.</p>
                             </div>
-                            <button id="addNoteBtn" type="button" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900">New</button>
+                            <button id="addNoteBtn" type="button" class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900" th:text="#{ui.02124}">New</button>
                         </div>
 
                         <div class="mt-4">
                             <input id="noteSearch" type="text" placeholder="Search notes" th:value="${q}"
-                                   class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100" />
+                                   class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"  th:placeholder="#{ui.02113}"/>
                         </div>
 
                         <div class="mt-4 space-y-2" id="noteList">
@@ -82,7 +82,7 @@
                                     <span class="text-[10px] text-slate-400" th:text="${#temporals.format(note.updatedAt, 'dd MMM')}">Date</span>
                                 </div>
                             </button>
-                            <div th:if="${notes == null or #lists.isEmpty(notes)}" class="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-950/40">No notes yet.</div>
+                            <div th:if="${notes == null or #lists.isEmpty(notes)}" class="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-950/40" th:text="#{ui.02125}">No notes yet.</div>
                         </div>
                     </section>
 
@@ -93,12 +93,12 @@
                                 <div class="min-w-0">
                                     <input id="noteTitle" type="text" placeholder="Untitled note"
                                            th:value="${activeNote != null ? activeNote.title : ''}"
-                                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100" />
+                                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"  th:placeholder="#{ui.02126}"/>
                                     <p id="noteMeta" class="mt-1 text-xs text-slate-500" th:text="${activeNote != null ? #temporals.format(activeNote.updatedAt, 'dd MMM yyyy HH:mm') : ''}"></p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <button id="exportHtmlBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">Export HTML</button>
-                                    <button id="deleteNoteBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 shadow-sm hover:bg-rose-100 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-200">Delete</button>
+                                    <button id="exportHtmlBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200" th:text="#{ui.02127}">Export HTML</button>
+                                    <button id="deleteNoteBtn" type="button" class="inline-flex items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 shadow-sm hover:bg-rose-100 dark:border-rose-900/40 dark:bg-rose-900/20 dark:text-rose-200" th:text="#{ui.00139}">Delete</button>
                                 </div>
                             </div>
 
@@ -109,8 +109,8 @@
                             </div>
 
                             <div class="flex items-center gap-2 text-xs text-slate-500">
-                                <span id="saveStatus" class="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">Idle</span>
-                                <span class="text-slate-400">Autosaves after 1s.</span>
+                                <span id="saveStatus" class="rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300" th:text="#{ui.02128}">Idle</span>
+                                <span class="text-slate-400" th:text="#{ui.02129}">Autosaves after 1s.</span>
                             </div>
                         </div>
                     </section>

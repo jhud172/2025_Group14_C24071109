@@ -277,29 +277,114 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const finalCta = document.querySelector('[data-final-cta]');
-    const supportsFinalDepth = finalCta && supportsFinePointerMotion;
+    const finalSurface = document.querySelector('[data-final-cta]');
+    const finalCta = finalSurface?.querySelector('[data-final-cta-panel]');
+    const supportsFinalDepth = finalSurface && finalCta && supportsFinePointerMotion;
     if (supportsFinalDepth) {
+        const neutralPose = {
+            rotateX: 0,
+            rotateY: 0,
+            lightX: 78,
+            lightY: 18
+        };
+        const targetPose = {...neutralPose};
+        const currentPose = {...neutralPose};
         let finalFrame = null;
-        const setFinalPose = (x, y) => {
-            finalCta.style.setProperty('--final-rotate-x', `${((0.5 - y) * 2.4).toFixed(2)}deg`);
-            finalCta.style.setProperty('--final-rotate-y', `${((x - 0.5) * 3.4).toFixed(2)}deg`);
-            finalCta.style.setProperty('--final-light-x', `${38 + (x * 54)}%`);
-            finalCta.style.setProperty('--final-light-y', `${8 + (y * 54)}%`);
+        let previousFinalFrameTime = 0;
+        let finalPointer = null;
+        let finalIsEngaged = false;
+
+        const applyFinalPose = () => {
+            finalCta.style.setProperty('--final-rotate-x', `${currentPose.rotateX.toFixed(3)}deg`);
+            finalCta.style.setProperty('--final-rotate-y', `${currentPose.rotateY.toFixed(3)}deg`);
+            finalCta.style.setProperty('--final-light-x', `${currentPose.lightX.toFixed(2)}%`);
+            finalCta.style.setProperty('--final-light-y', `${currentPose.lightY.toFixed(2)}%`);
         };
 
-        finalCta.addEventListener('pointermove', (event) => {
-            const bounds = finalCta.getBoundingClientRect();
-            const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
-            const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
-            window.cancelAnimationFrame(finalFrame);
-            finalFrame = window.requestAnimationFrame(() => setFinalPose(x, y));
-        });
-        finalCta.addEventListener('pointerleave', () => {
-            window.cancelAnimationFrame(finalFrame);
-            setFinalPose(0.74, 0.18);
-            finalCta.style.setProperty('--final-rotate-x', '0deg');
-            finalCta.style.setProperty('--final-rotate-y', '0deg');
+        const finalPoseIsSettled = () => (
+            Math.abs(targetPose.rotateX - currentPose.rotateX) < 0.003
+            && Math.abs(targetPose.rotateY - currentPose.rotateY) < 0.003
+            && Math.abs(targetPose.lightX - currentPose.lightX) < 0.04
+            && Math.abs(targetPose.lightY - currentPose.lightY) < 0.04
+        );
+
+        const animateFinalPose = (frameTime) => {
+            const elapsed = previousFinalFrameTime
+                ? Math.min((frameTime - previousFinalFrameTime) / 1000, 0.05)
+                : 1 / 60;
+            previousFinalFrameTime = frameTime;
+            const responsiveness = finalIsEngaged ? 12.5 : 7.5;
+            const blend = 1 - Math.exp(-responsiveness * elapsed);
+
+            Object.keys(currentPose).forEach((key) => {
+                currentPose[key] += (targetPose[key] - currentPose[key]) * blend;
+            });
+            applyFinalPose();
+
+            if (finalPoseIsSettled()) {
+                Object.assign(currentPose, targetPose);
+                applyFinalPose();
+                finalFrame = null;
+                previousFinalFrameTime = 0;
+                return;
+            }
+            finalFrame = window.requestAnimationFrame(animateFinalPose);
+        };
+
+        const queueFinalAnimation = () => {
+            if (finalFrame === null) {
+                finalFrame = window.requestAnimationFrame(animateFinalPose);
+            }
+        };
+
+        const resetFinalPose = () => {
+            finalIsEngaged = false;
+            finalPointer = null;
+            Object.assign(targetPose, neutralPose);
+            queueFinalAnimation();
+        };
+
+        const syncFinalTargetToPointer = () => {
+            if (!finalIsEngaged || !finalPointer) {
+                return;
+            }
+
+            const bounds = finalSurface.getBoundingClientRect();
+            const pointerIsInside = finalPointer.x >= bounds.left
+                && finalPointer.x <= bounds.right
+                && finalPointer.y >= bounds.top
+                && finalPointer.y <= bounds.bottom;
+            if (!pointerIsInside || bounds.width <= 0 || bounds.height <= 0) {
+                resetFinalPose();
+                return;
+            }
+
+            const x = Math.max(0, Math.min(1, (finalPointer.x - bounds.left) / bounds.width));
+            const y = Math.max(0, Math.min(1, (finalPointer.y - bounds.top) / bounds.height));
+            targetPose.rotateX = (0.5 - y) * 2.4;
+            targetPose.rotateY = (x - 0.5) * 3.4;
+            targetPose.lightX = 38 + (x * 54);
+            targetPose.lightY = 8 + (y * 54);
+            queueFinalAnimation();
+        };
+
+        const trackFinalPointer = (event) => {
+            finalIsEngaged = true;
+            finalPointer = {x: event.clientX, y: event.clientY};
+            syncFinalTargetToPointer();
+        };
+
+        finalSurface.addEventListener('pointerenter', trackFinalPointer);
+        finalSurface.addEventListener('pointermove', trackFinalPointer);
+        finalSurface.addEventListener('pointerleave', resetFinalPose);
+        finalSurface.addEventListener('pointercancel', resetFinalPose);
+        window.addEventListener('scroll', syncFinalTargetToPointer, {passive: true});
+        window.addEventListener('resize', syncFinalTargetToPointer, {passive: true});
+        window.addEventListener('blur', resetFinalPose);
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                resetFinalPose();
+            }
         });
     }
 
@@ -725,8 +810,45 @@ document.addEventListener('DOMContentLoaded', () => {
     createHomeChapterNavigation();
 
     const brandObject = document.querySelector('[data-brand-object]');
+    const prepareBrandSculpture = () => {
+        if (!brandObject || prefersReducedMotion) return;
+
+        const sliceTemplate = brandObject.querySelector('[data-brand-slice-template]');
+        const volumes = Array.from(brandObject.querySelectorAll('[data-brand-volume]'));
+        if (!sliceTemplate || !volumes.length) return;
+
+        volumes.forEach((volume) => {
+            const frontFace = volume.querySelector('.brand-sculpture__front');
+            const sliceCount = Math.max(1, Number.parseInt(volume.dataset.brandSlices || '1', 10));
+            const volumeDepth = Math.max(1, Number.parseFloat(volume.dataset.brandDepth || '1'));
+            const fragment = document.createDocumentFragment();
+
+            for (let index = sliceCount - 1; index >= 0; index -= 1) {
+                const slice = sliceTemplate.content.firstElementChild?.cloneNode(true);
+                if (!slice) continue;
+
+                const progress = sliceCount === 1 ? 1 : index / (sliceCount - 1);
+                const edgeLight = 0.18 + ((1 - progress) * 0.2);
+                slice.style.setProperty('--slice-layer', String(sliceCount - index));
+                slice.style.setProperty('--slice-x', `${(progress * 7.5).toFixed(2)}px`);
+                slice.style.setProperty('--slice-y', `${(progress * 10.5).toFixed(2)}px`);
+                slice.style.setProperty('--slice-z', `${(-progress * volumeDepth).toFixed(2)}px`);
+                slice.style.setProperty('--slice-brightness', edgeLight.toFixed(3));
+                slice.style.setProperty('--slice-opacity', `${(0.76 + ((1 - progress) * 0.22)).toFixed(3)}`);
+                fragment.appendChild(slice);
+            }
+
+            volume.insertBefore(fragment, frontFace);
+        });
+
+        brandObject.classList.add('is-volume-ready');
+    };
+
+    prepareBrandSculpture();
+
     if (brandObject && !prefersReducedMotion) {
         const visual = brandObject.closest('[data-home-depth]');
+        const interactionSurface = visual?.matches('[data-brand-interaction]') ? visual : brandObject;
         const currentPose = { x: 0, y: 0 };
         const targetPose = { x: 0, y: 0 };
         let interactionBounds = null;
@@ -734,12 +856,28 @@ document.addEventListener('DOMContentLoaded', () => {
         let previousFrameTime = performance.now();
 
         const renderBrandPose = (x, y) => {
-            brandObject.style.setProperty('--brand-rotate-x', `${(-5 - (y * 11)).toFixed(2)}deg`);
-            brandObject.style.setProperty('--brand-rotate-y', `${(-8 + (x * 18)).toFixed(2)}deg`);
-            brandObject.style.setProperty('--brand-shine-x', `${50 + (x * 28)}%`);
-            brandObject.style.setProperty('--brand-shine-y', `${45 + (y * 25)}%`);
-            visual?.style.setProperty('--signal-shift-x', `${(-x * 12).toFixed(1)}px`);
-            visual?.style.setProperty('--signal-shift-y', `${(-y * 9).toFixed(1)}px`);
+            brandObject.style.setProperty('--brand-rotate-x', `${(-5 - (y * 22)).toFixed(2)}deg`);
+            brandObject.style.setProperty('--brand-rotate-y', `${(-8 + (x * 42)).toFixed(2)}deg`);
+            brandObject.style.setProperty('--brand-shift-x', `${(x * 14).toFixed(1)}px`);
+            brandObject.style.setProperty('--brand-shift-y', `${(y * 10).toFixed(1)}px`);
+            brandObject.style.setProperty('--brand-mark-shift-x', `${(-x * 7).toFixed(1)}px`);
+            brandObject.style.setProperty('--brand-mark-shift-y', `${(-y * 4).toFixed(1)}px`);
+            brandObject.style.setProperty('--brand-word-shift-x', `${(x * 5).toFixed(1)}px`);
+            brandObject.style.setProperty('--brand-word-shift-y', `${(y * 3).toFixed(1)}px`);
+            brandObject.style.setProperty('--brand-shine-x', `${50 + (x * 39)}%`);
+            brandObject.style.setProperty('--brand-shine-y', `${46 + (y * 36)}%`);
+            brandObject.style.setProperty('--brand-light-tilt', `${(-12 + (x * 26)).toFixed(1)}deg`);
+            visual?.style.setProperty('--field-shift-x', `${(x * 28).toFixed(1)}px`);
+            visual?.style.setProperty('--field-shift-y', `${(y * 18).toFixed(1)}px`);
+            visual?.style.setProperty('--field-counter-shift-x', `${(-x * 10).toFixed(1)}px`);
+            visual?.style.setProperty('--field-counter-shift-y', `${(-y * 7).toFixed(1)}px`);
+            visual?.style.setProperty('--field-dot-shift-x', `${(x * 6.5).toFixed(1)}px`);
+            visual?.style.setProperty('--field-dot-shift-y', `${(y * 4.5).toFixed(1)}px`);
+            visual?.style.setProperty('--field-rotate-z', `${(-4 + (x * 7)).toFixed(2)}deg`);
+            visual?.style.setProperty('--field-light-x', `${50 + (x * 31)}%`);
+            visual?.style.setProperty('--field-light-y', `${44 + (y * 27)}%`);
+            visual?.style.setProperty('--signal-shift-x', `${(-x * 24).toFixed(1)}px`);
+            visual?.style.setProperty('--signal-shift-y', `${(-y * 16).toFixed(1)}px`);
         };
 
         const animateBrandPose = (time) => {
@@ -763,8 +901,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const moveBrandTo = (x, y) => {
-            targetPose.x = Math.max(-0.5, Math.min(0.5, x));
-            targetPose.y = Math.max(-0.5, Math.min(0.5, y));
+            targetPose.x = Math.max(-1, Math.min(1, x));
+            targetPose.y = Math.max(-1, Math.min(1, y));
             if (poseFrame) {
                 return;
             }
@@ -774,33 +912,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const resetBrandPose = () => {
             interactionBounds = null;
+            visual?.classList.remove('is-brand-engaged');
             moveBrandTo(0, 0);
         };
 
         if (supportsFinePointer) {
-            brandObject.addEventListener('pointerenter', () => {
-                interactionBounds = brandObject.getBoundingClientRect();
+            interactionSurface.addEventListener('pointerenter', () => {
+                interactionBounds = interactionSurface.getBoundingClientRect();
+                visual?.classList.add('is-brand-engaged');
             });
-            brandObject.addEventListener('pointermove', (event) => {
-                const bounds = interactionBounds || brandObject.getBoundingClientRect();
+            interactionSurface.addEventListener('pointermove', (event) => {
+                interactionBounds = interactionSurface.getBoundingClientRect();
+                const bounds = interactionBounds;
                 moveBrandTo(
-                    ((event.clientX - bounds.left) / bounds.width) - 0.5,
-                    ((event.clientY - bounds.top) / bounds.height) - 0.5
+                    ((((event.clientX - bounds.left) / bounds.width) - 0.5) * 2),
+                    ((((event.clientY - bounds.top) / bounds.height) - 0.5) * 2)
                 );
             });
-            brandObject.addEventListener('pointerleave', resetBrandPose);
-            brandObject.addEventListener('pointercancel', resetBrandPose);
+            interactionSurface.addEventListener('pointerleave', resetBrandPose);
+            interactionSurface.addEventListener('pointercancel', resetBrandPose);
+            window.addEventListener('scroll', resetBrandPose, { passive: true });
         }
         brandObject.addEventListener('blur', resetBrandPose);
         brandObject.addEventListener('keydown', (event) => {
             const poses = {
-                ArrowLeft: [-0.45, 0],
-                ArrowRight: [0.45, 0],
-                ArrowUp: [0, -0.4],
-                ArrowDown: [0, 0.4]
+                ArrowLeft: [-0.82, 0],
+                ArrowRight: [0.82, 0],
+                ArrowUp: [0, -0.72],
+                ArrowDown: [0, 0.72]
             };
             if (!poses[event.key]) return;
             event.preventDefault();
+            visual?.classList.add('is-brand-engaged');
             moveBrandTo(...poses[event.key]);
         });
     }

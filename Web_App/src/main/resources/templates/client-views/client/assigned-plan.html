@@ -1,17 +1,17 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(${pageTitle} ?: 'Assigned Plan', null, ~{::content}, null)}">
+          th:replace="~{base :: layout(${pageTitle} ?: #{ui.00233}, null, ~{::content}, null)}">
 
     <div th:fragment="content" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div class="rounded-xl bg-white/5 dark:bg-slate-900/40 ring-1 ring-white/10 shadow-sm p-6">
             <div>
-                <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Assigned Plan</h1>
-                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Workouts and programmes shared by your active trainer.</p>
+                <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00233}">Assigned Plan</h1>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00234}">Workouts and programmes shared by your active trainer.</p>
             </div>
 
             <div class="mt-8">
-                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Workouts</h2>
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00235}">Workouts</h2>
 
-                <div th:if="${#lists.isEmpty(assignedWorkouts)}" class="mt-3 text-sm text-slate-600 dark:text-slate-300">No workouts assigned.</div>
+                <div th:if="${#lists.isEmpty(assignedWorkouts)}" class="mt-3 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00236}">No workouts assigned.</div>
 
                 <div th:if="${!#lists.isEmpty(assignedWorkouts)}" class="mt-3 space-y-4">
                     <div th:each="aw : ${assignedWorkouts}" class="rounded-xl border border-white/10 bg-white/5 p-5">
@@ -19,8 +19,8 @@
                         <div class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${aw.workout.summary}">Summary</div>
 
                         <div class="mt-4">
-                            <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Items</div>
-                            <div th:if="${#lists.isEmpty(aw.items)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300">No items.</div>
+                            <div class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00237}">Items</div>
+                            <div th:if="${#lists.isEmpty(aw.items)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00238}">No items.</div>
                             <div th:if="${!#lists.isEmpty(aw.items)}" class="mt-2 space-y-2">
                                 <div th:each="it : ${aw.items}" class="rounded-xl border border-white/10 bg-white/5 p-3">
                                     <div class="text-sm font-semibold text-slate-900 dark:text-slate-100"
@@ -32,8 +32,8 @@
                         </div>
 
                         <div class="mt-4">
-                            <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Coaching notes</div>
-                            <div th:if="${#lists.isEmpty(aw.notes)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300">No notes.</div>
+                            <div class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00239}">Coaching notes</div>
+                            <div th:if="${#lists.isEmpty(aw.notes)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00240}">No notes.</div>
                             <ul th:if="${!#lists.isEmpty(aw.notes)}" class="mt-2 space-y-2">
                                 <li th:each="n : ${aw.notes}" class="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-900 dark:text-slate-100" th:text="${n.noteText}">Note</li>
                             </ul>
@@ -43,9 +43,9 @@
             </div>
 
             <div class="mt-10">
-                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Programmes</h2>
+                <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00241}">Programmes</h2>
 
-                <div th:if="${#lists.isEmpty(assignedProgrammes)}" class="mt-3 text-sm text-slate-600 dark:text-slate-300">No programmes assigned.</div>
+                <div th:if="${#lists.isEmpty(assignedProgrammes)}" class="mt-3 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00242}">No programmes assigned.</div>
 
                 <div th:if="${!#lists.isEmpty(assignedProgrammes)}" class="mt-3 space-y-4">
                     <div th:each="ap : ${assignedProgrammes}" class="rounded-xl border border-white/10 bg-white/5 p-5">
@@ -53,8 +53,8 @@
                         <div class="mt-1 text-sm text-slate-600 dark:text-slate-300" th:text="${ap.programme.weeks != null ? (ap.programme.weeks + ' weeks') : ''}">Weeks</div>
 
                         <div class="mt-4">
-                            <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Days</div>
-                            <div th:if="${#lists.isEmpty(ap.days)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300">No days.</div>
+                            <div class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00243}">Days</div>
+                            <div th:if="${#lists.isEmpty(ap.days)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00244}">No days.</div>
                             <div th:if="${!#lists.isEmpty(ap.days)}" class="mt-2 space-y-2">
                                 <div th:each="d : ${ap.days}" class="rounded-xl border border-white/10 bg-white/5 p-3">
                                     <div class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="${d.dayOfWeek}">Day</div>
@@ -65,8 +65,8 @@
                         </div>
 
                         <div class="mt-4">
-                            <div class="text-sm font-semibold text-slate-900 dark:text-slate-100">Coaching notes</div>
-                            <div th:if="${#lists.isEmpty(ap.notes)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300">No notes.</div>
+                            <div class="text-sm font-semibold text-slate-900 dark:text-slate-100" th:text="#{ui.00239}">Coaching notes</div>
+                            <div th:if="${#lists.isEmpty(ap.notes)}" class="mt-2 text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.00240}">No notes.</div>
                             <ul th:if="${!#lists.isEmpty(ap.notes)}" class="mt-2 space-y-2">
                                 <li th:each="n : ${ap.notes}" class="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-900 dark:text-slate-100" th:text="${n.noteText}">Note</li>
                             </ul>

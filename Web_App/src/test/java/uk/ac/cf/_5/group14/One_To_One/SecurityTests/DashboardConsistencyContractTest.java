@@ -101,7 +101,7 @@ class DashboardConsistencyContractTest {
         String stylesheet = read("src/main/resources/static/css/components/dashboard/client-dashboard-refresh.css");
 
         assertThat(template)
-                .contains("<h1 class=\"sr-only\">Client dashboard</h1>");
+                .contains("<h1 class=\"sr-only\" th:text=\"#{ui.00480}\">Client dashboard</h1>");
         assertThat(stylesheet)
                 .contains("@media (max-width: 360px)")
                 .contains(".cd-primary-actions,")

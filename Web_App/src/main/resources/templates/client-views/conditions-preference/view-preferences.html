@@ -1,5 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout('Preferences', ~{::styles}, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.00298}, ~{::styles}, ~{::content}, null)}">
 
 <div th:fragment="styles">
 </div>
@@ -9,13 +9,13 @@
     <div class="detail-header">
         <div class="detail-header-content">
             <div class="detail-header-meta">
-                <p class="detail-label">User preferences</p>
-                <h1 class="detail-title">Your preferences</h1>
-                <p class="detail-subtitle">A quick summary of what you've saved.</p>
+                <p class="detail-label" th:text="#{ui.00383}">User preferences</p>
+                <h1 class="detail-title" th:text="#{ui.00384}">Your preferences</h1>
+                <p class="detail-subtitle" th:text="#{ui.00385}">A quick summary of what you've saved.</p>
             </div>
             <!-- Primary actions - sticky on larger screens -->
             <div class="detail-actions-sticky">
-                <a href="/preferences/edit" class="detail-btn-primary">Edit preferences</a>
+                <a href="/preferences/edit" class="detail-btn-primary" th:text="#{ui.00386}">Edit preferences</a>
             </div>
         </div>
     </div>
@@ -25,33 +25,33 @@
         <div class="detail-grid-2">
             <!-- Display Settings Section -->
             <section class="detail-section">
-                <h2 class="detail-section-title">Display settings</h2>
+                <h2 class="detail-section-title" th:text="#{ui.00387}">Display settings</h2>
                 <div class="detail-section-content">
                     <div class="detail-metadata">
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Language</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00315}">Language</p>
                             <p class="detail-metadata-value" th:text="${userSettings != null ? userSettings.language : 'en'}"></p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Theme</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00316}">Theme</p>
                             <p class="detail-metadata-value" th:text="${userSettings != null && userSettings.theme != null ? userSettings.theme : 'SYSTEM'}"></p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Easy mode</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00329}">Easy mode</p>
                             <p class="detail-metadata-value" th:text="${userSettings != null && userSettings.easyMode ? 'On' : 'Off'}"></p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Weather unit</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00320}">Weather unit</p>
                             <p class="detail-metadata-value"
                                th:text="${userSettings != null && userSettings.weatherTemperatureUnit != null && userSettings.weatherTemperatureUnit.name() == 'FAHRENHEIT' ? 'Fahrenheit (F)' : 'Celsius (C)'}">Celsius (C)</p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Weather view</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00388}">Weather view</p>
                             <p class="detail-metadata-value"
                                th:text="${userSettings != null && userSettings.weatherDisplayMode != null && userSettings.weatherDisplayMode.name() == 'GRAPH' ? 'Graph view' : 'Visual weather view'}">Visual weather view</p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Time format</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00326}">Time format</p>
                             <p class="detail-metadata-value"
                                th:text="${userSettings != null && userSettings.timeDisplayFormat != null && userSettings.timeDisplayFormat.name() == 'TWENTY_FOUR_HOUR' ? '24 hour' : '12 hour'}">12 hour</p>
                         </div>
@@ -61,20 +61,20 @@
 
             <!-- Smart Defaults Section -->
             <section class="detail-section">
-                <h2 class="detail-section-title">Smart defaults</h2>
+                <h2 class="detail-section-title" th:text="#{ui.00341}">Smart defaults</h2>
                 <div class="detail-section-content">
                     <div class="detail-metadata">
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Default sets</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00344}">Default sets</p>
                             <p class="detail-metadata-value" th:text="${userSettings != null ? userSettings.defaultSets : 3}">3</p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Rep range</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00389}">Rep range</p>
                             <p class="detail-metadata-value"
                                th:text="${userSettings != null ? (userSettings.defaultRepMin + '-' + userSettings.defaultRepMax) : '8-12'}">8-12</p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Macro targets</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00362}">Macro targets</p>
                             <p class="detail-metadata-value"
                                th:text="${userSettings != null && userSettings.macroTargetCalories != null ? userSettings.macroTargetCalories + ' kcal' : 'Not set'}">Not set</p>
                             <p class="detail-metadata-value text-xs"
@@ -82,16 +82,16 @@
                                th:text="${'P ' + (userSettings.macroTargetProtein != null ? userSettings.macroTargetProtein : '-') + 'g | C ' + (userSettings.macroTargetCarbs != null ? userSettings.macroTargetCarbs : '-') + 'g | F ' + (userSettings.macroTargetFat != null ? userSettings.macroTargetFat : '-') + 'g'}">P -g | C -g | F -g</p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Preferred equipment</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00347}">Preferred equipment</p>
                             <div class="flex flex-wrap gap-2 text-xs">
-                                <span th:if="${userSettings != null && userSettings.preferredEquipmentBodyweight}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1">Bodyweight</span>
-                                <span th:if="${userSettings != null && userSettings.preferredEquipmentDumbbell}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1">Dumbbells</span>
-                                <span th:if="${userSettings != null && userSettings.preferredEquipmentBarbell}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1">Barbells</span>
-                                <span th:if="${userSettings != null && userSettings.preferredEquipmentMachine}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1">Machines</span>
-                                <span th:if="${userSettings != null && userSettings.preferredEquipmentBands}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1">Bands</span>
-                                <span th:if="${userSettings != null && userSettings.preferredEquipmentKettlebell}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1">Kettlebells</span>
+                                <span th:if="${userSettings != null && userSettings.preferredEquipmentBodyweight}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1" th:text="#{ui.00348}">Bodyweight</span>
+                                <span th:if="${userSettings != null && userSettings.preferredEquipmentDumbbell}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1" th:text="#{ui.00349}">Dumbbells</span>
+                                <span th:if="${userSettings != null && userSettings.preferredEquipmentBarbell}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1" th:text="#{ui.00350}">Barbells</span>
+                                <span th:if="${userSettings != null && userSettings.preferredEquipmentMachine}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1" th:text="#{ui.00351}">Machines</span>
+                                <span th:if="${userSettings != null && userSettings.preferredEquipmentBands}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1" th:text="#{ui.00352}">Bands</span>
+                                <span th:if="${userSettings != null && userSettings.preferredEquipmentKettlebell}" class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1" th:text="#{ui.00353}">Kettlebells</span>
                                 <span th:if="${userSettings == null || (!userSettings.preferredEquipmentBodyweight && !userSettings.preferredEquipmentDumbbell && !userSettings.preferredEquipmentBarbell && !userSettings.preferredEquipmentMachine && !userSettings.preferredEquipmentBands && !userSettings.preferredEquipmentKettlebell)}"
-                                      class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1">No equipment preferences</span>
+                                      class="rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 px-3 py-1" th:text="#{ui.00390}">No equipment preferences</span>
                             </div>
                         </div>
                     </div>
@@ -102,9 +102,9 @@
         <div class="detail-grid-2">
             <!-- Training Preferences Section -->
             <section class="detail-section">
-                <h2 class="detail-section-title">Training preferences</h2>
+                <h2 class="detail-section-title" th:text="#{ui.00391}">Training preferences</h2>
                 <div class="detail-section-content">
-                    <div th:if="${preferencesByCategory == null || preferencesByCategory.isEmpty()}" class="detail-empty">
+                    <div th:if="${preferencesByCategory == null || preferencesByCategory.isEmpty()}" class="detail-empty" th:text="#{ui.00392}">
                         You haven't selected any preferences yet.
                     </div>
 
@@ -123,9 +123,9 @@
 
             <!-- Physical Conditions Section -->
             <section class="detail-section">
-                <h2 class="detail-section-title">Physical conditions</h2>
+                <h2 class="detail-section-title" th:text="#{ui.00335}">Physical conditions</h2>
                 <div class="detail-section-content">
-                    <div th:if="${physicalConditions.isEmpty()}" class="detail-empty">
+                    <div th:if="${physicalConditions.isEmpty()}" class="detail-empty" th:text="#{ui.00393}">
                         You don't have any saved conditions.
                     </div>
 

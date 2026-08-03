@@ -84,7 +84,12 @@ class PublicPageConsistencyContractTest {
                 .contains("data-preview-tab=\"today\"")
                 .contains("data-workspace-tab=\"client\"")
                 .contains("aria-controls=\"workspace-client\"")
-                .contains("class=\"brand-object__depth brand-object__depth--far\"")
+                .contains("data-brand-sculpture")
+                .contains("data-brand-slices=\"34\"")
+                .contains("data-brand-depth=\"124\"")
+                .contains("class=\"brand-sculpture__volume brand-sculpture__volume--wordmark\"")
+                .contains("class=\"brand-sculpture__slice\"")
+                .contains("th:src=\"@{/img/home/one-to-one-sculpture-v2.png}\"")
                 .contains("class=\"brand-object__reflection\"")
                 .contains("th:src=\"@{/img/logo.png}\"")
                 .contains("data-product-nav=\"coach\"")
@@ -101,7 +106,9 @@ class PublicPageConsistencyContractTest {
                 .contains("th:src=\"@{/img/home/role-client.webp}\"")
                 .contains("th:src=\"@{/img/home/role-trainer.webp}\"")
                 .contains("th:src=\"@{/img/home/role-gym.webp}\"")
+                .contains("class=\"home-final-motion\"")
                 .contains("data-final-cta")
+                .contains("data-final-cta-panel")
                 .contains("class=\"home-final__route home-final__route--primary\"")
                 .contains("class=\"home-final__route home-final__route--secondary\"")
                 .contains("th:src=\"@{/img/brand/tab_logo.png}\"")
@@ -109,7 +116,12 @@ class PublicPageConsistencyContractTest {
         assertThat(css)
                 .contains(".workspace-panel[hidden]")
                 .contains("@keyframes brandFloat")
-                .contains("@keyframes brandOrbitOuter")
+                .contains("@keyframes brandFieldScan")
+                .contains(".brand-sculpture__volume--mark")
+                .contains(".brand-sculpture__volume--wordmark")
+                .contains("--slice-z")
+                .contains("clip-path: inset(64% 0 0 0)")
+                .contains(".brand-object__render-fallback")
                 .contains("--stage-rotate-x")
                 .contains("translateZ(72px)")
                 .contains("@keyframes coachDrawerIn")
@@ -120,6 +132,7 @@ class PublicPageConsistencyContractTest {
                 .contains("--workspace-image-x")
                 .contains(".workspace-panel__image")
                 .contains("--final-rotate-x")
+                .contains(".home-final-motion")
                 .contains("@keyframes finalMarkFloat")
                 .contains(".home-final__route:focus-visible")
                 .contains("@media (hover: none), (pointer: coarse)")
@@ -136,10 +149,15 @@ class PublicPageConsistencyContractTest {
                 .contains("supportsStageTilt")
                 .contains("supportsFinePointerMotion")
                 .contains("usesCoarsePointer")
+                .contains("prepareBrandSculpture")
+                .contains("document.createDocumentFragment()")
+                .contains("volume.dataset.brandDepth")
                 .contains("interactionBounds")
                 .contains("Math.exp(-11 * elapsed)")
+                .contains("(x * 42)")
                 .contains("requestAnimationFrame(animateBrandPose)")
                 .contains("pointercancel")
+                .contains("window.addEventListener('scroll', resetBrandPose, { passive: true })")
                 .contains("createStandardExperience")
                 .contains("data-standard-controller")
                 .contains("supportsProofDepth")
@@ -147,7 +165,19 @@ class PublicPageConsistencyContractTest {
                 .contains("supportsWorkspaceDepth")
                 .contains("supportsFinalDepth")
                 .contains("data-final-cta")
+                .contains("animateFinalPose")
+                .contains("syncFinalTargetToPointer")
+                .contains("window.addEventListener('scroll', syncFinalTargetToPointer")
+                .contains("Math.exp(-responsiveness * elapsed)")
                 .contains("prefers-reduced-motion");
+    }
+
+    @Test
+    void homeWorkspaceImagesExistAndAreNotEmpty() throws IOException {
+        assertPublicImageExists("role-client.webp");
+        assertPublicImageExists("role-trainer.webp");
+        assertPublicImageExists("role-gym.webp");
+        assertPublicImageExists("one-to-one-sculpture-v2.png");
     }
 
     @Test
@@ -236,5 +266,16 @@ class PublicPageConsistencyContractTest {
 
     private static String read(String relativePath) throws IOException {
         return Files.readString(Path.of(relativePath));
+    }
+
+    private static void assertPublicImageExists(String filename) throws IOException {
+        Path image = Path.of("src/main/resources/static/img/home", filename);
+
+        assertThat(image)
+                .as("Homepage workspace image should be packaged as a public static resource: %s", filename)
+                .isRegularFile();
+        assertThat(Files.size(image))
+                .as("Homepage workspace image should contain image data: %s", filename)
+                .isGreaterThan(0L);
     }
 }

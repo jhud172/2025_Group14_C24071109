@@ -1,4 +1,4 @@
-<th:block th:replace="~{base :: layout('Exercise Log', null, ~{::content}, null)}">
+<th:block th:replace="~{base :: layout(#{ui.01984}, null, ~{::content}, null)}">
 
     <div th:fragment="content" class="detail-container">
 
@@ -7,13 +7,13 @@
         <div class="detail-header">
             <div class="detail-header-content">
                 <div class="detail-header-meta">
-                    <p class="detail-label">Exercise Log</p>
-                    <h1 class="detail-title">Exercise Log Details</h1>
-                    <p class="detail-subtitle">A full view of the selected log entry.</p>
+                    <p class="detail-label" th:text="#{ui.01984}">Exercise Log</p>
+                    <h1 class="detail-title" th:text="#{ui.01996}">Exercise Log Details</h1>
+                    <p class="detail-subtitle" th:text="#{ui.01997}">A full view of the selected log entry.</p>
                 </div>
                 <!-- Primary actions - sticky on larger screens -->
                 <div class="detail-actions-sticky">
-                    <a href="/exercise-log/list" class="detail-btn-secondary">Back to list</a>
+                    <a href="/exercise-log/list" class="detail-btn-secondary" th:text="#{ui.00668}">Back to list</a>
                 </div>
             </div>
         </div>
@@ -21,23 +21,23 @@
         <!-- Structured content sections -->
         <div class="detail-sections">
             <section class="detail-section">
-                <h2 class="detail-section-title">Log details</h2>
+                <h2 class="detail-section-title" th:text="#{ui.01998}">Log details</h2>
                 <div class="detail-section-content">
                     <div class="detail-metadata">
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Date</p>
+                            <p class="detail-metadata-label" th:text="#{ui.00660}">Date</p>
                             <p class="detail-metadata-value" th:text="${log.date}"></p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Mood before</p>
+                            <p class="detail-metadata-label" th:text="#{ui.01999}">Mood before</p>
                             <p class="detail-metadata-value" th:text="${log.moodBefore}"></p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Mood after</p>
+                            <p class="detail-metadata-label" th:text="#{ui.02000}">Mood after</p>
                             <p class="detail-metadata-value" th:text="${log.moodAfter}"></p>
                         </div>
                         <div class="detail-metadata-item">
-                            <p class="detail-metadata-label">Confidence after</p>
+                            <p class="detail-metadata-label" th:text="#{ui.02001}">Confidence after</p>
                             <p class="detail-metadata-value" th:text="${log.confidence}"></p>
                         </div>
                     </div>
@@ -45,7 +45,7 @@
             </section>
 
             <section class="detail-section" th:if="${log.comments != null && !log.comments.isEmpty()}">
-                <h2 class="detail-section-title">Comments</h2>
+                <h2 class="detail-section-title" th:text="#{ui.01976}">Comments</h2>
                 <div class="detail-section-content">
                     <p class="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300" th:text="${log.comments}"></p>
                 </div>
