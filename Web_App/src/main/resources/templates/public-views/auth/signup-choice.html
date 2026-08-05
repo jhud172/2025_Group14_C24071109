@@ -1,14 +1,20 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(#{ui.01189}, ~{::pageStyles}, ~{::content}, null)}">
+          th:replace="~{base :: layout(#{ui.01189}, null, ~{::content}, null)}">
 
-    <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
-        <div class="auth-card">
-            <div class="auth-accent-bar"></div>
+    <div th:fragment="content" class="auth-container auth-container--wide guest-experience guest-auth guest-auth--choice" data-guest-scene>
+        <div class="guest-auth__stage">
+            <header class="guest-auth__assurance">
+                <span class="guest-auth__brand-mark" aria-hidden="true"></span>
+                <div class="guest-auth__intro">
+                    <span class="guest-auth__signal-line" aria-hidden="true"></span>
+                    <h1 class="auth-heading" th:text="#{auth.signupChoice.title}">Choose your account type</h1>
+                    <p class="auth-subheading" th:text="#{auth.signupChoice.subtitle}">Select how you plan to use One To One.</p>
+                </div>
+                <span class="guest-auth__assurance-rail" aria-hidden="true"></span>
+            </header>
 
-            <div class="mb-6 mt-4">
-                <h1 class="auth-heading text-center" th:text="#{auth.signupChoice.title}">Choose your account type</h1>
-                <p class="auth-subheading text-center" th:text="#{auth.signupChoice.subtitle}">Select how you plan to use One To One.</p>
-            </div>
+            <div class="auth-card guest-auth__panel">
+                <div class="auth-accent-bar"></div>
 
             <div class="grid gap-6 md:grid-cols-3 mb-8">
                 <a th:href="@{/signup/client}" class="auth-choice-card">
@@ -58,11 +64,8 @@
                 <span th:text="#{auth.login.haveAccount}">Already have an account?</span>
                 <a th:href="@{/login}" class="auth-link" th:text="#{auth.login.submit}">Log in</a>
             </p>
+            </div>
         </div>
     </div>
-
-    <th:block th:fragment="pageStyles">
-        <link rel="stylesheet" th:href="@{/css/bundles/auth.css(v=${assetVersion})}">
-    </th:block>
 
 </th:block>

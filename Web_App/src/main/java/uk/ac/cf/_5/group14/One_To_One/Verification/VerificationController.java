@@ -103,6 +103,9 @@ public class VerificationController {
                                     Locale locale) {
         applyAuthLayout(model);
         User sessionUser = authHelper.getAuthenticatedUser();
+        if (sessionUser == null && (email == null || email.isBlank())) {
+            return "redirect:/login";
+        }
         User user = sessionUser;
         if (user == null && email != null && !email.isBlank()) {
             user = userService.findByEmail(email);
@@ -223,6 +226,9 @@ public class VerificationController {
 
     @GetMapping("/verify/phone/code")
     public String showPhoneCodePage(Model model) {
+        if (authHelper.getAuthenticatedUser() == null) {
+            return "redirect:/login";
+        }
         applyAuthLayout(model);
         return "public-views/verify/phone-code";
     }

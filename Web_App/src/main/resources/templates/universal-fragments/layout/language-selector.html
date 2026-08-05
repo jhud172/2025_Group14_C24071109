@@ -76,7 +76,8 @@
                         th:value="${language.code()}"
                         class="language-selector__option"
                         th:classappend="${currentLanguage.code() == language.code()} ? ' is-active' : ''"
-                        th:attr="aria-pressed=${currentLanguage.code() == language.code()},
+                        th:attr="aria-label=${#messages.msg(language.messageKey())},
+                                 aria-pressed=${currentLanguage.code() == language.code()},
                                  lang=${language.localeTag()},
                                  dir=${language.rightToLeft() ? 'rtl' : 'ltr'},
                                  data-language-option=${language.code()},

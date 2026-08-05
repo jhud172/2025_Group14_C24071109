@@ -141,8 +141,15 @@ public class UserController {
         if (isAuthenticatedUser()) {
             return "redirect:/dashboard";
         }
+
+        Object trainerCode = model.asMap().get("trainerCode");
+        Object verifyEmail = model.asMap().get("verifyEmail");
+        if (!(trainerCode instanceof String code) || code.isBlank()
+                || !(verifyEmail instanceof String email) || email.isBlank()) {
+            return "redirect:/signup/trainer";
+        }
+
         applyAuthLayout(model);
-        // trainerCode and verifyEmail are flash attributes added after successful signup
         return "public-views/auth/signup-trainer-success";
     }
 
@@ -194,20 +201,28 @@ public class UserController {
         profile.setWebsiteUrl(signupForm.getWebsiteUrl());
         trainerProfileService.updateProfile(savedUser.getId(), profile);
 
+        boolean verificationEmailSent = true;
         try {
             emailVerificationService.sendVerification(savedUser);
         } catch (Exception e) {
+            verificationEmailSent = false;
             log.warn("Failed to send verification email to {} after trainer signup", savedUser.getEmail(), e);
         }
 
-        // Show trainer code on success page before proceeding to email verification
-        String trainerCode = profile.getTrainerCode();
-        if (trainerCode != null) {
-            String formatted = trainerCode.substring(0, 4) + "-" + trainerCode.substring(4, 8) + "-" + trainerCode.substring(8, 12);
-            redirectAttributes.addFlashAttribute("trainerCode", formatted);
+        String trainerCode = TrainerProfileService.normalizeTrainerCode(profile.getTrainerCode());
+        if (trainerCode == null) {
+            log.error("Trainer profile {} was created without a valid trainer code", savedUser.getId());
+            redirectAttributes.addFlashAttribute("verifyRegistered", true);
+            return "redirect:/verify/email/code?email=" + encodeEmail(savedUser.getEmail());
         }
-        redirectAttributes.addFlashAttribute("verifyRegistered", true);
-        return "redirect:/verify/email/code?email=" + encodeEmail(savedUser.getEmail());
+
+        String formattedCode = trainerCode.substring(0, 4)
+                + "-" + trainerCode.substring(4, 8)
+                + "-" + trainerCode.substring(8, 12);
+        redirectAttributes.addFlashAttribute("trainerCode", formattedCode);
+        redirectAttributes.addFlashAttribute("verifyEmail", savedUser.getEmail());
+        redirectAttributes.addFlashAttribute("verificationEmailSent", verificationEmailSent);
+        return "redirect:/signup/trainer/success";
     }
 
     @GetMapping("/signup/gym")
@@ -259,6 +274,12 @@ public class UserController {
             result.reject("gym.application.failed", "We could not submit the gym application. Please try again.");
             return "public-views/auth/signup-gym";
         }
+    }
+
+    @GetMapping("/confirm-logout")
+    public String confirmLogout(Model model) {
+        applyAuthLayout(model);
+        return "public-views/auth/confirm-logout";
     }
 
     // login page

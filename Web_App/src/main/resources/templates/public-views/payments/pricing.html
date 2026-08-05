@@ -1,132 +1,242 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout(#{ui.01471}, null, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="content" class="pricing-page public-journey"
+    <div th:fragment="content"
+         class="guest-experience guest-marketing guest-pricing"
+         data-guest-scene
          th:with="sub=${platformSubscription},
                   isInfinite=${sub != null and sub.plan.name() == 'INFINITE'},
                   isActive=${sub != null and (sub.status.name() == 'ACTIVE' or sub.status.name() == 'EXPIRES')},
                   isExpired=${sub != null and sub.status.name() == 'CANCELLED'}">
 
-        <div class="mx-auto w-full max-w-5xl px-4 pt-6 sm:px-6 lg:px-8">
-            <div th:if="${pricingSuccess}" class="mb-4 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900" role="status" th:text="${pricingSuccess}">Platform Premium is now active.</div>
-            <div th:if="${pricingError}" class="mb-4 rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert" th:text="${pricingError}">Subscription checkout error.</div>
-            <div th:if="${!paymentProviderConfigured}" class="mb-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950" th:text="#{ui.01438}">
-                Secure subscription checkout is not configured yet. Pricing is visible, but hosted payment is unavailable in this environment.
+        <div class="guest-shell guest-pricing__alerts">
+            <div th:if="${pricingSuccess}"
+                 class="guest-notice guest-notice--success"
+                 role="status">
+                <span class="guest-notice__signal" aria-hidden="true"></span>
+                <span th:text="${pricingSuccess}">Platform Premium is now active.</span>
+            </div>
+            <div th:if="${pricingError}"
+                 class="guest-notice guest-notice--danger"
+                 role="alert">
+                <span class="guest-notice__signal" aria-hidden="true"></span>
+                <span th:text="${pricingError}">Subscription checkout error.</span>
+            </div>
+            <div th:if="${!paymentProviderConfigured}"
+                 class="guest-notice guest-notice--warning"
+                 role="status">
+                <span class="guest-notice__signal" aria-hidden="true"></span>
+                <span th:text="#{ui.01438}">Secure subscription checkout is not configured yet. Pricing is visible, but hosted payment is unavailable in this environment.</span>
             </div>
         </div>
 
-        <header class="public-section public-section--muted" data-public-hero>
-            <div class="public-section__inner public-section__inner--narrow text-center">
-                <p class="public-eyebrow" th:text="#{ui.01439}">Platform Premium</p>
-                <h1 class="public-title" th:text="#{ui.01440}">More insight. The same focused training journey.</h1>
-                <p class="public-copy mx-auto" th:text="#{ui.01441}">Premium adds deeper dashboards, weekly insight and priority support without changing your core coaching relationship.</p>
+        <header class="guest-hero guest-pricing__hero"
+                data-public-hero
+                data-guest-reveal>
+            <div class="guest-shell guest-pricing__hero-grid">
+                <div>
+                    <p class="guest-kicker" th:text="#{ui.01439}">Platform Premium</p>
+                    <h1 class="guest-title" th:text="#{ui.01440}">More insight. The same focused training journey.</h1>
+                    <p class="guest-lead" th:text="#{ui.01441}">Premium adds deeper dashboards, weekly insight and priority support without changing your core coaching relationship.</p>
+                </div>
+
+                <div class="guest-pricing__meter" aria-hidden="true">
+                    <span class="guest-pricing__meter-orbit"></span>
+                    <span class="guest-pricing__meter-line guest-pricing__meter-line--one"></span>
+                    <span class="guest-pricing__meter-line guest-pricing__meter-line--two"></span>
+                    <span class="guest-pricing__meter-line guest-pricing__meter-line--three"></span>
+                    <span class="guest-pricing__meter-line guest-pricing__meter-line--four"></span>
+                    <span class="guest-pricing__meter-pulse"></span>
+                </div>
             </div>
         </header>
 
-        <section class="public-section" data-public-section aria-labelledby="pricing-plans-heading">
-            <div class="public-section__inner">
-                <div class="public-section__header public-section__header--centred">
-                    <p class="public-eyebrow" th:text="#{ui.01442}">Choose a plan</p>
-                    <h2 id="pricing-plans-heading" class="public-heading" th:text="#{ui.01443}">Monthly flexibility or yearly value.</h2>
-                    <p class="public-copy mx-auto" th:text="#{ui.01444}">Both paid plans include the same Premium features. Only the billing period changes.</p>
+        <section class="guest-section guest-pricing__plans-section"
+                 data-public-section
+                 data-guest-reveal
+                 aria-labelledby="pricing-plans-heading">
+            <div class="guest-shell">
+                <div class="guest-section__header">
+                    <div>
+                        <p class="guest-kicker" th:text="#{ui.01442}">Choose a plan</p>
+                        <h2 id="pricing-plans-heading"
+                            class="guest-heading"
+                            th:text="#{ui.01443}">Monthly flexibility or yearly value.</h2>
+                    </div>
+                    <p class="guest-lead" th:text="#{ui.01444}">Both paid plans include the same Premium features. Only the billing period changes.</p>
                 </div>
 
-                <div th:if="${isInfinite}" class="pricing-surface-success mb-8 rounded-2xl p-5">
-                    <p class="font-bold text-emerald-900 text-lg" th:text="#{ui.01445}">Premium active</p>
-                    <p class="text-sm text-slate-700 mt-1" th:text="#{ui.01446}">You have lifetime access to every Platform Premium feature.</p>
+                <div class="guest-pricing__account-states">
+                    <div th:if="${isInfinite}"
+                         class="guest-notice guest-notice--success"
+                         role="status">
+                        <span class="guest-notice__signal" aria-hidden="true"></span>
+                        <div>
+                            <strong th:text="#{ui.01445}">Premium active</strong>
+                            <p th:text="#{ui.01446}">You have lifetime access to every Platform Premium feature.</p>
+                        </div>
+                    </div>
+
+                    <div th:if="${isExpired}"
+                         class="guest-notice guest-notice--danger"
+                         role="status">
+                        <span class="guest-notice__signal" aria-hidden="true"></span>
+                        <div>
+                            <strong th:text="#{ui.01447}">Subscription ended</strong>
+                            <p th:text="#{ui.01448}">Reactivate below to restore Premium features.</p>
+                        </div>
+                    </div>
+
+                    <div th:if="${isActive and !isInfinite}"
+                         class="guest-notice guest-notice--success"
+                         role="status">
+                        <span class="guest-notice__signal" aria-hidden="true"></span>
+                        <div>
+                            <strong th:text="#{ui.01445}">Premium active</strong>
+                            <p>
+                                <th:block th:text="#{ui.01449}">Manage your active subscription from your</th:block>
+                                <a th:href="@{/profile}" th:text="#{ui.01450}">profile</a>.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <div th:if="${isExpired}" class="pricing-surface-danger mb-8 rounded-2xl p-5">
-                    <p class="font-bold text-red-800 text-lg" th:text="#{ui.01447}">Subscription ended</p>
-                    <p class="text-sm text-slate-700 mt-1" th:text="#{ui.01448}">Reactivate below to restore Premium features.</p>
-                </div>
-
-                <div th:if="${isActive and !isInfinite}" class="pricing-surface-success-soft mb-8 rounded-2xl p-5">
-                    <p class="font-bold text-emerald-900 text-lg" th:text="#{ui.01445}">Premium active</p>
-                    <p class="text-sm text-slate-700 mt-1"><th:block th:text="#{ui.01449}">Manage your active subscription from your</th:block> <a th:href="@{/profile}" class="font-semibold text-emerald-800 underline" th:text="#{ui.01450}">profile</a>.</p>
-                </div>
-
-                <div class="grid gap-8 md:grid-cols-2">
-                    <article th:each="plan : ${plans}" class="plan-card" th:classappend="${plan.plan.name() == 'YEARLY'} ? ' featured' : ''">
-                        <span th:if="${plan.plan.name() == 'YEARLY'}" class="plan-badge-recommended" th:text="#{ui.01451}">Best value</span>
+                <div class="guest-pricing__plan-grid">
+                    <article th:each="plan : ${plans}"
+                             class="guest-plan guest-panel"
+                             th:classappend="${plan.plan.name() == 'YEARLY'} ? ' guest-plan--featured' : ''">
+                        <span th:if="${plan.plan.name() == 'YEARLY'}"
+                              class="guest-plan__recommended"
+                              th:text="#{ui.01451}">Best value</span>
 
                         <div th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}"
-                             class="absolute top-4 right-4 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800" th:text="#{ui.00134}">
-                            Active
+                             class="guest-plan__active"
+                             th:text="#{ui.00134}">Active</div>
+
+                        <div class="guest-plan__heading">
+                            <div>
+                                <h3 th:text="${plan.displayName}">Monthly</h3>
+                                <span class="guest-plan__badge" th:text="${plan.badge}">Plan</span>
+                            </div>
+                            <span class="guest-plan__index"
+                                  aria-hidden="true"
+                                  th:text="${plan.plan.name() == 'YEARLY'} ? '02' : '01'">01</span>
                         </div>
 
-                        <div class="flex items-start justify-between gap-3 mb-1">
-                            <h3 class="text-xl font-bold text-slate-900" th:text="${plan.displayName}">Monthly</h3>
-                            <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800" th:text="${plan.badge}">Plan</span>
-                        </div>
+                        <p class="guest-plan__price" th:text="${plan.priceLabel}">&#163;12 / month</p>
+                        <p th:if="${plan.plan.name() == 'YEARLY'}"
+                           class="guest-plan__billing"
+                           th:text="#{ui.01452}">Equivalent to &#163;9 per month, billed annually.</p>
+                        <p th:if="${plan.plan.name() == 'MONTHLY'}"
+                           class="guest-plan__billing"
+                           th:text="#{ui.01453}">Billed monthly. Cancel at any time.</p>
 
-                        <div class="mt-3 mb-1">
-                            <span class="price-display" th:classappend="${plan.plan.name() == 'MONTHLY'} ? ' cyan' : ''" th:text="${plan.priceLabel}">&#163;12 / month</span>
-                        </div>
-                        <p th:if="${plan.plan.name() == 'YEARLY'}" class="text-xs text-slate-600 mb-4" th:text="#{ui.01452}">Equivalent to &#163;9 per month, billed annually.</p>
-                        <p th:if="${plan.plan.name() == 'MONTHLY'}" class="text-xs text-slate-600 mb-4" th:text="#{ui.01453}">Billed monthly. Cancel at any time.</p>
-
-                        <div class="pricing-divider-emerald h-px mb-4"></div>
-
-                        <ul class="space-y-2.5 text-sm text-slate-700 mb-6">
-                            <li th:each="benefit : ${plan.benefits}" class="flex items-start gap-2.5">
-                                <svg class="h-5 w-5 mt-0.5 flex-shrink-0 text-emerald-700" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <ul class="guest-plan__benefits">
+                            <li th:each="benefit : ${plan.benefits}">
+                                <svg aria-hidden="true"
+                                     fill="none"
+                                     viewBox="0 0 24 24"
+                                     stroke="currentColor">
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="2"
+                                          d="M5 13l4 4L19 7"/>
+                                </svg>
                                 <span th:text="${benefit}">Feature</span>
                             </li>
                         </ul>
 
-                        <th:block th:if="${sub == null or (isExpired and sub.plan.name() != plan.plan.name())}">
-                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full" th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'" th:text="#{ui.01275}">Get started</a>
-                        </th:block>
-                        <th:block th:if="${isExpired and sub.plan.name() == plan.plan.name()}">
-                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full btn--primary" th:text="#{ui.01454}">Reactivate now</a>
-                        </th:block>
-                        <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}">
-                            <a th:href="@{/profile}" class="btn w-full btn--ghost" th:text="#{ui.01455}">Manage subscription</a>
-                        </th:block>
-                        <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() != plan.plan.name()}">
-                            <a th:href="@{/pricing/checkout(plan=${plan.plan})}" class="btn w-full" th:classappend="${plan.plan.name() == 'YEARLY'} ? 'btn--primary' : 'btn--secondary'" th:text="#{ui.01456}">Switch to this plan</a>
-                        </th:block>
-                        <th:block th:if="${isInfinite}">
-                            <span class="btn w-full btn--ghost inline-flex items-center justify-center opacity-60" th:text="#{ui.01457}">Included in lifetime</span>
-                        </th:block>
+                        <div class="guest-plan__footer">
+                            <th:block th:if="${sub == null or (isExpired and sub.plan.name() != plan.plan.name())}">
+                                <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
+                                   class="guest-action guest-plan__action"
+                                   th:classappend="${plan.plan.name() == 'YEARLY'} ? ' guest-action--primary' : ' guest-action--secondary'"
+                                   th:text="#{ui.01275}">Get started</a>
+                            </th:block>
+                            <th:block th:if="${isExpired and sub.plan.name() == plan.plan.name()}">
+                                <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
+                                   class="guest-action guest-action--primary guest-plan__action"
+                                   th:text="#{ui.01454}">Reactivate now</a>
+                            </th:block>
+                            <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() == plan.plan.name()}">
+                                <a th:href="@{/profile}"
+                                   class="guest-action guest-action--secondary guest-plan__action"
+                                   th:text="#{ui.01455}">Manage subscription</a>
+                            </th:block>
+                            <th:block th:if="${isActive and !isInfinite and sub != null and sub.plan.name() != plan.plan.name()}">
+                                <a th:href="@{/pricing/checkout(plan=${plan.plan})}"
+                                   class="guest-action guest-plan__action"
+                                   th:classappend="${plan.plan.name() == 'YEARLY'} ? ' guest-action--primary' : ' guest-action--secondary'"
+                                   th:text="#{ui.01456}">Switch to this plan</a>
+                            </th:block>
+                            <th:block th:if="${isInfinite}">
+                                <span class="guest-action guest-action--secondary guest-plan__action guest-plan__action--disabled"
+                                      aria-disabled="true"
+                                      th:text="#{ui.01457}">Included in lifetime</span>
+                            </th:block>
+                        </div>
                     </article>
                 </div>
             </div>
         </section>
 
-        <section class="public-section public-section--muted" data-public-section aria-labelledby="pricing-includes-heading">
-            <div class="public-section__inner">
-                <div class="public-section__header">
-                    <p class="public-eyebrow" th:text="#{ui.01458}">Included with Premium</p>
-                    <h2 id="pricing-includes-heading" class="public-heading" th:text="#{ui.01459}">Three upgrades, one clear purpose.</h2>
+        <section class="guest-section guest-pricing__features"
+                 data-public-section
+                 data-guest-reveal
+                 aria-labelledby="pricing-includes-heading">
+            <div class="guest-shell">
+                <div class="guest-section__header">
+                    <div>
+                        <p class="guest-kicker" th:text="#{ui.01458}">Included with Premium</p>
+                        <h2 id="pricing-includes-heading"
+                            class="guest-heading"
+                            th:text="#{ui.01459}">Three upgrades, one clear purpose.</h2>
+                    </div>
                 </div>
-                <div class="public-proof-list">
-                    <article class="public-proof">
-                        <h3 class="public-proof__title" th:text="#{ui.01460}">Deeper progress insight</h3>
-                        <p class="public-proof__copy" th:text="#{ui.01461}">Premium dashboards, richer analytics and weekly summaries make patterns easier to see.</p>
+
+                <div class="guest-pricing__feature-ledger guest-ledger">
+                    <article>
+                        <span aria-hidden="true">01</span>
+                        <h3 th:text="#{ui.01460}">Deeper progress insight</h3>
+                        <p th:text="#{ui.01461}">Premium dashboards, richer analytics and weekly summaries make patterns easier to see.</p>
                     </article>
-                    <article class="public-proof">
-                        <h3 class="public-proof__title" th:text="#{ui.01462}">Priority guidance</h3>
-                        <p class="public-proof__copy" th:text="#{ui.01463}">Receive priority Charlie access and faster support handling when you need help.</p>
+                    <article>
+                        <span aria-hidden="true">02</span>
+                        <h3 th:text="#{ui.01462}">Priority guidance</h3>
+                        <p th:text="#{ui.01463}">Receive priority Charlie access and faster support handling when you need help.</p>
                     </article>
-                    <article class="public-proof">
-                        <h3 class="public-proof__title" th:text="#{ui.01464}">Trainer collaboration</h3>
-                        <p class="public-proof__copy" th:text="#{ui.01465}">Share clearer progress signals with your trainer to support useful programme decisions.</p>
+                    <article>
+                        <span aria-hidden="true">03</span>
+                        <h3 th:text="#{ui.01464}">Trainer collaboration</h3>
+                        <p th:text="#{ui.01465}">Share clearer progress signals with your trainer to support useful programme decisions.</p>
                     </article>
                 </div>
             </div>
         </section>
 
-        <section class="public-section public-section--accent" data-public-section aria-labelledby="pricing-help-heading">
-            <div class="public-section__inner public-section__inner--narrow">
-                <p class="public-eyebrow" th:text="#{ui.01466}">Before you subscribe</p>
-                <h2 id="pricing-help-heading" class="public-heading" th:text="#{ui.01467}">Check the details or ask us first.</h2>
-                <p class="public-copy" th:text="#{ui.01468}">Platform Premium is separate from gym membership and renews until cancelled. Subscription controls remain available from your profile.</p>
-                <div class="public-actions">
-                    <a th:href="@{/faq}" class="public-action public-action--inverse" th:text="#{ui.01469}">Read common questions</a>
-                    <a th:href="@{/support}" class="public-action public-action--inverse-secondary" th:text="#{ui.01470}">Contact support</a>
+        <section class="guest-section guest-marketing__final"
+                 data-public-section
+                 data-guest-reveal
+                 aria-labelledby="pricing-help-heading">
+            <div class="guest-shell guest-marketing__final-grid">
+                <div>
+                    <p class="guest-kicker" th:text="#{ui.01466}">Before you subscribe</p>
+                    <h2 id="pricing-help-heading"
+                        class="guest-heading"
+                        th:text="#{ui.01467}">Check the details or ask us first.</h2>
                 </div>
+                <div class="guest-marketing__final-copy">
+                    <p class="guest-lead" th:text="#{ui.01468}">Platform Premium is separate from gym membership and renews until cancelled. Subscription controls remain available from your profile.</p>
+                    <div class="guest-actions">
+                        <a th:href="@{/faq}"
+                           class="guest-action guest-action--primary"
+                           th:text="#{ui.01469}">Read common questions</a>
+                        <a th:href="@{/support}"
+                           class="guest-action guest-action--secondary"
+                           th:text="#{ui.01470}">Contact support</a>
+                    </div>
+                </div>
+                <div class="guest-marketing__final-orbit" aria-hidden="true"></div>
             </div>
         </section>
     </div>

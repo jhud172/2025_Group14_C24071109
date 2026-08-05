@@ -70,7 +70,6 @@ public class SecurityConfig {
                     "/verify/email/code",
                     "/verify/email/send",
             "/verify/email/confirm",
-                    "/verify/phone/code",
                     "/api/mobile/auth/**"
     };
     
@@ -122,6 +121,8 @@ public class SecurityConfig {
                             .requestMatchers("/api/mobile/**").permitAll()
                             .requestMatchers(HttpMethod.POST, "/chat/ask").permitAll()
                             .requestMatchers("/dashboard/public", "/client/dashboard/public").permitAll()
+                            .requestMatchers("/confirm-logout").authenticated()
+                            .requestMatchers("/verify/phone/**").authenticated()
                             // Leaderboard: keep protected â€” not open in dev mode
                             .requestMatchers("/levels/**").authenticated()
                             // Trainers area: keep role requirements
@@ -157,6 +158,7 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/chat/ask").permitAll()
                             .requestMatchers("/dashboard/public", "/client/dashboard/public").permitAll()
                             .requestMatchers("/confirm-logout").authenticated()
+                            .requestMatchers("/verify/phone/**").authenticated()
                             .requestMatchers("/trainer/**").hasRole("TRAINER")
                             .requestMatchers("/gym/**").hasRole("GYM_ADMIN")
                             .requestMatchers("/super-admin/**").hasAnyRole("PLATFORM_ADMIN", "SUPER_ADMIN")

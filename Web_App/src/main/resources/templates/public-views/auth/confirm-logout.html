@@ -1,13 +1,20 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout(#{ui.01106}, null, ~{::content}, null)}">
 
-    <div th:fragment="content">
-        <div class="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
-            <div class="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
-                <h1 class="text-2xl font-semibold tracking-tight text-slate-900" th:text="#{ui.01104}">Confirm logout</h1>
-                <p class="mt-1 text-sm text-slate-600" th:text="#{ui.01105}">You can sign out now, or go back if you changed your mind.</p>
+    <div th:fragment="content" class="guest-experience guest-auth guest-auth--compact" data-guest-scene>
+        <div class="guest-auth__stage">
+            <header class="guest-auth__assurance">
+                <span class="guest-auth__brand-mark" aria-hidden="true"></span>
+                <div class="guest-auth__intro">
+                    <span class="guest-auth__signal-line" aria-hidden="true"></span>
+                    <h1 class="auth-heading" th:text="#{ui.01104}">Confirm logout</h1>
+                    <p class="auth-subheading" th:text="#{ui.01105}">You can sign out now, or go back if you changed your mind.</p>
+                </div>
+                <span class="guest-auth__assurance-rail" aria-hidden="true"></span>
+            </header>
 
-                <div class="mt-6">
+            <div class="guest-auth__panel guest-auth__panel--action">
+                <div class="guest-auth__action-slot">
                     <div th:replace="~{universal-fragments/layout/username-logout :: usernameLogout}"></div>
                 </div>
             </div>

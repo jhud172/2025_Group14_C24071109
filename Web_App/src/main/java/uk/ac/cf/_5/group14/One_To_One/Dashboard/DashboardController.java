@@ -373,7 +373,8 @@ public class DashboardController {
         if (authentication != null && authentication.isAuthenticated()) {
             return "redirect:/dashboard";
         }
-        model.addAttribute("pageTitle", "One to One");
+        model.addAttribute("pageTitle", "Coaching Workspace");
+        model.addAttribute("pageDescription", "Preview the connected One To One coaching workspace for sessions, feedback and visible progress.");
         return "public-views/dashboard/client-dashboard-public";
     }
 

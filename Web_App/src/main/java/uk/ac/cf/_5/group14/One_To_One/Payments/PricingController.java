@@ -47,6 +47,7 @@ public class PricingController {
     @GetMapping("/pricing")
     public String pricingPage(Model model) {
         model.addAttribute("pageTitle", "Pricing");
+        model.addAttribute("pageDescription", "Compare One To One monthly and yearly platform plans, with clear features before you choose how to join.");
         model.addAttribute("plans", List.of(
                 new CheckoutPlanInfo(PlatformPlan.MONTHLY, "Monthly", "£12 / month", "Most flexible",
                         List.of("Premium dashboards", "Weekly insights", "Priority support")),

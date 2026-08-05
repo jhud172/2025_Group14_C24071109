@@ -186,6 +186,8 @@ class TemplateRouteContractTest {
         String template = read("src/main/resources/templates/universal-fragments/chat/chat-widget.html");
 
         assertThat(template).contains("aria-label=\"Open Charlie\"");
+        assertThat(template).contains("<label class=\"sr-only\" for=\"chatInput\" th:text=\"#{ui.02962}\">Message Charlie</label>");
+        assertThat(template).contains("<textarea id=\"chatInput\"");
         assertThat(template).contains("Log in to use coach");
         assertThat(template).contains("Mark all read");
         assertThat(template).doesNotContain("aria-label=\"Open chat\"");
@@ -229,9 +231,10 @@ class TemplateRouteContractTest {
     }
 
     @Test
-    void publicEntryRoutesDeclareTheirCriticalVersionedAssets() throws IOException {
+    void publicEntryRoutesUseCentralAuthStylesAndKeepCriticalScriptsVersioned() throws IOException {
         String base = read("src/main/resources/templates/base.html");
         String about = read("src/main/resources/templates/public-views/public/about.html");
+        String styleAdvice = read("src/main/java/uk/ac/cf/_5/group14/One_To_One/Config/UiStyleBundleAdvice.java");
         String login = read("src/main/resources/templates/public-views/auth/login.html");
         String signupChoice = read("src/main/resources/templates/public-views/auth/signup-choice.html");
         String signupClient = read("src/main/resources/templates/public-views/auth/signup-client.html");
@@ -239,18 +242,26 @@ class TemplateRouteContractTest {
         String signupGym = read("src/main/resources/templates/public-views/auth/signup-gym.html");
 
         assertThat(base).contains("assetVersion=${uiCssVersion != null");
-        assertThat(about).contains("/css/bundles/content.css(v=${assetVersion})");
-        assertThat(login).contains("/css/bundles/auth.css(v=${assetVersion})");
-        assertThat(signupChoice).contains("/css/bundles/auth.css(v=${assetVersion})");
+        assertThat(styleAdvice)
+                .contains("\"/login\", \"/signup\", \"/forgot-password\", \"/reset-password\"")
+                .contains("addWhenMatched(bundles, path, AUTH_PATHS, \"/css/bundles/auth.css\")")
+                .contains("\"/about\", \"/faq\", \"/pricing\"")
+                .contains("addWhenMatched(bundles, path, CONTENT_PATHS, \"/css/bundles/content.css\")");
+        assertThat(about).doesNotContain("/css/bundles/content.css");
+
+        assertThat(login)
+                .doesNotContain("/css/bundles/auth.css")
+                .contains("/js/auth/login-page.js(v=${assetVersion})");
+        assertThat(signupChoice).doesNotContain("/css/bundles/auth.css");
 
         assertThat(signupClient)
-                .contains("/css/bundles/auth.css(v=${assetVersion})")
+                .doesNotContain("/css/bundles/auth.css")
                 .contains("/js/auth/signup-client-page.js(v=${assetVersion})");
         assertThat(signupTrainer)
-                .contains("/css/bundles/auth.css(v=${assetVersion})")
+                .doesNotContain("/css/bundles/auth.css")
                 .contains("/js/auth/signup-trainer-page.js(v=${assetVersion})");
         assertThat(signupGym)
-                .contains("/css/bundles/auth.css(v=${assetVersion})")
+                .doesNotContain("/css/bundles/auth.css")
                 .contains("/js/auth/signup-gym-page.js(v=${assetVersion})");
     }
 

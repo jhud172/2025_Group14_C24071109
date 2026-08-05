@@ -5,20 +5,23 @@
         <link rel="stylesheet" th:href="@{/css/components/account/verification.css(v='20260315b')}">
     </div>
 
-    <div th:fragment="content">
-        <div class="verify-shell">
-            <div class="verify-card">
-                <div class="verify-hero">
+    <div th:fragment="content" class="guest-experience guest-auth guest-auth--verify guest-auth--compact" data-guest-scene>
+        <div class="verify-shell guest-auth__stage">
+                <div class="verify-hero guest-auth__assurance">
+                    <span class="guest-auth__brand-mark" aria-hidden="true"></span>
                     <div class="verify-icon-wrap" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" class="verify-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12.75 11.25 15 15 9.75m6 2.25a9 9 0 11-18 0 9 9 0 0118 0Z" />
                         </svg>
                     </div>
-                    <div>
+                    <div class="guest-auth__intro">
                         <h1 class="verify-title" th:text="#{verify.email.title}">Email verification</h1>
                         <p class="verify-copy" th:text="#{verify.email.subtitle}">Confirm your email so you can access all features.</p>
                     </div>
+                    <span class="guest-auth__assurance-rail" aria-hidden="true"></span>
                 </div>
+
+            <div class="verify-card guest-auth__panel">
 
                 <div th:if="${verificationSuccess}" class="verify-alert verify-alert--success" th:text="${verificationSuccess}">
                     Email verified successfully.

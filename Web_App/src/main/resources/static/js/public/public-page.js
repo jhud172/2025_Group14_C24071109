@@ -14,11 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = notice.querySelector('[data-dev-mode-notification-card]');
         const closeButton = notice.querySelector('[data-dev-mode-notification-close]');
         const triggers = Array.from(document.querySelectorAll('[data-dev-mode-trigger]'));
+        const navbar = document.querySelector('.navheader');
         const autoDismissMs = Number.parseInt(notice.dataset.autoDismissMs || '5000', 10);
         let autoDismissTimer = null;
         let entranceTimer = null;
         let finishTimer = null;
         let badgeBounceTimer = null;
+        let dockBounceTimer = null;
+        let lastNavbarHidden = null;
 
         const visibleTrigger = () => triggers.find((trigger) => {
             const rect = trigger.getBoundingClientRect();
@@ -30,6 +33,33 @@ document.addEventListener('DOMContentLoaded', () => {
             window.clearTimeout(entranceTimer);
             window.clearTimeout(finishTimer);
             window.clearTimeout(badgeBounceTimer);
+            window.clearTimeout(dockBounceTimer);
+            notice.classList.remove('is-repositioning');
+        };
+
+        const syncNavbarDock = ({ animate = true } = {}) => {
+            const navbarHidden = !navbar || navbar.classList.contains('navheader--hidden');
+
+            if (navbar) {
+                const navbarHeight = Math.max(navbar.offsetHeight, navbar.getBoundingClientRect().height);
+                notice.style.setProperty('--dev-notice-navbar-height', `${Math.ceil(navbarHeight)}px`);
+            }
+
+            notice.classList.toggle('is-navbar-detached', navbarHidden);
+
+            const dockChanged = lastNavbarHidden !== null && navbarHidden !== lastNavbarHidden;
+            lastNavbarHidden = navbarHidden;
+            if (!animate || !dockChanged || notice.hidden || prefersReducedMotion) {
+                return;
+            }
+
+            window.clearTimeout(dockBounceTimer);
+            notice.classList.remove('is-repositioning');
+            void notice.offsetWidth;
+            notice.classList.add('is-repositioning');
+            dockBounceTimer = window.setTimeout(() => {
+                notice.classList.remove('is-repositioning');
+            }, 520);
         };
 
         const setTriggerState = (expanded) => {
@@ -74,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const finishDismissal = () => {
-            notice.classList.remove('is-visible', 'is-entering', 'is-exiting', 'is-measuring');
+            notice.classList.remove('is-visible', 'is-entering', 'is-exiting', 'is-measuring', 'is-repositioning');
             notice.hidden = true;
             notice.setAttribute('aria-hidden', 'true');
             notice.setAttribute('inert', '');
@@ -115,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             notice.setAttribute('aria-hidden', 'false');
             notice.classList.remove('is-visible', 'is-entering', 'is-exiting', 'is-measuring');
             notice.classList.add('is-measuring');
+            syncNavbarDock({ animate: false });
 
             const activeTrigger = setMorphTarget(trigger);
 
@@ -149,11 +180,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         window.addEventListener('resize', () => {
+            syncNavbarDock({ animate: false });
             if (!notice.hidden) {
                 setMorphTarget();
             }
         }, { passive: true });
 
+        if (navbar) {
+            const navbarObserver = new MutationObserver(() => syncNavbarDock());
+            navbarObserver.observe(navbar, { attributes: true, attributeFilter: ['class'] });
+
+            if ('ResizeObserver' in window) {
+                const navbarResizeObserver = new ResizeObserver(() => syncNavbarDock({ animate: false }));
+                navbarResizeObserver.observe(navbar);
+            }
+        }
+
+        syncNavbarDock({ animate: false });
         setTriggerState(false);
         return { show };
     };
@@ -851,7 +894,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const interactionSurface = visual?.matches('[data-brand-interaction]') ? visual : brandObject;
         const currentPose = { x: 0, y: 0 };
         const targetPose = { x: 0, y: 0 };
+        const desiredPose = { x: 0, y: 0 };
         let interactionBounds = null;
+        let brandIsEngaged = false;
         let poseFrame = 0;
         let previousFrameTime = performance.now();
 
@@ -882,15 +927,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const animateBrandPose = (time) => {
             const elapsed = Math.min(Math.max((time - previousFrameTime) / 1000, 0), 0.05);
-            const smoothing = 1 - Math.exp(-11 * elapsed);
+            const targetResponsiveness = brandIsEngaged ? 7 : 5.5;
+            const poseResponsiveness = brandIsEngaged ? 4.4 : 5.2;
+            const targetSmoothing = 1 - Math.exp(-targetResponsiveness * elapsed);
+            const poseSmoothing = 1 - Math.exp(-poseResponsiveness * elapsed);
             previousFrameTime = time;
-            currentPose.x += (targetPose.x - currentPose.x) * smoothing;
-            currentPose.y += (targetPose.y - currentPose.y) * smoothing;
+            targetPose.x += (desiredPose.x - targetPose.x) * targetSmoothing;
+            targetPose.y += (desiredPose.y - targetPose.y) * targetSmoothing;
+            currentPose.x += (targetPose.x - currentPose.x) * poseSmoothing;
+            currentPose.y += (targetPose.y - currentPose.y) * poseSmoothing;
 
-            const distance = Math.abs(targetPose.x - currentPose.x) + Math.abs(targetPose.y - currentPose.y);
+            const distance = Math.abs(desiredPose.x - targetPose.x)
+                + Math.abs(desiredPose.y - targetPose.y)
+                + Math.abs(targetPose.x - currentPose.x)
+                + Math.abs(targetPose.y - currentPose.y);
             if (distance < 0.001) {
-                currentPose.x = targetPose.x;
-                currentPose.y = targetPose.y;
+                Object.assign(targetPose, desiredPose);
+                Object.assign(currentPose, desiredPose);
                 renderBrandPose(currentPose.x, currentPose.y);
                 poseFrame = 0;
                 return;
@@ -901,8 +954,8 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const moveBrandTo = (x, y) => {
-            targetPose.x = Math.max(-1, Math.min(1, x));
-            targetPose.y = Math.max(-1, Math.min(1, y));
+            desiredPose.x = Math.max(-1, Math.min(1, x));
+            desiredPose.y = Math.max(-1, Math.min(1, y));
             if (poseFrame) {
                 return;
             }
@@ -912,26 +965,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const resetBrandPose = () => {
             interactionBounds = null;
+            brandIsEngaged = false;
             visual?.classList.remove('is-brand-engaged');
             moveBrandTo(0, 0);
         };
 
+        const syncBrandTargetToPointer = (event) => {
+            const bounds = interactionBounds;
+            if (!bounds?.width || !bounds?.height) {
+                return;
+            }
+
+            moveBrandTo(
+                ((((event.clientX - bounds.left) / bounds.width) - 0.5) * 2),
+                ((((event.clientY - bounds.top) / bounds.height) - 0.5) * 2)
+            );
+        };
+
         if (supportsFinePointer) {
-            interactionSurface.addEventListener('pointerenter', () => {
+            interactionSurface.addEventListener('pointerenter', (event) => {
                 interactionBounds = interactionSurface.getBoundingClientRect();
+                brandIsEngaged = true;
                 visual?.classList.add('is-brand-engaged');
+                syncBrandTargetToPointer(event);
             });
-            interactionSurface.addEventListener('pointermove', (event) => {
-                interactionBounds = interactionSurface.getBoundingClientRect();
-                const bounds = interactionBounds;
-                moveBrandTo(
-                    ((((event.clientX - bounds.left) / bounds.width) - 0.5) * 2),
-                    ((((event.clientY - bounds.top) / bounds.height) - 0.5) * 2)
-                );
-            });
+            interactionSurface.addEventListener('pointermove', syncBrandTargetToPointer);
             interactionSurface.addEventListener('pointerleave', resetBrandPose);
             interactionSurface.addEventListener('pointercancel', resetBrandPose);
             window.addEventListener('scroll', resetBrandPose, { passive: true });
+            window.addEventListener('resize', resetBrandPose, { passive: true });
         }
         brandObject.addEventListener('blur', resetBrandPose);
         brandObject.addEventListener('keydown', (event) => {
@@ -943,6 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             if (!poses[event.key]) return;
             event.preventDefault();
+            brandIsEngaged = true;
             visual?.classList.add('is-brand-engaged');
             moveBrandTo(...poses[event.key]);
         });

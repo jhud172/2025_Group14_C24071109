@@ -7,28 +7,30 @@
              data-lang=${currentLanguage.code()},
              data-theme=${userSettings != null && userSettings.theme != null ? userSettings.theme.toString().toLowerCase() : 'system'},
              data-colorblind=${userSettings != null && userSettings.colorBlindMode ? 'on' : 'off'}"
-    th:with="assetVersion=${uiCssVersion != null and !#strings.isEmpty(uiCssVersion) ? uiCssVersion : '20260803p73'},
+    th:with="assetVersion=${uiCssVersion != null and !#strings.isEmpty(uiCssVersion) ? uiCssVersion : '20260804p75'},
              authUser=${@authHelper.getAuthenticatedUser()},
              includeNavbar=${@environment.getProperty('app.ui.includeNavbar') != 'false'},
              includeGlobalChatbot=${@environment.getProperty('app.ui.includeChatbot') != 'false' and disableGlobalChatbot != true and disableGlobalChatbot != 'true'},
-             includeQuickActions=${#authentication != null and #authentication.authenticated and #authentication.principal != 'anonymousUser'}"
+             includeQuickActions=${#authentication != null and #authentication.authenticated and #authentication.principal != 'anonymousUser'},
+             documentTitle=${includeGuestExperience == true and currentRequestPath != '/' and pageTitle != null and !#strings.isEmpty(pageTitle) and !#strings.contains(#strings.toLowerCase(pageTitle), 'one to one') ? pageTitle + ' | One To One' : (pageTitle != null and !#strings.isEmpty(pageTitle) ? pageTitle : 'One To One')}"
     th:fragment="layout(pageTitle, pageStyles, content, pageScripts)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description"
           th:content="${pageDescription} ?: 'One To One connects clients with verified personal trainers through structured programmes, secure payments and visible progress.'">
-    <meta name="theme-color" content="#f4f8f5" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#07120e" media="(prefers-color-scheme: dark)">
+    <meta th:if="${includeGuestExperience}" name="theme-color" content="#04100c">
+    <meta th:unless="${includeGuestExperience}" name="theme-color" content="#f4f8f5" media="(prefers-color-scheme: light)">
+    <meta th:unless="${includeGuestExperience}" name="theme-color" content="#07120e" media="(prefers-color-scheme: dark)">
     <meta property="og:site_name" content="One To One">
     <meta property="og:type" content="website">
-    <meta property="og:title" th:content="${pageTitle} ?: 'One To One'">
+    <meta property="og:title" th:content="${documentTitle}">
     <meta property="og:description"
           th:content="${pageDescription} ?: 'Verified personal training, connected programmes and visible progress.'">
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <meta name="_csrf_param" th:if="${_csrf != null}" th:content="${_csrf.parameterName}">
-    <title th:text="${pageTitle} ?: 'One To One'">One To One</title>
+    <title th:text="${documentTitle}">One To One</title>
     <link rel="shortcut icon" th:href="@{/favicon.ico}">
     <link rel="icon" type="image/png" sizes="32x32" th:href="@{/img/brand/tab_logo.png}">
     <link rel="icon" type="image/png" sizes="16x16" th:href="@{/img/brand/tab_logo.png}">
@@ -56,7 +58,7 @@
 </head>
 
 <body class="min-h-screen bg-cyber-900 text-slate-100 antialiased"
-    th:classappend="${((userSettings != null and userSettings.easyMode) ? ' text-lg leading-relaxed' : ' text-base') + (userSettings != null and userSettings.colorBlindMode ? ' color-blind' : '') + (timeOfDayMoodClass != null ? ' ' + timeOfDayMoodClass : '') + (includeGlobalChatbot ? ' has-global-chat' : '') + (includeQuickActions ? ' has-quick-actions has-platform-panel' : ' public-guest')}"
+    th:classappend="${((userSettings != null and userSettings.easyMode) ? ' text-lg leading-relaxed' : ' text-base') + (userSettings != null and userSettings.colorBlindMode ? ' color-blind' : '') + (timeOfDayMoodClass != null ? ' ' + timeOfDayMoodClass : '') + (includeGlobalChatbot ? ' has-global-chat' : '') + (includeQuickActions ? ' has-quick-actions has-platform-panel' : ' public-guest') + (includeGuestExperience ? ' guest-route' : '')}"
     th:attr="data-time-theme=${timeTheme},
              data-chat-history=${disableChatHistory == true ? 'off' : 'on'},
              data-language=${currentLanguage.code()},
@@ -105,6 +107,8 @@
 <script th:src="@{/js/core/language-selector.js(v=${assetVersion})}" defer></script>
 <script th:src="@{/js/core/floating-profile-card.js(v=${assetVersion})}" defer></script>
 <script th:src="@{/js/core/profile-preview.js(v=${assetVersion})}" defer></script>
+<script th:if="${includeGuestExperience}"
+        th:src="@{/js/public/guest-experience.js(v=${assetVersion})}" defer></script>
 
 <!-- Page-specific scripts -->
 <th:block th:if="${pageScripts != null}">

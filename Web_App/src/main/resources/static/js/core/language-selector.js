@@ -15,6 +15,7 @@
         const status = selector.querySelector('[data-language-search-status]');
         const searchBlock = selector.querySelector('[data-language-search-block]');
         const clearButton = selector.querySelector('[data-language-search-clear]');
+        const optionsForm = selector.querySelector('[data-language-options]');
         const availableLabel = selector.dataset.languageAvailableLabel || '';
 
         if (!trigger || !search || options.length === 0) {
@@ -85,6 +86,20 @@
 
         if (clearButton) {
             clearButton.addEventListener('click', clearSearch);
+        }
+
+        if (optionsForm) {
+            optionsForm.addEventListener('submit', (event) => {
+                const selected = event.submitter;
+                if (!(selected instanceof HTMLButtonElement) || !selected.value) {
+                    return;
+                }
+
+                event.preventDefault();
+                const destination = new URL(window.location.href);
+                destination.searchParams.set('lang', selected.value);
+                window.location.assign(destination);
+            });
         }
 
         options.forEach((option) => {

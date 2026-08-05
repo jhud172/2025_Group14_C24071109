@@ -137,6 +137,21 @@ class DevModeSecurityTest {
         }
     }
 
+    @Test
+    void devMode_unauthenticatedCannotAccessPhoneVerificationCode() throws Exception {
+        var response = mockMvc.perform(get("/verify/phone/code"))
+                .andReturn().getResponse();
+
+        String redirectUrl = response.getHeader("Location");
+        if (redirectUrl != null) {
+            assertThat(redirectUrl)
+                    .as("Phone verification must send anonymous users to login")
+                    .contains("/login");
+        } else {
+            assertBlockedStatus(response.getStatus(), "/verify/phone/code");
+        }
+    }
+
     // --- Dev mode: restricted sections must stay locked ---
 
     @Test

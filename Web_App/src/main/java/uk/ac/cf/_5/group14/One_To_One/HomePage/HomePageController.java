@@ -99,12 +99,16 @@ public class HomePageController {
 
     @GetMapping("/about")
     public ModelAndView aboutPage() {
-        return new ModelAndView("public-views/public/about");
+        ModelAndView mav = new ModelAndView("public-views/public/about");
+        mav.addObject("pageDescription", "See how One To One connects clients, verified trainers and visible progress in one focused coaching relationship.");
+        return mav;
     }
 
     @GetMapping("/faq")
     public ModelAndView faqPage() {
-        return new ModelAndView("public-views/public/faq");
+        ModelAndView mav = new ModelAndView("public-views/public/faq");
+        mav.addObject("pageDescription", "Clear answers about joining One To One, trainer verification, coaching, subscriptions, payments and account support.");
+        return mav;
     }
 
     @GetMapping("/home")

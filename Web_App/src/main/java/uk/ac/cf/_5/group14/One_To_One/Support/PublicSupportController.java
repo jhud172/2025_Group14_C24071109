@@ -24,6 +24,8 @@ public class PublicSupportController {
     @GetMapping("/support")
     public String support(Model model) {
         model.addAttribute("authUser", authHelper.getAuthenticatedUser());
+        model.addAttribute("pageTitle", "Support");
+        model.addAttribute("pageDescription", "Get practical help with One To One accounts, coaching, payments, access and technical questions.");
         return "shared-views/support/index";
     }
 

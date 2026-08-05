@@ -1,19 +1,24 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(#{ui.01237}, ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.01237}, null, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="content" class="auth-container animate-fade-in">
-        <div class="auth-card">
-            <div class="auth-accent-bar"></div>
-
-            <div class="mb-6 mt-4 text-center">
-                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/30">
-                    <svg class="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
+    <div th:fragment="content" class="auth-container guest-experience guest-auth guest-auth--success" data-guest-scene>
+        <div class="guest-auth__stage">
+            <header class="guest-auth__assurance">
+                <span class="guest-auth__brand-mark" aria-hidden="true"></span>
+                <div class="guest-auth__intro">
+                    <div class="guest-auth__status-icon" aria-hidden="true">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h1 class="auth-heading" th:text="#{ui.01229}">Trainer account created!</h1>
+                    <p class="auth-subheading" th:text="#{ui.01230}">Your unique trainer code has been generated. Save it somewhere safe.</p>
                 </div>
-                <h1 class="auth-heading" th:text="#{ui.01229}">Trainer account created!</h1>
-                <p class="auth-subheading" th:text="#{ui.01230}">Your unique trainer code has been generated. Save it somewhere safe.</p>
-            </div>
+                <span class="guest-auth__assurance-rail" aria-hidden="true"></span>
+            </header>
+
+            <div class="auth-card guest-auth__panel">
+                <div class="auth-accent-bar"></div>
 
             <!-- Trainer Code Display -->
             <div th:if="${trainerCode}" class="mb-6 rounded-2xl border-2 border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 p-6 text-center">
@@ -35,7 +40,8 @@
             </div>
 
             <!-- Email verification notice -->
-            <div class="mb-6 rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-900/40 px-4 py-3 text-sm text-blue-800 dark:text-blue-200"
+            <div th:if="${verificationEmailSent == true}"
+                 class="mb-6 rounded-xl border border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-900/40 px-4 py-3 text-sm text-blue-800 dark:text-blue-200"
                  role="status">
                 <div class="flex items-start gap-3">
                     <svg class="h-5 w-5 flex-shrink-0 mt-0.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -43,6 +49,15 @@
                     </svg>
                     <span th:text="#{ui.01234}">A verification code has been sent to your email. Please verify your account to continue.</span>
                 </div>
+            </div>
+
+            <div th:unless="${verificationEmailSent == true}"
+                 class="mb-6 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800/60 px-4 py-3 text-sm text-amber-900 dark:text-amber-100"
+                 role="alert">
+                <p th:text="#{verify.email.error.generic}">Unable to verify email. Please try again.</p>
+                <a th:href="@{/verify/email/code(email=${verifyEmail})}"
+                   class="mt-2 inline-flex font-semibold underline decoration-amber-500/70 underline-offset-4"
+                   th:text="#{verify.email.code.resend}">Resend code</a>
             </div>
 
             <div class="space-y-3">
@@ -57,12 +72,9 @@
                     Go to login
                 </a>
             </div>
+            </div>
         </div>
     </div>
-
-    <th:block th:fragment="pageStyles">
-        <!-- auth.css is included in app.css -->
-    </th:block>
 
     <th:block th:fragment="pageScripts">
     <script th:src="@{/js/auth/signup-trainer-success-page.js}"></script>

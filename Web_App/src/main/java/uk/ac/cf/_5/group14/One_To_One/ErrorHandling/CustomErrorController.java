@@ -1,9 +1,12 @@
 package uk.ac.cf._5.group14.One_To_One.ErrorHandling;
 
 import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomErrorController implements ErrorController {
 
     private static final String ERROR_PATH = "/error";
+
+    @GetMapping("/access-denied")
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String accessDenied(Model model) {
+        model.addAttribute("statusCode", HttpStatus.FORBIDDEN.value());
+        model.addAttribute("requestPath", "/access-denied");
+        return "system-views/error/403";
+    }
 
     @RequestMapping(ERROR_PATH)
     public String handleError(HttpServletRequest request, Model model) {
@@ -34,7 +45,6 @@ public class CustomErrorController implements ErrorController {
         // Add error information to model for templates
         model.addAttribute("statusCode", statusCode);
         model.addAttribute("requestPath", requestPath != null ? requestPath.toString() : "Unknown");
-        model.addAttribute("errorMessage", message != null ? message.toString() : "An unexpected error occurred");
 
         // Log the error for debugging
         logError(statusCode, requestPath, message);

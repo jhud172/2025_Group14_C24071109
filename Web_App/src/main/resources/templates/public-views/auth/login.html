@@ -1,21 +1,23 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(#{ui.01186}, ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
-
-    <th:block th:fragment="pageStyles">
-        <link rel="stylesheet" th:href="@{/css/bundles/auth.css(v=${assetVersion})}">
-    </th:block>
+          th:replace="~{base :: layout(#{ui.01186}, null, ~{::content}, ~{::pageScripts})}">
 
     <div th:fragment="content"
-         class="auth-container auth-container--login animate-fade-in"
+         class="auth-container auth-container--login guest-experience guest-auth"
+         data-guest-scene
          th:attr="data-login-server-role=${preselectedRole},data-login-error=${loginError},data-client-hint=#{auth.login.clientHint},data-trainer-hint=#{auth.login.trainerHint},data-gym-hint=#{auth.login.gymHint},data-client-signup-url=@{/signup/client},data-trainer-signup-url=@{/signup/trainer},data-gym-signup-url=@{/signup/gym}">
+        <div class="guest-auth__stage">
+            <header class="guest-auth__assurance">
+                <span class="guest-auth__brand-mark" aria-hidden="true"></span>
+                <div class="guest-auth__intro">
+                    <span class="guest-auth__signal-line" aria-hidden="true"></span>
+                    <h1 class="auth-heading" th:text="#{auth.login.title}">Welcome back</h1>
+                    <p class="auth-subheading" th:text="#{auth.login.subtitle}">Log in to continue.</p>
+                </div>
+                <span class="guest-auth__assurance-rail" aria-hidden="true"></span>
+            </header>
 
-        <div class="auth-card auth-card--login">
+            <div class="auth-card auth-card--login guest-auth__panel">
             <div class="auth-accent-bar"></div>
-
-            <div class="mb-6 mt-4 text-center">
-                <h1 class="auth-heading" th:text="#{auth.login.title}">Welcome back</h1>
-                <p class="auth-subheading" th:text="#{auth.login.subtitle}">Log in to continue.</p>
-            </div>
 
             <div th:if="${isDevMode}" class="auth-alert auth-alert--dev auth-alert--stacked" role="alert">
                 <div class="auth-dev-alert__row">
@@ -268,6 +270,7 @@
                     <a id="roleSignupLink" th:href="${signupPath}" class="auth-link" th:text="#{auth.login.signup}">Sign up</a>
                 </p>
             </form>
+            </div>
         </div>
     </div>
 

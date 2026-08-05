@@ -1,7 +1,8 @@
 <!-- fragments/navbar.html -->
 <th:block xmlns:th="http://www.thymeleaf.org"
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
-          th:fragment="navLinks">
+          th:fragment="navLinks"
+          th:with="navPath=${currentRequestPath != null ? currentRequestPath : ''}">
 
     <!-- ============================================== -->
     <!-- NON-AUTHENTICATED USER NAVIGATION -->
@@ -9,37 +10,43 @@
     <th:block sec:authorize="!isAuthenticated()">
         <a th:href="@{/}"
            class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('Home')} ? ' navlink-active' : ''">
+           th:classappend="${navPath == '/'} ? ' navlink-active' : ''"
+           th:attr="aria-current=${navPath == '/'} ? 'page' : null">
             <span th:text="#{nav.home}">Home</span>
         </a>
 
         <a th:href="@{/about}"
            class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('About')} ? ' navlink-active' : ''">
+           th:classappend="${navPath == '/about'} ? ' navlink-active' : ''"
+           th:attr="aria-current=${navPath == '/about'} ? 'page' : null">
             <span th:text="#{nav.about}">About</span>
         </a>
 
         <a th:href="@{/pricing}"
            class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('Pricing')} ? ' navlink-active' : ''">
+           th:classappend="${navPath.startsWith('/pricing')} ? ' navlink-active' : ''"
+           th:attr="aria-current=${navPath.startsWith('/pricing')} ? 'page' : null">
             <span th:text="#{nav.pricing}">Pricing</span>
         </a>
 
           <a th:href="@{/faq}"
               class="navlink group"
-              th:classappend="${pageTitle != null and pageTitle.contains('FAQ')} ? ' navlink-active' : ''">
+              th:classappend="${navPath == '/faq'} ? ' navlink-active' : ''"
+              th:attr="aria-current=${navPath == '/faq'} ? 'page' : null">
                 <span th:text="#{nav.faq}">FAQ</span>
           </a>
 
         <a th:href="@{/explore}"
            class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle.contains('Explore')} ? ' navlink-active' : ''">
+           th:classappend="${navPath == '/explore' or navPath.startsWith('/u/')} ? ' navlink-active' : ''"
+           th:attr="aria-current=${navPath == '/explore' or navPath.startsWith('/u/')} ? 'page' : null">
             <span th:text="#{nav.trainers}">Trainers</span>
         </a>
 
         <a th:href="@{/merch}"
            class="navlink group"
-           th:classappend="${pageTitle != null and pageTitle == 'Merch Shop'} ? ' navlink-active' : ''">
+           th:classappend="${navPath == '/merch'} ? ' navlink-active' : ''"
+           th:attr="aria-current=${navPath == '/merch'} ? 'page' : null">
             <span th:text="#{nav.shop}">Shop</span>
         </a>
     </th:block>

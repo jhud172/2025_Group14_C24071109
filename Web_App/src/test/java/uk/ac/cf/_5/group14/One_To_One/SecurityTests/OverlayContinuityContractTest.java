@@ -93,11 +93,20 @@ class OverlayContinuityContractTest {
     @Test
     void closedGlobalPanelsAreInertBeforeJavascriptInitialises() throws IOException {
         String chat = read("src/main/resources/templates/universal-fragments/chat/chat-widget.html");
+        String chatScript = read("src/main/resources/static/js/chat/chat.js");
+        String chatStyles = read("src/main/resources/static/css/components/chat/chat-widget.css");
         String quickActions = read("src/main/resources/templates/universal-fragments/layout/quick-actions.html");
         String platformPanel = read("src/main/resources/templates/universal-fragments/layout/platform-panel.html");
 
-        assertThat(chat).contains("id=\"chatPanel\" aria-hidden=\"true\" inert")
+        assertThat(chat).contains("id=\"chatPanel\" aria-hidden=\"true\" inert hidden")
                 .contains("id=\"chatMediaLightbox\" class=\"chat-media-lightbox\" aria-hidden=\"true\" inert");
+        assertThat(chatScript)
+                .contains("revealChatPanel(panel)")
+                .contains("concealChatPanelAfterTransition(panel)")
+                .contains("panel.hidden = !panelStartsOpen");
+        assertThat(chatStyles)
+                .contains(".chat-panel-premium[hidden]")
+                .contains("display: none !important;");
         assertThat(quickActions).contains("aria-hidden=\"true\"\n           inert");
         assertThat(platformPanel).contains("aria-hidden=\"true\"\n             inert");
     }

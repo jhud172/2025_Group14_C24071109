@@ -1,23 +1,23 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout(#{ui.02393}, null, ~{::content}, null)}">
 
-<div th:fragment="content">
+<div th:fragment="content" class="guest-experience guest-experience--error guest-error" data-guest-scene>
+    <div class="guest-error__trace" aria-hidden="true"></div>
     <section class="error-page" aria-labelledby="error-title">
-        <div class="error-card error-card--generic">
+        <div class="error-card error-card--generic guest-panel" data-guest-reveal>
             <div class="error-status">
-                <span class="error-status__code" th:text="${statusCode ?: 'Error'}">Error</span>
+                <span th:if="${statusCode != null}" class="error-status__code" th:text="${statusCode}">500</span>
+                <span th:unless="${statusCode != null}" class="error-status__code" th:text="#{ui.02393}">Error</span>
                 <span class="error-status__label" th:text="#{ui.02391}">Request failed</span>
             </div>
 
             <div class="error-card__body">
                 <p class="error-eyebrow" th:text="#{ui.02392}">Page unavailable</p>
-                <h1 id="error-title" class="error-title" th:text="${statusCode != null ? 'Error ' + statusCode : 'Something went wrong'}">Something went wrong</h1>
-                <p class="error-copy" th:text="${errorMessage ?: 'An unexpected error occurred. Please try again later.'}">
-                    An unexpected error occurred. Please try again later.
-                </p>
+                <h1 id="error-title" class="error-title" th:text="#{ui.02384}">Something went wrong</h1>
+                <p class="error-copy" th:text="#{ui.02385}">The page could not be loaded. Your data has not been changed unless the previous action clearly completed.</p>
 
                 <div class="error-actions">
-                    <a th:href="@{/dashboard}" class="error-button error-button--primary" th:text="#{ui.00308}">Dashboard</a>
+                    <a th:href="@{/support}" class="error-button error-button--primary" th:text="#{ui.01470}">Contact support</a>
                     <a th:href="@{/}" class="error-button error-button--secondary" th:text="#{ui.01401}">Home</a>
                     <button type="button" data-history-back data-history-fallback="/" class="error-button error-button--ghost" th:text="#{ui.02373}">Go back</button>
                 </div>

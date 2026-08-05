@@ -1,83 +1,203 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout(#{ui.00530}, null, ~{::content}, ~{::scripts})}">
 
-    <div th:fragment="content" class="public-journey min-h-screen">
-        <header class="public-section public-section--muted" data-public-hero>
-            <div class="public-section__inner public-section__inner--narrow text-center">
-                <p class="public-eyebrow" th:text="#{ui.01546}">Help centre</p>
-                <h1 class="public-title" th:text="#{ui.01547}">Questions, answered clearly.</h1>
-                <p class="public-copy mx-auto" th:text="#{ui.01548}">Find fast answers about trainers, coaching, payments and privacy.</p>
+    <div th:fragment="content"
+         class="guest-experience guest-marketing guest-faq"
+         data-guest-scene>
+        <header class="guest-hero guest-faq__hero"
+                data-public-hero
+                data-guest-reveal>
+            <div class="guest-shell guest-faq__hero-grid">
+                <div>
+                    <p class="guest-kicker" th:text="#{ui.01546}">Help centre</p>
+                    <h1 class="guest-title" th:text="#{ui.01547}">Questions, answered clearly.</h1>
+                    <p class="guest-lead" th:text="#{ui.01548}">Find fast answers about trainers, coaching, payments and privacy.</p>
+                </div>
+                <div class="guest-faq__radar" aria-hidden="true">
+                    <span class="guest-faq__radar-ring guest-faq__radar-ring--one"></span>
+                    <span class="guest-faq__radar-ring guest-faq__radar-ring--two"></span>
+                    <span class="guest-faq__radar-ring guest-faq__radar-ring--three"></span>
+                    <span class="guest-faq__radar-sweep"></span>
+                    <span class="guest-faq__radar-point guest-faq__radar-point--one"></span>
+                    <span class="guest-faq__radar-point guest-faq__radar-point--two"></span>
+                    <span class="guest-faq__radar-point guest-faq__radar-point--three"></span>
+                </div>
             </div>
         </header>
 
-        <section class="public-section" data-public-section aria-labelledby="faq-search-heading">
-            <div class="public-section__inner public-section__inner--narrow">
-                <div class="public-section__header">
-                    <h2 id="faq-search-heading" class="public-heading" th:text="#{ui.01549}">Search common questions</h2>
-                    <p class="public-copy" th:text="#{ui.01550}">Try a subject such as verification, payments, trainers or data.</p>
+        <section class="guest-section guest-faq__questions"
+                 data-public-section
+                 data-guest-reveal
+                 aria-labelledby="faq-search-heading">
+            <div class="guest-shell">
+                <div class="guest-section__header">
+                    <div>
+                        <p class="guest-kicker" th:text="#{ui.01546}">Help centre</p>
+                        <h2 id="faq-search-heading"
+                            class="guest-heading"
+                            th:text="#{ui.01549}">Search common questions</h2>
+                    </div>
+                    <p class="guest-lead" th:text="#{ui.01550}">Try a subject such as verification, payments, trainers or data.</p>
                 </div>
 
-                <div class="faq-card p-4 sm:p-6 mb-6">
-                    <label for="faq-search" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-2" th:text="#{ui.01551}">Search questions</label>
-                    <input id="faq-search" type="search" placeholder="Type a keyword"
-                           class="w-full min-h-12 rounded-xl border border-slate-400 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/40 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"  th:placeholder="#{ui.01552}"/>
+                <div class="guest-faq__search guest-panel">
+                    <label for="faq-search"
+                           class="guest-faq__search-label"
+                           th:text="#{ui.01551}">Search questions</label>
+                    <div class="guest-faq__search-control">
+                        <svg aria-hidden="true"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor">
+                            <circle cx="11" cy="11" r="6.5"></circle>
+                            <path d="m16 16 4 4"></path>
+                        </svg>
+                        <input id="faq-search"
+                               type="search"
+                               autocomplete="off"
+                               spellcheck="false"
+                               aria-controls="faq-list"
+                               aria-describedby="faq-results-status"
+                               th:placeholder="#{ui.01552}"
+                               placeholder="Type a keyword"/>
+                        <button id="faq-clear"
+                                type="button"
+                                class="guest-faq__clear"
+                                data-faq-clear
+                                hidden
+                                th:text="#{ui.00555}">Clear</button>
+                    </div>
+                    <p id="faq-results-status"
+                       class="guest-faq__results"
+                       data-faq-results
+                       th:attr="data-faq-results-label=#{ui.01551}"
+                       role="status"
+                       aria-live="polite"
+                       aria-atomic="true">5 / 5</p>
                 </div>
 
-                <div id="faq-list" class="space-y-4">
-                    <details class="faq-item faq-card p-5" data-faq-item data-keywords="trainer verified certificates quality">
-                        <summary class="flex min-h-11 items-center justify-between gap-4 font-semibold text-slate-900 dark:text-slate-100">
-                            <th:block th:text="#{ui.01553}">How are trainers verified?</th:block>
-                            <svg class="faq-chevron h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                <div id="faq-list" class="guest-faq__list">
+                    <details class="faq-item guest-faq__item" data-faq-item>
+                        <summary>
+                            <span class="guest-faq__index" aria-hidden="true">01</span>
+                            <span class="guest-faq__question" th:text="#{ui.01553}">How are trainers verified?</span>
+                            <svg class="faq-chevron"
+                                 aria-hidden="true"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </summary>
-                        <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300" th:text="#{ui.01554}">Each trainer profile is manually reviewed for credentials and compliance before being listed as verified.</p>
+                        <p th:text="#{ui.01554}">Each trainer profile is manually reviewed for credentials and compliance before being listed as verified.</p>
                     </details>
 
-                    <details class="faq-item faq-card p-5" data-faq-item data-keywords="ai coach trainer difference">
-                        <summary class="flex min-h-11 items-center justify-between gap-4 font-semibold text-slate-900 dark:text-slate-100">
-                            <th:block th:text="#{ui.01555}">What is the difference between Charlie and a real trainer?</th:block>
-                            <svg class="faq-chevron h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <details class="faq-item guest-faq__item" data-faq-item>
+                        <summary>
+                            <span class="guest-faq__index" aria-hidden="true">02</span>
+                            <span class="guest-faq__question" th:text="#{ui.01555}">What is the difference between Charlie and a real trainer?</span>
+                            <svg class="faq-chevron"
+                                 aria-hidden="true"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </summary>
-                        <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300" th:text="#{ui.01556}">Charlie offers immediate platform and training guidance. A verified trainer provides individual programming, direct feedback and human accountability.</p>
+                        <p th:text="#{ui.01556}">Charlie offers immediate platform and training guidance. A verified trainer provides individual programming, direct feedback and human accountability.</p>
                     </details>
 
-                    <details class="faq-item faq-card p-5" data-faq-item data-keywords="payments billing subscription refund">
-                        <summary class="flex min-h-11 items-center justify-between gap-4 font-semibold text-slate-900 dark:text-slate-100">
-                            <th:block th:text="#{ui.01557}">How do payments work?</th:block>
-                            <svg class="faq-chevron h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <details class="faq-item guest-faq__item" data-faq-item>
+                        <summary>
+                            <span class="guest-faq__index" aria-hidden="true">03</span>
+                            <span class="guest-faq__question" th:text="#{ui.01557}">How do payments work?</span>
+                            <svg class="faq-chevron"
+                                 aria-hidden="true"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </summary>
-                        <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300" th:text="#{ui.01558}">Platform and coaching payments are handled through One To One. Charges, refunds and subscription changes are recorded in your account history.</p>
+                        <p th:text="#{ui.01558}">Platform and coaching payments are handled through One To One. Charges, refunds and subscription changes are recorded in your account history.</p>
                     </details>
 
-                    <details class="faq-item faq-card p-5" data-faq-item data-keywords="switch trainer cancel relationship">
-                        <summary class="flex min-h-11 items-center justify-between gap-4 font-semibold text-slate-900 dark:text-slate-100">
-                            <th:block th:text="#{ui.01559}">Can I switch trainers?</th:block>
-                            <svg class="faq-chevron h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <details class="faq-item guest-faq__item" data-faq-item>
+                        <summary>
+                            <span class="guest-faq__index" aria-hidden="true">04</span>
+                            <span class="guest-faq__question" th:text="#{ui.01559}">Can I switch trainers?</span>
+                            <svg class="faq-chevron"
+                                 aria-hidden="true"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </summary>
-                        <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300" th:text="#{ui.01560}">Yes. A client can have one active trainer at a time and may change that relationship through the coaching management journey.</p>
+                        <p th:text="#{ui.01560}">Yes. A client can have one active trainer at a time and may change that relationship through the coaching management journey.</p>
                     </details>
 
-                    <details class="faq-item faq-card p-5" data-faq-item data-keywords="privacy data gdpr security">
-                        <summary class="flex min-h-11 items-center justify-between gap-4 font-semibold text-slate-900 dark:text-slate-100">
-                            <th:block th:text="#{ui.01561}">How is my data handled?</th:block>
-                            <svg class="faq-chevron h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    <details class="faq-item guest-faq__item" data-faq-item>
+                        <summary>
+                            <span class="guest-faq__index" aria-hidden="true">05</span>
+                            <span class="guest-faq__question" th:text="#{ui.01561}">How is my data handled?</span>
+                            <svg class="faq-chevron"
+                                 aria-hidden="true"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </summary>
-                        <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300" th:text="#{ui.01562}">Account and training data are handled through controlled access and the platform's privacy and data-protection policies.</p>
+                        <p th:text="#{ui.01562}">Account and training data are handled through controlled access and the platform's privacy and data-protection policies.</p>
                     </details>
                 </div>
 
-                <p id="faq-empty" class="mt-6 faq-hidden text-center text-sm text-slate-600 dark:text-slate-300" th:text="#{ui.01563}">No results found. Try another keyword.</p>
+                <p id="faq-empty"
+                   class="guest-faq__empty"
+                   hidden
+                   th:text="#{ui.01563}">No results found. Try another keyword.</p>
             </div>
         </section>
 
-        <section class="public-section public-section--accent" data-public-section aria-labelledby="faq-support-heading">
-            <div class="public-section__inner public-section__inner--narrow">
-                <p class="public-eyebrow" th:text="#{ui.01564}">Still need help?</p>
-                <h2 id="faq-support-heading" class="public-heading" th:text="#{ui.01565}">Send the support team the details.</h2>
-                <p class="public-copy" th:text="#{ui.01566}">Tell us which page or action is involved and what you expected to happen.</p>
-                <div class="public-actions">
-                    <a th:href="@{/support}" class="public-action public-action--inverse" th:text="#{ui.01470}">Contact support</a>
-                    <a th:href="@{/policies/privacy}" class="public-action public-action--inverse-secondary" th:text="#{ui.01567}">Read privacy information</a>
+        <section class="guest-section guest-marketing__final"
+                 data-public-section
+                 data-guest-reveal
+                 aria-labelledby="faq-support-heading">
+            <div class="guest-shell guest-marketing__final-grid">
+                <div>
+                    <p class="guest-kicker" th:text="#{ui.01564}">Still need help?</p>
+                    <h2 id="faq-support-heading"
+                        class="guest-heading"
+                        th:text="#{ui.01565}">Send the support team the details.</h2>
                 </div>
+                <div class="guest-marketing__final-copy">
+                    <p class="guest-lead" th:text="#{ui.01566}">Tell us which page or action is involved and what you expected to happen.</p>
+                    <div class="guest-actions">
+                        <a th:href="@{/support}"
+                           class="guest-action guest-action--primary"
+                           th:text="#{ui.01470}">Contact support</a>
+                        <a th:href="@{/policies/privacy}"
+                           class="guest-action guest-action--secondary"
+                           th:text="#{ui.01567}">Read privacy information</a>
+                    </div>
+                </div>
+                <div class="guest-marketing__final-orbit" aria-hidden="true"></div>
             </div>
         </section>
     </div>

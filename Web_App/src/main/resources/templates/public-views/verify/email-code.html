@@ -5,20 +5,23 @@
         <link rel="stylesheet" th:href="@{/css/components/account/verification.css(v='20260315b')}">
     </div>
 
-    <div th:fragment="content">
-        <div class="verify-shell">
-            <div class="verify-card">
-                <div class="verify-hero">
+    <div th:fragment="content" class="guest-experience guest-auth guest-auth--verify" data-guest-scene>
+        <div class="verify-shell guest-auth__stage">
+                <div class="verify-hero guest-auth__assurance">
+                    <span class="guest-auth__brand-mark" aria-hidden="true"></span>
                     <div class="verify-icon-wrap" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" class="verify-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <div>
+                    <div class="guest-auth__intro">
                         <h1 class="verify-title" th:text="#{verify.email.code.title}">Enter verification code</h1>
                         <p class="verify-copy" th:text="#{verify.email.code.subtitle}">We sent a 6-digit code to your email address. Enter it below to verify your account.</p>
                     </div>
+                    <span class="guest-auth__assurance-rail" aria-hidden="true"></span>
                 </div>
+
+            <div class="verify-card guest-auth__panel">
 
                 <div th:if="${verifyRegistered}" class="verify-alert verify-alert--success" th:text="#{verify.email.code.registered}">
                     Your account has been created. Check your email for a verification code.

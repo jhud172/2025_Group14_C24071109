@@ -1,35 +1,62 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout(#{ui.01500}, null, ~{::content}, null)}">
 
-    <div th:fragment="content" class="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-        <h1 class="text-2xl font-semibold tracking-tight text-slate-900" th:text="#{ui.01500}">Subscription Terms</h1>
-        <p class="mt-2 text-sm text-slate-600" th:text="#{ui.01501}">Placeholder cancellation and refund wording for Platform Premium.</p>
-
-        <div class="mt-6 space-y-4 text-sm text-slate-600">
-            <p><strong th:text="#{ui.01502}">Cancellation:</strong> <th:block th:text="#{ui.01503}">You may cancel at the end of your billing period. Access continues until the end of the current period.</th:block></p>
-            <p><strong th:text="#{ui.01504}">Refunds:</strong> <th:block th:text="#{ui.01505}">Refunds are subject to the provider policy and will be clarified here.</th:block></p>
-            <p><strong th:text="#{ui.01506}">Renewals:</strong> <th:block th:text="#{ui.01507}">Subscriptions renew automatically unless cancelled before the period end.</th:block></p>
-        </div>
-
-        <div id="legal-confirm-box"
-             class="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-5"
-             data-legal-confirm-key="subscription-terms">
-            <p class="mb-4 text-sm text-slate-700" th:text="#{ui.01508}">By clicking below you confirm that you have read and understood these Subscription Terms.</p>
-            <div id="legal-confirm-pending" class="flex items-center gap-2.5">
-                <button id="legal-confirm-btn"
-                        type="button"
-                        data-legal-confirm
-                        class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" th:text="#{ui.01509}">
-                    I have read and accept these Terms
-                </button>
+    <div th:fragment="content"
+         class="guest-experience guest-legal"
+         data-guest-scene>
+        <header class="guest-legal__hero" data-guest-reveal>
+            <div class="guest-shell guest-legal__hero-grid">
+                <div>
+                    <p class="guest-kicker" th:text="#{ui.01472}">Policy</p>
+                    <h1 class="guest-title" th:text="#{ui.01500}">Subscription Terms</h1>
+                    <p class="guest-lead guest-legal__pending-copy">
+                        <span th:text="#{ui.02981}">Legal</span>
+                        <span aria-hidden="true"> · </span>
+                        <span th:text="#{ui.01068}">Awaiting review</span>
+                    </p>
+                </div>
+                <div class="guest-legal__folio guest-legal__folio--subscription" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
-            <div id="legal-confirmed-msg" class="hidden items-center gap-2 text-[13px] font-semibold text-emerald-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <th:block th:text="#{ui.01510}">Terms accepted, thank you!</th:block>
+        </header>
+
+        <div class="guest-section guest-legal__content" data-guest-reveal>
+            <div class="guest-shell guest-legal__layout">
+                <nav class="guest-legal__nav" th:attr="aria-label=#{ui.01472}">
+                    <a th:href="@{/policies/privacy}"
+                       th:text="#{ui.01484}">Privacy Policy</a>
+                    <a th:href="@{/policies/payments}"
+                       th:text="#{ui.01483}">Payments Policy</a>
+                    <a th:href="@{/policies/terms}"
+                       th:text="#{ui.01511}">Terms of Service</a>
+                    <a th:href="@{/policies/subscription-terms}"
+                       aria-current="page"
+                       th:text="#{ui.01500}">Subscription Terms</a>
+                </nav>
+
+                <article class="guest-legal__document guest-panel guest-legal__unpublished"
+                         aria-labelledby="subscription-publication-heading">
+                    <div class="guest-legal__publication">
+                        <span class="guest-legal__publication-signal" aria-hidden="true"></span>
+                        <p class="guest-kicker" th:text="#{ui.02981}">Legal</p>
+                        <h2 id="subscription-publication-heading" th:text="#{ui.01068}">Awaiting review</h2>
+                        <p th:text="#{ui.02392}">Page unavailable</p>
+                        <div class="guest-legal__actions">
+                            <a th:href="@{/support}"
+                               class="guest-action guest-action--primary"
+                               th:text="#{ui.01470}">Contact support</a>
+                            <a th:href="@{/pricing}"
+                               class="guest-action guest-action--secondary"
+                               th:text="#{ui.01471}">Pricing</a>
+                        </div>
+                    </div>
+                </article>
             </div>
         </div>
-
-        <script th:src="@{/js/policies/legal-confirmation.js}"></script>
     </div>
 
 </th:block>

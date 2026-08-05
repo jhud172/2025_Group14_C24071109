@@ -155,11 +155,18 @@ class PublicPageConsistencyContractTest {
                 .contains("document.createDocumentFragment()")
                 .contains("volume.dataset.brandDepth")
                 .contains("interactionBounds")
-                .contains("Math.exp(-11 * elapsed)")
+                .contains("const desiredPose = { x: 0, y: 0 }")
+                .contains("const targetResponsiveness = brandIsEngaged ? 7 : 5.5")
+                .contains("const poseResponsiveness = brandIsEngaged ? 4.4 : 5.2")
+                .contains("Math.exp(-targetResponsiveness * elapsed)")
+                .contains("Math.exp(-poseResponsiveness * elapsed)")
+                .contains("interactionSurface.addEventListener('pointermove', syncBrandTargetToPointer)")
+                .contains("const bounds = interactionBounds")
                 .contains("(x * 42)")
                 .contains("requestAnimationFrame(animateBrandPose)")
                 .contains("pointercancel")
                 .contains("window.addEventListener('scroll', resetBrandPose, { passive: true })")
+                .contains("window.addEventListener('resize', resetBrandPose, { passive: true })")
                 .contains("createStandardExperience")
                 .contains("data-standard-controller")
                 .contains("supportsProofDepth")
@@ -191,14 +198,23 @@ class PublicPageConsistencyContractTest {
         assertThat(script)
                 .contains("setMorphTarget(trigger)")
                 .contains("const activeTrigger = setMorphTarget(trigger)")
-                .contains("bounceTrigger(activeTrigger, 'is-launching-notice', 520)");
+                .contains("bounceTrigger(activeTrigger, 'is-launching-notice', 520)")
+                .contains("syncNavbarDock")
+                .contains("navbar.classList.contains('navheader--hidden')")
+                .contains("new MutationObserver(() => syncNavbarDock())")
+                .contains("new ResizeObserver(() => syncNavbarDock({ animate: false }))");
         assertThat(css)
                 .contains("var(--dev-notice-target-x)")
                 .contains("var(--dev-notice-target-y)")
                 .contains("var(--dev-notice-target-scale-x)")
                 .contains("var(--dev-notice-target-scale-y)")
+                .contains("left: 50%")
+                .contains("transform: translateX(-50%)")
+                .contains("var(--dev-notice-navbar-height)")
+                .contains(".dev-mode-notification.is-navbar-detached")
                 .contains("@keyframes devNoticeIn")
-                .contains("@keyframes devNoticeOut");
+                .contains("@keyframes devNoticeOut")
+                .contains("@keyframes devNoticeDockBounce");
     }
 
     @Test

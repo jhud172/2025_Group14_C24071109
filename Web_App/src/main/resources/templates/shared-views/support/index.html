@@ -3,27 +3,35 @@
 
     <div th:fragment="styles"></div>
 
-    <div th:fragment="content">
-        <div class="role-surface role-surface__page" th:attr="data-role-surface=${roleSurface.roleKey}">
-            <header class="role-surface__header">
+    <div th:fragment="content"
+         th:class="${roleSurface.roleKey == 'guest'} ? 'guest-experience guest-experience--support guest-support' : ''"
+         th:attr="data-guest-scene=${roleSurface.roleKey == 'guest'} ? '' : null">
+        <div th:if="${roleSurface.roleKey == 'guest'}" class="guest-support__signal" aria-hidden="true">
+            <span></span>
+            <span></span>
+        </div>
+        <div class="role-surface role-surface__page guest-support__shell" th:attr="data-role-surface=${roleSurface.roleKey}">
+            <header class="role-surface__header guest-support__header" data-guest-reveal>
                 <div class="px-6 py-6 sm:px-8">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                            <p class="role-surface__eyebrow" th:text="${roleSurface.roleLabel + ' workspace'}">Support</p>
+                            <p class="role-surface__eyebrow" th:text="#{ui.00950}">Support</p>
                             <h1 class="role-surface__title" th:text="${roleSurface.supportHeading}">Contact support</h1>
                             <p class="role-surface__copy" th:text="${roleSurface.supportCopy}">Tell us what you need help with.</p>
                         </div>
-                        <a th:href="${roleSurface.dashboardPath}" class="role-surface__action role-surface__action--secondary"
-                           th:text="${roleSurface.roleKey == 'guest' ? 'Back to home' : 'Back to dashboard'}">Back</a>
+                        <a th:href="${roleSurface.dashboardPath}" class="role-surface__action role-surface__action--secondary">
+                            <th:block th:if="${roleSurface.roleKey == 'guest'}" th:text="#{ui.00542}">Back to home</th:block>
+                            <th:block th:unless="${roleSurface.roleKey == 'guest'}" th:text="#{ui.00311}">Back to dashboard</th:block>
+                        </a>
                     </div>
                 </div>
             </header>
 
-            <div th:if="${feedbackSuccess}" class="role-surface__notice" role="status" th:text="${feedbackSuccess}"></div>
-            <div th:if="${feedbackError}" class="role-surface__notice" role="alert" th:text="${feedbackError}"></div>
+            <div th:if="${feedbackSuccess}" class="role-surface__notice guest-support__feedback" role="status" th:text="${feedbackSuccess}"></div>
+            <div th:if="${feedbackError}" class="role-surface__notice guest-support__feedback" role="alert" th:text="${feedbackError}"></div>
 
-            <div class="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
-                <section class="role-surface__surface" aria-labelledby="support-form-heading">
+            <div class="guest-support__workspace grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
+                <section class="role-surface__surface guest-support__form-surface" aria-labelledby="support-form-heading" data-guest-reveal>
                     <form th:action="@{/support/feedback}" method="post" class="role-surface__form" id="support-form">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <div>
@@ -70,7 +78,7 @@
                         </div>
 
                         <label class="flex min-h-11 items-start gap-3 text-sm text-slate-700 dark:text-slate-200">
-                            <input type="checkbox" name="allowEmailReply" class="mt-1 h-5 w-5 shrink-0">
+                            <input type="checkbox" name="allowEmailReply" class="mt-1 h-6 w-6 shrink-0">
                             <span th:text="#{ui.02249}">Allow the support team to reply by email. This is required for a question.</span>
                         </label>
 
@@ -81,7 +89,7 @@
                     </form>
                 </section>
 
-                <aside class="role-surface__surface role-surface__empty" aria-labelledby="support-next-heading">
+                <aside class="role-surface__surface role-surface__empty guest-support__aside" aria-labelledby="support-next-heading" data-guest-reveal>
                     <h2 id="support-next-heading" class="role-surface__empty-title" th:text="#{ui.02250}">Before you send</h2>
                     <p class="role-surface__empty-copy" th:text="#{ui.02251}">Do not include passwords, payment card details or other sensitive information.</p>
                     <a th:href="@{/faq}" class="role-surface__action role-surface__action--secondary" th:text="#{ui.02252}">Check common questions</a>

@@ -83,6 +83,7 @@ public class ExploreController {
         model.addAttribute("selectedMinRating", minRating);
         model.addAttribute("selectedSort", sort);
         model.addAttribute("hasFilters", hasFilters(location, selectedTags, minPrice, maxPrice, minRating));
+        model.addAttribute("pageDescription", "Explore verified personal trainers and compare specialisms, ratings, location and coaching rates.");
         return "client-views/explore/index";
     }
 
@@ -262,10 +263,7 @@ public class ExploreController {
             if (profile != null && profile.getPrimaryGym() != null && !profile.getPrimaryGym().isBlank()) {
                 return profile.getPrimaryGym().trim();
             }
-            if (trainer.getGymId() != null) {
-                return "Gym #" + trainer.getGymId();
-            }
-            return "Independent";
+            return null;
         }
 
         public String getInitials() {

@@ -6,11 +6,13 @@
         <link rel="stylesheet" th:href="@{/css/components/dev/dev-hub.css(v=${uiCssVersion})}">
     </th:block>
 
-    <div th:fragment="content" class="devhub">
+    <div th:fragment="content"
+         class="devhub guest-experience guest-experience--devhub guest-devhub"
+         data-guest-scene>
         <div class="devhub__atmosphere" aria-hidden="true"></div>
 
         <div class="devhub-shell">
-            <header class="devhub-header" aria-labelledby="devhub-title">
+            <header class="devhub-header" aria-labelledby="devhub-title" data-guest-reveal>
                 <div class="devhub-header__identity">
                     <div class="devhub-brand-mark" aria-hidden="true">
                         <th:block th:replace="~{universal-fragments/dev/dev-page-display :: icon('layout')}"></th:block>
@@ -42,7 +44,7 @@
                 </div>
             </header>
 
-            <dl class="devhub-overview" aria-label="Development route summary" th:attr="aria-label=#{ui.02344}">
+            <dl class="devhub-overview" aria-label="Development route summary" th:attr="aria-label=#{ui.02344}" data-guest-reveal>
                 <div class="devhub-overview__item devhub-overview__item--public">
                     <dt th:text="#{ui.02347}">Public Pages</dt>
                     <dd>
@@ -66,7 +68,7 @@
                 </div>
             </dl>
 
-            <div class="devhub-workspace">
+            <div class="devhub-workspace" data-guest-reveal>
                 <aside class="devhub-sidebar" aria-label="Dev Hub route groups" th:attr="aria-label=#{ui.02360}">
                     <div class="devhub-sidebar__nav">
                         <p class="devhub-sidebar__label" th:text="#{ui.02360}">Dev Hub</p>

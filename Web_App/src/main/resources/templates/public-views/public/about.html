@@ -1,79 +1,146 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(#{ui.01545}, ~{::styles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.01545}, null, ~{::content}, ~{::pageScripts})}">
 
-    <th:block th:fragment="styles">
-        <link rel="stylesheet" th:href="@{/css/bundles/content.css(v=${assetVersion})}">
-    </th:block>
+    <div th:fragment="content"
+         class="guest-experience guest-marketing guest-about"
+         data-guest-scene>
+        <section class="guest-hero guest-about__hero"
+                 data-public-hero
+                 data-guest-reveal>
+            <div class="guest-shell guest-about__hero-grid">
+                <div class="guest-about__hero-copy">
+                    <p class="guest-kicker" th:text="#{ui.01520}">About One To One</p>
+                    <h1 class="guest-title" th:text="#{ui.01521}">Better coaching starts with one trusted place.</h1>
+                    <p class="guest-lead" th:text="#{ui.01522}">One To One connects clients with verified trainers and gives both sides a clear way to plan, communicate and see progress.</p>
+                    <div class="guest-actions">
+                        <a th:href="@{/signup}"
+                           class="guest-action guest-action--primary"
+                           th:text="#{ui.01523}">Start as a client</a>
+                        <a th:href="@{/explore}"
+                           class="guest-action guest-action--secondary"
+                           th:text="#{ui.01524}">Explore verified trainers</a>
+                    </div>
+                </div>
 
-    <div th:fragment="content" class="public-journey">
-        <section class="public-section public-section--muted" data-public-hero>
-            <div class="public-section__inner public-section__inner--narrow">
-                <p class="public-eyebrow" th:text="#{ui.01520}">About One To One</p>
-                <h1 class="public-title" th:text="#{ui.01521}">Better coaching starts with one trusted place.</h1>
-                <p class="public-copy" th:text="#{ui.01522}">One To One connects clients with verified trainers and gives both sides a clear way to plan, communicate and see progress.</p>
-                <div class="public-actions">
-                    <a th:href="@{/signup}" class="public-action public-action--primary" th:text="#{ui.01523}">Start as a client</a>
-                    <a th:href="@{/explore}" class="public-action public-action--secondary" th:text="#{ui.01524}">Explore verified trainers</a>
+                <div class="guest-about__system" aria-hidden="true">
+                    <span class="guest-about__orbit guest-about__orbit--outer"></span>
+                    <span class="guest-about__orbit guest-about__orbit--inner"></span>
+                    <span class="guest-about__signal guest-about__signal--one"></span>
+                    <span class="guest-about__signal guest-about__signal--two"></span>
+                    <span class="guest-about__signal guest-about__signal--three"></span>
+                    <div class="guest-about__mark">
+                        <span class="guest-about__mark-half guest-about__mark-half--client"></span>
+                        <span class="guest-about__mark-half guest-about__mark-half--trainer"></span>
+                        <span class="guest-about__mark-person guest-about__mark-person--client"></span>
+                        <span class="guest-about__mark-person guest-about__mark-person--trainer"></span>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="public-section" data-public-section aria-labelledby="about-principles-heading">
-            <div class="public-section__inner">
-                <div class="public-section__header">
-                    <p class="public-eyebrow" th:text="#{ui.01525}">What matters</p>
-                    <h2 id="about-principles-heading" class="public-heading" th:text="#{ui.01526}">Structure without losing the human relationship.</h2>
-                    <p class="public-copy" th:text="#{ui.01527}">The platform keeps the practical parts of coaching together so trainers can coach and clients can focus on training.</p>
+        <section class="guest-section guest-about__principles"
+                 data-public-section
+                 data-guest-reveal
+                 aria-labelledby="about-principles-heading">
+            <div class="guest-shell">
+                <div class="guest-section__header">
+                    <div>
+                        <p class="guest-kicker" th:text="#{ui.01525}">What matters</p>
+                        <h2 id="about-principles-heading"
+                            class="guest-heading"
+                            th:text="#{ui.01526}">Structure without losing the human relationship.</h2>
+                    </div>
+                    <p class="guest-lead" th:text="#{ui.01527}">The platform keeps the practical parts of coaching together so trainers can coach and clients can focus on training.</p>
                 </div>
-                <div class="public-proof-list">
-                    <article class="public-proof">
-                        <h3 class="public-proof__title" th:text="#{ui.01528}">Verified trainers</h3>
-                        <p class="public-proof__copy" th:text="#{ui.01529}">Trainer credentials and professional details are reviewed before a verified profile is approved.</p>
+
+                <div class="guest-about__principle-ledger guest-ledger">
+                    <article class="guest-about__principle">
+                        <span class="guest-about__principle-index" aria-hidden="true">01</span>
+                        <h3 th:text="#{ui.01528}">Verified trainers</h3>
+                        <p th:text="#{ui.01529}">Trainer credentials and professional details are reviewed before a verified profile is approved.</p>
                     </article>
-                    <article class="public-proof">
-                        <h3 class="public-proof__title" th:text="#{ui.01530}">Visible progress</h3>
-                        <p class="public-proof__copy" th:text="#{ui.01531}">Programmes, goals, sessions and check-ins stay connected to the work that produced them.</p>
+                    <article class="guest-about__principle">
+                        <span class="guest-about__principle-index" aria-hidden="true">02</span>
+                        <h3 th:text="#{ui.01530}">Visible progress</h3>
+                        <p th:text="#{ui.01531}">Programmes, goals, sessions and check-ins stay connected to the work that produced them.</p>
                     </article>
-                    <article class="public-proof">
-                        <h3 class="public-proof__title" th:text="#{ui.01532}">Protected platform</h3>
-                        <p class="public-proof__copy" th:text="#{ui.01533}">Messages, account data and platform payments remain within one controlled service.</p>
+                    <article class="guest-about__principle">
+                        <span class="guest-about__principle-index" aria-hidden="true">03</span>
+                        <h3 th:text="#{ui.01532}">Protected platform</h3>
+                        <p th:text="#{ui.01533}">Messages, account data and platform payments remain within one controlled service.</p>
                     </article>
                 </div>
             </div>
         </section>
 
-        <section class="public-section public-section--muted" data-public-section aria-labelledby="about-flow-heading">
-            <div class="public-section__inner">
-                <div class="public-section__header public-section__header--centred">
-                    <p class="public-eyebrow" th:text="#{ui.01362}">How it works</p>
-                    <h2 id="about-flow-heading" class="public-heading" th:text="#{ui.01534}">From finding support to building momentum.</h2>
+        <section class="guest-section guest-about__flow-section"
+                 data-public-section
+                 data-guest-reveal
+                 aria-labelledby="about-flow-heading">
+            <div class="guest-shell">
+                <div class="guest-section__header">
+                    <div>
+                        <p class="guest-kicker" th:text="#{ui.01362}">How it works</p>
+                        <h2 id="about-flow-heading"
+                            class="guest-heading"
+                            th:text="#{ui.01534}">From finding support to building momentum.</h2>
+                    </div>
+                    <div class="guest-about__flow-signal" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </div>
-                <div class="public-flow">
-                    <article class="public-flow__step">
-                        <h3 th:text="#{ui.01535}">Choose your route</h3>
-                        <p th:text="#{ui.01536}">Create a client, trainer or gym account with a workspace designed for that role.</p>
+
+                <div class="guest-about__flow">
+                    <article class="guest-about__flow-step">
+                        <span class="guest-about__flow-number" aria-hidden="true">01</span>
+                        <div>
+                            <h3 th:text="#{ui.01535}">Choose your route</h3>
+                            <p th:text="#{ui.01536}">Create a client, trainer or gym account with a workspace designed for that role.</p>
+                        </div>
                     </article>
-                    <article class="public-flow__step">
-                        <h3 th:text="#{ui.01537}">Build the connection</h3>
-                        <p th:text="#{ui.01538}">Clients can compare verified trainers before beginning one active coaching relationship.</p>
+                    <article class="guest-about__flow-step">
+                        <span class="guest-about__flow-number" aria-hidden="true">02</span>
+                        <div>
+                            <h3 th:text="#{ui.01537}">Build the connection</h3>
+                            <p th:text="#{ui.01538}">Clients can compare verified trainers before beginning one active coaching relationship.</p>
+                        </div>
                     </article>
-                    <article class="public-flow__step">
-                        <h3 th:text="#{ui.01539}">Work from one plan</h3>
-                        <p th:text="#{ui.01540}">Use shared programmes, messaging, scheduling and progress signals to keep the next step clear.</p>
+                    <article class="guest-about__flow-step">
+                        <span class="guest-about__flow-number" aria-hidden="true">03</span>
+                        <div>
+                            <h3 th:text="#{ui.01539}">Work from one plan</h3>
+                            <p th:text="#{ui.01540}">Use shared programmes, messaging, scheduling and progress signals to keep the next step clear.</p>
+                        </div>
                     </article>
                 </div>
             </div>
         </section>
 
-        <section class="public-section public-section--accent" data-public-section aria-labelledby="about-cta-heading">
-            <div class="public-section__inner public-section__inner--narrow">
-                <p class="public-eyebrow" th:text="#{ui.01541}">Ready when you are</p>
-                <h2 id="about-cta-heading" class="public-heading" th:text="#{ui.01542}">Find the right structure for your next step.</h2>
-                <p class="public-copy" th:text="#{ui.01543}">Start your account or compare trainer profiles before making a decision.</p>
-                <div class="public-actions">
-                    <a th:href="@{/signup}" class="public-action public-action--inverse" th:text="#{ui.01544}">Create an account</a>
-                    <a th:href="@{/explore}" class="public-action public-action--inverse-secondary" th:text="#{ui.00432}">Explore trainers</a>
+        <section class="guest-section guest-marketing__final"
+                 data-public-section
+                 data-guest-reveal
+                 aria-labelledby="about-cta-heading">
+            <div class="guest-shell guest-marketing__final-grid">
+                <div>
+                    <p class="guest-kicker" th:text="#{ui.01541}">Ready when you are</p>
+                    <h2 id="about-cta-heading"
+                        class="guest-heading"
+                        th:text="#{ui.01542}">Find the right structure for your next step.</h2>
                 </div>
+                <div class="guest-marketing__final-copy">
+                    <p class="guest-lead" th:text="#{ui.01543}">Start your account or compare trainer profiles before making a decision.</p>
+                    <div class="guest-actions">
+                        <a th:href="@{/signup}"
+                           class="guest-action guest-action--primary"
+                           th:text="#{ui.01544}">Create an account</a>
+                        <a th:href="@{/explore}"
+                           class="guest-action guest-action--secondary"
+                           th:text="#{ui.00432}">Explore trainers</a>
+                    </div>
+                </div>
+                <div class="guest-marketing__final-orbit" aria-hidden="true"></div>
             </div>
         </section>
     </div>

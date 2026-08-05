@@ -49,6 +49,7 @@ class HomeLocalisationContractTest {
         assertThat(selector)
                 .contains("name=\"lang\"")
                 .contains("th:each=\"language : ${supportedLanguages}\"")
+                .contains("aria-label=${#messages.msg(language.messageKey())}")
                 .contains("data-language-search")
                 .contains("data-language-search-value");
         assertThat(application).contains("spring.messages.basename=messages,messages-home,messages-ui");

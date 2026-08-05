@@ -10,10 +10,10 @@ import java.util.List;
 @ControllerAdvice
 public class UiStyleBundleAdvice {
 
-    static final String CSS_VERSION = "20260803p73";
+    static final String CSS_VERSION = "20260804p75";
 
     private static final List<String> AUTH_PATHS = List.of(
-            "/forgot-password", "/reset-password"
+            "/login", "/signup", "/forgot-password", "/reset-password"
     );
     private static final List<String> PROFILE_PATHS = List.of(
             "/profile", "/u", "/trainer/profile"
@@ -27,8 +27,17 @@ public class UiStyleBundleAdvice {
             "/trainer/templates", "/client/assigned-plan", "/client/plan"
     );
     private static final List<String> CONTENT_PATHS = List.of(
-            "/faq", "/pricing", "/notes", "/vault", "/merch",
+            "/about", "/faq", "/pricing", "/notes", "/vault", "/merch",
             "/admin/merch", "/chat", "/chatv2", "/inbox"
+    );
+    private static final List<String> GUEST_EXPERIENCE_EXACT_PATHS = List.of(
+            "/about", "/faq", "/pricing", "/explore", "/merch", "/support",
+            "/login", "/forgot-password", "/reset-password",
+            "/dashboard/public", "/client/dashboard/public", "/access-denied",
+            "/confirm-logout"
+    );
+    private static final List<String> GUEST_EXPERIENCE_PREFIXES = List.of(
+            "/signup", "/verify", "/policies", "/u", "/dev-mode", "/error"
     );
 
     @ModelAttribute("uiCssVersion")
@@ -39,7 +48,7 @@ public class UiStyleBundleAdvice {
     @ModelAttribute("uiStyleBundles")
     public List<String> uiStyleBundles(HttpServletRequest request) {
         String path = normalizedPath(request);
-        List<String> bundles = new ArrayList<>(2);
+        List<String> bundles = new ArrayList<>(3);
 
         addWhenMatched(bundles, path, AUTH_PATHS, "/css/bundles/auth.css");
         addWhenMatched(bundles, path, PROFILE_PATHS, "/css/bundles/profile.css");
@@ -47,14 +56,36 @@ public class UiStyleBundleAdvice {
         addWhenMatched(bundles, path, List.of("/calendar"), "/css/bundles/calendar.css");
         addWhenMatched(bundles, path, TRAINING_PATHS, "/css/bundles/training.css");
         addWhenMatched(bundles, path, CONTENT_PATHS, "/css/bundles/content.css");
+        if (matchesGuestExperience(path)) {
+            bundles.add("/css/bundles/guest.css");
+        }
 
         return List.copyOf(bundles);
     }
 
+    @ModelAttribute("includeGuestExperience")
+    public boolean includeGuestExperience(HttpServletRequest request) {
+        return matchesGuestExperience(normalizedPath(request));
+    }
+
+    @ModelAttribute("currentRequestPath")
+    public String currentRequestPath(HttpServletRequest request) {
+        return normalizedPath(request);
+    }
+
     private static void addWhenMatched(List<String> bundles, String path, List<String> prefixes, String bundle) {
-        if (prefixes.stream().anyMatch(prefix -> matchesPath(path, prefix))) {
+        if (matchesAny(path, prefixes)) {
             bundles.add(bundle);
         }
+    }
+
+    private static boolean matchesAny(String path, List<String> prefixes) {
+        return prefixes.stream().anyMatch(prefix -> matchesPath(path, prefix));
+    }
+
+    private static boolean matchesGuestExperience(String path) {
+        return GUEST_EXPERIENCE_EXACT_PATHS.contains(path)
+                || matchesAny(path, GUEST_EXPERIENCE_PREFIXES);
     }
 
     private static boolean matchesPath(String path, String prefix) {

@@ -1,3 +1,40 @@
+const chatPanelConcealments = new WeakMap();
+
+function cancelChatPanelConceal(panel) {
+    const concealment = chatPanelConcealments.get(panel);
+    if (!concealment) return;
+    window.clearTimeout(concealment.timer);
+    panel.removeEventListener("transitionend", concealment.onTransitionEnd);
+    chatPanelConcealments.delete(panel);
+}
+
+function revealChatPanel(panel) {
+    cancelChatPanelConceal(panel);
+    panel.hidden = false;
+    // Commit the closed visual state before the existing opening transition.
+    panel.getBoundingClientRect();
+}
+
+function concealChatPanelAfterTransition(panel) {
+    cancelChatPanelConceal(panel);
+
+    const complete = () => {
+        cancelChatPanelConceal(panel);
+        if (!panel.classList.contains("open")) {
+            panel.hidden = true;
+        }
+    };
+    const onTransitionEnd = (event) => {
+        if (event.target === panel && event.propertyName === "transform") {
+            complete();
+        }
+    };
+    const timer = window.setTimeout(complete, 600);
+
+    chatPanelConcealments.set(panel, { timer, onTransitionEnd });
+    panel.addEventListener("transitionend", onTransitionEnd);
+}
+
 // Global fallback toggle function (in case DOMContentLoaded hasn't fired yet)
 window.toggleChatPanel = function() {
     const panel = document.getElementById("chatPanel");
@@ -9,9 +46,11 @@ window.toggleChatPanel = function() {
         panel.classList.remove("open");
         panel.setAttribute("aria-hidden", "true");
         panel.setAttribute("inert", "");
+        concealChatPanelAfterTransition(panel);
         fab.setAttribute("aria-expanded", "false");
         fab.setAttribute("aria-label", getChatCopy("openCharlie", "Open Charlie"));
     } else {
+        revealChatPanel(panel);
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
         panel.removeAttribute("inert");
@@ -366,6 +405,7 @@ function initCharlieWidget(config) {
 
     const openPanel = () => {
         overlayManager?.open("charlie");
+        revealChatPanel(panel);
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
         panel.removeAttribute("inert");
@@ -382,6 +422,7 @@ function initCharlieWidget(config) {
         panel.classList.remove("open");
         panel.setAttribute("aria-hidden", "true");
         panel.setAttribute("inert", "");
+        concealChatPanelAfterTransition(panel);
         fab.setAttribute("aria-expanded", "false");
         fab.setAttribute("aria-label", getChatCopy("openCharlie", "Open Charlie"));
         closeComposerOptions();
@@ -746,8 +787,10 @@ function initCharlieWidget(config) {
         else if (panel.classList.contains("open")) closePanel({ restoreFocus: true });
     });
 
-    panel.toggleAttribute("inert", !panel.classList.contains("open"));
-    if (panel.classList.contains("open")) overlayManager?.open("charlie");
+    const panelStartsOpen = panel.classList.contains("open");
+    panel.toggleAttribute("inert", !panelStartsOpen);
+    panel.hidden = !panelStartsOpen;
+    if (panelStartsOpen) overlayManager?.open("charlie");
     else overlayManager?.release("charlie");
     renderHistory(isAuthenticated ? readHistory() : []);
     setActiveView("chat");
@@ -825,10 +868,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (isOpen) {
                     panel.classList.remove("open");
                     panel.setAttribute("aria-hidden", "true");
+                    panel.setAttribute("inert", "");
+                    concealChatPanelAfterTransition(panel);
                     fab.setAttribute("aria-expanded", "false");
                 } else {
+                    revealChatPanel(panel);
                     panel.classList.add("open");
                     panel.setAttribute("aria-hidden", "false");
+                    panel.removeAttribute("inert");
                     fab.setAttribute("aria-expanded", "true");
                 }
                 console.log("Chat panel toggled:", !isOpen ? "open" : "closed");
@@ -882,8 +929,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function open() {
+        revealChatPanel(panel);
         panel.classList.add("open");
         panel.setAttribute("aria-hidden", "false");
+        panel.removeAttribute("inert");
         fab.setAttribute("aria-expanded", "true");
         hideNotificationsPanel();
         dot?.classList.remove("active");
@@ -900,6 +949,8 @@ document.addEventListener("DOMContentLoaded", () => {
         hideNotificationsPanel();
         panel.classList.remove("open");
         panel.setAttribute("aria-hidden", "true");
+        panel.setAttribute("inert", "");
+        concealChatPanelAfterTransition(panel);
         fab.setAttribute("aria-expanded", "false");
     }
 

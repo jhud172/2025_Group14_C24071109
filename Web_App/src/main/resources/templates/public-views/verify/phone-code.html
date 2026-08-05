@@ -5,20 +5,23 @@
         <link rel="stylesheet" th:href="@{/css/components/account/verification.css(v='20260315b')}">
     </div>
 
-    <div th:fragment="content">
-        <div class="verify-shell">
-            <div class="verify-card">
-                <div class="verify-hero">
+    <div th:fragment="content" class="guest-experience guest-auth guest-auth--verify" data-guest-scene>
+        <div class="verify-shell guest-auth__stage">
+                <div class="verify-hero guest-auth__assurance">
+                    <span class="guest-auth__brand-mark" aria-hidden="true"></span>
                     <div class="verify-icon-wrap" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" class="verify-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <div>
+                    <div class="guest-auth__intro">
                         <h1 class="verify-title" th:text="#{ui.01576}">Enter SMS code</h1>
                         <p class="verify-copy" th:text="#{ui.01577}">We sent a 6-digit code to your phone number. Enter it below to verify your account.</p>
                     </div>
+                    <span class="guest-auth__assurance-rail" aria-hidden="true"></span>
                 </div>
+
+            <div class="verify-card guest-auth__panel">
 
                 <div th:if="${verifySuccess}" class="verify-alert verify-alert--success" th:text="${verifySuccess}">
                     Verification code sent.

@@ -1,9 +1,10 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
           th:replace="~{base :: layout(#{ui.02374}, null, ~{::content}, null)}">
 
-<div th:fragment="content">
+<div th:fragment="content" class="guest-experience guest-experience--error guest-error" data-guest-scene>
+    <div class="guest-error__trace" aria-hidden="true"></div>
     <section class="error-page" aria-labelledby="error-title">
-        <div class="error-card error-card--forbidden">
+        <div class="error-card error-card--forbidden guest-panel" data-guest-reveal>
             <div class="error-status">
                 <span class="error-status__code">403</span>
                 <span class="error-status__label" th:text="#{ui.02369}">Forbidden</span>
@@ -12,13 +13,10 @@
             <div class="error-card__body">
                 <p class="error-eyebrow" th:text="#{ui.02370}">Access control</p>
                 <h1 id="error-title" class="error-title" th:text="#{ui.02371}">Access denied</h1>
-                <p class="error-copy">
-                    <span th:text="${errorMessage ?: 'You do not have permission to access this page.'}"></span>
-                </p>
-                <p class="error-support" th:text="#{ui.02372}">If this page should be available to your role, return to your dashboard and retry from the correct workflow.</p>
+                <p class="error-copy" th:text="#{ui.02372}">If this page should be available to your role, return to your dashboard and retry from the correct workflow.</p>
 
                 <div class="error-actions">
-                    <a th:href="@{/dashboard}" class="error-button error-button--primary" th:text="#{ui.00308}">Dashboard</a>
+                    <a th:href="@{/support}" class="error-button error-button--primary" th:text="#{ui.01470}">Contact support</a>
                     <a th:href="@{/}" class="error-button error-button--secondary" th:text="#{ui.01401}">Home</a>
                     <button type="button" data-history-back data-history-fallback="/" class="error-button error-button--ghost" th:text="#{ui.02373}">Go back</button>
                 </div>

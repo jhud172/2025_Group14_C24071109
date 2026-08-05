@@ -1,14 +1,20 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
-          th:replace="~{base :: layout(#{ui.01205}, ~{::pageStyles}, ~{::content}, ~{::pageScripts})}">
+          th:replace="~{base :: layout(#{ui.01205}, null, ~{::content}, ~{::pageScripts})}">
 
-    <div th:fragment="content" class="auth-container auth-container--wide animate-fade-in">
-        <div class="auth-card auth-card--signup-compact">
-            <div class="auth-accent-bar"></div>
+    <div th:fragment="content" class="auth-container auth-container--wide guest-experience guest-auth" data-guest-scene>
+        <div class="guest-auth__stage">
+            <header class="guest-auth__assurance">
+                <span class="guest-auth__brand-mark" aria-hidden="true"></span>
+                <div class="guest-auth__intro">
+                    <span class="guest-auth__signal-line" aria-hidden="true"></span>
+                    <h1 class="auth-heading" th:text="#{ui.01190}">Create your client account</h1>
+                    <p class="auth-subheading" th:text="#{ui.01191}">Personalise your profile and start booking trainers.</p>
+                </div>
+                <span class="guest-auth__assurance-rail" aria-hidden="true"></span>
+            </header>
 
-            <div class="mb-6 mt-4 text-center">
-                <h1 class="auth-heading" th:text="#{ui.01190}">Create your client account</h1>
-                <p class="auth-subheading" th:text="#{ui.01191}">Personalise your profile and start booking trainers.</p>
-            </div>
+            <div class="auth-card auth-card--signup-compact guest-auth__panel">
+                <div class="auth-accent-bar"></div>
 
             <th:block th:replace="~{public-views/auth/fragments/social-auth-buttons :: buttons('client', ${socialProviders})}"></th:block>
 
@@ -116,12 +122,9 @@
                     <a th:href="@{/login(role=client)}" class="auth-link" th:text="#{ui.01204}">Log in</a>
                 </p>
             </form>
+            </div>
         </div>
     </div>
-
-    <th:block th:fragment="pageStyles">
-        <link rel="stylesheet" th:href="@{/css/bundles/auth.css(v=${assetVersion})}">
-    </th:block>
 
     <th:block th:fragment="pageScripts">
     <script th:src="@{/js/auth/signup-client-page.js(v=${assetVersion})}" defer></script>

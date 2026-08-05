@@ -54,7 +54,7 @@ class ShellPerformanceContractTest {
 
         for (String bundle : List.of(
                 "assistant.css", "authenticated-shell.css", "auth.css", "profile.css",
-                "calendar.css", "dashboard.css", "training.css", "content.css")) {
+                "calendar.css", "dashboard.css", "training.css", "content.css", "guest.css")) {
             assertThat(Path.of("src/main/resources/static/css/bundles", bundle)).exists();
         }
     }
@@ -67,6 +67,7 @@ class ShellPerformanceContractTest {
                 .contains("/css/bundles/assistant.css")
                 .contains("/css/bundles/authenticated-shell.css")
                 .contains("th:each=\"styleBundle : ${uiStyleBundles}\"")
+                .contains("/js/public/guest-experience.js")
                 .contains("has-quick-actions has-platform-panel");
     }
 
@@ -99,6 +100,18 @@ class ShellPerformanceContractTest {
                 .containsExactly("/css/bundles/profile.css");
         assertThat(bundlesFor("/pricing/checkout"))
                 .containsExactly("/css/bundles/content.css");
+        assertThat(bundlesFor("/pricing"))
+                .containsExactly("/css/bundles/content.css", "/css/bundles/guest.css");
+        assertThat(bundlesFor("/login"))
+                .containsExactly("/css/bundles/auth.css", "/css/bundles/guest.css");
+        assertThat(bundlesFor("/signup/trainer"))
+                .containsExactly("/css/bundles/auth.css", "/css/bundles/guest.css");
+        assertThat(bundlesFor("/explore"))
+                .containsExactly("/css/bundles/guest.css");
+        assertThat(bundlesFor("/dashboard/public"))
+                .containsExactly("/css/bundles/dashboard.css", "/css/bundles/guest.css");
+        assertThat(bundlesFor("/access-denied"))
+                .containsExactly("/css/bundles/guest.css");
     }
 
     @Test

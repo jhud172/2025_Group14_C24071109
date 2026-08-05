@@ -34,6 +34,7 @@ public class MerchController {
         mav.addObject("products", products);
         mav.addObject("demoMode", demoMode);
         mav.addObject("user", user);
+        mav.addObject("pageDescription", "Browse the One To One training collection, from performance clothing to practical workout and recovery equipment.");
         return mav;
     }
 
