@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -49,6 +50,7 @@ public class SecurityConfig {
             "/home-public",
             "/about",
             "/faq",
+            "/birthday/mission-vi",
             "/pricing",
             "/pricing/**",
             "/explore",
@@ -89,7 +91,25 @@ public class SecurityConfig {
      * To disable dev mode:
      * 1. Set environment variable: DEV_MODE=false (or unset)
      * 2. Restart the application
-     */
+    */
+
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public SecurityFilterChain birthdayExperienceSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher(
+                        "/birthday/**",
+                        "/css/birthday/**",
+                        "/js/birthday/**",
+                        "/img/birthday/**"
+                )
+                .authorizeHttpRequests(request -> request.anyRequest().permitAll())
+                .requestCache(cache -> cache.disable())
+                .securityContext(context -> context.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.disable())
+                .build();
+    }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE + 1)
